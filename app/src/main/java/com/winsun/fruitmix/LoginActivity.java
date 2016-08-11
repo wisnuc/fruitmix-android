@@ -1,0 +1,240 @@
+package com.winsun.fruitmix;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.util.Base64;
+import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.services.LocalShareService;
+import com.winsun.fruitmix.services.LocalCommentService;
+import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
+public class LoginActivity extends Activity implements View.OnClickListener, EditText.OnFocusChangeListener {
+
+    @BindView(R.id.back)
+    ImageView mBack;
+
+    @BindView(R.id.equipment_group_name)
+    TextView mEquipmentGroupNameTextView;
+
+    @BindView(R.id.equipment_child_name)
+    TextView mEquipmentChildNameTextView;
+
+    @BindView(R.id.pwd_edit)
+    EditText mPwdEdit;
+
+    @BindView(R.id.login_btn)
+    Button mLoginBtn;
+
+    @BindView(R.id.user_default_portrait)
+    TextView mUserDefaultPortrait;
+
+    private Context mContext;
+
+    private String mEquipmentGroupName;
+    private String mEquipmentChildName;
+    private String mUserUUid;
+    private String mPwd;
+    private String mGateway;
+    private String mJwt;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        ButterKnife.bind(this);
+
+        mContext = this;
+
+        mBack.setOnClickListener(this);
+        mPwdEdit.setOnFocusChangeListener(this);
+        mLoginBtn.setOnClickListener(this);
+
+        Intent intent = getIntent();
+        mEquipmentGroupName = intent.getStringExtra(Util.EQUIPMENT_GROUP_NAME);
+        mEquipmentChildName = intent.getStringExtra(Util.EQUIPMENT_CHILD_NAME);
+        mUserUUid = intent.getStringExtra(Util.USER_UUID);
+        mGateway = intent.getStringExtra(Util.GATEWAY);
+
+        mEquipmentGroupNameTextView.setText(mEquipmentGroupName);
+        mEquipmentChildNameTextView.setText(mEquipmentChildName);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        String[] splitStrings = mEquipmentChildName.split(" ");
+        for (String splitString : splitStrings) {
+            stringBuilder.append(splitString.substring(0, 1).toUpperCase());
+        }
+        mUserDefaultPortrait.setText(stringBuilder.toString());
+        int color = (int)(Math.random() * 3);
+        switch (color){
+            case 0:
+                mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_blue);
+                break;
+            case 1:
+                mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_green);
+                break;
+            case 2:
+                mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
+                break;
+        }
+
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.back:
+                finish();
+                break;
+            case R.id.login_btn:
+
+                InputMethodManager methodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                methodManager.hideSoftInputFromWindow(mPwdEdit.getWindowToken(), 0);
+
+                mPwd = mPwdEdit.getText().toString();
+                login(mLoginBtn);
+                break;
+            default:
+        }
+    }
+
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        if (hasFocus) {
+            mPwdEdit.setHint("");
+        } else {
+            mPwdEdit.setHint(getString(R.string.password_text));
+        }
+    }
+
+    /**
+     * use uuid and password to login
+     *
+     * @param view show Snackbar when error occurs
+     */
+    private void login(final View view) {
+
+        new AsyncTask<String, Void, String>() {
+            @Override
+            protected String doInBackground(String... params) {
+
+                HttpURLConnection conn;
+                String str;
+                try {
+                    conn = (HttpURLConnection) (new URL(mGateway + "/token").openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
+                    conn.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((mUserUUid + ":" + mPwd).getBytes(), Base64.DEFAULT));
+                    if (conn.getResponseCode() != 200) {
+                        Snackbar.make(view, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
+                    } else {
+
+                        FNAS.Gateway = mGateway;
+                        FNAS.userUUID = mUserUUid;
+
+                        str = FNAS.ReadFull(conn.getInputStream());
+                        mJwt = new JSONObject(str).getString("token"); // get token
+                        FNAS.JWT = mJwt;
+
+                        if (LocalCache.DeviceID == null) {
+                            //SetGlobalData("deviceID", UUID.randomUUID().toString());
+                            str = FNAS.PostRemoteCall("/library/", "");
+                            LocalCache.DeviceID = str.replace("\"", "");
+                            LocalCache.SetGlobalData("deviceID", LocalCache.DeviceID);
+                        } // get deviceID
+                        Log.d("uuid", LocalCache.GetGlobalData("deviceID"));
+
+                        //FNAS.checkOfflineTask(mContext);
+
+                        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+                        dbUtils.doOneTaskInCachedThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    FNAS.LoadDocuments();
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+                        });
+
+                        LocalCache.saveGateway(mGateway, mContext);
+                        LocalCache.saveJwt(mJwt, mContext);
+                        setGroupNameUserName(mEquipmentGroupName, mEquipmentChildName);
+                        setUuidPassword(mUserUUid, mPwd);
+
+                        FNAS.checkLocalShareAndComment(mContext);
+
+                        Intent intent = new Intent(mContext, NavPagerActivity.class);
+                        intent.putExtra(Util.EQUIPMENT_CHILD_NAME, mEquipmentChildName);
+                        startActivity(intent);
+
+                        setResult(RESULT_OK);
+
+                        finish();
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                return null;
+            }
+        }.execute();
+
+    }
+
+    private void setGroupNameUserName(String groupName, String userName) {
+        SharedPreferences sp;
+        SharedPreferences.Editor editor;
+        sp = getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        editor = sp.edit();
+        editor.putString(Util.EQUIPMENT_GROUP_NAME, groupName);
+        editor.putString(Util.EQUIPMENT_CHILD_NAME, userName);
+        editor.apply();
+    }
+
+    private void setUuidPassword(String uuid, String password) {
+        SharedPreferences sp;
+        SharedPreferences.Editor editor;
+        sp = getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        editor = sp.edit();
+        editor.putString(Util.USER_UUID, uuid);
+        editor.putString(Util.PASSWORD, password);
+        editor.apply();
+    }
+
+}

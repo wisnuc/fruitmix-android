@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <!-- begin add by liang.wu-->
+    <color name="white">#FFFFFF</color>
+    <color name="gray">#C0C0C0</color>
+    <color name="yellow">#ffc107</color>
+    <color name="green">#8bc34a</color>
+    <color name="blue">#00bcd4</color>
+    <color name="black">#000000</color>
+    <color name="light_black">#404040</color>
+    <color name="light_gray">#9a9a9a</color>
+    <color name="comment_hint">#bbbbbb</color>
+    <color name="album_title_text">#999999</color>
+    <color name="album_desc_text">#e8643b</color>
+    <color name="content_text">#333333</color>
+    <color name="album_time">#666666</color>
+    <!-- finish add by liang.wu-->
+
+</resources>

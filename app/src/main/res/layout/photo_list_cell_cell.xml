@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <ImageView
+        android:layout_margin="1dp"
+        android:layout_width="match_parent"
+        android:layout_height="114dp"
+        android:src="@drawable/default_img"
+        android:scaleType="centerCrop"
+        android:id="@+id/mainPic" />
+    <ImageView
+        android:id="@+id/lock"
+        android:visibility="gone"
+        android:layout_width="20dp"
+        android:layout_height="25dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="5dp"
+        android:paddingBottom="5dp"
+        android:src="@drawable/lock_photo"/>
+    <ImageView
+        android:id="@+id/select"
+        android:visibility="gone"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_margin="5dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/select"/>
+
+</RelativeLayout>

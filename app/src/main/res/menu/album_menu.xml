@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/setting_album"
+        android:title="@string/setting_album"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/edit_photo"
+        android:title="@string/edit_photo"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/set_private_public"
+        android:title="@string/set_private"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/delete_album"
+        android:title="@string/delete_album"
+        app:showAsAction="never" />
+
+</menu>

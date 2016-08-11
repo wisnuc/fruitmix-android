@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.winsun.fruitmix.MainActivity">
+
+    <!--<android.support.design.widget.AppBarLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:theme="@style/AppTheme.AppBarOverlay">-->
+
+        <!--<android.support.v7.widget.Toolbar-->
+            <!--android:id="@+id/toolbar"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="?attr/actionBarSize"-->
+            <!--android:background="?attr/colorPrimary"-->
+            <!--app:popupTheme="@style/AppTheme.PopupOverlay" >-->
+            <!--<RelativeLayout-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="match_parent">-->
+                <!--<ImageView-->
+                    <!--android:id="@+id/back"-->
+                    <!--android:layout_width="30dp"-->
+                    <!--android:layout_centerVertical="true"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:src="@drawable/back"/>-->
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_centerVertical="true"-->
+                    <!--android:text="Album Content"-->
+                    <!--android:textSize="24dp"-->
+                    <!--android:layout_marginLeft="10dp"-->
+                    <!--android:layout_toRightOf="@+id/back"/>-->
+            <!--</RelativeLayout>-->
+
+        <!--</android.support.v7.widget.Toolbar>-->
+
+
+    <!--</android.support.design.widget.AppBarLayout>-->
+
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#3F52B4"
+        app:popupTheme="@style/Theme.AppCompat.Light.NoActionBar">
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/back" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/album_content_text"
+            android:textColor="@color/white"
+            android:textSize="24dp" />
+
+    </android.support.v7.widget.Toolbar>
+
+    <GridView
+        android:id="@+id/mainGrid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:numColumns="3"
+        android:layout_marginTop="60dp"/>
+
+</android.support.design.widget.CoordinatorLayout>

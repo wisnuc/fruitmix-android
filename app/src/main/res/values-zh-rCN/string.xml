@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <!--begin add by liang.wu-->
+    <string name="app_name">照片宝</string>
+    <string name="action_settings">设置操作</string>
+    <string name="navigation_drawer_open">打开侧边栏</string>
+    <string name="navigation_drawer_close">关闭侧边栏</string>
+    <string name="setting_succeed">设置成功</string>
+    <string name="setting_fail">设置失败</string>
+
+    <string name="finish_text">完成</string>
+
+    <string name="person_data">个人信息</string>
+    <string name="cloud">我的私有云</string>
+    <string name="user_manage">用户管理</string>
+    <string name="setting">设置</string>
+    <string name="help">帮助</string>
+    <string name="logout">注销</string>
+    <string name="login">登录</string>
+    <string name="login_fail">对不起，登录失败！</string>
+    <string name="share_uploading">对不起，相册正在上传，请稍后操作！</string>
+    <string name="replace_action">请更改行为</string>
+    <string name="patch_now">正在提交</string>
+    <string name="success"> 操作成功</string>
+    <string name="fail">操作失败</string>
+
+    <string name="email_text">电子邮件</string>
+    <string name="password_text">密码</string>
+    <string name="confirm_password_text">确认密码</string>
+    <string name="login_by_password_text">通过密码登录</string>
+    <string name="title_activity_user_manage">用户管理</string>
+    <string name="password_error">输入密码错误</string>
+    <string name="no_edit_photo_permission">你没有权限编辑照片</string>
+    <string name="set_maintainer">他人可否添加</string>
+    <string name="set_private">设置为私密</string>
+    <string name="set_public">设置为公开</string>
+    <string name="choose_text">选择</string>
+    <string name="album_content_text">相册</string>
+    <string name="modify_album_text">修改相册</string>
+    <string name="create_album_text">创建相册</string>
+    <string name="title_text">标题</string>
+    <string name="title_hint">未命名 %1$s</string>
+    <string name="description_text">描述</string>
+    <string name="ok">完成</string>
+    <string name="public_text">分享</string>
+    <string name="search_equipment">搜索设备</string>
+    <string name="winsun_group_name">Winsun</string>
+    <string name="name_abbreviations">AD</string>
+    <string name="admin_default_name">admin</string>
+    <string name="comment_text">评论</string>
+    <string name="send_comment_hint">说点什么吧…</string>
+    <string name="no_user_text">无用户</string>
+    <string name="share_text">分享</string>
+    <string name="private_text">私密</string>
+    <string name="delete_text">删除</string>
+    <string name="album_item_title">New York</string>
+    <string name="album_item_desc">2016–02–09 ~ 2017–05–05</string>
+    <string name="album_item_date">2016–02–01</string>
+    <string name="hello_world">Hello World!</string>
+    <string name="today_text">今天</string>
+    <string name="test_text">测试</string>
+    <string name="share_item_date">21:08 昨天</string>
+    <string name="user_email">example@qq.com</string>
+    <string name="album_text">相册</string>
+    <string name="photo_text">照片</string>
+    <string name="unknown_time_text">未知时间</string>
+    <string name="loading_title">正在加载…</string>
+    <string name="loading_message">请稍候!</string>
+    <string name="choose_photo">选择照片</string>
+    <string name="select_count">已选%1$d张</string>
+    <string name="no_content">对不起,无内容!</string>
+
+    <!-- album menu-->
+    <string name="setting_album">设置相册</string>
+    <string name="edit_photo">编辑照片</string>
+    <string name="modify_cover">修改封面</string>
+    <string name="delete_album">删除相册</string>
+    <string name="operation_fail">操作失败，请检查网络！</string>
+    <string name="no_network">没有网络，请检查</string>
+    <string name="share_comment_count">分享了%1$s张照片</string>
+    <string name="share_comment_text">%1$s : %2$s</string>
+    <string name="photo_count">(%1$s)</string>
+
+    <!-- share -->
+    <string name="share_album_title">%1$s·%2$s张</string>
+
+    <!-- time format -->
+    <string name="seconds_ago">%1$s秒前</string>
+    <string name="minutes_ago">%1$s分钟前</string>
+    <string name="hours_ago">%1$s小时前</string>
+    <string name="yesterday">昨天</string>
+
+    <!-- finish add by liang.wu-->
+
+
+</resources>

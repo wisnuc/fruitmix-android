@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/chooseHeader"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#3F52B4">
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/comment_text"
+            android:textColor="#FFFFFF"
+            android:textSize="24dp" />
+    </RelativeLayout>
+
+    <com.winsun.fruitmix.component.BigLittleImageView
+        android:id="@+id/mainPic"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_below="@+id/chooseHeader"
+        android:layout_marginBottom="2dp"
+        android:layout_marginTop="2dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        android:src="@drawable/placeholder_photo" />
+
+    <ListView
+        android:id="@+id/comment_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/panel_send"
+        android:layout_below="@+id/chooseHeader"
+        android:divider="#808080"
+        android:orientation="horizontal">
+
+    </ListView>
+
+    <RelativeLayout
+        android:id="@+id/panel_send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#FFFFFF">
+
+        <EditText
+            android:id="@+id/send_text"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginRight="60dp"
+            android:hint="@string/send_comment_hint"
+            android:textColorHint="@color/comment_hint"
+            android:textColor="@color/black"
+            android:textSize="15dp"
+            android:lines="2" />
+
+        <ImageView
+            android:id="@+id/send"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentRight="true"
+            android:background="#3F52B4"
+            android:paddingBottom="20dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:paddingTop="20dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/send_select" />
+    </RelativeLayout>
+
+</RelativeLayout>
