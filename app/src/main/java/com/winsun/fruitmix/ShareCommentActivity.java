@@ -68,7 +68,7 @@ public class ShareCommentActivity extends Activity {
 
     private CustomBroadCastReceiver mReceiver;
     private LocalBroadcastManager mManager;
-
+    private CommentListViewAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +86,8 @@ public class ShareCommentActivity extends Activity {
         mManager.registerReceiver(mReceiver, new IntentFilter(Util.LOCAL_COMMENT_CHANGED));
 
         lvComment = (ListView) findViewById(R.id.comment_list);
-        lvComment.setAdapter(new CommentListViewAdapter());
+        mAdapter = new CommentListViewAdapter();
+        lvComment.setAdapter(mAdapter);
 
         ivBack = (ImageView) findViewById(R.id.back);
         ivSend = (ImageView) findViewById(R.id.send);
@@ -103,14 +104,24 @@ public class ShareCommentActivity extends Activity {
 
         String imageUUID = getIntent().getStringExtra("imageUUID");
         imageRaw = LocalCache.MediasMap.get(imageUUID);
-        if(imageRaw == null)
+        if(imageRaw == null) {
             imageRaw = LocalCache.LocalImagesMap2.get(imageUUID);
-        imageData = new HashMap<String, Object>();
-        imageData.put("uuid", imageRaw.get("uuid"));
-        imageData.put("width", imageRaw.get("width"));
-        imageData.put("height", imageRaw.get("height"));
-        imageData.put("cacheType", "nas");
-        imageData.put("resHash", imageRaw.get("uuid"));
+
+            imageData = new HashMap<String, Object>();
+            imageData.put("uuid", imageRaw.get("uuid"));
+            imageData.put("width", imageRaw.get("width"));
+            imageData.put("height", imageRaw.get("height"));
+            imageData.put("cacheType", "local");
+            imageData.put("thumb", imageRaw.get("thumb"));
+        }else {
+            imageData = new HashMap<String, Object>();
+            imageData.put("uuid", imageRaw.get("uuid"));
+            imageData.put("width", imageRaw.get("width"));
+            imageData.put("height", imageRaw.get("height"));
+            imageData.put("cacheType", "nas");
+            imageData.put("resHash", imageRaw.get("uuid"));
+        }
+
 
         for (String key : LocalCache.DocumentsMap.keySet()) {
             shareRaw = LocalCache.DocumentsMap.get(key);
@@ -128,15 +139,17 @@ public class ShareCommentActivity extends Activity {
         w = Integer.parseInt((String) imageData.get("width"));
         h = Integer.parseInt((String) imageData.get("height"));
         if (w > h) {
-            w = w * 640 / h;
-            h = 640;
+            w = w * 300 / h;
+            h = 300;
         } else if (h > w) {
-            h = h * 640 / w;
-            w = 640;
+            h = h * 300 / w;
+            w = 300;
         }
 
         ivMain.setData(imageData, w, h);
         ivMain.loadSmallPic();
+
+        reloadList();
 
         ivSend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -228,7 +241,6 @@ public class ShareCommentActivity extends Activity {
             }
         });
 
-        reloadList();
     }
 
     @Override
@@ -272,6 +284,8 @@ public class ShareCommentActivity extends Activity {
 
                 try {
 
+                    commentData.clear();
+
                     DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
                     List<Comment> list = dbUtils.getAllLocalImageComment().get(String.valueOf(imageData.get("uuid")));
                     commentData.addAll(list);
@@ -288,7 +302,7 @@ public class ShareCommentActivity extends Activity {
                         commentData.add(commentItem);
                     }
 
-                    Log.d("winsun", commentData + "");
+                    Log.d(TAG, commentData + "");
                     return true;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -304,7 +318,7 @@ public class ShareCommentActivity extends Activity {
                 ((BaseAdapter) (lvComment.getAdapter())).notifyDataSetChanged();
             }
 
-        }.execute();
+        }.execute(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private class CustomBroadCastReceiver extends BroadcastReceiver {
@@ -359,13 +373,10 @@ public class ShareCommentActivity extends Activity {
                 lbComment.setText(currentItem.getText());
                 lbDate.setText(currentItem.getFormatTime());
             }
-            StringBuilder stringBuilder = new StringBuilder();
-            String[] splitStrings = currentItem.getCreator().split(" ");
-            for (String splitString : splitStrings) {
-                stringBuilder.append(splitString.substring(0, 1).toUpperCase());
-            }
-            ivAvatar.setText(stringBuilder.toString());
-            int color = (int) (Math.random() * 3);
+            Map<String,String> map = LocalCache.UsersMap.get(currentItem.getCreator());
+            ivAvatar.setText(map.get("avatar_default"));
+
+            int color = Integer.parseInt(map.get("avatar_default_color"));
             switch (color) {
                 case 0:
                     ivAvatar.setBackgroundResource(R.drawable.user_portrait_bg_blue);

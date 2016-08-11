@@ -81,7 +81,7 @@
     <string name="no_network">没有网络，请检查</string>
     <string name="share_comment_count">分享了%1$s张照片</string>
     <string name="share_comment_text">%1$s : %2$s</string>
-    <string name="photo_count">(%1$s)</string>
+    <string name="photo_count">%1$s张</string>
 
     <!-- share -->
     <string name="share_album_title">%1$s·%2$s张</string>

@@ -11,6 +11,7 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
+import java.io.FileNotFoundException;
 import java.net.ConnectException;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.Map;
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
- * <p>
+ * <p/>
  * TODO: Customize class - update intent actions, extra parameters and static
  * helper methods.
  */
@@ -77,20 +78,20 @@ public class LocalCommentService extends IntentService {
         mCommentMap = mDbUtils.getAllLocalImageComment();
         int albumCount = mCommentMap.size();
 
-        Iterator<Map.Entry<String,List<Comment>>> iterator = mCommentMap.entrySet().iterator();
+        Iterator<Map.Entry<String, List<Comment>>> iterator = mCommentMap.entrySet().iterator();
 
         boolean isContinue = true;
 
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
 
-            Map.Entry<String,List<Comment>> entry = iterator.next();
+            Map.Entry<String, List<Comment>> entry = iterator.next();
             String image = entry.getKey();
 
             if (!FNAS.isPhotoInMediaMap(image)) {
 
                 if (LocalCache.LocalImagesMap2.containsKey(image)) {
-                    Map<String,String> map = LocalCache.LocalImagesMap2.get(image);
-                    if(!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")){
+                    Map<String, String> map = LocalCache.LocalImagesMap2.get(image);
+                    if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
                         // if upload fail,skip this album
                         if (!FNAS.UploadFile(map.get("thumb")))
                             continue;
@@ -111,9 +112,12 @@ public class LocalCommentService extends IntentService {
                     FNAS.PostRemoteCall(request, data);
                     listIterator.remove();
                     mDbUtils.deleteLocalComment(mComment.getId());
-                } catch (ConnectException ex){
+                } catch (ConnectException ex) {
                     isContinue = false;
-                }catch (Exception ex){
+                } catch (FileNotFoundException ex) {
+                    isContinue = false;
+                    ex.printStackTrace();
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
 

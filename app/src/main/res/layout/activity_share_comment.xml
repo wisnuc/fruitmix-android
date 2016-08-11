@@ -29,7 +29,7 @@
     <com.winsun.fruitmix.component.BigLittleImageView
         android:id="@+id/mainPic"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="300dp"
         android:layout_below="@+id/chooseHeader"
         android:layout_marginBottom="2dp"
         android:layout_marginTop="2dp"
@@ -42,7 +42,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/panel_send"
-        android:layout_below="@+id/chooseHeader"
+        android:layout_below="@+id/mainPic"
         android:divider="#808080"
         android:orientation="horizontal">
 

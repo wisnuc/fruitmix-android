@@ -244,7 +244,7 @@
     <string name="no_network">No Network,Please check it</string>
     <string name="share_comment_count">Share %1$s Pictures</string>
     <string name="share_comment_text">%1$s : %2$s</string>
-    <string name="photo_count">(%1$s)</string>
+    <string name="photo_count">%1$sPhotos</string>
 
     <!-- share -->
     <string name="share_album_title">%1$s·%2$sPhoto</string>

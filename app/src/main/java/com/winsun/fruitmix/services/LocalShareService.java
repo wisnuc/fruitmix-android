@@ -12,6 +12,7 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
+import java.io.FileNotFoundException;
 import java.net.ConnectException;
 import java.util.Iterator;
 import java.util.List;
@@ -172,6 +173,9 @@ public class LocalShareService extends IntentService {
                 Log.i(TAG, "deleteLocalShare:" + mShare.getId() + "result:" + result);
             } catch (ConnectException ex) {
                 isContinue = false;
+            } catch (FileNotFoundException ex) {
+                isContinue = false;
+                ex.printStackTrace();
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
