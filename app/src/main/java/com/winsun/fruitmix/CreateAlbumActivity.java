@@ -116,7 +116,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
                     protected void onPreExecute() {
                         super.onPreExecute();
 
-                        mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
+                        mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
                     }
 
                     @Override

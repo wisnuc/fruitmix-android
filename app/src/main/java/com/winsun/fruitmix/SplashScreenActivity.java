@@ -21,6 +21,10 @@ import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -54,6 +58,7 @@ public class SplashScreenActivity extends Activity {
         mHandler = new CustomHandler(this);
         mHandler.sendEmptyMessageDelayed(WELCOME,3 * 1000);
 
+//        writeOneByteToFile();
     }
 
     private void welcome(){
@@ -137,7 +142,7 @@ public class SplashScreenActivity extends Activity {
                         } // get deviceID
                         Log.d("uuid", LocalCache.GetGlobalData("deviceID"));
 
-                        FNAS.checkOfflineTask(mContext);
+//                        FNAS.checkOfflineTask(mContext);
 
                         DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
                         dbUtils.doOneTaskInCachedThread(new Runnable() {
@@ -188,6 +193,7 @@ public class SplashScreenActivity extends Activity {
                 if (!aBoolean) {
                     Toast.makeText(Util.APPLICATION_CONTEXT, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
                 }
+                Util.loginState = aBoolean;
             }
 
         }.execute();
@@ -213,5 +219,27 @@ public class SplashScreenActivity extends Activity {
         }
     }
 
+    private void writeOneByteToFile(){
+
+        File file = new File(getDir("test",MODE_PRIVATE),"test");
+
+        FileOutputStream fileOutputStream;
+
+        try {
+
+            file.createNewFile();
+            fileOutputStream = new FileOutputStream(file);
+
+            byte[] bytes = {1};
+
+            fileOutputStream.write(bytes);
+            fileOutputStream.flush();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

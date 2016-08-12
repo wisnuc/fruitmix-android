@@ -71,6 +71,8 @@ public class ImageLoader {
 
     private Map<String, String> mHeaders;
 
+    private Object mTag;
+
     /**
      * Simple cache adapter interface. If provided to the ImageLoader, it
      * will be used as an L1 cache before dispatch to Volley. Implementations
@@ -247,9 +249,14 @@ public class ImageLoader {
         Request<Bitmap> newRequest = makeImageRequest(requestUrl, maxWidth, maxHeight, scaleType,
                 cacheKey);
 
+        if(mTag != null){
+            newRequest.setTag(mTag);
+        }
+
         mRequestQueue.add(newRequest);
         mInFlightRequests.put(cacheKey,
                 new BatchedImageRequest(newRequest, imageContainer));
+
         return imageContainer;
     }
 
@@ -284,6 +291,10 @@ public class ImageLoader {
      */
     public void setHeaders(Map<String, String> headers) {
         mHeaders = headers;
+    }
+
+    public void setTag(Object tag){
+        mTag = tag;
     }
 
     /**

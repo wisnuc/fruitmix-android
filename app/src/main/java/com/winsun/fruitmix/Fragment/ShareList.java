@@ -46,6 +46,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by Administrator on 2016/4/19.
@@ -85,7 +86,7 @@ public class ShareList implements NavPagerActivity.Page {
 
         mCommentMap = new HashMap<>();
 
-        while (true) {
+/*        while (true) {
             try {
                 Thread.sleep(2000);
                 refreshView();
@@ -97,7 +98,7 @@ public class ShareList implements NavPagerActivity.Page {
                 } catch (Exception e1) {
                 }
             }
-        }
+        }*/
         //loadRemoteData();
     }
 
@@ -134,6 +135,7 @@ public class ShareList implements NavPagerActivity.Page {
                 albumItem.put("avatar_default_color", map.get("avatar_default_color"));
             } else {
                 albumItem.put("avatar", avatar);
+                albumItem.put("avatar_default_color", map.get("avatar_default_color"));
             }
 
             albumItem.put("type", albumRaw.get("type"));
@@ -292,9 +294,11 @@ public class ShareList implements NavPagerActivity.Page {
     class ShareListViewAdapter extends BaseAdapter {
 
         ShareList container;
+        Map<String, List<Comment>> commentMap;
 
         public ShareListViewAdapter(ShareList container_) {
             container = container_;
+            commentMap = new HashMap<>();
         }
 
         @Override
@@ -353,7 +357,14 @@ public class ShareList implements NavPagerActivity.Page {
 
             //add by liang.wu
             mAvator.setText(String.valueOf(currentItem.get("avatar")));
-            int color = Integer.valueOf(String.valueOf(currentItem.get("avatar_default_color")));
+            int color = 0;
+            if (currentItem.containsKey("avatar_default_color") && currentItem.get("avatar_default_color") != null) {
+                color = Integer.valueOf(String.valueOf(currentItem.get("avatar_default_color")));
+            } else {
+                color = new Random().nextInt(3);
+                currentItem.put("avatar_default_color", color);
+            }
+
             switch (color) {
                 case 0:
                     mAvator.setBackgroundResource(R.drawable.user_portrait_bg_blue);
@@ -482,8 +493,8 @@ public class ShareList implements NavPagerActivity.Page {
                         mShareCommentTextView = (TextView) view.findViewById(R.id.share_comment_textview);
 
                         String uuid = itemImg.get("uuid");
-                        if (mCommentMap.containsKey(uuid)) {
-                            List<Comment> commentList = mCommentMap.get(uuid);
+                        if (commentMap.containsKey(uuid)) {
+                            List<Comment> commentList = commentMap.get(uuid);
                             if (commentList.size() != 0) {
                                 mShareCommentTextView.setText(String.format(containerActivity.getString(R.string.share_comment_text), nickName, commentList.get(0).getText()));
                             }
@@ -726,6 +737,8 @@ public class ShareList implements NavPagerActivity.Page {
             @Override
             protected void onPostExecute(Boolean aBoolean) {
 
+                mAdapter.commentMap.clear();
+                mAdapter.commentMap.putAll(mCommentMap);
                 mAdapter.notifyDataSetChanged();
             }
         }.execute();
@@ -781,6 +794,8 @@ public class ShareList implements NavPagerActivity.Page {
 
                 mLoadCommentCount++;
                 if (mLoadCommentCount == mLoadCommentTotal) {
+                    mAdapter.commentMap.clear();
+                    mAdapter.commentMap.putAll(mCommentMap);
                     mAdapter.notifyDataSetChanged();
                 }
 

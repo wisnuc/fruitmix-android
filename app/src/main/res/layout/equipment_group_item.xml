@@ -27,7 +27,7 @@
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/arrow"
             android:text="@string/test_text"
-            android:textSize="28dp"
+            android:textSize="20dp"
             android:textColor="@color/light_black"/>
 
         <TextView
@@ -37,7 +37,7 @@
             android:layout_toRightOf="@id/arrow"
             android:text="192.168.5.156"
             android:layout_below="@id/equipment_group_name"
-            android:textSize="18dp"
+            android:textSize="16dp"
             android:textColor="@color/light_black"/>
 
     </RelativeLayout>

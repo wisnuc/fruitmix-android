@@ -71,12 +71,15 @@
     <string name="choose_photo">选择照片</string>
     <string name="select_count">已选%1$d张</string>
     <string name="no_content">对不起,无内容!</string>
+    <string name="operating_title">正在执行…</string>
+    <string name="no_comment_content">请填写内容</string>
 
     <!-- album menu-->
     <string name="setting_album">设置相册</string>
     <string name="edit_photo">编辑照片</string>
     <string name="modify_cover">修改封面</string>
     <string name="delete_album">删除相册</string>
+    <string name="operation_success">操作成功！</string>
     <string name="operation_fail">操作失败，请检查网络！</string>
     <string name="no_network">没有网络，请检查</string>
     <string name="share_comment_count">分享了%1$s张照片</string>

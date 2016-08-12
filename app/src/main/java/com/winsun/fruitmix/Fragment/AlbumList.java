@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.Fragment;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -66,6 +67,8 @@ public class AlbumList implements NavPagerActivity.Page {
     private long mDownTime = 0;
     private double mDiffTime = 200; // millisecond
 
+    ProgressDialog mDialog;
+
     public AlbumList(NavPagerActivity activity_) {
 
         containerActivity = activity_;
@@ -99,7 +102,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
         //loadRemoteData();
 
-        while (true) {
+/*        while (true) {
             try {
                 Thread.sleep(2000);
                 refreshView();
@@ -111,7 +114,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 } catch (Exception e1) {
                 }
             }
-        }
+        }*/
 
     }
 
@@ -294,6 +297,9 @@ public class AlbumList implements NavPagerActivity.Page {
             lbDate = (TextView) view.findViewById(R.id.date);
             lbOwner = (TextView) view.findViewById(R.id.owner);
 
+            //restore mainbar state
+            mainBar.setTranslationX(0.0f);
+
             //check image
             coverImg = LocalCache.MediasMap.get(currentItem.get("coverImg"));
             if (coverImg != null) sLocal = false;
@@ -355,6 +361,14 @@ public class AlbumList implements NavPagerActivity.Page {
                 public void onClick(final View v) {
 
                     new AsyncTask<Object, Object, Integer>() {
+
+                        @Override
+                        protected void onPreExecute() {
+                            super.onPreExecute();
+
+                            mDialog = ProgressDialog.show(containerActivity, containerActivity.getString(R.string.operating_title), containerActivity.getString(R.string.loading_message), true, false);
+                        }
+
                         @Override
                         protected Integer doInBackground(Object... params) {
                             String data;
@@ -413,10 +427,15 @@ public class AlbumList implements NavPagerActivity.Page {
                         @Override
                         protected void onPostExecute(Integer sSuccess) {
 
+                            mDialog.dismiss();
+
                             if (sSuccess == 0) {
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.share_uploading), Toast.LENGTH_SHORT).show();
 
                             } else if (sSuccess == 1) {
+
+                                Toast.makeText(containerActivity, containerActivity.getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
+
                                 reloadList();
                                 ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
                             } else if (sSuccess == 2) {
@@ -427,6 +446,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                             }
 
+                            mainBar.setTranslationX(0.0f);
                         }
 
                     }.execute();
@@ -440,6 +460,15 @@ public class AlbumList implements NavPagerActivity.Page {
 
 
                     new AsyncTask<Object, Object, Integer>() {
+
+                        @Override
+                        protected void onPreExecute() {
+                            super.onPreExecute();
+
+                            mDialog = ProgressDialog.show(containerActivity, containerActivity.getString(R.string.operating_title), containerActivity.getString(R.string.loading_message), true, false);
+
+                        }
+
                         @Override
                         protected Integer doInBackground(Object... params) {
                             String data;
@@ -498,10 +527,11 @@ public class AlbumList implements NavPagerActivity.Page {
                         @Override
                         protected void onPostExecute(Integer sSuccess) {
 
+                            mDialog.dismiss();
+
                             if (sSuccess == 0) {
 
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.share_uploading), Toast.LENGTH_SHORT).show();
-
 
                             } else if (sSuccess == 1) {
                                 //Snackbar.make(mainListView, containerActivity.getString(R.string.operation_fail), Snackbar.LENGTH_SHORT).show();
@@ -510,6 +540,8 @@ public class AlbumList implements NavPagerActivity.Page {
                                 reloadList();
 
                                 ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();*/
+
+                                Toast.makeText(containerActivity, containerActivity.getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
 
                                 reloadList();
                                 ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
@@ -521,6 +553,7 @@ public class AlbumList implements NavPagerActivity.Page {
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
 
                             }
+                            mainBar.setTranslationX(0.0f);
                         }
 
                     }.execute();

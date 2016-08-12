@@ -145,9 +145,9 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
      */
     private void login(final View view) {
 
-        new AsyncTask<String, Void, String>() {
+        new AsyncTask<String, Void, Boolean>() {
             @Override
-            protected String doInBackground(String... params) {
+            protected Boolean doInBackground(String... params) {
 
                 HttpURLConnection conn;
                 String str;
@@ -155,7 +155,9 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                     conn = (HttpURLConnection) (new URL(mGateway + "/token").openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
                     conn.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((mUserUUid + ":" + mPwd).getBytes(), Base64.DEFAULT));
                     if (conn.getResponseCode() != 200) {
-                        Snackbar.make(view, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
+
+                        return false;
+
                     } else {
 
                         FNAS.Gateway = mGateway;
@@ -201,17 +203,33 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                         setResult(RESULT_OK);
 
                         finish();
+
+                        return true;
                     }
 
                 } catch (IOException e) {
                     e.printStackTrace();
+
+                    return false;
                 } catch (JSONException e) {
                     e.printStackTrace();
+
+                    return false;
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
 
-                return null;
+                    return false;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Boolean aBoolean) {
+
+                if(!aBoolean){
+                    Snackbar.make(view, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
+                }
+                Util.loginState = aBoolean;
+
             }
         }.execute();
 

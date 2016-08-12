@@ -52,6 +52,7 @@ import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -151,7 +152,7 @@ public class NavPagerActivity extends AppCompatActivity
             stringBuilder.append(splitString.substring(0, 1).toUpperCase());
         }
         mUserAvatar.setText(stringBuilder.toString());
-        int color = (int) (Math.random() * 3);
+        int color = new Random().nextInt(3);
         switch (color) {
             case 0:
                 mUserAvatar.setBackgroundResource(R.drawable.user_portrait_bg_blue);
@@ -375,9 +376,9 @@ public class NavPagerActivity extends AppCompatActivity
 
     @Override
     public void onNoPhotoItem(boolean noPhotoItem) {
-        if(noPhotoItem){
+        if (noPhotoItem) {
             lbRight.setVisibility(View.GONE);
-        }else {
+        } else {
             lbRight.setVisibility(View.VISIBLE);
         }
     }
@@ -408,8 +409,8 @@ public class NavPagerActivity extends AppCompatActivity
         }
     }
 
-    private void onDidAppear(int position){
-        switch (position){
+    private void onDidAppear(int position) {
+        switch (position) {
             case 0://share
                 toolbar.setTitle(getString(R.string.share_text));
                 fab.setVisibility(View.GONE);
@@ -603,9 +604,12 @@ public class NavPagerActivity extends AppCompatActivity
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            container.addView(pageList.get(position).getView());
 
-            return pageList.get(position).getView();
+            View view = pageList.get(position).getView();
+
+            container.addView(view);
+
+            return view;
         }
 
         @Override

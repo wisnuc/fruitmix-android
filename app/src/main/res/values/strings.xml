@@ -234,12 +234,15 @@
     <string name="choose_photo">Choose Photo</string>
     <string name="select_count">Select %1$d item</string>
     <string name="no_content">Sorry,No content!</string>
+    <string name="operating_title">Operating</string>
+    <string name="no_comment_content">Please write comment!</string>
 
     <!-- album menu-->
     <string name="setting_album">Setting Ablum</string>
     <string name="edit_photo">Edit Photo</string>
     <string name="modify_cover">Modify Cover</string>
     <string name="delete_album">Delete Album</string>
+    <string name="operation_success">Operation Success!</string>
     <string name="operation_fail">Operation fail,Please check network!</string>
     <string name="no_network">No Network,Please check it</string>
     <string name="share_comment_count">Share %1$s Pictures</string>

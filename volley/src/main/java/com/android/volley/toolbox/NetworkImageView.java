@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 
+import com.android.volley.Network;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader.ImageContainer;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
@@ -31,6 +32,9 @@ import com.android.volley.toolbox.ImageLoader.ImageListener;
  * associated request.
  */
 public class NetworkImageView extends ImageView {
+
+    public static final String TAG = NetworkImageView.class.getSimpleName();
+
     /**
      * The URL of the network image to load
      */

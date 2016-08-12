@@ -24,6 +24,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
@@ -92,7 +94,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     private ImageLoader mImageLoader;
 
-    private boolean mHaveFling = false;
+    private boolean mIsFling = false;
     private NewPhotoListScrollListener mScrollListener;
 
     private boolean mSelectMode = false;
@@ -101,13 +103,20 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     private int mSelectCount;
 
+    private boolean mHasFlung = false;
+    private RequestQueue mRequestQueue;
+
+    private int mFirstVisiableItem;
+    private int mVisiableItemCount;
+
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
         view = View.inflate(containerActivity, R.layout.new_photo_layout, null);
         ButterKnife.bind(this, view);
 
-        mImageLoader = new ImageLoader(RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue(), ImageLruCache.instance());
+        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "JWT " + FNAS.JWT);
         mImageLoader.setHeaders(headers);
@@ -373,7 +382,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             protected void onPreExecute() {
                 super.onPreExecute();
 
-//                mDialog = ProgressDialog.show(containerActivity, containerActivity.getString(R.string.loading_title), containerActivity.getString(R.string.loading_message), true, false);
+                mDialog = ProgressDialog.show(containerActivity, containerActivity.getString(R.string.operating_title), containerActivity.getString(R.string.loading_message), true, false);
             }
 
             @Override
@@ -417,7 +426,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             @Override
             protected void onPostExecute(Boolean sSuccess) {
 
-//                mDialog.dismiss();
+                mDialog.dismiss();
 
                 if (Util.getNetworkState(containerActivity)) {
                     LocalShareService.startActionLocalShareTask(containerActivity);
@@ -678,7 +687,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                     photoHolder = new PhotoHolder(view);
                     view.setTag(photoHolder);
 
-                    photoHolder.refreshView(photo);
+                    photoHolder.refreshView(photo, position);
 
                 } else {
 
@@ -686,7 +695,23 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                     photoHolder = (PhotoHolder) view.getTag();
 
-                    photoHolder.refreshView(photo);
+                    if (mHasFlung && !mIsFling) {
+                        mRequestQueue.cancelAll(new RequestQueue.RequestFilter() {
+                            @Override
+                            public boolean apply(Request<?> request) {
+
+                                int position = Integer.parseInt(String.valueOf(request.getTag()));
+                                if (position < mFirstVisiableItem || position > mFirstVisiableItem + mVisiableItemCount) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+
+                            }
+                        });
+                    }
+
+                    photoHolder.refreshView(photo, position);
 
                 }
 
@@ -712,7 +737,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             ButterKnife.bind(this, view);
         }
 
-        public void refreshView(final Photo photo) {
+        public void refreshView(final Photo photo, int position) {
 
             int width = Integer.parseInt(photo.getWidth());
             int height = Integer.parseInt(photo.getHeight());
@@ -724,7 +749,9 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 width = 100;
             }
 
-            if (photo.isCached() && !mHaveFling) {
+            mImageLoader.setTag(position);
+
+            if (photo.isCached() && !mIsFling) {
 //                    LocalCache.LoadLocalBitmapThumb(photo.getUuid(), width, height, mPhotoIv);
 
                 String url = photo.getThumb();
@@ -733,7 +760,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(url, mImageLoader);
 
-            } else if (!photo.isCached() && !mHaveFling) {
+            } else if (!photo.isCached() && !mIsFling) {
 
 //                    LocalCache.LoadRemoteBitmapThumb(photo.getUuid(), width, height, mPhotoIv);
 
@@ -858,7 +885,8 @@ public class NewPhotoList implements NavPagerActivity.Page {
     private class NewPhotoListScrollListener implements AbsListView.OnScrollListener {
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
+            mFirstVisiableItem = firstVisibleItem;
+            mVisiableItemCount = visibleItemCount;
         }
 
         @Override
@@ -866,11 +894,12 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             if (scrollState == SCROLL_STATE_FLING) {
 
-                mHaveFling = true;
+                mHasFlung = true;
+                mIsFling = true;
 
             } else if (scrollState == SCROLL_STATE_IDLE) {
 
-                mHaveFling = false;
+                mIsFling = false;
 
                 mPhotoListAdapter.notifyDataSetChanged();
             }

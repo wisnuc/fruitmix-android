@@ -1,6 +1,7 @@
 package com.winsun.fruitmix;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -70,6 +71,8 @@ public class ShareCommentActivity extends Activity {
     private LocalBroadcastManager mManager;
     private CommentListViewAdapter mAdapter;
 
+    private ProgressDialog mDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Map<String, String> imageRaw;
@@ -104,7 +107,7 @@ public class ShareCommentActivity extends Activity {
 
         String imageUUID = getIntent().getStringExtra("imageUUID");
         imageRaw = LocalCache.MediasMap.get(imageUUID);
-        if(imageRaw == null) {
+        if (imageRaw == null) {
             imageRaw = LocalCache.LocalImagesMap2.get(imageUUID);
 
             imageData = new HashMap<String, Object>();
@@ -113,7 +116,7 @@ public class ShareCommentActivity extends Activity {
             imageData.put("height", imageRaw.get("height"));
             imageData.put("cacheType", "local");
             imageData.put("thumb", imageRaw.get("thumb"));
-        }else {
+        } else {
             imageData = new HashMap<String, Object>();
             imageData.put("uuid", imageRaw.get("uuid"));
             imageData.put("width", imageRaw.get("width"));
@@ -160,8 +163,22 @@ public class ShareCommentActivity extends Activity {
 
                 mCommment = tfContent.getText() + "";
 
+                if (mCommment.isEmpty()) {
+                    Toast.makeText(mContext, getString(R.string.no_comment_content), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 Log.d("winsun", tfContent.getText() + "");
                 new AsyncTask<Object, Object, Boolean>() {
+
+                    @Override
+                    protected void onPreExecute() {
+                        super.onPreExecute();
+
+                        mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+
+                    }
+
                     @Override
                     protected Boolean doInBackground(Object... params) {
 
@@ -219,9 +236,11 @@ public class ShareCommentActivity extends Activity {
                     @Override
                     protected void onPostExecute(Boolean sSuccess) {
 
+                        mDialog.dismiss();
+
                         if (sSuccess) {
                             reloadList();
-                            ((BaseAdapter) (lvComment.getAdapter())).notifyDataSetChanged();
+
                             tfContent.setText("");
 
                             LocalBroadcastManager.getInstance(mContext).sendBroadcast(new Intent(Util.LOCAL_COMMENT_CHANGED));
@@ -230,7 +249,7 @@ public class ShareCommentActivity extends Activity {
                             //Snackbar.make(ivSend, getString(R.string.operation_fail), Snackbar.LENGTH_SHORT).show();
                             Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
 
-                            ((BaseAdapter) (lvComment.getAdapter())).notifyDataSetChanged();
+
                             tfContent.setText("");
                             //end add
                         }
@@ -275,6 +294,15 @@ public class ShareCommentActivity extends Activity {
 
     public void reloadList() {
         new AsyncTask<Object, Object, Boolean>() {
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+
+                mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
+
+            }
+
             @Override
             protected Boolean doInBackground(Object... params) {
                 String str;
@@ -314,7 +342,11 @@ public class ShareCommentActivity extends Activity {
             @Override
             protected void onPostExecute(Boolean sSuccess) {
 
+                mDialog.dismiss();
+
                 //reloadList();
+                mAdapter.commentList.clear();
+                mAdapter.commentList.addAll(commentData);
                 ((BaseAdapter) (lvComment.getAdapter())).notifyDataSetChanged();
             }
 
@@ -326,21 +358,22 @@ public class ShareCommentActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Util.LOCAL_COMMENT_CHANGED)) {
                 reloadList();
-                ((BaseAdapter) (lvComment.getAdapter())).notifyDataSetChanged();
             }
         }
     }
 
     class CommentListViewAdapter extends BaseAdapter {
 
-        public CommentListViewAdapter() {
+        List<Comment> commentList;
 
+        public CommentListViewAdapter() {
+            commentList = new ArrayList<>();
         }
 
         @Override
         public int getCount() {
-            if (commentData == null) return 0;
-            return commentData.size();
+            if (commentList == null) return 0;
+            return commentList.size();
         }
 
         @Override
@@ -373,7 +406,7 @@ public class ShareCommentActivity extends Activity {
                 lbComment.setText(currentItem.getText());
                 lbDate.setText(currentItem.getFormatTime());
             }
-            Map<String,String> map = LocalCache.UsersMap.get(currentItem.getCreator());
+            Map<String, String> map = LocalCache.UsersMap.get(currentItem.getCreator());
             ivAvatar.setText(map.get("avatar_default"));
 
             int color = Integer.parseInt(map.get("avatar_default_color"));
@@ -400,7 +433,7 @@ public class ShareCommentActivity extends Activity {
 
         @Override
         public Object getItem(int position) {
-            return commentData.get(position);
+            return commentList.get(position);
         }
     }
 }

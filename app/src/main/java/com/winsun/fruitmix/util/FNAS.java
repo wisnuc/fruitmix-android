@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.util;
 
 import android.content.Context;
+import android.os.Process;
 import android.util.Base64;
 import android.util.Log;
 
@@ -11,8 +12,6 @@ import com.winsun.fruitmix.model.OfflineTask;
 import com.winsun.fruitmix.services.LocalCommentService;
 import com.winsun.fruitmix.services.LocalShareService;
 
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -31,8 +30,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by Administrator on 2016/4/22.
@@ -136,14 +137,14 @@ public class FNAS {
             if (itemRaw.has("email")) {
                 item.put("email", itemRaw.getString("email"));
             }
+
             StringBuilder stringBuilder = new StringBuilder();
-            String[] splitStrings = itemRaw.getString("username").split(" ");
+            String[] splitStrings = item.get("name").split(" ");
             for (String splitString : splitStrings) {
                 stringBuilder.append(splitString.substring(0, 1).toUpperCase());
             }
-            item.put("avatar_default",stringBuilder.toString());
-            int color = (int)(Math.random() * 3);
-            item.put("avatar_default_color",color+"");
+            item.put("avatar_default", stringBuilder.toString());
+            item.put("avatar_default_color", String.valueOf(new Random().nextInt(3)));
 
             LocalCache.UsersMap.put(item.get("uuid"), item); // save all user info
         }
@@ -188,6 +189,9 @@ public class FNAS {
         new Thread(new Runnable() {
             @Override
             public void run() {
+
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
                 try {
                     UploadAll();
                 } catch (Exception ex) {
@@ -426,11 +430,9 @@ public class FNAS {
     public static void UploadAll() {
         Map<String, String> itemRaw;
 
-        for (String key : LocalCache.LocalImagesMap.keySet()) {
-            itemRaw = LocalCache.LocalImagesMap.get(key);
-            //Log.d("winsun", "XX "+itemRaw+"");
+        for (Iterator<Map<String, String>> iterator = LocalCache.LocalImagesMap.values().iterator(); iterator.hasNext(); ) {
+            itemRaw = iterator.next();
             if (itemRaw != null) {
-
                 if (!itemRaw.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || itemRaw.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
                     boolean result = UploadFile(itemRaw.get("thumb"));
                     itemRaw.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, result + "");
@@ -597,6 +599,9 @@ public class FNAS {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
+
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
                     DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
                     if (!dbUtils.getAllLocalShare().isEmpty()) {
@@ -624,6 +629,8 @@ public class FNAS {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
+
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
                     DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 

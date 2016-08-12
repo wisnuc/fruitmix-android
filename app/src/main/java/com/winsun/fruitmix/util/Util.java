@@ -49,6 +49,8 @@ public class Util {
 
     public static Context APPLICATION_CONTEXT = null;
 
+    public static boolean loginState = false;
+
     public static int Dp2Px(float dpValue) {
         final float scale = LocalCache.CurrentApp.getBaseContext().getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
@@ -99,7 +101,7 @@ public class Util {
             NetworkInfo info = manager.getActiveNetworkInfo();
             if (info != null && info.isConnected()) {
                 // 当前网络是连接的
-                if (info.getState() == NetworkInfo.State.CONNECTED) {
+                if (info.getState() == NetworkInfo.State.CONNECTED && loginState) {
                     // 当前所连接的网络可用
                     return true;
                 }
