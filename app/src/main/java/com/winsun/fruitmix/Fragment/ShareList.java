@@ -243,6 +243,8 @@ public class ShareList implements NavPagerActivity.Page {
                     }
                 }
 
+            } else {
+                loadRemoteCommentList();
             }
 
         }
@@ -603,6 +605,7 @@ public class ShareList implements NavPagerActivity.Page {
                                     intent.putExtra("desc", (String) currentItem.get("desc"));
                                     intent.putExtra("maintained", (boolean) currentItem.get("maintained"));
                                     intent.putExtra("private", (String) currentItem.get("private"));
+                                    intent.putExtra(Util.NEED_SHOW_MENU, false);
                                     containerActivity.startActivity(intent);
                                 } else {
                                     Log.d("winsun", getImgList("images") + "");
@@ -701,23 +704,10 @@ public class ShareList implements NavPagerActivity.Page {
             @Override
             protected Boolean doInBackground(Void... params) {
                 dbUtils = DBUtils.SINGLE_INSTANCE;
-                mCommentMap = dbUtils.getAllRemoteImageComment();
 
-                for (String imageUUid : mCommentMap.keySet()) {
-
-                    List<Comment> list = mCommentMap.get(imageUUid);
-
-                    List<Comment> localList = dbUtils.getLocalImageCommentByUUid(imageUUid);
-
-                    list.addAll(localList);
-
-                    for (Comment comment : list) {
-                        Log.i(TAG, "remote comment:" + comment.toString());
-                    }
-                }
 
                 Map<String, List<Comment>> localMap = dbUtils.getAllLocalImageComment();
-                for (String uuid : localMap.keySet()) {
+ /*               for (String uuid : localMap.keySet()) {
 
                     List<Comment> localList = localMap.get(uuid);
 
@@ -727,6 +717,58 @@ public class ShareList implements NavPagerActivity.Page {
 
                     for (Comment comment : localList) {
                         Log.i(TAG, "local comment:" + comment.toString());
+                    }
+
+                }*/
+                mCommentMap.putAll(localMap);
+
+                return true;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean aBoolean) {
+
+                mAdapter.commentMap.clear();
+                mAdapter.commentMap.putAll(mCommentMap);
+                mAdapter.notifyDataSetChanged();
+            }
+        }.execute();
+    }
+
+    private void loadRemoteCommentList() {
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                dbUtils = DBUtils.SINGLE_INSTANCE;
+
+
+                Map<String, List<Comment>> remoteMap = dbUtils.getAllRemoteImageComment();
+ /*               for (String uuid : localMap.keySet()) {
+
+                    List<Comment> localList = localMap.get(uuid);
+
+                    if (!mCommentMap.containsKey(uuid)) {
+                        mCommentMap.put(uuid, localList);
+                    }
+
+                    for (Comment comment : localList) {
+                        Log.i(TAG, "local comment:" + comment.toString());
+                    }
+
+                }*/
+
+                for (Map.Entry<String, List<Comment>> entry : remoteMap.entrySet()) {
+
+                    String imageUUid = entry.getKey();
+                    if (mCommentMap.containsKey(imageUUid)) {
+                        List<Comment> list = mCommentMap.get(imageUUid);
+
+                        list.addAll(entry.getValue());
+
+                    } else {
+
+                        mCommentMap.put(imageUUid, entry.getValue());
+
                     }
 
                 }
@@ -743,6 +785,7 @@ public class ShareList implements NavPagerActivity.Page {
             }
         }.execute();
     }
+
 
     private void loadCommentList(String imageUuid) {
 
@@ -777,8 +820,6 @@ public class ShareList implements NavPagerActivity.Page {
 
                         dbUtils.insertRemoteComment(comment, params[0]);
                     }
-
-                    mCommentMap.put(params[0], commentList);
 
                     Log.d("winsun mCommentMap:", mCommentMap + "");
                     return true;

@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -98,10 +99,16 @@ public class NavPagerActivity extends AppCompatActivity
 
     private boolean sMenuUnfolding = false;
 
+    private Context mContext;
+
+    private ProgressDialog mDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nav_pager);
+
+        mContext = this;
 
         mManager = LocalBroadcastManager.getInstance(this);
         mReceiver = new CustomBroadReceiver();
@@ -575,20 +582,49 @@ public class NavPagerActivity extends AppCompatActivity
         } else */
         if (id == R.id.logout) {
 
-            LocalCache.clearGatewayUuidPasswordToken(this);
-            LocalCache.CleanAll();
-            LocalCache.Init(this);
-            LocalCache.LoadLocalData();
+            new AsyncTask<Void, Void, Void>() {
 
-            Intent intent = new Intent(NavPagerActivity.this, EquipmentSearchActivity.class);
-            startActivity(intent);
-            finish();
+                @Override
+                protected void onPreExecute() {
+                    super.onPreExecute();
+
+                    mDialog = ProgressDialog.show(mContext, mContext.getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+
+                }
+
+                @Override
+                protected Void doInBackground(Void... params) {
+
+                    LocalCache.clearGatewayUuidPasswordToken(mContext);
+                    LocalCache.CleanAll();
+                    LocalCache.Init(NavPagerActivity.this);
+                    LocalCache.LoadLocalData();
+                    FNAS.restoreLocalPhotoUploadState();
+
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    super.onPostExecute(aVoid);
+
+                    mDialog.dismiss();
+
+                    Intent intent = new Intent(NavPagerActivity.this, EquipmentSearchActivity.class);
+                    startActivity(intent);
+                    finish();
+
+                }
+
+            }.execute();
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
     private class MyAdapter extends PagerAdapter {
         private NavPagerActivity activity;

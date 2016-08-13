@@ -220,6 +220,17 @@ public enum DBUtils {
         return returnValue;
     }
 
+    public long deleteAllLocalShare() {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.LOCAL_SHARE_TABLE_NAME, null, null);
+
+        close();
+
+        return returnValue;
+    }
+
     public List<OfflineTask> getAllOfflineTask() {
 
         openReadableDB();

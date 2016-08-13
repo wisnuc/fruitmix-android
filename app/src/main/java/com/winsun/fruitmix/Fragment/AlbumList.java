@@ -251,7 +251,6 @@ public class AlbumList implements NavPagerActivity.Page {
 
         AlbumList container;
         RelativeLayout lastMainbar;
-        ;
 
         public AlbumListViewAdapter(AlbumList container_) {
             container = container_;

@@ -314,20 +314,34 @@ public class ShareCommentActivity extends Activity {
 
                     commentData.clear();
 
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                    List<Comment> list = dbUtils.getAllLocalImageComment().get(String.valueOf(imageData.get("uuid")));
-                    commentData.addAll(list);
+                    String uuid = String.valueOf(imageData.get("uuid"));
 
-                    str = FNAS.RemoteCall("/media/" + imageData.get("uuid") + "?type=comments");
-                    json = new JSONArray(str);
-                    for (i = 0; i < json.length(); i++) {
-                        commentItem = new Comment();
-                        commentItem.setCreator(json.getJSONObject(i).getString("creator"));
-                        commentItem.setTime(json.getJSONObject(i).getString("datatime"));
-                        commentItem.setFormatTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(Long.parseLong(json.getJSONObject(i).getString("datatime")))));
-                        commentItem.setShareId(json.getJSONObject(i).getString("shareid"));
-                        commentItem.setText(json.getJSONObject(i).getString("text"));
-                        commentData.add(commentItem);
+                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+                    Map<String, List<Comment>> localImageCommentMap = dbUtils.getAllLocalImageComment();
+                    if (localImageCommentMap.containsKey(uuid)) {
+                        commentData.addAll(localImageCommentMap.get(uuid));
+                    }
+
+
+                    if (Util.getNetworkState(mContext)) {
+
+                        str = FNAS.RemoteCall("/media/" + imageData.get("uuid") + "?type=comments");
+                        json = new JSONArray(str);
+                        for (i = 0; i < json.length(); i++) {
+                            commentItem = new Comment();
+                            commentItem.setCreator(json.getJSONObject(i).getString("creator"));
+                            commentItem.setTime(json.getJSONObject(i).getString("datatime"));
+                            commentItem.setFormatTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(Long.parseLong(json.getJSONObject(i).getString("datatime")))));
+                            commentItem.setShareId(json.getJSONObject(i).getString("shareid"));
+                            commentItem.setText(json.getJSONObject(i).getString("text"));
+                            commentData.add(commentItem);
+                        }
+                    } else {
+
+                        Map<String, List<Comment>> remoteImageMap = dbUtils.getAllRemoteImageComment();
+                        if (remoteImageMap.containsKey(uuid)) {
+                            commentData.addAll(remoteImageMap.get(uuid));
+                        }
                     }
 
                     Log.d(TAG, commentData + "");
@@ -350,7 +364,7 @@ public class ShareCommentActivity extends Activity {
                 ((BaseAdapter) (lvComment.getAdapter())).notifyDataSetChanged();
             }
 
-        }.execute(AsyncTask.THREAD_POOL_EXECUTOR);
+        }.execute();
     }
 
     private class CustomBroadCastReceiver extends BroadcastReceiver {
@@ -406,6 +420,7 @@ public class ShareCommentActivity extends Activity {
                 lbComment.setText(currentItem.getText());
                 lbDate.setText(currentItem.getFormatTime());
             }
+
             Map<String, String> map = LocalCache.UsersMap.get(currentItem.getCreator());
             ivAvatar.setText(map.get("avatar_default"));
 

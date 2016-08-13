@@ -91,8 +91,8 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
             stringBuilder.append(splitString.substring(0, 1).toUpperCase());
         }
         mUserDefaultPortrait.setText(stringBuilder.toString());
-        int color = (int)(Math.random() * 3);
-        switch (color){
+        int color = (int) (Math.random() * 3);
+        switch (color) {
             case 0:
                 mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_blue);
                 break;
@@ -156,6 +156,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                     conn.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((mUserUUid + ":" + mPwd).getBytes(), Base64.DEFAULT));
                     if (conn.getResponseCode() != 200) {
 
+                        Util.loginState = false;
                         return false;
 
                     } else {
@@ -166,6 +167,8 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                         str = FNAS.ReadFull(conn.getInputStream());
                         mJwt = new JSONObject(str).getString("token"); // get token
                         FNAS.JWT = mJwt;
+
+                        Util.loginState = true;
 
                         if (LocalCache.DeviceID == null) {
                             //SetGlobalData("deviceID", UUID.randomUUID().toString());
@@ -207,17 +210,10 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                         return true;
                     }
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-
-                    return false;
-                } catch (JSONException e) {
-                    e.printStackTrace();
-
-                    return false;
                 } catch (Exception e) {
                     e.printStackTrace();
 
+                    Util.loginState = false;
                     return false;
                 }
             }
@@ -225,10 +221,9 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
             @Override
             protected void onPostExecute(Boolean aBoolean) {
 
-                if(!aBoolean){
+                if (!aBoolean) {
                     Snackbar.make(view, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
                 }
-                Util.loginState = aBoolean;
 
             }
         }.execute();

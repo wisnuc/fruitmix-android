@@ -91,12 +91,10 @@
             android:label="@string/title_activity_test3"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
             android:name=".NewAlbumPicChooseActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
             android:name=".Test4Activity"
             android:label="@string/title_activity_test4" />
@@ -125,6 +123,9 @@
             android:exported="false" />
         <service
             android:name=".services.LocalCommentService"
+            android:exported="false" />
+        <service
+            android:name=".services.LocalPhotoUploadService"
             android:exported="false" />
     </application>
 

@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Comment;
@@ -25,7 +26,9 @@ import java.util.Map;
  * helper methods.
  */
 public class LocalCommentService extends IntentService {
-    // TODO: Rename actions, choose action names that describe tasks that this
+
+    public static final String TAG = LocalCommentService.class.getSimpleName();
+
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_LOCAL_COMMENT_TASK = "com.winsun.fruitmix.services.action.local_comment_task";
 
@@ -76,11 +79,10 @@ public class LocalCommentService extends IntentService {
         mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());
 
         mCommentMap = mDbUtils.getAllLocalImageComment();
+
         int albumCount = mCommentMap.size();
 
         Iterator<Map.Entry<String, List<Comment>>> iterator = mCommentMap.entrySet().iterator();
-
-        boolean isContinue = true;
 
         while (iterator.hasNext()) {
 
@@ -112,11 +114,6 @@ public class LocalCommentService extends IntentService {
                     FNAS.PostRemoteCall(request, data);
                     listIterator.remove();
                     mDbUtils.deleteLocalComment(mComment.getId());
-                } catch (ConnectException ex) {
-                    isContinue = false;
-                } catch (FileNotFoundException ex) {
-                    isContinue = false;
-                    ex.printStackTrace();
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -130,9 +127,6 @@ public class LocalCommentService extends IntentService {
             FNAS.LoadDocuments();
             Intent intent = new Intent(Util.LOCAL_COMMENT_CHANGED);
             mManager.sendBroadcast(intent);
-        }
-        if (!mCommentMap.isEmpty() && isContinue) {
-            startActionLocalCommentTask(this);
         }
     }
 

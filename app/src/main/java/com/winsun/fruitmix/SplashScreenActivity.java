@@ -56,12 +56,12 @@ public class SplashScreenActivity extends Activity {
         mContext = this;
 
         mHandler = new CustomHandler(this);
-        mHandler.sendEmptyMessageDelayed(WELCOME,3 * 1000);
+        mHandler.sendEmptyMessageDelayed(WELCOME, 3 * 1000);
 
 //        writeOneByteToFile();
     }
 
-    private void welcome(){
+    private void welcome() {
         mGateway = LocalCache.getGateway(mContext);
         mUuid = LocalCache.getUuidValue(mContext);
         mPassword = LocalCache.getPasswordValue(mContext);
@@ -122,6 +122,7 @@ public class SplashScreenActivity extends Activity {
                             }
                         });
 
+                        Util.loginState = false;
                         return false;
 
                     } else {
@@ -133,6 +134,8 @@ public class SplashScreenActivity extends Activity {
 
                         str = FNAS.ReadFull(conn.getInputStream());
                         FNAS.JWT = new JSONObject(str).getString("token"); // get token
+
+                        Util.loginState = true;
 
                         if (LocalCache.DeviceID == null) {
                             //SetGlobalData("deviceID", UUID.randomUUID().toString());
@@ -164,6 +167,8 @@ public class SplashScreenActivity extends Activity {
                 } catch (Exception e) {
                     e.printStackTrace();
 
+                    Util.loginState = false;
+
                     FNAS.Gateway = mGateway;
                     FNAS.JWT = mToken;
                     FNAS.userUUID = mUuid;
@@ -193,7 +198,6 @@ public class SplashScreenActivity extends Activity {
                 if (!aBoolean) {
                     Toast.makeText(Util.APPLICATION_CONTEXT, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
                 }
-                Util.loginState = aBoolean;
             }
 
         }.execute();
@@ -219,9 +223,9 @@ public class SplashScreenActivity extends Activity {
         }
     }
 
-    private void writeOneByteToFile(){
+    private void writeOneByteToFile() {
 
-        File file = new File(getDir("test",MODE_PRIVATE),"test");
+        File file = new File(getDir("test", MODE_PRIVATE), "test");
 
         FileOutputStream fileOutputStream;
 

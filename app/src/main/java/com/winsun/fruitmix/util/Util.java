@@ -15,8 +15,10 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -138,16 +140,27 @@ public class Util {
 
         long currentTime = System.currentTimeMillis();
 
-        long timeDifference = currentTime - createTime;
-        if (timeDifference < 0) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC+8"));
+        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        long timeDifference = calendar.getTimeInMillis() - createTime;
+/*        if (timeDifference < 0) {
             builder.append(String.format(context.getString(R.string.seconds_ago), 0));
         } else if (timeDifference < 60 * 1000) {
             builder.append(String.format(context.getString(R.string.seconds_ago), timeDifference / 1000));
         } else if (timeDifference < 3600 * 1000) {
             builder.append(String.format(context.getString(R.string.minutes_ago), timeDifference / 60 / 1000));
+        } else */
+        if (timeDifference < 0) {
+//            builder.append(String.format(context.getString(R.string.hours_ago), timeDifference / 3600 / 1000));
+
+            builder.append(new SimpleDateFormat("HH:mm:ss", Locale.SIMPLIFIED_CHINESE).format(new Date(createTime)));
+
         } else if (timeDifference < 24 * 3600 * 1000) {
-            builder.append(String.format(context.getString(R.string.hours_ago), timeDifference / 3600 / 1000));
-        } else if (timeDifference < 48 * 3600 * 1000) {
             builder.append(context.getString(R.string.yesterday));
             builder.append(new SimpleDateFormat("HH:mm", Locale.SIMPLIFIED_CHINESE).format(new Date(createTime)));
         } else if (timeDifference < 4 * 24 * 3600 * 1000) {

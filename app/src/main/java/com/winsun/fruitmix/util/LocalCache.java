@@ -25,6 +25,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Comment;
+import com.winsun.fruitmix.services.LocalPhotoUploadService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -128,6 +129,10 @@ public class LocalCache {
 
         DeviceID = null;
 
+        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        dbUtils.deleteAllLocalShare();
+        dbUtils.deleteAllLocalComment();
+        dbUtils.deleteAllRemoteComment();
         //
     }
 
@@ -216,11 +221,8 @@ public class LocalCache {
         List<Map<String, String>> localPhotoList;
         int i;
         Map<String, String> itemRaw, item;
-        Map<String, String> localHashObj;
 
         localPhotoList = LocalCache.PhotoList("Camera");
-
-        LocalCache.LocalImagesMap = new HashMap<String, Map<String, String>>();
 
         for (i = 0; i < localPhotoList.size(); i++) {
             itemRaw = localPhotoList.get(i);
@@ -238,7 +240,7 @@ public class LocalCache {
         LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
         Log.d("winsun", "LocalImagesMap " + LocalCache.LocalImagesMap);
 
-
+        LocalPhotoUploadService.startActionUploadLocalPhoto(Util.APPLICATION_CONTEXT);
     }
 
     /*
@@ -296,8 +298,10 @@ public class LocalCache {
                 @Override
                 protected void onPostExecute(Bitmap bmp) {
                     try {
-                        if (bmp != null && iv.getTag() != null && iv.getTag().equals(key)) {
+                        if (bmp != null) {
                             iv.setImageBitmap(bmp);
+                            if (iv instanceof BigLittleImageView)
+                                ((BigLittleImageView) iv).bigPic = bmp;
                         }
                     } catch (NullPointerException e) {
                         e.printStackTrace();
@@ -522,8 +526,8 @@ public class LocalCache {
                 try {
                     if (bmp != null) {
                         iv.setImageBitmap(bmp);
-                        if(iv instanceof BigLittleImageView)
-                            ((BigLittleImageView)iv).bigPic = bmp;
+                        if (iv instanceof BigLittleImageView)
+                            ((BigLittleImageView) iv).bigPic = bmp;
                     }
                 } catch (NullPointerException e) {
                     e.printStackTrace();

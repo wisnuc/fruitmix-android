@@ -5,11 +5,13 @@ import android.os.Process;
 import android.util.Base64;
 import android.util.Log;
 
+import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Share;
 import com.winsun.fruitmix.model.OfflineTask;
 import com.winsun.fruitmix.services.LocalCommentService;
+import com.winsun.fruitmix.services.LocalPhotoUploadService;
 import com.winsun.fruitmix.services.LocalShareService;
 
 import org.json.JSONArray;
@@ -143,8 +145,12 @@ public class FNAS {
             for (String splitString : splitStrings) {
                 stringBuilder.append(splitString.substring(0, 1).toUpperCase());
             }
-            item.put("avatar_default", stringBuilder.toString());
-            item.put("avatar_default_color", String.valueOf(new Random().nextInt(3)));
+            if (!item.containsKey("avatar_default")) {
+                item.put("avatar_default", stringBuilder.toString());
+            }
+            if (!item.containsKey("avatar_default_color")) {
+                item.put("avatar_default_color", String.valueOf(new Random().nextInt(3)));
+            }
 
             LocalCache.UsersMap.put(item.get("uuid"), item); // save all user info
         }
@@ -152,7 +158,9 @@ public class FNAS {
         str = FNAS.RemoteCall("/media"); // get all pictures;
         json = new JSONArray(str);
 
-        LocalCache.MediasMap.clear();
+        if (json.length() != 0) {
+            LocalCache.MediasMap.clear();
+        }
 
         for (i = 0; i < json.length(); i++) {
             try {
@@ -185,23 +193,7 @@ public class FNAS {
             }
         }
 
-        // upload
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
-                try {
-                    UploadAll();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-                LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
-
-            }
-        }).start();
+        LocalPhotoUploadService.startActionUploadLocalPhoto(Util.APPLICATION_CONTEXT);
 
 
         str = FNAS.RemoteCall("/mediashare"); // get all album share and normal share(immutable)
@@ -428,9 +420,8 @@ public class FNAS {
     }
 
     public static void UploadAll() {
-        Map<String, String> itemRaw;
 
-        for (Iterator<Map<String, String>> iterator = LocalCache.LocalImagesMap.values().iterator(); iterator.hasNext(); ) {
+/*        for (Iterator<Map<String, String>> iterator = LocalCache.LocalImagesMap.values().iterator(); iterator.hasNext(); ) {
             itemRaw = iterator.next();
             if (itemRaw != null) {
                 if (!itemRaw.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || itemRaw.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
@@ -439,10 +430,26 @@ public class FNAS {
                 }
 
             }
+        }*/
+
+        for (Map<String, String> map : LocalCache.LocalImagesMap.values()) {
+            if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
+                boolean result = UploadFile(map.get("thumb"));
+                map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, String.valueOf(result));
+            }
         }
 
     }
 
+    /**
+     * restore local photo upload state when user logout
+     */
+    public static void restoreLocalPhotoUploadState() {
+        for (Map<String, String> map : LocalCache.LocalImagesMap.values()) {
+            map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, "false");
+        }
+        LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
+    }
 
     public static boolean UploadFile(String fname) {
         HashMap<String, Map<String, String>> localHashMap;

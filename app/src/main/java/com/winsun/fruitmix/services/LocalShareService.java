@@ -22,7 +22,6 @@ import java.util.Map;
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  * <p/>
- * TODO: Customize class - update intent actions, extra parameters and static
  * helper methods.
  */
 public class LocalShareService extends IntentService {
@@ -82,10 +81,10 @@ public class LocalShareService extends IntentService {
         mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());
         mShareList = mDbUtils.getAllLocalShare();
 
+        Log.i(TAG,"local share:" + mShareList);
+
         Iterator<Share> iterator = mShareList.iterator();
         int shareCount = mShareList.size();
-
-        boolean isContinue = true;
 
         while (iterator.hasNext()) {
 
@@ -171,12 +170,7 @@ public class LocalShareService extends IntentService {
                 long result = mDbUtils.deleteLocalShare(mShare.getId());
                 LocalCache.DocumentsMap.remove(mShare.getUuid());
                 Log.i(TAG, "deleteLocalShare:" + mShare.getId() + "result:" + result);
-            } catch (ConnectException ex) {
-                isContinue = false;
-            } catch (FileNotFoundException ex) {
-                isContinue = false;
-                ex.printStackTrace();
-            } catch (Exception ex) {
+            }  catch (Exception ex) {
                 ex.printStackTrace();
             }
 
@@ -188,10 +182,6 @@ public class LocalShareService extends IntentService {
             Intent intent = new Intent(Util.LOCAL_SHARE_CHANGED);
             mManager.sendBroadcast(intent);
             Log.i(TAG, "after send broadcast");
-        }
-
-        if (!mShareList.isEmpty() && isContinue) {
-            startActionLocalShareTask(this);
         }
 
     }
