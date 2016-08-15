@@ -25,6 +25,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageLruCache;
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.AlbumPicContentActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.NewAlbumPicChooseActivity;
@@ -32,6 +36,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.ShareCommentActivity;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.OfflineTask;
+import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.Share;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -69,6 +74,10 @@ public class AlbumList implements NavPagerActivity.Page {
 
     ProgressDialog mDialog;
 
+    private RequestQueue mRequestQueue;
+
+    private ImageLoader mImageLoader;
+
     public AlbumList(NavPagerActivity activity_) {
 
         containerActivity = activity_;
@@ -81,6 +90,13 @@ public class AlbumList implements NavPagerActivity.Page {
                 */
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
                 R.layout.album_list, null);
+
+        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "JWT " + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
 
         mainListView = (ListView) view.findViewById(R.id.mainList);
         mainListView.setAdapter(new AlbumListViewAdapter(this));
@@ -268,7 +284,8 @@ public class AlbumList implements NavPagerActivity.Page {
             GridView gvGrid;
             final Map<String, Object> currentItem;
             final RelativeLayout mainBar;
-            ImageView ivMainPic, ivRecommand, ivCreate, ivLock;
+            NetworkImageView ivMainPic;
+            ImageView ivRecommand, ivCreate, ivLock;
             TextView lbHot, lbTitle, lbDesc, lbDate, lbOwner, lbPhotoCount;
             TextView lbDelete, lbShare;
             Map<String, String> coverImg;
@@ -283,7 +300,7 @@ public class AlbumList implements NavPagerActivity.Page {
             currentItem = (Map<String, Object>) this.getItem(position);
 
             mainBar = (RelativeLayout) view.findViewById(R.id.mainBar);
-            ivMainPic = (ImageView) view.findViewById(R.id.mainPic);
+            ivMainPic = (NetworkImageView) view.findViewById(R.id.mainPic);
             ivRecommand = (ImageView) view.findViewById(R.id.recommand);
             ivCreate = (ImageView) view.findViewById(R.id.create);
             ivLock = (ImageView) view.findViewById(R.id.lock);
@@ -308,22 +325,38 @@ public class AlbumList implements NavPagerActivity.Page {
             }
 
             if (coverImg != null) {
-                w = Integer.parseInt((String) coverImg.get("width"));
-                h = Integer.parseInt((String) coverImg.get("height"));
-                if (w >= h) {
-                    w = w * 100 / h;
-                    h = 100;
-                } else {
-                    h = h * 100 / w;
-                    w = 100;
-                }
+
                 if (sLocal) {  // local bitmap path
-                    LocalCache.LoadLocalBitmapThumb(coverImg.get("thumb"), w, h, ivMainPic);
+//                    LocalCache.LoadLocalBitmapThumb(coverImg.get("thumb"), w, h, ivMainPic);
+
+                    String url = String.valueOf(coverImg.get("thumb"));
+
+                    ivMainPic.setTag(url);
+                    ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
+                    ivMainPic.setImageUrl(url, mImageLoader);
+
                 } else {
-                    LocalCache.LoadRemoteBitmapThumb((String) (coverImg.get("uuid")), w, h, ivMainPic);
+//                    LocalCache.LoadRemoteBitmapThumb((String) (coverImg.get("uuid")), w, h, ivMainPic);
+
+                    w = Integer.parseInt(coverImg.get("width"));
+                    h = Integer.parseInt(coverImg.get("height"));
+                    if (w >= h) {
+                        w = w * 100 / h;
+                        h = 100;
+                    } else {
+                        h = h * 100 / w;
+                        w = 100;
+                    }
+
+                    String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=thumb&width=" + w + "&height=" + h;
+
+                    ivMainPic.setTag(url);
+                    ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
+                    ivMainPic.setImageUrl(url, mImageLoader);
                 }
             } else {
-                ivMainPic.setImageResource(R.drawable.placeholder_photo);
+                ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivMainPic.setImageUrl(null, mImageLoader);
             }
 
             if (currentItem.get("type").equals("recommand")) {

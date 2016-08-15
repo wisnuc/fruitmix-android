@@ -132,7 +132,12 @@ public class FNAS {
         for (i = 0; i < json.length(); i++) {
             itemRaw = json.getJSONObject(i);
             uuid = itemRaw.getString("uuid");
-            item = new HashMap<String, String>();
+            if(LocalCache.UsersMap.containsKey(uuid)){
+                item = LocalCache.UsersMap.get(uuid);
+            }else {
+                item = new HashMap<String, String>();
+            }
+
             item.put("name", itemRaw.getString("username"));
             item.put("uuid", itemRaw.getString("uuid"));
             item.put("avatar", itemRaw.getString("avatar"));

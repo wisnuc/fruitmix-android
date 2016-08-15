@@ -24,9 +24,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageLruCache;
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.OfflineTask;
+import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.Share;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -68,6 +73,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private boolean mShowMenu;
 
+    private RequestQueue mRequestQueue;
+
+    private ImageLoader mImageLoader;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -75,13 +84,21 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         mContext = this;
 
+        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "JWT " + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
+
+
         imagesStr = getIntent().getStringExtra("images");
         mUuid = getIntent().getStringExtra("uuid");
         mTitle = getIntent().getStringExtra("title");
         mDesc = getIntent().getStringExtra("desc");
         mMaintained = getIntent().getBooleanExtra("maintained", false);
         mIsLocked = getIntent().getBooleanExtra("local", false);
-        mShowMenu = getIntent().getBooleanExtra(Util.NEED_SHOW_MENU,true);
+        mShowMenu = getIntent().getBooleanExtra(Util.NEED_SHOW_MENU, true);
 
         if (getIntent().getStringExtra("private").equals("1")) {
             mPrivate = true;
@@ -196,8 +213,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             GridView gvGrid;
             final Map<String, Object> currentItem;
             final RelativeLayout mainBar;
-            ImageView ivMain, ivLock;
-            int w, h;
+            NetworkImageView ivMain;
+            ImageView ivLock;
 
             if (convertView == null)
                 view = LayoutInflater.from(activity).inflate(R.layout.photo_list_cell_cell, parent, false);
@@ -205,23 +222,36 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             currentItem = (Map<String, Object>) this.getItem(position);
 
-            ivMain = (ImageView) view.findViewById(R.id.mainPic);
+            ivMain = (NetworkImageView) view.findViewById(R.id.mainPic);
             ivLock = (ImageView) view.findViewById(R.id.lock);
 
-            w = Integer.parseInt((String) currentItem.get("width"));
-            h = Integer.parseInt((String) currentItem.get("height"));
-            if (w >= h) {
-                w = w * 100 / h;
-                h = 100;
-            } else {
-                h = h * 100 / w;
-                w = 100;
-            }
-
             if (currentItem.get("cacheType").equals("local")) {  // local bitmap path
-                LocalCache.LoadLocalBitmapThumb((String) currentItem.get("thumb"), w, h, ivMain);
+//                LocalCache.LoadLocalBitmapThumb((String) currentItem.get("thumb"), w, h, ivMain);
+
+                String url = String.valueOf(currentItem.get("thumb"));
+
+                ivMain.setTag(url);
+                ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivMain.setImageUrl(url, mImageLoader);
+
             } else if (currentItem.get("cacheType").equals("nas")) {
-                LocalCache.LoadRemoteBitmapThumb((String) (currentItem.get("resHash")), w, h, ivMain);
+//                LocalCache.LoadRemoteBitmapThumb((String) (currentItem.get("resHash")), w, h, ivMain);
+
+                int width = Integer.parseInt((String) currentItem.get("width"));
+                int height = Integer.parseInt((String) currentItem.get("height"));
+                if (width >= height) {
+                    width = width * 100 / height;
+                    height = 100;
+                } else {
+                    height = height * 100 / width;
+                    width = 100;
+                }
+
+                String url = FNAS.Gateway + "/media/" + currentItem.get("resHash") + "?type=thumb&width=" + width + "&height=" + height;
+
+                ivMain.setTag(url);
+                ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivMain.setImageUrl(url, mImageLoader);
             }
 
             ivMain.setOnClickListener(new View.OnClickListener() {
@@ -249,7 +279,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        if(mShowMenu){
+        if (mShowMenu) {
 
             getMenuInflater().inflate(R.menu.album_menu, menu);
 

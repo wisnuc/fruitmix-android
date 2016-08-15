@@ -69,13 +69,7 @@ public class SplashScreenActivity extends Activity {
 
         if (mUuid != null && mPassword != null && mGateway != null && mToken != null) {
 
-            Intent intent = new Intent(SplashScreenActivity.this, NavPagerActivity.class);
-            intent.putExtra(Util.EQUIPMENT_CHILD_NAME, LocalCache.getUserNameValue(mContext));
-            startActivity(intent);
-
             login();
-
-            finish();
 
         } else {
             Intent intent = new Intent();
@@ -198,6 +192,12 @@ public class SplashScreenActivity extends Activity {
                 if (!aBoolean) {
                     Toast.makeText(Util.APPLICATION_CONTEXT, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
                 }
+
+                Intent intent = new Intent(SplashScreenActivity.this, NavPagerActivity.class);
+                intent.putExtra(Util.EQUIPMENT_CHILD_NAME, LocalCache.getUserNameValue(mContext));
+                startActivity(intent);
+                finish();
+
             }
 
         }.execute();

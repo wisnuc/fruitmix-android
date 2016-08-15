@@ -36,7 +36,7 @@
         android:paddingRight="3dp"
         android:translationX="0dp">
 
-        <ImageView
+        <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic"
             android:layout_width="150dp"
             android:layout_height="120dp"

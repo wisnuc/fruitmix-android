@@ -22,6 +22,10 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageLruCache;
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.AlbumPicContentActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.PhotoSliderActivity;
@@ -30,6 +34,7 @@ import com.winsun.fruitmix.ShareCommentActivity;
 import com.winsun.fruitmix.SplashScreenActivity;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Comment;
+import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -71,11 +76,22 @@ public class ShareList implements NavPagerActivity.Page {
 
     private DBUtils dbUtils;
 
+    private RequestQueue mRequestQueue;
+
+    private ImageLoader mImageLoader;
+
     public ShareList(NavPagerActivity activity_) {
         containerActivity = activity_;
 
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
                 R.layout.share_list2, null);
+
+        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "JWT " + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
 
         mainListView = (ListView) view.findViewById(R.id.mainList);
         mAdapter = new ShareListViewAdapter(this);
@@ -317,8 +333,8 @@ public class ShareList implements NavPagerActivity.Page {
             Map<String, String> coverImg, itemImg;
             TextView lbNick, lbTime, lbAlbumTitle;
             ImageView lbAlbumShare;
-            ImageView ivCover;
-            ImageView ivItems[];
+            NetworkImageView ivCover;
+            NetworkImageView ivItems[];
             View rlAlbum, llPic1, llPic2, llPic3;
             boolean sLocal;
             int w, h, i;
@@ -344,7 +360,7 @@ public class ShareList implements NavPagerActivity.Page {
 
             lbNick = (TextView) view.findViewById(R.id.nick);
             lbTime = (TextView) view.findViewById(R.id.time);
-            ivCover = (ImageView) view.findViewById(R.id.cover_img);
+            ivCover = (NetworkImageView) view.findViewById(R.id.cover_img);
             lbAlbumTitle = (TextView) view.findViewById(R.id.album_title);
             lbAlbumShare = (ImageView) view.findViewById(R.id.album_share);
 
@@ -384,16 +400,16 @@ public class ShareList implements NavPagerActivity.Page {
             llPic2 = (View) view.findViewById(R.id.pic_row2);
             llPic3 = (View) view.findViewById(R.id.pic_row3);
 
-            ivItems = new ImageView[9];
-            ivItems[0] = (ImageView) view.findViewById(R.id.mainPic0);
-            ivItems[1] = (ImageView) view.findViewById(R.id.mainPic1);
-            ivItems[2] = (ImageView) view.findViewById(R.id.mainPic2);
-            ivItems[3] = (ImageView) view.findViewById(R.id.mainPic3);
-            ivItems[4] = (ImageView) view.findViewById(R.id.mainPic4);
-            ivItems[5] = (ImageView) view.findViewById(R.id.mainPic5);
-            ivItems[6] = (ImageView) view.findViewById(R.id.mainPic6);
-            ivItems[7] = (ImageView) view.findViewById(R.id.mainPic7);
-            ivItems[8] = (ImageView) view.findViewById(R.id.mainPic8);
+            ivItems = new NetworkImageView[9];
+            ivItems[0] = (NetworkImageView) view.findViewById(R.id.mainPic0);
+            ivItems[1] = (NetworkImageView) view.findViewById(R.id.mainPic1);
+            ivItems[2] = (NetworkImageView) view.findViewById(R.id.mainPic2);
+            ivItems[3] = (NetworkImageView) view.findViewById(R.id.mainPic3);
+            ivItems[4] = (NetworkImageView) view.findViewById(R.id.mainPic4);
+            ivItems[5] = (NetworkImageView) view.findViewById(R.id.mainPic5);
+            ivItems[6] = (NetworkImageView) view.findViewById(R.id.mainPic6);
+            ivItems[7] = (NetworkImageView) view.findViewById(R.id.mainPic7);
+            ivItems[8] = (NetworkImageView) view.findViewById(R.id.mainPic8);
 
             if (currentItem.get("type").equals("album")) {
                 rlAlbum.setVisibility(View.VISIBLE);
@@ -417,22 +433,39 @@ public class ShareList implements NavPagerActivity.Page {
                     sLocal = true;
                 }
                 if (coverImg != null) {
-                    w = Integer.parseInt((String) coverImg.get("width"));
-                    h = Integer.parseInt((String) coverImg.get("height"));
-                    if (w >= h) {
-                        w = w * 200 / h;
-                        h = 200;
-                    } else {
-                        h = h * 200 / w;
-                        w = 200;
-                    }
+
                     if (sLocal) {
-                        LocalCache.LoadLocalBitmapThumb(coverImg.get("thumb"), w, h, ivCover);
+//                        LocalCache.LoadLocalBitmapThumb(coverImg.get("thumb"), w, h, ivCover);
+
+                        String url = String.valueOf(coverImg.get("thumb"));
+
+                        ivCover.setTag(url);
+                        ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                        ivCover.setImageUrl(url, mImageLoader);
+
                     } else {
-                        LocalCache.LoadRemoteBitmapThumb((String) (coverImg.get("uuid")), w, h, ivCover);
+//                        LocalCache.LoadRemoteBitmapThumb((String) (coverImg.get("uuid")), w, h, ivCover);
+
+                        w = Integer.parseInt( coverImg.get("width"));
+                        h = Integer.parseInt( coverImg.get("height"));
+                        if (w >= h) {
+                            w = w * 100 / h;
+                            h = 100;
+                        } else {
+                            h = h * 100 / w;
+                            w = 100;
+                        }
+
+                        String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=thumb&width=" + w + "&height=" + h;
+
+                        ivCover.setTag(url);
+                        ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                        ivCover.setImageUrl(url, mImageLoader);
+
                     }
                 } else {
-                    ivCover.setImageResource(R.drawable.placeholder_photo);
+                    ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                    ivCover.setImageUrl(null,mImageLoader);
                 }
 
                 ivCover.setOnClickListener(new View.OnClickListener() {
@@ -477,19 +510,35 @@ public class ShareList implements NavPagerActivity.Page {
                     }
 
                     if (itemImg != null) {
-                        w = Integer.parseInt((String) itemImg.get("width"));
-                        h = Integer.parseInt((String) itemImg.get("height"));
-                        if (w >= h) {
-                            w = w * 200 / h;
-                            h = 200;
-                        } else {
-                            h = h * 200 / w;
-                            w = 200;
-                        }
                         if (sLocal) {
-                            LocalCache.LoadLocalBitmapThumb(itemImg.get("thumb"), w, h, ivCover);
+//                            LocalCache.LoadLocalBitmapThumb(itemImg.get("thumb"), w, h, ivCover);
+
+                            String url = String.valueOf(itemImg.get("thumb"));
+
+                            ivCover.setTag(url);
+                            ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                            ivCover.setImageUrl(url, mImageLoader);
+
+
                         } else {
-                            LocalCache.LoadRemoteBitmapThumb((String) (itemImg.get("uuid")), w, h, ivCover);
+//                            LocalCache.LoadRemoteBitmapThumb((String) (itemImg.get("uuid")), w, h, ivCover);
+
+                            w = Integer.parseInt( itemImg.get("width"));
+                            h = Integer.parseInt( itemImg.get("height"));
+                            if (w >= h) {
+                                w = w * 100 / h;
+                                h = 100;
+                            } else {
+                                h = h * 100 / w;
+                                w = 100;
+                            }
+
+                            String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=thumb&width=" + w + "&height=" + h;
+
+                            ivCover.setTag(url);
+                            ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                            ivCover.setImageUrl(url, mImageLoader);
+
                         }
 
                         mShareCommentTextView = (TextView) view.findViewById(R.id.share_comment_textview);
@@ -504,7 +553,8 @@ public class ShareList implements NavPagerActivity.Page {
 
                         }
                     } else {
-                        ivCover.setImageResource(R.drawable.placeholder_photo);
+                        ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                        ivCover.setImageUrl(null,mImageLoader);
                     }
 
                     ivCover.setOnClickListener(new View.OnClickListener() {
@@ -572,22 +622,37 @@ public class ShareList implements NavPagerActivity.Page {
                         }
                         //Log.d("winsun", "shareX "+position+" "+i+" "+itemImg);
                         if (itemImg != null) {
-                            w = Integer.parseInt((String) itemImg.get("width"));
-                            h = Integer.parseInt((String) itemImg.get("height"));
-                            if (w >= h) {
-                                w = w * 200 / h;
-                                h = 200;
-                            } else {
-                                h = h * 200 / w;
-                                w = 200;
-                            }
                             if (sLocal) {
-                                LocalCache.LoadLocalBitmapThumb(itemImg.get("thumb"), w, h, ivItems[i]);
+//                                LocalCache.LoadLocalBitmapThumb(itemImg.get("thumb"), w, h, ivItems[i]);
+
+                                String url = itemImg.get("thumb");
+
+                                ivItems[i].setTag(url);
+                                ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
+                                ivItems[i].setImageUrl(url, mImageLoader);
+
                             } else {
-                                LocalCache.LoadRemoteBitmapThumb((String) (itemImg.get("uuid")), w, h, ivItems[i]);
+//                                LocalCache.LoadRemoteBitmapThumb((String) (itemImg.get("uuid")), w, h, ivItems[i]);
+
+                                w = Integer.parseInt(itemImg.get("width"));
+                                h = Integer.parseInt(itemImg.get("height"));
+                                if (w >= h) {
+                                    w = w * 100 / h;
+                                    h = 100;
+                                } else {
+                                    h = h * 100 / w;
+                                    w = 100;
+                                }
+
+                                String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=thumb&width=" + w + "&height=" + h;
+
+                                ivItems[i].setTag(url);
+                                ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
+                                ivItems[i].setImageUrl(url, mImageLoader);
                             }
                         } else {
-                            ivItems[i].setImageResource(R.drawable.placeholder_photo);
+                            ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
+                            ivItems[i].setImageUrl(null,mImageLoader);
                         }
 
                         final int mItemPosition = i;

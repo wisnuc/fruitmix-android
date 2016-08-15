@@ -92,8 +92,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     private int mScreenWidth;
 
-    private ImageLoader mImageLoader;
-
     private boolean mIsFling = false;
     private NewPhotoListScrollListener mScrollListener;
 
@@ -105,6 +103,8 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     private boolean mHasFlung = false;
     private RequestQueue mRequestQueue;
+
+    private ImageLoader mImageLoader;
 
     private int mFirstVisiableItem;
     private int mVisiableItemCount;
@@ -119,6 +119,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "JWT " + FNAS.JWT);
+        Log.i(TAG,FNAS.JWT);
         mImageLoader.setHeaders(headers);
 
         mPhotoGroupList = new ArrayList<>();
@@ -695,7 +696,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                     photoHolder = (PhotoHolder) view.getTag();
 
-                    if (mHasFlung && !mIsFling) {
+/*                    if (mHasFlung && !mIsFling) {
                         mRequestQueue.cancelAll(new RequestQueue.RequestFilter() {
                             @Override
                             public boolean apply(Request<?> request) {
@@ -709,7 +710,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                             }
                         });
-                    }
+                    }*/
 
                     photoHolder.refreshView(photo, position);
 
@@ -791,6 +792,9 @@ public class NewPhotoList implements NavPagerActivity.Page {
                     mPhotoSelectedIv.setVisibility(View.INVISIBLE);
                 }
             } else {
+
+                photo.setSelected(false);
+
                 RelativeLayout.LayoutParams photoParams = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
                 photoParams.setMargins(0, 0, 0, 0);
                 mPhotoIv.setLayoutParams(photoParams);

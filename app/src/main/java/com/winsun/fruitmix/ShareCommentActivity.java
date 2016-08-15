@@ -25,10 +25,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageLruCache;
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.OfflineTask;
+import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.services.LocalCommentService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -54,7 +59,7 @@ public class ShareCommentActivity extends Activity {
     public static final String TAG = ShareCommentActivity.class.getSimpleName();
 
     ImageView ivBack, ivSend;
-    BigLittleImageView ivMain;
+    NetworkImageView ivMain;
     Map<String, Object> imageData;
     List<Comment> commentData;
     EditText tfContent;
@@ -73,6 +78,10 @@ public class ShareCommentActivity extends Activity {
 
     private ProgressDialog mDialog;
 
+    private RequestQueue mRequestQueue;
+
+    private ImageLoader mImageLoader;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Map<String, String> imageRaw;
@@ -83,6 +92,13 @@ public class ShareCommentActivity extends Activity {
         setContentView(R.layout.activity_share_comment);
 
         mContext = this;
+
+        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "JWT " + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
 
         mReceiver = new CustomBroadCastReceiver();
         mManager = LocalBroadcastManager.getInstance(this);
@@ -136,21 +152,32 @@ public class ShareCommentActivity extends Activity {
             }
         }
 
-        int w, h;
-        ivMain = (BigLittleImageView) findViewById(R.id.mainPic);
+        ivMain = (NetworkImageView) findViewById(R.id.mainPic);
 
-        w = Integer.parseInt((String) imageData.get("width"));
-        h = Integer.parseInt((String) imageData.get("height"));
-        if (w > h) {
-            w = w * 300 / h;
-            h = 300;
-        } else if (h > w) {
-            h = h * 300 / w;
-            w = 300;
+        //load ivMain
+        if (imageData.get("cacheType").equals("local")) {
+            String url = String.valueOf(imageData.get("thumb"));
+
+            ivMain.setTag(url);
+            ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
+            ivMain.setImageUrl(url, mImageLoader);
+        } else {
+            int width = Integer.parseInt((String) imageData.get("width"));
+            int height = Integer.parseInt((String) imageData.get("height"));
+            if (width >= height) {
+                width = width * 100 / height;
+                height = 100;
+            } else {
+                height = height * 100 / width;
+                width = 100;
+            }
+
+            String url = FNAS.Gateway + "/media/" + imageData.get("resHash") + "?type=thumb&width=" + width + "&height=" + height;
+
+            ivMain.setTag(url);
+            ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
+            ivMain.setImageUrl(url, mImageLoader);
         }
-
-        ivMain.setData(imageData, w, h);
-        ivMain.loadSmallPic();
 
         reloadList();
 

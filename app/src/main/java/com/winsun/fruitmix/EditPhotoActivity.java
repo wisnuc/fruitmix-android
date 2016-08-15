@@ -17,7 +17,12 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageLruCache;
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.Share;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -59,12 +64,24 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
     private String mMediaShareUUid;
 
+    private RequestQueue mRequestQueue;
+
+    private ImageLoader mImageLoader;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_photo);
 
         ButterKnife.bind(this);
+
+        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "JWT " + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
+
         mBack.setOnClickListener(this);
         mAddPhoto.setOnClickListener(this);
         mFinish.setOnClickListener(this);
@@ -287,7 +304,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
     class EditPhotoViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.photo_item)
-        ImageView mPhotoItem;
+        NetworkImageView mPhotoItem;
         @BindView(R.id.del_photo)
         ImageView mDelPhoto;
 
@@ -303,20 +320,33 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         public void refreshView(final int position) {
             mMap = mPhotoList.get(position);
 
-            width = Integer.parseInt((String) mMap.get("width"));
-            height = Integer.parseInt((String) mMap.get("height"));
-            if (width >= height) {
-                width = width * 100 / height;
-                height = 100;
-            } else {
-                height = height * 100 / width;
-                width = 100;
-            }
-
             if (mMap.get("cacheType").equals("local")) {  // local bitmap path
-                LocalCache.LoadLocalBitmapThumb((String) mMap.get("thumb"), width, height, mPhotoItem);
+//                LocalCache.LoadLocalBitmapThumb((String) mMap.get("thumb"), width, height, mPhotoItem);
+
+                String url = String.valueOf(mMap.get("thumb"));
+
+                mPhotoItem.setTag(url);
+                mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
+                mPhotoItem.setImageUrl(url, mImageLoader);
+
             } else if (mMap.get("cacheType").equals("nas")) {
-                LocalCache.LoadRemoteBitmapThumb((String) (mMap.get("resHash")), width, height, mPhotoItem);
+//                LocalCache.LoadRemoteBitmapThumb((String) (mMap.get("resHash")), width, height, mPhotoItem);
+
+                width = Integer.parseInt((String) mMap.get("width"));
+                height = Integer.parseInt((String) mMap.get("height"));
+                if (width >= height) {
+                    width = width * 100 / height;
+                    height = 100;
+                } else {
+                    height = height * 100 / width;
+                    width = 100;
+                }
+
+                String url = FNAS.Gateway + "/media/" + mMap.get("resHash") + "?type=thumb&width=" + width + "&height=" + height;
+
+                mPhotoItem.setTag(url);
+                mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
+                mPhotoItem.setImageUrl(url, mImageLoader);
             }
 
             mDelPhoto.setOnClickListener(new View.OnClickListener() {
@@ -340,9 +370,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         public EditPhotoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
             View view = LayoutInflater.from(mContext).inflate(R.layout.edit_photo_item, parent, false);
-            EditPhotoViewHolder holder = new EditPhotoViewHolder(view);
 
-            return holder;
+            return new EditPhotoViewHolder(view);
         }
 
         @Override

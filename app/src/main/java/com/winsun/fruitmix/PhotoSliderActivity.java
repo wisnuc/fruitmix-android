@@ -29,16 +29,24 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.Network;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageLruCache;
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.Fragment.AlbumList;
 import com.winsun.fruitmix.Fragment.PhotoList;
 import com.winsun.fruitmix.Fragment.ShareList;
 import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.component.NavPageBar;
+import com.winsun.fruitmix.model.RequestQueueInstance;
+import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -63,10 +71,20 @@ public class PhotoSliderActivity extends AppCompatActivity {
     boolean sInEdit;
     //public List<Page> pageList;
 
+    private ImageLoader mImageLoader;
+    private RequestQueue mRequestQueue;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_slider);
+
+        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "JWT " + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
 
         pos = getIntent().getIntExtra("pos", 0);
 
@@ -242,34 +260,52 @@ public class PhotoSliderActivity extends AppCompatActivity {
             return iv;
             */
             View view;
-            final BigLittleImageView iv;
+//            final BigLittleImageView iv;
+            final NetworkImageView networkImageView;
             ImageView defaultMainImg;
             int w, h;
 
             view = LayoutInflater.from(activity).inflate(R.layout.photo_slider_cell, null);
-            iv = (BigLittleImageView) view.findViewById(R.id.mainPic);
+            networkImageView = (NetworkImageView) view.findViewById(R.id.mainPic);
             defaultMainImg = (ImageView) view.findViewById(R.id.default_main_pic);
-
-            Log.i(TAG, "instantiateItem");
 
             if (imgList.size() > position && position > -1) {
 
-                iv.setVisibility(View.VISIBLE);
+                networkImageView.setVisibility(View.VISIBLE);
                 defaultMainImg.setVisibility(View.GONE);
 
-                activity.imgList.get(position).put("view", iv);
+//                activity.imgList.get(position).put("view", iv);
 
-                w = Integer.parseInt((String) activity.imgList.get(position).get("width"));
-                h = Integer.parseInt((String) activity.imgList.get(position).get("height"));
-                if (w > h) {
-                    w = w * 640 / h;
-                    h = 640;
-                } else if (h > w) {
-                    h = h * 640 / w;
-                    w = 640;
+                Map<String, Object> map = imgList.get(position);
+
+                w = Integer.parseInt((String) map.get("width"));
+                h = Integer.parseInt((String) map.get("height"));
+                if (w >= h) {
+                    w = w * 100 / h;
+                    h = 100;
+                } else if (h >= w) {
+                    h = h * 100 / w;
+                    w = 100;
                 }
 
-                iv.setData(activity.imgList.get(position), w, h);
+                if (map.get("cacheType").equals("local")) {
+                    String url = String.valueOf(map.get("thumb"));
+
+                    networkImageView.setTag(url);
+                    networkImageView.setDefaultImageResId(R.drawable.placeholder_photo);
+                    networkImageView.setImageUrl(url, mImageLoader);
+                } else {
+
+                    String url = FNAS.Gateway + "/media/" + map.get("resHash") + "?type=thumb&width=" + w + "&height=" + h;
+
+                    networkImageView.setTag(url);
+                    networkImageView.setDefaultImageResId(R.drawable.placeholder_photo);
+                    networkImageView.setImageUrl(url, mImageLoader);
+
+                }
+
+//                iv.setData(activity.imgList.get(position), w, h);
+//                iv.loadSmallPic();
 
             /*
             if(pos==position) {
@@ -277,7 +313,6 @@ public class PhotoSliderActivity extends AppCompatActivity {
                 lbDate.setText((String) activity.imgList.get(position).get("mtime"));
             }
             else iv.loadSmallPic();*/
-                iv.loadSmallPic();
 /*
             iv.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -292,7 +327,7 @@ public class PhotoSliderActivity extends AppCompatActivity {
             });
 */
 
-                iv.setOnTouchListener(new View.OnTouchListener() {
+                networkImageView.setOnTouchListener(new View.OnTouchListener() {
 
                     float x, y, lastX, lastY;
 
@@ -307,11 +342,11 @@ public class PhotoSliderActivity extends AppCompatActivity {
                         } else if (event.getAction() == 2) {
                             lastX = event.getRawX();
                             lastY = event.getRawY();
-                            iv.setTranslationY(lastY - y);
+                            networkImageView.setTranslationY(lastY - y);
                         } else if (event.getAction() == 1) {
                             if (lastY - y > 200) finish();
                             else {
-                                iv.setTranslationY(0);
+                                networkImageView.setTranslationY(0);
                                 if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
                                     sInEdit = !sInEdit;
                                     if (sInEdit) {
@@ -335,7 +370,7 @@ public class PhotoSliderActivity extends AppCompatActivity {
                     }
                 });
 
-                iv.setOnClickListener(new View.OnClickListener() {
+                networkImageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Log.d("winsin", "clicked!");
@@ -352,7 +387,7 @@ public class PhotoSliderActivity extends AppCompatActivity {
                     }
                 });
             } else {
-                iv.setVisibility(View.GONE);
+                networkImageView.setVisibility(View.GONE);
                 defaultMainImg.setVisibility(View.VISIBLE);
             }
 
@@ -365,8 +400,6 @@ public class PhotoSliderActivity extends AppCompatActivity {
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
-            BigLittleImageView iv = (BigLittleImageView) ((View) object).findViewById(R.id.mainPic);
-            iv.recycleBigPic();
             container.removeView((View) object);
         }
 
