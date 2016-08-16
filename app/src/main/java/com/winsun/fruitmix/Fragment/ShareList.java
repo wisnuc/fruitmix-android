@@ -439,6 +439,7 @@ public class ShareList implements NavPagerActivity.Page {
 
                         String url = String.valueOf(coverImg.get("thumb"));
 
+                        mImageLoader.setShouldCache(false);
                         ivCover.setTag(url);
                         ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
                         ivCover.setImageUrl(url, mImageLoader);
@@ -446,8 +447,8 @@ public class ShareList implements NavPagerActivity.Page {
                     } else {
 //                        LocalCache.LoadRemoteBitmapThumb((String) (coverImg.get("uuid")), w, h, ivCover);
 
-                        w = Integer.parseInt( coverImg.get("width"));
-                        h = Integer.parseInt( coverImg.get("height"));
+                        w = Integer.parseInt(coverImg.get("width"));
+                        h = Integer.parseInt(coverImg.get("height"));
                         if (w >= h) {
                             w = w * 100 / h;
                             h = 100;
@@ -458,6 +459,7 @@ public class ShareList implements NavPagerActivity.Page {
 
                         String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=thumb&width=" + w + "&height=" + h;
 
+                        mImageLoader.setShouldCache(true);
                         ivCover.setTag(url);
                         ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
                         ivCover.setImageUrl(url, mImageLoader);
@@ -465,7 +467,7 @@ public class ShareList implements NavPagerActivity.Page {
                     }
                 } else {
                     ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                    ivCover.setImageUrl(null,mImageLoader);
+                    ivCover.setImageUrl(null, mImageLoader);
                 }
 
                 ivCover.setOnClickListener(new View.OnClickListener() {
@@ -480,6 +482,7 @@ public class ShareList implements NavPagerActivity.Page {
                         intent.putExtra("maintained", (boolean) currentItem.get("maintained"));
                         intent.putExtra("private", (String) currentItem.get("private"));
                         intent.putExtra(Util.NEED_SHOW_MENU, false);
+                        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN,true);
                         containerActivity.startActivity(intent);
                     }
                 });
@@ -515,6 +518,7 @@ public class ShareList implements NavPagerActivity.Page {
 
                             String url = String.valueOf(itemImg.get("thumb"));
 
+                            mImageLoader.setShouldCache(false);
                             ivCover.setTag(url);
                             ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
                             ivCover.setImageUrl(url, mImageLoader);
@@ -523,8 +527,8 @@ public class ShareList implements NavPagerActivity.Page {
                         } else {
 //                            LocalCache.LoadRemoteBitmapThumb((String) (itemImg.get("uuid")), w, h, ivCover);
 
-                            w = Integer.parseInt( itemImg.get("width"));
-                            h = Integer.parseInt( itemImg.get("height"));
+                            w = Integer.parseInt(itemImg.get("width"));
+                            h = Integer.parseInt(itemImg.get("height"));
                             if (w >= h) {
                                 w = w * 100 / h;
                                 h = 100;
@@ -535,6 +539,7 @@ public class ShareList implements NavPagerActivity.Page {
 
                             String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=thumb&width=" + w + "&height=" + h;
 
+                            mImageLoader.setShouldCache(true);
                             ivCover.setTag(url);
                             ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
                             ivCover.setImageUrl(url, mImageLoader);
@@ -554,7 +559,7 @@ public class ShareList implements NavPagerActivity.Page {
                         }
                     } else {
                         ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                        ivCover.setImageUrl(null,mImageLoader);
+                        ivCover.setImageUrl(null, mImageLoader);
                     }
 
                     ivCover.setOnClickListener(new View.OnClickListener() {
@@ -563,6 +568,7 @@ public class ShareList implements NavPagerActivity.Page {
                             LocalCache.TransActivityContainer.put("imgSliderList", getImgList((String) currentItem.get("images")));
                             Intent intent = new Intent();
                             intent.putExtra("pos", 0);
+                            intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                             intent.setClass(containerActivity, PhotoSliderActivity.class);
                             containerActivity.startActivity(intent);
                         }
@@ -627,6 +633,7 @@ public class ShareList implements NavPagerActivity.Page {
 
                                 String url = itemImg.get("thumb");
 
+                                mImageLoader.setShouldCache(false);
                                 ivItems[i].setTag(url);
                                 ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
                                 ivItems[i].setImageUrl(url, mImageLoader);
@@ -646,13 +653,14 @@ public class ShareList implements NavPagerActivity.Page {
 
                                 String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=thumb&width=" + w + "&height=" + h;
 
+                                mImageLoader.setShouldCache(true);
                                 ivItems[i].setTag(url);
                                 ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
                                 ivItems[i].setImageUrl(url, mImageLoader);
                             }
                         } else {
                             ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
-                            ivItems[i].setImageUrl(null,mImageLoader);
+                            ivItems[i].setImageUrl(null, mImageLoader);
                         }
 
                         final int mItemPosition = i;
@@ -671,12 +679,14 @@ public class ShareList implements NavPagerActivity.Page {
                                     intent.putExtra("maintained", (boolean) currentItem.get("maintained"));
                                     intent.putExtra("private", (String) currentItem.get("private"));
                                     intent.putExtra(Util.NEED_SHOW_MENU, false);
+                                    intent.putExtra(Util.KEY_SHOW_COMMENT_BTN,true);
                                     containerActivity.startActivity(intent);
                                 } else {
                                     Log.d("winsun", getImgList("images") + "");
                                     LocalCache.TransActivityContainer.put("imgSliderList", getImgList((String) currentItem.get("images")));
                                     Intent intent = new Intent();
                                     intent.putExtra("pos", mItemPosition);
+                                    intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                                     intent.setClass(containerActivity, PhotoSliderActivity.class);
                                     containerActivity.startActivity(intent);
 

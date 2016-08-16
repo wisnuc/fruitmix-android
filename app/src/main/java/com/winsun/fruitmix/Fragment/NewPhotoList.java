@@ -119,7 +119,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "JWT " + FNAS.JWT);
-        Log.i(TAG,FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
 
         mPhotoGroupList = new ArrayList<>();
@@ -254,6 +254,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
         }
 
         //load remote images
+        //TO DO: concurrentexception
         for (Map<String, String> map : LocalCache.MediasMap.values()) {
 
             date = map.get("mtime").substring(0, 10);
@@ -757,6 +758,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                 String url = photo.getThumb();
 
+                mImageLoader.setShouldCache(false);
                 mPhotoIv.setTag(url);
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(url, mImageLoader);
@@ -767,6 +769,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                 String url = FNAS.Gateway + "/media/" + photo.getUuid() + "?type=thumb&width=" + width + "&height=" + height;
 
+                mImageLoader.setShouldCache(true);
                 mPhotoIv.setTag(url);
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(url, mImageLoader);
@@ -859,6 +862,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
 //                        Log.i(TAG, "photo pos:" + position);
                         intent.putExtra("pos", position);
+                        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
                         containerActivity.startActivity(intent);
 

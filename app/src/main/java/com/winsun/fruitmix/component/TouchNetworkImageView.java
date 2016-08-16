@@ -203,7 +203,6 @@ public class TouchNetworkImageView extends TouchImageView {
                             mImageLoadListener.onImageLoadFinish(mUrl);
                             setImageBitmap(response.getBitmap());
                         } else if (mDefaultImageId != 0) {
-                            mImageLoadListener.onImageLoadFinish(null);
                             setImageResource(mDefaultImageId);
                         }
                     }

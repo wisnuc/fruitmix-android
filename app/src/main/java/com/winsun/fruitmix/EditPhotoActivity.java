@@ -325,6 +325,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                 String url = String.valueOf(mMap.get("thumb"));
 
+                mImageLoader.setShouldCache(false);
                 mPhotoItem.setTag(url);
                 mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoItem.setImageUrl(url, mImageLoader);
@@ -344,6 +345,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                 String url = FNAS.Gateway + "/media/" + mMap.get("resHash") + "?type=thumb&width=" + width + "&height=" + height;
 
+                mImageLoader.setShouldCache(true);
                 mPhotoItem.setTag(url);
                 mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoItem.setImageUrl(url, mImageLoader);

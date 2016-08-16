@@ -510,6 +510,10 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     public void hideChooseHeader() {
+        if (sMenuUnfolding) {
+            sMenuUnfolding = false;
+            collapseFab();
+        }
         fab.setVisibility(View.GONE);
         ivBtAlbum.setVisibility(View.GONE);
         ivBtShare.setVisibility(View.GONE);

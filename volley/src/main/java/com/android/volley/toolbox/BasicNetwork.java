@@ -96,8 +96,6 @@ public class BasicNetwork implements Network {
 
                 //add by liang.wu for get local photo
                 if (request.getUrl().startsWith("/")) {
-                    request.setShouldCache(false);
-
                     return new NetworkResponse(getBytesFromFile(request.getUrl()));
                 }
 
@@ -310,6 +308,7 @@ public class BasicNetwork implements Network {
             return bytes.toByteArray();
         } catch (Exception ex) {
             ex.printStackTrace();
+            return null;
         } finally {
             if (in != null) {
                 try {
@@ -325,6 +324,5 @@ public class BasicNetwork implements Network {
                 e.printStackTrace();
             }
         }
-        return null;
     }
 }

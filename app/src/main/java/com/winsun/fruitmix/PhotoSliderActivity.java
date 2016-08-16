@@ -1,7 +1,9 @@
 package com.winsun.fruitmix;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -39,6 +41,8 @@ import com.winsun.fruitmix.Fragment.PhotoList;
 import com.winsun.fruitmix.Fragment.ShareList;
 import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.component.NavPageBar;
+import com.winsun.fruitmix.component.TouchNetworkImageView;
+import com.winsun.fruitmix.interfaces.IImageLoadListener;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -52,7 +56,7 @@ import java.util.Map;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class PhotoSliderActivity extends AppCompatActivity {
+public class PhotoSliderActivity extends AppCompatActivity implements IImageLoadListener {
 
     public static final String TAG = PhotoSliderActivity.class.getSimpleName();
 
@@ -67,6 +71,7 @@ public class PhotoSliderActivity extends AppCompatActivity {
     //add by liang.wu
     private ImageView mReturnResize;
     private MyAdapter myAdapter;
+    private ViewPager mViewPager;
 
     boolean sInEdit;
     //public List<Page> pageList;
@@ -74,10 +79,19 @@ public class PhotoSliderActivity extends AppCompatActivity {
     private ImageLoader mImageLoader;
     private RequestQueue mRequestQueue;
 
+    private Context mContext;
+
+    private ProgressDialog mDialog;
+    private static final String LOAD_FINISH = "load_finish";
+
+    private boolean mShowCommentBtn = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_slider);
+
+        mContext = this;
 
         mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
@@ -87,6 +101,8 @@ public class PhotoSliderActivity extends AppCompatActivity {
         mImageLoader.setHeaders(headers);
 
         pos = getIntent().getIntExtra("pos", 0);
+
+        mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
 
         //add by liang.wu
         if (getShowPhotoReturnTipsValue()) {
@@ -117,18 +133,24 @@ public class PhotoSliderActivity extends AppCompatActivity {
             }
         });
 
-        ivComment.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        if (mShowCommentBtn) {
+            ivComment.setVisibility(View.VISIBLE);
+            ivComment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-                if (imgList.size() > pos) {
-                    Intent intent = new Intent();
-                    intent.setClass(PhotoSliderActivity.this, ShareCommentActivity.class);
-                    intent.putExtra("imageUUID", "" + imgList.get(pos).get("uuid"));
-                    startActivity(intent);
+                    if (imgList.size() > pos) {
+                        Intent intent = new Intent();
+                        intent.setClass(PhotoSliderActivity.this, ShareCommentActivity.class);
+                        intent.putExtra("imageUUID", "" + imgList.get(pos).get("uuid"));
+                        startActivity(intent);
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            ivComment.setVisibility(View.GONE);
+        }
+
         sInEdit = true;
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -142,11 +164,11 @@ public class PhotoSliderActivity extends AppCompatActivity {
 
         imgList = (List<Map<String, Object>>) LocalCache.TransActivityContainer.get("imgSliderList");
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewPager);
+        mViewPager = (ViewPager) findViewById(R.id.viewPager);
         myAdapter = new MyAdapter(this);
-        viewPager.setAdapter(myAdapter);
-        viewPager.setCurrentItem(pos, false);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        mViewPager.setAdapter(myAdapter);
+        mViewPager.setCurrentItem(pos, false);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
@@ -155,8 +177,21 @@ public class PhotoSliderActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 //LocalCache.LoadLocalBitmap((String) imgList.get(position).get("thumb"), (ImageView)imgList.get(position).get("view"));
-                Log.d("winsun", position + "");
+                Log.d(TAG, "onPageSelected:" + position);
                 setPosition(position);
+
+                Map<String, Object> map = imgList.get(position);
+
+                if (!map.containsKey(LOAD_FINISH) && mViewPager.getCurrentItem() == position) {
+                    if (mDialog == null || !mDialog.isShowing()) {
+                        mDialog = ProgressDialog.show(mContext, mContext.getString(R.string.loading_title), mContext.getString(R.string.loading_message), true, true, new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                finish();
+                            }
+                        });
+                    }
+                }
             }
 
             @Override
@@ -166,7 +201,6 @@ public class PhotoSliderActivity extends AppCompatActivity {
         });
 
         setPosition(pos);
-
     }
 
     //add by liang.wu
@@ -198,6 +232,33 @@ public class PhotoSliderActivity extends AppCompatActivity {
                 lbDate.setText(getString(R.string.unknown_time_text));
             } else {
                 lbDate.setText((String) imgList.get(position).get("mtime"));
+            }
+        }
+
+    }
+
+    @Override
+    public void onImageLoadFinish(String url) {
+
+        if (url == null)
+            return;
+
+        for (int i = 0; i < imgList.size(); i++) {
+            Map<String, Object> map = imgList.get(i);
+            String currentUrl;
+            if (map.get("cacheType").equals("local")) {
+                currentUrl = String.valueOf(map.get("thumb"));
+            } else {
+                currentUrl = FNAS.Gateway + "/media/" + map.get("resHash") + "?type=original";
+            }
+            if (currentUrl.equals(url)) {
+
+                if (!map.containsKey(LOAD_FINISH)) {
+                    map.put(LOAD_FINISH, "true");
+                }
+
+                if (mViewPager.getCurrentItem() == i && mDialog != null && mDialog.isShowing())
+                    mDialog.dismiss();
             }
         }
 
@@ -260,14 +321,14 @@ public class PhotoSliderActivity extends AppCompatActivity {
             return iv;
             */
             View view;
-//            final BigLittleImageView iv;
-            final NetworkImageView networkImageView;
-            ImageView defaultMainImg;
-            int w, h;
 
             view = LayoutInflater.from(activity).inflate(R.layout.photo_slider_cell, null);
-            networkImageView = (NetworkImageView) view.findViewById(R.id.mainPic);
-            defaultMainImg = (ImageView) view.findViewById(R.id.default_main_pic);
+
+            final TouchNetworkImageView networkImageView = (TouchNetworkImageView) view.findViewById(R.id.mainPic);
+            ImageView defaultMainImg = (ImageView) view.findViewById(R.id.default_main_pic);
+
+            networkImageView.registerImageLoadListener(PhotoSliderActivity.this);
+            ;
 
             if (imgList.size() > position && position > -1) {
 
@@ -278,26 +339,29 @@ public class PhotoSliderActivity extends AppCompatActivity {
 
                 Map<String, Object> map = imgList.get(position);
 
-                w = Integer.parseInt((String) map.get("width"));
-                h = Integer.parseInt((String) map.get("height"));
-                if (w >= h) {
-                    w = w * 100 / h;
-                    h = 100;
-                } else if (h >= w) {
-                    h = h * 100 / w;
-                    w = 100;
+                if (!map.containsKey(LOAD_FINISH) && mViewPager.getCurrentItem() == position) {
+                    if (mDialog == null || !mDialog.isShowing()) {
+                        mDialog = ProgressDialog.show(mContext, mContext.getString(R.string.loading_title), mContext.getString(R.string.loading_message), true, true, new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                finish();
+                            }
+                        });
+                    }
                 }
 
                 if (map.get("cacheType").equals("local")) {
                     String url = String.valueOf(map.get("thumb"));
 
+                    mImageLoader.setShouldCache(false);
                     networkImageView.setTag(url);
                     networkImageView.setDefaultImageResId(R.drawable.placeholder_photo);
                     networkImageView.setImageUrl(url, mImageLoader);
                 } else {
 
-                    String url = FNAS.Gateway + "/media/" + map.get("resHash") + "?type=thumb&width=" + w + "&height=" + h;
+                    String url = FNAS.Gateway + "/media/" + map.get("resHash") + "?type=original";
 
+                    mImageLoader.setShouldCache(true);
                     networkImageView.setTag(url);
                     networkImageView.setDefaultImageResId(R.drawable.placeholder_photo);
                     networkImageView.setImageUrl(url, mImageLoader);
@@ -342,11 +406,12 @@ public class PhotoSliderActivity extends AppCompatActivity {
                         } else if (event.getAction() == 2) {
                             lastX = event.getRawX();
                             lastY = event.getRawY();
-                            networkImageView.setTranslationY(lastY - y);
+                            if(!networkImageView.isZoomed()){
+                                networkImageView.setTranslationY(lastY - y);
+                            }
                         } else if (event.getAction() == 1) {
-                            if (lastY - y > 200) finish();
-                            else {
-                                networkImageView.setTranslationY(0);
+                            if (lastY - y > 200 && !networkImageView.isZoomed()) finish();
+                            else if (!networkImageView.isZoomed()) {
                                 if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
                                     sInEdit = !sInEdit;
                                     if (sInEdit) {
@@ -358,40 +423,25 @@ public class PhotoSliderActivity extends AppCompatActivity {
                                     }
                                 }
                             }
-                        } else if (event.getAction() == 261) {
-                            //LocalCache.TransActivityContainer.put("bigPic", iv.BigPic);
-                            LocalCache.TransActivityContainer.put("bigPic", activity.imgList.get(position));
-                            Intent intent = new Intent();
-                            intent.setClass(activity, ImageZoomActivity.class);
-                            startActivity(intent);
                         }
                         //return super.onTouch(v, event);
                         return false;
                     }
                 });
 
-                networkImageView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.d("winsin", "clicked!");
-                        if (new Date().getTime() - lastClickTime < 300) {
-                            Log.d("winsin", "dblclicked!");
-                            lastClickTime = 0;
-                            LocalCache.TransActivityContainer.put("bigPic", activity.imgList.get(position));
-                            Intent intent = new Intent();
-                            intent.setClass(activity, ImageZoomActivity.class);
-                            intent.putExtra("zoomIn", 1);
-                            startActivity(intent);
-                        } else lastClickTime = new Date().getTime();
-
-                    }
-                });
             } else {
                 networkImageView.setVisibility(View.GONE);
                 defaultMainImg.setVisibility(View.VISIBLE);
             }
 
             container.addView(view);
+
+            Log.i(TAG, "inistatiate position : " + position);
+/*            if (mIsFirstInstantiateItem)
+                setPhoto(position);
+
+            mIsFirstInstantiateItem = false;*/
+
 
             return view;
 
@@ -400,6 +450,10 @@ public class PhotoSliderActivity extends AppCompatActivity {
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
+
+            TouchNetworkImageView touchNetworkImageView = (TouchNetworkImageView) ((View) object).findViewById(R.id.mainPic);
+            touchNetworkImageView.unregisterImageLoadListener();
+
             container.removeView((View) object);
         }
 

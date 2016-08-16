@@ -77,6 +77,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private ImageLoader mImageLoader;
 
+    private boolean mShowCommentBtn = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -99,6 +101,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         mMaintained = getIntent().getBooleanExtra("maintained", false);
         mIsLocked = getIntent().getBooleanExtra("local", false);
         mShowMenu = getIntent().getBooleanExtra(Util.NEED_SHOW_MENU, true);
+
+        mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN,false);
 
         if (getIntent().getStringExtra("private").equals("1")) {
             mPrivate = true;
@@ -188,6 +192,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         LocalCache.TransActivityContainer.put("imgSliderList", picList);
         Intent intent = new Intent();
         intent.putExtra("pos", position);
+        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN,mShowCommentBtn);
         intent.setClass(this, PhotoSliderActivity.class);
         startActivity(intent);
     }
@@ -230,6 +235,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                 String url = String.valueOf(currentItem.get("thumb"));
 
+                mImageLoader.setShouldCache(false);
                 ivMain.setTag(url);
                 ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
                 ivMain.setImageUrl(url, mImageLoader);
@@ -249,6 +255,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                 String url = FNAS.Gateway + "/media/" + currentItem.get("resHash") + "?type=thumb&width=" + width + "&height=" + height;
 
+                mImageLoader.setShouldCache(true);
                 ivMain.setTag(url);
                 ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
                 ivMain.setImageUrl(url, mImageLoader);

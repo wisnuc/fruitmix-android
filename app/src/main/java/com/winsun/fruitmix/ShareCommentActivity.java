@@ -158,6 +158,7 @@ public class ShareCommentActivity extends Activity {
         if (imageData.get("cacheType").equals("local")) {
             String url = String.valueOf(imageData.get("thumb"));
 
+            mImageLoader.setShouldCache(false);
             ivMain.setTag(url);
             ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
             ivMain.setImageUrl(url, mImageLoader);
@@ -174,6 +175,7 @@ public class ShareCommentActivity extends Activity {
 
             String url = FNAS.Gateway + "/media/" + imageData.get("resHash") + "?type=thumb&width=" + width + "&height=" + height;
 
+            mImageLoader.setShouldCache(true);
             ivMain.setTag(url);
             ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
             ivMain.setImageUrl(url, mImageLoader);

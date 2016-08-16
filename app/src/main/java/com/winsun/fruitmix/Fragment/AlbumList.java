@@ -331,6 +331,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                     String url = String.valueOf(coverImg.get("thumb"));
 
+                    mImageLoader.setShouldCache(false);
                     ivMainPic.setTag(url);
                     ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
                     ivMainPic.setImageUrl(url, mImageLoader);
@@ -350,6 +351,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                     String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=thumb&width=" + w + "&height=" + h;
 
+                    mImageLoader.setShouldCache(true);
                     ivMainPic.setTag(url);
                     ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
                     ivMainPic.setImageUrl(url, mImageLoader);

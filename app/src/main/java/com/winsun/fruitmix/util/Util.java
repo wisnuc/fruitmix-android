@@ -48,6 +48,7 @@ public class Util {
     public static final String LOCAL_COMMENT_CHANGED = "local_comment_changed";
     public static final String NEED_SHOW_MENU = "need_show_menu";
     public static final String KEY_LOCAL_PHOTO_UPLOAD_SUCCESS = "key_local_photo_upload_success";
+    public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
 
     public static Context APPLICATION_CONTEXT = null;
 
@@ -140,14 +141,10 @@ public class Util {
 
         long currentTime = System.currentTimeMillis();
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone("UTC+8"));
-        calendar.set(Calendar.HOUR, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
+        Date date = new Date();
+        long l = 24 * 60 * 60 & 1000;
+        long timeDifference = date.getTime() - date.getTime() % l - 8 * 60 * 60 * 1000 - createTime;
 
-        long timeDifference = calendar.getTimeInMillis() - createTime;
 /*        if (timeDifference < 0) {
             builder.append(String.format(context.getString(R.string.seconds_ago), 0));
         } else if (timeDifference < 60 * 1000) {
