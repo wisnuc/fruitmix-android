@@ -58,7 +58,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
         mContext = this;
 
         selectedUIDStr = getIntent().getStringExtra("selectedUIDStr");
-        Log.d("winsun", selectedUIDStr);
+        Log.d(TAG, "selectedUIDStr:" + selectedUIDStr);
         setContentView(R.layout.activity_create_album);
 
         tfTitle = (TextInputEditText) findViewById(R.id.title_edit);
@@ -95,6 +95,8 @@ public class CreateAlbumActivity extends AppCompatActivity {
                     return;
                 }
                 */
+
+                Util.hideSoftInput(CreateAlbumActivity.this);
 
                 final boolean sPublic, sSetMaintainer;
                 final String title, desc;
@@ -141,13 +143,16 @@ public class CreateAlbumActivity extends AppCompatActivity {
                             viewers += ",";
                         }
 
-                        Log.i("winsun ,viewers:", viewers);
+                        Log.i(TAG, "viewers:" + viewers);
 
+                        maintainers = "";
                         if (sSetMaintainer) {
-                            maintainers = viewers;
+                            for (String key : LocalCache.UsersMap.keySet()) {
+                                maintainers += ",\\\"" + key + "\\\"";
+                            }
                         } else maintainers = ",\\\"" + FNAS.userUUID + "\\\"";
 
-                        Log.i("winsun ,miantianers:", maintainers);
+                        Log.i(TAG, "miantianers:" + maintainers);
 
                         createAlbumInLocalAlbumDatabase(sPublic, sSetMaintainer, title, desc, selectedUIDStr);
                         FNAS.loadLocalShare();
@@ -221,21 +226,25 @@ public class CreateAlbumActivity extends AppCompatActivity {
                 builder.append(user);
                 builder.append(",");
             }
-        }
+        } else builder.append(",");
+
         String viewer = builder.toString();
         Log.i(TAG, "create album viewer:" + viewer);
         share.setViewer(viewer);
 
-        String maintainer;
         if (otherMaintianer) {
-            maintainer = viewer;
+            builder.setLength(0);
+            for (String user : LocalCache.UsersMap.keySet()) {
+                builder.append(user);
+                builder.append(",");
+            }
         } else {
             builder.setLength(0);
             builder.append(FNAS.userUUID);
             builder.append(",");
-
-            maintainer = builder.toString();
         }
+        String maintainer = builder.toString();
+        Log.i(TAG, "create album maintainer:" + maintainer);
         share.setMaintainer(maintainer);
 
         share.setCreator(FNAS.userUUID);

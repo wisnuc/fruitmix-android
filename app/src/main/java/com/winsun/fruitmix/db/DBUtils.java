@@ -185,6 +185,17 @@ public enum DBUtils {
         return returnValue;
     }
 
+    public long deleteLocalCommentByUUid(String uuid) {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.LOCAL_COMMENT_TABLE_NAME, DBHelper.COMMENT_IMAGE_UUID + " = ?", new String[]{uuid});
+
+        close();
+
+        return returnValue;
+    }
+
     public long deleteAllLocalComment() {
 
         openWritableDB();
@@ -279,6 +290,7 @@ public enum DBUtils {
             } else {
                 commentList = new ArrayList<>();
                 Comment comment = new Comment();
+                comment.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.COMMENT_KEY_ID)));
                 comment.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_CREATOR)));
                 comment.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TIME)));
                 comment.setFormatTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_FORMAT_TIME)));
@@ -370,6 +382,7 @@ public enum DBUtils {
             } else {
                 commentList = new ArrayList<>();
                 Comment comment = new Comment();
+                comment.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.COMMENT_KEY_ID)));
                 comment.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_CREATOR)));
                 comment.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TIME)));
                 comment.setFormatTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_FORMAT_TIME)));

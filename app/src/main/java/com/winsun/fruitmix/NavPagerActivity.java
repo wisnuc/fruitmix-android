@@ -114,6 +114,7 @@ public class NavPagerActivity extends AppCompatActivity
         mReceiver = new CustomBroadReceiver();
         IntentFilter intentFilter = new IntentFilter(Util.LOCAL_SHARE_CHANGED);
         intentFilter.addAction(Util.LOCAL_COMMENT_CHANGED);
+        intentFilter.addAction(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
         mManager.registerReceiver(mReceiver, intentFilter);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -233,7 +234,7 @@ public class NavPagerActivity extends AppCompatActivity
         super.onResume();
 
         mNavPageBar.registerOnTabChangedListener(this);
-
+/*
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
@@ -253,7 +254,7 @@ public class NavPagerActivity extends AppCompatActivity
                 pageList.get(viewPager.getCurrentItem()).refreshView();
 
             }
-        }.execute();
+        }.execute();*/
 
     }
 
@@ -377,6 +378,10 @@ public class NavPagerActivity extends AppCompatActivity
                 Log.i(TAG, "local changed");
 
                 shareList.refreshView();
+            } else if (intent.getAction().equals(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED)) {
+                Log.i(TAG, "local photo upload state changed");
+
+                photoList.refreshView();
             }
         }
     }
@@ -601,8 +606,6 @@ public class NavPagerActivity extends AppCompatActivity
 
                     LocalCache.clearGatewayUuidPasswordToken(mContext);
                     LocalCache.CleanAll();
-                    LocalCache.Init(NavPagerActivity.this);
-                    LocalCache.LoadLocalData();
                     FNAS.restoreLocalPhotoUploadState();
 
                     return null;

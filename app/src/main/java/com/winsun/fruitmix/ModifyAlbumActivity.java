@@ -102,6 +102,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                     return;
                 }
                 */
+                Util.hideSoftInput(ModifyAlbumActivity.this);
 
                 final boolean sPublic, sSetMaintainer;
                 final String title, desc;
@@ -118,7 +119,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                     protected void onPreExecute() {
                         super.onPreExecute();
 
-                        mDialog = ProgressDialog.show(mContext,getString(R.string.operating_title),getString(R.string.loading_message),true,false);
+                        mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
                     }
 
                     @Override
@@ -170,20 +171,20 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                             share.setDesc(desc);
 
                             StringBuilder builder = new StringBuilder();
-                            if(sPublic){
-                                for (String user:LocalCache.UsersMap.keySet()){
+                            if (sPublic) {
+                                for (String user : LocalCache.UsersMap.keySet()) {
                                     builder.append(user);
                                     builder.append(",");
                                 }
                             }
                             String viewer = builder.toString();
-                            Log.i("create album viewer:",viewer);
+                            Log.i("create album viewer:", viewer);
                             share.setViewer(viewer);
 
                             String maintainer;
-                            if(sSetMaintainer){
+                            if (sSetMaintainer) {
                                 maintainer = viewer;
-                            }else {
+                            } else {
                                 builder.setLength(0);
                                 builder.append(FNAS.userUUID);
                                 builder.append(",");
@@ -192,7 +193,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                             }
                             share.setMaintainer(maintainer);
 
-                            dbUtils.updateLocalShare(share,share.getUuid());
+                            dbUtils.updateLocalShare(share, share.getUuid());
 
                             FNAS.loadLocalShare();
 
@@ -208,8 +209,8 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                         mDialog.dismiss();
 
                         if (sSuccess) {
-                            getIntent().putExtra(Util.UPDATED_ALBUM_TITLE,title);
-                            setResult(RESULT_OK,getIntent());
+                            getIntent().putExtra(Util.UPDATED_ALBUM_TITLE, title);
+                            setResult(RESULT_OK, getIntent());
                             finish();
                         } else {
                             setResult(RESULT_CANCELED);

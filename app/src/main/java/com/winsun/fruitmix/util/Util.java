@@ -1,10 +1,13 @@
 package com.winsun.fruitmix.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.IBinder;
 import android.util.Base64OutputStream;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 
 import com.winsun.fruitmix.R;
 
@@ -46,6 +49,7 @@ public class Util {
     public static final String LOCAL_COMMENT_MAP = "local_comment_map";
     public static final String LOCAL_SHARE_CHANGED = "local_share_changed";
     public static final String LOCAL_COMMENT_CHANGED = "local_comment_changed";
+    public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
     public static final String NEED_SHOW_MENU = "need_show_menu";
     public static final String KEY_LOCAL_PHOTO_UPLOAD_SUCCESS = "key_local_photo_upload_success";
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
@@ -194,4 +198,10 @@ public class Util {
         return builder.toString();
     }
 
+    public static void hideSoftInput(Activity activity) {
+        InputMethodManager methodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (activity.getCurrentFocus() != null) {
+            methodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        }
+    }
 }

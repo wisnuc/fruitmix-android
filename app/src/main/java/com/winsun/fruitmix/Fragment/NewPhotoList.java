@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v7.widget.GridLayout;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -19,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.animation.BounceInterpolator;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -232,6 +232,10 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         //load local images
         for (Map<String, String> map : LocalCache.LocalImagesMap.values()) {
+
+            if (map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) && map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("true")) {
+                continue;
+            }
 
             date = map.get("mtime").substring(0, 10);
             if (mPhotoMap.containsKey(date)) {
@@ -665,7 +669,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             int size = mPhotoList.size();
             if (size < mSpanCount) {
-                for (int i = 0; i < mPhotoList.size(); i++) {
+                for (int i = size; i < mSpanCount; i++) {
                     View view = mPhotoGridLayout.getChildAt(i);
                     if (view != null) {
                         mPhotoGridLayout.removeView(view);
@@ -773,6 +777,9 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 mPhotoIv.setTag(url);
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(url, mImageLoader);
+            } else if (mIsFling) {
+                mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
+                mPhotoIv.setImageUrl(null, mImageLoader);
             }
 
             GridLayout.LayoutParams params = (GridLayout.LayoutParams) view.getLayoutParams();
@@ -867,6 +874,8 @@ public class NewPhotoList implements NavPagerActivity.Page {
                         containerActivity.startActivity(intent);
 
                     }
+
+                    Log.i(TAG, "image digest:" + photo.getUuid());
                 }
             });
 

@@ -118,9 +118,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                 finish();
                 break;
             case R.id.login_btn:
-
-                InputMethodManager methodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                methodManager.hideSoftInputFromWindow(mPwdEdit.getWindowToken(), 0);
+                Util.hideSoftInput(LoginActivity.this);
 
                 mPwd = mPwdEdit.getText().toString();
                 login(mLoginBtn);

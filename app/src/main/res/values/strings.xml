@@ -195,7 +195,7 @@
     <string name="login_by_password_text">Login By Password</string>
     <string name="title_activity_user_manage">UserManage</string>
     <string name="password_error">Input Password Error</string>
-    <string name="no_edit_photo_permission">You have not the permission to edit photo</string>
+    <string name="no_edit_photo_permission">You have not the permission to operate</string>
     <string name="set_maintainer">Set Maintainer</string>
     <string name="set_private">Set Private</string>
     <string name="set_public">Set Public</string>
@@ -244,7 +244,7 @@
     <string name="delete_album">Delete Album</string>
     <string name="operation_success">Operation Success!</string>
     <string name="operation_fail">Operation fail,Please check network!</string>
-    <string name="no_network">No Network,Please check it</string>
+    <string name="no_network">No Network or Log in failed,Please check it</string>
     <string name="share_comment_count">Share %1$s Pictures</string>
     <string name="share_comment_text">%1$s : %2$s</string>
     <string name="photo_count">%1$sPhotos</string>

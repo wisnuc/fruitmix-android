@@ -1,5 +1,6 @@
 package com.winsun.fruitmix;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -79,6 +80,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private boolean mShowCommentBtn = false;
 
+    private ProgressDialog mDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -102,7 +105,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         mIsLocked = getIntent().getBooleanExtra("local", false);
         mShowMenu = getIntent().getBooleanExtra(Util.NEED_SHOW_MENU, true);
 
-        mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN,false);
+        mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
 
         if (getIntent().getStringExtra("private").equals("1")) {
             mPrivate = true;
@@ -192,7 +195,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         LocalCache.TransActivityContainer.put("imgSliderList", picList);
         Intent intent = new Intent();
         intent.putExtra("pos", position);
-        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN,mShowCommentBtn);
+        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, mShowCommentBtn);
         intent.setClass(this, PhotoSliderActivity.class);
         startActivity(intent);
     }
@@ -324,6 +327,12 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             }
         }
 
+        if (!mMaintained) {
+            Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
+
+            return true;
+        }
+
         Intent intent;
         switch (item.getItemId()) {
             case R.id.setting_album:
@@ -332,14 +341,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 startActivityForResult(intent, 102);
                 break;
             case R.id.edit_photo:
-                if (!mMaintained) {
-                    Snackbar.make(mTitleTextView, getString(R.string.no_edit_photo_permission), Snackbar.LENGTH_SHORT).show();
-                } else {
-                    intent = new Intent(this, EditPhotoActivity.class);
-                    intent.putExtra("images", imagesStr);
-                    intent.putExtra(Util.MEDIASHARE_UUID, mUuid);
-                    startActivityForResult(intent, 101);
-                }
+                intent = new Intent(this, EditPhotoActivity.class);
+                intent.putExtra("images", imagesStr);
+                intent.putExtra(Util.MEDIASHARE_UUID, mUuid);
+                startActivityForResult(intent, 101);
                 break;
             case R.id.set_private_public:
                 setPublicPrivate();
@@ -369,6 +374,14 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private void deleteCurrentAblum() {
         new AsyncTask<Object, Object, Boolean>() {
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+
+                mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
+            }
+
             @Override
             protected Boolean doInBackground(Object... params) {
                 String data;
@@ -425,6 +438,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 }
                 //end add by liang.wu*/
 
+                mDialog.dismiss();
+
                 finish();
 
             }
@@ -445,6 +460,14 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private void setPublicPrivate() {
         new AsyncTask<Object, Object, Boolean>() {
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+
+                mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
+            }
+
             @Override
             protected Boolean doInBackground(Object... params) {
                 String data;
@@ -490,6 +513,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             @Override
             protected void onPostExecute(Boolean sSuccess) {
+
+                mDialog.dismiss();
 
                 if (sSuccess) {
                     Toast.makeText(mContext, getString(R.string.setting_succeed), Toast.LENGTH_SHORT).show();

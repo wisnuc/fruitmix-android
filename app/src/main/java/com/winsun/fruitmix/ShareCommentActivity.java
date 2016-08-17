@@ -44,6 +44,8 @@ import org.json.JSONArray;
 import java.sql.Struct;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -187,8 +189,7 @@ public class ShareCommentActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                InputMethodManager methodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                methodManager.hideSoftInputFromWindow(tfContent.getWindowToken(), 0);
+                Util.hideSoftInput(ShareCommentActivity.this);
 
                 mCommment = tfContent.getText() + "";
 
@@ -211,8 +212,8 @@ public class ShareCommentActivity extends Activity {
                     @Override
                     protected Boolean doInBackground(Object... params) {
 
-                        String request = "/media/" + imageData.get("uuid") + "?type=comments";
-                        String data = "{\"shareid\":\"" + imageData.get("shareInstance") + "\", \"text\":\"" + mCommment + "\"}";
+//                        String request = "/media/" + imageData.get("uuid") + "?type=comments";
+//                        String data = "{\"shareid\":\"" + imageData.get("shareInstance") + "\", \"text\":\"" + mCommment + "\"}";
 
                         createCommentInLocalCommentDatabase(String.valueOf(imageData.get("uuid")), String.valueOf(imageData.get("shareInstance")), mCommment);
 
@@ -272,12 +273,9 @@ public class ShareCommentActivity extends Activity {
 
                             tfContent.setText("");
 
-                            LocalBroadcastManager.getInstance(mContext).sendBroadcast(new Intent(Util.LOCAL_COMMENT_CHANGED));
-
                         } else {
                             //Snackbar.make(ivSend, getString(R.string.operation_fail), Snackbar.LENGTH_SHORT).show();
                             Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
-
 
                             tfContent.setText("");
                             //end add
@@ -299,7 +297,6 @@ public class ShareCommentActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mManager.unregisterReceiver(mReceiver);
     }
 
     private void createCommentInLocalCommentDatabase(String imageUUid, String shareId, String commentText) {
@@ -325,14 +322,6 @@ public class ShareCommentActivity extends Activity {
         new AsyncTask<Object, Object, Boolean>() {
 
             @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-
-                mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
-
-            }
-
-            @Override
             protected Boolean doInBackground(Object... params) {
                 String str;
                 Comment commentItem;
@@ -346,11 +335,7 @@ public class ShareCommentActivity extends Activity {
                     String uuid = String.valueOf(imageData.get("uuid"));
 
                     DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                    Map<String, List<Comment>> localImageCommentMap = dbUtils.getAllLocalImageComment();
-                    if (localImageCommentMap.containsKey(uuid)) {
-                        commentData.addAll(localImageCommentMap.get(uuid));
-                    }
-
+                    commentData.addAll(dbUtils.getLocalImageCommentByUUid(uuid));
 
                     if (Util.getNetworkState(mContext)) {
 
@@ -367,12 +352,23 @@ public class ShareCommentActivity extends Activity {
                         }
                     } else {
 
-                        Map<String, List<Comment>> remoteImageMap = dbUtils.getAllRemoteImageComment();
-                        if (remoteImageMap.containsKey(uuid)) {
-                            commentData.addAll(remoteImageMap.get(uuid));
-                        }
+                        commentData.addAll(dbUtils.getRemoteImageCommentByUUid(uuid));
                     }
 
+                    Collections.sort(commentData, new Comparator<Comment>() {
+                        @Override
+                        public int compare(Comment lhs, Comment rhs) {
+
+                            long mtime1 = Long.parseLong(lhs.getTime());
+                            long mtime2 = Long.parseLong(rhs.getTime());
+                            if (mtime1 < mtime2)
+                                return 1;
+                            else if (mtime1 > mtime2)
+                                return -1;
+                            else return 0;
+
+                        }
+                    });
                     Log.d(TAG, commentData + "");
                     return true;
                 } catch (Exception e) {
@@ -384,8 +380,6 @@ public class ShareCommentActivity extends Activity {
 
             @Override
             protected void onPostExecute(Boolean sSuccess) {
-
-                mDialog.dismiss();
 
                 //reloadList();
                 mAdapter.commentList.clear();

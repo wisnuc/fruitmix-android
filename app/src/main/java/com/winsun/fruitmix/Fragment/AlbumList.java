@@ -241,6 +241,7 @@ public class AlbumList implements NavPagerActivity.Page {
             mNoContentLayout.setVisibility(View.INVISIBLE);
             mainListView.setVisibility(View.VISIBLE);
             ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
+            mainListView.setSelection(0);
         }
 
     }
@@ -394,13 +395,25 @@ public class AlbumList implements NavPagerActivity.Page {
                 @Override
                 public void onClick(final View v) {
 
+                    if (!(boolean) currentItem.get("maintained")) {
+                        Toast.makeText(containerActivity, containerActivity.getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
+
+                        return;
+                    }
+
                     new AsyncTask<Object, Object, Integer>() {
 
                         @Override
                         protected void onPreExecute() {
                             super.onPreExecute();
 
-                            mDialog = ProgressDialog.show(containerActivity, containerActivity.getString(R.string.operating_title), containerActivity.getString(R.string.loading_message), true, false);
+//                            mDialog = ProgressDialog.show(containerActivity, containerActivity.getString(R.string.operating_title), containerActivity.getString(R.string.loading_message), true, false);
+                            mDialog = new ProgressDialog(containerActivity, R.style.dialog);
+                            mDialog.setTitle(containerActivity.getString(R.string.operating_title));
+                            mDialog.setMessage(containerActivity.getString(R.string.loading_message));
+                            mDialog.setIndeterminate(true);
+                            mDialog.setCancelable(false);
+                            mDialog.show();
                         }
 
                         @Override
@@ -472,6 +485,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                                 reloadList();
                                 ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
+                                mainListView.setSelection(0);
                             } else if (sSuccess == 2) {
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
 
@@ -492,6 +506,11 @@ public class AlbumList implements NavPagerActivity.Page {
                 @Override
                 public void onClick(final View v) {
 
+                    if (!(boolean) currentItem.get("maintained")) {
+                        Toast.makeText(containerActivity, containerActivity.getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
+
+                        return;
+                    }
 
                     new AsyncTask<Object, Object, Integer>() {
 
@@ -500,7 +519,6 @@ public class AlbumList implements NavPagerActivity.Page {
                             super.onPreExecute();
 
                             mDialog = ProgressDialog.show(containerActivity, containerActivity.getString(R.string.operating_title), containerActivity.getString(R.string.loading_message), true, false);
-
                         }
 
                         @Override
@@ -579,6 +597,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                                 reloadList();
                                 ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
+                                mainListView.setSelection(0);
 
                             } else if (sSuccess == 2) {
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.no_network), Toast.LENGTH_SHORT).show();

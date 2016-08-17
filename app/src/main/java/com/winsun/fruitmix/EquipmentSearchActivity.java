@@ -85,7 +85,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         mMapList = new ArrayList<>();
         mEquipmentList = new ArrayList<>();
 
-        Equipment equipment = new Equipment("Winsuc Appliction 102 By Wu", "192.168.5.102", 6666);
+        Equipment equipment = new Equipment("Winsuc Appliction 140 By Wu", "192.168.5.140", 6666);
         getUserList(equipment);
 
         mHandler = new CustomHandler(this, getMainLooper());
@@ -436,6 +436,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         item.put("uuid", itemRaw.getString("uuid"));
                         item.put("avatar", itemRaw.getString("avatar"));
                         itemList.add(item);
+                    }
+
+                    for (Equipment equipment1 : mEquipmentList) {
+                        if (equipment1.getHost().equals(equipment.getHost()))
+                            return;
                     }
 
                     mEquipmentList.add(equipment);

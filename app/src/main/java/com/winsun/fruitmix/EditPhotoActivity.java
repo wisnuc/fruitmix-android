@@ -1,6 +1,7 @@
 package com.winsun.fruitmix;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -16,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
@@ -64,9 +66,9 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
     private String mMediaShareUUid;
 
-    private RequestQueue mRequestQueue;
-
     private ImageLoader mImageLoader;
+
+    private ProgressDialog mDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,8 +77,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         ButterKnife.bind(this);
 
-        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        mImageLoader = new ImageLoader(RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue(), ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "JWT " + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
@@ -194,7 +195,10 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                         protected void onPreExecute() {
                             super.onPreExecute();
 
-                            Snackbar.make(mAddPhoto, getString(R.string.patch_now), Snackbar.LENGTH_LONG).show();
+//                            Snackbar.make(mAddPhoto, getString(R.string.patch_now), Snackbar.LENGTH_LONG).show();
+//                            Toast.makeText(mContext, getString(R.string.patch_now), Toast.LENGTH_SHORT).show();
+
+                            mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
                         }
 
                         @Override
@@ -203,11 +207,10 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                             if (Util.getNetworkState(mContext)) {
                                 try {
 
-                                    boolean uploadFileResult = false;
+                                    boolean uploadFileResult = true;
                                     for (String string : photoUuidList) {
                                         if (!mPhotoUuidListOriginal.contains(string)) {
                                             if (!FNAS.isPhotoInMediaMap(string)) {
-
 
                                                 if (LocalCache.LocalImagesMap2.containsKey(string)) {
                                                     Map<String, String> map = LocalCache.LocalImagesMap2.get(string);
@@ -256,8 +259,11 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                         @Override
                         protected void onPostExecute(Boolean sSuccess) {
 
+                            mDialog.dismiss();
+
                             if (sSuccess) {
-                                Snackbar.make(mAddPhoto, "Patch Success", Snackbar.LENGTH_LONG).show();
+//                                Snackbar.make(mAddPhoto, "Patch Success", Snackbar.LENGTH_LONG).show();
+                                Toast.makeText(mContext, getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
 
                                 stringBuilder.setLength(0);
                                 for (Map<String, Object> map : mPhotoList) {
@@ -272,7 +278,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                                 finish();
 
                             } else {
-                                Snackbar.make(mAddPhoto, "Patch Fail", Snackbar.LENGTH_LONG).show();
+//                                Snackbar.make(mAddPhoto, "Patch Fail", Snackbar.LENGTH_LONG).show();
+                                Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
 
                                 setResult(RESULT_CANCELED, getIntent());
                                 finish();

@@ -80,7 +80,7 @@ public class LocalCommentService extends IntentService {
 
         mCommentMap = mDbUtils.getAllLocalImageComment();
 
-        int albumCount = mCommentMap.size();
+        int commentCount = mCommentMap.size();
 
         Iterator<Map.Entry<String, List<Comment>>> iterator = mCommentMap.entrySet().iterator();
 
@@ -99,7 +99,6 @@ public class LocalCommentService extends IntentService {
                             continue;
                     }
                 }
-
             }
 
             List<Comment> commentList = entry.getValue();
@@ -121,10 +120,11 @@ public class LocalCommentService extends IntentService {
             }
             if (commentList.size() == 0) {
                 iterator.remove();
+                mDbUtils.deleteLocalCommentByUUid(image);
             }
         }
-        if (albumCount > mCommentMap.size()) {
-            FNAS.LoadDocuments();
+        if (commentCount > mCommentMap.size()) {
+//            FNAS.LoadDocuments();
             Intent intent = new Intent(Util.LOCAL_COMMENT_CHANGED);
             mManager.sendBroadcast(intent);
         }

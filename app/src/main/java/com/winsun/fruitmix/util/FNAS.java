@@ -132,9 +132,9 @@ public class FNAS {
         for (i = 0; i < json.length(); i++) {
             itemRaw = json.getJSONObject(i);
             uuid = itemRaw.getString("uuid");
-            if(LocalCache.UsersMap.containsKey(uuid)){
+            if (LocalCache.UsersMap.containsKey(uuid)) {
                 item = LocalCache.UsersMap.get(uuid);
-            }else {
+            } else {
                 item = new HashMap<String, String>();
             }
 
@@ -242,7 +242,6 @@ public class FNAS {
                 boolean isMaintainer = false;
                 JSONArray jsonArray = itemRaw.getJSONObject("latest").getJSONArray("maintainers");
                 for (int k = 0; k < jsonArray.length(); k++) {
-
                     if (jsonArray.getString(k).equals(userUUID)) {
                         isMaintainer = true;
                     }
@@ -424,7 +423,12 @@ public class FNAS {
 
     }
 
-    public static void UploadAll() {
+    /**
+     * upload all local images
+     *
+     * @return true if upload happened and succeed,otherwise reture false;
+     */
+    public static boolean UploadAll() {
 
 /*        for (Iterator<Map<String, String>> iterator = LocalCache.LocalImagesMap.values().iterator(); iterator.hasNext(); ) {
             itemRaw = iterator.next();
@@ -437,13 +441,23 @@ public class FNAS {
             }
         }*/
 
+        if (!Util.getNetworkState(Util.APPLICATION_CONTEXT)) {
+            return false;
+        }
+
+        boolean result = false;
         for (Map<String, String> map : LocalCache.LocalImagesMap.values()) {
             if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
-                boolean result = UploadFile(map.get("thumb"));
-                map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, String.valueOf(result));
+                boolean uploadResult = UploadFile(map.get("thumb"));
+                map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, String.valueOf(uploadResult));
+
+                Log.i(TAG, "upload file:" + map.get("thumb") + "result:" + uploadResult);
+                if (uploadResult)
+                    result = uploadResult;
             }
         }
 
+        return result;
     }
 
     /**

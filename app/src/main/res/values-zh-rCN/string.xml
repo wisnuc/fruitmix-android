@@ -32,7 +32,7 @@
     <string name="login_by_password_text">通过密码登录</string>
     <string name="title_activity_user_manage">用户管理</string>
     <string name="password_error">输入密码错误</string>
-    <string name="no_edit_photo_permission">你没有权限编辑照片</string>
+    <string name="no_edit_photo_permission">你没有权限操作</string>
     <string name="set_maintainer">他人可否添加</string>
     <string name="set_private">设置为私密</string>
     <string name="set_public">设置为公开</string>
@@ -81,7 +81,7 @@
     <string name="delete_album">删除相册</string>
     <string name="operation_success">操作成功！</string>
     <string name="operation_fail">操作失败，请检查网络！</string>
-    <string name="no_network">没有网络，请检查</string>
+    <string name="no_network">没有网络或登录失败，请检查</string>
     <string name="share_comment_count">分享了%1$s张照片</string>
     <string name="share_comment_text">%1$s : %2$s</string>
     <string name="photo_count">%1$s张</string>

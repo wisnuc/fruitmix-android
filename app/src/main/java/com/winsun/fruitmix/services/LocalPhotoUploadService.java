@@ -3,9 +3,12 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -14,9 +17,15 @@ import com.winsun.fruitmix.util.LocalCache;
  * helper methods.
  */
 public class LocalPhotoUploadService extends IntentService {
+
+    private static final String TAG = LocalPhotoUploadService.class.getSimpleName();
+
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_UPLOAD_LOCAL_PHOTO = "com.winsun.fruitmix.services.action.upload.local.photo";
 
+    private boolean uploadResult = false;
+    private boolean isSave = false;
+    private LocalBroadcastManager mManager;
 
     public LocalPhotoUploadService() {
         super("LocalPhotoUploadService");
@@ -51,13 +60,37 @@ public class LocalPhotoUploadService extends IntentService {
      */
     private void handleActionUploadLocalPhoto() {
         // TODO: Handle action upload local photo
+        mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());
+
         try {
-            FNAS.UploadAll();
+            uploadResult = FNAS.UploadAll();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
+        if (uploadResult) {
+            LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
+            Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
+            mManager.sendBroadcast(intent);
+            isSave = true;
+        }
+
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        //save upload state if error happened
+        if (uploadResult && !isSave) {
+
+            Log.i(TAG, "onDestroy set upload photo");
+
+            LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
+
+            Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
+            mManager.sendBroadcast(intent);
+        }
+
+    }
 }
