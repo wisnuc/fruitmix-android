@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -265,6 +267,9 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 //                                Snackbar.make(mAddPhoto, "Patch Success", Snackbar.LENGTH_LONG).show();
                                 Toast.makeText(mContext, getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
 
+                                LocalBroadcastManager mBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+                                mBroadcastManager.sendBroadcast(new Intent(Util.LOCAL_SHARE_CHANGED));
+
                                 stringBuilder.setLength(0);
                                 for (Map<String, Object> map : mPhotoList) {
                                     stringBuilder.append(map.get("uuid"));
@@ -272,7 +277,9 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                                 }
 
                                 int position = stringBuilder.lastIndexOf(",");
-                                stringBuilder.replace(position, position + 1, "");
+                                if (position != -1) {
+                                    stringBuilder.replace(position, position + 1, "");
+                                }
                                 getIntent().putExtra(Util.NEW_ALBUM_CONTENT, stringBuilder.toString());
                                 setResult(RESULT_OK, getIntent());
                                 finish();
@@ -287,7 +294,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                         }
 
-                    }.execute();
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                 }
 
@@ -314,6 +321,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         NetworkImageView mPhotoItem;
         @BindView(R.id.del_photo)
         ImageView mDelPhoto;
+        @BindView(R.id.del_photo_layout)
+        FrameLayout mDelPhotoLayout;
 
         private Map<String, Object> mMap;
         private int width, height;
@@ -342,15 +351,10 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                 width = Integer.parseInt((String) mMap.get("width"));
                 height = Integer.parseInt((String) mMap.get("height"));
-                if (width >= height) {
-                    width = width * 100 / height;
-                    height = 100;
-                } else {
-                    height = height * 100 / width;
-                    width = 100;
-                }
 
-                String url = FNAS.Gateway + "/media/" + mMap.get("resHash") + "?type=thumb&width=" + width + "&height=" + height;
+                int[] result = Util.formatPhotoWidthHeight(width, height);
+
+                String url = FNAS.Gateway + "/media/" + mMap.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                 mImageLoader.setShouldCache(true);
                 mPhotoItem.setTag(url);
@@ -358,11 +362,12 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 mPhotoItem.setImageUrl(url, mImageLoader);
             }
 
-            mDelPhoto.setOnClickListener(new View.OnClickListener() {
+            mDelPhotoLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mPhotoList.remove(position);
-                    mAdapter.notifyItemRemoved(position);
+
+                    mPhotoList.remove(getAdapterPosition());
+                    mAdapter.notifyItemRemoved(getAdapterPosition());
                 }
             });
         }
@@ -388,5 +393,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
             holder.refreshView(position);
         }
+
     }
 }

@@ -204,4 +204,21 @@ public class Util {
             methodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
         }
     }
+
+    public static int[] formatPhotoWidthHeight(int width, int height) {
+        if (width >= height) {
+            width = width * 100 / height;
+            height = 100;
+        } else {
+            height = height * 100 / width;
+            width = 100;
+        }
+
+        if (width / height > 2)
+            width = 100;
+        else if (height / width > 2)
+            height = 100;
+
+        return new int[]{width, height};
+    }
 }

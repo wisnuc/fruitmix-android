@@ -203,6 +203,11 @@ public class FNAS {
 
         str = FNAS.RemoteCall("/mediashare"); // get all album share and normal share(immutable)
         json = new JSONArray(str);
+
+        if (json.length() != 0) {
+            LocalCache.DocumentsMap.clear();
+        }
+
         for (i = 0; i < json.length(); i++) {
             itemRaw = json.getJSONObject(i);
             Log.d("winsun", "" + itemRaw);
@@ -234,25 +239,28 @@ public class FNAS {
                 if (imgStr.length() > 1) imgStr = imgStr.substring(1);
                 item.put("images", imgStr);
                 item.put("coverImg", jsonArr.getJSONObject(0).getString("digest").toLowerCase());
-                if (itemRaw.getJSONObject("latest").getJSONArray("viewers").length() <= 1 && itemRaw.getJSONObject("latest").getJSONArray("maintainers").length() <= 1)
-                    item.put("private", "1");
-                else item.put("private", "0"); // 1 means private,0 means public
-
-                //begin add by liang.wu
-                boolean isMaintainer = false;
-                JSONArray jsonArray = itemRaw.getJSONObject("latest").getJSONArray("maintainers");
-                for (int k = 0; k < jsonArray.length(); k++) {
-                    if (jsonArray.getString(k).equals(userUUID)) {
-                        isMaintainer = true;
-                    }
-                }
-                item.put("maintained", isMaintainer ? "true" : "false");
-
-                item.put("locked", "false");
-                //finish add by liang.wu
-
-                LocalCache.DocumentsMap.put(uuid, item);
+            } else {
+                item.put("images", "");
+                item.put("coverImg", "");
             }
+            if (itemRaw.getJSONObject("latest").getJSONArray("viewers").length() <= 1 && itemRaw.getJSONObject("latest").getJSONArray("maintainers").length() <= 1)
+                item.put("private", "1");
+            else item.put("private", "0"); // 1 means private,0 means public
+
+            //begin add by liang.wu
+            boolean isMaintainer = false;
+            JSONArray jsonArray = itemRaw.getJSONObject("latest").getJSONArray("maintainers");
+            for (int k = 0; k < jsonArray.length(); k++) {
+                if (jsonArray.getString(k).equals(userUUID)) {
+                    isMaintainer = true;
+                }
+            }
+            item.put("maintained", isMaintainer ? "true" : "false");
+
+            item.put("locked", "false");
+            //finish add by liang.wu
+
+            LocalCache.DocumentsMap.put(uuid, item);
         }
 
         //LocalCache.SetGlobalHashMap("documentsMap", LocalCache.DocumentsMap);
@@ -310,9 +318,9 @@ public class FNAS {
         outStream.write(str.toString().getBytes());
         outStream.flush();
 
-        Log.d("winsun", "NAS POST: " + (Gateway + req) + " " + conn.getResponseCode() + " " + str);
+        Log.d(TAG, "NAS POST: " + (Gateway + req) + " " + conn.getResponseCode() + " " + str);
         str = FNAS.ReadFull(conn.getInputStream());
-        Log.d("winsun", "NAS POST END: " + (Gateway + req) + " " + str);
+        Log.d(TAG, "NAS POST END: " + (Gateway + req) + " " + str);
 
         outStream.close();
         conn.disconnect();

@@ -81,7 +81,7 @@ public class LocalShareService extends IntentService {
         mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());
         mShareList = mDbUtils.getAllLocalShare();
 
-        Log.i(TAG,"local share:" + mShareList);
+        Log.i(TAG, "local share:" + mShareList);
 
         Iterator<Share> iterator = mShareList.iterator();
         int shareCount = mShareList.size();
@@ -164,13 +164,15 @@ public class LocalShareService extends IntentService {
             Log.d(TAG, "winsun createlocalshare:" + data);
 
             try {
-                FNAS.PostRemoteCall("/mediashare", data);
-                iterator.remove();
+                String str = FNAS.PostRemoteCall("/mediashare", data);
+                if (str != null) {
+                    iterator.remove();
+                    long result = mDbUtils.deleteLocalShare(mShare.getId());
+                    LocalCache.DocumentsMap.remove(mShare.getUuid());
+                    Log.i(TAG, "deleteLocalShare:" + mShare.getId() + "result:" + result);
+                }
 
-                long result = mDbUtils.deleteLocalShare(mShare.getId());
-                LocalCache.DocumentsMap.remove(mShare.getUuid());
-                Log.i(TAG, "deleteLocalShare:" + mShare.getId() + "result:" + result);
-            }  catch (Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
 

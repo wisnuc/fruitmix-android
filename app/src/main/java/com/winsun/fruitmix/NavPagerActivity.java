@@ -373,9 +373,10 @@ public class NavPagerActivity extends AppCompatActivity
                 Log.i(TAG, "local share changed");
 
                 albumList.refreshView();
+                shareList.refreshView();
             } else if (intent.getAction().equals(Util.LOCAL_COMMENT_CHANGED)) {
 
-                Log.i(TAG, "local changed");
+                Log.i(TAG, "local comment changed");
 
                 shareList.refreshView();
             } else if (intent.getAction().equals(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED)) {

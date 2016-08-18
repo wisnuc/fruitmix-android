@@ -85,7 +85,7 @@
             android:name=".ShareCommentActivity"
             android:label="@string/title_activity_test3"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.MyToolBar" />
         <activity
             android:name=".AlbumPicChooseActivity"
             android:label="@string/title_activity_test3"

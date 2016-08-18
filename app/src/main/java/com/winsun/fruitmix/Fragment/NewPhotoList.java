@@ -745,16 +745,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         public void refreshView(final Photo photo, int position) {
 
-            int width = Integer.parseInt(photo.getWidth());
-            int height = Integer.parseInt(photo.getHeight());
-            if (width >= height) {
-                width = width * 100 / height;
-                height = 100;
-            } else {
-                height = height * 100 / width;
-                width = 100;
-            }
-
             mImageLoader.setTag(position);
 
             if (photo.isCached() && !mIsFling) {
@@ -771,7 +761,12 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
 //                    LocalCache.LoadRemoteBitmapThumb(photo.getUuid(), width, height, mPhotoIv);
 
-                String url = FNAS.Gateway + "/media/" + photo.getUuid() + "?type=thumb&width=" + width + "&height=" + height;
+                int width = Integer.parseInt(photo.getWidth());
+                int height = Integer.parseInt(photo.getHeight());
+
+                int[] result = Util.formatPhotoWidthHeight(width,height);
+
+                String url = FNAS.Gateway + "/media/" + photo.getUuid() + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                 mImageLoader.setShouldCache(true);
                 mPhotoIv.setTag(url);

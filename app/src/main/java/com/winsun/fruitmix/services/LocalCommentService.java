@@ -110,9 +110,12 @@ public class LocalCommentService extends IntentService {
                 String data = "{\"shareid\":\"" + mComment.getShareId() + "\", \"text\":\"" + mComment.getText() + "\"}";
 
                 try {
-                    FNAS.PostRemoteCall(request, data);
-                    listIterator.remove();
-                    mDbUtils.deleteLocalComment(mComment.getId());
+                    String str = FNAS.PostRemoteCall(request, data);
+                    if(str != null ){
+                        listIterator.remove();
+                        mDbUtils.deleteLocalComment(mComment.getId());
+                    }
+
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

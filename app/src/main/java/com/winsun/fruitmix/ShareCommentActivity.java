@@ -167,15 +167,10 @@ public class ShareCommentActivity extends Activity {
         } else {
             int width = Integer.parseInt((String) imageData.get("width"));
             int height = Integer.parseInt((String) imageData.get("height"));
-            if (width >= height) {
-                width = width * 100 / height;
-                height = 100;
-            } else {
-                height = height * 100 / width;
-                width = 100;
-            }
 
-            String url = FNAS.Gateway + "/media/" + imageData.get("resHash") + "?type=thumb&width=" + width + "&height=" + height;
+            int[] result = Util.formatPhotoWidthHeight(width, height);
+
+            String url = FNAS.Gateway + "/media/" + imageData.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
             mImageLoader.setShouldCache(true);
             ivMain.setTag(url);
@@ -265,8 +260,6 @@ public class ShareCommentActivity extends Activity {
 
                     @Override
                     protected void onPostExecute(Boolean sSuccess) {
-
-                        mDialog.dismiss();
 
                         if (sSuccess) {
                             reloadList();
@@ -380,6 +373,9 @@ public class ShareCommentActivity extends Activity {
 
             @Override
             protected void onPostExecute(Boolean sSuccess) {
+
+                if (mDialog != null && mDialog.isShowing())
+                    mDialog.dismiss();
 
                 //reloadList();
                 mAdapter.commentList.clear();

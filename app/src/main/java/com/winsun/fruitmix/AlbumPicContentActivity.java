@@ -248,15 +248,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                 int width = Integer.parseInt((String) currentItem.get("width"));
                 int height = Integer.parseInt((String) currentItem.get("height"));
-                if (width >= height) {
-                    width = width * 100 / height;
-                    height = 100;
-                } else {
-                    height = height * 100 / width;
-                    width = 100;
-                }
 
-                String url = FNAS.Gateway + "/media/" + currentItem.get("resHash") + "?type=thumb&width=" + width + "&height=" + height;
+                int[] result = Util.formatPhotoWidthHeight(width,height);
+
+                String url = FNAS.Gateway + "/media/" + currentItem.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                 mImageLoader.setShouldCache(true);
                 ivMain.setTag(url);

@@ -230,6 +230,10 @@ public class ShareList implements NavPagerActivity.Page {
 
         reloadList();
 
+        mCommentMap.clear();
+        mLoadCommentCount = 0;
+        mLoadCommentTotal = 0;
+
         mLoadingLayout.setVisibility(View.INVISIBLE);
         if (shareList.size() == 0) {
             mNoContentLayout.setVisibility(View.VISIBLE);
@@ -243,16 +247,25 @@ public class ShareList implements NavPagerActivity.Page {
             //load comment
             if (Util.getNetworkState(containerActivity)) {
 
+                List<String> imageUUIDList = new ArrayList<>(shareList.size());
+
                 for (Map<String, Object> map : shareList) {
                     if (!map.get("type").equals("album")) {
                         String[] images = map.get("images").toString().split(",");
                         if (images.length == 1) {
-                            mLoadCommentTotal++;
 
                             Map<String, String> imageMap = LocalCache.MediasMap.get(images[0]);
 
                             if (imageMap != null && imageMap.containsKey("uuid")) {
-                                loadCommentList(LocalCache.MediasMap.get(images[0]).get("uuid"));
+                                String uuid = imageMap.get("uuid");
+                                if (!imageUUIDList.contains(uuid)) {
+                                    mLoadCommentTotal++;
+                                    loadCommentList(uuid);
+
+                                    Log.i(TAG, "load image comment,image uuid:" + uuid);
+                                    imageUUIDList.add(uuid);
+                                }
+
                             }
 
                         }
@@ -447,17 +460,12 @@ public class ShareList implements NavPagerActivity.Page {
                     } else {
 //                        LocalCache.LoadRemoteBitmapThumb((String) (coverImg.get("uuid")), w, h, ivCover);
 
-                        w = Integer.parseInt(coverImg.get("width"));
-                        h = Integer.parseInt(coverImg.get("height"));
-                        if (w >= h) {
-                            w = w * 100 / h;
-                            h = 100;
-                        } else {
-                            h = h * 100 / w;
-                            w = 100;
-                        }
+//                        w = Integer.parseInt(coverImg.get("width"));
+//                        h = Integer.parseInt(coverImg.get("height"));
+//
+//                        int[] result = Util.formatPhotoWidthHeight(w, h);
 
-                        String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=thumb&width=" + w + "&height=" + h;
+                        String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=original";
 
                         mImageLoader.setShouldCache(true);
                         ivCover.setTag(url);
@@ -482,7 +490,7 @@ public class ShareList implements NavPagerActivity.Page {
                         intent.putExtra("maintained", (boolean) currentItem.get("maintained"));
                         intent.putExtra("private", (String) currentItem.get("private"));
                         intent.putExtra(Util.NEED_SHOW_MENU, false);
-                        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN,true);
+                        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                         containerActivity.startActivity(intent);
                     }
                 });
@@ -529,15 +537,10 @@ public class ShareList implements NavPagerActivity.Page {
 
                             w = Integer.parseInt(itemImg.get("width"));
                             h = Integer.parseInt(itemImg.get("height"));
-                            if (w >= h) {
-                                w = w * 100 / h;
-                                h = 100;
-                            } else {
-                                h = h * 100 / w;
-                                w = 100;
-                            }
 
-                            String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=thumb&width=" + w + "&height=" + h;
+                            int[] result = Util.formatPhotoWidthHeight(w, h);
+
+                            String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=original";
 
                             mImageLoader.setShouldCache(true);
                             ivCover.setTag(url);
@@ -553,9 +556,14 @@ public class ShareList implements NavPagerActivity.Page {
                             List<Comment> commentList = commentMap.get(uuid);
                             if (commentList.size() != 0) {
                                 mShareCommentTextView.setText(String.format(containerActivity.getString(R.string.share_comment_text), nickName, commentList.get(0).getText()));
+                            } else {
+                                mShareCommentTextView.setText("");
                             }
                             mShareCommentCountTextView.setText(String.valueOf(commentList.size()));
 
+                        } else {
+                            mShareCommentTextView.setText("");
+                            mShareCommentCountTextView.setText("0");
                         }
                     } else {
                         ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
@@ -643,15 +651,10 @@ public class ShareList implements NavPagerActivity.Page {
 
                                 w = Integer.parseInt(itemImg.get("width"));
                                 h = Integer.parseInt(itemImg.get("height"));
-                                if (w >= h) {
-                                    w = w * 100 / h;
-                                    h = 100;
-                                } else {
-                                    h = h * 100 / w;
-                                    w = 100;
-                                }
 
-                                String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=thumb&width=" + w + "&height=" + h;
+                                int[] result = Util.formatPhotoWidthHeight(w, h);
+
+                                String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                                 mImageLoader.setShouldCache(true);
                                 ivItems[i].setTag(url);
@@ -679,7 +682,7 @@ public class ShareList implements NavPagerActivity.Page {
                                     intent.putExtra("maintained", (boolean) currentItem.get("maintained"));
                                     intent.putExtra("private", (String) currentItem.get("private"));
                                     intent.putExtra(Util.NEED_SHOW_MENU, false);
-                                    intent.putExtra(Util.KEY_SHOW_COMMENT_BTN,true);
+                                    intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                                     containerActivity.startActivity(intent);
                                 } else {
                                     Log.d("winsun", getImgList("images") + "");
@@ -877,6 +880,9 @@ public class ShareList implements NavPagerActivity.Page {
                     commentList = mCommentMap.get(params[0]);
                     if (commentList == null) {
                         commentList = new ArrayList<>();
+                        mCommentMap.put(params[0], commentList);
+                    }else {
+                        return true;
                     }
 
                     str = FNAS.RemoteCall("/media/" + params[0] + "?type=comments");
@@ -896,7 +902,7 @@ public class ShareList implements NavPagerActivity.Page {
                         dbUtils.insertRemoteComment(comment, params[0]);
                     }
 
-                    Log.d("winsun mCommentMap:", mCommentMap + "");
+                    Log.d(TAG, "mCommentMap:" + mCommentMap);
                     return true;
                 } catch (Exception e) {
                     e.printStackTrace();

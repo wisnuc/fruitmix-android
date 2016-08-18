@@ -342,15 +342,10 @@ public class AlbumList implements NavPagerActivity.Page {
 
                     w = Integer.parseInt(coverImg.get("width"));
                     h = Integer.parseInt(coverImg.get("height"));
-                    if (w >= h) {
-                        w = w * 100 / h;
-                        h = 100;
-                    } else {
-                        h = h * 100 / w;
-                        w = 100;
-                    }
 
-                    String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=thumb&width=" + w + "&height=" + h;
+                    int[] result = Util.formatPhotoWidthHeight(w, h);
+
+                    String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                     mImageLoader.setShouldCache(true);
                     ivMainPic.setTag(url);
@@ -407,13 +402,13 @@ public class AlbumList implements NavPagerActivity.Page {
                         protected void onPreExecute() {
                             super.onPreExecute();
 
-//                            mDialog = ProgressDialog.show(containerActivity, containerActivity.getString(R.string.operating_title), containerActivity.getString(R.string.loading_message), true, false);
-                            mDialog = new ProgressDialog(containerActivity, R.style.dialog);
+                            mDialog = ProgressDialog.show(containerActivity, containerActivity.getString(R.string.operating_title), containerActivity.getString(R.string.loading_message), true, false);
+/*                            mDialog = new ProgressDialog(containerActivity, R.style.dialog);
                             mDialog.setTitle(containerActivity.getString(R.string.operating_title));
                             mDialog.setMessage(containerActivity.getString(R.string.loading_message));
                             mDialog.setIndeterminate(true);
                             mDialog.setCancelable(false);
-                            mDialog.show();
+                            mDialog.show();*/
                         }
 
                         @Override
@@ -497,7 +492,7 @@ public class AlbumList implements NavPagerActivity.Page {
                             mainBar.setTranslationX(0.0f);
                         }
 
-                    }.execute();
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
                 }
             });
@@ -609,7 +604,7 @@ public class AlbumList implements NavPagerActivity.Page {
                             mainBar.setTranslationX(0.0f);
                         }
 
-                    }.execute();
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 
 //                    reloadList();

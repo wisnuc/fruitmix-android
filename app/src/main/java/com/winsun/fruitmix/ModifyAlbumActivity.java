@@ -2,14 +2,17 @@ package com.winsun.fruitmix;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -80,6 +83,20 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         }
         btOK = (TextView) findViewById(R.id.ok);
         ivBack = (ImageView) findViewById(R.id.back);
+
+        ckPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    ckSetMaintainer.setClickable(true);
+                } else {
+                    ckSetMaintainer.setClickable(false);
+                    if (ckSetMaintainer.isChecked()) {
+                        ckSetMaintainer.setChecked(false);
+                    }
+                }
+            }
+        });
 
         btOK.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -209,6 +226,10 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                         mDialog.dismiss();
 
                         if (sSuccess) {
+
+                            LocalBroadcastManager mBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+                            mBroadcastManager.sendBroadcast(new Intent(Util.LOCAL_SHARE_CHANGED));
+
                             getIntent().putExtra(Util.UPDATED_ALBUM_TITLE, title);
                             setResult(RESULT_OK, getIntent());
                             finish();
