@@ -50,6 +50,7 @@ public class Util {
     public static final String LOCAL_SHARE_CHANGED = "local_share_changed";
     public static final String LOCAL_COMMENT_CHANGED = "local_comment_changed";
     public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
+    public static final String REMOTE_PHOTO_CHANGED = "remote_photo_changed";
     public static final String NEED_SHOW_MENU = "need_show_menu";
     public static final String KEY_LOCAL_PHOTO_UPLOAD_SUCCESS = "key_local_photo_upload_success";
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";

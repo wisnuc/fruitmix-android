@@ -1,7 +1,9 @@
 package com.winsun.fruitmix.util;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Process;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
 
@@ -110,14 +112,13 @@ public class FNAS {
         }).start();
     }
 
-    public static void LoadDocuments() throws Exception {
+    public static void LoadDocuments() {
 
-        String str, date, uuid, lhash;
+        String str, uuid;
         JSONArray json, jsonArr;
         int i, j;
-        JSONObject itemRaw, jsonObject;
+        JSONObject itemRaw;
         Map<String, String> item;
-        List<String> newList;
         String imgStr, mtime;
 
         if (Util.getNetworkState(Util.APPLICATION_CONTEXT)) {
@@ -125,50 +126,57 @@ public class FNAS {
             Log.i("delete result :", result + "");
         }
 
-        loadLocalShare();
+        try {
+            str = FNAS.RemoteCall("/users"); // get all user;
+            json = new JSONArray(str);
+            for (i = 0; i < json.length(); i++) {
+                itemRaw = json.getJSONObject(i);
+                uuid = itemRaw.getString("uuid");
+                if (LocalCache.UsersMap.containsKey(uuid)) {
+                    item = LocalCache.UsersMap.get(uuid);
+                } else {
+                    item = new HashMap<String, String>();
+                }
 
-        str = FNAS.RemoteCall("/users"); // get all user;
-        json = new JSONArray(str);
-        for (i = 0; i < json.length(); i++) {
-            itemRaw = json.getJSONObject(i);
-            uuid = itemRaw.getString("uuid");
-            if (LocalCache.UsersMap.containsKey(uuid)) {
-                item = LocalCache.UsersMap.get(uuid);
-            } else {
-                item = new HashMap<String, String>();
+                item.put("name", itemRaw.getString("username"));
+                item.put("uuid", itemRaw.getString("uuid"));
+                item.put("avatar", itemRaw.getString("avatar"));
+                if (itemRaw.has("email")) {
+                    item.put("email", itemRaw.getString("email"));
+                }
+
+                StringBuilder stringBuilder = new StringBuilder();
+                String[] splitStrings = item.get("name").split(" ");
+                for (String splitString : splitStrings) {
+                    stringBuilder.append(splitString.substring(0, 1).toUpperCase());
+                }
+                if (!item.containsKey("avatar_default")) {
+                    item.put("avatar_default", stringBuilder.toString());
+                }
+                if (!item.containsKey("avatar_default_color")) {
+                    item.put("avatar_default_color", String.valueOf(new Random().nextInt(3)));
+                }
+
+                LocalCache.UsersMap.put(item.get("uuid"), item); // save all user info
+
             }
 
-            item.put("name", itemRaw.getString("username"));
-            item.put("uuid", itemRaw.getString("uuid"));
-            item.put("avatar", itemRaw.getString("avatar"));
-            if (itemRaw.has("email")) {
-                item.put("email", itemRaw.getString("email"));
-            }
-
-            StringBuilder stringBuilder = new StringBuilder();
-            String[] splitStrings = item.get("name").split(" ");
-            for (String splitString : splitStrings) {
-                stringBuilder.append(splitString.substring(0, 1).toUpperCase());
-            }
-            if (!item.containsKey("avatar_default")) {
-                item.put("avatar_default", stringBuilder.toString());
-            }
-            if (!item.containsKey("avatar_default_color")) {
-                item.put("avatar_default_color", String.valueOf(new Random().nextInt(3)));
-            }
-
-            LocalCache.UsersMap.put(item.get("uuid"), item); // save all user info
+            LocalCache.SetGlobalHashMap("usersMap", LocalCache.UsersMap);
+            Log.d("winsun", "UsersMap " + LocalCache.UsersMap);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        str = FNAS.RemoteCall("/media"); // get all pictures;
-        json = new JSONArray(str);
 
-        if (json.length() != 0) {
-            LocalCache.MediasMap.clear();
-        }
+        try {
+            str = FNAS.RemoteCall("/media"); // get all pictures;
+            json = new JSONArray(str);
 
-        for (i = 0; i < json.length(); i++) {
-            try {
+            if (json.length() != 0) {
+                LocalCache.MediasMap.clear();
+            }
+
+            for (i = 0; i < json.length(); i++) {
                 itemRaw = json.getJSONObject(i);
                 if (itemRaw.getString("kind").equals("image")) {
                     item = new HashMap<String, String>();
@@ -191,89 +199,97 @@ public class FNAS {
                         } else item.put("mtime", "1916-01-01 00:00:00");
                     }
                     LocalCache.MediasMap.put(item.get("uuid"), item);
+
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                continue;
             }
+
+            LocalCache.SetGlobalHashMap("mediasMap", LocalCache.MediasMap);
+            Log.d("winsun", "MediasMap " + LocalCache.MediasMap);
+
+            LocalBroadcastManager manager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
+            manager.sendBroadcast(new Intent(Util.REMOTE_PHOTO_CHANGED));
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         LocalPhotoUploadService.startActionUploadLocalPhoto(Util.APPLICATION_CONTEXT);
 
+        try {
+            str = FNAS.RemoteCall("/mediashare"); // get all album share and normal share(immutable)
+            json = new JSONArray(str);
 
-        str = FNAS.RemoteCall("/mediashare"); // get all album share and normal share(immutable)
-        json = new JSONArray(str);
-
-        if (json.length() != 0) {
-            LocalCache.DocumentsMap.clear();
-        }
-
-        for (i = 0; i < json.length(); i++) {
-            itemRaw = json.getJSONObject(i);
-            Log.d("winsun", "" + itemRaw);
-            uuid = itemRaw.getString("uuid");
-            if (LocalCache.DocumentsMap.containsKey(uuid)) {
-                item = LocalCache.DocumentsMap.get(uuid);
-                //if(itemRaw.getJSONObject("latest").get("_id").equals()) continue;
-            } else item = new HashMap<String, String>();
-            item.put("_id", itemRaw.getJSONObject("latest").getString("_id"));
-            if (itemRaw.getJSONObject("latest").has("creator"))
-                item.put("creator", itemRaw.getJSONObject("latest").getString("creator"));
-            else
-                item.put("creator", itemRaw.getJSONObject("latest").getJSONArray("maintainers").getString(0));
-            item.put("album", itemRaw.getJSONObject("latest").getString("album"));
-            item.put("mtime", itemRaw.getJSONObject("latest").getString("mtime"));
-            item.put("uuid", uuid);
-            item.put("del", itemRaw.getJSONObject("latest").getString("archived").equals("true") ? "1" : "0"); // 1 means deleted,0 means not deleted,（archived是服务端是否已删标志）
-            item.put("date", new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(itemRaw.getJSONObject("latest").getString("mtime")))));
-            if (itemRaw.getJSONObject("latest").getString("album").equals("true")) {
-                item.put("type", "album");
-                item.put("title", itemRaw.getJSONObject("latest").getJSONArray("tags").getJSONObject(0).getString("albumname"));
-                item.put("desc", itemRaw.getJSONObject("latest").getJSONArray("tags").getJSONObject(0).getString("desc"));
-            } else item.put("type", "set");
-            imgStr = "";
-            jsonArr = itemRaw.getJSONObject("latest").getJSONArray("contents");
-            if (jsonArr.length() > 0) {
-                for (j = 0; j < jsonArr.length(); j++)
-                    imgStr += "," + jsonArr.getJSONObject(j).getString("digest").toLowerCase();
-                if (imgStr.length() > 1) imgStr = imgStr.substring(1);
-                item.put("images", imgStr);
-                item.put("coverImg", jsonArr.getJSONObject(0).getString("digest").toLowerCase());
-            } else {
-                item.put("images", "");
-                item.put("coverImg", "");
+            if (json.length() != 0) {
+                LocalCache.DocumentsMap.clear();
             }
-            if (itemRaw.getJSONObject("latest").getJSONArray("viewers").length() <= 1 && itemRaw.getJSONObject("latest").getJSONArray("maintainers").length() <= 1)
-                item.put("private", "1");
-            else item.put("private", "0"); // 1 means private,0 means public
 
-            //begin add by liang.wu
-            boolean isMaintainer = false;
-            JSONArray jsonArray = itemRaw.getJSONObject("latest").getJSONArray("maintainers");
-            for (int k = 0; k < jsonArray.length(); k++) {
-                if (jsonArray.getString(k).equals(userUUID)) {
-                    isMaintainer = true;
+            for (i = 0; i < json.length(); i++) {
+                itemRaw = json.getJSONObject(i);
+                Log.d("winsun", "" + itemRaw);
+                uuid = itemRaw.getString("uuid");
+                if (LocalCache.DocumentsMap.containsKey(uuid)) {
+                    item = LocalCache.DocumentsMap.get(uuid);
+                    //if(itemRaw.getJSONObject("latest").get("_id").equals()) continue;
+                } else item = new HashMap<String, String>();
+                item.put("_id", itemRaw.getJSONObject("latest").getString("_id"));
+                if (itemRaw.getJSONObject("latest").has("creator"))
+                    item.put("creator", itemRaw.getJSONObject("latest").getString("creator"));
+                else
+                    item.put("creator", itemRaw.getJSONObject("latest").getJSONArray("maintainers").getString(0));
+                item.put("album", itemRaw.getJSONObject("latest").getString("album"));
+                item.put("mtime", itemRaw.getJSONObject("latest").getString("mtime"));
+                item.put("uuid", uuid);
+                item.put("del", itemRaw.getJSONObject("latest").getString("archived").equals("true") ? "1" : "0"); // 1 means deleted,0 means not deleted,（archived是服务端是否已删标志）
+                item.put("date", new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(itemRaw.getJSONObject("latest").getString("mtime")))));
+                if (itemRaw.getJSONObject("latest").getString("album").equals("true")) {
+                    item.put("type", "album");
+                    item.put("title", itemRaw.getJSONObject("latest").getJSONArray("tags").getJSONObject(0).getString("albumname"));
+                    item.put("desc", itemRaw.getJSONObject("latest").getJSONArray("tags").getJSONObject(0).getString("desc"));
+                } else item.put("type", "set");
+                imgStr = "";
+                jsonArr = itemRaw.getJSONObject("latest").getJSONArray("contents");
+                if (jsonArr.length() > 0) {
+                    for (j = 0; j < jsonArr.length(); j++)
+                        imgStr += "," + jsonArr.getJSONObject(j).getString("digest").toLowerCase();
+                    if (imgStr.length() > 1) imgStr = imgStr.substring(1);
+                    item.put("images", imgStr);
+                    item.put("coverImg", jsonArr.getJSONObject(0).getString("digest").toLowerCase());
+                } else {
+                    item.put("images", "");
+                    item.put("coverImg", "");
                 }
+                if (itemRaw.getJSONObject("latest").getJSONArray("viewers").length() <= 1 && itemRaw.getJSONObject("latest").getJSONArray("maintainers").length() <= 1)
+                    item.put("private", "1");
+                else item.put("private", "0"); // 1 means private,0 means public
+
+                //begin add by liang.wu
+                boolean isMaintainer = false;
+                JSONArray jsonArray = itemRaw.getJSONObject("latest").getJSONArray("maintainers");
+                for (int k = 0; k < jsonArray.length(); k++) {
+                    if (jsonArray.getString(k).equals(userUUID)) {
+                        isMaintainer = true;
+                    }
+                }
+                item.put("maintained", isMaintainer ? "true" : "false");
+
+                item.put("locked", "false");
+                //finish add by liang.wu
+
+                LocalCache.DocumentsMap.put(uuid, item);
+
             }
-            item.put("maintained", isMaintainer ? "true" : "false");
 
-            item.put("locked", "false");
-            //finish add by liang.wu
-
-            LocalCache.DocumentsMap.put(uuid, item);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        //LocalCache.SetGlobalHashMap("documentsMap", LocalCache.DocumentsMap);
-        //Log.d("winsun", "List: " + newList);
-
-        LocalCache.SetGlobalHashMap("usersMap", LocalCache.UsersMap);
-        Log.d("winsun", "UsersMap " + LocalCache.UsersMap);
+        loadLocalShare();
 
         LocalCache.SetGlobalHashMap("documentsMap", LocalCache.DocumentsMap);
         Log.d("winsun", "DocumentsMap " + LocalCache.DocumentsMap);
 
-        LocalCache.SetGlobalHashMap("mediasMap", LocalCache.MediasMap);
-        Log.d("winsun", "MediasMap " + LocalCache.MediasMap);
+        //LocalCache.SetGlobalHashMap("documentsMap", LocalCache.DocumentsMap);
+        //Log.d("winsun", "List: " + newList);
 
     }
 
@@ -593,7 +609,7 @@ public class FNAS {
             } else {
                 item.put("type", "set");
             }
-            item.put("mtime", String.valueOf(System.currentTimeMillis()));
+            item.put("mtime", share.getmTime());
             item.put("uuid", share.getUuid());
             item.put("del", "0"); // 本地存在，判断是否需要显示（archived是服务端是否已删标志）
             item.put("date", new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(System.currentTimeMillis())));

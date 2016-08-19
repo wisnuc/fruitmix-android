@@ -74,6 +74,9 @@ public class NewPhotoList implements NavPagerActivity.Page {
     @BindView(R.id.no_content_layout)
     LinearLayout mNoContentLayout;
 
+    @BindView(R.id.change_span_count)
+    ImageView mChangeSpanCount;
+
     private TextView mCurrentTimeTv;
 
     private int mSpanCount = 3;
@@ -109,11 +112,17 @@ public class NewPhotoList implements NavPagerActivity.Page {
     private int mFirstVisiableItem;
     private int mVisiableItemCount;
 
+    private Map<String, Map<String, String>> mMediaMap;
+    private Map<String, Map<String, String>> mLocalImagesMap;
+
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
         view = View.inflate(containerActivity, R.layout.new_photo_layout, null);
         ButterKnife.bind(this, view);
+
+        mMediaMap = new HashMap<>();
+        mLocalImagesMap = new HashMap<>();
 
         mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
@@ -160,7 +169,17 @@ public class NewPhotoList implements NavPagerActivity.Page {
             }
         });
 
-        refreshView();
+        mChangeSpanCount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                mSpanCount++;
+
+                calcPhotoLineNumber();
+                mPhotoListAdapter.notifyDataSetChanged();
+
+            }
+        });
     }
 
     public void addPhotoListListener(IPhotoListListener listListener) {
@@ -181,10 +200,9 @@ public class NewPhotoList implements NavPagerActivity.Page {
     public void refreshView() {
 
         if (!mSelectMode) {
-            LocalCache.LoadLocalData();
-
             mLoadingLayout.setVisibility(View.VISIBLE);
 
+            LocalCache.LoadLocalData();
             reloadData();
 
             mLoadingLayout.setVisibility(View.INVISIBLE);
@@ -230,8 +248,16 @@ public class NewPhotoList implements NavPagerActivity.Page {
         mPhotoGroupList.clear();
         mPhotoMap.clear();
 
+        mPhotoTitleLineNumberMap.clear();
+        mPhotoContentLineNumberMap.clear();
+
+        mMediaMap.clear();
+        mLocalImagesMap.clear();
+        mMediaMap.putAll(LocalCache.MediasMap);
+        mLocalImagesMap.putAll(LocalCache.LocalImagesMap);
+
         //load local images
-        for (Map<String, String> map : LocalCache.LocalImagesMap.values()) {
+        for (Map<String, String> map : mLocalImagesMap.values()) {
 
             if (map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) && map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("true")) {
                 continue;
@@ -259,7 +285,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         //load remote images
         //TO DO: concurrentexception
-        for (Map<String, String> map : LocalCache.MediasMap.values()) {
+        for (Map<String, String> map : mMediaMap.values()) {
 
             date = map.get("mtime").substring(0, 10);
             if (mPhotoMap.containsKey(date)) {
@@ -297,6 +323,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
         int titlePosition = 0;
         int photoListSize;
         int photoListLineSize;
+        mPhotoLineTotalCount = 0;
 
         for (String title : mPhotoGroupList) {
             mPhotoTitleLineNumberMap.put(titlePosition, title);
@@ -677,7 +704,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 }
             }
 
-            mPhotoGridLayout.setColumnCount(mPhotoList.size());
+            mPhotoGridLayout.setColumnCount(mSpanCount);
 
             for (int i = 0; i < mPhotoList.size(); i++) {
 
@@ -764,7 +791,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 int width = Integer.parseInt(photo.getWidth());
                 int height = Integer.parseInt(photo.getHeight());
 
-                int[] result = Util.formatPhotoWidthHeight(width,height);
+                int[] result = Util.formatPhotoWidthHeight(width, height);
 
                 String url = FNAS.Gateway + "/media/" + photo.getUuid() + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
@@ -778,8 +805,8 @@ public class NewPhotoList implements NavPagerActivity.Page {
             }
 
             GridLayout.LayoutParams params = (GridLayout.LayoutParams) view.getLayoutParams();
-            params.width = mScreenWidth / mSpanCount;
-            params.height = mScreenWidth / mSpanCount;
+            params.width = mScreenWidth / mSpanCount - dip2px(5);
+            params.height = mScreenWidth / mSpanCount - dip2px(5);
             params.setMargins(0, 0, dip2px(5), dip2px(5));
             view.setLayoutParams(params);
 

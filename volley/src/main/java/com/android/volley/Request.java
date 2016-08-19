@@ -280,7 +280,12 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Returns the cache key for this request.  By default, this is the URL.
      */
     public String getCacheKey() {
-        return getUrl();
+
+        String url = getUrl();
+        if(url.contains("&"))
+            url = url.substring(0,url.indexOf("&"));
+
+        return url;
     }
 
     /**

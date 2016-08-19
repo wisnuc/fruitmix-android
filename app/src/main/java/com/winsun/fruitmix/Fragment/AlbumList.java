@@ -78,6 +78,10 @@ public class AlbumList implements NavPagerActivity.Page {
 
     private ImageLoader mImageLoader;
 
+    private Map<String, Map<String, String>> mMediaMap;
+    private Map<String, Map<String, String>> mLocalImagesMap;
+    private Map<String, Map<String, String>> mDocumentMap;
+
     public AlbumList(NavPagerActivity activity_) {
 
         containerActivity = activity_;
@@ -97,6 +101,10 @@ public class AlbumList implements NavPagerActivity.Page {
         headers.put("Authorization", "JWT " + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
+
+        mMediaMap = new HashMap<>();
+        mLocalImagesMap = new HashMap<>();
+        mDocumentMap = new HashMap<>();
 
         mainListView = (ListView) view.findViewById(R.id.mainList);
         mainListView.setAdapter(new AlbumListViewAdapter(this));
@@ -137,16 +145,21 @@ public class AlbumList implements NavPagerActivity.Page {
     public void reloadList() {
         List<Map<String, Object>> albumList1;
         Map<String, Object> albumItem;
-        Map<String, String> albumRaw;
         String[] stArr;
         String coverImg;
-        Map<String, Map<String, String>> albumsMap;
 
-        albumList1 = new ArrayList<Map<String, Object>>();
+        mMediaMap.clear();
+        mLocalImagesMap.clear();
+        mDocumentMap.clear();
 
-        for (String key : LocalCache.DocumentsMap.keySet()) {
+        mMediaMap.putAll(LocalCache.MediasMap);
+        mLocalImagesMap.putAll(LocalCache.LocalImagesMap2);
+        mDocumentMap.putAll(LocalCache.DocumentsMap);
+
+        albumList1 = new ArrayList<>();
+
+        for (Map<String, String> albumRaw : mDocumentMap.values()) {
             albumItem = new HashMap<String, Object>();
-            albumRaw = LocalCache.DocumentsMap.get(key);
             if (albumRaw.get("type").equals("album") && albumRaw.get("del").equals("0")) {
                 albumItem.put("type", albumRaw.get("type"));
                 albumItem.put("title", albumRaw.get("title"));
@@ -155,7 +168,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 StringBuilder images = new StringBuilder("");
                 for (String image : albumRaw.get("images").split(",")) {
 
-                    if (LocalCache.MediasMap.containsKey(image) || LocalCache.LocalImagesMap2.containsKey(image)) {
+                    if (mMediaMap.containsKey(image) || mLocalImagesMap.containsKey(image)) {
                         images.append(image);
                         images.append(",");
                     } else {
@@ -318,10 +331,10 @@ public class AlbumList implements NavPagerActivity.Page {
             mainBar.setTranslationX(0.0f);
 
             //check image
-            coverImg = LocalCache.MediasMap.get(currentItem.get("coverImg"));
+            coverImg = mMediaMap.get(currentItem.get("coverImg"));
             if (coverImg != null) sLocal = false;
             else {
-                coverImg = LocalCache.LocalImagesMap2.get(currentItem.get("coverImg"));
+                coverImg = mLocalImagesMap.get(currentItem.get("coverImg"));
                 sLocal = true;
             }
 

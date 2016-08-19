@@ -40,7 +40,6 @@ public class AlbumPicChooseActivity extends Activity {
     List<Map<String, Object>> dateList;
     List<Map<String, Object>> imgList;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

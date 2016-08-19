@@ -56,7 +56,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     @BindView(R.id.add_album)
     ImageView mAddPhoto;
 
-    private int mSpanCount = 4;
+    private int mSpanCount = 3;
     private GridLayoutManager mManager;
     private Context mContext;
     private EditPhotoAdapter mAdapter;
@@ -72,12 +72,18 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
     private ProgressDialog mDialog;
 
+    private Map<String, Map<String, String>> mMediaMap;
+    private Map<String, Map<String, String>> mLocalImagesMap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_photo);
 
         ButterKnife.bind(this);
+
+        mMediaMap = new HashMap<>();
+        mLocalImagesMap = new HashMap<>();
 
         mImageLoader = new ImageLoader(RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue(), ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
@@ -117,18 +123,25 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     }
 
     private void fillPhotoList(String selectedUIDStr) {
+
+        mPhotoList.clear();
+
+        mMediaMap.clear();
+        mLocalImagesMap.clear();
+        mMediaMap.putAll(LocalCache.MediasMap);
+        mLocalImagesMap.putAll(LocalCache.LocalImagesMap2);
+
         if (!selectedUIDStr.equals("")) {
             String[] stArr = selectedUIDStr.split(",");
             Map<String, Object> picItem;
             Map<String, String> picItemRaw;
             for (int i = 0; i < stArr.length; i++) {
                 picItem = new HashMap<>();
-                picItemRaw = LocalCache.LocalImagesMap2.get(stArr[i]);
+                picItemRaw = mMediaMap.get(stArr[i]);
                 if (picItemRaw != null) {
-                    picItem.put("cacheType", "local");
+                    picItem.put("cacheType", "nas");
                     picItem.put("resID", "" + R.drawable.default_img);
-                    picItem.put("resHash", picItemRaw.get("resHash"));
-                    picItem.put("thumb", picItemRaw.get("thumb"));
+                    picItem.put("resHash", picItemRaw.get("uuid"));
                     picItem.put("width", picItemRaw.get("width"));
                     picItem.put("height", picItemRaw.get("height"));
                     picItem.put("uuid", picItemRaw.get("uuid"));
@@ -137,11 +150,11 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                     picItem.put("locked", "1");
                     mPhotoList.add(picItem);
                 } else {
-                    picItemRaw = LocalCache.MediasMap.get(stArr[i]);
+                    picItemRaw = mLocalImagesMap.get(stArr[i]);
                     if (picItemRaw != null) {
-                        picItem.put("cacheType", "nas");
+                        picItem.put("cacheType", "local");
                         picItem.put("resID", "" + R.drawable.default_img);
-                        picItem.put("resHash", picItemRaw.get("uuid"));
+                        picItem.put("thumb", picItemRaw.get("thumb"));
                         picItem.put("width", picItemRaw.get("width"));
                         picItem.put("height", picItemRaw.get("height"));
                         picItem.put("uuid", picItemRaw.get("uuid"));

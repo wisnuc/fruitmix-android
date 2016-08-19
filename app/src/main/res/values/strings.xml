@@ -236,6 +236,7 @@
     <string name="no_content">Sorry,No content!</string>
     <string name="operating_title">Operating</string>
     <string name="no_comment_content">Please write comment!</string>
+    <string name="check_more_photos">Check more photos</string>
 
     <!-- album menu-->
     <string name="setting_album">Setting Ablum</string>

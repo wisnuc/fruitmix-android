@@ -195,24 +195,36 @@
 
         </LinearLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/share_count_layout"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:orientation="horizontal"
             android:visibility="gone">
 
             <TextView
                 android:id="@+id/share_count_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_centerVertical="true"
                 android:layout_marginLeft="18dp"
                 android:gravity="center"
                 android:text="@string/share_comment_count"
                 android:textSize="14dp" />
 
-        </LinearLayout>
+            <TextView
+                android:id="@+id/check_more_photos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="18dp"
+                android:text="@string/check_more_photos"
+                android:textSize="14dp"
+                android:textColor="@color/light_black"
+                android:visibility="gone"/>
+
+
+        </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/share_comment_layout"

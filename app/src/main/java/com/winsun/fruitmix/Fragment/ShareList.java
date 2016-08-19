@@ -3,6 +3,7 @@ package com.winsun.fruitmix.Fragment;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
@@ -27,6 +28,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.AlbumPicContentActivity;
+import com.winsun.fruitmix.MorePhotoActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
@@ -80,6 +82,10 @@ public class ShareList implements NavPagerActivity.Page {
 
     private ImageLoader mImageLoader;
 
+    private Map<String, Map<String, String>> mMediaMap;
+    private Map<String, Map<String, String>> mLocalImagesMap;
+    private Map<String, Map<String, String>> mDocumentMap;
+
     public ShareList(NavPagerActivity activity_) {
         containerActivity = activity_;
 
@@ -92,6 +98,10 @@ public class ShareList implements NavPagerActivity.Page {
         headers.put("Authorization", "JWT " + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
+
+        mMediaMap = new HashMap<>();
+        mLocalImagesMap = new HashMap<>();
+        mDocumentMap = new HashMap<>();
 
         mainListView = (ListView) view.findViewById(R.id.mainList);
         mAdapter = new ShareListViewAdapter(this);
@@ -121,17 +131,19 @@ public class ShareList implements NavPagerActivity.Page {
     public void reloadList() {
         List<Map<String, Object>> shareList1;
         Map<String, Object> albumItem;
-        Map<String, String> albumRaw;
-        String[] stArr;
-        String coverImg;
-        Map<String, Map<String, String>> albumsMap;
-
         shareList1 = new ArrayList<Map<String, Object>>();
 
-        for (String key : LocalCache.DocumentsMap.keySet()) {
-            albumRaw = LocalCache.DocumentsMap.get(key);
-            if (albumRaw.get("del").equals("1")) continue;
+        mMediaMap.clear();
+        mLocalImagesMap.clear();
+        mDocumentMap.clear();
 
+        mMediaMap.putAll(LocalCache.MediasMap);
+        mLocalImagesMap.putAll(LocalCache.LocalImagesMap2);
+        mDocumentMap.putAll(LocalCache.DocumentsMap);
+
+        for (Map<String, String> albumRaw : mDocumentMap.values()) {
+
+            if (albumRaw.get("del").equals("1")) continue;
 
             String creator = albumRaw.get("creator");
 
@@ -162,7 +174,7 @@ public class ShareList implements NavPagerActivity.Page {
             StringBuilder images = new StringBuilder("");
             for (String image : albumRaw.get("images").split(",")) {
 
-                if (LocalCache.MediasMap.containsKey(image) || LocalCache.LocalImagesMap2.containsKey(image)) {
+                if (mMediaMap.containsKey(image) || mLocalImagesMap.containsKey(image)) {
                     images.append(image);
                     images.append(",");
                 } else {
@@ -254,7 +266,7 @@ public class ShareList implements NavPagerActivity.Page {
                         String[] images = map.get("images").toString().split(",");
                         if (images.length == 1) {
 
-                            Map<String, String> imageMap = LocalCache.MediasMap.get(images[0]);
+                            Map<String, String> imageMap = mMediaMap.get(images[0]);
 
                             if (imageMap != null && imageMap.containsKey("uuid")) {
                                 String uuid = imageMap.get("uuid");
@@ -354,7 +366,7 @@ public class ShareList implements NavPagerActivity.Page {
             String images[];
 
             //add by liang.wu
-            LinearLayout mShareCountLayout;
+            RelativeLayout mShareCountLayout;
             RelativeLayout mShareCommentLayout;
             TextView mShareCountTextView;
             TextView mShareCommentTextView;
@@ -378,7 +390,7 @@ public class ShareList implements NavPagerActivity.Page {
             lbAlbumShare = (ImageView) view.findViewById(R.id.album_share);
 
             //add by liang.wu
-            mShareCountLayout = (LinearLayout) view.findViewById(R.id.share_count_layout);
+            mShareCountLayout = (RelativeLayout) view.findViewById(R.id.share_count_layout);
             mShareCommentLayout = (RelativeLayout) view.findViewById(R.id.share_comment_layout);
             mAvator = (TextView) view.findViewById(R.id.avatar);
             mShareCommentCountTextView = (TextView) view.findViewById(R.id.share_comment_count_textview);
@@ -439,10 +451,10 @@ public class ShareList implements NavPagerActivity.Page {
                 Log.i(TAG, currentItem.get("images").toString());
                 lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.share_album_title), currentItem.get("title"), currentItem.get("imageCount")));
 
-                coverImg = LocalCache.MediasMap.get(currentItem.get("coverImg"));
+                coverImg = mMediaMap.get(currentItem.get("coverImg"));
                 if (coverImg != null) sLocal = false;
                 else {
-                    coverImg = LocalCache.LocalImagesMap2.get(currentItem.get("coverImg"));
+                    coverImg = mLocalImagesMap.get(currentItem.get("coverImg"));
                     sLocal = true;
                 }
                 if (coverImg != null) {
@@ -513,10 +525,10 @@ public class ShareList implements NavPagerActivity.Page {
                     mShareCountLayout.setVisibility(View.GONE);
 
                     Log.i(TAG, "images[0]:" + images[0]);
-                    itemImg = LocalCache.MediasMap.get(images[0]);
+                    itemImg = mMediaMap.get(images[0]);
                     if (itemImg != null) sLocal = false;
                     else {
-                        itemImg = LocalCache.LocalImagesMap2.get(images[0]);
+                        itemImg = mLocalImagesMap.get(images[0]);
                         sLocal = true;
                     }
 
@@ -603,6 +615,24 @@ public class ShareList implements NavPagerActivity.Page {
                         llPic2.setVisibility(View.VISIBLE);
                         llPic3.setVisibility(View.VISIBLE);
 
+                        TextView mCheckMorePhoto = (TextView) view.findViewById(R.id.check_more_photos);
+                        if (images.length > 9) {
+                            mCheckMorePhoto.setVisibility(View.VISIBLE);
+                            mCheckMorePhoto.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
+                            mCheckMorePhoto.getPaint().setAntiAlias(true);
+
+                            mCheckMorePhoto.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(containerActivity, MorePhotoActivity.class);
+                                    intent.putExtra("images", currentItem.get("images").toString());
+                                    containerActivity.startActivity(intent);
+                                }
+                            });
+                        } else {
+                            mCheckMorePhoto.setVisibility(View.GONE);
+                        }
+
                     }
 
                     mShareCommentLayout.setVisibility(View.GONE);
@@ -628,10 +658,10 @@ public class ShareList implements NavPagerActivity.Page {
                             continue;
                         }
                         ivItems[i].setVisibility(View.VISIBLE);
-                        itemImg = LocalCache.MediasMap.get(images[i]);
+                        itemImg = mMediaMap.get(images[i]);
                         if (itemImg != null) sLocal = false;
                         else {
-                            itemImg = LocalCache.LocalImagesMap2.get(images[i]);
+                            itemImg = mLocalImagesMap.get(images[i]);
                             sLocal = true;
                         }
                         //Log.d("winsun", "shareX "+position+" "+i+" "+itemImg);
@@ -742,12 +772,11 @@ public class ShareList implements NavPagerActivity.Page {
                 Log.i(TAG, "stArr[0]" + stArr[0]);
                 for (int i = 0; i < stArr.length; i++) {
                     picItem = new HashMap<String, Object>();
-                    picItemRaw = LocalCache.LocalImagesMap2.get(stArr[i]);
+                    picItemRaw = mMediaMap.get(stArr[i]);
                     if (picItemRaw != null) {
-                        picItem.put("cacheType", "local");
+                        picItem.put("cacheType", "nas");
                         picItem.put("resID", "" + R.drawable.default_img);
-                        picItem.put("resHash", picItemRaw.get("resHash"));
-                        picItem.put("thumb", picItemRaw.get("thumb"));
+                        picItem.put("resHash", picItemRaw.get("uuid"));
                         picItem.put("width", picItemRaw.get("width"));
                         picItem.put("height", picItemRaw.get("height"));
                         picItem.put("uuid", picItemRaw.get("uuid"));
@@ -756,11 +785,11 @@ public class ShareList implements NavPagerActivity.Page {
                         picItem.put("locked", "1");
                         picList.add(picItem);
                     } else {
-                        picItemRaw = LocalCache.MediasMap.get(stArr[i]);
+                        picItemRaw = mLocalImagesMap.get(stArr[i]);
                         if (picItemRaw != null) {
-                            picItem.put("cacheType", "nas");
+                            picItem.put("cacheType", "local");
                             picItem.put("resID", "" + R.drawable.default_img);
-                            picItem.put("resHash", picItemRaw.get("uuid"));
+                            picItem.put("thumb", picItemRaw.get("thumb"));
                             picItem.put("width", picItemRaw.get("width"));
                             picItem.put("height", picItemRaw.get("height"));
                             picItem.put("uuid", picItemRaw.get("uuid"));
@@ -881,7 +910,7 @@ public class ShareList implements NavPagerActivity.Page {
                     if (commentList == null) {
                         commentList = new ArrayList<>();
                         mCommentMap.put(params[0], commentList);
-                    }else {
+                    } else {
                         return true;
                     }
 

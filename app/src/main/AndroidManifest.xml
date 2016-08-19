@@ -127,6 +127,11 @@
         <service
             android:name=".services.LocalPhotoUploadService"
             android:exported="false" />
+
+        <activity
+            android:name=".MorePhotoActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 
 </manifest>

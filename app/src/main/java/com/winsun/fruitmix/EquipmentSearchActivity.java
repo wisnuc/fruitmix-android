@@ -265,6 +265,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         }
 
         public void refreshView(int groupPosition, boolean isExpanded) {
+            Equipment equipment = mAdapter.equipmentList.get(groupPosition);
+            if(equipment == null){
+                return;
+            }
             mGroupName.setText(mAdapter.equipmentList.get(groupPosition).getServiceName());
             mEquipmentIpTV.setText(mAdapter.equipmentList.get(groupPosition).getHost());
             if (isExpanded) {

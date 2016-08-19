@@ -87,7 +87,6 @@ public class ShareCommentActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Map<String, String> imageRaw;
-        Map<String, String> shareRaw;
 
         super.onCreate(savedInstanceState);
 
@@ -143,9 +142,11 @@ public class ShareCommentActivity extends Activity {
             imageData.put("resHash", imageRaw.get("uuid"));
         }
 
+        Map<String, Map<String, String>> documentMap = new HashMap<>();
+        documentMap.putAll(LocalCache.DocumentsMap);
 
-        for (String key : LocalCache.DocumentsMap.keySet()) {
-            shareRaw = LocalCache.DocumentsMap.get(key);
+        for (Map<String, String> shareRaw : documentMap.values()) {
+
             Log.d("winsun", "sss1 " + shareRaw);
             if (shareRaw.containsKey("images") && shareRaw.get("images").contains((String) imageData.get("uuid"))) {
                 Log.d("winsun", "ssss " + shareRaw.get("uuid"));

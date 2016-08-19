@@ -115,6 +115,7 @@ public class NavPagerActivity extends AppCompatActivity
         IntentFilter intentFilter = new IntentFilter(Util.LOCAL_SHARE_CHANGED);
         intentFilter.addAction(Util.LOCAL_COMMENT_CHANGED);
         intentFilter.addAction(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
+        intentFilter.addAction(Util.REMOTE_PHOTO_CHANGED);
         mManager.registerReceiver(mReceiver, intentFilter);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -383,6 +384,12 @@ public class NavPagerActivity extends AppCompatActivity
                 Log.i(TAG, "local photo upload state changed");
 
                 photoList.refreshView();
+                albumList.refreshView();
+                shareList.refreshView();
+
+            } else if (intent.getAction().equals(Util.REMOTE_PHOTO_CHANGED)) {
+                Log.i(TAG, "remote photo changed");
+                photoList.refreshView();
             }
         }
     }
@@ -608,6 +615,7 @@ public class NavPagerActivity extends AppCompatActivity
                     LocalCache.clearGatewayUuidPasswordToken(mContext);
                     LocalCache.CleanAll();
                     FNAS.restoreLocalPhotoUploadState();
+                    LocalCache.Init(NavPagerActivity.this);
 
                     return null;
                 }

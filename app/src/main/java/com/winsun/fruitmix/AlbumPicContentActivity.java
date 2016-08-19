@@ -82,6 +82,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private ProgressDialog mDialog;
 
+    private Map<String, Map<String, String>> mMediaMap;
+    private Map<String, Map<String, String>> mLocalImagesMap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -96,6 +99,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
 
+        mMediaMap = new HashMap<>();
+        mLocalImagesMap = new HashMap<>();
 
         imagesStr = getIntent().getStringExtra("images");
         mUuid = getIntent().getStringExtra("uuid");
@@ -146,6 +151,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         picList.clear();
 
+        mMediaMap.clear();
+        mLocalImagesMap.clear();
+        mMediaMap.putAll(LocalCache.MediasMap);
+        mLocalImagesMap.putAll(LocalCache.LocalImagesMap2);
+
         if (!imagesStr.equals("")) {
             stArr = imagesStr.split(",");
 
@@ -153,15 +163,14 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             for (int i = 0; i < stArr.length; i++) {
                 picItem = new HashMap<String, Object>();
-                picItemRaw = LocalCache.LocalImagesMap2.get(stArr[i]);
+                picItemRaw = mMediaMap.get(stArr[i]);
 
-                Log.i(TAG, "localimagemaps2 has it or not:" + (picItemRaw != null ? "true" : "false"));
+                Log.i(TAG, "media has it or not:" + (picItemRaw != null ? "true" : "false"));
 
                 if (picItemRaw != null) {
-                    picItem.put("cacheType", "local");
+                    picItem.put("cacheType", "nas");
                     picItem.put("resID", "" + R.drawable.default_img);
-                    picItem.put("resHash", picItemRaw.get("resHash"));
-                    picItem.put("thumb", picItemRaw.get("thumb"));
+                    picItem.put("resHash", picItemRaw.get("uuid"));
                     picItem.put("width", picItemRaw.get("width"));
                     picItem.put("height", picItemRaw.get("height"));
                     picItem.put("uuid", picItemRaw.get("uuid"));
@@ -170,14 +179,14 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     picItem.put("locked", "1");
                     picList.add(picItem);
                 } else {
-                    picItemRaw = LocalCache.MediasMap.get(stArr[i]);
+                    picItemRaw = mLocalImagesMap.get(stArr[i]);
 
-                    Log.i(TAG, "mediasmap has it or not:" + (picItemRaw != null ? "true" : "false"));
+                    Log.i(TAG, "localimagesMap2 has it or not:" + (picItemRaw != null ? "true" : "false"));
 
                     if (picItemRaw != null) {
-                        picItem.put("cacheType", "nas");
+                        picItem.put("cacheType", "local");
                         picItem.put("resID", "" + R.drawable.default_img);
-                        picItem.put("resHash", picItemRaw.get("uuid"));
+                        picItem.put("thumb", picItemRaw.get("thumb"));
                         picItem.put("width", picItemRaw.get("width"));
                         picItem.put("height", picItemRaw.get("height"));
                         picItem.put("uuid", picItemRaw.get("uuid"));
@@ -249,7 +258,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 int width = Integer.parseInt((String) currentItem.get("width"));
                 int height = Integer.parseInt((String) currentItem.get("height"));
 
-                int[] result = Util.formatPhotoWidthHeight(width,height);
+                int[] result = Util.formatPhotoWidthHeight(width, height);
 
                 String url = FNAS.Gateway + "/media/" + currentItem.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
@@ -527,7 +536,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 }
             }
 
-        }.execute();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
 }
