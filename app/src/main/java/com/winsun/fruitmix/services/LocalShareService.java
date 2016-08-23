@@ -55,7 +55,6 @@ public class LocalShareService extends IntentService {
         context.startService(intent);
     }
 
-
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
@@ -96,12 +95,21 @@ public class LocalShareService extends IntentService {
                 if (!FNAS.isPhotoInMediaMap(digest)) {
 
                     if (LocalCache.LocalImagesMap2.containsKey(digest)) {
-                        Map<String, String> map = LocalCache.LocalImagesMap2.get(digest);
+                        String thumb = LocalCache.LocalImagesMap2.get(digest).get("thumb");
+
+                        Map<String,String> map = LocalCache.LocalImagesMap.get(thumb);
+
+                        Log.i(TAG,"thumb:"+thumb+"hash:"+digest);
+
                         if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
-                            uploadFileResult = FNAS.UploadFile(map.get("thumb"));
+                            uploadFileResult = FNAS.UploadFile(thumb);
                             Log.i(TAG, "digest:" + digest + "uploadFileResult:" + uploadFileResult);
-                            if (!uploadFileResult)
+                            if (!uploadFileResult){
                                 break;
+                            }else {
+
+                            }
+
                         }
                     }
 

@@ -37,7 +37,6 @@ public class LocalCommentService extends IntentService {
     private Comment mComment;
     private LocalBroadcastManager mManager;
 
-
     public LocalCommentService() {
         super("LocalCommentService");
     }

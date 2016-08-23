@@ -159,6 +159,11 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
                     } else {
 
+                        if (!mUserUUid.equals(FNAS.userUUID)) {
+                            LocalCache.CleanAll();
+                            LocalCache.Init(LoginActivity.this);
+                        }
+
                         FNAS.Gateway = mGateway;
                         FNAS.userUUID = mUserUUid;
 
@@ -168,7 +173,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
                         Util.loginState = true;
 
-                        if (LocalCache.DeviceID == null) {
+                        if (LocalCache.DeviceID == null || LocalCache.DeviceID.equals("")) {
                             //SetGlobalData("deviceID", UUID.randomUUID().toString());
                             str = FNAS.PostRemoteCall("/library/", "");
                             LocalCache.DeviceID = str.replace("\"", "");

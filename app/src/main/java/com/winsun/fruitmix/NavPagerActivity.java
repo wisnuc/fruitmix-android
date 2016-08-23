@@ -47,6 +47,7 @@ import com.winsun.fruitmix.Fragment.PhotoList;
 import com.winsun.fruitmix.Fragment.ShareList;
 import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
+import com.winsun.fruitmix.services.LocalPhotoUploadService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -256,6 +257,10 @@ public class NavPagerActivity extends AppCompatActivity
 
             }
         }.execute();*/
+
+        if(viewPager.getCurrentItem() == 1){
+            onDidAppear(1);
+        }
 
     }
 
@@ -612,10 +617,9 @@ public class NavPagerActivity extends AppCompatActivity
                 @Override
                 protected Void doInBackground(Void... params) {
 
-                    LocalCache.clearGatewayUuidPasswordToken(mContext);
-                    LocalCache.CleanAll();
+                    LocalCache.clearToken(mContext);
                     FNAS.restoreLocalPhotoUploadState();
-                    LocalCache.Init(NavPagerActivity.this);
+                    LocalPhotoUploadService.stopActionUploadLocalPhoto();
 
                     return null;
                 }

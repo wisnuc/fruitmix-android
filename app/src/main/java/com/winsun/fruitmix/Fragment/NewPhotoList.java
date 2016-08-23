@@ -10,9 +10,12 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.util.DisplayMetrics;
+import android.util.FloatMath;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.BounceInterpolator;
@@ -74,12 +77,11 @@ public class NewPhotoList implements NavPagerActivity.Page {
     @BindView(R.id.no_content_layout)
     LinearLayout mNoContentLayout;
 
-    @BindView(R.id.change_span_count)
-    ImageView mChangeSpanCount;
-
     private TextView mCurrentTimeTv;
 
     private int mSpanCount = 3;
+    private int mSpanMaxCount = 6;
+    private int mSpanMinCount = 2;
 
     private PhotoListAdapter mPhotoListAdapter;
 
@@ -115,6 +117,10 @@ public class NewPhotoList implements NavPagerActivity.Page {
     private Map<String, Map<String, String>> mMediaMap;
     private Map<String, Map<String, String>> mLocalImagesMap;
 
+    //field for pinch
+    private float mOldSpacingDist = 0;
+    private ScaleGestureDetector mPinchScaleDetector;
+
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
@@ -141,15 +147,32 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         calcScreenWidth();
 
+        mPinchScaleDetector = new ScaleGestureDetector(containerActivity, new PinchScaleListener());
+
         mPhotoListAdapter = new PhotoListAdapter();
         mScrollListener = new NewPhotoListScrollListener();
         mListView.setOnScrollListener(mScrollListener);
+        mListView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                mPinchScaleDetector.onTouchEvent(event);
+
+                return false;
+            }
+        });
         mListView.setAdapter(mPhotoListAdapter);
 
         mListView.setOnPositionChangedListener(new ScrollbarPanelListView.OnPositionChangedListener() {
             @Override
             public void onPositionChanged(ScrollbarPanelListView listView, int position, View scrollBarPanel) {
+
                 mCurrentTimeTv = (TextView) scrollBarPanel;
+
+                if (!mIsFling) {
+                    mCurrentTimeTv.setVisibility(View.GONE);
+                    return;
+                }
 
                 String title;
 
@@ -169,17 +192,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
             }
         });
 
-        mChangeSpanCount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                mSpanCount++;
-
-                calcPhotoLineNumber();
-                mPhotoListAdapter.notifyDataSetChanged();
-
-            }
-        });
     }
 
     public void addPhotoListListener(IPhotoListListener listListener) {
@@ -199,32 +211,30 @@ public class NewPhotoList implements NavPagerActivity.Page {
     @Override
     public void refreshView() {
 
-        if (!mSelectMode) {
-            mLoadingLayout.setVisibility(View.VISIBLE);
+        mLoadingLayout.setVisibility(View.VISIBLE);
 
-            LocalCache.LoadLocalData();
-            reloadData();
+        LocalCache.LoadLocalData();
+        reloadData();
 
-            mLoadingLayout.setVisibility(View.INVISIBLE);
-            if (mPhotoGroupList.size() == 0) {
-                mNoContentLayout.setVisibility(View.VISIBLE);
-                mListView.setVisibility(View.INVISIBLE);
+        mLoadingLayout.setVisibility(View.INVISIBLE);
+        if (mPhotoGroupList.size() == 0) {
+            mNoContentLayout.setVisibility(View.VISIBLE);
+            mListView.setVisibility(View.INVISIBLE);
 
-                for (IPhotoListListener listener : mPhotoListListenerList)
-                    listener.onNoPhotoItem(true);
+            for (IPhotoListListener listener : mPhotoListListenerList)
+                listener.onNoPhotoItem(true);
 
-            } else {
-                mNoContentLayout.setVisibility(View.INVISIBLE);
-                mListView.setVisibility(View.VISIBLE);
-                ((BaseAdapter) (mListView.getAdapter())).notifyDataSetChanged();
+        } else {
+            mNoContentLayout.setVisibility(View.INVISIBLE);
+            mListView.setVisibility(View.VISIBLE);
+            ((BaseAdapter) (mListView.getAdapter())).notifyDataSetChanged();
 
-                for (IPhotoListListener listener : mPhotoListListenerList)
-                    listener.onNoPhotoItem(false);
-            }
-
-            clearSelectedPhoto();
-
+            for (IPhotoListListener listener : mPhotoListListenerList)
+                listener.onNoPhotoItem(false);
         }
+
+        clearSelectedPhoto();
+
 
     }
 
@@ -591,6 +601,12 @@ public class NewPhotoList implements NavPagerActivity.Page {
                     childHolder.refreshView(position);
                 }
 
+/*                convertView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        return false;
+                    }
+                });*/
 
             } else {
 
@@ -607,7 +623,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 }
 
             }
-
 
             return convertView;
         }
@@ -656,6 +671,13 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 mPhotoTitleSelectImg.setVisibility(View.GONE);
             }
 
+/*            mPhotoTitleLayout.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return false;
+                }
+            });*/
+
             mPhotoTitleLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -684,8 +706,8 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     class PhotoChildHolder {
 
-        @BindView(R.id.photo_gridlayout)
-        GridLayout mPhotoGridLayout;
+        @BindView(R.id.photo_linearlayout)
+        LinearLayout mPhotoLinearLayout;
 
         public PhotoChildHolder(View view) {
             ButterKnife.bind(this, view);
@@ -694,17 +716,25 @@ public class NewPhotoList implements NavPagerActivity.Page {
         public void refreshView(int position) {
             List<Photo> mPhotoList = mPhotoContentLineNumberMap.get(position);
 
-            int size = mPhotoList.size();
-            if (size < mSpanCount) {
-                for (int i = size; i < mSpanCount; i++) {
-                    View view = mPhotoGridLayout.getChildAt(i);
+            int childCount = mPhotoLinearLayout.getChildCount();
+            if (mSpanCount < childCount) {
+                for (int i = mSpanCount; i < childCount; i++) {
+                    View view = mPhotoLinearLayout.getChildAt(i);
                     if (view != null) {
-                        mPhotoGridLayout.removeView(view);
+                        mPhotoLinearLayout.removeView(view);
                     }
                 }
             }
 
-            mPhotoGridLayout.setColumnCount(mSpanCount);
+            int size = mPhotoList.size();
+            if (size < mSpanCount) {
+                for (int i = size; i < mSpanCount; i++) {
+                    View view = mPhotoLinearLayout.getChildAt(i);
+                    if (view != null) {
+                        mPhotoLinearLayout.removeView(view);
+                    }
+                }
+            }
 
             for (int i = 0; i < mPhotoList.size(); i++) {
 
@@ -712,10 +742,10 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                 PhotoHolder photoHolder;
 
-                if (mPhotoGridLayout.getChildAt(i) == null) {
+                if (mPhotoLinearLayout.getChildAt(i) == null) {
                     view = View.inflate(containerActivity, R.layout.new_photo_gridlayout_item, null);
 
-                    mPhotoGridLayout.addView(view);
+                    mPhotoLinearLayout.addView(view);
 
                     photoHolder = new PhotoHolder(view);
                     view.setTag(photoHolder);
@@ -724,7 +754,14 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                 } else {
 
-                    view = mPhotoGridLayout.getChildAt(i);
+                    view = mPhotoLinearLayout.getChildAt(i);
+
+/*                    view.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View v, MotionEvent event) {
+                            return false;
+                        }
+                    });*/
 
                     photoHolder = (PhotoHolder) view.getTag();
 
@@ -765,9 +802,12 @@ public class NewPhotoList implements NavPagerActivity.Page {
         @BindView(R.id.photo_select_img)
         ImageView mPhotoSelectedIv;
 
+        View view;
+
         public PhotoHolder(View view) {
 
             ButterKnife.bind(this, view);
+            this.view = view;
         }
 
         public void refreshView(final Photo photo, int position) {
@@ -804,7 +844,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 mPhotoIv.setImageUrl(null, mImageLoader);
             }
 
-            GridLayout.LayoutParams params = (GridLayout.LayoutParams) view.getLayoutParams();
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) view.getLayoutParams();
             params.width = mScreenWidth / mSpanCount - dip2px(5);
             params.height = mScreenWidth / mSpanCount - dip2px(5);
             params.setMargins(0, 0, dip2px(5), dip2px(5));
@@ -832,6 +872,15 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 mPhotoIv.setLayoutParams(photoParams);
                 mPhotoSelectedIv.setVisibility(View.INVISIBLE);
             }
+
+/*
+            mPhotoIv.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return false;
+                }
+            });
+*/
 
             mPhotoIv.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -944,4 +993,44 @@ public class NewPhotoList implements NavPagerActivity.Page {
             }
         }
     }
+
+    private class PinchScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+
+            mOldSpacingDist = detector.getCurrentSpan();
+
+            return super.onScaleBegin(detector);
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+
+            float newSpacingDist = detector.getCurrentSpan();
+
+            if (newSpacingDist > mOldSpacingDist + dip2px(2)) {
+
+                if (mSpanCount > mSpanMinCount) {
+                    mSpanCount--;
+                    calcPhotoLineNumber();
+                    mPhotoListAdapter.notifyDataSetChanged();
+                }
+
+                Log.i(TAG, "pinch more");
+
+            } else if (mOldSpacingDist > newSpacingDist + dip2px(2)) {
+
+                if (mSpanCount < mSpanMaxCount) {
+                    mSpanCount++;
+                    calcPhotoLineNumber();
+                    mPhotoListAdapter.notifyDataSetChanged();
+                }
+
+                Log.i(TAG, "pinch less");
+            }
+
+        }
+    }
+
 }

@@ -10,6 +10,8 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
+import java.util.Map;
+
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
@@ -27,12 +29,14 @@ public class LocalPhotoUploadService extends IntentService {
     private boolean isSave = false;
     private LocalBroadcastManager mManager;
 
+    private static boolean isStop = false;
+
     public LocalPhotoUploadService() {
         super("LocalPhotoUploadService");
     }
 
     /**
-     * Starts this service to perform action Foo with the given parameters. If
+     * Starts this service to perform action with the given parameters. If
      * the service is already performing a task this action will be queued.
      *
      * @see IntentService
@@ -42,6 +46,10 @@ public class LocalPhotoUploadService extends IntentService {
         Intent intent = new Intent(context, LocalPhotoUploadService.class);
         intent.setAction(ACTION_UPLOAD_LOCAL_PHOTO);
         context.startService(intent);
+    }
+
+    public static void stopActionUploadLocalPhoto() {
+        isStop = true;
     }
 
     @Override
@@ -63,7 +71,29 @@ public class LocalPhotoUploadService extends IntentService {
         mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());
 
         try {
-            uploadResult = FNAS.UploadAll();
+            if (!Util.getNetworkState(Util.APPLICATION_CONTEXT)) {
+                return;
+            }
+
+            boolean result;
+            uploadResult = false;
+            for (Map<String, String> map : LocalCache.LocalImagesMap.values()) {
+
+                if (isStop) {
+                    uploadResult = false;
+                    break;
+                }
+
+                if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
+                    result = FNAS.UploadFile(map.get("thumb"));
+                    map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, String.valueOf(result));
+
+                    Log.i(TAG, "upload file:" + map.get("thumb") + "result:" + result);
+                    if (result)
+                        uploadResult = result;
+                }
+            }
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -73,6 +103,8 @@ public class LocalPhotoUploadService extends IntentService {
             Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
             mManager.sendBroadcast(intent);
             isSave = true;
+
+            uploadResult = false;
         }
 
     }

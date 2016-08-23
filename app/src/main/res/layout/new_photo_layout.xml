@@ -18,14 +18,6 @@
         app:scrollBarPanel="@layout/scrollbarpanel_layout"
         android:animateLayoutChanges="true"/>
 
-    <ImageView
-        android:id="@+id/change_span_count"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="8dp"
-        android:src="@drawable/add_album"/>
-
     <LinearLayout
         android:id="@+id/loading_layout"
         android:layout_width="match_parent"

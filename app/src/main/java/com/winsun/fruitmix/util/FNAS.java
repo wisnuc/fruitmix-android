@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -38,6 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by Administrator on 2016/4/22.
@@ -52,18 +54,30 @@ public class FNAS {
     public static String JWT = null;
     public static String userUUID = null;
 
-    public static String ReadFull(InputStream ins) throws IOException {
-        BufferedReader br;
-        String result, line;
+    public static String ReadFull(InputStream ins) {
+        String result = "";
+        int length;
+        byte[] buffer = new byte[1024];
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        br = new BufferedReader(new InputStreamReader(ins));
-        result = "";
-        while ((line = br.readLine()) != null) {
-            Log.d("winsun", "aaa " + line);
-            result += line;
+        try {
+            while ((length = ins.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, length);
+            }
+            result = new String(outputStream.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+
+            try {
+                ins.close();
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
 
-        Log.d("winsun", result);
         return result;
     }
 
@@ -170,6 +184,9 @@ public class FNAS {
 
         try {
             str = FNAS.RemoteCall("/media"); // get all pictures;
+
+            Log.i(TAG, "media json:" + str);
+
             json = new JSONArray(str);
 
             if (json.length() != 0) {
@@ -296,15 +313,18 @@ public class FNAS {
 
     public static String RemoteCall(String req) throws Exception {
         HttpURLConnection conn;
-        String str;
+        String str = "";
 
         while (JWT == null) Thread.sleep(500);
 
         conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
         conn.setRequestProperty("Authorization", "JWT " + JWT);
+        conn.setUseCaches(false);
         conn.setConnectTimeout(15 * 1000);
-        Log.d("winsun", "NAS GET: " + (Gateway + req));
-        str = FNAS.ReadFull(conn.getInputStream());
+        Log.d(TAG, "NAS GET: " + (Gateway + req));
+        if (conn.getResponseCode() == 200) {
+            str = FNAS.ReadFull(conn.getInputStream());
+        }
 
         return str;
     }
@@ -495,7 +515,7 @@ public class FNAS {
     }
 
     public static boolean UploadFile(String fname) {
-        HashMap<String, Map<String, String>> localHashMap;
+        ConcurrentMap<String, Map<String, String>> localHashMap;
         Map<String, String> localHashObj;
         String hash, url, boundary;
         BufferedOutputStream outStream;
@@ -515,9 +535,11 @@ public class FNAS {
             }
             hash = localHashMap.get(fname).get("digest");
 
+            Log.i(TAG, "thumb:" + fname + "hash:" + hash);
+
             // head
             url = Gateway + "/library/" + LocalCache.DeviceID + "?hash=" + hash;
-            Log.d("winsun", "UP: " + url);
+            Log.d(TAG, "Photo UP: " + url);
             boundary = java.util.UUID.randomUUID().toString();
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setReadTimeout(60 * 1000);
@@ -553,7 +575,7 @@ public class FNAS {
             outStream.flush();
 
             resCode = conn.getResponseCode();
-            Log.d("winsun", "UP END1: " + resCode);
+            Log.d(TAG, "UP END1: " + resCode);
             if (resCode == 200) return true;
             if (resCode == 404) {
                 LocalCache.DropGlobalData("deviceID");

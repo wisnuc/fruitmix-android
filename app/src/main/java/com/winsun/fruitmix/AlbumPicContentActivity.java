@@ -85,6 +85,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     private Map<String, Map<String, String>> mMediaMap;
     private Map<String, Map<String, String>> mLocalImagesMap;
 
+    private boolean isOperated = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -141,6 +143,14 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         picList = new ArrayList<Map<String, Object>>();
         fillPicList(imagesStr);
         ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isOperated)
+            setResult(200);
+
+        super.onBackPressed();
     }
 
     private void fillPicList(String imagesStr) {
@@ -372,8 +382,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         } else if (requestCode == 102 && resultCode == RESULT_OK) {
             mTitle = data.getStringExtra(Util.UPDATED_ALBUM_TITLE);
             mTitleTextView.setText(mTitle);
-
         }
+
+        isOperated = true;
     }
 
     private void deleteCurrentAblum() {
@@ -444,11 +455,17 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                 mDialog.dismiss();
 
+                if (sSuccess) {
+                    setResult(200);
+                } else {
+                    Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+                }
+
                 finish();
 
             }
 
-        }.execute();
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 
     }
@@ -529,6 +546,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     } else {
                         mPrivatePublicMenu.setTitle(getString(R.string.set_private));
                     }
+
+                    isOperated = true;
 
                 } else {
                     Toast.makeText(mContext, getString(R.string.setting_fail), Toast.LENGTH_SHORT).show();

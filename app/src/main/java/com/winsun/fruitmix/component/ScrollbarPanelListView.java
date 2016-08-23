@@ -1,12 +1,12 @@
 /**
  * Copyright rno
- * <p>
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -36,6 +37,8 @@ import android.widget.ListView;
 import com.winsun.fruitmix.R;
 
 public class ScrollbarPanelListView extends ListView implements OnScrollListener {
+
+    public static final String TAG = ScrollbarPanelListView.class.getSimpleName();
 
     public interface OnPositionChangedListener {
 
@@ -160,18 +163,18 @@ public class ScrollbarPanelListView extends ListView implements OnScrollListener
                     if (childView != null) {
                         if (thumbOffset > childView.getTop() && thumbOffset < childView.getBottom()) {
                             /*
-							 * we have our candidate
+                             * we have our candidate
 							 */
                             if (mLastPosition != firstVisibleItem + i) {
                                 mLastPosition = firstVisibleItem + i;
-								
+
 								/*
-								 * inform the position of the panel has changed
+                                 * inform the position of the panel has changed
 								 */
                                 mPositionChangedListener.onPositionChanged(this, mLastPosition, mScrollBarPanel);
-								
+
 								/*
-								 * measure panel right now since it has just changed
+                                 * measure panel right now since it has just changed
 								 * 
 								 * INFO: quick hack to handle TextView has ScrollBarPanel (to wrap text in
 								 * case TextView's content has changed)
@@ -278,4 +281,13 @@ public class ScrollbarPanelListView extends ListView implements OnScrollListener
         mHandler.removeCallbacks(mScrollBarPanelFadeRunnable);
     }
 
+ /*   @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+
+        if (ev.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
+            return true;
+        }
+
+        return super.onInterceptTouchEvent(ev);
+    }*/
 }

@@ -82,6 +82,8 @@ public class AlbumList implements NavPagerActivity.Page {
     private Map<String, Map<String, String>> mLocalImagesMap;
     private Map<String, Map<String, String>> mDocumentMap;
 
+    private final int REQUEST_CODE = 101;
+
     public AlbumList(NavPagerActivity activity_) {
 
         containerActivity = activity_;
@@ -658,7 +660,7 @@ public class AlbumList implements NavPagerActivity.Page {
                                 intent.putExtra("maintained", (boolean) currentItem.get("maintained"));
                                 intent.putExtra("private", (String) currentItem.get("private"));
                                 intent.putExtra("local", currentItem.containsKey("local"));
-                                containerActivity.startActivity(intent);
+                                containerActivity.startActivityForResult(intent,REQUEST_CODE);
 
                             }
                         case MotionEvent.ACTION_CANCEL:

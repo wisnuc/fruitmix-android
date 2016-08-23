@@ -131,13 +131,13 @@ public class SplashScreenActivity extends Activity {
 
                         Util.loginState = true;
 
-                        if (LocalCache.DeviceID == null) {
+                        if (LocalCache.DeviceID == null || LocalCache.DeviceID.equals("")) {
                             //SetGlobalData("deviceID", UUID.randomUUID().toString());
                             str = FNAS.PostRemoteCall("/library/", "");
                             LocalCache.DeviceID = str.replace("\"", "");
                             LocalCache.SetGlobalData("deviceID", LocalCache.DeviceID);
                         } // get deviceID
-                        Log.d("uuid", LocalCache.GetGlobalData("deviceID"));
+                        Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData("deviceID"));
 
 //                        FNAS.checkOfflineTask(mContext);
 

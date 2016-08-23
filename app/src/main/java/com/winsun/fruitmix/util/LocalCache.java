@@ -45,6 +45,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by Administrator on 2016/4/22.
@@ -60,21 +62,18 @@ public class LocalCache {
     static ImageView HotIV = null;
     static Map<String, Object> HotImage = null;
 
-    public static Map<String, Map<String, String>> DocumentsMap = null;
-    public static Map<String, Map<String, String>> AlbumsMap = null;
-    public static Map<String, Map<String, String>> PhotoLinksMap = null;
-    public static Map<String, Map<String, String>> UsersMap = null;
-    public static Map<String, Map<String, String>> MediasMap = null;
-    public static Map<String, Map<String, String>> LocalImagesMap = null; // 本地图片缓存(thumb为key)
-    public static Map<String, Map<String, String>> LocalImagesMap2 = null;// 本地图片缓存副本（uuid为key）
+    public static ConcurrentMap<String, Map<String, String>> DocumentsMap = null;
+    public static ConcurrentMap<String, Map<String, String>> AlbumsMap = null;
+    public static ConcurrentMap<String, Map<String, String>> PhotoLinksMap = null;
+    public static ConcurrentMap<String, Map<String, String>> UsersMap = null;
+    public static ConcurrentMap<String, Map<String, String>> MediasMap = null;
+    public static ConcurrentMap<String, Map<String, String>> LocalImagesMap = null; // 本地图片缓存(thumb为key)
+    public static ConcurrentMap<String, Map<String, String>> LocalImagesMap2 = null;// 本地图片缓存副本（uuid为key）
 
     public static String DeviceID = null;
 
 //    public static Map<String, Map<String, String>> Images=null;
 //    public static Map<String, Map<String, String>> Shares=null;
-
-    //add by liang.wu
-    public static Map<String, List<Comment>> LocalCommentMap = null;//本地评论缓存
 
     public static Map<String, Object> TransActivityContainer;
 
@@ -140,7 +139,7 @@ public class LocalCache {
     public static void BuildLocalImagesMaps2() {
         Map<String, String> itemRaw;
 
-        LocalCache.LocalImagesMap2 = new HashMap<String, Map<String, String>>();
+        LocalCache.LocalImagesMap2 = new ConcurrentHashMap<>();
         for (String key : LocalCache.LocalImagesMap.keySet()) {
             itemRaw = LocalCache.LocalImagesMap.get(key);
             LocalCache.LocalImagesMap2.put(itemRaw.get("uuid"), itemRaw);
@@ -226,15 +225,19 @@ public class LocalCache {
 
         for (i = 0; i < localPhotoList.size(); i++) {
             itemRaw = localPhotoList.get(i);
-            if (LocalCache.LocalImagesMap.containsKey(itemRaw.get("thumb"))) continue;
+            if (LocalImagesMap.containsKey(itemRaw.get("thumb"))) continue;
+
+            String uuid = Util.CalcSHA256OfFile(itemRaw.get("thumb"));
 
             item = new HashMap<String, String>();
             item.put("thumb", itemRaw.get("thumb"));
             item.put("width", itemRaw.get("width"));
             item.put("height", itemRaw.get("height"));
             item.put("mtime", itemRaw.get("lastModified"));
-            item.put("uuid", Util.CalcSHA256OfFile(itemRaw.get("thumb")));
-            LocalCache.LocalImagesMap.put(itemRaw.get("thumb"), item);
+            item.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS,"false");
+            item.put("uuid", uuid);
+            LocalImagesMap.put(itemRaw.get("thumb"), item);
+            LocalImagesMap2.put(uuid, item);
         }
 
         LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
@@ -681,7 +684,7 @@ public class LocalCache {
     public static String GetGlobalData(String name) {
         SharedPreferences sp;
         sp = CurrentApp.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
-        return sp.getString(name, "");
+        return sp.getString(name, null);
     }
 
     public static void SetGlobalData(String name, String data) {
@@ -700,25 +703,25 @@ public class LocalCache {
 
         sp = CurrentApp.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
         mEditor = sp.edit();
-        mEditor.putString(name, "");
+        mEditor.putString(name, null);
         mEditor.commit();
     }
 
-    public static HashMap<String, Map<String, String>> GetGlobalHashMap(String name) {
+    public static ConcurrentMap<String, Map<String, String>> GetGlobalHashMap(String name) {
         String strData;
         ObjectInputStream ois;
-        HashMap<String, Map<String, String>> dataList;
+        ConcurrentHashMap<String, Map<String, String>> dataList;
 
         try {
             strData = GetGlobalData(name);
-            if (strData.equals("")) return new HashMap<String, Map<String, String>>();
+            if (strData.equals("")) return new ConcurrentHashMap<>();
             ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decode(strData, Base64.DEFAULT)));
-            dataList = (HashMap<String, Map<String, String>>) ois.readObject();
+            dataList = (ConcurrentHashMap<String, Map<String, String>>) ois.readObject();
             ois.close();
             return dataList;
         } catch (Exception e) {
             e.printStackTrace();
-            return new HashMap<String, Map<String, String>>();
+            return new ConcurrentHashMap<>();
         }
     }
 
@@ -749,6 +752,16 @@ public class LocalCache {
         editor.putString(Util.JWT, null);
         editor.apply();
     }
+
+    public static void clearToken(Context context) {
+        SharedPreferences sp;
+        SharedPreferences.Editor editor;
+        sp = context.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        editor = sp.edit();
+        editor.putString(Util.JWT, null);
+        editor.apply();
+    }
+
 
     public static void saveGateway(String gateway, Context context) {
         SharedPreferences sp;
