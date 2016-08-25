@@ -593,7 +593,7 @@ public class FNAS {
             outStream.close();
             conn.disconnect();
 
-            Log.d("winsun", "UP END: " + resCode + " " + data);
+            Log.d(TAG, "UP END: " + resCode + " " + data);
 
         } catch (Exception e) {
             e.printStackTrace();

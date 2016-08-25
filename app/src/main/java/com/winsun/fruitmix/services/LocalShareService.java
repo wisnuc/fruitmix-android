@@ -60,12 +60,7 @@ public class LocalShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_LOCAL_SHARE_TASK.equals(action)) {
-                try {
-                    handleActionLocalShareTask();
-
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+                handleActionLocalShareTask();
             }
         }
     }
@@ -74,7 +69,7 @@ public class LocalShareService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionLocalShareTask() throws Exception {
+    private void handleActionLocalShareTask() {
         // TODO: Handle action Foo
         mDbUtils = DBUtils.SINGLE_INSTANCE;
         mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());
@@ -91,34 +86,43 @@ public class LocalShareService extends IntentService {
 
             boolean uploadFileResult = true;
             String[] digests = mShare.getDigest().split(",");
+            int uploadSucceedCount = digests.length;
+
             for (String digest : digests) {
                 if (!FNAS.isPhotoInMediaMap(digest)) {
 
                     if (LocalCache.LocalImagesMap2.containsKey(digest)) {
                         String thumb = LocalCache.LocalImagesMap2.get(digest).get("thumb");
 
-                        Map<String,String> map = LocalCache.LocalImagesMap.get(thumb);
+                        Map<String, String> map = LocalCache.LocalImagesMap.get(thumb);
 
-                        Log.i(TAG,"thumb:"+thumb+"hash:"+digest);
+                        Log.i(TAG, "thumb:" + thumb + "hash:" + digest);
 
                         if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
                             uploadFileResult = FNAS.UploadFile(thumb);
+
+                            map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, String.valueOf(uploadFileResult));
                             Log.i(TAG, "digest:" + digest + "uploadFileResult:" + uploadFileResult);
-                            if (!uploadFileResult){
+
+                            if(!uploadFileResult){
                                 break;
-                            }else {
-
                             }
-
                         }
                     }
 
                 }
             }
 
-            // if upload fail,skip this album
-            if (!uploadFileResult)
+            if (uploadSucceedCount > 0){
+                LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
+                Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
+                mManager.sendBroadcast(intent);
+            }
+
+            // if upload fail,skip this album,otherwise save upload state
+            if (!uploadFileResult){
                 continue;
+            }
 
             String data, viewers, maintainers;
             int i;
@@ -175,9 +179,9 @@ public class LocalShareService extends IntentService {
                 String str = FNAS.PostRemoteCall("/mediashare", data);
                 if (str != null) {
                     iterator.remove();
-                    long result = mDbUtils.deleteLocalShare(mShare.getId());
+                    long deleteResult = mDbUtils.deleteLocalShare(mShare.getId());
                     LocalCache.DocumentsMap.remove(mShare.getUuid());
-                    Log.i(TAG, "deleteLocalShare:" + mShare.getId() + "result:" + result);
+                    Log.i(TAG, "deleteLocalShare:" + mShare.getId() + "result:" + deleteResult);
                 }
 
             } catch (Exception ex) {

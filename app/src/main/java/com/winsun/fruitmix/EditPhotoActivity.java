@@ -228,7 +228,11 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                                             if (!FNAS.isPhotoInMediaMap(string)) {
 
                                                 if (LocalCache.LocalImagesMap2.containsKey(string)) {
-                                                    Map<String, String> map = LocalCache.LocalImagesMap2.get(string);
+                                                    String thumb = LocalCache.LocalImagesMap2.get(string).get("thumb");
+
+                                                    Map<String,String> map = LocalCache.LocalImagesMap.get(thumb);
+
+                                                    Log.i(TAG,"thumb:"+thumb+"hash:"+string);
                                                     if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
                                                         uploadFileResult = FNAS.UploadFile(map.get("thumb"));
                                                         Log.i(TAG, "digest:" + string + "uploadFileResult:" + uploadFileResult);

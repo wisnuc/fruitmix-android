@@ -166,12 +166,7 @@ public class ShareCommentActivity extends Activity {
             ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
             ivMain.setImageUrl(url, mImageLoader);
         } else {
-            int width = Integer.parseInt((String) imageData.get("width"));
-            int height = Integer.parseInt((String) imageData.get("height"));
-
-            int[] result = Util.formatPhotoWidthHeight(width, height);
-
-            String url = FNAS.Gateway + "/media/" + imageData.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
+            String url = FNAS.Gateway + "/media/" + imageData.get("resHash") + "?type=original";
 
             mImageLoader.setShouldCache(true);
             ivMain.setTag(url);

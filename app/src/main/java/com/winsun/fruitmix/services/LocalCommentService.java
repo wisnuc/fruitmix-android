@@ -88,14 +88,26 @@ public class LocalCommentService extends IntentService {
             Map.Entry<String, List<Comment>> entry = iterator.next();
             String image = entry.getKey();
 
+
             if (!FNAS.isPhotoInMediaMap(image)) {
 
                 if (LocalCache.LocalImagesMap2.containsKey(image)) {
-                    Map<String, String> map = LocalCache.LocalImagesMap2.get(image);
+                    String thumb = LocalCache.LocalImagesMap2.get(image).get("thumb");
+
+                    Map<String, String> map = LocalCache.LocalImagesMap.get(thumb);
+
+                    Log.i(TAG, "thumb:" + thumb + "hash:" + image);
                     if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
                         // if upload fail,skip this album
-                        if (!FNAS.UploadFile(map.get("thumb")))
+                        if (!FNAS.UploadFile(map.get("thumb"))) {
                             continue;
+                        } else {
+                            map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, "true");
+                            LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
+                            Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
+                            mManager.sendBroadcast(intent);
+                        }
+
                     }
                 }
             }
@@ -110,7 +122,7 @@ public class LocalCommentService extends IntentService {
 
                 try {
                     String str = FNAS.PostRemoteCall(request, data);
-                    if(str != null ){
+                    if (str != null) {
                         listIterator.remove();
                         mDbUtils.deleteLocalComment(mComment.getId());
                     }

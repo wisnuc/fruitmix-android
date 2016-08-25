@@ -70,32 +70,28 @@ public class LocalPhotoUploadService extends IntentService {
         // TODO: Handle action upload local photo
         mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());
 
-        try {
-            if (!Util.getNetworkState(Util.APPLICATION_CONTEXT)) {
-                return;
+        if (!Util.getNetworkState(Util.APPLICATION_CONTEXT)) {
+            return;
+        }
+
+        boolean result;
+        uploadResult = false;
+        for (Map<String, String> map : LocalCache.LocalImagesMap.values()) {
+
+            if (isStop) {
+                uploadResult = false;
+                isStop = false;
+                break;
             }
 
-            boolean result;
-            uploadResult = false;
-            for (Map<String, String> map : LocalCache.LocalImagesMap.values()) {
+            if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
+                result = FNAS.UploadFile(map.get("thumb"));
+                map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, String.valueOf(result));
 
-                if (isStop) {
-                    uploadResult = false;
-                    break;
-                }
-
-                if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
-                    result = FNAS.UploadFile(map.get("thumb"));
-                    map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, String.valueOf(result));
-
-                    Log.i(TAG, "upload file:" + map.get("thumb") + "result:" + result);
-                    if (result)
-                        uploadResult = result;
-                }
+                Log.i(TAG, "upload file:" + map.get("thumb") + "result:" + result);
+                if (result)
+                    uploadResult = result;
             }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
 
         if (uploadResult) {

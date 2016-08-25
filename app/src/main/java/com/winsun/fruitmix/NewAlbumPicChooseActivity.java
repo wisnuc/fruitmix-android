@@ -16,8 +16,10 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.winsun.fruitmix.Fragment.NewPhotoList;
+import com.winsun.fruitmix.Fragment.NewPhotoList2;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -44,7 +46,9 @@ public class NewAlbumPicChooseActivity extends Activity {
     @BindView(R.id.main_framelayout)
     FrameLayout mMainFrameLayout;
 
-    private NewPhotoList mNewPhotoList;
+    private NewPhotoList2 mNewPhotoList;
+
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +58,9 @@ public class NewAlbumPicChooseActivity extends Activity {
 
         ButterKnife.bind(this);
 
-        mNewPhotoList = new NewPhotoList(this);
+        mContext = this;
+
+        mNewPhotoList = new NewPhotoList2(this);
 
         mMainFrameLayout.addView(mNewPhotoList.getView());
         mNewPhotoList.setSelectMode(true);
@@ -73,18 +79,24 @@ public class NewAlbumPicChooseActivity extends Activity {
             @Override
             public void onClick(View v) {
 
+                String selectUIDString = getSelectedUIDString();
+                if (selectUIDString.equals("")) {
+                    Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 Intent intent = getIntent();
 
                 if (intent.getBooleanExtra(Util.EDIT_PHOTO, false)) {
 
-                    getIntent().putExtra("selectedUIDStr", getSelectedUIDString());
+                    getIntent().putExtra("selectedUIDStr", selectUIDString);
                     setResult(RESULT_OK, intent);
                     finish();
 
                 } else {
                     intent = new Intent();
                     intent.setClass(NewAlbumPicChooseActivity.this, CreateAlbumActivity.class);
-                    intent.putExtra("selectedUIDStr", getSelectedUIDString());
+                    intent.putExtra("selectedUIDStr", selectUIDString);
                     startActivityForResult(intent, 100);
                 }
 

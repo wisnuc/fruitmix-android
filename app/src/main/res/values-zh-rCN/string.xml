@@ -72,6 +72,7 @@
     <string name="select_count">已选%1$d张</string>
     <string name="no_content">对不起,无内容!</string>
     <string name="operating_title">正在执行…</string>
+    <string name="select_nothing">未选择内容，请进行选择</string>
     <string name="no_comment_content">请填写内容</string>
     <string name="check_more_photos">查看更多照片</string>
 

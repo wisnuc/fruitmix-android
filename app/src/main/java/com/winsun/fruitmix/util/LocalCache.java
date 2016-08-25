@@ -177,7 +177,7 @@ public class LocalCache {
         DocumentsMap = LocalCache.GetGlobalHashMap("documentsMap");
         UsersMap = LocalCache.GetGlobalHashMap("usersMap");
         AlbumsMap = LocalCache.GetGlobalHashMap("albumsMap");
-        PhotoLinksMap = LocalCache.GetGlobalHashMap("photolinksMap");
+//        PhotoLinksMap = LocalCache.GetGlobalHashMap("photolinksMap");
         MediasMap = LocalCache.GetGlobalHashMap("mediasMap");
         LocalImagesMap = LocalCache.GetGlobalHashMap("localImagesMap");
         BuildLocalImagesMaps2();

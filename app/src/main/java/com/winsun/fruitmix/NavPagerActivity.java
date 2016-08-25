@@ -40,9 +40,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.winsun.fruitmix.Fragment.AlbumList;
 import com.winsun.fruitmix.Fragment.NewPhotoList;
+import com.winsun.fruitmix.Fragment.NewPhotoList2;
 import com.winsun.fruitmix.Fragment.PhotoList;
 import com.winsun.fruitmix.Fragment.ShareList;
 import com.winsun.fruitmix.component.NavPageBar;
@@ -78,7 +80,7 @@ public class NavPagerActivity extends AppCompatActivity
 
     public List<Page> pageList;
     AlbumList albumList;
-    NewPhotoList photoList;
+    NewPhotoList2 photoList;
     ShareList shareList;
 
     public boolean sInChooseMode = false;
@@ -177,7 +179,7 @@ public class NavPagerActivity extends AppCompatActivity
 
 
         shareList = new ShareList(this);
-        photoList = new NewPhotoList(this);
+        photoList = new NewPhotoList2(this);
         albumList = new AlbumList(this);
         pageList = new ArrayList<Page>();
         pageList.add(shareList);
@@ -213,7 +215,14 @@ public class NavPagerActivity extends AppCompatActivity
         ivBtAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                photoList.createAlbum();
+
+                String selectUIDString = photoList.getSelectedUIDString();
+                if (selectUIDString.equals("")) {
+                    Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                photoList.createAlbum(selectUIDString);
                 hideChooseHeader();
             }
         });
@@ -221,7 +230,14 @@ public class NavPagerActivity extends AppCompatActivity
         ivBtShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                photoList.createShare();
+
+                String selectUIDString = photoList.getSelectedUIDString();
+                if (selectUIDString.equals("")) {
+                    Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                photoList.createShare(selectUIDString);
             }
         });
 
@@ -258,7 +274,7 @@ public class NavPagerActivity extends AppCompatActivity
             }
         }.execute();*/
 
-        if(viewPager.getCurrentItem() == 1){
+        if (viewPager.getCurrentItem() == 1) {
             onDidAppear(1);
         }
 

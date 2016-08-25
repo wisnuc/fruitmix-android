@@ -208,17 +208,17 @@ public class Util {
 
     public static int[] formatPhotoWidthHeight(int width, int height) {
         if (width >= height) {
-            width = width * 100 / height;
-            height = 100;
+            width = width * 200 / height;
+            height = 200;
         } else {
-            height = height * 100 / width;
-            width = 100;
+            height = height * 200 / width;
+            width = 200;
         }
 
         if (width / height > 2)
-            width = 100;
+            width = 200;
         else if (height / width > 2)
-            height = 100;
+            height = 200;
 
         return new int[]{width, height};
     }
