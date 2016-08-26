@@ -3,7 +3,6 @@ package com.winsun.fruitmix;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,16 +12,11 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -34,8 +28,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.animation.BounceInterpolator;
-import android.widget.GridLayout;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -43,9 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.Fragment.AlbumList;
-import com.winsun.fruitmix.Fragment.NewPhotoList;
 import com.winsun.fruitmix.Fragment.NewPhotoList2;
-import com.winsun.fruitmix.Fragment.PhotoList;
 import com.winsun.fruitmix.Fragment.ShareList;
 import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
@@ -57,7 +47,6 @@ import com.winsun.fruitmix.util.Util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -105,6 +94,10 @@ public class NavPagerActivity extends AppCompatActivity
     private Context mContext;
 
     private ProgressDialog mDialog;
+
+    private static final int PAGE_SHARE = 0;
+    private static final int PAGE_PHOTO = 1;
+    private static final int PAGE_ALBUM = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -238,6 +231,7 @@ public class NavPagerActivity extends AppCompatActivity
                 }
 
                 photoList.createShare(selectUIDString);
+
             }
         });
 
@@ -390,36 +384,48 @@ public class NavPagerActivity extends AppCompatActivity
     private class CustomBroadReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+
+            int currentItem = viewPager.getCurrentItem();
+
             if (intent.getAction().equals(Util.LOCAL_SHARE_CHANGED)) {
 
                 Log.i(TAG, "local share changed");
 
-                albumList.refreshView();
-                shareList.refreshView();
+                if (currentItem != PAGE_PHOTO) {
+                    pageList.get(currentItem).refreshView();
+                }
+
             } else if (intent.getAction().equals(Util.LOCAL_COMMENT_CHANGED)) {
 
                 Log.i(TAG, "local comment changed");
 
-                shareList.refreshView();
+                if (currentItem == PAGE_SHARE) {
+                    pageList.get(currentItem).refreshView();
+                }
+
             } else if (intent.getAction().equals(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED)) {
                 Log.i(TAG, "local photo upload state changed");
 
-                photoList.refreshView();
-                albumList.refreshView();
-                shareList.refreshView();
+                pageList.get(currentItem).refreshView();
 
             } else if (intent.getAction().equals(Util.REMOTE_PHOTO_CHANGED)) {
                 Log.i(TAG, "remote photo changed");
-                photoList.refreshView();
+                if (currentItem == PAGE_PHOTO) {
+                    pageList.get(currentItem).refreshView();
+                }
             }
         }
     }
 
     @Override
     public void onNoPhotoItem(boolean noPhotoItem) {
-        if (noPhotoItem) {
+
+        Log.i(TAG, "onNoPhotoItem:" + noPhotoItem);
+        int currentItem = viewPager.getCurrentItem();
+
+        if (noPhotoItem && currentItem == PAGE_PHOTO) {
             lbRight.setVisibility(View.GONE);
-        } else {
+        } else if (!noPhotoItem && currentItem == PAGE_PHOTO) {
             lbRight.setVisibility(View.VISIBLE);
         }
     }
@@ -438,14 +444,14 @@ public class NavPagerActivity extends AppCompatActivity
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (resultCode == 200) {
+
+        if ((requestCode == Util.KEY_ALBUM_CONTENT_REQUEST_CODE || requestCode == Util.KEY_CREATE_ALBUM_REQUEST_CODE || requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE) && resultCode == RESULT_OK) {
             hideChooseHeader();
             viewPager.setCurrentItem(2);
             onDidAppear(2);
-        } else if (resultCode == 201) {
+        } else if (requestCode == Util.KEY_CREATE_SHARE_REQUEST_CODE && resultCode == RESULT_OK) {
             hideChooseHeader();
             viewPager.setCurrentItem(0);
-
             onDidAppear(0);
         }
     }
@@ -501,7 +507,7 @@ public class NavPagerActivity extends AppCompatActivity
     //add by liang.wu
     private boolean getShowAlbumTipsValue() {
         SharedPreferences sp;
-        sp = getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         return sp.getBoolean(Util.SHOW_ALBUM_TIPS, true);
     }
 
@@ -509,7 +515,7 @@ public class NavPagerActivity extends AppCompatActivity
     private void setShowAlbumTipsValue(boolean value) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
-        sp = getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
         editor.putBoolean(Util.SHOW_ALBUM_TIPS, value);
         editor.apply();

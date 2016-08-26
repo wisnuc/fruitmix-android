@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -82,9 +83,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private ProgressDialog mDialog;
 
-    private Map<String, Map<String, String>> mMediaMap;
-    private Map<String, Map<String, String>> mLocalImagesMap;
-
     private boolean isOperated = false;
 
     @Override
@@ -97,12 +95,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "JWT " + FNAS.JWT);
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
-
-        mMediaMap = new HashMap<>();
-        mLocalImagesMap = new HashMap<>();
 
         imagesStr = getIntent().getStringExtra("images");
         mUuid = getIntent().getStringExtra("uuid");
@@ -156,15 +151,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     private void fillPicList(String imagesStr) {
 
         Map<String, Object> picItem;
-        Map<String, String> picItemRaw;
+        ConcurrentMap<String, String> picItemRaw;
         String[] stArr;
 
         picList.clear();
-
-        mMediaMap.clear();
-        mLocalImagesMap.clear();
-        mMediaMap.putAll(LocalCache.MediasMap);
-        mLocalImagesMap.putAll(LocalCache.LocalImagesMap2);
 
         if (!imagesStr.equals("")) {
             stArr = imagesStr.split(",");
@@ -173,7 +163,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             for (int i = 0; i < stArr.length; i++) {
                 picItem = new HashMap<String, Object>();
-                picItemRaw = mMediaMap.get(stArr[i]);
+                picItemRaw = LocalCache.MediasMap.get(stArr[i]);
 
                 Log.i(TAG, "media has it or not:" + (picItemRaw != null ? "true" : "false"));
 
@@ -189,7 +179,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     picItem.put("locked", "1");
                     picList.add(picItem);
                 } else {
-                    picItemRaw = mLocalImagesMap.get(stArr[i]);
+                    picItemRaw = LocalCache.LocalImagesMap2.get(stArr[i]);
 
                     Log.i(TAG, "localimagesMap2 has it or not:" + (picItemRaw != null ? "true" : "false"));
 
@@ -270,7 +260,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                 int[] result = Util.formatPhotoWidthHeight(width, height);
 
-                String url = FNAS.Gateway + "/media/" + currentItem.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
+                String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + currentItem.get("resHash"), result[0], result[1]);
 
                 mImageLoader.setShouldCache(true);
                 ivMain.setTag(url);
@@ -352,13 +342,13 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             case R.id.setting_album:
                 intent = new Intent(this, ModifyAlbumActivity.class);
                 intent.putExtra(Util.MEDIASHARE_UUID, mUuid);
-                startActivityForResult(intent, 102);
+                startActivityForResult(intent, Util.KEY_MODIFY_ALBUM_REQUEST_CODE);
                 break;
             case R.id.edit_photo:
                 intent = new Intent(this, EditPhotoActivity.class);
                 intent.putExtra("images", imagesStr);
                 intent.putExtra(Util.MEDIASHARE_UUID, mUuid);
-                startActivityForResult(intent, 101);
+                startActivityForResult(intent, Util.KEY_EDIT_PHOTO_REQUEST_CODE);
                 break;
             case R.id.set_private_public:
                 setPublicPrivate();
@@ -376,10 +366,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 101 && resultCode == RESULT_OK) {
+        if (requestCode == Util.KEY_EDIT_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
             fillPicList(data.getStringExtra(Util.NEW_ALBUM_CONTENT));
             ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
-        } else if (requestCode == 102 && resultCode == RESULT_OK) {
+        } else if (requestCode == Util.KEY_MODIFY_ALBUM_REQUEST_CODE && resultCode == RESULT_OK) {
             mTitle = data.getStringExtra(Util.UPDATED_ALBUM_TITLE);
             mTitleTextView.setText(mTitle);
         }
@@ -405,7 +395,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                     data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mUuid + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"true\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mTitle + "\\\", \\\"desc\\\":\\\"" + mDesc + "\\\"}], \\\"viewers\\\":[]}}]\"}";
                     try {
-                        FNAS.PatchRemoteCall("/mediashare", data);
+                        FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
                         FNAS.LoadDocuments();
                         return true;
                     } catch (Exception e) {
@@ -503,7 +493,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                     data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mUuid + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"false\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mTitle + "\\\", \\\"desc\\\":\\\"" + mDesc + "\\\"}], \\\"viewers\\\":[" + data.substring(1) + "]}}]\"}";
                     try {
-                        FNAS.PatchRemoteCall("/mediashare", data);
+                        FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
                         FNAS.LoadDocuments();
                         return true;
                     } catch (Exception e) {

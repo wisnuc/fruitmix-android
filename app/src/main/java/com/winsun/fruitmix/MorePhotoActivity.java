@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -54,9 +55,6 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
 
     private ImageLoader mImageLoader;
 
-    private Map<String, Map<String, String>> mMediaMap;
-    private Map<String, Map<String, String>> mLocalImagesMap;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,12 +62,9 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
 
         ButterKnife.bind(this);
 
-        mMediaMap = new HashMap<>();
-        mLocalImagesMap = new HashMap<>();
-
         mImageLoader = new ImageLoader(RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue(), ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "JWT " + FNAS.JWT);
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
 
@@ -101,18 +96,13 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
 
         mPhotoList.clear();
 
-        mMediaMap.clear();
-        mLocalImagesMap.clear();
-        mMediaMap.putAll(LocalCache.MediasMap);
-        mLocalImagesMap.putAll(LocalCache.LocalImagesMap2);
-
         if (!selectedUIDStr.equals("")) {
             String[] stArr = selectedUIDStr.split(",");
             Map<String, Object> picItem;
-            Map<String, String> picItemRaw;
-            for (int i = 0; i < stArr.length; i++) {
+            ConcurrentMap<String, String> picItemRaw;
+            for (String str : stArr) {
                 picItem = new HashMap<>();
-                picItemRaw = mMediaMap.get(stArr[i]);
+                picItemRaw = LocalCache.MediasMap.get(str);
                 if (picItemRaw != null) {
                     picItem.put("cacheType", "nas");
                     picItem.put("resID", "" + R.drawable.default_img);
@@ -126,7 +116,7 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
                     picItem.put("locked", "1");
                     mPhotoList.add(picItem);
                 } else {
-                    picItemRaw = mLocalImagesMap.get(stArr[i]);
+                    picItemRaw = LocalCache.LocalImagesMap2.get(str);
                     if (picItemRaw != null) {
                         picItem.put("cacheType", "local");
                         picItem.put("resID", "" + R.drawable.default_img);
@@ -192,7 +182,8 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
 
                 int[] result = Util.formatPhotoWidthHeight(width, height);
 
-                String url = FNAS.Gateway + "/media/" + mMap.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
+                String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + mMap.get("resHash"), result[0], result[1]);
+//                String url = FNAS.Gateway + "/media/" + mMap.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                 mImageLoader.setShouldCache(true);
                 mPhotoItem.setTag(url);

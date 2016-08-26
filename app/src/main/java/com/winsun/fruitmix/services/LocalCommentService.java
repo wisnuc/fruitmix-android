@@ -6,6 +6,7 @@ import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.util.FNAS;
@@ -17,6 +18,7 @@ import java.net.ConnectException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -94,7 +96,7 @@ public class LocalCommentService extends IntentService {
                 if (LocalCache.LocalImagesMap2.containsKey(image)) {
                     String thumb = LocalCache.LocalImagesMap2.get(image).get("thumb");
 
-                    Map<String, String> map = LocalCache.LocalImagesMap.get(thumb);
+                    ConcurrentMap<String, String> map = LocalCache.LocalImagesMap.get(thumb);
 
                     Log.i(TAG, "thumb:" + thumb + "hash:" + image);
                     if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
@@ -103,7 +105,7 @@ public class LocalCommentService extends IntentService {
                             continue;
                         } else {
                             map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, "true");
-                            LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
+                            LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMap);
                             Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
                             mManager.sendBroadcast(intent);
                         }
@@ -117,7 +119,7 @@ public class LocalCommentService extends IntentService {
             while (listIterator.hasNext()) {
                 mComment = listIterator.next();
 
-                String request = "/media/" + image + "?type=comments";
+                String request = String.format(getString(R.string.photo_comment_url), Util.MEDIA_PARAMETER + "/" + image);
                 String data = "{\"shareid\":\"" + mComment.getShareId() + "\", \"text\":\"" + mComment.getText() + "\"}";
 
                 try {

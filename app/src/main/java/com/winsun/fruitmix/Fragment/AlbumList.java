@@ -52,6 +52,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by Administrator on 2016/4/19.
@@ -78,12 +79,6 @@ public class AlbumList implements NavPagerActivity.Page {
 
     private ImageLoader mImageLoader;
 
-    private Map<String, Map<String, String>> mMediaMap;
-    private Map<String, Map<String, String>> mLocalImagesMap;
-    private Map<String, Map<String, String>> mDocumentMap;
-
-    private final int REQUEST_CODE = 101;
-
     public AlbumList(NavPagerActivity activity_) {
 
         containerActivity = activity_;
@@ -100,13 +95,9 @@ public class AlbumList implements NavPagerActivity.Page {
         mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "JWT " + FNAS.JWT);
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
-
-        mMediaMap = new HashMap<>();
-        mLocalImagesMap = new HashMap<>();
-        mDocumentMap = new HashMap<>();
 
         mainListView = (ListView) view.findViewById(R.id.mainList);
         mainListView.setAdapter(new AlbumListViewAdapter(this));
@@ -122,7 +113,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 Intent intent = new Intent();
                 intent.setClass(containerActivity, NewAlbumPicChooseActivity.class);
                 //intent.setClass(MainActivity.this, AlbumPicContentActivity.class);
-                containerActivity.startActivityForResult(intent, 100);
+                containerActivity.startActivityForResult(intent, Util.KEY_CHOOSE_PHOTO_REQUEST_CODE);
             }
         });
 
@@ -150,17 +141,9 @@ public class AlbumList implements NavPagerActivity.Page {
         String[] stArr;
         String coverImg;
 
-        mMediaMap.clear();
-        mLocalImagesMap.clear();
-        mDocumentMap.clear();
-
-        mMediaMap.putAll(LocalCache.MediasMap);
-        mLocalImagesMap.putAll(LocalCache.LocalImagesMap2);
-        mDocumentMap.putAll(LocalCache.DocumentsMap);
-
         albumList1 = new ArrayList<>();
 
-        for (Map<String, String> albumRaw : mDocumentMap.values()) {
+        for (ConcurrentMap<String, String> albumRaw : LocalCache.DocumentsMap.values()) {
             albumItem = new HashMap<String, Object>();
             if (albumRaw.get("type").equals("album") && albumRaw.get("del").equals("0")) {
                 albumItem.put("type", albumRaw.get("type"));
@@ -170,7 +153,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 StringBuilder images = new StringBuilder("");
                 for (String image : albumRaw.get("images").split(",")) {
 
-                    if (mMediaMap.containsKey(image) || mLocalImagesMap.containsKey(image)) {
+                    if (LocalCache.MediasMap.containsKey(image) || LocalCache.LocalImagesMap2.containsKey(image)) {
                         images.append(image);
                         images.append(",");
                     } else {
@@ -304,7 +287,7 @@ public class AlbumList implements NavPagerActivity.Page {
             ImageView ivRecommand, ivCreate, ivLock;
             TextView lbHot, lbTitle, lbDesc, lbDate, lbOwner, lbPhotoCount;
             TextView lbDelete, lbShare;
-            Map<String, String> coverImg;
+            ConcurrentMap<String, String> coverImg;
             final boolean sLocal;
             int w, h;
 
@@ -333,10 +316,10 @@ public class AlbumList implements NavPagerActivity.Page {
             mainBar.setTranslationX(0.0f);
 
             //check image
-            coverImg = mMediaMap.get(currentItem.get("coverImg"));
+            coverImg = LocalCache.MediasMap.get(String.valueOf(currentItem.get("coverImg")));
             if (coverImg != null) sLocal = false;
             else {
-                coverImg = mLocalImagesMap.get(currentItem.get("coverImg"));
+                coverImg = LocalCache.LocalImagesMap2.get(String.valueOf(currentItem.get("coverImg")));
                 sLocal = true;
             }
 
@@ -360,7 +343,8 @@ public class AlbumList implements NavPagerActivity.Page {
 
                     int[] result = Util.formatPhotoWidthHeight(w, h);
 
-                    String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
+                    String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + coverImg.get("uuid"), result[0], result[1]);
+//                    String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                     mImageLoader.setShouldCache(true);
                     ivMainPic.setTag(url);
@@ -444,7 +428,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                                 data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + currentItem.get("uuid") + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"false\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + currentItem.get("title") + "\\\", \\\"desc\\\":\\\"" + currentItem.get("desc") + "\\\"}], \\\"viewers\\\":[" + data.substring(1) + "]}}]\"}";
                                 try {
-                                    FNAS.PatchRemoteCall("/mediashare", data);
+                                    FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
                                     FNAS.LoadDocuments();
                                     return 1;
                                 } catch (Exception e) {
@@ -542,7 +526,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                                 data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + currentItem.get("uuid") + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"true\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + currentItem.get("title") + "\\\", \\\"desc\\\":\\\"" + currentItem.get("desc") + "\\\"}], \\\"viewers\\\":[]}}]\"}";
                                 try {
-                                    FNAS.PatchRemoteCall("/mediashare", data);
+                                    FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
                                     FNAS.LoadDocuments();
                                     return 1;
                                 } catch (Exception e) {
@@ -660,7 +644,7 @@ public class AlbumList implements NavPagerActivity.Page {
                                 intent.putExtra("maintained", (boolean) currentItem.get("maintained"));
                                 intent.putExtra("private", (String) currentItem.get("private"));
                                 intent.putExtra("local", currentItem.containsKey("local"));
-                                containerActivity.startActivityForResult(intent,REQUEST_CODE);
+                                containerActivity.startActivityForResult(intent, Util.KEY_ALBUM_CONTENT_REQUEST_CODE);
 
                             }
                         case MotionEvent.ACTION_CANCEL:

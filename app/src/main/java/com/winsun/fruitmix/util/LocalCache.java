@@ -56,19 +56,15 @@ public class LocalCache {
     public static String CacheRootPath;
     static Application CurrentApp;
 
-    public static int ScreenWidth, ScreenHeight;
-
     static Bitmap BigPic = null;
     static ImageView HotIV = null;
     static Map<String, Object> HotImage = null;
 
-    public static ConcurrentMap<String, Map<String, String>> DocumentsMap = null;
-    public static ConcurrentMap<String, Map<String, String>> AlbumsMap = null;
-    public static ConcurrentMap<String, Map<String, String>> PhotoLinksMap = null;
-    public static ConcurrentMap<String, Map<String, String>> UsersMap = null;
-    public static ConcurrentMap<String, Map<String, String>> MediasMap = null;
-    public static ConcurrentMap<String, Map<String, String>> LocalImagesMap = null; // 本地图片缓存(thumb为key)
-    public static ConcurrentMap<String, Map<String, String>> LocalImagesMap2 = null;// 本地图片缓存副本（uuid为key）
+    public static ConcurrentMap<String, ConcurrentMap<String, String>> DocumentsMap = null;
+    public static ConcurrentMap<String, ConcurrentMap<String, String>> UsersMap = null;
+    public static ConcurrentMap<String, ConcurrentMap<String, String>> MediasMap = null;
+    public static ConcurrentMap<String, ConcurrentMap<String, String>> LocalImagesMap = null; // 本地图片缓存(thumb为key)
+    public static ConcurrentMap<String, ConcurrentMap<String, String>> LocalImagesMap2 = null;// 本地图片缓存副本（uuid为key）
 
     public static String DeviceID = null;
 
@@ -93,6 +89,7 @@ public class LocalCache {
     }
 
     public static void CleanAll() {
+/*
         File file1;
         // reset cache
         file1 = new File(CacheRootPath + "/thumbCache");
@@ -105,25 +102,22 @@ public class LocalCache {
         file1 = new File(CacheRootPath + "/innerCache");
         if (!file1.exists()) file1.mkdirs();
         Log.d("winsun", "Cache: " + file1);
+*/
 
         // Upload Record Table
         // LocalCache.DropGlobalData("localHashMap");
         // Document Hash
-        LocalCache.DropGlobalData("documentsMap");
+        LocalCache.DropGlobalData(Util.DOCUMENT_MAP_NAME);
         LocalCache.DropGlobalData("albumsMap");
-        LocalCache.DropGlobalData("photosMap");
-        LocalCache.DropGlobalData("usersMap");
-        LocalCache.DropGlobalData("mediasMap");
-        LocalCache.DropGlobalData("localHashMap");
-        LocalCache.DropGlobalData("deviceID");
+        LocalCache.DropGlobalData(Util.USER_MAP_NAME);
+        LocalCache.DropGlobalData(Util.MEDIA_MAP_NAME);
+        LocalCache.DropGlobalData(Util.DEVICE_ID_MAP_NAME);
         LocalCache.DropGlobalData(Util.LOCAL_COMMENT_MAP);
 
-        DocumentsMap = LocalCache.GetGlobalHashMap("documentsMap");
-        UsersMap = LocalCache.GetGlobalHashMap("usersMap");
-        AlbumsMap = LocalCache.GetGlobalHashMap("albumsMap");
-        PhotoLinksMap = LocalCache.GetGlobalHashMap("photolinksMap");
-        MediasMap = LocalCache.GetGlobalHashMap("mediasMap");
-        LocalImagesMap = LocalCache.GetGlobalHashMap("localImagesMap");
+        DocumentsMap = LocalCache.GetGlobalHashMap(Util.DOCUMENT_MAP_NAME);
+        UsersMap = LocalCache.GetGlobalHashMap(Util.USER_MAP_NAME);
+        MediasMap = LocalCache.GetGlobalHashMap(Util.MEDIA_MAP_NAME);
+        LocalImagesMap = LocalCache.GetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME);
         BuildLocalImagesMaps2();
 
         DeviceID = null;
@@ -137,7 +131,7 @@ public class LocalCache {
 
 
     public static void BuildLocalImagesMaps2() {
-        Map<String, String> itemRaw;
+        ConcurrentMap<String, String> itemRaw;
 
         LocalCache.LocalImagesMap2 = new ConcurrentHashMap<>();
         for (String key : LocalCache.LocalImagesMap.keySet()) {
@@ -147,12 +141,14 @@ public class LocalCache {
     }
 
     public static boolean Init(Activity activity) {
+/*
         File file, file1;
         boolean b;
         Map<String, String> item;
+*/
 
         CurrentApp = activity.getApplication();
-        file = activity.getApplication().getExternalCacheDir();
+/*        file = activity.getApplication().getExternalCacheDir();
         if (file == null) file = activity.getApplication().getCacheDir();
         if (!file.exists() && !file.mkdirs()) {
             file = activity.getApplication().getFilesDir();
@@ -170,22 +166,19 @@ public class LocalCache {
 
         file1 = new File(CacheRootPath + "/innerCache");
         if (!file1.exists()) file1.mkdirs();
-        Log.d("winsun", "Cache: " + file1);
+        Log.d("winsun", "Cache: " + file1);*/
 
         TransActivityContainer = new HashMap<String, Object>();
 
-        DocumentsMap = LocalCache.GetGlobalHashMap("documentsMap");
-        UsersMap = LocalCache.GetGlobalHashMap("usersMap");
-        AlbumsMap = LocalCache.GetGlobalHashMap("albumsMap");
-//        PhotoLinksMap = LocalCache.GetGlobalHashMap("photolinksMap");
-        MediasMap = LocalCache.GetGlobalHashMap("mediasMap");
-        LocalImagesMap = LocalCache.GetGlobalHashMap("localImagesMap");
+        DocumentsMap = LocalCache.GetGlobalHashMap(Util.DOCUMENT_MAP_NAME);
+        UsersMap = LocalCache.GetGlobalHashMap(Util.USER_MAP_NAME);
+        MediasMap = LocalCache.GetGlobalHashMap(Util.MEDIA_MAP_NAME);
+        LocalImagesMap = LocalCache.GetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME);
         BuildLocalImagesMaps2();
-        DeviceID = LocalCache.GetGlobalData("deviceID");
+        DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
 
         Log.i("LocalCache", DocumentsMap.toString());
         Log.i("LocalCache", UsersMap.toString());
-        Log.i("LocalCache", AlbumsMap.toString());
         Log.i("LocalCache", MediasMap.toString());
         Log.i("LocalCache", LocalImagesMap.toString());
 
@@ -196,11 +189,6 @@ public class LocalCache {
 //        Shares.put("ss", item);
 //        item=new HashMap<String, String>();
 //        Shares.put("ss1", item);
-
-        WindowManager windowManager = activity.getWindowManager();
-        Display display = windowManager.getDefaultDisplay();
-        ScreenWidth = display.getWidth();
-        ScreenHeight = display.getHeight();
 
         return true;
     }
@@ -219,7 +207,8 @@ public class LocalCache {
 
         List<Map<String, String>> localPhotoList;
         int i;
-        Map<String, String> itemRaw, item;
+        Map<String, String> itemRaw;
+        ConcurrentMap<String, String> item;
 
         localPhotoList = LocalCache.PhotoList("Camera");
 
@@ -229,18 +218,18 @@ public class LocalCache {
 
             String uuid = Util.CalcSHA256OfFile(itemRaw.get("thumb"));
 
-            item = new HashMap<String, String>();
+            item = new ConcurrentHashMap<>();
             item.put("thumb", itemRaw.get("thumb"));
             item.put("width", itemRaw.get("width"));
             item.put("height", itemRaw.get("height"));
             item.put("mtime", itemRaw.get("lastModified"));
-            item.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS,"false");
+            item.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, "false");
             item.put("uuid", uuid);
             LocalImagesMap.put(itemRaw.get("thumb"), item);
             LocalImagesMap2.put(uuid, item);
         }
 
-        LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
+        LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMap);
         Log.d("winsun", "LocalImagesMap " + LocalCache.LocalImagesMap);
 
         LocalPhotoUploadService.startActionUploadLocalPhoto(Util.APPLICATION_CONTEXT);
@@ -683,7 +672,7 @@ public class LocalCache {
 
     public static String GetGlobalData(String name) {
         SharedPreferences sp;
-        sp = CurrentApp.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = CurrentApp.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         return sp.getString(name, null);
     }
 
@@ -691,7 +680,7 @@ public class LocalCache {
         SharedPreferences sp;
         SharedPreferences.Editor mEditor;
 
-        sp = CurrentApp.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = CurrentApp.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         mEditor = sp.edit();
         mEditor.putString(name, data);
         mEditor.commit();
@@ -701,22 +690,22 @@ public class LocalCache {
         SharedPreferences sp;
         SharedPreferences.Editor mEditor;
 
-        sp = CurrentApp.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = CurrentApp.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         mEditor = sp.edit();
         mEditor.putString(name, null);
         mEditor.commit();
     }
 
-    public static ConcurrentMap<String, Map<String, String>> GetGlobalHashMap(String name) {
+    public static ConcurrentMap<String, ConcurrentMap<String, String>> GetGlobalHashMap(String name) {
         String strData;
         ObjectInputStream ois;
-        ConcurrentHashMap<String, Map<String, String>> dataList;
+        ConcurrentHashMap<String, ConcurrentMap<String, String>> dataList;
 
         try {
             strData = GetGlobalData(name);
-            if (strData.equals("")) return new ConcurrentHashMap<>();
+            if (strData == null || strData.equals("")) return new ConcurrentHashMap<>();
             ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decode(strData, Base64.DEFAULT)));
-            dataList = (ConcurrentHashMap<String, Map<String, String>>) ois.readObject();
+            dataList = (ConcurrentHashMap<String, ConcurrentMap<String, String>>) ois.readObject();
             ois.close();
             return dataList;
         } catch (Exception e) {
@@ -725,7 +714,7 @@ public class LocalCache {
         }
     }
 
-    public static void SetGlobalHashMap(String name, Map<String, Map<String, String>> data) {
+    public static void SetGlobalHashMap(String name, ConcurrentMap<String, ConcurrentMap<String, String>> data) {
         ByteArrayOutputStream baos;
         ObjectOutputStream oos;
 
@@ -744,7 +733,7 @@ public class LocalCache {
     public static void clearGatewayUuidPasswordToken(Context context) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
-        sp = context.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
         editor.putString(Util.GATEWAY, null);
         editor.putString(Util.USER_UUID, null);
@@ -756,7 +745,7 @@ public class LocalCache {
     public static void clearToken(Context context) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
-        sp = context.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
         editor.putString(Util.JWT, null);
         editor.apply();
@@ -766,7 +755,7 @@ public class LocalCache {
     public static void saveGateway(String gateway, Context context) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
-        sp = context.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
         editor.putString(Util.GATEWAY, gateway);
         editor.apply();
@@ -774,7 +763,7 @@ public class LocalCache {
 
     public static String getGateway(Context context) {
         SharedPreferences sp;
-        sp = context.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
 
         return sp.getString(Util.GATEWAY, null);
     }
@@ -782,7 +771,7 @@ public class LocalCache {
     public static void saveJwt(String jwt, Context context) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
-        sp = context.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
         editor.putString(Util.JWT, jwt);
         editor.apply();
@@ -790,26 +779,26 @@ public class LocalCache {
 
     public static String getJWT(Context context) {
         SharedPreferences sp;
-        sp = context.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
 
         return sp.getString(Util.JWT, null);
     }
 
     public static String getUuidValue(Context context) {
         SharedPreferences sp;
-        sp = context.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         return sp.getString(Util.USER_UUID, null);
     }
 
     public static String getPasswordValue(Context context) {
         SharedPreferences sp;
-        sp = context.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         return sp.getString(Util.PASSWORD, null);
     }
 
     public static String getUserNameValue(Context context) {
         SharedPreferences sp;
-        sp = context.getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         return sp.getString(Util.EQUIPMENT_CHILD_NAME, null);
     }
 }

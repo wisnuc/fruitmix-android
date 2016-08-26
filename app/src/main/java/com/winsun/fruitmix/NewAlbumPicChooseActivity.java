@@ -97,7 +97,7 @@ public class NewAlbumPicChooseActivity extends Activity {
                     intent = new Intent();
                     intent.setClass(NewAlbumPicChooseActivity.this, CreateAlbumActivity.class);
                     intent.putExtra("selectedUIDStr", selectUIDString);
-                    startActivityForResult(intent, 100);
+                    startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
                 }
 
             }
@@ -111,8 +111,8 @@ public class NewAlbumPicChooseActivity extends Activity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (resultCode == 200) {
-            setResult(200);
+        if (requestCode == Util.KEY_CREATE_ALBUM_REQUEST_CODE) {
+            setResult(resultCode);
             finish();
         }
     }

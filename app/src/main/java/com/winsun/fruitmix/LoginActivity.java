@@ -150,8 +150,8 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                 HttpURLConnection conn;
                 String str;
                 try {
-                    conn = (HttpURLConnection) (new URL(mGateway + "/token").openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
-                    conn.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((mUserUUid + ":" + mPwd).getBytes(), Base64.DEFAULT));
+                    conn = (HttpURLConnection) (new URL(mGateway + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
+                    conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((mUserUUid + ":" + mPwd).getBytes(), Base64.DEFAULT));
                     if (conn.getResponseCode() != 200) {
 
                         Util.loginState = false;
@@ -177,9 +177,9 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                             //SetGlobalData("deviceID", UUID.randomUUID().toString());
                             str = FNAS.PostRemoteCall("/library/", "");
                             LocalCache.DeviceID = str.replace("\"", "");
-                            LocalCache.SetGlobalData("deviceID", LocalCache.DeviceID);
+                            LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
                         } // get deviceID
-                        Log.d("uuid", LocalCache.GetGlobalData("deviceID"));
+                        Log.d("uuid", LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
 
                         //FNAS.checkOfflineTask(mContext);
 
@@ -236,7 +236,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     private void setGroupNameUserName(String groupName, String userName) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
-        sp = getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
         editor.putString(Util.EQUIPMENT_GROUP_NAME, groupName);
         editor.putString(Util.EQUIPMENT_CHILD_NAME, userName);
@@ -246,7 +246,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     private void setUuidPassword(String uuid, String password) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
-        sp = getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
         editor.putString(Util.USER_UUID, uuid);
         editor.putString(Util.PASSWORD, password);

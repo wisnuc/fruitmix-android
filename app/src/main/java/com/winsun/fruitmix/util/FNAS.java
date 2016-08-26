@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -92,12 +93,12 @@ public class FNAS {
 
                     // get addr first
 
-                    Log.d("wisun", Gateway + "/login"); // output:{"username":"admin","uuid":"db3aeeef-75ba-4e66-8f0e-5d71365a04db","avatar":"defaultAvatar.jpg"}
-                    conn = (HttpURLConnection) (new URL(Gateway + "/login").openConnection());
+                    Log.d("wisun", Gateway + Util.LOGIN_PARAMETER); // output:{"username":"admin","uuid":"db3aeeef-75ba-4e66-8f0e-5d71365a04db","avatar":"defaultAvatar.jpg"}
+                    conn = (HttpURLConnection) (new URL(Gateway + Util.LOGIN_PARAMETER).openConnection());
                     str = ReadFull(conn.getInputStream());
                     userUUID = "e1ea7108-cfd7-4b4a-bbbd-99feeb1a6ca6"; //new JSONArray(str).getJSONObject(0).getString("uuid");
 
-                    conn = (HttpURLConnection) (new URL(Gateway + "/token").openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
+                    conn = (HttpURLConnection) (new URL(Gateway + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
                     conn.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((userUUID + ":123456").getBytes(), Base64.DEFAULT));
                     str = ReadFull(conn.getInputStream());
                     JWT = new JSONObject(str).getString("token"); // get token
@@ -108,9 +109,9 @@ public class FNAS {
                         //SetGlobalData("deviceID", UUID.randomUUID().toString());
                         str = PostRemoteCall("/library/", "");
                         LocalCache.DeviceID = str.replace("\"", "");
-                        LocalCache.SetGlobalData("deviceID", LocalCache.DeviceID);
+                        LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
                     } // get deviceID
-                    Log.d("uuid", LocalCache.GetGlobalData("deviceID"));
+                    Log.d("uuid", LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
 
 
                     //PostRemoteCall("/mediashare", "{\"uuid\":\"11\" }") {}
@@ -132,7 +133,7 @@ public class FNAS {
         JSONArray json, jsonArr;
         int i, j;
         JSONObject itemRaw;
-        Map<String, String> item;
+        ConcurrentMap<String, String> item;
         String imgStr, mtime;
 
         if (Util.getNetworkState(Util.APPLICATION_CONTEXT)) {
@@ -141,7 +142,7 @@ public class FNAS {
         }
 
         try {
-            str = FNAS.RemoteCall("/users"); // get all user;
+            str = FNAS.RemoteCall(Util.USER_PARAMETER); // get all user;
             json = new JSONArray(str);
             for (i = 0; i < json.length(); i++) {
                 itemRaw = json.getJSONObject(i);
@@ -149,7 +150,7 @@ public class FNAS {
                 if (LocalCache.UsersMap.containsKey(uuid)) {
                     item = LocalCache.UsersMap.get(uuid);
                 } else {
-                    item = new HashMap<String, String>();
+                    item = new ConcurrentHashMap<>();
                 }
 
                 item.put("name", itemRaw.getString("username"));
@@ -175,7 +176,7 @@ public class FNAS {
 
             }
 
-            LocalCache.SetGlobalHashMap("usersMap", LocalCache.UsersMap);
+            LocalCache.SetGlobalHashMap(Util.USER_MAP_NAME, LocalCache.UsersMap);
             Log.d("winsun", "UsersMap " + LocalCache.UsersMap);
         } catch (Exception e) {
             e.printStackTrace();
@@ -183,7 +184,7 @@ public class FNAS {
 
 
         try {
-            str = FNAS.RemoteCall("/media"); // get all pictures;
+            str = FNAS.RemoteCall(Util.MEDIA_PARAMETER); // get all pictures;
 
             Log.i(TAG, "media json:" + str);
 
@@ -196,7 +197,7 @@ public class FNAS {
             for (i = 0; i < json.length(); i++) {
                 itemRaw = json.getJSONObject(i);
                 if (itemRaw.getString("kind").equals("image")) {
-                    item = new HashMap<String, String>();
+                    item = new ConcurrentHashMap<>();
                     item.put("uuid", "" + itemRaw.getString("hash"));
                     item.put("mtime", "1916-01-01 00:00:00");
                     if (itemRaw.has("width")) {
@@ -220,7 +221,7 @@ public class FNAS {
                 }
             }
 
-            LocalCache.SetGlobalHashMap("mediasMap", LocalCache.MediasMap);
+            LocalCache.SetGlobalHashMap(Util.MEDIA_MAP_NAME, LocalCache.MediasMap);
             Log.d("winsun", "MediasMap " + LocalCache.MediasMap);
 
             LocalBroadcastManager manager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
@@ -233,7 +234,7 @@ public class FNAS {
         LocalPhotoUploadService.startActionUploadLocalPhoto(Util.APPLICATION_CONTEXT);
 
         try {
-            str = FNAS.RemoteCall("/mediashare"); // get all album share and normal share(immutable)
+            str = FNAS.RemoteCall(Util.MEDIASHARE_PARAMETER); // get all album share and normal share(immutable)
             json = new JSONArray(str);
 
             if (json.length() != 0) {
@@ -247,7 +248,7 @@ public class FNAS {
                 if (LocalCache.DocumentsMap.containsKey(uuid)) {
                     item = LocalCache.DocumentsMap.get(uuid);
                     //if(itemRaw.getJSONObject("latest").get("_id").equals()) continue;
-                } else item = new HashMap<String, String>();
+                } else item = new ConcurrentHashMap<>();
                 item.put("_id", itemRaw.getJSONObject("latest").getString("_id"));
                 if (itemRaw.getJSONObject("latest").has("creator"))
                     item.put("creator", itemRaw.getJSONObject("latest").getString("creator"));
@@ -302,7 +303,7 @@ public class FNAS {
 
         loadLocalShare();
 
-        LocalCache.SetGlobalHashMap("documentsMap", LocalCache.DocumentsMap);
+        LocalCache.SetGlobalHashMap(Util.DOCUMENT_MAP_NAME, LocalCache.DocumentsMap);
         Log.d("winsun", "DocumentsMap " + LocalCache.DocumentsMap);
 
         //LocalCache.SetGlobalHashMap("documentsMap", LocalCache.DocumentsMap);
@@ -318,9 +319,9 @@ public class FNAS {
         while (JWT == null) Thread.sleep(500);
 
         conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
-        conn.setRequestProperty("Authorization", "JWT " + JWT);
+        conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         conn.setUseCaches(false);
-        conn.setConnectTimeout(15 * 1000);
+        conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
         Log.d(TAG, "NAS GET: " + (Gateway + req));
         if (conn.getResponseCode() == 200) {
             str = FNAS.ReadFull(conn.getInputStream());
@@ -338,15 +339,15 @@ public class FNAS {
         while (JWT == null) Thread.sleep(500);
 
         conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Authorization", "JWT " + JWT);
+        conn.setRequestMethod(Util.HTTP_POST_METHOD);
+        conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         conn.setDoInput(true);// 允许输入
         conn.setDoOutput(true);// 允许输出
         conn.setUseCaches(false);
         conn.setRequestProperty("Connection", "keep-alive");
         conn.setRequestProperty("Charsert", "UTF-8");
         conn.setRequestProperty("Content-Type", "application/json");
-        conn.setConnectTimeout(15 * 1000);
+        conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
         outStream = new BufferedOutputStream(conn.getOutputStream());
         //str="{\"version\":\"0.1.G513b\",\"permission\":\"public\",\"doctype\":\"album\",\"content\":{\"title\":\"test1\",\"desc\":\"test1desc\",\"items\":[{\"type\":\"media1\",\"uuid\":\"75922aa33a961c3769966e70bec6430e4d5a6c8028e5d6616d5a5a599f337483\"}]}}";
         if (data == null) str = "";
@@ -373,8 +374,8 @@ public class FNAS {
 
         conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
         //conn=(HttpURLConnection) (new URL("http://192.168.1.102:9220" + req).openConnection());
-        conn.setRequestMethod("PATCH");
-        conn.setRequestProperty("Authorization", "JWT " + JWT);
+        conn.setRequestMethod(Util.HTTP_PATCH_METHOD);
+        conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         conn.setDoInput(true);// 允许输入
         conn.setDoOutput(true);// 允许输出
         conn.setUseCaches(false);
@@ -382,7 +383,7 @@ public class FNAS {
         //conn.setRequestProperty("Charsert", "UTF-8");
         conn.setRequestProperty("Accept", "*/*");
         conn.setRequestProperty("Content-Type", "application/json");
-        conn.setConnectTimeout(15 * 1000);
+        conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
         outStream = new BufferedOutputStream(conn.getOutputStream());
         //str="{\"version\":\"0.1.G513b\",\"permission\":\"public\",\"doctype\":\"album\",\"content\":{\"title\":\"test1\",\"desc\":\"test1desc\",\"items\":[{\"type\":\"media1\",\"uuid\":\"75922aa33a961c3769966e70bec6430e4d5a6c8028e5d6616d5a5a599f337483\"}]}}";
         if (data == null) str = "";
@@ -413,7 +414,7 @@ public class FNAS {
             buffer = new byte[4096];
             tempFile = LocalCache.GetInnerTempFile();
             conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
-            conn.setRequestProperty("Authorization", "JWT " + JWT);
+            conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
             conn.setConnectTimeout(15 * 1000);
             Log.d("winsun", Gateway + req + "  " + JWT);
             bin = new BufferedInputStream(conn.getInputStream());
@@ -508,15 +509,15 @@ public class FNAS {
      * restore local photo upload state when user logout
      */
     public static void restoreLocalPhotoUploadState() {
-        for (Map<String, String> map : LocalCache.LocalImagesMap.values()) {
+        for (ConcurrentMap<String, String> map : LocalCache.LocalImagesMap.values()) {
             map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, "false");
         }
-        LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
+        LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMap);
     }
 
     public static boolean UploadFile(String fname) {
-        ConcurrentMap<String, Map<String, String>> localHashMap;
-        Map<String, String> localHashObj;
+        ConcurrentMap<String, String> localHashMap;
+
         String hash, url, boundary;
         BufferedOutputStream outStream;
         StringBuilder sb;
@@ -527,13 +528,8 @@ public class FNAS {
         try {
             while (JWT == null) Thread.sleep(500);
             // calc SHA256
-            localHashMap = LocalCache.GetGlobalHashMap("localHashMap");
-            if (!localHashMap.containsKey(fname)) {
-                localHashObj = new HashMap<String, String>();
-                localHashObj.put("digest", Util.CalcSHA256OfFile(fname));
-                localHashMap.put(fname, localHashObj);
-            }
-            hash = localHashMap.get(fname).get("digest");
+            localHashMap = LocalCache.LocalImagesMap.get(fname);
+            hash = localHashMap.get("uuid");
 
             Log.i(TAG, "thumb:" + fname + "hash:" + hash);
 
@@ -546,12 +542,12 @@ public class FNAS {
             conn.setDoInput(true);// 允许输入
             conn.setDoOutput(true);// 允许输出
             conn.setUseCaches(false);
-            conn.setRequestMethod("POST"); // Post方式
-            conn.setRequestProperty("Authorization", "JWT " + JWT);
+            conn.setRequestMethod(Util.HTTP_POST_METHOD); // Post方式
+            conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
             conn.setRequestProperty("Connection", "keep-alive");
             conn.setRequestProperty("Charsert", "UTF-8");
             conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-            conn.setConnectTimeout(15 * 1000);
+            conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
 
             outStream = new BufferedOutputStream(conn.getOutputStream());
 
@@ -578,7 +574,7 @@ public class FNAS {
             Log.d(TAG, "UP END1: " + resCode);
             if (resCode == 200) return true;
             if (resCode == 404) {
-                LocalCache.DropGlobalData("deviceID");
+                LocalCache.DropGlobalData(Util.DEVICE_ID_MAP_NAME);
                 System.exit(0);
             }
             InputStream in = conn.getInputStream();
@@ -615,14 +611,14 @@ public class FNAS {
         DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
         List<Share> shareList = dbUtils.getAllLocalShare();
-        Map<String, String> item;
+        ConcurrentMap<String, String> item;
 
         for (Share share : shareList) {
 
             if (LocalCache.DocumentsMap.containsKey(share.getUuid())) {
                 item = LocalCache.DocumentsMap.get(share.getUuid());
                 //if(itemRaw.getJSONObject("latest").get("_id").equals()) continue;
-            } else item = new HashMap<String, String>();
+            } else item = new ConcurrentHashMap<>();
 
             item.put("_id", "");
             item.put("creator", FNAS.userUUID);

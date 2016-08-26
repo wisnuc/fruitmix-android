@@ -5,6 +5,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.IBinder;
+import android.os.ParcelUuid;
 import android.util.Base64OutputStream;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
@@ -43,7 +44,6 @@ public class Util {
     public static final String MEDIASHARE_UUID = "mediashare_uuid";
     public static final String PASSWORD = "password";
     public static final String EDIT_PHOTO = "edit_photo";
-    public static final int ADD_ALBUM = 101;
     public static final String UPDATED_ALBUM_TITLE = "updated_album_title";
     public static final String NEW_ALBUM_CONTENT = "new_album_content";
     public static final String LOCAL_COMMENT_MAP = "local_comment_map";
@@ -54,6 +54,37 @@ public class Util {
     public static final String NEED_SHOW_MENU = "need_show_menu";
     public static final String KEY_LOCAL_PHOTO_UPLOAD_SUCCESS = "key_local_photo_upload_success";
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
+    public static final String KEY_AUTHORIZATION = "Authorization";
+    public static final String KEY_JWT_HEAD = "JWT ";
+    public static final String KEY_BASE_HEAD = "Basic ";
+
+    public static final int KEY_MODIFY_ALBUM_REQUEST_CODE = 100;
+    public static final int KEY_EDIT_PHOTO_REQUEST_CODE = 101;
+    public static final int KEY_CHOOSE_PHOTO_REQUEST_CODE = 102;
+    public static final int KEY_LOGIN_REQUEST_CODE = 103;
+    public static final int KEY_CREATE_ALBUM_REQUEST_CODE = 104;
+    public static final int KEY_ALBUM_CONTENT_REQUEST_CODE = 105;
+    public static final int KEY_CREATE_SHARE_REQUEST_CODE = 106;
+
+    public static final String HTTP = "http://";
+    public static final String MEDIASHARE_PARAMETER = "/mediashare";
+    public static final String MEDIA_PARAMETER = "/media";
+    public static final String USER_PARAMETER = "/users";
+    public static final String TOKEN_PARAMETER = "/token";
+    public static final String LOGIN_PARAMETER = "/login";
+
+    public static final String FRUITMIX_SHAREDPREFERENCE_NAME = "fruitMix";
+
+    public static final String DOCUMENT_MAP_NAME = "documentsMap";
+    public static final String MEDIA_MAP_NAME = "mediasMap";
+    public static final String USER_MAP_NAME = "usersMap";
+    public static final String LOCAL_IMAGE_MAP_NAME = "localImagesMap";
+    public static final String DEVICE_ID_MAP_NAME = "deviceID";
+
+    public static final String HTTP_POST_METHOD = "POST";
+    public static final String HTTP_PATCH_METHOD = "PATCH";
+
+    public static final int HTTP_CONNECT_TIMEOUT = 15 * 1000;
 
     public static Context APPLICATION_CONTEXT = null;
 

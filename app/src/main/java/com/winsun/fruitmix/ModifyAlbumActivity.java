@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -45,7 +46,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
     String selectedUIDStr;
 
     private String mUuid;
-    private Map<String, String> mAblumMap;
+    private ConcurrentMap<String, String> mAblumMap;
 
     private Context mContext;
 
@@ -172,7 +173,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
                             Log.d("winsun", data);
                             try {
-                                FNAS.PatchRemoteCall("/mediashare", data);
+                                FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
                                 FNAS.LoadDocuments();
                                 return true;
                             } catch (Exception e) {

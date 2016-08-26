@@ -93,16 +93,17 @@ public class SplashScreenActivity extends Activity {
                 HttpURLConnection conn;
                 String str;
                 try {
-                    conn = (HttpURLConnection) (new URL(mGateway + "/token").openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
-                    conn.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((mUuid + ":" + mPassword).getBytes(), Base64.DEFAULT));
+                    conn = (HttpURLConnection) (new URL(mGateway + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
+                    conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((mUuid + ":" + mPassword).getBytes(), Base64.DEFAULT));
                     conn.setConnectTimeout(15 * 1000);
                     if (conn.getResponseCode() != 200) {
 
                         FNAS.Gateway = mGateway;
                         FNAS.JWT = mToken;
                         FNAS.userUUID = mUuid;
+                        Util.loginState = false;
 
-                        LocalCache.DeviceID = LocalCache.GetGlobalData("deviceID");
+                        LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
 
                         DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
                         dbUtils.doOneTaskInCachedThread(new Runnable() {
@@ -116,7 +117,6 @@ public class SplashScreenActivity extends Activity {
                             }
                         });
 
-                        Util.loginState = false;
                         return false;
 
                     } else {
@@ -135,9 +135,9 @@ public class SplashScreenActivity extends Activity {
                             //SetGlobalData("deviceID", UUID.randomUUID().toString());
                             str = FNAS.PostRemoteCall("/library/", "");
                             LocalCache.DeviceID = str.replace("\"", "");
-                            LocalCache.SetGlobalData("deviceID", LocalCache.DeviceID);
+                            LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
                         } // get deviceID
-                        Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData("deviceID"));
+                        Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
 
 //                        FNAS.checkOfflineTask(mContext);
 
@@ -167,7 +167,7 @@ public class SplashScreenActivity extends Activity {
                     FNAS.JWT = mToken;
                     FNAS.userUUID = mUuid;
 
-                    LocalCache.DeviceID = LocalCache.GetGlobalData("deviceID");
+                    LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
 
                     DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
                     dbUtils.doOneTaskInCachedThread(new Runnable() {

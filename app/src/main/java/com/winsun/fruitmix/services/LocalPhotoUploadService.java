@@ -11,6 +11,7 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -76,7 +77,7 @@ public class LocalPhotoUploadService extends IntentService {
 
         boolean result;
         uploadResult = false;
-        for (Map<String, String> map : LocalCache.LocalImagesMap.values()) {
+        for (ConcurrentMap<String, String> map : LocalCache.LocalImagesMap.values()) {
 
             if (isStop) {
                 uploadResult = false;
@@ -95,7 +96,7 @@ public class LocalPhotoUploadService extends IntentService {
         }
 
         if (uploadResult) {
-            LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
+            LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMap);
             Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
             mManager.sendBroadcast(intent);
             isSave = true;
@@ -114,7 +115,7 @@ public class LocalPhotoUploadService extends IntentService {
 
             Log.i(TAG, "onDestroy set upload photo");
 
-            LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
+            LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMap);
 
             Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
             mManager.sendBroadcast(intent);

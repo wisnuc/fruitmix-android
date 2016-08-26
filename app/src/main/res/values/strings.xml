@@ -260,6 +260,10 @@
     <string name="hours_ago">%1$s hours ago</string>
     <string name="yesterday">yesterday</string>
 
+    <!-- url -->
+    <string name="thumb_photo_url">%1$s?type=thumb&amp;width=%2$s&amp;height=%3$s</string>
+    <string name="original_photo_url">%1$s?type=original</string>
+    <string name="photo_comment_url">%1$s?type=comments</string>
     <!-- finish add by liang.wu-->
 
 </resources>

@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -72,9 +73,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
     private ProgressDialog mDialog;
 
-    private Map<String, Map<String, String>> mMediaMap;
-    private Map<String, Map<String, String>> mLocalImagesMap;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,12 +80,9 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         ButterKnife.bind(this);
 
-        mMediaMap = new HashMap<>();
-        mLocalImagesMap = new HashMap<>();
-
         mImageLoader = new ImageLoader(RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue(), ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "JWT " + FNAS.JWT);
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
 
@@ -126,18 +121,13 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         mPhotoList.clear();
 
-        mMediaMap.clear();
-        mLocalImagesMap.clear();
-        mMediaMap.putAll(LocalCache.MediasMap);
-        mLocalImagesMap.putAll(LocalCache.LocalImagesMap2);
-
         if (!selectedUIDStr.equals("")) {
             String[] stArr = selectedUIDStr.split(",");
             Map<String, Object> picItem;
-            Map<String, String> picItemRaw;
+            ConcurrentMap<String, String> picItemRaw;
             for (int i = 0; i < stArr.length; i++) {
                 picItem = new HashMap<>();
-                picItemRaw = mMediaMap.get(stArr[i]);
+                picItemRaw = LocalCache.MediasMap.get(stArr[i]);
                 if (picItemRaw != null) {
                     picItem.put("cacheType", "nas");
                     picItem.put("resID", "" + R.drawable.default_img);
@@ -150,7 +140,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                     picItem.put("locked", "1");
                     mPhotoList.add(picItem);
                 } else {
-                    picItemRaw = mLocalImagesMap.get(stArr[i]);
+                    picItemRaw = LocalCache.LocalImagesMap2.get(stArr[i]);
                     if (picItemRaw != null) {
                         picItem.put("cacheType", "local");
                         picItem.put("resID", "" + R.drawable.default_img);
@@ -177,7 +167,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             case R.id.add_album:
                 Intent intent = new Intent(mContext, NewAlbumPicChooseActivity.class);
                 intent.putExtra(Util.EDIT_PHOTO, true);
-                startActivityForResult(intent, Util.ADD_ALBUM);
+                startActivityForResult(intent, Util.KEY_CHOOSE_PHOTO_REQUEST_CODE);
                 break;
             case R.id.finish:
 
@@ -230,9 +220,9 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                                                 if (LocalCache.LocalImagesMap2.containsKey(string)) {
                                                     String thumb = LocalCache.LocalImagesMap2.get(string).get("thumb");
 
-                                                    Map<String,String> map = LocalCache.LocalImagesMap.get(thumb);
+                                                    ConcurrentMap<String, String> map = LocalCache.LocalImagesMap.get(thumb);
 
-                                                    Log.i(TAG,"thumb:"+thumb+"hash:"+string);
+                                                    Log.i(TAG, "thumb:" + thumb + "hash:" + string);
                                                     if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
                                                         uploadFileResult = FNAS.UploadFile(map.get("thumb"));
                                                         Log.i(TAG, "digest:" + string + "uploadFileResult:" + uploadFileResult);
@@ -248,7 +238,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                                     if (!uploadFileResult)
                                         return false;
 
-                                    FNAS.PatchRemoteCall("/mediashare", stringBuilder.toString());
+                                    FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, stringBuilder.toString());
                                     FNAS.LoadDocuments();
                                     return true;
                                 } catch (Exception e) {
@@ -325,7 +315,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == Util.ADD_ALBUM && resultCode == RESULT_OK) {
+        if (requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
 
             String selectedUIDStr = data.getStringExtra("selectedUIDStr");
             fillPhotoList(selectedUIDStr);
@@ -371,7 +361,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                 int[] result = Util.formatPhotoWidthHeight(width, height);
 
-                String url = FNAS.Gateway + "/media/" + mMap.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
+                String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + mMap.get("resHash"), result[0], result[1]);
+//                String url = FNAS.Gateway + Util.MEDIA_PARAMETER + mMap.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                 mImageLoader.setShouldCache(true);
                 mPhotoItem.setTag(url);

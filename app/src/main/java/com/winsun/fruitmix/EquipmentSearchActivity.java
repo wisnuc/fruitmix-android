@@ -71,8 +71,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private static final int DATA_CHANGE = 0x0001;
 
-    private static final int REQUEST_CODE = 100;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,7 +104,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 intent.putExtra(Util.EQUIPMENT_GROUP_NAME, mEquipmentList.get(groupPosition).getServiceName());
                 intent.putExtra(Util.EQUIPMENT_CHILD_NAME, userMap.get("username"));
                 intent.putExtra(Util.USER_UUID, userMap.get("uuid"));
-                startActivityForResult(intent, REQUEST_CODE);
+                startActivityForResult(intent, Util.KEY_LOGIN_REQUEST_CODE);
 
                 return false;
             }
@@ -142,7 +140,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == Util.KEY_LOGIN_REQUEST_CODE && resultCode == RESULT_OK) {
             finish();
         }
     }
@@ -427,8 +425,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 String str;
 
                 try {
-                    Log.i(TAG, "login url:" + "http://" + equipment.getHost() + "/login");
-                    conn = (HttpURLConnection) (new URL("http://" + equipment.getHost() + "/login")).openConnection();
+                    Log.i(TAG, "login url:" + Util.HTTP + equipment.getHost() + Util.LOGIN_PARAMETER);
+                    conn = (HttpURLConnection) (new URL(Util.HTTP + equipment.getHost() + Util.LOGIN_PARAMETER)).openConnection();
                     Log.i(TAG, "response code" + conn.getResponseCode() + "");
                     str = FNAS.ReadFull(conn.getInputStream());
                     json = new JSONArray(str);

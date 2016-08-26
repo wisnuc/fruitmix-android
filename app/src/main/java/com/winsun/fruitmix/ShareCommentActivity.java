@@ -50,6 +50,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -86,7 +87,7 @@ public class ShareCommentActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Map<String, String> imageRaw;
+        ConcurrentMap<String, String> imageRaw;
 
         super.onCreate(savedInstanceState);
 
@@ -97,7 +98,7 @@ public class ShareCommentActivity extends Activity {
         mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "JWT " + FNAS.JWT);
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
 
@@ -142,10 +143,8 @@ public class ShareCommentActivity extends Activity {
             imageData.put("resHash", imageRaw.get("uuid"));
         }
 
-        Map<String, Map<String, String>> documentMap = new HashMap<>();
-        documentMap.putAll(LocalCache.DocumentsMap);
 
-        for (Map<String, String> shareRaw : documentMap.values()) {
+        for (ConcurrentMap<String, String> shareRaw : LocalCache.DocumentsMap.values()) {
 
             Log.d("winsun", "sss1 " + shareRaw);
             if (shareRaw.containsKey("images") && shareRaw.get("images").contains((String) imageData.get("uuid"))) {
@@ -166,7 +165,8 @@ public class ShareCommentActivity extends Activity {
             ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
             ivMain.setImageUrl(url, mImageLoader);
         } else {
-            String url = FNAS.Gateway + "/media/" + imageData.get("resHash") + "?type=original";
+            String url = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + imageData.get("resHash"));
+//            String url = FNAS.Gateway + "/media/" + imageData.get("resHash") + "?type=original";
 
             mImageLoader.setShouldCache(true);
             ivMain.setTag(url);
@@ -328,7 +328,7 @@ public class ShareCommentActivity extends Activity {
 
                     if (Util.getNetworkState(mContext)) {
 
-                        str = FNAS.RemoteCall("/media/" + imageData.get("uuid") + "?type=comments");
+                        str = FNAS.RemoteCall(String.format(getString(R.string.photo_comment_url), Util.MEDIA_PARAMETER + "/" + imageData.get("uuid")));
                         json = new JSONArray(str);
                         for (i = 0; i < json.length(); i++) {
                             commentItem = new Comment();
@@ -436,20 +436,22 @@ public class ShareCommentActivity extends Activity {
                 lbDate.setText(currentItem.getFormatTime());
             }
 
-            Map<String, String> map = LocalCache.UsersMap.get(currentItem.getCreator());
-            ivAvatar.setText(map.get("avatar_default"));
+            if (currentItem != null) {
+                ConcurrentMap<String, String> map = LocalCache.UsersMap.get(currentItem.getCreator());
+                ivAvatar.setText(map.get("avatar_default"));
 
-            int color = Integer.parseInt(map.get("avatar_default_color"));
-            switch (color) {
-                case 0:
-                    ivAvatar.setBackgroundResource(R.drawable.user_portrait_bg_blue);
-                    break;
-                case 1:
-                    ivAvatar.setBackgroundResource(R.drawable.user_portrait_bg_green);
-                    break;
-                case 2:
-                    ivAvatar.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
-                    break;
+                int color = Integer.parseInt(map.get("avatar_default_color"));
+                switch (color) {
+                    case 0:
+                        ivAvatar.setBackgroundResource(R.drawable.user_portrait_bg_blue);
+                        break;
+                    case 1:
+                        ivAvatar.setBackgroundResource(R.drawable.user_portrait_bg_green);
+                        break;
+                    case 2:
+                        ivAvatar.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
+                        break;
+                }
             }
 
             return view;

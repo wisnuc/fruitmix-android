@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -73,6 +74,21 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         mTitle = String.format(getString(R.string.title_hint), new SimpleDateFormat("yyyy-MM-dd", Locale.SIMPLIFIED_CHINESE).format(new Date(System.currentTimeMillis())));
         mTitleLayout.setHint(mTitle);
+
+        ckPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    ckSetMaintainer.setClickable(true);
+                } else {
+                    ckSetMaintainer.setClickable(false);
+                    if (ckSetMaintainer.isChecked()) {
+                        ckSetMaintainer.setChecked(false);
+                    }
+                }
+            }
+        });
+        ckSetMaintainer.setClickable(false);
 
         btOK.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -179,13 +195,13 @@ public class CreateAlbumActivity extends AppCompatActivity {
                         }
 
                         if (sSuccess) {
-                            setResult(200);
+                            setResult(RESULT_OK);
                             finish();
                         } else {
 
                             Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
 
-                            setResult(200);
+                            setResult(RESULT_CANCELED);
                             finish();
                         }
                     }

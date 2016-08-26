@@ -49,6 +49,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -116,9 +117,6 @@ public class NewPhotoList2 implements NavPagerActivity.Page {
 
     private ImageLoader mImageLoader;
 
-    private Map<String, Map<String, String>> mMediaMap;
-    private Map<String, Map<String, String>> mLocalImagesMap;
-
     //field for pinch
     private float mOldSpacingDist = 0;
     private ScaleGestureDetector mPinchScaleDetector;
@@ -129,13 +127,10 @@ public class NewPhotoList2 implements NavPagerActivity.Page {
         view = View.inflate(containerActivity, R.layout.new_photo_layout2, null);
         ButterKnife.bind(this, view);
 
-        mMediaMap = new HashMap<>();
-        mLocalImagesMap = new HashMap<>();
-
         mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "JWT " + FNAS.JWT);
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
 
@@ -336,13 +331,8 @@ public class NewPhotoList2 implements NavPagerActivity.Page {
         mPhotoTitlePositionNumberMap.clear();
         mPhotoContentPositionNumberMap.clear();
 
-        mMediaMap.clear();
-        mLocalImagesMap.clear();
-        mMediaMap.putAll(LocalCache.MediasMap);
-        mLocalImagesMap.putAll(LocalCache.LocalImagesMap);
-
         //load local images
-        for (Map<String, String> map : mLocalImagesMap.values()) {
+        for (ConcurrentMap<String, String> map : LocalCache.LocalImagesMap.values()) {
 
             if (map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) && map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("true")) {
                 continue;
@@ -369,8 +359,7 @@ public class NewPhotoList2 implements NavPagerActivity.Page {
         }
 
         //load remote images
-        //TO DO: concurrentexception
-        for (Map<String, String> map : mMediaMap.values()) {
+        for (ConcurrentMap<String, String> map : LocalCache.MediasMap.values()) {
 
             date = map.get("mtime").substring(0, 10);
             if (mPhotoMap.containsKey(date)) {
@@ -484,7 +473,7 @@ public class NewPhotoList2 implements NavPagerActivity.Page {
         Intent intent = new Intent();
         intent.setClass(containerActivity, CreateAlbumActivity.class);
         intent.putExtra("selectedUIDStr", selectUID);
-        containerActivity.startActivityForResult(intent, 100);
+        containerActivity.startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
     }
 
     public void createShare(final String selectUID) {
@@ -545,7 +534,7 @@ public class NewPhotoList2 implements NavPagerActivity.Page {
                 }
                 if (sSuccess) {
                     if (containerActivity instanceof NavPagerActivity) {
-                        ((NavPagerActivity) containerActivity).onActivityResult(0, 201, null);
+                        ((NavPagerActivity) containerActivity).onActivityResult(Util.KEY_CREATE_SHARE_REQUEST_CODE, Activity.RESULT_OK, null);
                     }
 
                 } else {
@@ -1023,7 +1012,8 @@ public class NewPhotoList2 implements NavPagerActivity.Page {
 
                 int[] result = Util.formatPhotoWidthHeight(width, height);
 
-                String url = FNAS.Gateway + "/media/" + photo.getUuid() + "?type=thumb&width=" + result[0] + "&height=" + result[1];
+                String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + photo.getUuid(), result[0], result[1]);
+//                String url = FNAS.Gateway + "/media/" + photo.getUuid() + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                 mImageLoader.setShouldCache(true);
                 mPhotoIv.setTag(url);

@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,7 +60,7 @@ public class UserManageActivity extends Activity implements View.OnClickListener
 
             mUserMapList = new ArrayList<>();
 
-            for (Map.Entry<String, Map<String, String>> map : LocalCache.UsersMap.entrySet()) {
+            for (Map.Entry<String, ConcurrentMap<String, String>> map : LocalCache.UsersMap.entrySet()) {
                 mUserMapList.add(map.getValue());
             }
 

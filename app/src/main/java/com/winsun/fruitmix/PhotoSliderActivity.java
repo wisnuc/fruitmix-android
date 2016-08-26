@@ -1,6 +1,5 @@
 package com.winsun.fruitmix;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,38 +8,23 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.volley.Network;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
-import com.android.volley.toolbox.NetworkImageView;
-import com.winsun.fruitmix.Fragment.AlbumList;
-import com.winsun.fruitmix.Fragment.PhotoList;
-import com.winsun.fruitmix.Fragment.ShareList;
-import com.winsun.fruitmix.component.BigLittleImageView;
-import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.component.TouchNetworkImageView;
 import com.winsun.fruitmix.interfaces.IImageLoadListener;
 import com.winsun.fruitmix.model.RequestQueueInstance;
@@ -48,8 +32,6 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +78,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "JWT " + FNAS.JWT);
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
 
@@ -206,7 +188,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     //add by liang.wu
     private boolean getShowPhotoReturnTipsValue() {
         SharedPreferences sp;
-        sp = getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         return sp.getBoolean(Util.SHOW_PHOTO_RETURN_TIPS, true);
     }
 
@@ -214,7 +196,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     private void setShowPhotoReturnTipsValue(boolean value) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
-        sp = getSharedPreferences("fruitMix", Context.MODE_PRIVATE);
+        sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
         editor.putBoolean(Util.SHOW_PHOTO_RETURN_TIPS, false);
         editor.apply();
@@ -249,7 +231,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             if (map.get("cacheType").equals("local")) {
                 currentUrl = String.valueOf(map.get("thumb"));
             } else {
-                currentUrl = FNAS.Gateway + "/media/" + map.get("resHash") + "?type=original";
+                currentUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("resHash"));
+//                currentUrl = FNAS.Gateway + "/media/" + map.get("resHash") + "?type=original";
             }
             if (currentUrl.equals(url)) {
 
@@ -359,7 +342,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                     networkImageView.setImageUrl(url, mImageLoader);
                 } else {
 
-                    String url = FNAS.Gateway + "/media/" + map.get("resHash") + "?type=original";
+                    String url = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("resHash"));
+//                    String url = FNAS.Gateway + "/media/" + map.get("resHash") + "?type=original";
 
                     mImageLoader.setShouldCache(true);
                     networkImageView.setTag(url);
@@ -406,7 +390,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                         } else if (event.getAction() == 2) {
                             lastX = event.getRawX();
                             lastY = event.getRawY();
-                            if(!networkImageView.isZoomed()){
+                            if (!networkImageView.isZoomed()) {
                                 networkImageView.setTranslationY(lastY - y);
                             }
                         } else if (event.getAction() == 1) {

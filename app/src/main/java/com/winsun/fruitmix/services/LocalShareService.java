@@ -17,6 +17,7 @@ import java.net.ConnectException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -94,7 +95,7 @@ public class LocalShareService extends IntentService {
                     if (LocalCache.LocalImagesMap2.containsKey(digest)) {
                         String thumb = LocalCache.LocalImagesMap2.get(digest).get("thumb");
 
-                        Map<String, String> map = LocalCache.LocalImagesMap.get(thumb);
+                        ConcurrentMap<String, String> map = LocalCache.LocalImagesMap.get(thumb);
 
                         Log.i(TAG, "thumb:" + thumb + "hash:" + digest);
 
@@ -114,7 +115,7 @@ public class LocalShareService extends IntentService {
             }
 
             if (uploadSucceedCount > 0){
-                LocalCache.SetGlobalHashMap("localImagesMap", LocalCache.LocalImagesMap);
+                LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMap);
                 Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
                 mManager.sendBroadcast(intent);
             }
@@ -176,7 +177,7 @@ public class LocalShareService extends IntentService {
             Log.d(TAG, "winsun createlocalshare:" + data);
 
             try {
-                String str = FNAS.PostRemoteCall("/mediashare", data);
+                String str = FNAS.PostRemoteCall(Util.MEDIASHARE_PARAMETER, data);
                 if (str != null) {
                     iterator.remove();
                     long deleteResult = mDbUtils.deleteLocalShare(mShare.getId());

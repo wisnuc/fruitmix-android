@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by Administrator on 2016/4/19.
@@ -82,10 +83,6 @@ public class ShareList implements NavPagerActivity.Page {
 
     private ImageLoader mImageLoader;
 
-    private Map<String, Map<String, String>> mMediaMap;
-    private Map<String, Map<String, String>> mLocalImagesMap;
-    private Map<String, Map<String, String>> mDocumentMap;
-
     public ShareList(NavPagerActivity activity_) {
         containerActivity = activity_;
 
@@ -95,13 +92,9 @@ public class ShareList implements NavPagerActivity.Page {
         mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "JWT " + FNAS.JWT);
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
-
-        mMediaMap = new HashMap<>();
-        mLocalImagesMap = new HashMap<>();
-        mDocumentMap = new HashMap<>();
 
         mainListView = (ListView) view.findViewById(R.id.mainList);
         mAdapter = new ShareListViewAdapter(this);
@@ -133,15 +126,7 @@ public class ShareList implements NavPagerActivity.Page {
         Map<String, Object> albumItem;
         shareList1 = new ArrayList<Map<String, Object>>();
 
-        mMediaMap.clear();
-        mLocalImagesMap.clear();
-        mDocumentMap.clear();
-
-        mMediaMap.putAll(LocalCache.MediasMap);
-        mLocalImagesMap.putAll(LocalCache.LocalImagesMap2);
-        mDocumentMap.putAll(LocalCache.DocumentsMap);
-
-        for (Map<String, String> albumRaw : mDocumentMap.values()) {
+        for (ConcurrentMap<String, String> albumRaw : LocalCache.DocumentsMap.values()) {
 
             if (albumRaw.get("del").equals("1")) continue;
 
@@ -174,7 +159,7 @@ public class ShareList implements NavPagerActivity.Page {
             StringBuilder images = new StringBuilder("");
             for (String image : albumRaw.get("images").split(",")) {
 
-                if (mMediaMap.containsKey(image) || mLocalImagesMap.containsKey(image)) {
+                if (LocalCache.MediasMap.containsKey(image) || LocalCache.LocalImagesMap2.containsKey(image)) {
                     images.append(image);
                     images.append(",");
                 } else {
@@ -266,7 +251,7 @@ public class ShareList implements NavPagerActivity.Page {
                         String[] images = map.get("images").toString().split(",");
                         if (images.length == 1) {
 
-                            Map<String, String> imageMap = mMediaMap.get(images[0]);
+                            ConcurrentMap<String, String> imageMap = LocalCache.MediasMap.get(images[0]);
 
                             if (imageMap != null && imageMap.containsKey("uuid")) {
                                 String uuid = imageMap.get("uuid");
@@ -355,7 +340,7 @@ public class ShareList implements NavPagerActivity.Page {
             View view;
             GridView gvGrid;
             final Map<String, Object> currentItem;
-            Map<String, String> coverImg, itemImg;
+            ConcurrentMap<String, String> coverImg, itemImg;
             TextView lbNick, lbTime, lbAlbumTitle;
             ImageView lbAlbumShare;
             NetworkImageView ivCover;
@@ -451,10 +436,10 @@ public class ShareList implements NavPagerActivity.Page {
                 Log.i(TAG, currentItem.get("images").toString());
                 lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.share_album_title), currentItem.get("title"), currentItem.get("imageCount")));
 
-                coverImg = mMediaMap.get(currentItem.get("coverImg"));
+                coverImg = LocalCache.MediasMap.get(String.valueOf(currentItem.get("coverImg")));
                 if (coverImg != null) sLocal = false;
                 else {
-                    coverImg = mLocalImagesMap.get(currentItem.get("coverImg"));
+                    coverImg = LocalCache.LocalImagesMap2.get(String.valueOf(currentItem.get("coverImg")));
                     sLocal = true;
                 }
                 if (coverImg != null) {
@@ -477,7 +462,8 @@ public class ShareList implements NavPagerActivity.Page {
 //
 //                        int[] result = Util.formatPhotoWidthHeight(w, h);
 
-                        String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=original";
+                        String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + coverImg.get("uuid"));
+//                        String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=original";
 
                         mImageLoader.setShouldCache(true);
                         ivCover.setTag(url);
@@ -525,10 +511,10 @@ public class ShareList implements NavPagerActivity.Page {
                     mShareCountLayout.setVisibility(View.GONE);
 
                     Log.i(TAG, "images[0]:" + images[0]);
-                    itemImg = mMediaMap.get(images[0]);
+                    itemImg = LocalCache.MediasMap.get(images[0]);
                     if (itemImg != null) sLocal = false;
                     else {
-                        itemImg = mLocalImagesMap.get(images[0]);
+                        itemImg = LocalCache.LocalImagesMap2.get(images[0]);
                         sLocal = true;
                     }
 
@@ -547,12 +533,13 @@ public class ShareList implements NavPagerActivity.Page {
                         } else {
 //                            LocalCache.LoadRemoteBitmapThumb((String) (itemImg.get("uuid")), w, h, ivCover);
 
-                            w = Integer.parseInt(itemImg.get("width"));
-                            h = Integer.parseInt(itemImg.get("height"));
+//                            w = Integer.parseInt(itemImg.get("width"));
+//                            h = Integer.parseInt(itemImg.get("height"));
+//
+//                            int[] result = Util.formatPhotoWidthHeight(w, h);
 
-                            int[] result = Util.formatPhotoWidthHeight(w, h);
-
-                            String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=original";
+                            String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + itemImg.get("uuid"));
+//                            String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=original";
 
                             mImageLoader.setShouldCache(true);
                             ivCover.setTag(url);
@@ -658,10 +645,10 @@ public class ShareList implements NavPagerActivity.Page {
                             continue;
                         }
                         ivItems[i].setVisibility(View.VISIBLE);
-                        itemImg = mMediaMap.get(images[i]);
+                        itemImg = LocalCache.MediasMap.get(images[i]);
                         if (itemImg != null) sLocal = false;
                         else {
-                            itemImg = mLocalImagesMap.get(images[i]);
+                            itemImg = LocalCache.LocalImagesMap2.get(images[i]);
                             sLocal = true;
                         }
                         //Log.d("winsun", "shareX "+position+" "+i+" "+itemImg);
@@ -684,7 +671,8 @@ public class ShareList implements NavPagerActivity.Page {
 
                                 int[] result = Util.formatPhotoWidthHeight(w, h);
 
-                                String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
+                                String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + itemImg.get("uuid"), result[0], result[1]);
+//                                String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                                 mImageLoader.setShouldCache(true);
                                 ivItems[i].setTag(url);
@@ -763,7 +751,7 @@ public class ShareList implements NavPagerActivity.Page {
         public List<Map<String, Object>> getImgList(String imagesStr) {
             List<Map<String, Object>> picList;
             Map<String, Object> picItem;
-            Map<String, String> picItemRaw;
+            ConcurrentMap<String, String> picItemRaw;
             String[] stArr;
 
             picList = new ArrayList<Map<String, Object>>();
@@ -772,7 +760,7 @@ public class ShareList implements NavPagerActivity.Page {
                 Log.i(TAG, "stArr[0]" + stArr[0]);
                 for (int i = 0; i < stArr.length; i++) {
                     picItem = new HashMap<String, Object>();
-                    picItemRaw = mMediaMap.get(stArr[i]);
+                    picItemRaw = LocalCache.MediasMap.get(stArr[i]);
                     if (picItemRaw != null) {
                         picItem.put("cacheType", "nas");
                         picItem.put("resID", "" + R.drawable.default_img);
@@ -785,7 +773,7 @@ public class ShareList implements NavPagerActivity.Page {
                         picItem.put("locked", "1");
                         picList.add(picItem);
                     } else {
-                        picItemRaw = mLocalImagesMap.get(stArr[i]);
+                        picItemRaw = LocalCache.LocalImagesMap2.get(stArr[i]);
                         if (picItemRaw != null) {
                             picItem.put("cacheType", "local");
                             picItem.put("resID", "" + R.drawable.default_img);
@@ -914,7 +902,7 @@ public class ShareList implements NavPagerActivity.Page {
                         return true;
                     }
 
-                    str = FNAS.RemoteCall("/media/" + params[0] + "?type=comments");
+                    str = FNAS.RemoteCall(String.format(containerActivity.getString(R.string.photo_comment_url), Util.MEDIA_PARAMETER + "/" + params[0]));
                     json = new JSONArray(str);
 
                     dbUtils = DBUtils.SINGLE_INSTANCE;
