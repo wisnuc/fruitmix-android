@@ -33,7 +33,6 @@ import java.util.concurrent.Executors;
  */
 public class Util {
 
-    //add by liang.wu
     public static final String SHOW_ALBUM_TIPS = "show_album_tips";
     public static final String SHOW_PHOTO_RETURN_TIPS = "show_photo_return_tips";
     public static final String EQUIPMENT_GROUP_NAME = "equipment_group_name";
@@ -50,13 +49,16 @@ public class Util {
     public static final String LOCAL_SHARE_CHANGED = "local_share_changed";
     public static final String LOCAL_COMMENT_CHANGED = "local_comment_changed";
     public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
-    public static final String REMOTE_PHOTO_CHANGED = "remote_photo_changed";
+    public static final String REMOTE_PHOTO_LOADED = "remote_photo_loaded";
+    public static final String SHARE_LOADED = "share_loaded";
     public static final String NEED_SHOW_MENU = "need_show_menu";
     public static final String KEY_LOCAL_PHOTO_UPLOAD_SUCCESS = "key_local_photo_upload_success";
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
     public static final String KEY_AUTHORIZATION = "Authorization";
     public static final String KEY_JWT_HEAD = "JWT ";
     public static final String KEY_BASE_HEAD = "Basic ";
+
+    public static final String CREATE_LOCAL_SHARE_FINISH = "create_local_share_finish";
 
     public static final int KEY_MODIFY_ALBUM_REQUEST_CODE = 100;
     public static final int KEY_EDIT_PHOTO_REQUEST_CODE = 101;
@@ -75,7 +77,7 @@ public class Util {
 
     public static final String FRUITMIX_SHAREDPREFERENCE_NAME = "fruitMix";
 
-    public static final String DOCUMENT_MAP_NAME = "documentsMap";
+    public static final String SHARE_MAP_NAME = "sharesMap";
     public static final String MEDIA_MAP_NAME = "mediasMap";
     public static final String USER_MAP_NAME = "usersMap";
     public static final String LOCAL_IMAGE_MAP_NAME = "localImagesMap";
@@ -139,26 +141,12 @@ public class Util {
         if (manager != null) {
             NetworkInfo info = manager.getActiveNetworkInfo();
             if (info != null && info.isConnected()) {
-                // 当前网络是连接的
                 if (info.getState() == NetworkInfo.State.CONNECTED && loginState) {
-                    // 当前所连接的网络可用
                     return true;
                 }
             }
         }
         return false;
-    }
-
-    public static String FormatDateDiff(String date) {
-        /*
-        long diff;
-        diff=new Date().getTime()-new DateFormat.getTime();
-        Log.e("winsun", "ww "+diff);
-        try {
-            Thread.sleep(1000000);
-        }catch (Exception e) {}
-        */
-        return "";
     }
 
     public static String createLocalUUid() {
@@ -181,16 +169,7 @@ public class Util {
         long l = 24 * 60 * 60 & 1000;
         long timeDifference = date.getTime() - date.getTime() % l - 8 * 60 * 60 * 1000 - createTime;
 
-/*        if (timeDifference < 0) {
-            builder.append(String.format(context.getString(R.string.seconds_ago), 0));
-        } else if (timeDifference < 60 * 1000) {
-            builder.append(String.format(context.getString(R.string.seconds_ago), timeDifference / 1000));
-        } else if (timeDifference < 3600 * 1000) {
-            builder.append(String.format(context.getString(R.string.minutes_ago), timeDifference / 60 / 1000));
-        } else */
         if (timeDifference < 0) {
-//            builder.append(String.format(context.getString(R.string.hours_ago), timeDifference / 3600 / 1000));
-
             builder.append(new SimpleDateFormat("HH:mm:ss", Locale.SIMPLIFIED_CHINESE).format(new Date(createTime)));
 
         } else if (timeDifference < 24 * 3600 * 1000) {

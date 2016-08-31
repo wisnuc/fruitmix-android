@@ -35,7 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.Fragment.AlbumList;
-import com.winsun.fruitmix.Fragment.NewPhotoList2;
+import com.winsun.fruitmix.Fragment.NewPhotoList;
 import com.winsun.fruitmix.Fragment.ShareList;
 import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
@@ -69,7 +69,7 @@ public class NavPagerActivity extends AppCompatActivity
 
     public List<Page> pageList;
     AlbumList albumList;
-    NewPhotoList2 photoList;
+    NewPhotoList photoList;
     ShareList shareList;
 
     public boolean sInChooseMode = false;
@@ -111,7 +111,8 @@ public class NavPagerActivity extends AppCompatActivity
         IntentFilter intentFilter = new IntentFilter(Util.LOCAL_SHARE_CHANGED);
         intentFilter.addAction(Util.LOCAL_COMMENT_CHANGED);
         intentFilter.addAction(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
-        intentFilter.addAction(Util.REMOTE_PHOTO_CHANGED);
+        intentFilter.addAction(Util.REMOTE_PHOTO_LOADED);
+        intentFilter.addAction(Util.SHARE_LOADED);
         mManager.registerReceiver(mReceiver, intentFilter);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -124,24 +125,12 @@ public class NavPagerActivity extends AppCompatActivity
         ivBtShare = (ImageView) findViewById(R.id.bt_share);
         lbRight = (TextView) findViewById(R.id.right);
 
-        //setSupportActionBar(toolbar);
-
         fab = (ImageView) findViewById(R.id.fab);
-        /*
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        */
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.setDrawerListener(toggle);
         toggle.syncState();
-        //drawer.openDrawer(GravityCompat.START);
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
@@ -172,44 +161,36 @@ public class NavPagerActivity extends AppCompatActivity
 
 
         shareList = new ShareList(this);
-        photoList = new NewPhotoList2(this);
+        photoList = new NewPhotoList(this);
         albumList = new AlbumList(this);
         pageList = new ArrayList<Page>();
         pageList.add(shareList);
         pageList.add(photoList);
         pageList.add(albumList);
 
-        final MyAdapter myAdapter = new MyAdapter(this);
+        final MyAdapter myAdapter = new MyAdapter();
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         viewPager.setAdapter(myAdapter);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
+        viewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 
             @Override
             public void onPageSelected(int position) {
                 onDidAppear(position);
             }
 
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
         });
 
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         mNavPageBar = new NavPageBar(tabLayout, viewPager);
 
-        viewPager.setCurrentItem(1);
-        onDidAppear(1);
+        viewPager.setCurrentItem(PAGE_PHOTO);
+        onDidAppear(PAGE_PHOTO);
 
         ivBtAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                String selectUIDString = photoList.getSelectedUIDString();
+                String selectUIDString = photoList.getSelectedImageUUIDString();
                 if (selectUIDString.equals("")) {
                     Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
                     return;
@@ -224,7 +205,7 @@ public class NavPagerActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
 
-                String selectUIDString = photoList.getSelectedUIDString();
+                String selectUIDString = photoList.getSelectedImageUUIDString();
                 if (selectUIDString.equals("")) {
                     Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
                     return;
@@ -246,30 +227,9 @@ public class NavPagerActivity extends AppCompatActivity
         super.onResume();
 
         mNavPageBar.registerOnTabChangedListener(this);
-/*
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                try {
-                    FNAS.LoadDocuments();
-                    return true;
-                } catch (Exception ex) {
-                    ex.printStackTrace();
 
-                    return false;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Boolean aBoolean) {
-
-                pageList.get(viewPager.getCurrentItem()).refreshView();
-
-            }
-        }.execute();*/
-
-        if (viewPager.getCurrentItem() == 1) {
-            onDidAppear(1);
+        if (viewPager.getCurrentItem() == PAGE_PHOTO) {
+            onDidAppear(PAGE_PHOTO);
         }
 
     }
@@ -304,10 +264,6 @@ public class NavPagerActivity extends AppCompatActivity
                 }
                 break;
             case R.id.right:
-                /*                if (!Util.getNetworkState(containerActivity)) {
-                    Toast.makeText(containerActivity, containerActivity.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-                    return;
-                }*/
 
                 showChooseHeader();
                 break;
@@ -408,9 +364,14 @@ public class NavPagerActivity extends AppCompatActivity
 
                 pageList.get(currentItem).refreshView();
 
-            } else if (intent.getAction().equals(Util.REMOTE_PHOTO_CHANGED)) {
-                Log.i(TAG, "remote photo changed");
+            } else if (intent.getAction().equals(Util.REMOTE_PHOTO_LOADED)) {
+                Log.i(TAG, "remote photo loaded");
                 if (currentItem == PAGE_PHOTO) {
+                    pageList.get(currentItem).refreshView();
+                }
+            } else if (intent.getAction().equals(Util.SHARE_LOADED)) {
+                Log.i(TAG, "share loaded");
+                if (currentItem == PAGE_SHARE || currentItem == PAGE_ALBUM) {
                     pageList.get(currentItem).refreshView();
                 }
             }
@@ -447,29 +408,29 @@ public class NavPagerActivity extends AppCompatActivity
 
         if ((requestCode == Util.KEY_ALBUM_CONTENT_REQUEST_CODE || requestCode == Util.KEY_CREATE_ALBUM_REQUEST_CODE || requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE) && resultCode == RESULT_OK) {
             hideChooseHeader();
-            viewPager.setCurrentItem(2);
-            onDidAppear(2);
+            viewPager.setCurrentItem(PAGE_ALBUM);
+            onDidAppear(PAGE_ALBUM);
         } else if (requestCode == Util.KEY_CREATE_SHARE_REQUEST_CODE && resultCode == RESULT_OK) {
             hideChooseHeader();
-            viewPager.setCurrentItem(0);
-            onDidAppear(0);
+            viewPager.setCurrentItem(PAGE_SHARE);
+            onDidAppear(PAGE_SHARE);
         }
     }
 
     private void onDidAppear(int position) {
         switch (position) {
-            case 0://share
+            case PAGE_SHARE:
                 toolbar.setTitle(getString(R.string.share_text));
                 fab.setVisibility(View.GONE);
                 ivBtAlbum.setVisibility(View.GONE);
                 ivBtShare.setVisibility(View.GONE);
                 lbRight.setVisibility(View.GONE);
                 break;
-            case 1://photo
+            case PAGE_PHOTO:
                 toolbar.setTitle(getString(R.string.photo_text));
                 lbRight.setVisibility(View.VISIBLE);
                 break;
-            case 2://album
+            case PAGE_ALBUM:
                 toolbar.setTitle(getString(R.string.album_text));
                 fab.setVisibility(View.GONE);
                 ivBtAlbum.setVisibility(View.GONE);
@@ -487,10 +448,8 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     public void showTips() {
-        //add by liang.wu
         if (getShowAlbumTipsValue()) {
             setShowAlbumTipsValue(false);
-
             mAlbumBalloon = (ImageView) findViewById(R.id.album_balloon);
             if (mAlbumBalloon != null) {
                 mAlbumBalloon.setVisibility(View.VISIBLE);
@@ -504,14 +463,12 @@ public class NavPagerActivity extends AppCompatActivity
         }
     }
 
-    //add by liang.wu
     private boolean getShowAlbumTipsValue() {
         SharedPreferences sp;
         sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         return sp.getBoolean(Util.SHOW_ALBUM_TIPS, true);
     }
 
-    //add by liang.wu
     private void setShowAlbumTipsValue(boolean value) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
@@ -669,11 +626,7 @@ public class NavPagerActivity extends AppCompatActivity
 
 
     private class MyAdapter extends PagerAdapter {
-        private NavPagerActivity activity;
 
-        public MyAdapter(NavPagerActivity activity) {
-            this.activity = activity;
-        }
 
         @Override
         public CharSequence getPageTitle(int position) {
@@ -709,9 +662,9 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     public interface Page {
-        public abstract void onDidAppear();
+        void onDidAppear();
 
-        public abstract View getView();
+        View getView();
 
         void refreshView();
     }

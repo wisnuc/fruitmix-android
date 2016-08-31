@@ -8,23 +8,14 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
-import android.view.Display;
-import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.services.LocalPhotoUploadService;
 
 import java.io.ByteArrayInputStream;
@@ -34,17 +25,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.HttpURLConnection;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -56,20 +43,13 @@ public class LocalCache {
     public static String CacheRootPath;
     static Application CurrentApp;
 
-    static Bitmap BigPic = null;
-    static ImageView HotIV = null;
-    static Map<String, Object> HotImage = null;
-
-    public static ConcurrentMap<String, ConcurrentMap<String, String>> DocumentsMap = null;
+    public static ConcurrentMap<String, ConcurrentMap<String, String>> SharesMap = null;
     public static ConcurrentMap<String, ConcurrentMap<String, String>> UsersMap = null;
     public static ConcurrentMap<String, ConcurrentMap<String, String>> MediasMap = null;
-    public static ConcurrentMap<String, ConcurrentMap<String, String>> LocalImagesMap = null; // 本地图片缓存(thumb为key)
-    public static ConcurrentMap<String, ConcurrentMap<String, String>> LocalImagesMap2 = null;// 本地图片缓存副本（uuid为key）
+    public static ConcurrentMap<String, ConcurrentMap<String, String>> LocalImagesMapKeyIsThumb = null;
+    public static ConcurrentMap<String, ConcurrentMap<String, String>> LocalImagesMapKeyIsUUID = null;
 
     public static String DeviceID = null;
-
-//    public static Map<String, Map<String, String>> Images=null;
-//    public static Map<String, Map<String, String>> Shares=null;
 
     public static Map<String, Object> TransActivityContainer;
 
@@ -80,7 +60,6 @@ public class LocalCache {
         if (file.isDirectory()) {
             files = file.listFiles();
             for (i = 0; i < files.length; i++) {
-                //Log.d("winsun", "AA "+files[i]);
                 if (file.isFile() || file.isDirectory()) DeleteFile(files[i]);
             }
         }
@@ -89,36 +68,19 @@ public class LocalCache {
     }
 
     public static void CleanAll() {
-/*
-        File file1;
-        // reset cache
-        file1 = new File(CacheRootPath + "/thumbCache");
-        DeleteFile(file1);
 
-        file1 = new File(CacheRootPath + "/thumbCache");
-        if (!file1.exists()) file1.mkdirs();
-        Log.d("winsun", "Cache: " + file1);
-
-        file1 = new File(CacheRootPath + "/innerCache");
-        if (!file1.exists()) file1.mkdirs();
-        Log.d("winsun", "Cache: " + file1);
-*/
-
-        // Upload Record Table
-        // LocalCache.DropGlobalData("localHashMap");
-        // Document Hash
-        LocalCache.DropGlobalData(Util.DOCUMENT_MAP_NAME);
+        LocalCache.DropGlobalData(Util.SHARE_MAP_NAME);
         LocalCache.DropGlobalData("albumsMap");
         LocalCache.DropGlobalData(Util.USER_MAP_NAME);
         LocalCache.DropGlobalData(Util.MEDIA_MAP_NAME);
         LocalCache.DropGlobalData(Util.DEVICE_ID_MAP_NAME);
         LocalCache.DropGlobalData(Util.LOCAL_COMMENT_MAP);
 
-        DocumentsMap = LocalCache.GetGlobalHashMap(Util.DOCUMENT_MAP_NAME);
+        SharesMap = LocalCache.GetGlobalHashMap(Util.SHARE_MAP_NAME);
         UsersMap = LocalCache.GetGlobalHashMap(Util.USER_MAP_NAME);
         MediasMap = LocalCache.GetGlobalHashMap(Util.MEDIA_MAP_NAME);
-        LocalImagesMap = LocalCache.GetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME);
-        BuildLocalImagesMaps2();
+        LocalImagesMapKeyIsThumb = LocalCache.GetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME);
+        BuildLocalImagesMapsKeyIsUUID();
 
         DeviceID = null;
 
@@ -126,69 +88,36 @@ public class LocalCache {
         dbUtils.deleteAllLocalShare();
         dbUtils.deleteAllLocalComment();
         dbUtils.deleteAllRemoteComment();
-        //
     }
 
 
-    public static void BuildLocalImagesMaps2() {
+    public static void BuildLocalImagesMapsKeyIsUUID() {
         ConcurrentMap<String, String> itemRaw;
 
-        LocalCache.LocalImagesMap2 = new ConcurrentHashMap<>();
-        for (String key : LocalCache.LocalImagesMap.keySet()) {
-            itemRaw = LocalCache.LocalImagesMap.get(key);
-            LocalCache.LocalImagesMap2.put(itemRaw.get("uuid"), itemRaw);
+        LocalCache.LocalImagesMapKeyIsUUID = new ConcurrentHashMap<>();
+        for (String key : LocalCache.LocalImagesMapKeyIsThumb.keySet()) {
+            itemRaw = LocalCache.LocalImagesMapKeyIsThumb.get(key);
+            LocalCache.LocalImagesMapKeyIsUUID.put(itemRaw.get("uuid"), itemRaw);
         }
     }
 
     public static boolean Init(Activity activity) {
-/*
-        File file, file1;
-        boolean b;
-        Map<String, String> item;
-*/
 
         CurrentApp = activity.getApplication();
-/*        file = activity.getApplication().getExternalCacheDir();
-        if (file == null) file = activity.getApplication().getCacheDir();
-        if (!file.exists() && !file.mkdirs()) {
-            file = activity.getApplication().getFilesDir();
-            if (!file.exists()) file.mkdirs();
-        }
 
-        CacheRootPath = "" + file;
+        TransActivityContainer = new HashMap<>();
 
-        file1 = new File(CacheRootPath + "/innerCache");
-        DeleteFile(file1);
-
-        file1 = new File(CacheRootPath + "/thumbCache");
-        if (!file1.exists()) file1.mkdirs();
-        Log.d("winsun", "Cache: " + file1);
-
-        file1 = new File(CacheRootPath + "/innerCache");
-        if (!file1.exists()) file1.mkdirs();
-        Log.d("winsun", "Cache: " + file1);*/
-
-        TransActivityContainer = new HashMap<String, Object>();
-
-        DocumentsMap = LocalCache.GetGlobalHashMap(Util.DOCUMENT_MAP_NAME);
+        SharesMap = LocalCache.GetGlobalHashMap(Util.SHARE_MAP_NAME);
         UsersMap = LocalCache.GetGlobalHashMap(Util.USER_MAP_NAME);
         MediasMap = LocalCache.GetGlobalHashMap(Util.MEDIA_MAP_NAME);
-        LocalImagesMap = LocalCache.GetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME);
-        BuildLocalImagesMaps2();
+        LocalImagesMapKeyIsThumb = LocalCache.GetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME);
+        BuildLocalImagesMapsKeyIsUUID();
         DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
 
-        Log.i("LocalCache", DocumentsMap.toString());
+        Log.i("LocalCache", SharesMap.toString());
         Log.i("LocalCache", UsersMap.toString());
         Log.i("LocalCache", MediasMap.toString());
-        Log.i("LocalCache", LocalImagesMap.toString());
-
-
-//        Images=new HashMap<String, Map<String, String>>();
-//        Shares=new HashMap<String, Map<String, String>>();
-//        item=new HashMap<String, String>();
-//        Shares.put("ss", item);
-//        item=new HashMap<String, String>();
-//        Shares.put("ss1", item);
+        Log.i("LocalCache", LocalImagesMapKeyIsThumb.toString());
 
         return true;
     }
@@ -214,7 +143,7 @@ public class LocalCache {
 
         for (i = 0; i < localPhotoList.size(); i++) {
             itemRaw = localPhotoList.get(i);
-            if (LocalImagesMap.containsKey(itemRaw.get("thumb"))) continue;
+            if (LocalImagesMapKeyIsThumb.containsKey(itemRaw.get("thumb"))) continue;
 
             String uuid = Util.CalcSHA256OfFile(itemRaw.get("thumb"));
 
@@ -225,42 +154,15 @@ public class LocalCache {
             item.put("mtime", itemRaw.get("lastModified"));
             item.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, "false");
             item.put("uuid", uuid);
-            LocalImagesMap.put(itemRaw.get("thumb"), item);
-            LocalImagesMap2.put(uuid, item);
+            LocalImagesMapKeyIsThumb.put(itemRaw.get("thumb"), item);
+            LocalImagesMapKeyIsUUID.put(uuid, item);
         }
 
-        LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMap);
-        Log.d("winsun", "LocalImagesMap " + LocalCache.LocalImagesMap);
+        LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMapKeyIsThumb);
+        Log.d("winsun", "LocalImagesMapKeyIsThumb " + LocalCache.LocalImagesMapKeyIsThumb);
 
         LocalPhotoUploadService.startActionUploadLocalPhoto(Util.APPLICATION_CONTEXT);
     }
-
-    /*
-    public static void LoadLocalBitmap(final String key, final ImageView iv) {
-
-        new AsyncTask<Object, Object, Bitmap>() {
-            @Override
-            protected Bitmap doInBackground(Object...params) {
-                String path;
-                Bitmap bmp;
-
-                if(key.startsWith("/")) path=key;
-                else path=CacheRootPath+"/thumbCache/"+key;
-                bmp= BitmapFactory.decodeFile(path);
-
-                return bmp;
-            }
-
-            @Override
-            protected void onPostExecute(Bitmap bmp) {
-                try {
-                    iv.setImageBitmap(bmp);
-                } catch (NullPointerException e) { e.printStackTrace(); }
-            }
-
-        }.execute();
-
-    }*/
 
     // get thumb bitmap
     public static void LoadRemoteBitmapThumb(final String key, final int width, final int height, final ImageView iv) {
@@ -319,7 +221,6 @@ public class LocalCache {
                 Bitmap bmp;
                 String path;
                 BitmapFactory.Options bmpOptions;
-//Log.d("winsun", "NAS: "+key);
                 BigLittleImageView.HotView2 = iv;
                 path = CacheRootPath + "/thumbCache/" + key;
                 if (!new File(path).exists()) {
@@ -404,75 +305,6 @@ public class LocalCache {
 
     public static void LoadLocalBitmapThumb(final String path, final int width, final int height, final ImageView iv) {
 
-//        // use cachethreadpool instead of asynctask
-//        DBUtils.SINGLE_INSTANCE.doOneTaskInCachedThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                String key, path1, pathTemp;
-//                Bitmap bmp;
-//                BitmapFactory.Options bmpOptions;
-//                int inSampleSize1, inSampleSize2;
-//                FileOutputStream fout;
-//
-//                try {
-//
-//                    key = CalcDegist(path + "?" + width + "X" + height);
-//                    path1 = CacheRootPath + "/thumbCache/" + key;
-//                    Log.i("LocalCache",p1)
-//                    if (!new File(path1).exists()) {
-//                        bmpOptions = new BitmapFactory.Options();
-//                        bmpOptions.inJustDecodeBounds = true;
-//                        bmp = BitmapFactory.decodeFile(path, bmpOptions);
-//                        inSampleSize1 = bmpOptions.outWidth / width / 2;
-//                        inSampleSize2 = bmpOptions.outHeight / height / 2;
-//                        bmpOptions.inSampleSize = inSampleSize1 > inSampleSize2 ? inSampleSize2 : inSampleSize1;
-//                        bmpOptions.inJustDecodeBounds = false;
-//                        bmp = BitmapFactory.decodeFile(path, bmpOptions);
-//                        pathTemp = GetInnerTempFile();
-//                        fout = new FileOutputStream(new File(pathTemp));
-//                        bmp.compress(Bitmap.CompressFormat.JPEG, 80, fout);
-//                        fout.flush();
-//                        fout.close();
-//                        MoveTempFileToThumbCache(pathTemp, key);
-//
-//                        final Bitmap bitmap = bmp;
-//
-//                        iv.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                try {
-//                                    if (iv.getTag() != null && iv.getTag().equals(path)) {
-//                                        iv.setImageBitmap(bitmap);
-//                                    }
-//                                } catch (NullPointerException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//                        });
-//
-//                    } else {
-////                        Log.d("winsun", "Cached!");
-//                        final Bitmap bitmap = BitmapFactory.decodeFile(path1);
-//
-//                        iv.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                try {
-//                                    if (bitmap != null && iv.getTag() != null && iv.getTag().equals(path)) {
-//                                        iv.setImageBitmap(bitmap);
-//                                    }
-//                                } catch (NullPointerException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//                        });
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
-
         new AsyncTask<Object, Object, Bitmap>() {
             @Override
             protected Bitmap doInBackground(Object... params) {
@@ -549,23 +381,7 @@ public class LocalCache {
             @Override
             protected void onPostExecute(Bitmap bmp) {
                 try {
-                    /*
-                    if(BigLittleImageView.HotView!=null) {
-                        BigLittleImageView.HotView.bigPic.recycle();
-                        BigLittleImageView.HotView.bigPic=null;
-                        BigLittleImageView.HotView.loadSmallPic();
-                        //BigLittleImageView.HotView.setImageResource(R.drawable.yesshou);
-                        System.gc();
-                        Log.d("winsun", "Recycled");
-                    }*/
                     iv.setImageBitmap(bmp);
-                    /*
-                    Matrix matrix;
-                    matrix=new Matrix();
-                    matrix.postRotate(30.0f);
-                    iv.setScaleType(ImageView.ScaleType.MATRIX);
-                    iv.setImageMatrix(matrix);
-                    */
                     iv.bigPic = bmp;
                     BigLittleImageView.HotView = iv;
 
@@ -683,7 +499,7 @@ public class LocalCache {
         sp = CurrentApp.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         mEditor = sp.edit();
         mEditor.putString(name, data);
-        mEditor.commit();
+        mEditor.apply();
     }
 
     public static void DropGlobalData(String name) {
@@ -693,7 +509,7 @@ public class LocalCache {
         sp = CurrentApp.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         mEditor = sp.edit();
         mEditor.putString(name, null);
-        mEditor.commit();
+        mEditor.apply();
     }
 
     public static ConcurrentMap<String, ConcurrentMap<String, String>> GetGlobalHashMap(String name) {

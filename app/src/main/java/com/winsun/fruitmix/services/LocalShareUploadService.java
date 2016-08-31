@@ -12,11 +12,8 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import java.io.FileNotFoundException;
-import java.net.ConnectException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -25,12 +22,11 @@ import java.util.concurrent.ConcurrentMap;
  * <p/>
  * helper methods.
  */
-public class LocalShareService extends IntentService {
+public class LocalShareUploadService extends IntentService {
 
-    public static final String TAG = LocalShareService.class.getSimpleName();
+    public static final String TAG = LocalShareUploadService.class.getSimpleName();
 
     // TODO: Rename actions, choose action names that describe tasks that this
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_LOCAL_SHARE_TASK = "com.winsun.fruitmix.action.local_share_task";
 
     private DBUtils mDbUtils;
@@ -39,7 +35,7 @@ public class LocalShareService extends IntentService {
 
     private LocalBroadcastManager mManager;
 
-    public LocalShareService() {
+    public LocalShareUploadService() {
         super("LocalShareService");
     }
 
@@ -51,7 +47,7 @@ public class LocalShareService extends IntentService {
      */
     // TODO: Customize helper method
     public static void startActionLocalShareTask(Context context) {
-        Intent intent = new Intent(context, LocalShareService.class);
+        Intent intent = new Intent(context, LocalShareUploadService.class);
         intent.setAction(ACTION_LOCAL_SHARE_TASK);
         context.startService(intent);
     }
@@ -87,15 +83,15 @@ public class LocalShareService extends IntentService {
 
             boolean uploadFileResult = true;
             String[] digests = mShare.getDigest().split(",");
-            int uploadSucceedCount = digests.length;
+            int uploadSucceedCount = 0;
 
             for (String digest : digests) {
                 if (!FNAS.isPhotoInMediaMap(digest)) {
 
-                    if (LocalCache.LocalImagesMap2.containsKey(digest)) {
-                        String thumb = LocalCache.LocalImagesMap2.get(digest).get("thumb");
+                    if (LocalCache.LocalImagesMapKeyIsUUID.containsKey(digest)) {
+                        String thumb = LocalCache.LocalImagesMapKeyIsUUID.get(digest).get("thumb");
 
-                        ConcurrentMap<String, String> map = LocalCache.LocalImagesMap.get(thumb);
+                        ConcurrentMap<String, String> map = LocalCache.LocalImagesMapKeyIsThumb.get(thumb);
 
                         Log.i(TAG, "thumb:" + thumb + "hash:" + digest);
 
@@ -105,8 +101,10 @@ public class LocalShareService extends IntentService {
                             map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, String.valueOf(uploadFileResult));
                             Log.i(TAG, "digest:" + digest + "uploadFileResult:" + uploadFileResult);
 
-                            if(!uploadFileResult){
+                            if (!uploadFileResult) {
                                 break;
+                            }else {
+                                uploadSucceedCount++;
                             }
                         }
                     }
@@ -114,14 +112,14 @@ public class LocalShareService extends IntentService {
                 }
             }
 
-            if (uploadSucceedCount > 0){
-                LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMap);
+            if (uploadSucceedCount > 0) {
+                LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMapKeyIsThumb);
                 Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
                 mManager.sendBroadcast(intent);
             }
 
             // if upload fail,skip this album,otherwise save upload state
-            if (!uploadFileResult){
+            if (!uploadFileResult) {
                 continue;
             }
 
@@ -149,9 +147,6 @@ public class LocalShareService extends IntentService {
 
             Log.i(TAG, "winsun maintainers:" + maintainers);
 
-//            data = "{\"album\":true, \"archived\":false,\"maintainers\":\"[" + maintainers.substring(1) + "]\",\"viewers\":\"[" + viewers.substring(1) + "]\",\"tags\":[{\"albumname\":\"" + mShare.getTitle() + "\",\"desc\":\"" + mShare.getDesc() + "\"}],\"contents\":\"[" + data.substring(1) + "]\"}";
-//            Log.d(TAG, "winsun old createlocalshare:" + data);
-
             StringBuilder builder = new StringBuilder();
             builder.append("{\"album\":");
             builder.append(String.valueOf(mShare.isAlbum()));
@@ -173,15 +168,14 @@ public class LocalShareService extends IntentService {
 
             data = builder.toString();
 
-//            data = "{\"album\":true, \"archived\":false,\"maintainers\":\"[" + maintainers.substring(1) + "]\",\"viewers\":\"[" + viewers.substring(1) + "]\",\"tags\":[{\"albumname\":\"" + mShare.getTitle() + "\",\"desc\":\"" + mShare.getDesc() + "\"}],\"contents\":\"[" + data.substring(1) + "]\"}";
-            Log.d(TAG, "winsun createlocalshare:" + data);
+            Log.d(TAG, "winsun create local share:" + data);
 
             try {
                 String str = FNAS.PostRemoteCall(Util.MEDIASHARE_PARAMETER, data);
                 if (str != null) {
                     iterator.remove();
                     long deleteResult = mDbUtils.deleteLocalShare(mShare.getId());
-                    LocalCache.DocumentsMap.remove(mShare.getUuid());
+                    LocalCache.SharesMap.remove(mShare.getUuid());
                     Log.i(TAG, "deleteLocalShare:" + mShare.getId() + "result:" + deleteResult);
                 }
 
@@ -193,7 +187,7 @@ public class LocalShareService extends IntentService {
 
         if (shareCount > mShareList.size()) {
             Log.i(TAG, "before send broadcast");
-            FNAS.LoadDocuments();
+            FNAS.retrieveShareMap();
             Intent intent = new Intent(Util.LOCAL_SHARE_CHANGED);
             mManager.sendBroadcast(intent);
             Log.i(TAG, "after send broadcast");

@@ -4,32 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
-import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.Fragment.NewPhotoList;
-import com.winsun.fruitmix.Fragment.NewPhotoList2;
-import com.winsun.fruitmix.interfaces.IPhotoListListener;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,7 +28,7 @@ public class NewAlbumPicChooseActivity extends Activity {
     @BindView(R.id.main_framelayout)
     FrameLayout mMainFrameLayout;
 
-    private NewPhotoList2 mNewPhotoList;
+    private NewPhotoList mNewPhotoList;
 
     private Context mContext;
 
@@ -60,7 +42,7 @@ public class NewAlbumPicChooseActivity extends Activity {
 
         mContext = this;
 
-        mNewPhotoList = new NewPhotoList2(this);
+        mNewPhotoList = new NewPhotoList(this);
 
         mMainFrameLayout.addView(mNewPhotoList.getView());
         mNewPhotoList.setSelectMode(true);
@@ -79,8 +61,8 @@ public class NewAlbumPicChooseActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                String selectUIDString = getSelectedUIDString();
-                if (selectUIDString.equals("")) {
+                String selectImageUUIDString = getSelectedImageUUIDString();
+                if (selectImageUUIDString.equals("")) {
                     Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -89,14 +71,14 @@ public class NewAlbumPicChooseActivity extends Activity {
 
                 if (intent.getBooleanExtra(Util.EDIT_PHOTO, false)) {
 
-                    getIntent().putExtra("selectedUIDStr", selectUIDString);
+                    getIntent().putExtra("mSelectedImageUUIDStr", selectImageUUIDString);
                     setResult(RESULT_OK, intent);
                     finish();
 
                 } else {
                     intent = new Intent();
                     intent.setClass(NewAlbumPicChooseActivity.this, CreateAlbumActivity.class);
-                    intent.putExtra("selectedUIDStr", selectUIDString);
+                    intent.putExtra("mSelectedImageUUIDStr", selectImageUUIDString);
                     startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
                 }
 
@@ -118,8 +100,8 @@ public class NewAlbumPicChooseActivity extends Activity {
     }
 
 
-    public String getSelectedUIDString() {
-        return mNewPhotoList.getSelectedUIDString();
+    public String getSelectedImageUUIDString() {
+        return mNewPhotoList.getSelectedImageUUIDString();
     }
 
 }

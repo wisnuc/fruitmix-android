@@ -114,10 +114,10 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <service
-            android:name=".services.LocalShareService"
+            android:name=".services.LocalShareUploadService"
             android:exported="false" />
         <service
-            android:name=".services.LocalCommentService"
+            android:name=".services.LocalCommentUploadService"
             android:exported="false" />
         <service
             android:name=".services.LocalPhotoUploadService"
@@ -127,6 +127,19 @@
             android:name=".MorePhotoActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <service
+            android:name=".services.CreateLocalShareService"
+            android:exported="false" />
+        <service
+            android:name=".services.ModifyShareService"
+            android:exported="false" />
+        <service
+            android:name=".services.DeleteShareService"
+            android:exported="false" />
+        <service
+            android:name=".services.CreateLocalCommentService"
+            android:exported="false" />
     </application>
 
 </manifest>

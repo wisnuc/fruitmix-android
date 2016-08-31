@@ -6,15 +6,13 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.services.LocalShareService;
-import com.winsun.fruitmix.services.LocalCommentService;
+import com.winsun.fruitmix.model.ExecutorServiceInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -46,6 +44,7 @@ public class SplashScreenActivity extends Activity {
     private CustomHandler mHandler;
     public static final int WELCOME = 0x0010;
 
+    public static final int DELAY_TIME_MILLISECOND = 3 * 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +55,8 @@ public class SplashScreenActivity extends Activity {
         mContext = this;
 
         mHandler = new CustomHandler(this);
-        mHandler.sendEmptyMessageDelayed(WELCOME, 3 * 1000);
+        mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
 
-//        writeOneByteToFile();
     }
 
     private void welcome() {
@@ -74,7 +72,6 @@ public class SplashScreenActivity extends Activity {
         } else {
             Intent intent = new Intent();
             intent.setClass(SplashScreenActivity.this, EquipmentSearchActivity.class);
-            //intent.setClass(MainActivity.this, AlbumPicContentActivity.class);
             startActivity(intent);
             finish();
         }
@@ -95,7 +92,7 @@ public class SplashScreenActivity extends Activity {
                 try {
                     conn = (HttpURLConnection) (new URL(mGateway + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
                     conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((mUuid + ":" + mPassword).getBytes(), Base64.DEFAULT));
-                    conn.setConnectTimeout(15 * 1000);
+                    conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
                     if (conn.getResponseCode() != 200) {
 
                         FNAS.Gateway = mGateway;
@@ -105,12 +102,12 @@ public class SplashScreenActivity extends Activity {
 
                         LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
 
-                        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                        dbUtils.doOneTaskInCachedThread(new Runnable() {
+                        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+                        instance.doOneTaskInCachedThread(new Runnable() {
                             @Override
                             public void run() {
                                 try {
-                                    FNAS.LoadDocuments();
+                                    FNAS.loadData();
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }
@@ -127,26 +124,24 @@ public class SplashScreenActivity extends Activity {
                         FNAS.userUUID = mUuid;
 
                         str = FNAS.ReadFull(conn.getInputStream());
-                        FNAS.JWT = new JSONObject(str).getString("token"); // get token
+                        FNAS.JWT = new JSONObject(str).getString("token");
 
                         Util.loginState = true;
 
                         if (LocalCache.DeviceID == null || LocalCache.DeviceID.equals("")) {
-                            //SetGlobalData("deviceID", UUID.randomUUID().toString());
                             str = FNAS.PostRemoteCall("/library/", "");
                             LocalCache.DeviceID = str.replace("\"", "");
                             LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
-                        } // get deviceID
+                        }
                         Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
 
-//                        FNAS.checkOfflineTask(mContext);
 
-                        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                        dbUtils.doOneTaskInCachedThread(new Runnable() {
+                        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+                        instance.doOneTaskInCachedThread(new Runnable() {
                             @Override
                             public void run() {
                                 try {
-                                    FNAS.LoadDocuments();
+                                    FNAS.loadData();
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }
@@ -169,12 +164,12 @@ public class SplashScreenActivity extends Activity {
 
                     LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
 
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                    dbUtils.doOneTaskInCachedThread(new Runnable() {
+                    ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+                    instance.doOneTaskInCachedThread(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                FNAS.LoadDocuments();
+                                FNAS.loadData();
                             } catch (Exception ex) {
                                 ex.printStackTrace();
                             }
@@ -225,9 +220,9 @@ public class SplashScreenActivity extends Activity {
 
     private void writeOneByteToFile() {
 
-        File file = new File(getDir("test", MODE_PRIVATE), "test");
+        File file = new File(getExternalFilesDir(null), "test");
 
-        FileOutputStream fileOutputStream;
+        FileOutputStream fileOutputStream = null;
 
         try {
 
@@ -239,10 +234,23 @@ public class SplashScreenActivity extends Activity {
             fileOutputStream.write(bytes);
             fileOutputStream.flush();
 
+            Toast.makeText(mContext, " 创建成功", Toast.LENGTH_SHORT).show();
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            Toast.makeText(mContext, " 创建失败", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
+            Toast.makeText(mContext, " 创建失败", Toast.LENGTH_SHORT).show();
+        } finally {
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
     }
 

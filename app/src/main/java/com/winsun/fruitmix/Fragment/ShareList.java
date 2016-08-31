@@ -1,18 +1,13 @@
 package com.winsun.fruitmix.Fragment;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.AsyncTask;
-import android.support.v7.widget.Toolbar;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -32,8 +27,6 @@ import com.winsun.fruitmix.MorePhotoActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.ShareCommentActivity;
-import com.winsun.fruitmix.SplashScreenActivity;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.RequestQueueInstance;
@@ -44,7 +37,6 @@ import com.winsun.fruitmix.util.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.net.ConnectException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,9 +61,9 @@ public class ShareList implements NavPagerActivity.Page {
     LinearLayout mNoContentLayout;
 
     public ListView mainListView;
-    List<Map<String, Object>> shareList;
+    List<Map<String, Object>> mShareList;
 
-    Map<String, List<Comment>> mCommentMap;
+    Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
     ShareListViewAdapter mAdapter;
 
     int mLoadCommentCount = 0;
@@ -103,22 +95,8 @@ public class ShareList implements NavPagerActivity.Page {
         mLoadingLayout = (LinearLayout) view.findViewById(R.id.loading_layout);
         mNoContentLayout = (LinearLayout) view.findViewById(R.id.no_content_layout);
 
-        mCommentMap = new HashMap<>();
+        mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
 
-/*        while (true) {
-            try {
-                Thread.sleep(2000);
-                refreshView();
-                break;
-            } catch (Exception e) {
-                try {
-                    e.printStackTrace();
-                    Thread.sleep(1000);
-                } catch (Exception e1) {
-                }
-            }
-        }*/
-        //loadRemoteData();
     }
 
     public void reloadList() {
@@ -126,7 +104,7 @@ public class ShareList implements NavPagerActivity.Page {
         Map<String, Object> albumItem;
         shareList1 = new ArrayList<Map<String, Object>>();
 
-        for (ConcurrentMap<String, String> albumRaw : LocalCache.DocumentsMap.values()) {
+        for (ConcurrentMap<String, String> albumRaw : LocalCache.SharesMap.values()) {
 
             if (albumRaw.get("del").equals("1")) continue;
 
@@ -159,7 +137,7 @@ public class ShareList implements NavPagerActivity.Page {
             StringBuilder images = new StringBuilder("");
             for (String image : albumRaw.get("images").split(",")) {
 
-                if (LocalCache.MediasMap.containsKey(image) || LocalCache.LocalImagesMap2.containsKey(image)) {
+                if (LocalCache.MediasMap.containsKey(image) || LocalCache.LocalImagesMapKeyIsUUID.containsKey(image)) {
                     images.append(image);
                     images.append(",");
                 } else {
@@ -214,9 +192,9 @@ public class ShareList implements NavPagerActivity.Page {
             }
         });
 
-        shareList = shareList1;
+        mShareList = shareList1;
 
-        Log.d(TAG, "shareList " + shareList);
+        Log.d(TAG, "mShareList " + mShareList);
 
     }
 
@@ -227,12 +205,12 @@ public class ShareList implements NavPagerActivity.Page {
 
         reloadList();
 
-        mCommentMap.clear();
+        mMapKeyIsImageUUIDValueIsComments.clear();
         mLoadCommentCount = 0;
         mLoadCommentTotal = 0;
 
         mLoadingLayout.setVisibility(View.INVISIBLE);
-        if (shareList.size() == 0) {
+        if (mShareList.size() == 0) {
             mNoContentLayout.setVisibility(View.VISIBLE);
             mainListView.setVisibility(View.INVISIBLE);
         } else {
@@ -241,12 +219,12 @@ public class ShareList implements NavPagerActivity.Page {
             ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
 
             loadLocalCommentList();
-            //load comment
+
             if (Util.getNetworkState(containerActivity)) {
 
-                List<String> imageUUIDList = new ArrayList<>(shareList.size());
+                List<String> imageUUIDList = new ArrayList<>(mShareList.size());
 
-                for (Map<String, Object> map : shareList) {
+                for (Map<String, Object> map : mShareList) {
                     if (!map.get("type").equals("album")) {
                         String[] images = map.get("images").toString().split(",");
                         if (images.length == 1) {
@@ -276,38 +254,6 @@ public class ShareList implements NavPagerActivity.Page {
         }
     }
 
-    public void loadRemoteData() {
-
-        new AsyncTask<Object, Object, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Object... params) {
-                String str, date;
-                JSONArray json;
-                int i;
-                JSONObject itemRaw;
-                Map<String, String> item;
-
-                try {
-
-                    str = FNAS.RemoteCall("/document");
-
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-
-                return true;
-            }
-
-            @Override
-            protected void onPostExecute(Boolean sSuccess) {
-                //if(sSuccess) ((BaseAdapter)(mainListView.getAdapter())).notifyDataSetChanged();
-            }
-
-        }.execute();
-    }
-
     public void onDidAppear() {
 
         refreshView();
@@ -331,8 +277,8 @@ public class ShareList implements NavPagerActivity.Page {
 
         @Override
         public int getCount() {
-            if (container.shareList == null) return 0;
-            return container.shareList.size();
+            if (container.mShareList == null) return 0;
+            return container.mShareList.size();
         }
 
         @Override
@@ -374,7 +320,6 @@ public class ShareList implements NavPagerActivity.Page {
             lbAlbumTitle = (TextView) view.findViewById(R.id.album_title);
             lbAlbumShare = (ImageView) view.findViewById(R.id.album_share);
 
-            //add by liang.wu
             mShareCountLayout = (RelativeLayout) view.findViewById(R.id.share_count_layout);
             mShareCommentLayout = (RelativeLayout) view.findViewById(R.id.share_comment_layout);
             mAvator = (TextView) view.findViewById(R.id.avatar);
@@ -383,7 +328,6 @@ public class ShareList implements NavPagerActivity.Page {
             lbNick.setText(nickName);
             lbTime.setText(Util.formatTime(containerActivity, Long.parseLong(String.valueOf(currentItem.get("mtime")))));
 
-            //add by liang.wu
             mAvator.setText(String.valueOf(currentItem.get("avatar")));
             int color = 0;
             if (currentItem.containsKey("avatar_default_color") && currentItem.get("avatar_default_color") != null) {
@@ -405,10 +349,10 @@ public class ShareList implements NavPagerActivity.Page {
                     break;
             }
 
-            rlAlbum = (View) view.findViewById(R.id.album_row);
-            llPic1 = (View) view.findViewById(R.id.pic_row1);
-            llPic2 = (View) view.findViewById(R.id.pic_row2);
-            llPic3 = (View) view.findViewById(R.id.pic_row3);
+            rlAlbum = view.findViewById(R.id.album_row);
+            llPic1 = view.findViewById(R.id.pic_row1);
+            llPic2 = view.findViewById(R.id.pic_row2);
+            llPic3 = view.findViewById(R.id.pic_row3);
 
             ivItems = new NetworkImageView[9];
             ivItems[0] = (NetworkImageView) view.findViewById(R.id.mainPic0);
@@ -439,13 +383,12 @@ public class ShareList implements NavPagerActivity.Page {
                 coverImg = LocalCache.MediasMap.get(String.valueOf(currentItem.get("coverImg")));
                 if (coverImg != null) sLocal = false;
                 else {
-                    coverImg = LocalCache.LocalImagesMap2.get(String.valueOf(currentItem.get("coverImg")));
+                    coverImg = LocalCache.LocalImagesMapKeyIsUUID.get(String.valueOf(currentItem.get("coverImg")));
                     sLocal = true;
                 }
                 if (coverImg != null) {
 
                     if (sLocal) {
-//                        LocalCache.LoadLocalBitmapThumb(coverImg.get("thumb"), w, h, ivCover);
 
                         String url = String.valueOf(coverImg.get("thumb"));
 
@@ -455,15 +398,8 @@ public class ShareList implements NavPagerActivity.Page {
                         ivCover.setImageUrl(url, mImageLoader);
 
                     } else {
-//                        LocalCache.LoadRemoteBitmapThumb((String) (coverImg.get("uuid")), w, h, ivCover);
-
-//                        w = Integer.parseInt(coverImg.get("width"));
-//                        h = Integer.parseInt(coverImg.get("height"));
-//
-//                        int[] result = Util.formatPhotoWidthHeight(w, h);
 
                         String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + coverImg.get("uuid"));
-//                        String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=original";
 
                         mImageLoader.setShouldCache(true);
                         ivCover.setTag(url);
@@ -498,7 +434,6 @@ public class ShareList implements NavPagerActivity.Page {
                 lbAlbumShare.setVisibility(View.GONE);
                 lbAlbumTitle.setVisibility(View.GONE);
 
-                // modify by liang.wu
                 images = currentItem.get("images").toString().split(",");
 
                 if (images.length == 1) {
@@ -514,13 +449,12 @@ public class ShareList implements NavPagerActivity.Page {
                     itemImg = LocalCache.MediasMap.get(images[0]);
                     if (itemImg != null) sLocal = false;
                     else {
-                        itemImg = LocalCache.LocalImagesMap2.get(images[0]);
+                        itemImg = LocalCache.LocalImagesMapKeyIsUUID.get(images[0]);
                         sLocal = true;
                     }
 
                     if (itemImg != null) {
                         if (sLocal) {
-//                            LocalCache.LoadLocalBitmapThumb(itemImg.get("thumb"), w, h, ivCover);
 
                             String url = String.valueOf(itemImg.get("thumb"));
 
@@ -531,15 +465,8 @@ public class ShareList implements NavPagerActivity.Page {
 
 
                         } else {
-//                            LocalCache.LoadRemoteBitmapThumb((String) (itemImg.get("uuid")), w, h, ivCover);
-
-//                            w = Integer.parseInt(itemImg.get("width"));
-//                            h = Integer.parseInt(itemImg.get("height"));
-//
-//                            int[] result = Util.formatPhotoWidthHeight(w, h);
 
                             String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + itemImg.get("uuid"));
-//                            String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=original";
 
                             mImageLoader.setShouldCache(true);
                             ivCover.setTag(url);
@@ -648,13 +575,12 @@ public class ShareList implements NavPagerActivity.Page {
                         itemImg = LocalCache.MediasMap.get(images[i]);
                         if (itemImg != null) sLocal = false;
                         else {
-                            itemImg = LocalCache.LocalImagesMap2.get(images[i]);
+                            itemImg = LocalCache.LocalImagesMapKeyIsUUID.get(images[i]);
                             sLocal = true;
                         }
-                        //Log.d("winsun", "shareX "+position+" "+i+" "+itemImg);
+
                         if (itemImg != null) {
                             if (sLocal) {
-//                                LocalCache.LoadLocalBitmapThumb(itemImg.get("thumb"), w, h, ivItems[i]);
 
                                 String url = itemImg.get("thumb");
 
@@ -664,7 +590,6 @@ public class ShareList implements NavPagerActivity.Page {
                                 ivItems[i].setImageUrl(url, mImageLoader);
 
                             } else {
-//                                LocalCache.LoadRemoteBitmapThumb((String) (itemImg.get("uuid")), w, h, ivItems[i]);
 
                                 w = Integer.parseInt(itemImg.get("width"));
                                 h = Integer.parseInt(itemImg.get("height"));
@@ -672,7 +597,6 @@ public class ShareList implements NavPagerActivity.Page {
                                 int[] result = Util.formatPhotoWidthHeight(w, h);
 
                                 String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + itemImg.get("uuid"), result[0], result[1]);
-//                                String url = FNAS.Gateway + "/media/" + itemImg.get("uuid") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                                 mImageLoader.setShouldCache(true);
                                 ivItems[i].setTag(url);
@@ -717,12 +641,6 @@ public class ShareList implements NavPagerActivity.Page {
                     }
                 }
 
-/*                if (images.length <= 3) llPic2.setVisibility(View.GONE);
-                else llPic2.setVisibility(View.VISIBLE);
-                if (images.length <= 6) llPic3.setVisibility(View.GONE);
-                else llPic3.setVisibility(View.VISIBLE);*/
-                Log.d("winsun", "shareX " + currentItem);
-
             }
 
 
@@ -745,7 +663,7 @@ public class ShareList implements NavPagerActivity.Page {
 
         @Override
         public Object getItem(int position) {
-            return container.shareList.get(position);
+            return container.mShareList.get(position);
         }
 
         public List<Map<String, Object>> getImgList(String imagesStr) {
@@ -758,9 +676,9 @@ public class ShareList implements NavPagerActivity.Page {
             if (!imagesStr.equals("")) {
                 stArr = imagesStr.split(",");
                 Log.i(TAG, "stArr[0]" + stArr[0]);
-                for (int i = 0; i < stArr.length; i++) {
+                for (String aStArr : stArr) {
                     picItem = new HashMap<String, Object>();
-                    picItemRaw = LocalCache.MediasMap.get(stArr[i]);
+                    picItemRaw = LocalCache.MediasMap.get(aStArr);
                     if (picItemRaw != null) {
                         picItem.put("cacheType", "nas");
                         picItem.put("resID", "" + R.drawable.default_img);
@@ -773,7 +691,7 @@ public class ShareList implements NavPagerActivity.Page {
                         picItem.put("locked", "1");
                         picList.add(picItem);
                     } else {
-                        picItemRaw = LocalCache.LocalImagesMap2.get(stArr[i]);
+                        picItemRaw = LocalCache.LocalImagesMapKeyIsUUID.get(aStArr);
                         if (picItemRaw != null) {
                             picItem.put("cacheType", "local");
                             picItem.put("resID", "" + R.drawable.default_img);
@@ -802,20 +720,7 @@ public class ShareList implements NavPagerActivity.Page {
 
 
                 Map<String, List<Comment>> localMap = dbUtils.getAllLocalImageComment();
- /*               for (String uuid : localMap.keySet()) {
-
-                    List<Comment> localList = localMap.get(uuid);
-
-                    if (!mCommentMap.containsKey(uuid)) {
-                        mCommentMap.put(uuid, localList);
-                    }
-
-                    for (Comment comment : localList) {
-                        Log.i(TAG, "local comment:" + comment.toString());
-                    }
-
-                }*/
-                mCommentMap.putAll(localMap);
+                mMapKeyIsImageUUIDValueIsComments.putAll(localMap);
 
                 return true;
             }
@@ -824,7 +729,7 @@ public class ShareList implements NavPagerActivity.Page {
             protected void onPostExecute(Boolean aBoolean) {
 
                 mAdapter.commentMap.clear();
-                mAdapter.commentMap.putAll(mCommentMap);
+                mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);
                 mAdapter.notifyDataSetChanged();
             }
         }.execute();
@@ -838,31 +743,18 @@ public class ShareList implements NavPagerActivity.Page {
 
 
                 Map<String, List<Comment>> remoteMap = dbUtils.getAllRemoteImageComment();
- /*               for (String uuid : localMap.keySet()) {
-
-                    List<Comment> localList = localMap.get(uuid);
-
-                    if (!mCommentMap.containsKey(uuid)) {
-                        mCommentMap.put(uuid, localList);
-                    }
-
-                    for (Comment comment : localList) {
-                        Log.i(TAG, "local comment:" + comment.toString());
-                    }
-
-                }*/
 
                 for (Map.Entry<String, List<Comment>> entry : remoteMap.entrySet()) {
 
                     String imageUUid = entry.getKey();
-                    if (mCommentMap.containsKey(imageUUid)) {
-                        List<Comment> list = mCommentMap.get(imageUUid);
+                    if (mMapKeyIsImageUUIDValueIsComments.containsKey(imageUUid)) {
+                        List<Comment> list = mMapKeyIsImageUUIDValueIsComments.get(imageUUid);
 
                         list.addAll(entry.getValue());
 
                     } else {
 
-                        mCommentMap.put(imageUUid, entry.getValue());
+                        mMapKeyIsImageUUIDValueIsComments.put(imageUUid, entry.getValue());
 
                     }
 
@@ -875,7 +767,7 @@ public class ShareList implements NavPagerActivity.Page {
             protected void onPostExecute(Boolean aBoolean) {
 
                 mAdapter.commentMap.clear();
-                mAdapter.commentMap.putAll(mCommentMap);
+                mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);
                 mAdapter.notifyDataSetChanged();
             }
         }.execute();
@@ -894,10 +786,10 @@ public class ShareList implements NavPagerActivity.Page {
 
                 try {
 
-                    commentList = mCommentMap.get(params[0]);
+                    commentList = mMapKeyIsImageUUIDValueIsComments.get(params[0]);
                     if (commentList == null) {
                         commentList = new ArrayList<>();
-                        mCommentMap.put(params[0], commentList);
+                        mMapKeyIsImageUUIDValueIsComments.put(params[0], commentList);
                     } else {
                         return true;
                     }
@@ -919,7 +811,7 @@ public class ShareList implements NavPagerActivity.Page {
                         dbUtils.insertRemoteComment(comment, params[0]);
                     }
 
-                    Log.d(TAG, "mCommentMap:" + mCommentMap);
+                    Log.d(TAG, "mMapKeyIsImageUUIDValueIsComments:" + mMapKeyIsImageUUIDValueIsComments);
                     return true;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -934,7 +826,7 @@ public class ShareList implements NavPagerActivity.Page {
                 mLoadCommentCount++;
                 if (mLoadCommentCount == mLoadCommentTotal) {
                     mAdapter.commentMap.clear();
-                    mAdapter.commentMap.putAll(mCommentMap);
+                    mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);
                     mAdapter.notifyDataSetChanged();
                 }
 

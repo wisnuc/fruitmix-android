@@ -1,22 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.winsun.fruitmix.component.ScrollbarPanelListView
-        android:id="@+id/photo_listview"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/photo_recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/light_gray"
-        android:cacheColorHint="@color/white"
-        android:divider="@null"
-        android:fadingEdge="none"
-        android:fastScrollAlwaysVisible="true"
-        android:fastScrollEnabled="true"
-        android:visibility="gone"
-        app:scrollBarPanel="@layout/scrollbarpanel_layout"
-        android:animateLayoutChanges="true"/>
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:id="@+id/loading_layout"
@@ -37,8 +27,8 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/loading_title"
-            android:textSize="20dp"
-            android:textColor="@color/light_black"/>
+            android:textColor="@color/light_black"
+            android:textSize="20dp" />
 
     </LinearLayout>
 
@@ -56,8 +46,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/no_content"
-            android:textSize="20dp"
-            android:textColor="@color/light_black"/>
+            android:textColor="@color/light_black"
+            android:textSize="20dp" />
 
     </LinearLayout>
 

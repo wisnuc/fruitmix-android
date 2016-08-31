@@ -10,7 +10,6 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -23,7 +22,6 @@ public class LocalPhotoUploadService extends IntentService {
 
     private static final String TAG = LocalPhotoUploadService.class.getSimpleName();
 
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_UPLOAD_LOCAL_PHOTO = "com.winsun.fruitmix.services.action.upload.local.photo";
 
     private boolean uploadResult = false;
@@ -77,7 +75,7 @@ public class LocalPhotoUploadService extends IntentService {
 
         boolean result;
         uploadResult = false;
-        for (ConcurrentMap<String, String> map : LocalCache.LocalImagesMap.values()) {
+        for (ConcurrentMap<String, String> map : LocalCache.LocalImagesMapKeyIsThumb.values()) {
 
             if (isStop) {
                 uploadResult = false;
@@ -96,7 +94,7 @@ public class LocalPhotoUploadService extends IntentService {
         }
 
         if (uploadResult) {
-            LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMap);
+            LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMapKeyIsThumb);
             Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
             mManager.sendBroadcast(intent);
             isSave = true;
@@ -115,7 +113,7 @@ public class LocalPhotoUploadService extends IntentService {
 
             Log.i(TAG, "onDestroy set upload photo");
 
-            LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMap);
+            LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMapKeyIsThumb);
 
             Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
             mManager.sendBroadcast(intent);

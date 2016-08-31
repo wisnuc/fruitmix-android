@@ -4,19 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Base64;
 import android.util.Log;
 
-import com.winsun.fruitmix.CustomApplication;
-import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Share;
-import com.winsun.fruitmix.model.OfflineTask;
-import com.winsun.fruitmix.services.LocalCommentService;
+import com.winsun.fruitmix.services.LocalCommentUploadService;
 import com.winsun.fruitmix.services.LocalPhotoUploadService;
-import com.winsun.fruitmix.services.LocalShareService;
+import com.winsun.fruitmix.services.LocalShareUploadService;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -29,15 +26,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -49,8 +41,6 @@ public class FNAS {
 
     public static final String TAG = FNAS.class.getSimpleName();
 
-    //public static String Gateway="http://192.168.5.132";
-//    public static String Gateway="http://192.168.5.108";
     public static String Gateway = "http://192.168.5.132";
     public static String JWT = null;
     public static String userUUID = null;
@@ -82,232 +72,233 @@ public class FNAS {
         return result;
     }
 
-    public static void Login() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String str;
-                    JSONObject json;
-                    HttpURLConnection conn;
-
-                    // get addr first
-
-                    Log.d("wisun", Gateway + Util.LOGIN_PARAMETER); // output:{"username":"admin","uuid":"db3aeeef-75ba-4e66-8f0e-5d71365a04db","avatar":"defaultAvatar.jpg"}
-                    conn = (HttpURLConnection) (new URL(Gateway + Util.LOGIN_PARAMETER).openConnection());
-                    str = ReadFull(conn.getInputStream());
-                    userUUID = "e1ea7108-cfd7-4b4a-bbbd-99feeb1a6ca6"; //new JSONArray(str).getJSONObject(0).getString("uuid");
-
-                    conn = (HttpURLConnection) (new URL(Gateway + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
-                    conn.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((userUUID + ":123456").getBytes(), Base64.DEFAULT));
-                    str = ReadFull(conn.getInputStream());
-                    JWT = new JSONObject(str).getString("token"); // get token
-
-                    // UUID
-                    // LocalCache.DeviceID="6830ebc0-03cf-477c-b62f-e95ac863058a";
-                    if (LocalCache.DeviceID == null) {
-                        //SetGlobalData("deviceID", UUID.randomUUID().toString());
-                        str = PostRemoteCall("/library/", "");
-                        LocalCache.DeviceID = str.replace("\"", "");
-                        LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
-                    } // get deviceID
-                    Log.d("uuid", LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
-
-
-                    //PostRemoteCall("/mediashare", "{\"uuid\":\"11\" }") {}
-
-
-                    // documents
-                    LoadDocuments(); // get all available data
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
-
-    public static void LoadDocuments() {
-
-        String str, uuid;
-        JSONArray json, jsonArr;
-        int i, j;
-        JSONObject itemRaw;
-        ConcurrentMap<String, String> item;
-        String imgStr, mtime;
-
+    public static long deleteAllRemoteCommentIfNetworkConnected() {
+        long result = 0;
         if (Util.getNetworkState(Util.APPLICATION_CONTEXT)) {
-            long result = DBUtils.SINGLE_INSTANCE.deleteAllRemoteComment();
+            result = DBUtils.SINGLE_INSTANCE.deleteAllRemoteComment();
             Log.i("delete result :", result + "");
         }
+        return result;
+    }
 
-        try {
-            str = FNAS.RemoteCall(Util.USER_PARAMETER); // get all user;
-            json = new JSONArray(str);
-            for (i = 0; i < json.length(); i++) {
-                itemRaw = json.getJSONObject(i);
-                uuid = itemRaw.getString("uuid");
-                if (LocalCache.UsersMap.containsKey(uuid)) {
-                    item = LocalCache.UsersMap.get(uuid);
-                } else {
-                    item = new ConcurrentHashMap<>();
-                }
+    public static String loadUser() throws Exception {
 
-                item.put("name", itemRaw.getString("username"));
-                item.put("uuid", itemRaw.getString("uuid"));
-                item.put("avatar", itemRaw.getString("avatar"));
-                if (itemRaw.has("email")) {
-                    item.put("email", itemRaw.getString("email"));
-                }
+        return FNAS.RemoteCall(Util.USER_PARAMETER);
 
-                StringBuilder stringBuilder = new StringBuilder();
-                String[] splitStrings = item.get("name").split(" ");
-                for (String splitString : splitStrings) {
-                    stringBuilder.append(splitString.substring(0, 1).toUpperCase());
-                }
-                if (!item.containsKey("avatar_default")) {
-                    item.put("avatar_default", stringBuilder.toString());
-                }
-                if (!item.containsKey("avatar_default_color")) {
-                    item.put("avatar_default_color", String.valueOf(new Random().nextInt(3)));
-                }
+    }
 
-                LocalCache.UsersMap.put(item.get("uuid"), item); // save all user info
+    public static void fillUserMapByJsonString(String str) throws JSONException {
 
+        String uuid;
+        JSONArray json;
+        JSONObject itemRaw;
+        ConcurrentMap<String, String> item;
+
+        json = new JSONArray(str);
+        for (int i = 0; i < json.length(); i++) {
+            itemRaw = json.getJSONObject(i);
+            uuid = itemRaw.getString("uuid");
+            if (LocalCache.UsersMap.containsKey(uuid)) {
+                item = LocalCache.UsersMap.get(uuid);
+            } else {
+                item = new ConcurrentHashMap<>();
             }
 
-            LocalCache.SetGlobalHashMap(Util.USER_MAP_NAME, LocalCache.UsersMap);
-            Log.d("winsun", "UsersMap " + LocalCache.UsersMap);
+            item.put("name", itemRaw.getString("username"));
+            item.put("uuid", itemRaw.getString("uuid"));
+            item.put("avatar", itemRaw.getString("avatar"));
+            if (itemRaw.has("email")) {
+                item.put("email", itemRaw.getString("email"));
+            }
+
+            StringBuilder stringBuilder = new StringBuilder();
+            String[] splitStrings = item.get("name").split(" ");
+            for (String splitString : splitStrings) {
+                stringBuilder.append(splitString.substring(0, 1).toUpperCase());
+            }
+            if (!item.containsKey("avatar_default")) {
+                item.put("avatar_default", stringBuilder.toString());
+            }
+            if (!item.containsKey("avatar_default_color")) {
+                item.put("avatar_default_color", String.valueOf(new Random().nextInt(3)));
+            }
+
+            LocalCache.UsersMap.put(item.get("uuid"), item); // save all user info
+
+        }
+
+        LocalCache.SetGlobalHashMap(Util.USER_MAP_NAME, LocalCache.UsersMap);
+        Log.d("winsun", "UsersMap " + LocalCache.UsersMap);
+    }
+
+    public static String loadMedia() throws Exception {
+
+        return FNAS.RemoteCall(Util.MEDIA_PARAMETER); // get all pictures;
+
+    }
+
+    public static void fillMediaMapByJsonString(String str) throws JSONException {
+
+        String mtime;
+        JSONArray json;
+        JSONObject itemRaw;
+        ConcurrentMap<String, String> item;
+
+        json = new JSONArray(str);
+
+        if (json.length() != 0) {
+            LocalCache.MediasMap.clear();
+        }
+
+        for (int i = 0; i < json.length(); i++) {
+            itemRaw = json.getJSONObject(i);
+            if (itemRaw.getString("kind").equals("image")) {
+                item = new ConcurrentHashMap<>();
+                item.put("uuid", "" + itemRaw.getString("hash"));
+                item.put("mtime", "1916-01-01 00:00:00");
+                if (itemRaw.has("width")) {
+
+                    item.put("width", itemRaw.getString("width"));
+                    item.put("height", itemRaw.getString("height"));
+
+                } else if (itemRaw.getJSONObject("detail").has("width")) {
+                    item.put("width", itemRaw.getJSONObject("detail").getString("width"));
+                    item.put("height", itemRaw.getJSONObject("detail").getString("height"));
+                } else {
+                    item.put("width", itemRaw.getJSONObject("detail").getJSONObject("exif").getString("ExifImageWidth"));
+                    item.put("height", itemRaw.getJSONObject("detail").getJSONObject("exif").getString("ExifImageHeight"));
+                    if (itemRaw.getJSONObject("detail").has("exif") && itemRaw.getJSONObject("detail").getJSONObject("exif").has("CreateDate")) {
+                        mtime = itemRaw.getJSONObject("detail").getJSONObject("exif").getString("CreateDate");
+                        item.put("mtime", mtime.substring(0, 4) + "-" + mtime.substring(5, 7) + "-" + mtime.substring(8));
+                    } else item.put("mtime", "1916-01-01 00:00:00");
+                }
+                LocalCache.MediasMap.put(item.get("uuid"), item);
+
+            }
+        }
+
+        LocalCache.SetGlobalHashMap(Util.MEDIA_MAP_NAME, LocalCache.MediasMap);
+        Log.d("winsun", "MediasMap " + LocalCache.MediasMap);
+
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
+        manager.sendBroadcast(new Intent(Util.REMOTE_PHOTO_LOADED));
+    }
+
+    public static String loadRemoteShare() throws Exception {
+        return FNAS.RemoteCall(Util.MEDIASHARE_PARAMETER);
+    }
+
+    public static void fillShareMapByJsonString(String str) throws JSONException {
+
+        String uuid, imgStr;
+        JSONArray json, jsonArr;
+        JSONObject itemRaw;
+        ConcurrentMap<String, String> item;
+
+        json = new JSONArray(str);
+
+        if (json.length() != 0) {
+            LocalCache.SharesMap.clear();
+        }
+
+        for (int i = 0; i < json.length(); i++) {
+            itemRaw = json.getJSONObject(i);
+            Log.d("winsun", "" + itemRaw);
+            uuid = itemRaw.getString("uuid");
+            if (LocalCache.SharesMap.containsKey(uuid)) {
+                item = LocalCache.SharesMap.get(uuid);
+            } else item = new ConcurrentHashMap<>();
+            item.put("_id", itemRaw.getJSONObject("latest").getString("_id"));
+            if (itemRaw.getJSONObject("latest").has("creator"))
+                item.put("creator", itemRaw.getJSONObject("latest").getString("creator"));
+            else
+                item.put("creator", itemRaw.getJSONObject("latest").getJSONArray("maintainers").getString(0));
+            item.put("album", itemRaw.getJSONObject("latest").getString("album"));
+            item.put("mtime", itemRaw.getJSONObject("latest").getString("mtime"));
+            item.put("uuid", uuid);
+            item.put("del", itemRaw.getJSONObject("latest").getString("archived").equals("true") ? "1" : "0"); // 1 means deleted,0 means not deleted,（archived是服务端是否已删标志）
+            item.put("date", new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(itemRaw.getJSONObject("latest").getString("mtime")))));
+            if (itemRaw.getJSONObject("latest").getString("album").equals("true")) {
+                item.put("type", "album");
+                item.put("title", itemRaw.getJSONObject("latest").getJSONArray("tags").getJSONObject(0).getString("albumname"));
+                item.put("desc", itemRaw.getJSONObject("latest").getJSONArray("tags").getJSONObject(0).getString("desc"));
+            } else item.put("type", "set");
+            imgStr = "";
+            jsonArr = itemRaw.getJSONObject("latest").getJSONArray("contents");
+            if (jsonArr.length() > 0) {
+                for (int j = 0; j < jsonArr.length(); j++)
+                    imgStr += "," + jsonArr.getJSONObject(j).getString("digest").toLowerCase();
+                if (imgStr.length() > 1) imgStr = imgStr.substring(1);
+                item.put("images", imgStr);
+                item.put("coverImg", jsonArr.getJSONObject(0).getString("digest").toLowerCase());
+            } else {
+                item.put("images", "");
+                item.put("coverImg", "");
+            }
+            if (itemRaw.getJSONObject("latest").getJSONArray("viewers").length() <= 1 && itemRaw.getJSONObject("latest").getJSONArray("maintainers").length() <= 1)
+                item.put("private", "true");
+            else item.put("private", "false"); // 1 means private,0 means public
+
+            boolean isMaintainer = false;
+            JSONArray jsonArray = itemRaw.getJSONObject("latest").getJSONArray("maintainers");
+            for (int k = 0; k < jsonArray.length(); k++) {
+                if (jsonArray.getString(k).equals(userUUID)) {
+                    isMaintainer = true;
+                }
+            }
+            item.put("maintained", isMaintainer ? "true" : "false");
+
+            item.put("locked", "false");
+
+            LocalCache.SharesMap.put(uuid, item);
+
+        }
+
+    }
+
+    public static void retrieveUserMap() {
+        try {
+            fillUserMapByJsonString(loadUser());
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
-
+    public static void retrieveMediaMap() {
         try {
-            str = FNAS.RemoteCall(Util.MEDIA_PARAMETER); // get all pictures;
-
-            Log.i(TAG, "media json:" + str);
-
-            json = new JSONArray(str);
-
-            if (json.length() != 0) {
-                LocalCache.MediasMap.clear();
-            }
-
-            for (i = 0; i < json.length(); i++) {
-                itemRaw = json.getJSONObject(i);
-                if (itemRaw.getString("kind").equals("image")) {
-                    item = new ConcurrentHashMap<>();
-                    item.put("uuid", "" + itemRaw.getString("hash"));
-                    item.put("mtime", "1916-01-01 00:00:00");
-                    if (itemRaw.has("width")) {
-
-                        item.put("width", itemRaw.getString("width"));
-                        item.put("height", itemRaw.getString("height"));
-
-                    } else if (itemRaw.getJSONObject("detail").has("width")) {
-                        item.put("width", itemRaw.getJSONObject("detail").getString("width"));
-                        item.put("height", itemRaw.getJSONObject("detail").getString("height"));
-                    } else {
-                        item.put("width", itemRaw.getJSONObject("detail").getJSONObject("exif").getString("ExifImageWidth"));
-                        item.put("height", itemRaw.getJSONObject("detail").getJSONObject("exif").getString("ExifImageHeight"));
-                        if (itemRaw.getJSONObject("detail").has("exif") && itemRaw.getJSONObject("detail").getJSONObject("exif").has("CreateDate")) {
-                            mtime = itemRaw.getJSONObject("detail").getJSONObject("exif").getString("CreateDate");
-                            item.put("mtime", mtime.substring(0, 4) + "-" + mtime.substring(5, 7) + "-" + mtime.substring(8));
-                        } else item.put("mtime", "1916-01-01 00:00:00");
-                    }
-                    LocalCache.MediasMap.put(item.get("uuid"), item);
-
-                }
-            }
-
-            LocalCache.SetGlobalHashMap(Util.MEDIA_MAP_NAME, LocalCache.MediasMap);
-            Log.d("winsun", "MediasMap " + LocalCache.MediasMap);
-
-            LocalBroadcastManager manager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
-            manager.sendBroadcast(new Intent(Util.REMOTE_PHOTO_CHANGED));
-
+            fillMediaMapByJsonString(loadMedia());
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
-        LocalPhotoUploadService.startActionUploadLocalPhoto(Util.APPLICATION_CONTEXT);
-
+    public static void retrieveShareMap() {
         try {
-            str = FNAS.RemoteCall(Util.MEDIASHARE_PARAMETER); // get all album share and normal share(immutable)
-            json = new JSONArray(str);
-
-            if (json.length() != 0) {
-                LocalCache.DocumentsMap.clear();
-            }
-
-            for (i = 0; i < json.length(); i++) {
-                itemRaw = json.getJSONObject(i);
-                Log.d("winsun", "" + itemRaw);
-                uuid = itemRaw.getString("uuid");
-                if (LocalCache.DocumentsMap.containsKey(uuid)) {
-                    item = LocalCache.DocumentsMap.get(uuid);
-                    //if(itemRaw.getJSONObject("latest").get("_id").equals()) continue;
-                } else item = new ConcurrentHashMap<>();
-                item.put("_id", itemRaw.getJSONObject("latest").getString("_id"));
-                if (itemRaw.getJSONObject("latest").has("creator"))
-                    item.put("creator", itemRaw.getJSONObject("latest").getString("creator"));
-                else
-                    item.put("creator", itemRaw.getJSONObject("latest").getJSONArray("maintainers").getString(0));
-                item.put("album", itemRaw.getJSONObject("latest").getString("album"));
-                item.put("mtime", itemRaw.getJSONObject("latest").getString("mtime"));
-                item.put("uuid", uuid);
-                item.put("del", itemRaw.getJSONObject("latest").getString("archived").equals("true") ? "1" : "0"); // 1 means deleted,0 means not deleted,（archived是服务端是否已删标志）
-                item.put("date", new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(itemRaw.getJSONObject("latest").getString("mtime")))));
-                if (itemRaw.getJSONObject("latest").getString("album").equals("true")) {
-                    item.put("type", "album");
-                    item.put("title", itemRaw.getJSONObject("latest").getJSONArray("tags").getJSONObject(0).getString("albumname"));
-                    item.put("desc", itemRaw.getJSONObject("latest").getJSONArray("tags").getJSONObject(0).getString("desc"));
-                } else item.put("type", "set");
-                imgStr = "";
-                jsonArr = itemRaw.getJSONObject("latest").getJSONArray("contents");
-                if (jsonArr.length() > 0) {
-                    for (j = 0; j < jsonArr.length(); j++)
-                        imgStr += "," + jsonArr.getJSONObject(j).getString("digest").toLowerCase();
-                    if (imgStr.length() > 1) imgStr = imgStr.substring(1);
-                    item.put("images", imgStr);
-                    item.put("coverImg", jsonArr.getJSONObject(0).getString("digest").toLowerCase());
-                } else {
-                    item.put("images", "");
-                    item.put("coverImg", "");
-                }
-                if (itemRaw.getJSONObject("latest").getJSONArray("viewers").length() <= 1 && itemRaw.getJSONObject("latest").getJSONArray("maintainers").length() <= 1)
-                    item.put("private", "1");
-                else item.put("private", "0"); // 1 means private,0 means public
-
-                //begin add by liang.wu
-                boolean isMaintainer = false;
-                JSONArray jsonArray = itemRaw.getJSONObject("latest").getJSONArray("maintainers");
-                for (int k = 0; k < jsonArray.length(); k++) {
-                    if (jsonArray.getString(k).equals(userUUID)) {
-                        isMaintainer = true;
-                    }
-                }
-                item.put("maintained", isMaintainer ? "true" : "false");
-
-                item.put("locked", "false");
-                //finish add by liang.wu
-
-                LocalCache.DocumentsMap.put(uuid, item);
-
-            }
-
+            fillShareMapByJsonString(loadRemoteShare());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         loadLocalShare();
 
-        LocalCache.SetGlobalHashMap(Util.DOCUMENT_MAP_NAME, LocalCache.DocumentsMap);
-        Log.d("winsun", "DocumentsMap " + LocalCache.DocumentsMap);
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
+        manager.sendBroadcast(new Intent(Util.SHARE_LOADED));
 
-        //LocalCache.SetGlobalHashMap("documentsMap", LocalCache.DocumentsMap);
-        //Log.d("winsun", "List: " + newList);
+        LocalCache.SetGlobalHashMap(Util.SHARE_MAP_NAME, LocalCache.SharesMap);
+        Log.d("winsun", "SharesMap " + LocalCache.SharesMap);
+    }
+
+    public static void loadData() {
+
+        deleteAllRemoteCommentIfNetworkConnected();
+
+        retrieveUserMap();
+
+        retrieveMediaMap();
+
+        LocalPhotoUploadService.startActionUploadLocalPhoto(Util.APPLICATION_CONTEXT);
+
+        retrieveShareMap();
 
     }
 
@@ -349,10 +340,9 @@ public class FNAS {
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
         outStream = new BufferedOutputStream(conn.getOutputStream());
-        //str="{\"version\":\"0.1.G513b\",\"permission\":\"public\",\"doctype\":\"album\",\"content\":{\"title\":\"test1\",\"desc\":\"test1desc\",\"items\":[{\"type\":\"media1\",\"uuid\":\"75922aa33a961c3769966e70bec6430e4d5a6c8028e5d6616d5a5a599f337483\"}]}}";
         if (data == null) str = "";
         else str = data;
-        outStream.write(str.toString().getBytes());
+        outStream.write(str.getBytes());
         outStream.flush();
 
         Log.d(TAG, "NAS POST: " + (Gateway + req) + " " + conn.getResponseCode() + " " + str);
@@ -373,22 +363,19 @@ public class FNAS {
         while (JWT == null) Thread.sleep(500);
 
         conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
-        //conn=(HttpURLConnection) (new URL("http://192.168.1.102:9220" + req).openConnection());
         conn.setRequestMethod(Util.HTTP_PATCH_METHOD);
         conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         conn.setDoInput(true);// 允许输入
         conn.setDoOutput(true);// 允许输出
         conn.setUseCaches(false);
         conn.setRequestProperty("Connection", "keep-alive");
-        //conn.setRequestProperty("Charsert", "UTF-8");
         conn.setRequestProperty("Accept", "*/*");
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
         outStream = new BufferedOutputStream(conn.getOutputStream());
-        //str="{\"version\":\"0.1.G513b\",\"permission\":\"public\",\"doctype\":\"album\",\"content\":{\"title\":\"test1\",\"desc\":\"test1desc\",\"items\":[{\"type\":\"media1\",\"uuid\":\"75922aa33a961c3769966e70bec6430e4d5a6c8028e5d6616d5a5a599f337483\"}]}}";
         if (data == null) str = "";
         else str = data;
-        outStream.write(str.toString().getBytes());
+        outStream.write(str.getBytes());
         outStream.flush();
 
 
@@ -423,7 +410,6 @@ public class FNAS {
                 r = bin.read(buffer);
                 if (r == -1) break;
                 bout.write(buffer, 0, r);
-                // Log.d("winsun", new String(buffer, 0, r)); "createing thumb"
             }
             bin.close();
             bout.close();
@@ -468,51 +454,11 @@ public class FNAS {
 
     }
 
-    /**
-     * upload all local images
-     *
-     * @return true if upload happened and succeed,otherwise reture false;
-     */
-    public static boolean UploadAll() {
-
-/*        for (Iterator<Map<String, String>> iterator = LocalCache.LocalImagesMap.values().iterator(); iterator.hasNext(); ) {
-            itemRaw = iterator.next();
-            if (itemRaw != null) {
-                if (!itemRaw.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || itemRaw.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
-                    boolean result = UploadFile(itemRaw.get("thumb"));
-                    itemRaw.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, result + "");
-                }
-
-            }
-        }*/
-
-        if (!Util.getNetworkState(Util.APPLICATION_CONTEXT)) {
-            return false;
-        }
-
-        boolean result = false;
-        for (Map<String, String> map : LocalCache.LocalImagesMap.values()) {
-            if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
-                boolean uploadResult = UploadFile(map.get("thumb"));
-                map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, String.valueOf(uploadResult));
-
-                Log.i(TAG, "upload file:" + map.get("thumb") + "result:" + uploadResult);
-                if (uploadResult)
-                    result = uploadResult;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * restore local photo upload state when user logout
-     */
     public static void restoreLocalPhotoUploadState() {
-        for (ConcurrentMap<String, String> map : LocalCache.LocalImagesMap.values()) {
+        for (ConcurrentMap<String, String> map : LocalCache.LocalImagesMapKeyIsThumb.values()) {
             map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, "false");
         }
-        LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMap);
+        LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMapKeyIsThumb);
     }
 
     public static boolean UploadFile(String fname) {
@@ -528,7 +474,7 @@ public class FNAS {
         try {
             while (JWT == null) Thread.sleep(500);
             // calc SHA256
-            localHashMap = LocalCache.LocalImagesMap.get(fname);
+            localHashMap = LocalCache.LocalImagesMapKeyIsThumb.get(fname);
             hash = localHashMap.get("uuid");
 
             Log.i(TAG, "thumb:" + fname + "hash:" + hash);
@@ -552,8 +498,8 @@ public class FNAS {
             outStream = new BufferedOutputStream(conn.getOutputStream());
 
             sb = new StringBuilder();
-            sb.append("--" + boundary + "\r\n");
-            sb.append("Content-Disposition: form-data; name=\"file\"; filename=\"" + fname + "\"\r\n");
+            sb.append("--").append(boundary).append("\r\n");
+            sb.append("Content-Disposition: form-data; name=\"file\"; filename=\"").append(fname).append("\"\r\n");
             sb.append("Content-Type: image/jpeg;\r\n");
             sb.append("\r\n");
             outStream.write(sb.toString().getBytes());
@@ -603,7 +549,7 @@ public class FNAS {
     }
 
     public static void delShareInDocumentsMapById(String uuid) {
-        LocalCache.DocumentsMap.remove(uuid);
+        LocalCache.SharesMap.remove(uuid);
     }
 
     public static void loadLocalShare() {
@@ -615,9 +561,8 @@ public class FNAS {
 
         for (Share share : shareList) {
 
-            if (LocalCache.DocumentsMap.containsKey(share.getUuid())) {
-                item = LocalCache.DocumentsMap.get(share.getUuid());
-                //if(itemRaw.getJSONObject("latest").get("_id").equals()) continue;
+            if (LocalCache.SharesMap.containsKey(share.getUuid())) {
+                item = LocalCache.SharesMap.get(share.getUuid());
             } else item = new ConcurrentHashMap<>();
 
             item.put("_id", "");
@@ -627,7 +572,7 @@ public class FNAS {
             } else {
                 item.put("type", "set");
             }
-            item.put("mtime", share.getmTime());
+            item.put("mtime", share.getTime());
             item.put("uuid", share.getUuid());
             item.put("del", "0"); // 本地存在，判断是否需要显示（archived是服务端是否已删标志）
             item.put("date", new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(System.currentTimeMillis())));
@@ -640,14 +585,14 @@ public class FNAS {
 
             String[] maintainers = share.getMaintainer().split(",");
             if (share.getViewer().split(",").length <= 1 && maintainers.length <= 1) {
-                item.put("private", "1");
+                item.put("private", "true");
             } else {
-                item.put("private", "0");
+                item.put("private", "false");
             }
 
             boolean isMaintainer = false;
-            for (int i = 0; i < maintainers.length; i++) {
-                if (maintainers[i].equals(FNAS.userUUID)) {
+            for (String maintainer : maintainers) {
+                if (maintainer.equals(FNAS.userUUID)) {
                     isMaintainer = true;
                 }
             }
@@ -656,7 +601,7 @@ public class FNAS {
 
             Log.i(TAG, "local share:" + item.toString());
 
-            LocalCache.DocumentsMap.put(share.getUuid(), item);
+            LocalCache.SharesMap.put(share.getUuid(), item);
 
         }
 
@@ -676,131 +621,19 @@ public class FNAS {
 
                         Log.i(TAG, "start local share task");
 
-                        LocalShareService.startActionLocalShareTask(context);
+                        LocalShareUploadService.startActionLocalShareTask(context);
                     }
 
                     if (!dbUtils.getAllLocalImageComment().isEmpty()) {
 
                         Log.i(TAG, "start local comment task");
 
-                        LocalCommentService.startActionLocalCommentTask(context);
+                        LocalCommentUploadService.startActionLocalCommentTask(context);
                     }
 
                 }
             }).start();
         }
     }
-
-    public static void checkOfflineTask(Context context) {
-        if (Util.getNetworkState(context)) {
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-
-                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-
-                    List<OfflineTask> taskList = dbUtils.getAllOfflineTask();
-                    for (final OfflineTask task : taskList) {
-                        Runnable runnable = new Runnable() {
-                            @Override
-                            public void run() {
-
-                                DBUtils myDBUtils = DBUtils.SINGLE_INSTANCE;
-
-                                if (task.getOperationCount() > 5) {
-                                    myDBUtils.deleteTask(task.getId());
-                                } else {
-                                    myDBUtils.modifyOperationCount(task.getOperationCount() + 1, task.getId());
-                                }
-                                try {
-                                    switch (task.getHttpType()) {
-                                        case POST:
-                                            FNAS.PostRemoteCall(task.getRequest(), task.getData());
-                                            break;
-                                        case PATCH:
-                                            FNAS.PatchRemoteCall(task.getRequest(), task.getData());
-                                            break;
-                                        default:
-                                    }
-
-                                    myDBUtils.deleteTask(task.getId());
-
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
-                                }
-
-                            }
-                        };
-                        dbUtils.doOneTaskInCachedThread(runnable);
-                    }
-                }
-            }).start();
-        }
-    }
-
-    // 发现设备
-   /* public static void FindBonjour() {
-        try {
-
-            // Activate these lines to see log messages of JmDNS
-            final JmDNS jmdns = JmDNS.create();
-            String type = "_http._tcp.local.";
-            jmdns.addServiceTypeListener(new ServiceTypeListener() {
-                @Override
-                public void subTypeForServiceTypeAdded(ServiceEvent event) {
-                    Log.d("bonjour", " subTypeForServiceTypeAdded: " + event.getInfo());
-                }
-
-                @Override
-                public void serviceTypeAdded(ServiceEvent event) {
-                    Log.d("bonjour", " serviceTypeAdded: " + event + " ");
-
-                }
-
-            });//事实证明，执行到这个方法时会去回调（该监听的相关方法）serviceAdded、serviceRemove、serviceresolved
-            jmdns.addServiceListener(type, new ServiceListener() {
-                @Override
-                public void serviceAdded(ServiceEvent event) {
-                    Log.d("bonjour", "Service added   : " + event.getName() + "." + event.getType());
-                    // Log.d("winsun", "Service added   : " + event.getInfo().getServer() + ":"+event);
-                    *//*
-                    try {
-                        final HostInfo hostInfo = HostInfo.newHostInfo(InetAddress.getByName(event.getName()+"."+event.getType()), new JmDNSImpl(null, null), null);
-                        Log.d("winsun", "MDNS hostname (Bonjour): " + hostInfo.getName());
-                        Log.d("winsun", "DNS hostname: " + hostInfo.getInetAddress().getHostName());
-                        Log.d("winsun", "IP address: " + hostInfo.getInetAddress().getHostAddress());
-                    } catch (Exception e) { e.printStackTrace();}*//*
-                }
-
-                @Override
-                public void serviceResolved(ServiceEvent event) {//什么时候监听接口回调该方法
-                    Log.d("bonjour", "Service resolved: " + event.getInfo());
-                }
-
-                //移除某一个服�?
-                @Override
-                public void serviceRemoved(ServiceEvent event) {
-                    Log.d("bonjour", "Service removed : " + event.getName() + "." + event.getType());
-                }
-            });//执行到这个方法的时候，会去回调（该监听的相关方法）serviceTypeAdded、subTypeForServiceTypeAdded
-
-            Log.i("bonjour", "end find bonjour");
-            jmdns.close();
-//            Thread.sleep(100000);
-            *//*
-            int b;
-            while ((b = System.in.read()) != -1 && (char) b != 'q') {
-
-            }
-            jmdns.close();
-            System.out.println("Done");
-            *//*
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
 
 }

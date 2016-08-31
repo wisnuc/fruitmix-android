@@ -6,7 +6,7 @@ import android.os.Parcelable;
 /**
  * Created by Administrator on 2016/7/12.
  */
-public class Comment {
+public class Comment implements Parcelable {
 
     private int id;
     private String creator;
@@ -26,6 +26,42 @@ public class Comment {
 
     public Comment() {
     }
+
+    protected Comment(Parcel in) {
+        id = in.readInt();
+        creator = in.readString();
+        time = in.readString();
+        formatTime = in.readString();
+        shareId = in.readString();
+        text = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(creator);
+        dest.writeString(time);
+        dest.writeString(formatTime);
+        dest.writeString(shareId);
+        dest.writeString(text);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Comment> CREATOR = new Creator<Comment>() {
+        @Override
+        public Comment createFromParcel(Parcel in) {
+            return new Comment(in);
+        }
+
+        @Override
+        public Comment[] newArray(int size) {
+            return new Comment[size];
+        }
+    };
 
     public int getId() {
         return id;

@@ -13,8 +13,6 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import java.io.FileNotFoundException;
-import java.net.ConnectException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,15 +21,14 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
- * <p/>
+ * <p>
  * TODO: Customize class - update intent actions, extra parameters and static
  * helper methods.
  */
-public class LocalCommentService extends IntentService {
+public class LocalCommentUploadService extends IntentService {
 
-    public static final String TAG = LocalCommentService.class.getSimpleName();
+    public static final String TAG = LocalCommentUploadService.class.getSimpleName();
 
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_LOCAL_COMMENT_TASK = "com.winsun.fruitmix.services.action.local_comment_task";
 
     private DBUtils mDbUtils;
@@ -39,7 +36,7 @@ public class LocalCommentService extends IntentService {
     private Comment mComment;
     private LocalBroadcastManager mManager;
 
-    public LocalCommentService() {
+    public LocalCommentUploadService() {
         super("LocalCommentService");
     }
 
@@ -51,7 +48,7 @@ public class LocalCommentService extends IntentService {
      */
     // TODO: Customize helper method
     public static void startActionLocalCommentTask(Context context) {
-        Intent intent = new Intent(context, LocalCommentService.class);
+        Intent intent = new Intent(context, LocalCommentUploadService.class);
         intent.setAction(ACTION_LOCAL_COMMENT_TASK);
         context.startService(intent);
     }
@@ -61,11 +58,7 @@ public class LocalCommentService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_LOCAL_COMMENT_TASK.equals(action)) {
-                try {
-                    handleActionLocalCommentTask();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                handleActionLocalCommentTask();
             }
         }
     }
@@ -74,7 +67,7 @@ public class LocalCommentService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionLocalCommentTask() throws Exception {
+    private void handleActionLocalCommentTask() {
         // TODO: Handle action Foo
         mDbUtils = DBUtils.SINGLE_INSTANCE;
         mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());
@@ -93,10 +86,10 @@ public class LocalCommentService extends IntentService {
 
             if (!FNAS.isPhotoInMediaMap(image)) {
 
-                if (LocalCache.LocalImagesMap2.containsKey(image)) {
-                    String thumb = LocalCache.LocalImagesMap2.get(image).get("thumb");
+                if (LocalCache.LocalImagesMapKeyIsUUID.containsKey(image)) {
+                    String thumb = LocalCache.LocalImagesMapKeyIsUUID.get(image).get("thumb");
 
-                    ConcurrentMap<String, String> map = LocalCache.LocalImagesMap.get(thumb);
+                    ConcurrentMap<String, String> map = LocalCache.LocalImagesMapKeyIsThumb.get(thumb);
 
                     Log.i(TAG, "thumb:" + thumb + "hash:" + image);
                     if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
@@ -105,7 +98,7 @@ public class LocalCommentService extends IntentService {
                             continue;
                         } else {
                             map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, "true");
-                            LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMap);
+                            LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMapKeyIsThumb);
                             Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
                             mManager.sendBroadcast(intent);
                         }
@@ -140,7 +133,6 @@ public class LocalCommentService extends IntentService {
             }
         }
         if (commentCount > mCommentMap.size()) {
-//            FNAS.LoadDocuments();
             Intent intent = new Intent(Util.LOCAL_COMMENT_CHANGED);
             mManager.sendBroadcast(intent);
         }

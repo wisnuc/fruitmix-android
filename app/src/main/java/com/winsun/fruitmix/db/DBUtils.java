@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Administrator on 2016/7/8.
@@ -25,36 +26,31 @@ public enum DBUtils {
 
     private DBHelper dbHelper;
     private SQLiteDatabase database;
-    private ExecutorService executorService;
 
-    private int referenceCount = 0;
+    private AtomicInteger referenceCount;
 
-    private DBUtils() {
+    DBUtils() {
         dbHelper = new DBHelper(Util.APPLICATION_CONTEXT);
-        executorService = Executors.newCachedThreadPool();
+        referenceCount = new AtomicInteger();
     }
 
     private synchronized void openWritableDB() {
 
-        referenceCount++;
+        referenceCount.incrementAndGet();
 
         database = dbHelper.getWritableDatabase();
     }
 
-    private void openReadableDB() {
+    private synchronized void openReadableDB() {
 
-        synchronized (this) {
-            referenceCount++;
-        }
+        referenceCount.incrementAndGet();
 
         database = dbHelper.getReadableDatabase();
     }
 
     private synchronized void close() {
 
-        referenceCount--;
-
-        if (referenceCount == 0) {
+        if (referenceCount.decrementAndGet() == 0) {
             database.close();
         }
     }
@@ -126,7 +122,7 @@ public enum DBUtils {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.LOCAL_SHARE_KEY_UUID, share.getUuid());
         contentValues.put(DBHelper.LOCAL_SHARE_KEY_CREATOR, share.getCreator());
-        contentValues.put(DBHelper.LOCAL_SHARE_KEY_MTIME, share.getmTime());
+        contentValues.put(DBHelper.LOCAL_SHARE_KEY_TIME, share.getTime());
         contentValues.put(DBHelper.LOCAL_SHARE_KEY_TITLE, share.getTitle());
         contentValues.put(DBHelper.LOCAL_SHARE_KEY_DESC, share.getDesc());
         contentValues.put(DBHelper.LOCAL_SHARE_KEY_DIGEST, share.getDigest());
@@ -416,7 +412,7 @@ public enum DBUtils {
             share.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_ID)));
             share.setUuid(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_UUID)));
             share.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_CREATOR)));
-            share.setmTime(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_MTIME)));
+            share.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_TIME)));
             share.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_TITLE)));
             share.setDesc(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_DESC)));
             share.setDigest(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_DIGEST)));
@@ -444,7 +440,7 @@ public enum DBUtils {
             share.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_ID)));
             share.setUuid(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_UUID)));
             share.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_CREATOR)));
-            share.setmTime(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_MTIME)));
+            share.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_TIME)));
             share.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_TITLE)));
             share.setDesc(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_DESC)));
             share.setDigest(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_DIGEST)));
@@ -470,7 +466,7 @@ public enum DBUtils {
             share.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_ID)));
             share.setUuid(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_UUID)));
             share.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_CREATOR)));
-            share.setmTime(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_MTIME)));
+            share.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_TIME)));
             share.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_TITLE)));
             share.setDesc(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_DESC)));
             share.setDigest(cursor.getString(cursor.getColumnIndex(DBHelper.LOCAL_SHARE_KEY_DIGEST)));
@@ -492,7 +488,7 @@ public enum DBUtils {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.LOCAL_SHARE_KEY_UUID, share.getUuid());
         contentValues.put(DBHelper.LOCAL_SHARE_KEY_CREATOR, share.getCreator());
-        contentValues.put(DBHelper.LOCAL_SHARE_KEY_MTIME, share.getmTime());
+        contentValues.put(DBHelper.LOCAL_SHARE_KEY_TIME, share.getTime());
         contentValues.put(DBHelper.LOCAL_SHARE_KEY_TITLE, share.getTitle());
         contentValues.put(DBHelper.LOCAL_SHARE_KEY_DESC, share.getDesc());
         contentValues.put(DBHelper.LOCAL_SHARE_KEY_DIGEST, share.getDigest());
@@ -519,10 +515,6 @@ public enum DBUtils {
         close();
 
         return returnValue;
-    }
-
-    public void doOneTaskInCachedThread(Runnable runnable) {
-        executorService.execute(runnable);
     }
 
 }

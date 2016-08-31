@@ -1,14 +1,17 @@
 package com.winsun.fruitmix.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Administrator on 2016/7/16.
  */
-public class Share {
+public class Share implements Parcelable{
 
     private int id;
     private String uuid;
     private String creator;
-    private String mTime;
+    private String time;
     private String title;
     private String desc;
     private String digest;
@@ -16,11 +19,11 @@ public class Share {
     private String maintainer;
     private boolean isAlbum;
 
-    public Share(int id, String uuid, String creator, String mTime, String title, String desc, String digest, String viewer, String maintainer, boolean isAlbum) {
+    public Share(int id, String uuid, String creator, String time, String title, String desc, String digest, String viewer, String maintainer, boolean isAlbum) {
         this.id = id;
         this.uuid = uuid;
         this.creator = creator;
-        this.mTime = mTime;
+        this.time = time;
         this.title = title;
         this.desc = desc;
         this.digest = digest;
@@ -30,6 +33,19 @@ public class Share {
     }
 
     public Share() {
+    }
+
+    protected Share(Parcel in) {
+        id = in.readInt();
+        uuid = in.readString();
+        creator = in.readString();
+        time = in.readString();
+        title = in.readString();
+        desc = in.readString();
+        digest = in.readString();
+        viewer = in.readString();
+        maintainer = in.readString();
+        isAlbum = in.readByte() != 0;
     }
 
     public int getId() {
@@ -56,12 +72,12 @@ public class Share {
         this.creator = creator;
     }
 
-    public String getmTime() {
-        return mTime;
+    public String getTime() {
+        return time;
     }
 
-    public void setmTime(String mTime) {
-        this.mTime = mTime;
+    public void setTime(String time) {
+        this.time = time;
     }
 
     public String getTitle() {
@@ -118,7 +134,7 @@ public class Share {
                 "id=" + id +
                 ", uuid='" + uuid + '\'' +
                 ", creator='" + creator + '\'' +
-                ", mTime='" + mTime + '\'' +
+                ", time='" + time + '\'' +
                 ", title='" + title + '\'' +
                 ", desc='" + desc + '\'' +
                 ", digest='" + digest + '\'' +
@@ -127,4 +143,36 @@ public class Share {
                 ", isAlbum=" + isAlbum +
                 '}';
     }
+
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(uuid);
+        dest.writeString(creator);
+        dest.writeString(time);
+        dest.writeString(title);
+        dest.writeString(desc);
+        dest.writeString(digest);
+        dest.writeString(viewer);
+        dest.writeString(maintainer);
+        dest.writeByte((byte) (isAlbum ? 1 : 0));
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Share> CREATOR = new Creator<Share>() {
+        @Override
+        public Share createFromParcel(Parcel in) {
+            return new Share(in);
+        }
+
+        @Override
+        public Share[] newArray(int size) {
+            return new Share[size];
+        }
+    };
 }

@@ -1,16 +1,15 @@
 package com.winsun.fruitmix.Fragment;
 
-import android.animation.Animator;
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
-import android.util.FloatMath;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -18,33 +17,25 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.BounceInterpolator;
-import android.widget.AbsListView;
-import android.widget.BaseAdapter;
-import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
-import com.android.volley.toolbox.Volley;
 import com.winsun.fruitmix.CreateAlbumActivity;
-import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.component.ScrollbarPanelListView;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.model.Photo;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.Share;
-import com.winsun.fruitmix.services.LocalShareService;
+import com.winsun.fruitmix.services.LocalShareUploadService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -59,6 +50,9 @@ import java.util.concurrent.ConcurrentMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.github.sin3hz.fastjumper.FastJumper;
+import io.github.sin3hz.fastjumper.callback.LinearScrollCalculator;
+import io.github.sin3hz.fastjumper.callback.SpannableCallback;
 
 /**
  * Created by Administrator on 2016/7/28.
@@ -70,29 +64,34 @@ public class NewPhotoList implements NavPagerActivity.Page {
     Activity containerActivity;
     private View view;
 
-    @BindView(R.id.photo_listview)
-    ScrollbarPanelListView mListView;
+    @BindView(R.id.photo_recyclerview)
+    RecyclerView mRecyclerView;
 
     @BindView(R.id.loading_layout)
     LinearLayout mLoadingLayout;
     @BindView(R.id.no_content_layout)
     LinearLayout mNoContentLayout;
 
-    private TextView mCurrentTimeTv;
-
     private int mSpanCount = 3;
     private int mSpanMaxCount = 6;
     private int mSpanMinCount = 2;
 
-    private PhotoListAdapter mPhotoListAdapter;
+    private PhotoRecycleAdapter mPhotoRecycleAdapter;
 
-    private List<String> mPhotoGroupList;
+    private FastJumper mFastJumper;
+    private SpannableCallback mJumperCallback;
+    private SpannableCallback.ScrollCalculator mLinearScrollCalculator;
+    private SpannableCallback.ScrollCalculator mScrollCalculator;
+    private RecyclerView.LayoutManager mLayoutManager;
 
-    private Map<String, List<Photo>> mPhotoMap;
+    private int mItemWidth;
 
-    private Map<Integer, String> mPhotoTitleLineNumberMap;// key is photo title line number,value is photo title;
-    private Map<Integer, List<Photo>> mPhotoContentLineNumberMap; // key is photo content line number,value is photo list;
-    private int mPhotoLineTotalCount;
+    private List<String> mPhotoDateGroups;
+
+    private Map<String, List<Photo>> mMapKeyIsDateValueIsPhotoList;
+
+    private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
+    private Map<Integer, Photo> mMapKeyIsPhotoPositionValueIsPhoto;
 
     private ProgressDialog mDialog;
 
@@ -103,20 +102,18 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     private boolean mSelectMode = false;
 
-    private List<IPhotoListListener> mPhotoListListenerList;
+    private List<IPhotoListListener> mPhotoListListeners;
 
     private int mSelectCount;
+
+    private int mAdapterItemTotalCount;
 
     private boolean mHasFlung = false;
     private RequestQueue mRequestQueue;
 
     private ImageLoader mImageLoader;
 
-    private int mFirstVisiableItem;
-    private int mVisiableItemCount;
-
-    //field for pinch
-    private float mOldSpacingDist = 0;
+    private float mOldSpan = 0;
     private ScaleGestureDetector mPinchScaleDetector;
 
     public NewPhotoList(Activity activity) {
@@ -132,22 +129,21 @@ public class NewPhotoList implements NavPagerActivity.Page {
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
 
-        mPhotoGroupList = new ArrayList<>();
-        mPhotoMap = new HashMap<>();
+        mPhotoDateGroups = new ArrayList<>();
+        mMapKeyIsDateValueIsPhotoList = new HashMap<>();
 
-        mPhotoTitleLineNumberMap = new HashMap<>();
-        mPhotoContentLineNumberMap = new HashMap<>();
+        mMapKeyIsPhotoPositionValueIsPhotoDate = new HashMap<>();
+        mMapKeyIsPhotoPositionValueIsPhoto = new HashMap<>();
 
-        mPhotoListListenerList = new ArrayList<>();
+        mPhotoListListeners = new ArrayList<>();
 
         calcScreenWidth();
 
         mPinchScaleDetector = new ScaleGestureDetector(containerActivity, new PinchScaleListener());
 
-        mPhotoListAdapter = new PhotoListAdapter();
         mScrollListener = new NewPhotoListScrollListener();
-        mListView.setOnScrollListener(mScrollListener);
-        mListView.setOnTouchListener(new View.OnTouchListener() {
+        mRecyclerView.addOnScrollListener(mScrollListener);
+        mRecyclerView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -156,51 +152,27 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 return false;
             }
         });
-        mListView.setAdapter(mPhotoListAdapter);
 
-        mListView.setOnPositionChangedListener(new ScrollbarPanelListView.OnPositionChangedListener() {
-            @Override
-            public void onPositionChanged(ScrollbarPanelListView listView, int position, View scrollBarPanel) {
+        mPhotoRecycleAdapter = new PhotoRecycleAdapter();
 
-                mCurrentTimeTv = (TextView) scrollBarPanel;
-
-                if (!mIsFling) {
-                    mCurrentTimeTv.setVisibility(View.GONE);
-                    return;
-                }
-
-                String title;
-
-                if (mPhotoTitleLineNumberMap.containsKey(position))
-                    title = mPhotoTitleLineNumberMap.get(position);
-                else {
-                    title = mPhotoContentLineNumberMap.get(position).get(0).getTitle();
-                }
-
-                if (title.contains("1916-01-01")) {
-                    mCurrentTimeTv.setText(containerActivity.getString(R.string.unknown_time_text));
-                } else {
-                    String[] titleSplit = title.split("-");
-                    String time = titleSplit[0] + "年" + titleSplit[1] + "月";
-                    mCurrentTimeTv.setText(time);
-                }
-            }
-        });
+        setupFastJumper();
+        mRecyclerView.setAdapter(mPhotoRecycleAdapter);
+        setupLayoutManager();
 
     }
 
     public void addPhotoListListener(IPhotoListListener listListener) {
-        mPhotoListListenerList.add(listListener);
+        mPhotoListListeners.add(listListener);
     }
 
     public void removePhotoListListener(IPhotoListListener listListener) {
-        mPhotoListListenerList.remove(listListener);
+        mPhotoListListeners.remove(listListener);
     }
 
     public void setSelectMode(boolean selectMode) {
         mSelectMode = selectMode;
 
-        mPhotoListAdapter.notifyDataSetChanged();
+        mPhotoRecycleAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -212,25 +184,86 @@ public class NewPhotoList implements NavPagerActivity.Page {
         reloadData();
 
         mLoadingLayout.setVisibility(View.INVISIBLE);
-        if (mPhotoGroupList.size() == 0) {
+        if (mPhotoDateGroups.size() == 0) {
             mNoContentLayout.setVisibility(View.VISIBLE);
-            mListView.setVisibility(View.INVISIBLE);
+            mRecyclerView.setVisibility(View.INVISIBLE);
 
-            for (IPhotoListListener listener : mPhotoListListenerList)
+            for (IPhotoListListener listener : mPhotoListListeners)
                 listener.onNoPhotoItem(true);
 
         } else {
             mNoContentLayout.setVisibility(View.INVISIBLE);
-            mListView.setVisibility(View.VISIBLE);
-            ((BaseAdapter) (mListView.getAdapter())).notifyDataSetChanged();
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mPhotoRecycleAdapter.notifyDataSetChanged();
 
-            for (IPhotoListListener listener : mPhotoListListenerList)
+            for (IPhotoListListener listener : mPhotoListListeners)
                 listener.onNoPhotoItem(false);
         }
 
         clearSelectedPhoto();
 
+    }
 
+    private void setupFastJumper() {
+        mLinearScrollCalculator = new LinearScrollCalculator(mRecyclerView) {
+
+            @Override
+            public int getItemHeight(int position) {
+                return mPhotoRecycleAdapter.getItemHeight(position);
+            }
+
+            @Override
+            public int getSpanSize(int position) {
+                return mPhotoRecycleAdapter.getSpanSize(position);
+            }
+
+            @Override
+            public int getSpanCount() {
+                return mSpanCount;
+            }
+        };
+
+        mJumperCallback = new SpannableCallback() {
+            @Override
+            public boolean isSectionEnable() {
+                return true;
+            }
+
+            @Override
+            public String getSection(int position) {
+                return mPhotoRecycleAdapter.getSectionForPosition(position);
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return true;
+            }
+        };
+        mFastJumper = new FastJumper(mJumperCallback);
+
+    }
+
+    private void setupGridLayoutManager() {
+        calcPhotoItemWidth();
+        GridLayoutManager glm = new GridLayoutManager(containerActivity, mSpanCount);
+        glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                return mPhotoRecycleAdapter.getSpanSize(position);
+            }
+        });
+        mLayoutManager = glm;
+        mScrollCalculator = mLinearScrollCalculator;
+    }
+
+    private void setupLayoutManager() {
+        mFastJumper.attachToRecyclerView(null);
+        setupGridLayoutManager();
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mJumperCallback.setScrollCalculator(mScrollCalculator);
+        mFastJumper.attachToRecyclerView(mRecyclerView);
+        mFastJumper.invalidate();
     }
 
     private void calcScreenWidth() {
@@ -238,6 +271,10 @@ public class NewPhotoList implements NavPagerActivity.Page {
         containerActivity.getWindowManager().getDefaultDisplay().getMetrics(metric);
 
         mScreenWidth = metric.widthPixels;
+    }
+
+    private void calcPhotoItemWidth() {
+        mItemWidth = mScreenWidth / mSpanCount - dip2px(5);
     }
 
     @Override
@@ -250,26 +287,25 @@ public class NewPhotoList implements NavPagerActivity.Page {
         String date;
         List<Photo> photoList;
 
-        mPhotoGroupList.clear();
-        mPhotoMap.clear();
+        mPhotoDateGroups.clear();
+        mMapKeyIsDateValueIsPhotoList.clear();
 
-        mPhotoTitleLineNumberMap.clear();
-        mPhotoContentLineNumberMap.clear();
+        mMapKeyIsPhotoPositionValueIsPhotoDate.clear();
+        mMapKeyIsPhotoPositionValueIsPhoto.clear();
 
-        //load local images
-        for (ConcurrentMap<String, String> map : LocalCache.LocalImagesMap.values()) {
+        for (ConcurrentMap<String, String> map : LocalCache.LocalImagesMapKeyIsThumb.values()) {
 
             if (map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) && map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("true")) {
                 continue;
             }
 
             date = map.get("mtime").substring(0, 10);
-            if (mPhotoMap.containsKey(date)) {
-                photoList = mPhotoMap.get(date);
+            if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
+                photoList = mMapKeyIsDateValueIsPhotoList.get(date);
             } else {
-                mPhotoGroupList.add(date);
+                mPhotoDateGroups.add(date);
                 photoList = new ArrayList<>();
-                mPhotoMap.put(date, photoList);
+                mMapKeyIsDateValueIsPhotoList.put(date, photoList);
             }
 
             Photo photo = new Photo();
@@ -283,17 +319,15 @@ public class NewPhotoList implements NavPagerActivity.Page {
             photoList.add(photo);
         }
 
-        //load remote images
-        //TO DO: concurrentexception
         for (ConcurrentMap<String, String> map : LocalCache.MediasMap.values()) {
 
             date = map.get("mtime").substring(0, 10);
-            if (mPhotoMap.containsKey(date)) {
-                photoList = mPhotoMap.get(date);
+            if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
+                photoList = mMapKeyIsDateValueIsPhotoList.get(date);
             } else {
-                mPhotoGroupList.add(date);
+                mPhotoDateGroups.add(date);
                 photoList = new ArrayList<>();
-                mPhotoMap.put(date, photoList);
+                mMapKeyIsDateValueIsPhotoList.put(date, photoList);
             }
 
             Photo photo = new Photo();
@@ -307,54 +341,48 @@ public class NewPhotoList implements NavPagerActivity.Page {
             photoList.add(photo);
         }
 
-        Collections.sort(mPhotoGroupList, new Comparator<String>() {
+        Collections.sort(mPhotoDateGroups, new Comparator<String>() {
             @Override
             public int compare(String lhs, String rhs) {
                 return -lhs.compareTo(rhs);
             }
         });
 
-        calcPhotoLineNumber();
+        calcPhotoPositionNumber();
 
     }
 
-    private void calcPhotoLineNumber() {
+    private void calcPhotoPositionNumber() {
 
         int titlePosition = 0;
         int photoListSize;
-        int photoListLineSize;
-        mPhotoLineTotalCount = 0;
+        mAdapterItemTotalCount = 0;
 
-        for (String title : mPhotoGroupList) {
-            mPhotoTitleLineNumberMap.put(titlePosition, title);
+        for (String title : mPhotoDateGroups) {
+            mMapKeyIsPhotoPositionValueIsPhotoDate.put(titlePosition, title);
 
-            List<Photo> photoList = mPhotoMap.get(title);
+            mAdapterItemTotalCount++;
+
+            List<Photo> photoList = mMapKeyIsDateValueIsPhotoList.get(title);
             photoListSize = photoList.size();
-            photoListLineSize = (photoListSize / mSpanCount) + (photoListSize % mSpanCount == 0 ? 0 : 1);
+            mAdapterItemTotalCount += photoListSize;
 
 //            Log.i(TAG, "titlePosition:" + titlePosition + " photoListSize:" + photoListSize + " photoListLineSize:" + photoListLineSize);
 
-            for (int i = 0; i < photoListLineSize; i++) {
-
-                if (mSpanCount + mSpanCount * i > photoListSize) {
-                    mPhotoContentLineNumberMap.put(titlePosition + i + 1, photoList.subList(mSpanCount * i, photoListSize));
-                } else {
-                    mPhotoContentLineNumberMap.put(titlePosition + i + 1, photoList.subList(mSpanCount * i, mSpanCount + mSpanCount * i));
-                }
-
+            for (int i = 0; i < photoListSize; i++) {
+                mMapKeyIsPhotoPositionValueIsPhoto.put(titlePosition + 1 + i, photoList.get(i));
             }
-            titlePosition += photoListLineSize + 1;
 
+            titlePosition = mAdapterItemTotalCount;
         }
 
-        mPhotoLineTotalCount = titlePosition - 1;
     }
 
     @NonNull
-    public String getSelectedUIDString() {
+    public String getSelectedImageUUIDString() {
 
         StringBuilder builder = new StringBuilder();
-        for (List<Photo> photoList : mPhotoMap.values()) {
+        for (List<Photo> photoList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Photo photo : photoList) {
                 if (photo.isSelected()) {
                     builder.append(",");
@@ -373,7 +401,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
     }
 
     private void clearSelectedPhoto() {
-        for (List<Photo> photoList : mPhotoMap.values()) {
+        for (List<Photo> photoList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Photo photo : photoList) {
                 photo.setSelected(false);
             }
@@ -384,7 +412,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         mSelectCount = 0;
 
-        for (List<Photo> photoList : mPhotoMap.values()) {
+        for (List<Photo> photoList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Photo photo : photoList) {
                 if (photo.isSelected())
                     mSelectCount++;
@@ -401,14 +429,14 @@ public class NewPhotoList implements NavPagerActivity.Page {
         return (int) (v + 0.5f);
     }
 
-    public void createAlbum() {
+    public void createAlbum(String selectUID) {
         Intent intent = new Intent();
         intent.setClass(containerActivity, CreateAlbumActivity.class);
-        intent.putExtra("selectedUIDStr", getSelectedUIDString());
+        intent.putExtra("selectedUIDStr", selectUID);
         containerActivity.startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
     }
 
-    public void createShare() {
+    public void createShare(final String selectUID) {
         new AsyncTask<Object, Object, Boolean>() {
 
             @Override
@@ -424,7 +452,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 String[] selectedUIDArr;
                 int i;
 
-                selectUUID = getSelectedUIDString();
+                selectUUID = selectUID;
                 selectedUIDArr = selectUUID.split(",");
                 data = "";
                 for (i = 0; i < selectedUIDArr.length; i++) {
@@ -445,15 +473,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                 return true;
 
-/*                data = "{\"album\":false, \"archived\":false,\"maintainers\":\"[\\\"" + FNAS.userUUID + "\\\"]\",\"viewers\":\"[" + viewers.substring(1) + "]\",\"tags\":[{}],\"contents\":\"[" + data.substring(1) + "]\"}";
-                Log.d("winsun", data);
-                try {
-                    FNAS.PostRemoteCall("/mediashare", data);
-                    FNAS.LoadDocuments();
-                    return true;
-                } catch (Exception e) {
-                    return false;
-                }*/
             }
 
             @Override
@@ -462,7 +481,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 mDialog.dismiss();
 
                 if (Util.getNetworkState(containerActivity)) {
-                    LocalShareService.startActionLocalShareTask(containerActivity);
+                    LocalShareUploadService.startActionLocalShareTask(containerActivity);
                 }
                 if (sSuccess) {
                     if (containerActivity instanceof NavPagerActivity) {
@@ -470,7 +489,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                     }
 
                 } else {
-                    Snackbar.make(mListView, containerActivity.getString(R.string.operation_fail), Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(mRecyclerView, containerActivity.getString(R.string.operation_fail), Snackbar.LENGTH_SHORT).show();
                 }
             }
 
@@ -515,7 +534,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
         share.setMaintainer(maintainer);
 
         share.setCreator(FNAS.userUUID);
-        share.setmTime(String.valueOf(System.currentTimeMillis()));
+        share.setTime(String.valueOf(System.currentTimeMillis()));
         share.setAlbum(false);
         dbUtils.insertLocalShare(share);
 
@@ -528,19 +547,51 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     }
 
-    private class PhotoListAdapter extends BaseAdapter {
+    private class PhotoRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        @Override
-        public boolean hasStableIds() {
-            return false;
+        private static final int VIEW_TYPE_HEAD = 0;
+        private static final int VIEW_TYPE_CONTENT = 1;
+
+        private int mSubHeaderHeight = containerActivity.getResources().getDimensionPixelSize(R.dimen.photo_title_height);
+
+        PhotoRecycleAdapter() {
+            setHasStableIds(true);
         }
 
         @Override
-        public Object getItem(int position) {
-            if (mPhotoTitleLineNumberMap.containsKey(position))
-                return mPhotoTitleLineNumberMap.get(position);
-            else
-                return mPhotoContentLineNumberMap.get(position);
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            int type = getItemViewType(position);
+            switch (type) {
+                case VIEW_TYPE_HEAD:
+                    PhotoGroupHolder groupHolder = (PhotoGroupHolder) holder;
+                    groupHolder.refreshView(position);
+                    break;
+                case VIEW_TYPE_CONTENT:
+                    PhotoHolder photoHolder = (PhotoHolder) holder;
+                    photoHolder.refreshView(position);
+                    break;
+            }
+        }
+
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            switch (viewType) {
+                case VIEW_TYPE_HEAD: {
+                    View view = LayoutInflater.from(containerActivity).inflate(R.layout.new_photo_title_item, parent, false);
+                    return new PhotoGroupHolder(view);
+                }
+                case VIEW_TYPE_CONTENT: {
+                    View view = LayoutInflater.from(containerActivity).inflate(R.layout.new_photo_gridlayout_item, parent, false);
+                    return new PhotoHolder(view);
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        public void onViewRecycled(RecyclerView.ViewHolder holder) {
+            super.onViewRecycled(holder);
         }
 
         @Override
@@ -549,77 +600,66 @@ public class NewPhotoList implements NavPagerActivity.Page {
         }
 
         @Override
-        public int getCount() {
-            return mPhotoLineTotalCount;
+        public boolean onFailedToRecycleView(RecyclerView.ViewHolder holder) {
+            return super.onFailedToRecycleView(holder);
         }
 
         @Override
-        public int getViewTypeCount() {
-            return 2;
+        public int getItemCount() {
+            return mAdapterItemTotalCount;
         }
 
         @Override
         public int getItemViewType(int position) {
-
-            if (mPhotoTitleLineNumberMap.containsKey(position))
-                return 0;
+            if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsKey(position))
+                return VIEW_TYPE_HEAD;
             else
-                return 1;
-
+                return VIEW_TYPE_CONTENT;
         }
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-
-//            Log.i(TAG, "getView position:" + position);
-
-            if (convertView == null) {
-
-                if (getItemViewType(position) == 0) {
-                    PhotoGroupHolder groupHolder;
-                    convertView = LayoutInflater.from(containerActivity).inflate(R.layout.new_photo_title_item, parent, false);
-                    groupHolder = new PhotoGroupHolder(convertView);
-                    convertView.setTag(groupHolder);
-
-                    groupHolder.refreshView(position);
-                } else {
-                    PhotoChildHolder childHolder;
-                    convertView = LayoutInflater.from(containerActivity).inflate(R.layout.new_photo_content_item, parent, false);
-                    childHolder = new PhotoChildHolder(convertView);
-                    convertView.setTag(childHolder);
-
-                    childHolder.refreshView(position);
-                }
-
-/*                convertView.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        return false;
-                    }
-                });*/
-
+        public int getSpanSize(int position) {
+            if (getItemViewType(position) == VIEW_TYPE_HEAD) {
+                return mSpanCount;
             } else {
+                return 1;
+            }
+        }
 
-                if (getItemViewType(position) == 0) {
-                    PhotoGroupHolder groupHolder;
-                    groupHolder = (PhotoGroupHolder) convertView.getTag();
+        public int getItemHeight(int position) {
+            if (getItemViewType(position) == VIEW_TYPE_HEAD) {
+                return mItemWidth;
+            } else {
+                return mSubHeaderHeight;
+            }
+        }
 
-                    groupHolder.refreshView(position);
-                } else {
-                    PhotoChildHolder childHolder;
-                    childHolder = (PhotoChildHolder) convertView.getTag();
+        public String getSectionForPosition(int position) {
+            String title;
 
-                    childHolder.refreshView(position);
-                }
-
+            if (position < 0) {
+                position = 0;
+            }
+            if (position >= getItemCount()) {
+                position = getItemCount() - 1;
             }
 
-            return convertView;
-        }
+            if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsKey(position))
+                title = mMapKeyIsPhotoPositionValueIsPhotoDate.get(position);
+            else {
+                title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getTitle();
+            }
 
+            if (title.contains("1916-01-01")) {
+                return containerActivity.getString(R.string.unknown_time_text);
+            } else {
+                String[] titleSplit = title.split("-");
+                return titleSplit[0] + "年" + titleSplit[1] + "月";
+            }
+
+        }
     }
 
-    class PhotoGroupHolder {
+    class PhotoGroupHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.photo_group_tv)
         TextView mPhotoTitle;
@@ -631,12 +671,13 @@ public class NewPhotoList implements NavPagerActivity.Page {
         LinearLayout mPhotoTitleLayout;
 
         public PhotoGroupHolder(View view) {
+            super(view);
             ButterKnife.bind(this, view);
         }
 
         public void refreshView(int groupPosition) {
 
-            final String date = mPhotoTitleLineNumberMap.get(groupPosition);
+            final String date = mMapKeyIsPhotoPositionValueIsPhotoDate.get(groupPosition);
             if (date.equals("1916-01-01")) {
                 mPhotoTitle.setText(containerActivity.getString(R.string.unknown_time_text));
             } else {
@@ -646,7 +687,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             if (mSelectMode) {
                 mPhotoTitleSelectImg.setVisibility(View.VISIBLE);
 
-                List<Photo> photoList = mPhotoMap.get(date);
+                List<Photo> photoList = mMapKeyIsDateValueIsPhotoList.get(date);
                 int selectNum = 0;
                 for (Photo photo : photoList) {
                     if (photo.isSelected())
@@ -661,12 +702,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 mPhotoTitleSelectImg.setVisibility(View.GONE);
             }
 
-/*            mPhotoTitleLayout.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });*/
 
             mPhotoTitleLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -675,15 +710,15 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                         boolean selected = mPhotoTitleSelectImg.isSelected();
                         mPhotoTitleSelectImg.setSelected(!selected);
-                        List<Photo> photoList = mPhotoMap.get(date);
+                        List<Photo> photoList = mMapKeyIsDateValueIsPhotoList.get(date);
                         for (Photo photo : photoList)
                             photo.setSelected(!selected);
 
-                        mPhotoListAdapter.notifyDataSetChanged();
+                        mPhotoRecycleAdapter.notifyDataSetChanged();
 
                         calcSelectedPhoto();
 
-                        for (IPhotoListListener listListener : mPhotoListListenerList) {
+                        for (IPhotoListListener listListener : mPhotoListListeners) {
                             listListener.onPhotoItemLongClick(mSelectCount);
                         }
                     }
@@ -694,94 +729,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     }
 
-    class PhotoChildHolder {
-
-        @BindView(R.id.photo_linearlayout)
-        LinearLayout mPhotoLinearLayout;
-
-        public PhotoChildHolder(View view) {
-            ButterKnife.bind(this, view);
-        }
-
-        public void refreshView(int position) {
-            List<Photo> mPhotoList = mPhotoContentLineNumberMap.get(position);
-
-            int childCount = mPhotoLinearLayout.getChildCount();
-            if (mSpanCount < childCount) {
-                for (int i = mSpanCount; i < childCount; i++) {
-                    View view = mPhotoLinearLayout.getChildAt(i);
-                    if (view != null) {
-                        mPhotoLinearLayout.removeView(view);
-                    }
-                }
-            }
-
-            int size = mPhotoList.size();
-            if (size < mSpanCount) {
-                for (int i = size; i < mSpanCount; i++) {
-                    View view = mPhotoLinearLayout.getChildAt(i);
-                    if (view != null) {
-                        mPhotoLinearLayout.removeView(view);
-                    }
-                }
-            }
-
-            for (int i = 0; i < mPhotoList.size(); i++) {
-
-                final Photo photo = mPhotoList.get(i);
-
-                PhotoHolder photoHolder;
-
-                if (mPhotoLinearLayout.getChildAt(i) == null) {
-                    view = View.inflate(containerActivity, R.layout.new_photo_gridlayout_item, null);
-
-                    mPhotoLinearLayout.addView(view);
-
-                    photoHolder = new PhotoHolder(view);
-                    view.setTag(photoHolder);
-
-                    photoHolder.refreshView(photo, position);
-
-                } else {
-
-                    view = mPhotoLinearLayout.getChildAt(i);
-
-/*                    view.setOnTouchListener(new View.OnTouchListener() {
-                        @Override
-                        public boolean onTouch(View v, MotionEvent event) {
-                            return false;
-                        }
-                    });*/
-
-                    photoHolder = (PhotoHolder) view.getTag();
-
-/*                    if (mHasFlung && !mIsFling) {
-                        mRequestQueue.cancelAll(new RequestQueue.RequestFilter() {
-                            @Override
-                            public boolean apply(Request<?> request) {
-
-                                int position = Integer.parseInt(String.valueOf(request.getTag()));
-                                if (position < mFirstVisiableItem || position > mFirstVisiableItem + mVisiableItemCount) {
-                                    return true;
-                                } else {
-                                    return false;
-                                }
-
-                            }
-                        });
-                    }*/
-
-                    photoHolder.refreshView(photo, position);
-
-                }
-
-            }
-
-        }
-
-    }
-
-    class PhotoHolder {
+    class PhotoHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.photo_iv)
         NetworkImageView mPhotoIv;
@@ -795,17 +743,18 @@ public class NewPhotoList implements NavPagerActivity.Page {
         View view;
 
         public PhotoHolder(View view) {
-
+            super(view);
             ButterKnife.bind(this, view);
             this.view = view;
         }
 
-        public void refreshView(final Photo photo, int position) {
+        public void refreshView(int position) {
+
+            final Photo photo = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
 
             mImageLoader.setTag(position);
 
             if (photo.isCached() && !mIsFling) {
-//                    LocalCache.LoadLocalBitmapThumb(photo.getUuid(), width, height, mPhotoIv);
 
                 String url = photo.getThumb();
 
@@ -816,7 +765,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             } else if (!photo.isCached() && !mIsFling) {
 
-//                    LocalCache.LoadRemoteBitmapThumb(photo.getUuid(), width, height, mPhotoIv);
 
                 int width = Integer.parseInt(photo.getWidth());
                 int height = Integer.parseInt(photo.getHeight());
@@ -824,20 +772,21 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 int[] result = Util.formatPhotoWidthHeight(width, height);
 
                 String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + photo.getUuid(), result[0], result[1]);
-//                String url = FNAS.Gateway + "/media/" + photo.getUuid() + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                 mImageLoader.setShouldCache(true);
                 mPhotoIv.setTag(url);
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(url, mImageLoader);
+
+
             } else if (mIsFling) {
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(null, mImageLoader);
             }
 
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) view.getLayoutParams();
-            params.width = mScreenWidth / mSpanCount - dip2px(5);
-            params.height = mScreenWidth / mSpanCount - dip2px(5);
+            GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) view.getLayoutParams();
+
+            params.height = mItemWidth;
             params.setMargins(0, 0, dip2px(5), dip2px(5));
             view.setLayoutParams(params);
 
@@ -864,15 +813,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 mPhotoSelectedIv.setVisibility(View.INVISIBLE);
             }
 
-/*
-            mPhotoIv.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    return false;
-                }
-            });
-*/
-
             mPhotoIv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -891,11 +831,11 @@ public class NewPhotoList implements NavPagerActivity.Page {
                         }
 
                         photo.setSelected(!selected);
-                        mPhotoListAdapter.notifyDataSetChanged();
+                        mPhotoRecycleAdapter.notifyDataSetChanged();
 
                         calcSelectedPhoto();
 
-                        for (IPhotoListListener listListener : mPhotoListListenerList) {
+                        for (IPhotoListListener listListener : mPhotoListListeners) {
                             listListener.onPhotoItemClick(mSelectCount);
                         }
 
@@ -903,7 +843,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                         int position = 0;
 
-                        List<Photo> photoList = mPhotoMap.get(photo.getTitle());
+                        List<Photo> photoList = mMapKeyIsDateValueIsPhotoList.get(photo.getTitle());
                         List<Map<String, Object>> imgList = new ArrayList<>(photoList.size());
                         Map<String, Object> map;
                         for (int i = 0; i < photoList.size(); i++) {
@@ -946,11 +886,11 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 public boolean onLongClick(View v) {
 
                     photo.setSelected(true);
-                    mPhotoListAdapter.notifyDataSetChanged();
+                    mPhotoRecycleAdapter.notifyDataSetChanged();
 
                     calcSelectedPhoto();
 
-                    for (IPhotoListListener listListener : mPhotoListListenerList) {
+                    for (IPhotoListListener listListener : mPhotoListListeners) {
                         listListener.onPhotoItemLongClick(mSelectCount);
                     }
 
@@ -961,28 +901,25 @@ public class NewPhotoList implements NavPagerActivity.Page {
         }
     }
 
-    private class NewPhotoListScrollListener implements AbsListView.OnScrollListener {
-        @Override
-        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            mFirstVisiableItem = firstVisibleItem;
-            mVisiableItemCount = visibleItemCount;
-        }
+    private class NewPhotoListScrollListener extends RecyclerView.OnScrollListener {
 
         @Override
-        public void onScrollStateChanged(AbsListView view, int scrollState) {
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
 
-            if (scrollState == SCROLL_STATE_FLING) {
+            if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
 
                 mHasFlung = true;
                 mIsFling = true;
 
-            } else if (scrollState == SCROLL_STATE_IDLE) {
+            } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
                 mIsFling = false;
 
-                mPhotoListAdapter.notifyDataSetChanged();
+                mPhotoRecycleAdapter.notifyDataSetChanged();
             }
         }
+
     }
 
     private class PinchScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
@@ -990,7 +927,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
 
-            mOldSpacingDist = detector.getCurrentSpan();
+            mOldSpan = detector.getCurrentSpan();
 
             return super.onScaleBegin(detector);
         }
@@ -998,24 +935,30 @@ public class NewPhotoList implements NavPagerActivity.Page {
         @Override
         public void onScaleEnd(ScaleGestureDetector detector) {
 
-            float newSpacingDist = detector.getCurrentSpan();
+            float newSpan = detector.getCurrentSpan();
 
-            if (newSpacingDist > mOldSpacingDist + dip2px(2)) {
+            if (newSpan > mOldSpan + dip2px(2)) {
 
                 if (mSpanCount > mSpanMinCount) {
                     mSpanCount--;
-                    calcPhotoLineNumber();
-                    mPhotoListAdapter.notifyDataSetChanged();
+                    calcPhotoItemWidth();
+                    calcPhotoPositionNumber();
+                    ((GridLayoutManager) mLayoutManager).setSpanCount(mSpanCount);
+                    mRecyclerView.setLayoutManager(mLayoutManager);
+                    mPhotoRecycleAdapter.notifyItemRangeChanged(0, mPhotoRecycleAdapter.getItemCount());
                 }
 
                 Log.i(TAG, "pinch more");
 
-            } else if (mOldSpacingDist > newSpacingDist + dip2px(2)) {
+            } else if (mOldSpan > newSpan + dip2px(2)) {
 
                 if (mSpanCount < mSpanMaxCount) {
                     mSpanCount++;
-                    calcPhotoLineNumber();
-                    mPhotoListAdapter.notifyDataSetChanged();
+                    calcPhotoItemWidth();
+                    calcPhotoPositionNumber();
+                    ((GridLayoutManager) mLayoutManager).setSpanCount(mSpanCount);
+                    mRecyclerView.setLayoutManager(mLayoutManager);
+                    mPhotoRecycleAdapter.notifyItemRangeChanged(0, mPhotoRecycleAdapter.getItemCount());
                 }
 
                 Log.i(TAG, "pinch less");

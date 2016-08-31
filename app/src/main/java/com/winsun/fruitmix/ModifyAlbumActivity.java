@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,10 +22,6 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -43,9 +38,9 @@ public class ModifyAlbumActivity extends AppCompatActivity {
     TextView btOK;
     ImageView ivBack;
 
-    String selectedUIDStr;
+    String mSelectedImageUUIDStr;
 
-    private String mUuid;
+    private String mMediaShareUuid;
     private ConcurrentMap<String, String> mAblumMap;
 
     private Context mContext;
@@ -60,10 +55,10 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
         mContext = this;
 
-        mUuid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
-        mAblumMap = LocalCache.DocumentsMap.get(mUuid);
-        selectedUIDStr = mAblumMap.get("images");
-        Log.d("winsun", selectedUIDStr);
+        mMediaShareUuid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
+        mAblumMap = LocalCache.SharesMap.get(mMediaShareUuid);
+        mSelectedImageUUIDStr = mAblumMap.get("images");
+        Log.d("winsun", mSelectedImageUUIDStr);
 
         tfTitle = (TextInputEditText) findViewById(R.id.title_edit);
         mTitleLayout = (TextInputLayout) findViewById(R.id.title_textlayout);
@@ -71,7 +66,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         tfDesc = (TextInputEditText) findViewById(R.id.desc);
         tfDesc.setText(mAblumMap.get("desc"));
         ckPublic = (CheckBox) findViewById(R.id.sPublic);
-        if (mAblumMap.get("private").equals("1")) {
+        if (mAblumMap.get("private").equals("true")) {
             ckPublic.setChecked(false);
         } else {
             ckPublic.setChecked(true);
@@ -102,24 +97,6 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         btOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Log.d("winsun", tfTitle.getText().toString()+" "+tfDesc.getText().toString()+" "+ckPrivate.isChecked());
-                /*
-                Map<String, String> item;
-                item=new HashMap<String, String>();
-                item.put("type", "normal");
-                item.put("title", tfTitle.getText().toString());
-                item.put("desc", tfDesc.getText().toString());
-                item.put("permission", ckPublic.isChecked()?"public":"");
-                item.put("date", new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()));
-                item.put("uuid", UUID.randomUUID().toString());
-                item.put("images", selectedUIDStr);
-                LocalCache.AlbumsMap.put(item.get("uuid"), item);
-                if(1==1) {
-                    setResult(200);
-                    finish();
-                    return;
-                }
-                */
                 Util.hideSoftInput(ModifyAlbumActivity.this);
 
                 final boolean sPublic, sSetMaintainer;
@@ -146,7 +123,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                         String[] selectedUIDArr;
                         int i;
 
-                        selectedUIDArr = selectedUIDStr.split(",");
+                        selectedUIDArr = mSelectedImageUUIDStr.split(",");
                         data = "";
                         for (i = 0; i < selectedUIDArr.length; i++) {
                             data += ",{\\\"type\\\":\\\"media\\\",\\\"digest\\\":\\\"" + selectedUIDArr[i] + "\\\"}";
@@ -166,15 +143,13 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                         }
 
                         if (Util.getNetworkState(mContext)) {
-                            //modify by liang.wu
-//                            data = "{\"album\":true, \"archived\":false,\"maintainers\":\"[\\\"" + FNAS.userUUID + "\\\"]\",\"viewers\":\"[" + viewers.substring(1) + "]\",\"tags\":[{\"albumname\":\"" + title + "\",\"desc\":\"" + desc + "\"}],\"contents\":\"[" + data.substring(1) + "]\"}";
 
-                            data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mUuid + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"false\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + title + "\\\", \\\"desc\\\":\\\"" + desc + "\\\"}], \\\"viewers\\\":[" + viewers.substring(1) + "], \\\"maintainers\\\":[" + maintainers.substring(1) + "]}}]\"}";
+                            data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mMediaShareUuid + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"false\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + title + "\\\", \\\"desc\\\":\\\"" + desc + "\\\"}], \\\"viewers\\\":[" + viewers.substring(1) + "], \\\"maintainers\\\":[" + maintainers.substring(1) + "]}}]\"}";
 
                             Log.d("winsun", data);
                             try {
                                 FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
-                                FNAS.LoadDocuments();
+                                FNAS.retrieveShareMap();
                                 return true;
                             } catch (Exception e) {
                                 return false;
@@ -183,7 +158,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
                             DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-                            Share share = dbUtils.getLocalShareByUuid(mUuid);
+                            Share share = dbUtils.getLocalShareByUuid(mMediaShareUuid);
 
                             share.setTitle(title);
                             share.setDesc(desc);
@@ -228,8 +203,10 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
                         if (sSuccess) {
 
-                            LocalBroadcastManager mBroadcastManager = LocalBroadcastManager.getInstance(mContext);
-                            mBroadcastManager.sendBroadcast(new Intent(Util.LOCAL_SHARE_CHANGED));
+                            if (!Util.getNetworkState(mContext)) {
+                                LocalBroadcastManager mBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+                                mBroadcastManager.sendBroadcast(new Intent(Util.LOCAL_SHARE_CHANGED));
+                            }
 
                             getIntent().putExtra(Util.UPDATED_ALBUM_TITLE, title);
                             setResult(RESULT_OK, getIntent());

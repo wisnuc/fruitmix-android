@@ -11,14 +11,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Share;
-import com.winsun.fruitmix.services.LocalShareService;
+import com.winsun.fruitmix.services.LocalShareUploadService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -44,7 +43,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
     ImageView ivBack;
     TextView mLayoutTitle;
 
-    String selectedUIDStr;
+    String mSelectedImageUUIDStr;
 
     private Context mContext;
 
@@ -58,8 +57,8 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         mContext = this;
 
-        selectedUIDStr = getIntent().getStringExtra("selectedUIDStr");
-        Log.d(TAG, "selectedUIDStr:" + selectedUIDStr);
+        mSelectedImageUUIDStr = getIntent().getStringExtra("mSelectedImageUUIDStr");
+        Log.d(TAG, "mSelectedImageUUIDStr:" + mSelectedImageUUIDStr);
         setContentView(R.layout.activity_create_album);
 
         tfTitle = (TextInputEditText) findViewById(R.id.title_edit);
@@ -93,24 +92,6 @@ public class CreateAlbumActivity extends AppCompatActivity {
         btOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                // Log.d("winsun", tfTitle.getText().toString()+" "+tfDesc.getText().toString()+" "+ckPrivate.isChecked());
-                /*
-                Map<String, String> item;
-                item=new HashMap<String, String>();
-                item.put("type", "normal");
-                item.put("title", tfTitle.getText().toString());
-                item.put("desc", tfDesc.getText().toString());
-                item.put("permission", ckPublic.isChecked()?"public":"");
-                item.put("date", new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()));
-                item.put("uuid", UUID.randomUUID().toString());
-                item.put("images", selectedUIDStr);
-                LocalCache.AlbumsMap.put(item.get("uuid"), item);
-                if(1==1) {
-                    setResult(200);
-                    finish();
-                    return;
-                }
-                */
 
                 Util.hideSoftInput(CreateAlbumActivity.this);
 
@@ -143,7 +124,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
                         String[] selectedUIDArr;
                         int i;
 
-                        selectedUIDArr = selectedUIDStr.split(",");
+                        selectedUIDArr = mSelectedImageUUIDStr.split(",");
                         data = "";
                         for (i = 0; i < selectedUIDArr.length; i++) {
                             data += ",{\\\"type\\\":\\\"media\\\",\\\"digest\\\":\\\"" + selectedUIDArr[i] + "\\\"}";
@@ -170,20 +151,11 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                         Log.i(TAG, "miantianers:" + maintainers);
 
-                        createAlbumInLocalAlbumDatabase(sPublic, sSetMaintainer, title, desc, selectedUIDStr);
+                        createAlbumInLocalAlbumDatabase(sPublic, sSetMaintainer, title, desc, mSelectedImageUUIDStr);
                         FNAS.loadLocalShare();
 
                         return true;
 
-//                        data = "{\"album\":true, \"archived\":false,\"maintainers\":\"[" + maintainers.substring(1) + "]\",\"viewers\":\"[" + viewers.substring(1) + "]\",\"tags\":[{\"albumname\":\"" + title + "\",\"desc\":\"" + desc + "\"}],\"contents\":\"[" + data.substring(1) + "]\"}";
-//                        Log.d("winsun", data);
-//                        try {
-//                            FNAS.PostRemoteCall("/mediashare", data);
-//                            FNAS.LoadDocuments();
-//                            return true;
-//                        } catch (Exception e) {
-//                            return false;
-//                        }
                     }
 
                     @Override
@@ -191,7 +163,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                         mDialog.dismiss();
                         if (Util.getNetworkState(mContext)) {
-                            LocalShareService.startActionLocalShareTask(mContext);
+                            LocalShareUploadService.startActionLocalShareTask(mContext);
                         }
 
                         if (sSuccess) {
@@ -264,7 +236,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
         share.setMaintainer(maintainer);
 
         share.setCreator(FNAS.userUUID);
-        share.setmTime(String.valueOf(System.currentTimeMillis()));
+        share.setTime(String.valueOf(System.currentTimeMillis()));
         share.setAlbum(true);
         dbUtils.insertLocalShare(share);
 

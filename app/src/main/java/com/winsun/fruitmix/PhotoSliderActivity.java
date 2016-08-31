@@ -50,13 +50,11 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     RelativeLayout rlChooseHeader;
     RelativeLayout rlPanelFooter;
 
-    //add by liang.wu
     private ImageView mReturnResize;
     private MyAdapter myAdapter;
     private ViewPager mViewPager;
 
     boolean sInEdit;
-    //public List<Page> pageList;
 
     private ImageLoader mImageLoader;
     private RequestQueue mRequestQueue;
@@ -86,7 +84,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
 
-        //add by liang.wu
         if (getShowPhotoReturnTipsValue()) {
             setShowPhotoReturnTipsValue(false);
 
@@ -150,15 +147,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         myAdapter = new MyAdapter(this);
         mViewPager.setAdapter(myAdapter);
         mViewPager.setCurrentItem(pos, false);
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 
             @Override
             public void onPageSelected(int position) {
-                //LocalCache.LoadLocalBitmap((String) imgList.get(position).get("thumb"), (ImageView)imgList.get(position).get("view"));
                 Log.d(TAG, "onPageSelected:" + position);
                 setPosition(position);
 
@@ -176,10 +168,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 }
             }
 
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
         });
 
         setPosition(pos);
@@ -198,13 +186,12 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         SharedPreferences.Editor editor;
         sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
-        editor.putBoolean(Util.SHOW_PHOTO_RETURN_TIPS, false);
+        editor.putBoolean(Util.SHOW_PHOTO_RETURN_TIPS, value);
         editor.apply();
     }
 
     public void setPosition(int position) {
         pos = position;
-        // ((BigLittleImageView) imgList.get(position).get("view")).loadBigPic();
 
         if (imgList.size() > position && position > -1) {
             Log.d(TAG, "image:" + imgList.get(position));
@@ -232,7 +219,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 currentUrl = String.valueOf(map.get("thumb"));
             } else {
                 currentUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("resHash"));
-//                currentUrl = FNAS.Gateway + "/media/" + map.get("resHash") + "?type=original";
             }
             if (currentUrl.equals(url)) {
 
@@ -272,12 +258,9 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
     private class MyAdapter extends PagerAdapter {
         private PhotoSliderActivity activity;
-        private long lastClickTime;
-
 
         public MyAdapter(PhotoSliderActivity activity) {
             this.activity = activity;
-            lastClickTime = 0;
         }
 
         @Override
@@ -287,22 +270,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         @Override
         public Object instantiateItem(ViewGroup container, final int position) {
-            /*TextView tv = new TextView(activity);
-            tv.setText("ViewPager" + position);
-            tv.setTextSize(30.0f);
-            tv.setGravity(Gravity.CENTER);
-
-            container.addView(tv);
-
-            return tv;
-            */
-            /*
-            ImageView iv=new ImageView(activity);
-            iv.setImageResource(R.drawable.yesshou);
-
-            container.addView(iv);
-            return iv;
-            */
             View view;
 
             view = LayoutInflater.from(activity).inflate(R.layout.photo_slider_cell, null);
@@ -311,14 +278,12 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             ImageView defaultMainImg = (ImageView) view.findViewById(R.id.default_main_pic);
 
             networkImageView.registerImageLoadListener(PhotoSliderActivity.this);
-            ;
+
 
             if (imgList.size() > position && position > -1) {
 
                 networkImageView.setVisibility(View.VISIBLE);
                 defaultMainImg.setVisibility(View.GONE);
-
-//                activity.imgList.get(position).put("view", iv);
 
                 Map<String, Object> map = imgList.get(position);
 
@@ -343,7 +308,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 } else {
 
                     String url = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("resHash"));
-//                    String url = FNAS.Gateway + "/media/" + map.get("resHash") + "?type=original";
 
                     mImageLoader.setShouldCache(true);
                     networkImageView.setTag(url);
@@ -352,29 +316,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 }
 
-//                iv.setData(activity.imgList.get(position), w, h);
-//                iv.loadSmallPic();
-
-            /*
-            if(pos==position) {
-                iv.loadBigPic();
-                lbDate.setText((String) activity.imgList.get(position).get("mtime"));
-            }
-            else iv.loadSmallPic();*/
-/*
-            iv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(iv.bigPic!=null) {
-                        LocalCache.TransActivityContainer.put("bigPic", iv.bigPic);
-                        Intent intent = new Intent();
-                        intent.setClass(activity, ImageZoomActivity.class);
-                        startActivity(intent);
-                    }
-                }
-            });
-*/
-
                 networkImageView.setOnTouchListener(new View.OnTouchListener() {
 
                     float x, y, lastX, lastY;
@@ -382,20 +323,21 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         //Log.d("winsun", "aa "+event.getAction());
-                        if (event.getAction() == 0) {
+                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
                             x = event.getRawX();
                             y = event.getRawY();
                             lastX = x;
                             lastY = y;
-                        } else if (event.getAction() == 2) {
+                        } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
                             lastX = event.getRawX();
                             lastY = event.getRawY();
                             if (!networkImageView.isZoomed()) {
                                 networkImageView.setTranslationY(lastY - y);
                             }
-                        } else if (event.getAction() == 1) {
+                        } else if (event.getAction() == MotionEvent.ACTION_UP) {
                             if (lastY - y > 200 && !networkImageView.isZoomed()) finish();
                             else if (!networkImageView.isZoomed()) {
+                                networkImageView.setTranslationY(0);
                                 if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
                                     sInEdit = !sInEdit;
                                     if (sInEdit) {
@@ -408,7 +350,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                                 }
                             }
                         }
-                        //return super.onTouch(v, event);
                         return false;
                     }
                 });
@@ -421,11 +362,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             container.addView(view);
 
             Log.i(TAG, "inistatiate position : " + position);
-/*            if (mIsFirstInstantiateItem)
-                setPhoto(position);
-
-            mIsFirstInstantiateItem = false;*/
-
 
             return view;
 

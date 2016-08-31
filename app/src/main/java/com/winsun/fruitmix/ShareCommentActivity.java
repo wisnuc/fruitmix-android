@@ -8,20 +8,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,19 +24,16 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
-import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Comment;
-import com.winsun.fruitmix.model.OfflineTask;
 import com.winsun.fruitmix.model.RequestQueueInstance;
-import com.winsun.fruitmix.services.LocalCommentService;
+import com.winsun.fruitmix.services.LocalCommentUploadService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONArray;
 
-import java.sql.Struct;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -126,7 +118,7 @@ public class ShareCommentActivity extends Activity {
         String imageUUID = getIntent().getStringExtra("imageUUID");
         imageRaw = LocalCache.MediasMap.get(imageUUID);
         if (imageRaw == null) {
-            imageRaw = LocalCache.LocalImagesMap2.get(imageUUID);
+            imageRaw = LocalCache.LocalImagesMapKeyIsUUID.get(imageUUID);
 
             imageData = new HashMap<String, Object>();
             imageData.put("uuid", imageRaw.get("uuid"));
@@ -144,7 +136,7 @@ public class ShareCommentActivity extends Activity {
         }
 
 
-        for (ConcurrentMap<String, String> shareRaw : LocalCache.DocumentsMap.values()) {
+        for (ConcurrentMap<String, String> shareRaw : LocalCache.SharesMap.values()) {
 
             Log.d("winsun", "sss1 " + shareRaw);
             if (shareRaw.containsKey("images") && shareRaw.get("images").contains((String) imageData.get("uuid"))) {
@@ -156,7 +148,6 @@ public class ShareCommentActivity extends Activity {
 
         ivMain = (NetworkImageView) findViewById(R.id.mainPic);
 
-        //load ivMain
         if (imageData.get("cacheType").equals("local")) {
             String url = String.valueOf(imageData.get("thumb"));
 
@@ -166,7 +157,6 @@ public class ShareCommentActivity extends Activity {
             ivMain.setImageUrl(url, mImageLoader);
         } else {
             String url = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + imageData.get("resHash"));
-//            String url = FNAS.Gateway + "/media/" + imageData.get("resHash") + "?type=original";
 
             mImageLoader.setShouldCache(true);
             ivMain.setTag(url);
@@ -203,55 +193,14 @@ public class ShareCommentActivity extends Activity {
                     @Override
                     protected Boolean doInBackground(Object... params) {
 
-//                        String request = "/media/" + imageData.get("uuid") + "?type=comments";
-//                        String data = "{\"shareid\":\"" + imageData.get("shareInstance") + "\", \"text\":\"" + mCommment + "\"}";
-
                         createCommentInLocalCommentDatabase(String.valueOf(imageData.get("uuid")), String.valueOf(imageData.get("shareInstance")), mCommment);
 
                         if (Util.getNetworkState(mContext)) {
-                            LocalCommentService.startActionLocalCommentTask(mContext);
+                            LocalCommentUploadService.startActionLocalCommentTask(mContext);
                         }
 
                         return true;
 
-/*                        try {
-                            FNAS.PostRemoteCall(request, data);
-                            return true;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-
-                            // insert offline work add by liang.wu
-                            DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                            dbUtils.openWritableDB();
-
-                            OfflineTask offlineTask = new OfflineTask();
-                            offlineTask.setHttpType(OfflineTask.HttpType.POST);
-                            offlineTask.setOperationType(OfflineTask.OperationType.CREATE);
-                            offlineTask.setRequest(request);
-                            offlineTask.setData(data);
-                            offlineTask.setOperationCount(0);
-                            dbUtils.insertTask(offlineTask);
-
-                            //show local change add by liang.wu
-                            if (commentData == null) {
-                                commentData = new ArrayList<>();
-                            }
-                            Comment commentItem = new Comment();
-                            commentItem.setCreator(FNAS.userUUID);
-                            commentItem.setTime(String.valueOf(System.currentTimeMillis()));
-                            commentItem.setFormatTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-                            commentItem.setShareId("");
-                            commentItem.setText(mCommment);
-                            commentData.add(commentItem);
-
-                            String uuid = String.valueOf(imageData.get("uuid"));
-                            dbUtils.insertComment(commentItem, uuid);
-
-                            dbUtils.close();
-                            //end add
-
-                            return false;
-                        }*/
                     }
 
                     @Override
@@ -267,7 +216,6 @@ public class ShareCommentActivity extends Activity {
                             Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
 
                             tfContent.setText("");
-                            //end add
                         }
 
                     }
@@ -281,11 +229,6 @@ public class ShareCommentActivity extends Activity {
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
 
     private void createCommentInLocalCommentDatabase(String imageUUid, String shareId, String commentText) {
@@ -311,6 +254,17 @@ public class ShareCommentActivity extends Activity {
         new AsyncTask<Object, Object, Boolean>() {
 
             @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+
+                if (mDialog == null) {
+                    mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+                } else if (!mDialog.isShowing()) {
+                    mDialog.show();
+                }
+            }
+
+            @Override
             protected Boolean doInBackground(Object... params) {
                 String str;
                 Comment commentItem;
@@ -322,9 +276,6 @@ public class ShareCommentActivity extends Activity {
                     commentData.clear();
 
                     String uuid = String.valueOf(imageData.get("uuid"));
-
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                    commentData.addAll(dbUtils.getLocalImageCommentByUUid(uuid));
 
                     if (Util.getNetworkState(mContext)) {
 
@@ -343,6 +294,9 @@ public class ShareCommentActivity extends Activity {
 
                         commentData.addAll(dbUtils.getRemoteImageCommentByUUid(uuid));
                     }
+
+                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+                    commentData.addAll(dbUtils.getLocalImageCommentByUUid(uuid));
 
                     Collections.sort(commentData, new Comparator<Comment>() {
                         @Override
@@ -373,7 +327,6 @@ public class ShareCommentActivity extends Activity {
                 if (mDialog != null && mDialog.isShowing())
                     mDialog.dismiss();
 
-                //reloadList();
                 mAdapter.commentList.clear();
                 mAdapter.commentList.addAll(commentData);
                 ((BaseAdapter) (lvComment.getAdapter())).notifyDataSetChanged();
@@ -417,8 +370,8 @@ public class ShareCommentActivity extends Activity {
                 view = LayoutInflater.from(ShareCommentActivity.this).inflate(R.layout.share_comment_cell, parent, false);
             else view = convertView;
 
-            vNormal = (View) view.findViewById(R.id.normal);
-            vHeader = (View) view.findViewById(R.id.header);
+            vNormal = view.findViewById(R.id.normal);
+            vHeader = view.findViewById(R.id.header);
 
             ivAvatar = (TextView) view.findViewById(R.id.avatar);
             lbComment = (TextView) view.findViewById(R.id.comment);

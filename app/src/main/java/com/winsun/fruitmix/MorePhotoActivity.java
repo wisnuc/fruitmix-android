@@ -11,18 +11,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
-import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.RequestQueueInstance;
-import com.winsun.fruitmix.model.Share;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -51,7 +46,7 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
     private MorePhotoAdapter mAdapter;
 
     private String mImages;
-    private List<Map<String, Object>> mPhotoList;
+    private List<Map<String, Object>> mPhotos;
 
     private ImageLoader mImageLoader;
 
@@ -81,7 +76,7 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
         mAdapter = new MorePhotoAdapter();
         mMorePhotoRecyclerView.setAdapter(mAdapter);
 
-        mPhotoList = new ArrayList<>();
+        mPhotos = new ArrayList<>();
         fillPhotoList(mImages);
         mAdapter.notifyDataSetChanged();
 
@@ -94,7 +89,7 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
 
     private void fillPhotoList(String selectedUIDStr) {
 
-        mPhotoList.clear();
+        mPhotos.clear();
 
         if (!selectedUIDStr.equals("")) {
             String[] stArr = selectedUIDStr.split(",");
@@ -114,9 +109,9 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
                     picItem.put("mtime", picItemRaw.get("lastModified"));
                     picItem.put("selected", "0");
                     picItem.put("locked", "1");
-                    mPhotoList.add(picItem);
+                    mPhotos.add(picItem);
                 } else {
-                    picItemRaw = LocalCache.LocalImagesMap2.get(str);
+                    picItemRaw = LocalCache.LocalImagesMapKeyIsUUID.get(str);
                     if (picItemRaw != null) {
                         picItem.put("cacheType", "local");
                         picItem.put("resID", "" + R.drawable.default_img);
@@ -128,7 +123,7 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
                         picItem.put("mtime", picItemRaw.get("lastModified"));
                         picItem.put("selected", "0");
                         picItem.put("locked", "1");
-                        mPhotoList.add(picItem);
+                        mPhotos.add(picItem);
                     }
                 }
             }
@@ -162,7 +157,7 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
         }
 
         public void refreshView(final int position) {
-            mMap = mPhotoList.get(position);
+            mMap = mPhotos.get(position);
 
             if (mMap.get("cacheType").equals("local")) {  // local bitmap path
 //                LocalCache.LoadLocalBitmapThumb((String) mMap.get("thumb"), width, height, mPhotoItem);
@@ -194,7 +189,7 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
             mMorelPhotoItemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    LocalCache.TransActivityContainer.put("imgSliderList", mPhotoList);
+                    LocalCache.TransActivityContainer.put("imgSliderList", mPhotos);
                     Intent intent = new Intent();
                     intent.putExtra("pos", getAdapterPosition());
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
@@ -209,7 +204,7 @@ public class MorePhotoActivity extends AppCompatActivity implements View.OnClick
     class MorePhotoAdapter extends RecyclerView.Adapter<MorePhotoViewHolder> {
         @Override
         public int getItemCount() {
-            return mPhotoList == null ? 0 : mPhotoList.size();
+            return mPhotos == null ? 0 : mPhotos.size();
         }
 
         @Override

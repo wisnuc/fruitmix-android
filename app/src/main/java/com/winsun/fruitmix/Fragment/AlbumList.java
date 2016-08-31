@@ -2,19 +2,11 @@ package com.winsun.fruitmix.Fragment;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
@@ -33,22 +25,16 @@ import com.winsun.fruitmix.AlbumPicContentActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.NewAlbumPicChooseActivity;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.ShareCommentActivity;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.OfflineTask;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.Share;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +57,7 @@ public class AlbumList implements NavPagerActivity.Page {
     List<Map<String, Object>> albumList;
 
     private long mDownTime = 0;
-    private double mDiffTime = 200; // millisecond
+    private double mDiffTimeMilliSecond = 200;
 
     ProgressDialog mDialog;
 
@@ -82,13 +68,7 @@ public class AlbumList implements NavPagerActivity.Page {
     public AlbumList(NavPagerActivity activity_) {
 
         containerActivity = activity_;
-                /*
-                TextView tv = new TextView(containerActivity);
-                tv.setText("VP2 Album");
-                tv.setTextSize(30.0f);
-                tv.setGravity(Gravity.CENTER);
-                view=tv;
-                */
+
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
                 R.layout.album_list, null);
 
@@ -109,29 +89,11 @@ public class AlbumList implements NavPagerActivity.Page {
         ivAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Intent intent = new Intent();
                 intent.setClass(containerActivity, NewAlbumPicChooseActivity.class);
-                //intent.setClass(MainActivity.this, AlbumPicContentActivity.class);
                 containerActivity.startActivityForResult(intent, Util.KEY_CHOOSE_PHOTO_REQUEST_CODE);
             }
         });
-
-        //loadRemoteData();
-
-/*        while (true) {
-            try {
-                Thread.sleep(2000);
-                refreshView();
-                break;
-            } catch (Exception e) {
-                try {
-                    e.printStackTrace();
-                    Thread.sleep(1000);
-                } catch (Exception e1) {
-                }
-            }
-        }*/
 
     }
 
@@ -143,7 +105,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
         albumList1 = new ArrayList<>();
 
-        for (ConcurrentMap<String, String> albumRaw : LocalCache.DocumentsMap.values()) {
+        for (ConcurrentMap<String, String> albumRaw : LocalCache.SharesMap.values()) {
             albumItem = new HashMap<String, Object>();
             if (albumRaw.get("type").equals("album") && albumRaw.get("del").equals("0")) {
                 albumItem.put("type", albumRaw.get("type"));
@@ -153,7 +115,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 StringBuilder images = new StringBuilder("");
                 for (String image : albumRaw.get("images").split(",")) {
 
-                    if (LocalCache.MediasMap.containsKey(image) || LocalCache.LocalImagesMap2.containsKey(image)) {
+                    if (LocalCache.MediasMap.containsKey(image) || LocalCache.LocalImagesMapKeyIsUUID.containsKey(image)) {
                         images.append(image);
                         images.append(",");
                     } else {
@@ -176,12 +138,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 } else {
                     albumItem.put("imageCount", ((String) albumItem.get("images")).split(",").length);
                 }
-                /*
-                if (albumRaw.get("permission").equals("public"))
-                    albumItem.put("private", "0");
-                else
-                    albumItem.put("private", "1");
-                    */
+
                 albumItem.put("private", albumRaw.get("private"));
 
                 // cover
@@ -219,9 +176,6 @@ public class AlbumList implements NavPagerActivity.Page {
 
         albumList = albumList1;
 
-
-        //Log.d("winsun", "albumList "+albumList);
-
     }
 
     public void refreshView() {
@@ -251,8 +205,8 @@ public class AlbumList implements NavPagerActivity.Page {
 
     private void deleteAlbumInLocalMap(String uuid) {
 
-        if (LocalCache.DocumentsMap.containsKey(uuid)) {
-            Map<String, String> map = LocalCache.DocumentsMap.get(uuid);
+        if (LocalCache.SharesMap.containsKey(uuid)) {
+            Map<String, String> map = LocalCache.SharesMap.get(uuid);
             map.put("del", "1");
         }
 
@@ -266,6 +220,11 @@ public class AlbumList implements NavPagerActivity.Page {
 
         AlbumList container;
         RelativeLayout lastMainbar;
+
+        public static final int LOCAL_ITEM_WITH_NETWORK = 0;
+        public static final int SUCCEED = 1;
+        public static final int REMOTE_ITEM_WITHOUT_NETWORK = 2;
+        public static final int EXCEPTION = 3;
 
         public AlbumListViewAdapter(AlbumList container_) {
             container = container_;
@@ -319,14 +278,13 @@ public class AlbumList implements NavPagerActivity.Page {
             coverImg = LocalCache.MediasMap.get(String.valueOf(currentItem.get("coverImg")));
             if (coverImg != null) sLocal = false;
             else {
-                coverImg = LocalCache.LocalImagesMap2.get(String.valueOf(currentItem.get("coverImg")));
+                coverImg = LocalCache.LocalImagesMapKeyIsUUID.get(String.valueOf(currentItem.get("coverImg")));
                 sLocal = true;
             }
 
             if (coverImg != null) {
 
                 if (sLocal) {  // local bitmap path
-//                    LocalCache.LoadLocalBitmapThumb(coverImg.get("thumb"), w, h, ivMainPic);
 
                     String url = String.valueOf(coverImg.get("thumb"));
 
@@ -336,7 +294,6 @@ public class AlbumList implements NavPagerActivity.Page {
                     ivMainPic.setImageUrl(url, mImageLoader);
 
                 } else {
-//                    LocalCache.LoadRemoteBitmapThumb((String) (coverImg.get("uuid")), w, h, ivMainPic);
 
                     w = Integer.parseInt(coverImg.get("width"));
                     h = Integer.parseInt(coverImg.get("height"));
@@ -344,7 +301,6 @@ public class AlbumList implements NavPagerActivity.Page {
                     int[] result = Util.formatPhotoWidthHeight(w, h);
 
                     String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + coverImg.get("uuid"), result[0], result[1]);
-//                    String url = FNAS.Gateway + "/media/" + coverImg.get("uuid") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                     mImageLoader.setShouldCache(true);
                     ivMainPic.setTag(url);
@@ -370,7 +326,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 lbOwner.setVisibility(View.VISIBLE);
             }
 
-            if (currentItem.get("private").equals("1")) {
+            if (currentItem.get("private").equals("true")) {
                 ivLock.setVisibility(View.GONE);
                 lbShare.setText(containerActivity.getString(R.string.public_text));
             } else {
@@ -402,12 +358,7 @@ public class AlbumList implements NavPagerActivity.Page {
                             super.onPreExecute();
 
                             mDialog = ProgressDialog.show(containerActivity, containerActivity.getString(R.string.operating_title), containerActivity.getString(R.string.loading_message), true, false);
-/*                            mDialog = new ProgressDialog(containerActivity, R.style.dialog);
-                            mDialog.setTitle(containerActivity.getString(R.string.operating_title));
-                            mDialog.setMessage(containerActivity.getString(R.string.loading_message));
-                            mDialog.setIndeterminate(true);
-                            mDialog.setCancelable(false);
-                            mDialog.show();*/
+
                         }
 
                         @Override
@@ -416,11 +367,11 @@ public class AlbumList implements NavPagerActivity.Page {
 
                             if (Util.getNetworkState(containerActivity)) {
                                 if (currentItem.containsKey("local")) {
-                                    return 0;
+                                    return LOCAL_ITEM_WITH_NETWORK;
                                 }
 
                                 data = "";
-                                if (currentItem.get("private").equals("1")) {
+                                if (currentItem.get("private").equals("true")) {
                                     for (String key : LocalCache.UsersMap.keySet()) {
                                         data += ",\\\"" + key + "\\\"";
                                     }
@@ -429,18 +380,18 @@ public class AlbumList implements NavPagerActivity.Page {
                                 data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + currentItem.get("uuid") + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"false\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + currentItem.get("title") + "\\\", \\\"desc\\\":\\\"" + currentItem.get("desc") + "\\\"}], \\\"viewers\\\":[" + data.substring(1) + "]}}]\"}";
                                 try {
                                     FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
-                                    FNAS.LoadDocuments();
-                                    return 1;
+                                    FNAS.retrieveShareMap();
+                                    return SUCCEED;
                                 } catch (Exception e) {
 
                                     e.printStackTrace();
 
-                                    return 3;
+                                    return EXCEPTION;
                                 }
 
                             } else {
                                 if (!currentItem.containsKey("local")) {
-                                    return 2;
+                                    return REMOTE_ITEM_WITHOUT_NETWORK;
                                 }
 
 
@@ -448,7 +399,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                                 Share share = dbUtils.getLocalShareByUuid(String.valueOf(currentItem.get("uuid")));
                                 StringBuilder builder = new StringBuilder();
-                                if (currentItem.get("private").equals("1")) {
+                                if (currentItem.get("private").equals("true")) {
                                     for (String user : LocalCache.UsersMap.keySet()) {
                                         builder.append(user);
                                         builder.append(",");
@@ -461,7 +412,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                                 FNAS.loadLocalShare();
 
-                                return 1;
+                                return SUCCEED;
                             }
                         }
 
@@ -470,20 +421,20 @@ public class AlbumList implements NavPagerActivity.Page {
 
                             mDialog.dismiss();
 
-                            if (sSuccess == 0) {
+                            if (sSuccess == LOCAL_ITEM_WITH_NETWORK) {
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.share_uploading), Toast.LENGTH_SHORT).show();
 
-                            } else if (sSuccess == 1) {
+                            } else if (sSuccess == SUCCEED) {
 
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
 
                                 reloadList();
                                 ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
                                 mainListView.setSelection(0);
-                            } else if (sSuccess == 2) {
+                            } else if (sSuccess == REMOTE_ITEM_WITHOUT_NETWORK) {
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
 
-                            } else if (sSuccess == 3) {
+                            } else if (sSuccess == EXCEPTION) {
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
 
                             }
@@ -521,40 +472,24 @@ public class AlbumList implements NavPagerActivity.Page {
 
                             if (Util.getNetworkState(containerActivity)) {
                                 if (currentItem.containsKey("local")) {
-                                    return 0;
+                                    return LOCAL_ITEM_WITH_NETWORK;
                                 }
 
                                 data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + currentItem.get("uuid") + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"true\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + currentItem.get("title") + "\\\", \\\"desc\\\":\\\"" + currentItem.get("desc") + "\\\"}], \\\"viewers\\\":[]}}]\"}";
                                 try {
                                     FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
-                                    FNAS.LoadDocuments();
-                                    return 1;
+                                    FNAS.retrieveShareMap();
+                                    return SUCCEED;
                                 } catch (Exception e) {
 
                                     e.printStackTrace();
 
-/*
-                                // insert offline work add by liang.wu
-                                DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                                dbUtils.openWritableDB();
-                                OfflineTask offlineTask = new OfflineTask();
-                                offlineTask.setHttpType(OfflineTask.HttpType.PATCH);
-                                offlineTask.setOperationType(OfflineTask.OperationType.DELETE);
-                                offlineTask.setRequest("/mediashare");
-                                offlineTask.setData(data);
-                                offlineTask.setOperationCount(0);
-                                dbUtils.insertTask(offlineTask);
-
-                                dbUtils.close();
-                                //end add
-*/
-
-                                    return 3;
+                                    return EXCEPTION;
                                 }
 
                             } else {
                                 if (!currentItem.containsKey("local")) {
-                                    return 2;
+                                    return REMOTE_ITEM_WITHOUT_NETWORK;
                                 }
 
                                 DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
@@ -565,7 +500,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                                 FNAS.delShareInDocumentsMapById(String.valueOf(currentItem.get("uuid")));
 
-                                return 1;
+                                return SUCCEED;
                             }
 
                         }
@@ -575,17 +510,12 @@ public class AlbumList implements NavPagerActivity.Page {
 
                             mDialog.dismiss();
 
-                            if (sSuccess == 0) {
+                            if (sSuccess == LOCAL_ITEM_WITH_NETWORK) {
 
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.share_uploading), Toast.LENGTH_SHORT).show();
 
-                            } else if (sSuccess == 1) {
+                            } else if (sSuccess == SUCCEED) {
                                 //Snackbar.make(mainListView, containerActivity.getString(R.string.operation_fail), Snackbar.LENGTH_SHORT).show();
-/*                                deleteAlbumInLocalMap(String.valueOf(currentItem.get("uuid")));
-
-                                reloadList();
-
-                                ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();*/
 
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
 
@@ -593,10 +523,10 @@ public class AlbumList implements NavPagerActivity.Page {
                                 ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
                                 mainListView.setSelection(0);
 
-                            } else if (sSuccess == 2) {
+                            } else if (sSuccess == REMOTE_ITEM_WITHOUT_NETWORK) {
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
 
-                            } else if (sSuccess == 3) {
+                            } else if (sSuccess == EXCEPTION) {
                                 Toast.makeText(containerActivity, containerActivity.getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
 
                             }
@@ -605,8 +535,6 @@ public class AlbumList implements NavPagerActivity.Page {
 
                     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-
-//                    reloadList();
                 }
             });
 
@@ -634,7 +562,7 @@ public class AlbumList implements NavPagerActivity.Page {
                         case MotionEvent.ACTION_UP:
                             Log.d(TAG, "up X:" + (lastX - x) + " Y:" + (lastY - y));
 
-                            if (System.currentTimeMillis() - mDownTime < mDiffTime && (lastX - x) * (lastX - x) + (lastY - y) * (lastY - y) < 100.0) {
+                            if (System.currentTimeMillis() - mDownTime < mDiffTimeMilliSecond && (lastX - x) * (lastX - x) + (lastY - y) * (lastY - y) < 100.0) {
                                 Intent intent = new Intent();
                                 intent.setClass(containerActivity, AlbumPicContentActivity.class);
                                 intent.putExtra("images", (String) currentItem.get("images"));

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -22,6 +21,7 @@ import android.widget.TextView;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Equipment;
+import com.winsun.fruitmix.model.ExecutorServiceInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,12 +59,12 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private EquipmentExpandableAdapter mAdapter;
 
-    private List<Equipment> mEquipmentList;
+    private List<Equipment> mEquipments;
 
     private NsdManager.DiscoveryListener mListener;
     private NsdManager mManager;
 
-    private List<List<Map<String, String>>> mMapList;
+    private List<List<Map<String, String>>> mUserExpandableLists;
 
     private CustomHandler mHandler;
 
@@ -80,8 +79,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         mContext = this;
 
-        mMapList = new ArrayList<>();
-        mEquipmentList = new ArrayList<>();
+        mUserExpandableLists = new ArrayList<>();
+        mEquipments = new ArrayList<>();
 
         Equipment equipment = new Equipment("Winsuc Appliction 140 By Wu", "192.168.5.140", 6666);
         getUserList(equipment);
@@ -97,11 +96,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
 
-                Map<String, String> userMap = mMapList.get(groupPosition).get(childPosition);
+                Map<String, String> userMap = mUserExpandableLists.get(groupPosition).get(childPosition);
 
                 Intent intent = new Intent(mContext, LoginActivity.class);
-                intent.putExtra(Util.GATEWAY, "http://" + mEquipmentList.get(groupPosition).getHost());
-                intent.putExtra(Util.EQUIPMENT_GROUP_NAME, mEquipmentList.get(groupPosition).getServiceName());
+                intent.putExtra(Util.GATEWAY, "http://" + mEquipments.get(groupPosition).getHost());
+                intent.putExtra(Util.EQUIPMENT_GROUP_NAME, mEquipments.get(groupPosition).getServiceName());
                 intent.putExtra(Util.EQUIPMENT_CHILD_NAME, userMap.get("username"));
                 intent.putExtra(Util.USER_UUID, userMap.get("uuid"));
                 startActivityForResult(intent, Util.KEY_LOGIN_REQUEST_CODE);
@@ -384,7 +383,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
                 Log.i(TAG, "onServiceResolved Service info:" + serviceInfo);
 
-                for (Equipment equipment : mEquipmentList) {
+                for (Equipment equipment : mEquipments) {
                     if (serviceInfo.getServiceName().equals(equipment.getServiceName())) {
                         return;
                     }
@@ -440,15 +439,15 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         itemList.add(item);
                     }
 
-                    for (Equipment equipment1 : mEquipmentList) {
+                    for (Equipment equipment1 : mEquipments) {
                         if (equipment1.getHost().equals(equipment.getHost()))
                             return;
                     }
 
-                    mEquipmentList.add(equipment);
-                    mMapList.add(itemList);
+                    mEquipments.add(equipment);
+                    mUserExpandableLists.add(itemList);
 
-                    Log.i(TAG, "EquipmentSearch: " + mMapList.toString());
+                    Log.i(TAG, "EquipmentSearch: " + mUserExpandableLists.toString());
 
                     //update list
                     mHandler.sendEmptyMessage(DATA_CHANGE);
@@ -461,8 +460,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             }
         };
 
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-        dbUtils.doOneTaskInCachedThread(runnable);
+        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+        instance.doOneTaskInCachedThread(runnable);
 
     }
 
@@ -487,8 +486,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                     mAdapter.equipmentList.clear();
                     mAdapter.mapList.clear();
-                    mAdapter.equipmentList.addAll(mEquipmentList);
-                    mAdapter.mapList.addAll(mMapList);
+                    mAdapter.equipmentList.addAll(mEquipments);
+                    mAdapter.mapList.addAll(mUserExpandableLists);
                     weakReference.get().mAdapter.notifyDataSetChanged();
                     break;
                 default:

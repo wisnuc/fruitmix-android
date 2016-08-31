@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -16,12 +15,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
@@ -33,11 +30,9 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentMap;
 
 import butterknife.BindView;
@@ -117,17 +112,15 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
-    private void fillPhotoList(String selectedUIDStr) {
+    private void fillPhotoList(String selectedImageUUIDStr) {
 
-        mPhotoList.clear();
-
-        if (!selectedUIDStr.equals("")) {
-            String[] stArr = selectedUIDStr.split(",");
+        if (!selectedImageUUIDStr.equals("")) {
+            String[] stArr = selectedImageUUIDStr.split(",");
             Map<String, Object> picItem;
             ConcurrentMap<String, String> picItemRaw;
-            for (int i = 0; i < stArr.length; i++) {
+            for (String aStArr : stArr) {
                 picItem = new HashMap<>();
-                picItemRaw = LocalCache.MediasMap.get(stArr[i]);
+                picItemRaw = LocalCache.MediasMap.get(aStArr);
                 if (picItemRaw != null) {
                     picItem.put("cacheType", "nas");
                     picItem.put("resID", "" + R.drawable.default_img);
@@ -140,7 +133,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                     picItem.put("locked", "1");
                     mPhotoList.add(picItem);
                 } else {
-                    picItemRaw = LocalCache.LocalImagesMap2.get(stArr[i]);
+                    picItemRaw = LocalCache.LocalImagesMapKeyIsUUID.get(aStArr);
                     if (picItemRaw != null) {
                         picItem.put("cacheType", "local");
                         picItem.put("resID", "" + R.drawable.default_img);
@@ -180,13 +173,13 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                 for (String string : mPhotoUuidListOriginal) {
                     if (!photoUuidList.contains(string)) {
-                        stringBuilder.append("{\\\"op\\\":\\\"remove\\\",\\\"path\\\":\\\"" + mMediaShareUUid + "\\\",\\\"value\\\":{\\\"digest\\\":\\\"" + string + "\\\"}},");
+                        stringBuilder.append("{\\\"op\\\":\\\"remove\\\",\\\"path\\\":\\\"").append(mMediaShareUUid).append("\\\",\\\"value\\\":{\\\"digest\\\":\\\"").append(string).append("\\\"}},");
                     }
                 }
 
                 for (String string : photoUuidList) {
                     if (!mPhotoUuidListOriginal.contains(string)) {
-                        stringBuilder.append("{\\\"op\\\":\\\"add\\\",\\\"path\\\":\\\"" + mMediaShareUUid + "\\\",\\\"value\\\":{\\\"type\\\":\\\"media\\\",\\\"digest\\\":\\\"" + string + "\\\"}},");
+                        stringBuilder.append("{\\\"op\\\":\\\"add\\\",\\\"path\\\":\\\"").append(mMediaShareUUid).append("\\\",\\\"value\\\":{\\\"type\\\":\\\"media\\\",\\\"digest\\\":\\\"").append(string).append("\\\"}},");
                     }
                 }
 
@@ -213,21 +206,27 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                                 try {
 
                                     boolean uploadFileResult = true;
+                                    int uploadSucceedCount = 0;
+
                                     for (String string : photoUuidList) {
                                         if (!mPhotoUuidListOriginal.contains(string)) {
                                             if (!FNAS.isPhotoInMediaMap(string)) {
 
-                                                if (LocalCache.LocalImagesMap2.containsKey(string)) {
-                                                    String thumb = LocalCache.LocalImagesMap2.get(string).get("thumb");
+                                                if (LocalCache.LocalImagesMapKeyIsUUID.containsKey(string)) {
+                                                    String thumb = LocalCache.LocalImagesMapKeyIsUUID.get(string).get("thumb");
 
-                                                    ConcurrentMap<String, String> map = LocalCache.LocalImagesMap.get(thumb);
+                                                    ConcurrentMap<String, String> map = LocalCache.LocalImagesMapKeyIsThumb.get(thumb);
 
                                                     Log.i(TAG, "thumb:" + thumb + "hash:" + string);
                                                     if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
                                                         uploadFileResult = FNAS.UploadFile(map.get("thumb"));
                                                         Log.i(TAG, "digest:" + string + "uploadFileResult:" + uploadFileResult);
-                                                        if (!uploadFileResult)
+                                                        if (!uploadFileResult){
                                                             break;
+                                                        }else {
+                                                            uploadSucceedCount++;
+                                                        }
+
                                                     }
                                                 }
 
@@ -235,11 +234,18 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                                         }
                                     }
 
+                                    if (uploadSucceedCount > 0) {
+                                        LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMapKeyIsThumb);
+                                        Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
+                                        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(mContext);
+                                        broadcastManager.sendBroadcast(intent);
+                                    }
+
                                     if (!uploadFileResult)
                                         return false;
 
                                     FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, stringBuilder.toString());
-                                    FNAS.LoadDocuments();
+                                    FNAS.retrieveShareMap();
                                     return true;
                                 } catch (Exception e) {
                                     return false;
@@ -274,8 +280,10 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 //                                Snackbar.make(mAddPhoto, "Patch Success", Snackbar.LENGTH_LONG).show();
                                 Toast.makeText(mContext, getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
 
-                                LocalBroadcastManager mBroadcastManager = LocalBroadcastManager.getInstance(mContext);
-                                mBroadcastManager.sendBroadcast(new Intent(Util.LOCAL_SHARE_CHANGED));
+                                if(!Util.getNetworkState(mContext)){
+                                    LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(mContext);
+                                    broadcastManager.sendBroadcast(new Intent(Util.LOCAL_SHARE_CHANGED));
+                                }
 
                                 stringBuilder.setLength(0);
                                 for (Map<String, Object> map : mPhotoList) {
@@ -317,8 +325,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         if (requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            String selectedUIDStr = data.getStringExtra("selectedUIDStr");
-            fillPhotoList(selectedUIDStr);
+            String selectedImageUUIDStr = data.getStringExtra("mSelectedImageUUIDStr");
+            fillPhotoList(selectedImageUUIDStr);
             mAdapter.notifyDataSetChanged();
         }
     }
@@ -343,8 +351,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         public void refreshView(final int position) {
             mMap = mPhotoList.get(position);
 
-            if (mMap.get("cacheType").equals("local")) {  // local bitmap path
-//                LocalCache.LoadLocalBitmapThumb((String) mMap.get("thumb"), width, height, mPhotoItem);
+            if (mMap.get("cacheType").equals("local")) {
 
                 String url = String.valueOf(mMap.get("thumb"));
 
@@ -354,7 +361,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 mPhotoItem.setImageUrl(url, mImageLoader);
 
             } else if (mMap.get("cacheType").equals("nas")) {
-//                LocalCache.LoadRemoteBitmapThumb((String) (mMap.get("resHash")), width, height, mPhotoItem);
 
                 width = Integer.parseInt((String) mMap.get("width"));
                 height = Integer.parseInt((String) mMap.get("height"));
@@ -362,7 +368,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 int[] result = Util.formatPhotoWidthHeight(width, height);
 
                 String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + mMap.get("resHash"), result[0], result[1]);
-//                String url = FNAS.Gateway + Util.MEDIA_PARAMETER + mMap.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                 mImageLoader.setShouldCache(true);
                 mPhotoItem.setTag(url);

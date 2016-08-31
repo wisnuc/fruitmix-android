@@ -5,22 +5,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,9 +24,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
-import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.OfflineTask;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.Share;
 import com.winsun.fruitmix.util.FNAS;
@@ -109,11 +102,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
 
-        if (getIntent().getStringExtra("private").equals("1")) {
-            mPrivate = true;
-        } else {
-            mPrivate = false;
-        }
+        mPrivate = getIntent().getStringExtra("private").equals("true");
 
         setContentView(R.layout.activity_album_pic_content);
 
@@ -161,9 +150,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             Log.i(TAG, "imageStr[0]:" + stArr[0]);
 
-            for (int i = 0; i < stArr.length; i++) {
+            for (String aStArr : stArr) {
                 picItem = new HashMap<String, Object>();
-                picItemRaw = LocalCache.MediasMap.get(stArr[i]);
+                picItemRaw = LocalCache.MediasMap.get(aStArr);
 
                 Log.i(TAG, "media has it or not:" + (picItemRaw != null ? "true" : "false"));
 
@@ -179,7 +168,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     picItem.put("locked", "1");
                     picList.add(picItem);
                 } else {
-                    picItemRaw = LocalCache.LocalImagesMap2.get(stArr[i]);
+                    picItemRaw = LocalCache.LocalImagesMapKeyIsUUID.get(aStArr);
 
                     Log.i(TAG, "localimagesMap2 has it or not:" + (picItemRaw != null ? "true" : "false"));
 
@@ -396,27 +385,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mUuid + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"true\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mTitle + "\\\", \\\"desc\\\":\\\"" + mDesc + "\\\"}], \\\"viewers\\\":[]}}]\"}";
                     try {
                         FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
-                        FNAS.LoadDocuments();
+                        FNAS.retrieveShareMap();
                         return true;
                     } catch (Exception e) {
 
                         e.printStackTrace();
-
-/*
-                    // insert offline work add by liang.wu
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                    dbUtils.openWritableDB();
-                    OfflineTask offlineTask = new OfflineTask();
-                    offlineTask.setHttpType(OfflineTask.HttpType.PATCH);
-                    offlineTask.setOperationType(OfflineTask.OperationType.DELETE);
-                    offlineTask.setRequest("/mediashare");
-                    offlineTask.setData(data);
-                    offlineTask.setOperationCount(0);
-                    dbUtils.insertTask(offlineTask);
-
-                    dbUtils.close();
-                    //end add
-*/
 
                         return false;
                     }
@@ -437,12 +410,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(Boolean sSuccess) {
 
-/*                //delete local album add by liang.wu
-                if (!sSuccess) {
-                    deleteAlbumInLocalMap(mUuid);
-                }
-                //end add by liang.wu*/
-
                 mDialog.dismiss();
 
                 if (sSuccess) {
@@ -462,8 +429,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private void deleteAlbumInLocalMap(String uuid) {
 
-        if (LocalCache.DocumentsMap.containsKey(uuid)) {
-            Map<String, String> map = LocalCache.DocumentsMap.get(uuid);
+        if (LocalCache.SharesMap.containsKey(uuid)) {
+            Map<String, String> map = LocalCache.SharesMap.get(uuid);
             map.put("del", "1");
         }
 
@@ -494,7 +461,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mUuid + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"false\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mTitle + "\\\", \\\"desc\\\":\\\"" + mDesc + "\\\"}], \\\"viewers\\\":[" + data.substring(1) + "]}}]\"}";
                     try {
                         FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
-                        FNAS.LoadDocuments();
+                        FNAS.retrieveShareMap();
                         return true;
                     } catch (Exception e) {
                         return false;

@@ -10,23 +10,19 @@ import android.support.design.widget.Snackbar;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.services.LocalShareService;
-import com.winsun.fruitmix.services.LocalCommentService;
+import com.winsun.fruitmix.model.ExecutorServiceInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -181,14 +177,12 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                         } // get deviceID
                         Log.d("uuid", LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
 
-                        //FNAS.checkOfflineTask(mContext);
-
-                        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                        dbUtils.doOneTaskInCachedThread(new Runnable() {
+                        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+                        instance.doOneTaskInCachedThread(new Runnable() {
                             @Override
                             public void run() {
                                 try {
-                                    FNAS.LoadDocuments();
+                                    FNAS.loadData();
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }

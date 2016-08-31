@@ -48,6 +48,6 @@
         android:background="#D9D9D9"
         android:dividerHeight="10dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context="com.winsun.fruitmix.Test2Activity"></ListView>
+        tools:context="com.winsun.fruitmix.Test2Activity"/>
 
 </RelativeLayout>
