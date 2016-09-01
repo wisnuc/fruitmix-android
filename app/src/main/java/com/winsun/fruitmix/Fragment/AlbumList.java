@@ -398,16 +398,13 @@ public class AlbumList implements NavPagerActivity.Page {
                                 DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
                                 Share share = dbUtils.getLocalShareByUuid(String.valueOf(currentItem.get("uuid")));
-                                StringBuilder builder = new StringBuilder();
+
                                 if (currentItem.get("private").equals("true")) {
-                                    for (String user : LocalCache.UsersMap.keySet()) {
-                                        builder.append(user);
-                                        builder.append(",");
-                                    }
+                                    share.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+                                }else {
+                                    share.setViewer(Collections.<String>emptyList());
                                 }
-                                String viewer = builder.toString();
-                                Log.i("create album viewer:", viewer);
-                                share.setViewer(viewer);
+
                                 dbUtils.updateLocalShare(share, share.getUuid());
 
                                 FNAS.loadLocalShare();

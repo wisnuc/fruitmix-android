@@ -22,6 +22,8 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentMap;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -163,28 +165,16 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                             share.setTitle(title);
                             share.setDesc(desc);
 
-                            StringBuilder builder = new StringBuilder();
                             if (sPublic) {
-                                for (String user : LocalCache.UsersMap.keySet()) {
-                                    builder.append(user);
-                                    builder.append(",");
-                                }
-                            }
-                            String viewer = builder.toString();
-                            Log.i("create album viewer:", viewer);
-                            share.setViewer(viewer);
+                                share.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+                            }else share.setViewer(new ArrayList<String>());
 
-                            String maintainer;
+
                             if (sSetMaintainer) {
-                                maintainer = viewer;
+                                share.setMaintainer(new ArrayList<>(LocalCache.UsersMap.keySet()));
                             } else {
-                                builder.setLength(0);
-                                builder.append(FNAS.userUUID);
-                                builder.append(",");
-
-                                maintainer = builder.toString();
+                                share.setMaintainer(Collections.singletonList(FNAS.userUUID));
                             }
-                            share.setMaintainer(maintainer);
 
                             dbUtils.updateLocalShare(share, share.getUuid());
 

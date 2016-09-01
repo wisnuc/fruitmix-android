@@ -32,6 +32,7 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -471,16 +472,14 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
                     Share share = dbUtils.getLocalShareByUuid(mUuid);
-                    StringBuilder builder = new StringBuilder();
+
                     if (mPrivate) {
-                        for (String user : LocalCache.UsersMap.keySet()) {
-                            builder.append(user);
-                            builder.append(",");
-                        }
+
+                        share.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+                    }else {
+                        share.setViewer(Collections.<String>emptyList());
                     }
-                    String viewer = builder.toString();
-                    Log.i("create album share:", share.toString());
-                    share.setViewer(viewer);
+
                     dbUtils.updateLocalShare(share, share.getUuid());
 
                     FNAS.loadLocalShare();

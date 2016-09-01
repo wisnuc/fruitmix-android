@@ -35,4 +35,5 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:24.0.0'
     compile 'io.github.sin3hz.fastjumper:fastjumper:0.1.0'
     compile project(':volley')
+    compile 'org.mockito:mockito-core:2.1.0-beta.119'
 }

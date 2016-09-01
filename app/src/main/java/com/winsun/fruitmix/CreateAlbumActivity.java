@@ -23,7 +23,11 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -199,41 +203,24 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-        StringBuilder builder = new StringBuilder();
-
         Share share = new Share();
         share.setUuid(Util.createLocalUUid());
-        share.setDigest(digest);
-        share.setTitle(title);
-        share.setDesc(desc);
 
         Log.i(TAG, "create album digest:" + digest);
 
-        if (isPublic) {
-            for (String user : LocalCache.UsersMap.keySet()) {
-                builder.append(user);
-                builder.append(",");
-            }
-        } else builder.append(",");
+        share.setImageDigests(Arrays.asList(digest.split(",")));
+        share.setTitle(title);
+        share.setDesc(desc);
 
-        String viewer = builder.toString();
-        Log.i(TAG, "create album viewer:" + viewer);
-        share.setViewer(viewer);
+        if (isPublic) {
+            share.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+        } else share.setViewer(Collections.<String>emptyList());
 
         if (otherMaintianer) {
-            builder.setLength(0);
-            for (String user : LocalCache.UsersMap.keySet()) {
-                builder.append(user);
-                builder.append(",");
-            }
+            share.setMaintainer(new ArrayList<>(LocalCache.UsersMap.keySet()));
         } else {
-            builder.setLength(0);
-            builder.append(FNAS.userUUID);
-            builder.append(",");
+            share.setMaintainer(Collections.singletonList(FNAS.userUUID));
         }
-        String maintainer = builder.toString();
-        Log.i(TAG, "create album maintainer:" + maintainer);
-        share.setMaintainer(maintainer);
 
         share.setCreator(FNAS.userUUID);
         share.setTime(String.valueOf(System.currentTimeMillis()));

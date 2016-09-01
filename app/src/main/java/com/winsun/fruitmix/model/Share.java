@@ -2,6 +2,7 @@ package com.winsun.fruitmix.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import java.util.List;
 
 /**
  * Created by Administrator on 2016/7/16.
@@ -14,23 +15,16 @@ public class Share implements Parcelable{
     private String time;
     private String title;
     private String desc;
-    private String digest;
-    private String viewer;
-    private String maintainer;
+    private List<String> imageDigests;
+    private List<String> viewer;
+    private List<String> maintainer;
     private boolean isAlbum;
-
-    public Share(int id, String uuid, String creator, String time, String title, String desc, String digest, String viewer, String maintainer, boolean isAlbum) {
-        this.id = id;
-        this.uuid = uuid;
-        this.creator = creator;
-        this.time = time;
-        this.title = title;
-        this.desc = desc;
-        this.digest = digest;
-        this.viewer = viewer;
-        this.maintainer = maintainer;
-        this.isAlbum = isAlbum;
-    }
+    private boolean isArchived;
+    private String date;
+    private String coverImageDigest;
+    private boolean isPrivate;
+    private boolean isMaintained;
+    private boolean isLocked;
 
     public Share() {
     }
@@ -42,11 +36,54 @@ public class Share implements Parcelable{
         time = in.readString();
         title = in.readString();
         desc = in.readString();
-        digest = in.readString();
-        viewer = in.readString();
-        maintainer = in.readString();
+        imageDigests = in.createStringArrayList();
+        viewer = in.createStringArrayList();
+        maintainer = in.createStringArrayList();
         isAlbum = in.readByte() != 0;
+        isArchived = in.readByte() != 0;
+        date = in.readString();
+        coverImageDigest = in.readString();
+        isPrivate = in.readByte() != 0;
+        isMaintained = in.readByte() != 0;
+        isLocked = in.readByte() != 0;
     }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(uuid);
+        dest.writeString(creator);
+        dest.writeString(time);
+        dest.writeString(title);
+        dest.writeString(desc);
+        dest.writeStringList(imageDigests);
+        dest.writeStringList(viewer);
+        dest.writeStringList(maintainer);
+        dest.writeByte((byte) (isAlbum ? 1 : 0));
+        dest.writeByte((byte) (isArchived ? 1 : 0));
+        dest.writeString(date);
+        dest.writeString(coverImageDigest);
+        dest.writeByte((byte) (isPrivate ? 1 : 0));
+        dest.writeByte((byte) (isMaintained ? 1 : 0));
+        dest.writeByte((byte) (isLocked ? 1 : 0));
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Share> CREATOR = new Creator<Share>() {
+        @Override
+        public Share createFromParcel(Parcel in) {
+            return new Share(in);
+        }
+
+        @Override
+        public Share[] newArray(int size) {
+            return new Share[size];
+        }
+    };
 
     public int getId() {
         return id;
@@ -96,28 +133,44 @@ public class Share implements Parcelable{
         this.desc = desc;
     }
 
-    public String getDigest() {
-        return digest;
-    }
-
-    public void setDigest(String digest) {
-        this.digest = digest;
-    }
-
-    public String getViewer() {
+    public List<String> getViewer() {
         return viewer;
     }
 
-    public void setViewer(String viewer) {
+    public void setViewer(List<String> viewer) {
         this.viewer = viewer;
     }
 
-    public String getMaintainer() {
+    public List<String> getMaintainer() {
         return maintainer;
     }
 
-    public void setMaintainer(String maintainer) {
+    public void setMaintainer(List<String> maintainer) {
         this.maintainer = maintainer;
+    }
+
+    public List<String> getImageDigests() {
+        return imageDigests;
+    }
+
+    public void setImageDigests(List<String> imageDigests) {
+        this.imageDigests = imageDigests;
+    }
+
+    public String getCoverImageDigest() {
+        return coverImageDigest;
+    }
+
+    public void setCoverImageDigest(String coverImageDigest) {
+        this.coverImageDigest = coverImageDigest;
+    }
+
+    public boolean isLocked() {
+        return isLocked;
+    }
+
+    public void setLocked(boolean locked) {
+        isLocked = locked;
     }
 
     public boolean isAlbum() {
@@ -128,51 +181,35 @@ public class Share implements Parcelable{
         isAlbum = album;
     }
 
-    @Override
-    public String toString() {
-        return "Share{" +
-                "id=" + id +
-                ", uuid='" + uuid + '\'' +
-                ", creator='" + creator + '\'' +
-                ", time='" + time + '\'' +
-                ", title='" + title + '\'' +
-                ", desc='" + desc + '\'' +
-                ", digest='" + digest + '\'' +
-                ", viewer='" + viewer + '\'' +
-                ", maintainer='" + maintainer + '\'' +
-                ", isAlbum=" + isAlbum +
-                '}';
+    public boolean isArchived() {
+        return isArchived;
     }
 
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeString(uuid);
-        dest.writeString(creator);
-        dest.writeString(time);
-        dest.writeString(title);
-        dest.writeString(desc);
-        dest.writeString(digest);
-        dest.writeString(viewer);
-        dest.writeString(maintainer);
-        dest.writeByte((byte) (isAlbum ? 1 : 0));
+    public void setArchived(boolean archived) {
+        isArchived = archived;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public String getDate() {
+        return date;
     }
 
-    public static final Creator<Share> CREATOR = new Creator<Share>() {
-        @Override
-        public Share createFromParcel(Parcel in) {
-            return new Share(in);
-        }
+    public void setDate(String date) {
+        this.date = date;
+    }
 
-        @Override
-        public Share[] newArray(int size) {
-            return new Share[size];
-        }
-    };
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean aPrivate) {
+        isPrivate = aPrivate;
+    }
+
+    public boolean isMaintained() {
+        return isMaintained;
+    }
+
+    public void setMaintained(boolean maintained) {
+        isMaintained = maintained;
+    }
 }

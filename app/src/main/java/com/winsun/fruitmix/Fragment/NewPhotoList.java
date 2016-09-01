@@ -32,7 +32,7 @@ import com.winsun.fruitmix.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
-import com.winsun.fruitmix.model.Photo;
+import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.Share;
 import com.winsun.fruitmix.services.LocalShareUploadService;
@@ -41,6 +41,7 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -88,10 +89,10 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     private List<String> mPhotoDateGroups;
 
-    private Map<String, List<Photo>> mMapKeyIsDateValueIsPhotoList;
+    private Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
 
     private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
-    private Map<Integer, Photo> mMapKeyIsPhotoPositionValueIsPhoto;
+    private Map<Integer, Media> mMapKeyIsPhotoPositionValueIsPhoto;
 
     private ProgressDialog mDialog;
 
@@ -285,7 +286,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
     private void reloadData() {
 
         String date;
-        List<Photo> photoList;
+        List<Media> mediaList;
 
         mPhotoDateGroups.clear();
         mMapKeyIsDateValueIsPhotoList.clear();
@@ -301,44 +302,44 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             date = map.get("mtime").substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
-                photoList = mMapKeyIsDateValueIsPhotoList.get(date);
+                mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
             } else {
                 mPhotoDateGroups.add(date);
-                photoList = new ArrayList<>();
-                mMapKeyIsDateValueIsPhotoList.put(date, photoList);
+                mediaList = new ArrayList<>();
+                mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
             }
 
-            Photo photo = new Photo();
-            photo.setUuid(map.get("uuid"));
-            photo.setWidth(map.get("width"));
-            photo.setHeight(map.get("height"));
-            photo.setCached(true);
-            photo.setTime(map.get("mtime"));
-            photo.setTitle(date);
-            photo.setThumb(map.get("thumb"));
-            photoList.add(photo);
+            Media media = new Media();
+            media.setUuid(map.get("uuid"));
+            media.setWidth(map.get("width"));
+            media.setHeight(map.get("height"));
+            media.setLocal(true);
+            media.setTime(map.get("mtime"));
+            media.setTitle(date);
+            media.setThumb(map.get("thumb"));
+            mediaList.add(media);
         }
 
         for (ConcurrentMap<String, String> map : LocalCache.MediasMap.values()) {
 
             date = map.get("mtime").substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
-                photoList = mMapKeyIsDateValueIsPhotoList.get(date);
+                mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
             } else {
                 mPhotoDateGroups.add(date);
-                photoList = new ArrayList<>();
-                mMapKeyIsDateValueIsPhotoList.put(date, photoList);
+                mediaList = new ArrayList<>();
+                mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
             }
 
-            Photo photo = new Photo();
-            photo.setUuid(map.get("uuid"));
-            photo.setWidth(map.get("width"));
-            photo.setHeight(map.get("height"));
-            photo.setCached(false);
-            photo.setTime(map.get("mtime").replace("T", " ").replace("Z", " "));
-            photo.setThumb("");
-            photo.setTitle(date);
-            photoList.add(photo);
+            Media media = new Media();
+            media.setUuid(map.get("uuid"));
+            media.setWidth(map.get("width"));
+            media.setHeight(map.get("height"));
+            media.setLocal(false);
+            media.setTime(map.get("mtime").replace("T", " ").replace("Z", " "));
+            media.setThumb("");
+            media.setTitle(date);
+            mediaList.add(media);
         }
 
         Collections.sort(mPhotoDateGroups, new Comparator<String>() {
@@ -363,14 +364,14 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             mAdapterItemTotalCount++;
 
-            List<Photo> photoList = mMapKeyIsDateValueIsPhotoList.get(title);
-            photoListSize = photoList.size();
+            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(title);
+            photoListSize = mediaList.size();
             mAdapterItemTotalCount += photoListSize;
 
 //            Log.i(TAG, "titlePosition:" + titlePosition + " photoListSize:" + photoListSize + " photoListLineSize:" + photoListLineSize);
 
             for (int i = 0; i < photoListSize; i++) {
-                mMapKeyIsPhotoPositionValueIsPhoto.put(titlePosition + 1 + i, photoList.get(i));
+                mMapKeyIsPhotoPositionValueIsPhoto.put(titlePosition + 1 + i, mediaList.get(i));
             }
 
             titlePosition = mAdapterItemTotalCount;
@@ -382,11 +383,11 @@ public class NewPhotoList implements NavPagerActivity.Page {
     public String getSelectedImageUUIDString() {
 
         StringBuilder builder = new StringBuilder();
-        for (List<Photo> photoList : mMapKeyIsDateValueIsPhotoList.values()) {
-            for (Photo photo : photoList) {
-                if (photo.isSelected()) {
+        for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
+            for (Media media : mediaList) {
+                if (media.isSelected()) {
                     builder.append(",");
-                    builder.append(photo.getUuid());
+                    builder.append(media.getUuid());
                 }
             }
         }
@@ -401,9 +402,9 @@ public class NewPhotoList implements NavPagerActivity.Page {
     }
 
     private void clearSelectedPhoto() {
-        for (List<Photo> photoList : mMapKeyIsDateValueIsPhotoList.values()) {
-            for (Photo photo : photoList) {
-                photo.setSelected(false);
+        for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
+            for (Media media : mediaList) {
+                media.setSelected(false);
             }
         }
     }
@@ -412,9 +413,9 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         mSelectCount = 0;
 
-        for (List<Photo> photoList : mMapKeyIsDateValueIsPhotoList.values()) {
-            for (Photo photo : photoList) {
-                if (photo.isSelected())
+        for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
+            for (Media media : mediaList) {
+                if (media.isSelected())
                     mSelectCount++;
             }
         }
@@ -501,37 +502,25 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-        StringBuilder builder = new StringBuilder();
-
         Share share = new Share();
         share.setUuid(Util.createLocalUUid());
-        share.setDigest(digest);
+
+        Log.i(TAG, "create share digest:" + digest);
+
+        share.setImageDigests(Arrays.asList(digest.split(",")));
         share.setTitle(title);
         share.setDesc(desc);
 
+
         if (isPublic) {
-            for (String user : LocalCache.UsersMap.keySet()) {
-                builder.append(user);
-                builder.append(",");
-            }
-        }
-        String viewer = builder.toString();
-        Log.i(TAG, "create share viewer:" + viewer);
-        Log.i(TAG, "create share digest:" + digest);
+            share.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+        } else share.setViewer(new ArrayList<String>());
 
-        share.setViewer(viewer);
-
-        String maintainer;
         if (otherMaintianer) {
-            maintainer = viewer;
+            share.setMaintainer(new ArrayList<>(LocalCache.UsersMap.keySet()));
         } else {
-            builder.setLength(0);
-            builder.append(FNAS.userUUID);
-            builder.append(",");
-
-            maintainer = builder.toString();
+            share.setMaintainer(Collections.singletonList(FNAS.userUUID));
         }
-        share.setMaintainer(maintainer);
 
         share.setCreator(FNAS.userUUID);
         share.setTime(String.valueOf(System.currentTimeMillis()));
@@ -687,13 +676,13 @@ public class NewPhotoList implements NavPagerActivity.Page {
             if (mSelectMode) {
                 mPhotoTitleSelectImg.setVisibility(View.VISIBLE);
 
-                List<Photo> photoList = mMapKeyIsDateValueIsPhotoList.get(date);
+                List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
                 int selectNum = 0;
-                for (Photo photo : photoList) {
-                    if (photo.isSelected())
+                for (Media media : mediaList) {
+                    if (media.isSelected())
                         selectNum++;
                 }
-                if (selectNum == photoList.size())
+                if (selectNum == mediaList.size())
                     mPhotoTitleSelectImg.setSelected(true);
                 else
                     mPhotoTitleSelectImg.setSelected(false);
@@ -710,9 +699,9 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                         boolean selected = mPhotoTitleSelectImg.isSelected();
                         mPhotoTitleSelectImg.setSelected(!selected);
-                        List<Photo> photoList = mMapKeyIsDateValueIsPhotoList.get(date);
-                        for (Photo photo : photoList)
-                            photo.setSelected(!selected);
+                        List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
+                        for (Media media : mediaList)
+                            media.setSelected(!selected);
 
                         mPhotoRecycleAdapter.notifyDataSetChanged();
 
@@ -750,28 +739,28 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         public void refreshView(int position) {
 
-            final Photo photo = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
+            final Media media = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
 
             mImageLoader.setTag(position);
 
-            if (photo.isCached() && !mIsFling) {
+            if (media.isLocal() && !mIsFling) {
 
-                String url = photo.getThumb();
+                String url = media.getThumb();
 
                 mImageLoader.setShouldCache(false);
                 mPhotoIv.setTag(url);
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(url, mImageLoader);
 
-            } else if (!photo.isCached() && !mIsFling) {
+            } else if (!media.isLocal() && !mIsFling) {
 
 
-                int width = Integer.parseInt(photo.getWidth());
-                int height = Integer.parseInt(photo.getHeight());
+                int width = Integer.parseInt(media.getWidth());
+                int height = Integer.parseInt(media.getHeight());
 
                 int[] result = Util.formatPhotoWidthHeight(width, height);
 
-                String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + photo.getUuid(), result[0], result[1]);
+                String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), result[0], result[1]);
 
                 mImageLoader.setShouldCache(true);
                 mPhotoIv.setTag(url);
@@ -791,7 +780,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             view.setLayoutParams(params);
 
             if (mSelectMode) {
-                boolean selected = photo.isSelected();
+                boolean selected = media.isSelected();
                 RelativeLayout.LayoutParams photoParams = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
                 if (selected) {
                     int margin = dip2px(20);
@@ -805,7 +794,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 }
             } else {
 
-                photo.setSelected(false);
+                media.setSelected(false);
 
                 RelativeLayout.LayoutParams photoParams = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
                 photoParams.setMargins(0, 0, 0, 0);
@@ -817,7 +806,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 @Override
                 public void onClick(View v) {
                     if (mSelectMode) {
-                        boolean selected = photo.isSelected();
+                        boolean selected = media.isSelected();
                         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
                         if (selected) {
                             int margin = dip2px(20);
@@ -830,7 +819,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                             mPhotoSelectedIv.setVisibility(View.INVISIBLE);
                         }
 
-                        photo.setSelected(!selected);
+                        media.setSelected(!selected);
                         mPhotoRecycleAdapter.notifyDataSetChanged();
 
                         calcSelectedPhoto();
@@ -843,25 +832,25 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                         int position = 0;
 
-                        List<Photo> photoList = mMapKeyIsDateValueIsPhotoList.get(photo.getTitle());
-                        List<Map<String, Object>> imgList = new ArrayList<>(photoList.size());
+                        List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(media.getTitle());
+                        List<Map<String, Object>> imgList = new ArrayList<>(mediaList.size());
                         Map<String, Object> map;
-                        for (int i = 0; i < photoList.size(); i++) {
-                            Photo photo1 = photoList.get(i);
+                        for (int i = 0; i < mediaList.size(); i++) {
+                            Media media1 = mediaList.get(i);
                             map = new HashMap<>();
-                            map.put("cacheType", photo1.isCached() ? "local" : "nas");
+                            map.put("cacheType", media1.isLocal() ? "local" : "nas");
                             map.put("resID", R.drawable.default_img);
-                            map.put("resHash", photo1.getUuid());
-                            map.put("thumb", photo1.getThumb());
-                            map.put("width", photo1.getWidth());
-                            map.put("height", photo1.getHeight());
-                            map.put("uuid", photo1.getUuid());
-                            map.put("mtime", photo1.getTime());
-                            map.put("selected", photo1.isSelected() ? "1" : "0");
+                            map.put("resHash", media1.getUuid());
+                            map.put("thumb", media1.getThumb());
+                            map.put("width", media1.getWidth());
+                            map.put("height", media1.getHeight());
+                            map.put("uuid", media1.getUuid());
+                            map.put("mtime", media1.getTime());
+                            map.put("selected", media1.isSelected() ? "1" : "0");
                             map.put("locked", "1");
                             imgList.add(map);
 
-                            if (photo.getUuid().equals(photo1.getUuid())) {
+                            if (media.getUuid().equals(media1.getUuid())) {
                                 position = i;
                             }
                         }
@@ -877,7 +866,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                     }
 
-                    Log.i(TAG, "image digest:" + photo.getUuid());
+                    Log.i(TAG, "image digest:" + media.getUuid());
                 }
             });
 
@@ -885,7 +874,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 @Override
                 public boolean onLongClick(View v) {
 
-                    photo.setSelected(true);
+                    media.setSelected(true);
                     mPhotoRecycleAdapter.notifyDataSetChanged();
 
                     calcSelectedPhoto();

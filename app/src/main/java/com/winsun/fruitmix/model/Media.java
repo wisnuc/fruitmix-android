@@ -3,7 +3,7 @@ package com.winsun.fruitmix.model;
 /**
  * Created by Administrator on 2016/7/28.
  */
-public class Photo {
+public class Media {
 
     private String uuid;
     private String thumb;
@@ -11,7 +11,7 @@ public class Photo {
     private String width;
     private String height;
     private boolean selected;
-    private boolean cached;
+    private boolean local;
     private String title;
 
     public String getUuid() {
@@ -54,12 +54,12 @@ public class Photo {
         this.selected = selected;
     }
 
-    public boolean isCached() {
-        return cached;
+    public boolean isLocal() {
+        return local;
     }
 
-    public void setCached(boolean cached) {
-        this.cached = cached;
+    public void setLocal(boolean local) {
+        this.local = local;
     }
 
     public String getTitle() {

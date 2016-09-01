@@ -578,25 +578,20 @@ public class FNAS {
             item.put("date", new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(System.currentTimeMillis())));
             item.put("title", share.getTitle());
             item.put("desc", share.getDesc());
-            item.put("images", share.getDigest());
 
-            String[] digests = share.getDigest().split(",");
-            item.put("coverImg", digests[0].toLowerCase());
-
-            String[] maintainers = share.getMaintainer().split(",");
-            if (share.getViewer().split(",").length <= 1 && maintainers.length <= 1) {
-                item.put("private", "true");
-            } else {
-                item.put("private", "false");
+            StringBuilder builder = new StringBuilder();
+            for (String digest : share.getImageDigests()) {
+                builder.append(digest);
+                builder.append(",");
             }
 
-            boolean isMaintainer = false;
-            for (String maintainer : maintainers) {
-                if (maintainer.equals(FNAS.userUUID)) {
-                    isMaintainer = true;
-                }
-            }
-            item.put("maintained", isMaintainer ? "true" : "false");
+            item.put("images", builder.toString());
+
+            item.put("coverImg", share.getCoverImageDigest().toLowerCase());
+
+            item.put("private", String.valueOf(share.isPrivate()));
+
+            item.put("maintained", String.valueOf(share.isMaintained()));
             item.put("local", "true");
 
             Log.i(TAG, "local share:" + item.toString());

@@ -82,7 +82,7 @@ public class LocalShareUploadService extends IntentService {
             mShare = iterator.next();
 
             boolean uploadFileResult = true;
-            String[] digests = mShare.getDigest().split(",");
+            String[] digests = (String[]) mShare.getImageDigests().toArray();
             int uploadSucceedCount = 0;
 
             for (String digest : digests) {
@@ -132,7 +132,7 @@ public class LocalShareUploadService extends IntentService {
             }
 
             viewers = "";
-            for (String key : mShare.getViewer().split(",")) {
+            for (String key : mShare.getViewer()) {
                 viewers += ",\\\"" + key + "\\\"";
             }
             if (viewers.length() == 0) {
@@ -141,7 +141,7 @@ public class LocalShareUploadService extends IntentService {
             Log.i(TAG, "winsun viewer:" + viewers);
 
             maintainers = "";
-            for (String key : mShare.getMaintainer().split(",")) {
+            for (String key : mShare.getMaintainer()) {
                 maintainers += ",\\\"" + key + "\\\"";
             }
 

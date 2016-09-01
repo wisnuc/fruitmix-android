@@ -140,6 +140,9 @@
         <service
             android:name=".services.CreateLocalCommentService"
             android:exported="false" />
+        <service
+            android:name=".services.GetRemoteDataService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

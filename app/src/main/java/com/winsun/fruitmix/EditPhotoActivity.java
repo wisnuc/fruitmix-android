@@ -255,15 +255,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                                 DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
                                 Share share = dbUtils.getLocalShareByUuid(mMediaShareUUid);
-                                StringBuilder builder = new StringBuilder();
-                                for (String string : photoUuidList) {
-                                    builder.append(string);
-                                    builder.append(",");
-                                }
-                                String digest = builder.toString();
-                                Log.i("winsun edit digest:", digest);
 
-                                share.setDigest(digest);
+                                share.setImageDigests(photoUuidList);
                                 dbUtils.updateLocalShare(share, mMediaShareUUid);
                                 FNAS.loadLocalShare();
                                 return true;
