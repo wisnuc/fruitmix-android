@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.winsun.fruitmix.MorePhotoActivity">
+    tools:context=".MoreMediaActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"

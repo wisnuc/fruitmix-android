@@ -4,20 +4,20 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 
-import com.winsun.fruitmix.model.Share;
+import com.winsun.fruitmix.model.MediaShare;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  */
-public class DeleteShareService extends IntentService {
-    private static final String ACTION_DELETE_SHARE = "com.winsun.fruitmix.services.action.delete.share";
+public class DeleteRemoteMediaShareService extends IntentService {
+    private static final String ACTION_DELETE_REMOTE_SHARE = "com.winsun.fruitmix.services.action.delete.remote.share";
 
     // TODO: Rename parameters
     private static final String EXTRA_SHARE = "com.winsun.fruitmix.services.extra.share";
 
-    public DeleteShareService() {
-        super("DeleteShareService");
+    public DeleteRemoteMediaShareService() {
+        super("DeleteRemoteMediaShareService");
     }
 
     /**
@@ -26,10 +26,10 @@ public class DeleteShareService extends IntentService {
      *
      * @see IntentService
      */
-    public static void startActionDeleteShare(Context context, Share share) {
-        Intent intent = new Intent(context, DeleteShareService.class);
-        intent.setAction(ACTION_DELETE_SHARE);
-        intent.putExtra(EXTRA_SHARE, share);
+    public static void startActionDeleteRemoteShare(Context context, MediaShare mediaShare) {
+        Intent intent = new Intent(context, DeleteRemoteMediaShareService.class);
+        intent.setAction(ACTION_DELETE_REMOTE_SHARE);
+        intent.putExtra(EXTRA_SHARE, mediaShare);
         context.startService(intent);
     }
 
@@ -37,9 +37,9 @@ public class DeleteShareService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_DELETE_SHARE.equals(action)) {
-                final Share share = intent.getParcelableExtra(EXTRA_SHARE);
-                handleActionDeleteShare(share);
+            if (ACTION_DELETE_REMOTE_SHARE.equals(action)) {
+                final MediaShare mediaShare = intent.getParcelableExtra(EXTRA_SHARE);
+                handleActionDeleteRemoteShare(mediaShare);
             }
         }
     }
@@ -48,7 +48,7 @@ public class DeleteShareService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionDeleteShare(Share share) {
+    private void handleActionDeleteRemoteShare(MediaShare mediaShare) {
 
     }
 

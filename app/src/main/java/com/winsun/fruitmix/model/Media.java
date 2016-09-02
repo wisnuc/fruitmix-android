@@ -1,9 +1,12 @@
 package com.winsun.fruitmix.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Administrator on 2016/7/28.
  */
-public class Media {
+public class Media implements Parcelable {
 
     private String uuid;
     private String thumb;
@@ -13,6 +16,50 @@ public class Media {
     private boolean selected;
     private boolean local;
     private String title;
+
+    public Media() {
+
+    }
+
+    protected Media(Parcel in) {
+        uuid = in.readString();
+        thumb = in.readString();
+        time = in.readString();
+        width = in.readString();
+        height = in.readString();
+        selected = in.readByte() != 0;
+        local = in.readByte() != 0;
+        title = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(uuid);
+        dest.writeString(thumb);
+        dest.writeString(time);
+        dest.writeString(width);
+        dest.writeString(height);
+        dest.writeByte((byte) (selected ? 1 : 0));
+        dest.writeByte((byte) (local ? 1 : 0));
+        dest.writeString(title);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Media> CREATOR = new Creator<Media>() {
+        @Override
+        public Media createFromParcel(Parcel in) {
+            return new Media(in);
+        }
+
+        @Override
+        public Media[] newArray(int size) {
+            return new Media[size];
+        }
+    };
 
     public String getUuid() {
         return uuid;

@@ -23,7 +23,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.AlbumPicContentActivity;
-import com.winsun.fruitmix.MorePhotoActivity;
+import com.winsun.fruitmix.MoreMediaActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
@@ -35,7 +35,6 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,9 +50,9 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Created by Administrator on 2016/4/19.
  */
-public class ShareList implements NavPagerActivity.Page {
+public class MediaShareList implements NavPagerActivity.Page {
 
-    public static final String TAG = ShareList.class.getSimpleName();
+    public static final String TAG = MediaShareList.class.getSimpleName();
 
     NavPagerActivity containerActivity;
     View view;
@@ -75,7 +74,7 @@ public class ShareList implements NavPagerActivity.Page {
 
     private ImageLoader mImageLoader;
 
-    public ShareList(NavPagerActivity activity_) {
+    public MediaShareList(NavPagerActivity activity_) {
         containerActivity = activity_;
 
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
@@ -267,10 +266,10 @@ public class ShareList implements NavPagerActivity.Page {
 
     class ShareListViewAdapter extends BaseAdapter {
 
-        ShareList container;
+        MediaShareList container;
         Map<String, List<Comment>> commentMap;
 
-        public ShareListViewAdapter(ShareList container_) {
+        public ShareListViewAdapter(MediaShareList container_) {
             container = container_;
             commentMap = new HashMap<>();
         }
@@ -538,7 +537,7 @@ public class ShareList implements NavPagerActivity.Page {
                             mCheckMorePhoto.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    Intent intent = new Intent(containerActivity, MorePhotoActivity.class);
+                                    Intent intent = new Intent(containerActivity, MoreMediaActivity.class);
                                     intent.putExtra("images", currentItem.get("images").toString());
                                     containerActivity.startActivity(intent);
                                 }

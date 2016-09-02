@@ -16,8 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Share;
-import com.winsun.fruitmix.services.LocalShareUploadService;
+import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.services.CreateRemoteMediaShareService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -167,7 +166,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                         mDialog.dismiss();
                         if (Util.getNetworkState(mContext)) {
-                            LocalShareUploadService.startActionLocalShareTask(mContext);
+                            CreateRemoteMediaShareService.startActionCreateRemoteMediaShareTask(mContext);
                         }
 
                         if (sSuccess) {
@@ -203,29 +202,29 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-        Share share = new Share();
-        share.setUuid(Util.createLocalUUid());
+        MediaShare mediaShare = new MediaShare();
+        mediaShare.setUuid(Util.createLocalUUid());
 
         Log.i(TAG, "create album digest:" + digest);
 
-        share.setImageDigests(Arrays.asList(digest.split(",")));
-        share.setTitle(title);
-        share.setDesc(desc);
+        mediaShare.setImageDigests(Arrays.asList(digest.split(",")));
+        mediaShare.setTitle(title);
+        mediaShare.setDesc(desc);
 
         if (isPublic) {
-            share.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
-        } else share.setViewer(Collections.<String>emptyList());
+            mediaShare.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+        } else mediaShare.setViewer(Collections.<String>emptyList());
 
         if (otherMaintianer) {
-            share.setMaintainer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+            mediaShare.setMaintainer(new ArrayList<>(LocalCache.UsersMap.keySet()));
         } else {
-            share.setMaintainer(Collections.singletonList(FNAS.userUUID));
+            mediaShare.setMaintainer(Collections.singletonList(FNAS.userUUID));
         }
 
-        share.setCreator(FNAS.userUUID);
-        share.setTime(String.valueOf(System.currentTimeMillis()));
-        share.setAlbum(true);
-        dbUtils.insertLocalShare(share);
+        mediaShare.setCreator(FNAS.userUUID);
+        mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
+        mediaShare.setAlbum(true);
+        dbUtils.insertLocalShare(mediaShare);
 
     }
 

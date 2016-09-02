@@ -6,14 +6,14 @@ import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Share;
+import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.Util;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  */
-public class CreateLocalShareService extends IntentService {
+public class CreateLocalMediaShareService extends IntentService {
     // TODO: Rename actions, choose action names that describe tasks that this
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_CREATE_SHARE = "com.winsun.fruitmix.services.action.create.share";
@@ -21,7 +21,7 @@ public class CreateLocalShareService extends IntentService {
     // TODO: Rename parameters
     private static final String EXTRA_SHARE = "com.winsun.fruitmix.services.extra.share";
 
-    public CreateLocalShareService() {
+    public CreateLocalMediaShareService() {
         super("CreateShareService");
     }
 
@@ -32,9 +32,9 @@ public class CreateLocalShareService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionCreateLocalShare(Context context, Share share) {
-        Intent intent = new Intent(context, CreateLocalShareService.class);
-        intent.putExtra(EXTRA_SHARE, share);
+    public static void startActionCreateLocalShare(Context context, MediaShare mediaShare) {
+        Intent intent = new Intent(context, CreateLocalMediaShareService.class);
+        intent.putExtra(EXTRA_SHARE, mediaShare);
         context.startService(intent);
     }
 
@@ -43,8 +43,8 @@ public class CreateLocalShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_CREATE_SHARE.equals(action)) {
-                final Share share = intent.getParcelableExtra(EXTRA_SHARE);
-                handleActionCreateShare(share);
+                final MediaShare mediaShare = intent.getParcelableExtra(EXTRA_SHARE);
+                handleActionCreateShare(mediaShare);
             }
         }
     }
@@ -52,13 +52,13 @@ public class CreateLocalShareService extends IntentService {
     /**
      * create local share and start upload share task if network connected
      */
-    private void handleActionCreateShare(Share share) {
+    private void handleActionCreateShare(MediaShare mediaShare) {
 
         DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-        dbUtils.insertLocalShare(share);
+        dbUtils.insertLocalShare(mediaShare);
 
         if(Util.getNetworkState(Util.APPLICATION_CONTEXT))
-            LocalShareUploadService.startActionLocalShareTask(Util.APPLICATION_CONTEXT);
+            CreateRemoteMediaShareService.startActionCreateRemoteMediaShareTask(Util.APPLICATION_CONTEXT);
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
         Intent intent = new Intent(Util.CREATE_LOCAL_SHARE_FINISH);

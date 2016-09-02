@@ -7,7 +7,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Share;
+import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -22,21 +22,21 @@ import java.util.concurrent.ConcurrentMap;
  * <p/>
  * helper methods.
  */
-public class LocalShareUploadService extends IntentService {
+public class CreateRemoteMediaShareService extends IntentService {
 
-    public static final String TAG = LocalShareUploadService.class.getSimpleName();
+    public static final String TAG = CreateRemoteMediaShareService.class.getSimpleName();
 
     // TODO: Rename actions, choose action names that describe tasks that this
-    private static final String ACTION_LOCAL_SHARE_TASK = "com.winsun.fruitmix.action.local_share_task";
+    private static final String ACTION_CREATE_REMOTE_MEDIASHARE_TASK = "com.winsun.fruitmix.action.create.remote.mediashare";
 
     private DBUtils mDbUtils;
-    private List<Share> mShareList;
-    private Share mShare;
+    private List<MediaShare> mMediaShareList;
+    private MediaShare mMediaShare;
 
     private LocalBroadcastManager mManager;
 
-    public LocalShareUploadService() {
-        super("LocalShareService");
+    public CreateRemoteMediaShareService() {
+        super("CreateRemoteMediaShareService");
     }
 
     /**
@@ -46,9 +46,9 @@ public class LocalShareUploadService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionLocalShareTask(Context context) {
-        Intent intent = new Intent(context, LocalShareUploadService.class);
-        intent.setAction(ACTION_LOCAL_SHARE_TASK);
+    public static void startActionCreateRemoteMediaShareTask(Context context) {
+        Intent intent = new Intent(context, CreateRemoteMediaShareService.class);
+        intent.setAction(ACTION_CREATE_REMOTE_MEDIASHARE_TASK);
         context.startService(intent);
     }
 
@@ -56,8 +56,8 @@ public class LocalShareUploadService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_LOCAL_SHARE_TASK.equals(action)) {
-                handleActionLocalShareTask();
+            if (ACTION_CREATE_REMOTE_MEDIASHARE_TASK.equals(action)) {
+                handleActionCreateRemoteMediaShareTask();
             }
         }
     }
@@ -66,23 +66,23 @@ public class LocalShareUploadService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionLocalShareTask() {
+    private void handleActionCreateRemoteMediaShareTask() {
         // TODO: Handle action Foo
         mDbUtils = DBUtils.SINGLE_INSTANCE;
         mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());
-        mShareList = mDbUtils.getAllLocalShare();
+        mMediaShareList = mDbUtils.getAllLocalShare();
 
-        Log.i(TAG, "local share:" + mShareList);
+        Log.i(TAG, "local share:" + mMediaShareList);
 
-        Iterator<Share> iterator = mShareList.iterator();
-        int shareCount = mShareList.size();
+        Iterator<MediaShare> iterator = mMediaShareList.iterator();
+        int shareCount = mMediaShareList.size();
 
         while (iterator.hasNext()) {
 
-            mShare = iterator.next();
+            mMediaShare = iterator.next();
 
             boolean uploadFileResult = true;
-            String[] digests = (String[]) mShare.getImageDigests().toArray();
+            String[] digests = (String[]) mMediaShare.getImageDigests().toArray();
             int uploadSucceedCount = 0;
 
             for (String digest : digests) {
@@ -132,7 +132,7 @@ public class LocalShareUploadService extends IntentService {
             }
 
             viewers = "";
-            for (String key : mShare.getViewer()) {
+            for (String key : mMediaShare.getViewer()) {
                 viewers += ",\\\"" + key + "\\\"";
             }
             if (viewers.length() == 0) {
@@ -141,7 +141,7 @@ public class LocalShareUploadService extends IntentService {
             Log.i(TAG, "winsun viewer:" + viewers);
 
             maintainers = "";
-            for (String key : mShare.getMaintainer()) {
+            for (String key : mMediaShare.getMaintainer()) {
                 maintainers += ",\\\"" + key + "\\\"";
             }
 
@@ -149,17 +149,17 @@ public class LocalShareUploadService extends IntentService {
 
             StringBuilder builder = new StringBuilder();
             builder.append("{\"album\":");
-            builder.append(String.valueOf(mShare.isAlbum()));
+            builder.append(String.valueOf(mMediaShare.isAlbum()));
             builder.append(", \"archived\":false,\"maintainers\":\"[");
             builder.append(maintainers.substring(1));
             builder.append("]\",\"viewers\":\"[");
             builder.append(viewers.substring(1));
             builder.append("]\",\"tags\":[{");
-            if (mShare.isAlbum()) {
+            if (mMediaShare.isAlbum()) {
                 builder.append("\"albumname\":\"");
-                builder.append(mShare.getTitle());
+                builder.append(mMediaShare.getTitle());
                 builder.append("\",\"desc\":\"");
-                builder.append(mShare.getDesc());
+                builder.append(mMediaShare.getDesc());
                 builder.append("\"");
             }
             builder.append("}],\"contents\":\"[");
@@ -174,9 +174,9 @@ public class LocalShareUploadService extends IntentService {
                 String str = FNAS.PostRemoteCall(Util.MEDIASHARE_PARAMETER, data);
                 if (str != null) {
                     iterator.remove();
-                    long deleteResult = mDbUtils.deleteLocalShare(mShare.getId());
-                    LocalCache.SharesMap.remove(mShare.getUuid());
-                    Log.i(TAG, "deleteLocalShare:" + mShare.getId() + "result:" + deleteResult);
+                    long deleteResult = mDbUtils.deleteLocalShare(mMediaShare.getId());
+                    LocalCache.SharesMap.remove(mMediaShare.getUuid());
+                    Log.i(TAG, "deleteLocalShare:" + mMediaShare.getId() + "result:" + deleteResult);
                 }
 
             } catch (Exception ex) {
@@ -185,7 +185,7 @@ public class LocalShareUploadService extends IntentService {
 
         }
 
-        if (shareCount > mShareList.size()) {
+        if (shareCount > mMediaShareList.size()) {
             Log.i(TAG, "before send broadcast");
             FNAS.retrieveShareMap();
             Intent intent = new Intent(Util.LOCAL_SHARE_CHANGED);

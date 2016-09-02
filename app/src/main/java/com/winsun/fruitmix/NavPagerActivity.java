@@ -36,10 +36,10 @@ import android.widget.Toast;
 
 import com.winsun.fruitmix.Fragment.AlbumList;
 import com.winsun.fruitmix.Fragment.NewPhotoList;
-import com.winsun.fruitmix.Fragment.ShareList;
+import com.winsun.fruitmix.Fragment.MediaShareList;
 import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
-import com.winsun.fruitmix.services.LocalPhotoUploadService;
+import com.winsun.fruitmix.services.CreateRemoteMediaService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -70,7 +70,7 @@ public class NavPagerActivity extends AppCompatActivity
     public List<Page> pageList;
     AlbumList albumList;
     NewPhotoList photoList;
-    ShareList shareList;
+    MediaShareList shareList;
 
     public boolean sInChooseMode = false;
 
@@ -160,7 +160,7 @@ public class NavPagerActivity extends AppCompatActivity
         }
 
 
-        shareList = new ShareList(this);
+        shareList = new MediaShareList(this);
         photoList = new NewPhotoList(this);
         albumList = new AlbumList(this);
         pageList = new ArrayList<Page>();
@@ -598,7 +598,7 @@ public class NavPagerActivity extends AppCompatActivity
 
                     LocalCache.clearToken(mContext);
                     FNAS.restoreLocalPhotoUploadState();
-                    LocalPhotoUploadService.stopActionUploadLocalPhoto();
+                    CreateRemoteMediaService.stopActionCreateRemoteMedia();
 
                     return null;
                 }

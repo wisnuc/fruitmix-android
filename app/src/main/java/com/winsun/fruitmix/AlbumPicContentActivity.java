@@ -26,7 +26,7 @@ import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.RequestQueueInstance;
-import com.winsun.fruitmix.model.Share;
+import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -471,16 +471,16 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                     DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-                    Share share = dbUtils.getLocalShareByUuid(mUuid);
+                    MediaShare mediaShare = dbUtils.getLocalShareByUuid(mUuid);
 
                     if (mPrivate) {
 
-                        share.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+                        mediaShare.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
                     }else {
-                        share.setViewer(Collections.<String>emptyList());
+                        mediaShare.setViewer(Collections.<String>emptyList());
                     }
 
-                    dbUtils.updateLocalShare(share, share.getUuid());
+                    dbUtils.updateLocalShare(mediaShare, mediaShare.getUuid());
 
                     FNAS.loadLocalShare();
                     return true;

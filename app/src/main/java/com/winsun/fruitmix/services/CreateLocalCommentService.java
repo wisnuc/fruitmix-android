@@ -14,8 +14,8 @@ public class CreateLocalCommentService extends IntentService {
 
     private static final String ACTION_CREATE_LOCAL_COMMENT = "com.winsun.fruitmix.services.action.create.local.comment";
 
-    private static final String EXTRA_IMAGE_UUID = "com.winsun.fruitmix.services.extra.PARAM1";
-    private static final String EXTRA_COMMENT = "com.winsun.fruitmix.services.extra.PARAM2";
+    private static final String EXTRA_IMAGE_UUID = "com.winsun.fruitmix.services.extra.image.uuid";
+    private static final String EXTRA_COMMENT = "com.winsun.fruitmix.services.extra.comment";
 
     public CreateLocalCommentService() {
         super("CreateLocalCommentService");
@@ -42,7 +42,7 @@ public class CreateLocalCommentService extends IntentService {
             if (ACTION_CREATE_LOCAL_COMMENT.equals(action)) {
                 final String imageUUID = intent.getStringExtra(EXTRA_IMAGE_UUID);
                 final Comment comment = intent.getParcelableExtra(EXTRA_COMMENT);
-                handleActionFoo(imageUUID, comment);
+                handleActionCreateLocalComment(imageUUID, comment);
             }
         }
     }
@@ -51,7 +51,7 @@ public class CreateLocalCommentService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionFoo(String imageUUID, Comment comment) {
+    private void handleActionCreateLocalComment(String imageUUID, Comment comment) {
 
     }
 

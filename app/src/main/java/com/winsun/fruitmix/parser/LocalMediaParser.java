@@ -15,8 +15,6 @@ public class LocalMediaParser implements LocalDataParser<Media> {
     @Override
     public List<Media> parse(Cursor cursor) {
 
-
-
         return new ArrayList<>();
     }
 }

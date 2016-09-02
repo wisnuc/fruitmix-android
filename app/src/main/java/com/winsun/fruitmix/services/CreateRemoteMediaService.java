@@ -18,11 +18,11 @@ import java.util.concurrent.ConcurrentMap;
  * <p/>
  * helper methods.
  */
-public class LocalPhotoUploadService extends IntentService {
+public class CreateRemoteMediaService extends IntentService {
 
-    private static final String TAG = LocalPhotoUploadService.class.getSimpleName();
+    private static final String TAG = CreateRemoteMediaService.class.getSimpleName();
 
-    private static final String ACTION_UPLOAD_LOCAL_PHOTO = "com.winsun.fruitmix.services.action.upload.local.photo";
+    private static final String ACTION_CREATE_REMOTE_MEDIA = "com.winsun.fruitmix.services.action.create.remote.media";
 
     private boolean uploadResult = false;
     private boolean isSave = false;
@@ -30,8 +30,8 @@ public class LocalPhotoUploadService extends IntentService {
 
     private static boolean isStop = false;
 
-    public LocalPhotoUploadService() {
-        super("LocalPhotoUploadService");
+    public CreateRemoteMediaService() {
+        super("CreateRemoteMediaService");
     }
 
     /**
@@ -41,13 +41,13 @@ public class LocalPhotoUploadService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionUploadLocalPhoto(Context context) {
-        Intent intent = new Intent(context, LocalPhotoUploadService.class);
-        intent.setAction(ACTION_UPLOAD_LOCAL_PHOTO);
+    public static void startActionCreateRemoteMedia(Context context) {
+        Intent intent = new Intent(context, CreateRemoteMediaService.class);
+        intent.setAction(ACTION_CREATE_REMOTE_MEDIA);
         context.startService(intent);
     }
 
-    public static void stopActionUploadLocalPhoto() {
+    public static void stopActionCreateRemoteMedia() {
         isStop = true;
     }
 
@@ -55,8 +55,8 @@ public class LocalPhotoUploadService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_UPLOAD_LOCAL_PHOTO.equals(action)) {
-                handleActionUploadLocalPhoto();
+            if (ACTION_CREATE_REMOTE_MEDIA.equals(action)) {
+                handleActionCreateRemoteMedia();
             }
         }
     }
@@ -65,7 +65,7 @@ public class LocalPhotoUploadService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionUploadLocalPhoto() {
+    private void handleActionCreateRemoteMedia() {
         // TODO: Handle action upload local photo
         mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());
 

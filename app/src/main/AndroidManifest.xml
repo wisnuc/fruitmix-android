@@ -82,7 +82,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.MyToolBar" />
         <activity
-            android:name=".ShareCommentActivity"
+            android:name=".MediaShareCommentActivity"
             android:label="@string/title_activity_test3"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.MyToolBar" />
@@ -114,34 +114,34 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <service
-            android:name=".services.LocalShareUploadService"
+            android:name=".services.CreateRemoteMediaShareService"
             android:exported="false" />
         <service
-            android:name=".services.LocalCommentUploadService"
+            android:name=".services.CreateRemoteCommentService"
             android:exported="false" />
         <service
-            android:name=".services.LocalPhotoUploadService"
+            android:name=".services.CreateRemoteMediaService"
             android:exported="false" />
 
         <activity
-            android:name=".MorePhotoActivity"
+            android:name=".MoreMediaActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <service
-            android:name=".services.CreateLocalShareService"
+            android:name=".services.CreateLocalMediaShareService"
             android:exported="false" />
         <service
-            android:name=".services.ModifyShareService"
+            android:name=".services.ModifyRemoteMediaShareService"
             android:exported="false" />
         <service
-            android:name=".services.DeleteShareService"
+            android:name=".services.DeleteRemoteMediaShareService"
             android:exported="false" />
         <service
             android:name=".services.CreateLocalCommentService"
             android:exported="false" />
         <service
-            android:name=".services.GetRemoteDataService"
+            android:name=".services.RetrieveRemoteDataService"
             android:exported="false"></service>
     </application>
 

@@ -24,7 +24,7 @@ import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.RequestQueueInstance;
-import com.winsun.fruitmix.model.Share;
+import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -254,10 +254,10 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                                 DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-                                Share share = dbUtils.getLocalShareByUuid(mMediaShareUUid);
+                                MediaShare mediaShare = dbUtils.getLocalShareByUuid(mMediaShareUUid);
 
-                                share.setImageDigests(photoUuidList);
-                                dbUtils.updateLocalShare(share, mMediaShareUUid);
+                                mediaShare.setImageDigests(photoUuidList);
+                                dbUtils.updateLocalShare(mediaShare, mMediaShareUUid);
                                 FNAS.loadLocalShare();
                                 return true;
                             }

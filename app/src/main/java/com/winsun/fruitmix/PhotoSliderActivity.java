@@ -120,7 +120,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     if (imgList.size() > pos) {
                         Intent intent = new Intent();
-                        intent.setClass(PhotoSliderActivity.this, ShareCommentActivity.class);
+                        intent.setClass(PhotoSliderActivity.this, MediaShareCommentActivity.class);
                         intent.putExtra("imageUUID", "" + imgList.get(pos).get("uuid"));
                         startActivity(intent);
                     }

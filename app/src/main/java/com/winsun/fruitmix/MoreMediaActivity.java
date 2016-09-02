@@ -32,8 +32,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class MorePhotoActivity extends AppCompatActivity implements View.OnClickListener {
-    public static final String TAG = MorePhotoActivity.class.getSimpleName();
+public class MoreMediaActivity extends AppCompatActivity implements View.OnClickListener {
+    public static final String TAG = MoreMediaActivity.class.getSimpleName();
 
     @BindView(R.id.back)
     ImageView mBack;

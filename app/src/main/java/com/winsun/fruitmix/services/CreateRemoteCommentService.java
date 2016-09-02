@@ -21,23 +21,23 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
- * <p>
+ * <p/>
  * TODO: Customize class - update intent actions, extra parameters and static
  * helper methods.
  */
-public class LocalCommentUploadService extends IntentService {
+public class CreateRemoteCommentService extends IntentService {
 
-    public static final String TAG = LocalCommentUploadService.class.getSimpleName();
+    public static final String TAG = CreateRemoteCommentService.class.getSimpleName();
 
-    private static final String ACTION_LOCAL_COMMENT_TASK = "com.winsun.fruitmix.services.action.local_comment_task";
+    private static final String ACTION_CREATE_REMOTE_COMMENT_TASK = "com.winsun.fruitmix.services.action.create.remote.comment";
 
     private DBUtils mDbUtils;
     private Map<String, List<Comment>> mCommentMap;
     private Comment mComment;
     private LocalBroadcastManager mManager;
 
-    public LocalCommentUploadService() {
-        super("LocalCommentService");
+    public CreateRemoteCommentService() {
+        super("CreateRemoteCommentService");
     }
 
     /**
@@ -47,9 +47,9 @@ public class LocalCommentUploadService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionLocalCommentTask(Context context) {
-        Intent intent = new Intent(context, LocalCommentUploadService.class);
-        intent.setAction(ACTION_LOCAL_COMMENT_TASK);
+    public static void startActionCreateRemoteCommentTask(Context context) {
+        Intent intent = new Intent(context, CreateRemoteCommentService.class);
+        intent.setAction(ACTION_CREATE_REMOTE_COMMENT_TASK);
         context.startService(intent);
     }
 
@@ -57,8 +57,8 @@ public class LocalCommentUploadService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_LOCAL_COMMENT_TASK.equals(action)) {
-                handleActionLocalCommentTask();
+            if (ACTION_CREATE_REMOTE_COMMENT_TASK.equals(action)) {
+                handleActionCreateRemoteCommentTask();
             }
         }
     }
@@ -67,7 +67,7 @@ public class LocalCommentUploadService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionLocalCommentTask() {
+    private void handleActionCreateRemoteCommentTask() {
         // TODO: Handle action Foo
         mDbUtils = DBUtils.SINGLE_INSTANCE;
         mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());

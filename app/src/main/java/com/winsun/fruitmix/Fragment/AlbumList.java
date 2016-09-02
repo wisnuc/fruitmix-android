@@ -27,7 +27,7 @@ import com.winsun.fruitmix.NewAlbumPicChooseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.RequestQueueInstance;
-import com.winsun.fruitmix.model.Share;
+import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -397,15 +397,15 @@ public class AlbumList implements NavPagerActivity.Page {
 
                                 DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-                                Share share = dbUtils.getLocalShareByUuid(String.valueOf(currentItem.get("uuid")));
+                                MediaShare mediaShare = dbUtils.getLocalShareByUuid(String.valueOf(currentItem.get("uuid")));
 
                                 if (currentItem.get("private").equals("true")) {
-                                    share.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+                                    mediaShare.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
                                 }else {
-                                    share.setViewer(Collections.<String>emptyList());
+                                    mediaShare.setViewer(Collections.<String>emptyList());
                                 }
 
-                                dbUtils.updateLocalShare(share, share.getUuid());
+                                dbUtils.updateLocalShare(mediaShare, mediaShare.getUuid());
 
                                 FNAS.loadLocalShare();
 

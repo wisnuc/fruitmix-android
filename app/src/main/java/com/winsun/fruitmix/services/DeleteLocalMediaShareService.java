@@ -4,21 +4,20 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 
-import com.winsun.fruitmix.model.Share;
+import com.winsun.fruitmix.model.MediaShare;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  */
-public class ModifyShareService extends IntentService {
-
-    private static final String ACTION_MODIFY_SHARE = "com.winsun.fruitmix.services.action.modify.share";
+public class DeleteLocalMediaShareService extends IntentService {
+    private static final String ACTION_DELETE_LOCAL_SHARE = "com.winsun.fruitmix.services.action.delete.local.share";
 
     // TODO: Rename parameters
     private static final String EXTRA_SHARE = "com.winsun.fruitmix.services.extra.share";
 
-    public ModifyShareService() {
-        super("ModifyShareService");
+    public DeleteLocalMediaShareService() {
+        super("DeleteLocalMediaShareService");
     }
 
     /**
@@ -27,10 +26,10 @@ public class ModifyShareService extends IntentService {
      *
      * @see IntentService
      */
-    public static void startActionModifyShare(Context context, Share share) {
-        Intent intent = new Intent(context, ModifyShareService.class);
-        intent.setAction(ACTION_MODIFY_SHARE);
-        intent.putExtra(EXTRA_SHARE, share);
+    public static void startActionDeleteLocalShare(Context context, MediaShare mediaShare) {
+        Intent intent = new Intent(context, DeleteLocalMediaShareService.class);
+        intent.setAction(ACTION_DELETE_LOCAL_SHARE);
+        intent.putExtra(EXTRA_SHARE, mediaShare);
         context.startService(intent);
     }
 
@@ -38,9 +37,9 @@ public class ModifyShareService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_MODIFY_SHARE.equals(action)) {
-                final Share share = intent.getParcelableExtra(EXTRA_SHARE);
-                handleActionModifyShare(share);
+            if (ACTION_DELETE_LOCAL_SHARE.equals(action)) {
+                final MediaShare mediaShare = intent.getParcelableExtra(EXTRA_SHARE);
+                handleActionDeleteLocalShare(mediaShare);
             }
         }
     }
@@ -49,7 +48,7 @@ public class ModifyShareService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionModifyShare(Share share) {
+    private void handleActionDeleteLocalShare(MediaShare mediaShare) {
 
     }
 

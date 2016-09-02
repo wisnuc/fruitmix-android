@@ -34,8 +34,8 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
-import com.winsun.fruitmix.model.Share;
-import com.winsun.fruitmix.services.LocalShareUploadService;
+import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.services.CreateRemoteMediaShareService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -482,7 +482,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 mDialog.dismiss();
 
                 if (Util.getNetworkState(containerActivity)) {
-                    LocalShareUploadService.startActionLocalShareTask(containerActivity);
+                    CreateRemoteMediaShareService.startActionCreateRemoteMediaShareTask(containerActivity);
                 }
                 if (sSuccess) {
                     if (containerActivity instanceof NavPagerActivity) {
@@ -502,30 +502,30 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-        Share share = new Share();
-        share.setUuid(Util.createLocalUUid());
+        MediaShare mediaShare = new MediaShare();
+        mediaShare.setUuid(Util.createLocalUUid());
 
         Log.i(TAG, "create share digest:" + digest);
 
-        share.setImageDigests(Arrays.asList(digest.split(",")));
-        share.setTitle(title);
-        share.setDesc(desc);
+        mediaShare.setImageDigests(Arrays.asList(digest.split(",")));
+        mediaShare.setTitle(title);
+        mediaShare.setDesc(desc);
 
 
         if (isPublic) {
-            share.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
-        } else share.setViewer(new ArrayList<String>());
+            mediaShare.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+        } else mediaShare.setViewer(new ArrayList<String>());
 
         if (otherMaintianer) {
-            share.setMaintainer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+            mediaShare.setMaintainer(new ArrayList<>(LocalCache.UsersMap.keySet()));
         } else {
-            share.setMaintainer(Collections.singletonList(FNAS.userUUID));
+            mediaShare.setMaintainer(Collections.singletonList(FNAS.userUUID));
         }
 
-        share.setCreator(FNAS.userUUID);
-        share.setTime(String.valueOf(System.currentTimeMillis()));
-        share.setAlbum(false);
-        dbUtils.insertLocalShare(share);
+        mediaShare.setCreator(FNAS.userUUID);
+        mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
+        mediaShare.setAlbum(false);
+        dbUtils.insertLocalShare(mediaShare);
 
     }
 

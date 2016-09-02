@@ -1,22 +1,16 @@
 package com.winsun.fruitmix;
 
-import android.database.Cursor;
-
 import com.winsun.fruitmix.model.Media;
-import com.winsun.fruitmix.model.Share;
+import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.parser.LocalDataParser;
 import com.winsun.fruitmix.parser.MediaDataParserFactory;
 import com.winsun.fruitmix.parser.ParserFactory;
 import com.winsun.fruitmix.parser.RemoteDataParser;
-import com.winsun.fruitmix.parser.ShareDataParserFactory;
+import com.winsun.fruitmix.parser.MediaShareDataParserFactory;
 import com.winsun.fruitmix.parser.UserDataParserFactory;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -29,23 +23,15 @@ public class ParserFactoryUnitTest {
     @Test
     public void createShareParserFactoryTest() {
 
-        ParserFactory<Share> factory = new ShareDataParserFactory();
+        ParserFactory<MediaShare> factory = new MediaShareDataParserFactory();
 
-        LocalDataParser<Share> parser = factory.createLocalDataParser();
+        LocalDataParser<MediaShare> parser = factory.createLocalDataParser();
 
-        Cursor cursor = Mockito.mock(Cursor.class);
+        assertNotNull(parser);
 
-        List<Share> shares = parser.parse(cursor);
+        RemoteDataParser<MediaShare> remoteDataParser = factory.createRemoteDataParser();
 
-        assertNotNull(shares);
-
-        RemoteDataParser<Share> remoteDataParser = factory.createRemoteDataParser();
-
-        String json = "";
-
-        shares = remoteDataParser.parse(json);
-
-        assertNotNull(shares);
+        assertNotNull(remoteDataParser);
 
     }
 
@@ -56,19 +42,11 @@ public class ParserFactoryUnitTest {
 
         LocalDataParser<Media> parser = factory.createLocalDataParser();
 
-        Cursor cursor = Mockito.mock(Cursor.class);
-
-        List<Media> shares = parser.parse(cursor);
-
-        assertNotNull(shares);
+        assertNotNull(parser);
 
         RemoteDataParser<Media> remoteDataParser = factory.createRemoteDataParser();
 
-        String json = "";
-
-        shares = remoteDataParser.parse(json);
-
-        assertNotNull(shares);
+        assertNotNull(remoteDataParser);
 
     }
 
@@ -79,19 +57,11 @@ public class ParserFactoryUnitTest {
 
         LocalDataParser<User> parser = factory.createLocalDataParser();
 
-        Cursor cursor = Mockito.mock(Cursor.class);
-
-        List<User> shares = parser.parse(cursor);
-
-        assertNotNull(shares);
+        assertNotNull(parser);
 
         RemoteDataParser<User> remoteDataParser = factory.createRemoteDataParser();
 
-        String json = "";
-
-        shares = remoteDataParser.parse(json);
-
-        assertNotNull(shares);
+        assertNotNull(remoteDataParser);
 
     }
 

@@ -17,7 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Share;
+import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -160,23 +160,23 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
                             DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-                            Share share = dbUtils.getLocalShareByUuid(mMediaShareUuid);
+                            MediaShare mediaShare = dbUtils.getLocalShareByUuid(mMediaShareUuid);
 
-                            share.setTitle(title);
-                            share.setDesc(desc);
+                            mediaShare.setTitle(title);
+                            mediaShare.setDesc(desc);
 
                             if (sPublic) {
-                                share.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
-                            }else share.setViewer(new ArrayList<String>());
+                                mediaShare.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+                            }else mediaShare.setViewer(new ArrayList<String>());
 
 
                             if (sSetMaintainer) {
-                                share.setMaintainer(new ArrayList<>(LocalCache.UsersMap.keySet()));
+                                mediaShare.setMaintainer(new ArrayList<>(LocalCache.UsersMap.keySet()));
                             } else {
-                                share.setMaintainer(Collections.singletonList(FNAS.userUUID));
+                                mediaShare.setMaintainer(Collections.singletonList(FNAS.userUUID));
                             }
 
-                            dbUtils.updateLocalShare(share, share.getUuid());
+                            dbUtils.updateLocalShare(mediaShare, mediaShare.getUuid());
 
                             FNAS.loadLocalShare();
 

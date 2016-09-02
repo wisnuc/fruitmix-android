@@ -16,7 +16,7 @@ import android.widget.ImageView;
 
 import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.services.LocalPhotoUploadService;
+import com.winsun.fruitmix.services.CreateRemoteMediaService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -161,7 +161,7 @@ public class LocalCache {
         LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMapKeyIsThumb);
         Log.d("winsun", "LocalImagesMapKeyIsThumb " + LocalCache.LocalImagesMapKeyIsThumb);
 
-        LocalPhotoUploadService.startActionUploadLocalPhoto(Util.APPLICATION_CONTEXT);
+        CreateRemoteMediaService.startActionCreateRemoteMedia(Util.APPLICATION_CONTEXT);
     }
 
     // get thumb bitmap

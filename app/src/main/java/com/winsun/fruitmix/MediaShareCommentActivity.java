@@ -27,7 +27,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.RequestQueueInstance;
-import com.winsun.fruitmix.services.LocalCommentUploadService;
+import com.winsun.fruitmix.services.CreateRemoteCommentService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -49,9 +49,9 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 /**
  * Created by Administrator on 2016/5/9.
  */
-public class ShareCommentActivity extends Activity {
+public class MediaShareCommentActivity extends Activity {
 
-    public static final String TAG = ShareCommentActivity.class.getSimpleName();
+    public static final String TAG = MediaShareCommentActivity.class.getSimpleName();
 
     ImageView ivBack, ivSend;
     NetworkImageView ivMain;
@@ -170,7 +170,7 @@ public class ShareCommentActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                Util.hideSoftInput(ShareCommentActivity.this);
+                Util.hideSoftInput(MediaShareCommentActivity.this);
 
                 mCommment = tfContent.getText() + "";
 
@@ -196,7 +196,7 @@ public class ShareCommentActivity extends Activity {
                         createCommentInLocalCommentDatabase(String.valueOf(imageData.get("uuid")), String.valueOf(imageData.get("shareInstance")), mCommment);
 
                         if (Util.getNetworkState(mContext)) {
-                            LocalCommentUploadService.startActionLocalCommentTask(mContext);
+                            CreateRemoteCommentService.startActionCreateRemoteCommentTask(mContext);
                         }
 
                         return true;
@@ -367,7 +367,7 @@ public class ShareCommentActivity extends Activity {
             final Comment currentItem;
 
             if (convertView == null)
-                view = LayoutInflater.from(ShareCommentActivity.this).inflate(R.layout.share_comment_cell, parent, false);
+                view = LayoutInflater.from(MediaShareCommentActivity.this).inflate(R.layout.share_comment_cell, parent, false);
             else view = convertView;
 
             vNormal = view.findViewById(R.id.normal);

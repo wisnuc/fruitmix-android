@@ -7,10 +7,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Share;
-import com.winsun.fruitmix.services.LocalCommentUploadService;
-import com.winsun.fruitmix.services.LocalPhotoUploadService;
-import com.winsun.fruitmix.services.LocalShareUploadService;
+import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.services.CreateRemoteCommentService;
+import com.winsun.fruitmix.services.CreateRemoteMediaService;
+import com.winsun.fruitmix.services.CreateRemoteMediaShareService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -296,7 +296,7 @@ public class FNAS {
 
         retrieveMediaMap();
 
-        LocalPhotoUploadService.startActionUploadLocalPhoto(Util.APPLICATION_CONTEXT);
+        CreateRemoteMediaService.startActionCreateRemoteMedia(Util.APPLICATION_CONTEXT);
 
         retrieveShareMap();
 
@@ -556,47 +556,47 @@ public class FNAS {
 
         DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-        List<Share> shareList = dbUtils.getAllLocalShare();
+        List<MediaShare> mediaShareList = dbUtils.getAllLocalShare();
         ConcurrentMap<String, String> item;
 
-        for (Share share : shareList) {
+        for (MediaShare mediaShare : mediaShareList) {
 
-            if (LocalCache.SharesMap.containsKey(share.getUuid())) {
-                item = LocalCache.SharesMap.get(share.getUuid());
+            if (LocalCache.SharesMap.containsKey(mediaShare.getUuid())) {
+                item = LocalCache.SharesMap.get(mediaShare.getUuid());
             } else item = new ConcurrentHashMap<>();
 
             item.put("_id", "");
             item.put("creator", FNAS.userUUID);
-            if (share.isAlbum()) {
+            if (mediaShare.isAlbum()) {
                 item.put("type", "album");
             } else {
                 item.put("type", "set");
             }
-            item.put("mtime", share.getTime());
-            item.put("uuid", share.getUuid());
+            item.put("mtime", mediaShare.getTime());
+            item.put("uuid", mediaShare.getUuid());
             item.put("del", "0"); // 本地存在，判断是否需要显示（archived是服务端是否已删标志）
             item.put("date", new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(System.currentTimeMillis())));
-            item.put("title", share.getTitle());
-            item.put("desc", share.getDesc());
+            item.put("title", mediaShare.getTitle());
+            item.put("desc", mediaShare.getDesc());
 
             StringBuilder builder = new StringBuilder();
-            for (String digest : share.getImageDigests()) {
+            for (String digest : mediaShare.getImageDigests()) {
                 builder.append(digest);
                 builder.append(",");
             }
 
             item.put("images", builder.toString());
 
-            item.put("coverImg", share.getCoverImageDigest().toLowerCase());
+            item.put("coverImg", mediaShare.getCoverImageDigest().toLowerCase());
 
-            item.put("private", String.valueOf(share.isPrivate()));
+            item.put("private", String.valueOf(mediaShare.isPrivate()));
 
-            item.put("maintained", String.valueOf(share.isMaintained()));
+            item.put("maintained", String.valueOf(mediaShare.isMaintained()));
             item.put("local", "true");
 
             Log.i(TAG, "local share:" + item.toString());
 
-            LocalCache.SharesMap.put(share.getUuid(), item);
+            LocalCache.SharesMap.put(mediaShare.getUuid(), item);
 
         }
 
@@ -616,14 +616,14 @@ public class FNAS {
 
                         Log.i(TAG, "start local share task");
 
-                        LocalShareUploadService.startActionLocalShareTask(context);
+                        CreateRemoteMediaShareService.startActionCreateRemoteMediaShareTask(context);
                     }
 
                     if (!dbUtils.getAllLocalImageComment().isEmpty()) {
 
                         Log.i(TAG, "start local comment task");
 
-                        LocalCommentUploadService.startActionLocalCommentTask(context);
+                        CreateRemoteCommentService.startActionCreateRemoteCommentTask(context);
                     }
 
                 }

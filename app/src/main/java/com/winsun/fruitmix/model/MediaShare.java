@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/7/16.
  */
-public class Share implements Parcelable{
+public class MediaShare implements Parcelable{
 
     private int id;
     private String uuid;
@@ -26,10 +26,10 @@ public class Share implements Parcelable{
     private boolean isMaintained;
     private boolean isLocked;
 
-    public Share() {
+    public MediaShare() {
     }
 
-    protected Share(Parcel in) {
+    protected MediaShare(Parcel in) {
         id = in.readInt();
         uuid = in.readString();
         creator = in.readString();
@@ -73,15 +73,15 @@ public class Share implements Parcelable{
         return 0;
     }
 
-    public static final Creator<Share> CREATOR = new Creator<Share>() {
+    public static final Creator<MediaShare> CREATOR = new Creator<MediaShare>() {
         @Override
-        public Share createFromParcel(Parcel in) {
-            return new Share(in);
+        public MediaShare createFromParcel(Parcel in) {
+            return new MediaShare(in);
         }
 
         @Override
-        public Share[] newArray(int size) {
-            return new Share[size];
+        public MediaShare[] newArray(int size) {
+            return new MediaShare[size];
         }
     };
 
