@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.util.Base64OutputStream;
@@ -87,6 +88,10 @@ public class Util {
     public static final String HTTP_PATCH_METHOD = "PATCH";
 
     public static final int HTTP_CONNECT_TIMEOUT = 15 * 1000;
+
+    public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
+    public static final String CURRENT_PHOTO_POSITION = "current_photo_position";
+    public static final String CURRENT_PHOTO_DATE = "current_photo_date";
 
     public static Context APPLICATION_CONTEXT = null;
 
@@ -231,5 +236,9 @@ public class Util {
             height = 200;
 
         return new int[]{width, height};
+    }
+
+    public static boolean checkRunningOnLollipopOrHigher(){
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
 }

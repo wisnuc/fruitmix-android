@@ -191,7 +191,7 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
                 public void onClick(View v) {
                     LocalCache.TransActivityContainer.put("imgSliderList", mPhotos);
                     Intent intent = new Intent();
-                    intent.putExtra("pos", getAdapterPosition());
+                    intent.putExtra(Util.INITIAL_PHOTO_POSITION, getAdapterPosition());
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                     intent.setClass(mContext, PhotoSliderActivity.class);
                     startActivity(intent);

@@ -1,43 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:fitsSystemWindows="true">
 
-    <android.support.design.widget.CoordinatorLayout
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.design.widget.AppBarLayout
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:layout_height="?attr/actionBarSize"
+            android:background="#3F51B5"
+            app:navigationIcon="@drawable/menu"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:titleTextAppearance="@style/ToolbarTitle">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="#3F51B5"
-                app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:titleTextAppearance="@style/ToolbarTitle">
+            <TextView
+                android:id="@+id/right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginRight="15dp"
+                android:text="@string/choose_text"
+                android:textColor="#FFFFFF"
+                android:textSize="18dp"
+                android:visibility="gone"/>
 
-                <TextView
-                    android:id="@+id/right"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical|right"
-                    android:layout_marginRight="15dp"
-                    android:text="@string/choose_text"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18dp"
-                    android:visibility="gone" />
+        </android.support.v7.widget.Toolbar>
 
-            </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
 
-        </android.support.design.widget.AppBarLayout>
-
-        <RelativeLayout
+    <!--    <RelativeLayout
             android:id="@+id/chooseHeader"
             android:layout_width="match_parent"
             android:layout_height="60dp"
@@ -51,101 +50,99 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="10dp"
-                android:src="@drawable/back" />
+                android:src="@drawable/back"/>
 
             <TextView
                 android:id="@+id/select_count_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:textColor="@color/white"
                 android:text="@string/photo_text"
-                android:textSize="26dp" />
+                android:textColor="@color/white"
+                android:textSize="26dp"/>
 
-        </RelativeLayout>
+        </RelativeLayout>-->
 
-        <include layout="@layout/content_left_drawer" />
-        <!--
-            <android.support.v4.view.ViewPager
-                android:id="@+id/viewPager"
-                android:layout_weight="1"
-                android:layout_marginTop="59dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />-->
-
-        <com.winsun.fruitmix.component.UnscrollableViewPager
+    <!--
+        <android.support.v4.view.ViewPager
             android:id="@+id/viewPager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="50dp"
+            android:layout_weight="1"
             android:layout_marginTop="59dp"
-            android:layout_weight="1" />
-
-        <android.support.design.widget.TabLayout
-            android:id="@+id/tabLayout"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_gravity="bottom|end"
-            android:background="#3F51B5"
-            android:elevation="10dp"
-            app:tabIndicatorColor="#0026c6da"
-            app:tabSelectedTextColor="#f44336"
-            app:tabTextColor="#bdbdbd" />
+            android:layout_height="wrap_content" />-->
 
-        <LinearLayout
-            android:id="@+id/btmenu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="50dp"
-            android:orientation="vertical">
+    <com.winsun.fruitmix.component.UnscrollableViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="54dp"
+        android:layout_marginTop="59dp"/>
 
-            <ImageView
-                android:id="@+id/bt_share"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_gravity="end"
-                android:layout_marginBottom="20dp"
-                android:layout_marginRight="20dp"
-                android:src="@drawable/share_bt"
-                android:visibility="gone" />
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|end"
+        android:background="#3F51B5"
+        android:elevation="2dp"
+        app:elevation="2dp"
+        app:tabIndicatorColor="#0026c6da"
+        app:tabIndicatorHeight="4dp"/>
 
-            <ImageView
-                android:id="@+id/bt_album"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_gravity="end"
-                android:layout_marginBottom="20dp"
-                android:layout_marginRight="20dp"
-                android:src="@drawable/photo_album2"
-                android:visibility="gone" />
+    <LinearLayout
+        android:id="@+id/btmenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="50dp"
+        android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/fab"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:layout_gravity="bottom|end"
-                android:layout_marginRight="10dp"
-                android:src="@drawable/add_album"
-                android:visibility="gone" />
+        <ImageView
+            android:id="@+id/bt_share"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="end"
+            android:layout_marginBottom="20dp"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/share_bt"
+            android:visibility="gone"/>
 
-        </LinearLayout>
+        <ImageView
+            android:id="@+id/bt_album"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="end"
+            android:layout_marginBottom="20dp"
+            android:layout_marginRight="20dp"
+            android:src="@drawable/photo_album2"
+            android:visibility="gone"/>
 
 
-        <!--
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
             android:layout_gravity="bottom|end"
-            android:layout_marginRight="@dimen/fab_margin"
-            android:layout_marginBottom="60dp"
-            app:backgroundTint="#00F57C00"
+            android:layout_margin="10dp"
+            android:src="@drawable/add_album"
+            android:visibility="visible"
+            app:borderWidth="0dp"/>
 
-            android:src="@drawable/down" />
-    -->
-    </android.support.design.widget.CoordinatorLayout>
+    </LinearLayout>
+
+    <!--
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="@dimen/fab_margin"
+        android:layout_marginBottom="60dp"
+        app:backgroundTint="#00F57C00"
+
+        android:src="@drawable/down" />
+-->
 
     <ImageView
         android:id="@+id/album_balloon"
@@ -153,7 +150,7 @@
         android:layout_height="match_parent"
         android:background="#c8000000"
         android:src="@drawable/album_balloon"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
-</FrameLayout>
+</android.support.design.widget.CoordinatorLayout>
 

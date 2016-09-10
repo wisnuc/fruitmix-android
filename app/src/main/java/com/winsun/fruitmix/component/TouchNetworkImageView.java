@@ -15,20 +15,17 @@
  */
 package com.winsun.fruitmix.component;
 
-import android.app.Application;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.ImageView;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLoader.ImageContainer;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.winsun.fruitmix.interfaces.IImageLoadListener;
-import com.winsun.fruitmix.util.Util;
 
 /**
  * Handles fetching an image from a URL as well as the life-cycle of the
@@ -200,8 +197,20 @@ public class TouchNetworkImageView extends TouchImageView {
                         }
 
                         if (response.getBitmap() != null && getTag().equals(mUrl)) {
-                            mImageLoadListener.onImageLoadFinish(mUrl);
+
                             setImageBitmap(response.getBitmap());
+
+                            post(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    Log.i(TAG, "onResponse Url:" + mUrl);
+                                    if (mImageLoadListener != null) {
+                                        mImageLoadListener.onImageLoadFinish(mUrl, TouchNetworkImageView.this);
+                                    }
+                                }
+                            });
+
                         } else if (mDefaultImageId != 0) {
                             setImageResource(mDefaultImageId);
                         }

@@ -30,7 +30,7 @@
         <item
             android:id="@+id/logout"
             android:icon="@drawable/logout"
-            android:title="@string/logout" />
+            android:title="@string/logout"/>
 
     </group>
 

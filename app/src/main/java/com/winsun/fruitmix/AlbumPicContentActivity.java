@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -190,13 +192,16 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
     }
 
-    public void showSlider(int position) {
+    public void showSlider(int position,View sharedElement,String sharedElementName) {
         LocalCache.TransActivityContainer.put("imgSliderList", picList);
         Intent intent = new Intent();
-        intent.putExtra("pos", position);
+        intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, mShowCommentBtn);
         intent.setClass(this, PhotoSliderActivity.class);
-        startActivity(intent);
+
+        ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this,sharedElement,sharedElementName);
+        startActivity(intent,optionsCompat.toBundle());
+//        startActivity(intent);
     }
 
     class PicGridViewAdapter extends BaseAdapter {
@@ -220,7 +225,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             GridView gvGrid;
             final Map<String, Object> currentItem;
             final RelativeLayout mainBar;
-            NetworkImageView ivMain;
+            final NetworkImageView ivMain;
             ImageView ivLock;
 
             if (convertView == null)
@@ -261,7 +266,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             ivMain.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    activity.showSlider(position);
+
+                    String sharedElementName = (String) currentItem.get("resHash");
+                    ViewCompat.setTransitionName(ivMain,sharedElementName);
+                    activity.showSlider(position,ivMain,String.valueOf(currentItem.get("resHash")));
                 }
             });
 

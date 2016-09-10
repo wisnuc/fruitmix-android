@@ -1,9 +1,11 @@
 package com.winsun.fruitmix.interfaces;
 
+import android.view.View;
+
 /**
  * Created by Administrator on 2016/8/15.
  */
 public interface IImageLoadListener {
 
-    void onImageLoadFinish(String url);
+    void onImageLoadFinish(String url, View view);
 }

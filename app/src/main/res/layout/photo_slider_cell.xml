@@ -19,21 +19,20 @@
         android:id="@+id/mainPic"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="60dp"
-        android:maxHeight="1000dp"
-        android:maxWidth="1000dp"
         android:layout_marginTop="60dp"
+        android:layout_marginBottom="60dp"
+        android:maxHeight="600dp"
+        android:scaleType="centerInside"
         android:src="@drawable/placeholder_photo"
         android:visibility="invisible" />
 
-    <ImageView
+    <com.winsun.fruitmix.component.TouchNetworkImageView
         android:id="@+id/default_main_pic"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="60dp"
-        android:layout_marginTop="60dp"
-        android:scaleType="centerCrop"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
         android:src="@drawable/placeholder_photo"
+        android:layout_centerInParent="true"
+        android:scaleType="centerCrop"
         android:visibility="visible" />
 
 </RelativeLayout>

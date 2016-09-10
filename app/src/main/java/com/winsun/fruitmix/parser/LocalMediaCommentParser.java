@@ -4,6 +4,7 @@ import android.database.Cursor;
 
 import com.winsun.fruitmix.model.Comment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,7 +15,6 @@ public class LocalMediaCommentParser implements LocalDataParser<Comment> {
     @Override
     public List<Comment> parse(Cursor cursor) {
 
-
-        return null;
+        return new ArrayList<>();
     }
 }

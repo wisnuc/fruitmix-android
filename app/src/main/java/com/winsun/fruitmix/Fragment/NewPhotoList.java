@@ -1,11 +1,16 @@
 package com.winsun.fruitmix.Fragment;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +22,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -116,6 +122,8 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     private float mOldSpan = 0;
     private ScaleGestureDetector mPinchScaleDetector;
+
+    private Bundle reenterState;
 
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
@@ -536,6 +544,93 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     }
 
+    public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+
+        if (reenterState != null) {
+
+            int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
+            int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
+            String currentPhotoDate = reenterState.getString(Util.CURRENT_PHOTO_DATE);
+
+            if (initialPhotoPosition != currentPhotoPosition) {
+
+                names.clear();
+                sharedElements.clear();
+
+                Media media = mMapKeyIsPhotoPositionValueIsPhoto.get(findPhotoPositionInRecyclerView(currentPhotoDate, currentPhotoPosition));
+
+                View newSharedElement = mRecyclerView.findViewWithTag(findPhotoTag(media));
+                String sharedElementName = media.getUuid();
+
+                names.add(sharedElementName);
+                sharedElements.put(sharedElementName, newSharedElement);
+            }
+
+        }
+        reenterState = null;
+
+    }
+
+    public void onActivityReenter(int resultCode, Intent data) {
+        reenterState = new Bundle(data.getExtras());
+        int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
+        int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
+        String currentPhotoDate = reenterState.getString(Util.CURRENT_PHOTO_DATE);
+
+
+        if (initialPhotoPosition != currentPhotoPosition) {
+
+            mRecyclerView.smoothScrollToPosition(findPhotoPositionInRecyclerView(currentPhotoDate, currentPhotoPosition));
+
+            ActivityCompat.postponeEnterTransition(containerActivity);
+            mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
+                    mRecyclerView.requestLayout();
+                    ActivityCompat.startPostponedEnterTransition(containerActivity);
+
+                    return true;
+                }
+            });
+        }
+
+    }
+
+    private int findPhotoPositionInRecyclerView(String photoDate, int photoPositionInDateList) {
+        int photoDatePosition = 0;
+        if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsValue(photoDate)) {
+
+            for (Map.Entry<Integer, String> entry : mMapKeyIsPhotoPositionValueIsPhotoDate.entrySet()) {
+                if (entry.getValue().equals(photoDate)) {
+                    photoDatePosition = entry.getKey();
+                }
+            }
+        }
+
+        return photoDatePosition + 1 + photoPositionInDateList;
+    }
+
+    private String findPhotoTag(Media media) {
+        String tag = "";
+        if (media.isLocal()) {
+
+            tag = media.getThumb();
+
+        } else if (!media.isLocal()) {
+
+
+            int width = Integer.parseInt(media.getWidth());
+            int height = Integer.parseInt(media.getHeight());
+
+            int[] result = Util.formatPhotoWidthHeight(width, height);
+
+            tag = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), result[0], result[1]);
+        }
+        return tag;
+    }
+
     private class PhotoRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private static final int VIEW_TYPE_HEAD = 0;
@@ -776,7 +871,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) view.getLayoutParams();
 
             params.height = mItemWidth;
-            params.setMargins(0, 0, dip2px(5), dip2px(5));
+            params.setMargins(dip2px(2.5f), dip2px(2.5f), dip2px(2.5f), dip2px(2.5f));
             view.setLayoutParams(params);
 
             if (mSelectMode) {
@@ -859,10 +954,15 @@ public class NewPhotoList implements NavPagerActivity.Page {
                         Intent intent = new Intent();
 
 //                        Log.i(TAG, "photo pos:" + position);
-                        intent.putExtra("pos", position);
+                        intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
-                        containerActivity.startActivity(intent);
+
+                        ViewCompat.setTransitionName(mPhotoIv, media.getUuid());
+
+                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, mPhotoIv, media.getUuid());
+
+                        containerActivity.startActivity(intent, options.toBundle());
 
                     }
 

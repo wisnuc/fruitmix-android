@@ -587,7 +587,7 @@ public class FNAS {
 
             item.put("images", builder.toString());
 
-            item.put("coverImg", mediaShare.getCoverImageDigest().toLowerCase());
+            item.put("coverImg", mediaShare.getImageDigests().get(0).toLowerCase());
 
             item.put("private", String.valueOf(mediaShare.isPrivate()));
 

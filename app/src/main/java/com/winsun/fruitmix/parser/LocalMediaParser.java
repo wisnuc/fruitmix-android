@@ -2,6 +2,7 @@ package com.winsun.fruitmix.parser;
 
 import android.database.Cursor;
 
+import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.Media;
 
 import java.util.ArrayList;

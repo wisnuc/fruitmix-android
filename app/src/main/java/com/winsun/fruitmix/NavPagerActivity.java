@@ -12,7 +12,9 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -46,6 +48,7 @@ import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -56,13 +59,13 @@ public class NavPagerActivity extends AppCompatActivity
     public static final String TAG = NavPagerActivity.class.getSimpleName();
 
     public Toolbar toolbar;
-    public RelativeLayout chooseHeader;
+    //    public RelativeLayout chooseHeader;
     public TabLayout tabLayout;
-    public ImageView fab;
+    public FloatingActionButton fab;
     public TextView lbRight;
     ViewPager viewPager;
-    ImageView ivBack;
-    TextView ivSelectCount;
+//    ImageView ivBack;
+//    TextView ivSelectCount;
 
     public LinearLayout llBtMenu;
     public ImageView ivBtAlbum, ivBtShare;
@@ -99,12 +102,24 @@ public class NavPagerActivity extends AppCompatActivity
     private static final int PAGE_PHOTO = 1;
     private static final int PAGE_ALBUM = 2;
 
+    private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
+        @Override
+        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+
+            if(viewPager.getCurrentItem() == PAGE_PHOTO){
+                ((NewPhotoList)pageList.get(viewPager.getCurrentItem())).onMapSharedElements(names,sharedElements);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nav_pager);
 
         mContext = this;
+
+        setExitSharedElementCallback(sharedElementCallback);
 
         mManager = LocalBroadcastManager.getInstance(this);
         mReceiver = new CustomBroadReceiver();
@@ -116,22 +131,21 @@ public class NavPagerActivity extends AppCompatActivity
         mManager.registerReceiver(mReceiver, intentFilter);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        chooseHeader = (RelativeLayout) findViewById(R.id.chooseHeader);
-        ivBack = (ImageView) findViewById(R.id.back);
-        ivSelectCount = (TextView) findViewById(R.id.select_count_tv);
+//        chooseHeader = (RelativeLayout) findViewById(R.id.chooseHeader);
+//        ivBack = (ImageView) findViewById(R.id.back);
+//        ivSelectCount = (TextView) findViewById(R.id.select_count_tv);
 
         llBtMenu = (LinearLayout) findViewById(R.id.btmenu);
         ivBtAlbum = (ImageView) findViewById(R.id.bt_album);
         ivBtShare = (ImageView) findViewById(R.id.bt_share);
         lbRight = (TextView) findViewById(R.id.right);
 
-        fab = (ImageView) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+/*        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.setDrawerListener(toggle);
-        toggle.syncState();
-
+        toggle.syncState();*/
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
 
@@ -248,6 +262,16 @@ public class NavPagerActivity extends AppCompatActivity
         mManager.unregisterReceiver(mReceiver);
 
         photoList.removePhotoListListener(this);
+    }
+
+    @Override
+    public void onActivityReenter(int resultCode, Intent data) {
+        super.onActivityReenter(resultCode, data);
+
+        if(viewPager.getCurrentItem() == PAGE_PHOTO){
+            ((NewPhotoList)pageList.get(viewPager.getCurrentItem())).onActivityReenter(resultCode,data);
+        }
+
     }
 
     @Override
@@ -444,7 +468,7 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     public void setSelectCountText(String text) {
-        ivSelectCount.setText(text);
+        toolbar.setTitle(text);
     }
 
     public void showTips() {
@@ -487,13 +511,13 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     public void showChooseHeader() {
-        chooseHeader.setVisibility(View.VISIBLE);
         fab.setVisibility(View.VISIBLE);
-        tabLayout.setVisibility(View.GONE);
+        toolbar.setNavigationIcon(R.drawable.arrow_back);
+        lbRight.setVisibility(View.GONE);
         CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
         lp.bottomMargin = 0;
         viewPager.setLayoutParams(lp);
-        ivBack.setOnClickListener(new View.OnClickListener() {
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
@@ -514,7 +538,9 @@ public class NavPagerActivity extends AppCompatActivity
         fab.setVisibility(View.GONE);
         ivBtAlbum.setVisibility(View.GONE);
         ivBtShare.setVisibility(View.GONE);
-        chooseHeader.setVisibility(View.GONE);
+        toolbar.setNavigationIcon(R.drawable.menu);
+        toolbar.setNavigationOnClickListener(null);
+        lbRight.setVisibility(View.VISIBLE);
         tabLayout.setVisibility(View.VISIBLE);
         CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
         lp.bottomMargin = Util.Dp2Px(48.0f);

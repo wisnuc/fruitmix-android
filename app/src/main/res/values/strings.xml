@@ -239,7 +239,6 @@
     <string name="no_comment_content">Please write comment!</string>
     <string name="check_more_photos">Check more photos</string>
 
-    <!-- album menu-->
     <string name="setting_album">Setting Ablum</string>
     <string name="edit_photo">Edit Photo</string>
     <string name="modify_cover">Modify Cover</string>
@@ -251,19 +250,17 @@
     <string name="share_comment_text">%1$s : %2$s</string>
     <string name="photo_count">%1$sPhotos</string>
 
-    <!-- share -->
     <string name="share_album_title">%1$s·%2$sPhoto</string>
 
-    <!-- time format -->
     <string name="seconds_ago">%1$s seconds ago</string>
     <string name="minutes_ago">%1$s minutes ago</string>
     <string name="hours_ago">%1$s hours ago</string>
     <string name="yesterday">yesterday</string>
 
-    <!-- url -->
     <string name="thumb_photo_url">%1$s?type=thumb&amp;width=%2$s&amp;height=%3$s</string>
     <string name="original_photo_url">%1$s?type=original</string>
     <string name="photo_comment_url">%1$s?type=comments</string>
+
     <!-- finish add by liang.wu-->
 
 </resources>

@@ -19,6 +19,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
@@ -43,6 +44,9 @@ import java.util.Map;
  * thread as well.
  */
 public class ImageLoader {
+
+    private static final String TAG = ImageLoader.class.getSimpleName();
+
     /**
      * RequestQueue for dispatching ImageRequests onto.
      */
@@ -280,18 +284,23 @@ public class ImageLoader {
         return imageContainer;
     }
 
-    protected Request<Bitmap> makeImageRequest(String requestUrl, int maxWidth, int maxHeight,
+    protected Request<Bitmap> makeImageRequest(final String requestUrl, int maxWidth, int maxHeight,
                                                ScaleType scaleType, final String cacheKey) {
         return new ImageRequest(requestUrl, new Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap response) {
                 onGetImageSuccess(cacheKey, response);
+
+
+                Log.i(TAG,"onGetImageSuccess requestUrl:" + requestUrl);
             }
 
         }, maxWidth, maxHeight, scaleType, Config.RGB_565, new ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 onGetImageError(cacheKey, error);
+
+                Log.i(TAG,"onGetImageSuccess requestUrl:" + requestUrl);
             }
         }) {
             @Override

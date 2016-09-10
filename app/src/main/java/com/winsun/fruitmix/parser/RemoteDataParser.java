@@ -1,7 +1,5 @@
 package com.winsun.fruitmix.parser;
 
-import org.json.JSONException;
-
 import java.util.List;
 
 /**

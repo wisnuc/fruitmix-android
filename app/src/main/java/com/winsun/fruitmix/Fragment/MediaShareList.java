@@ -500,7 +500,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                         public void onClick(View v) {
                             LocalCache.TransActivityContainer.put("imgSliderList", getImgList((String) currentItem.get("images")));
                             Intent intent = new Intent();
-                            intent.putExtra("pos", 0);
+                            intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
                             intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                             intent.setClass(containerActivity, PhotoSliderActivity.class);
                             containerActivity.startActivity(intent);
@@ -629,7 +629,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                                     Log.d("winsun", getImgList("images") + "");
                                     LocalCache.TransActivityContainer.put("imgSliderList", getImgList((String) currentItem.get("images")));
                                     Intent intent = new Intent();
-                                    intent.putExtra("pos", mItemPosition);
+                                    intent.putExtra(Util.INITIAL_PHOTO_POSITION, mItemPosition);
                                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                                     intent.setClass(containerActivity, PhotoSliderActivity.class);
                                     containerActivity.startActivity(intent);
