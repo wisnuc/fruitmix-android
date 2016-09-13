@@ -283,7 +283,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
     }
 
     private void calcPhotoItemWidth() {
-        mItemWidth = mScreenWidth / mSpanCount - dip2px(5);
+        mItemWidth = mScreenWidth / mSpanCount - Util.dip2px(5);
     }
 
     @Override
@@ -428,14 +428,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
             }
         }
 
-    }
-
-    /**
-     * 将dp转化为px
-     */
-    private int dip2px(float dip) {
-        float v = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, containerActivity.getResources().getDisplayMetrics());
-        return (int) (v + 0.5f);
     }
 
     public void createAlbum(String selectUID) {
@@ -871,15 +863,18 @@ public class NewPhotoList implements NavPagerActivity.Page {
             GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) view.getLayoutParams();
 
             params.height = mItemWidth;
-            params.setMargins(dip2px(2.5f), dip2px(2.5f), dip2px(2.5f), dip2px(2.5f));
+
+            int normalMargin = Util.dip2px(2.5f);
+
+            params.setMargins(normalMargin, normalMargin, normalMargin, normalMargin);
             view.setLayoutParams(params);
 
             if (mSelectMode) {
                 boolean selected = media.isSelected();
                 RelativeLayout.LayoutParams photoParams = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
                 if (selected) {
-                    int margin = dip2px(20);
-                    photoParams.setMargins(margin, margin, margin, margin);
+                    int selectMargin = Util.dip2px(20);
+                    photoParams.setMargins(selectMargin, selectMargin, selectMargin, selectMargin);
                     mPhotoIv.setLayoutParams(photoParams);
                     mPhotoSelectedIv.setVisibility(View.VISIBLE);
                 } else {
@@ -904,8 +899,8 @@ public class NewPhotoList implements NavPagerActivity.Page {
                         boolean selected = media.isSelected();
                         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
                         if (selected) {
-                            int margin = dip2px(20);
-                            params.setMargins(margin, margin, margin, margin);
+                            int selectMargin = Util.dip2px(20);
+                            params.setMargins(selectMargin, selectMargin, selectMargin, selectMargin);
                             mPhotoIv.setLayoutParams(params);
                             mPhotoSelectedIv.setVisibility(View.VISIBLE);
                         } else {
@@ -1026,7 +1021,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             float newSpan = detector.getCurrentSpan();
 
-            if (newSpan > mOldSpan + dip2px(2)) {
+            if (newSpan > mOldSpan + Util.dip2px(2)) {
 
                 if (mSpanCount > mSpanMinCount) {
                     mSpanCount--;
@@ -1039,7 +1034,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                 Log.i(TAG, "pinch more");
 
-            } else if (mOldSpan > newSpan + dip2px(2)) {
+            } else if (mOldSpan > newSpan + Util.dip2px(2)) {
 
                 if (mSpanCount < mSpanMaxCount) {
                     mSpanCount++;

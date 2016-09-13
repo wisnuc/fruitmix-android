@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -50,7 +51,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     @BindView(R.id.edit_photo_gridview)
     RecyclerView mEditPhotoRecyclerView;
     @BindView(R.id.add_album)
-    ImageView mAddPhoto;
+    FloatingActionButton mAddPhoto;
 
     private int mSpanCount = 3;
     private GridLayoutManager mManager;

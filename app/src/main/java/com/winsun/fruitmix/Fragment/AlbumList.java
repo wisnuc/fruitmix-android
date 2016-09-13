@@ -542,7 +542,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     int margin;
-                    margin = Util.Dp2Px(100);
+                    margin = Util.dip2px(100);
                     switch (event.getAction() & MotionEvent.ACTION_MASK) {
                         case MotionEvent.ACTION_DOWN:
                             if (lastMainbar != null) lastMainbar.setTranslationX(0.0f);

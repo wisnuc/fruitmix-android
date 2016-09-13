@@ -17,6 +17,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
@@ -106,8 +107,10 @@ public class NavPagerActivity extends AppCompatActivity
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
 
-            if(viewPager.getCurrentItem() == PAGE_PHOTO){
-                ((NewPhotoList)pageList.get(viewPager.getCurrentItem())).onMapSharedElements(names,sharedElements);
+            if (viewPager.getCurrentItem() == PAGE_PHOTO) {
+                ((NewPhotoList) pageList.get(viewPager.getCurrentItem())).onMapSharedElements(names, sharedElements);
+            }else if(viewPager.getCurrentItem() == PAGE_SHARE){
+                ((MediaShareList) pageList.get(viewPager.getCurrentItem())).onMapSharedElements(names, sharedElements);
             }
         }
     };
@@ -134,6 +137,8 @@ public class NavPagerActivity extends AppCompatActivity
 //        chooseHeader = (RelativeLayout) findViewById(R.id.chooseHeader);
 //        ivBack = (ImageView) findViewById(R.id.back);
 //        ivSelectCount = (TextView) findViewById(R.id.select_count_tv);
+
+        setSupportActionBar(toolbar);
 
         llBtMenu = (LinearLayout) findViewById(R.id.btmenu);
         ivBtAlbum = (ImageView) findViewById(R.id.bt_album);
@@ -268,8 +273,10 @@ public class NavPagerActivity extends AppCompatActivity
     public void onActivityReenter(int resultCode, Intent data) {
         super.onActivityReenter(resultCode, data);
 
-        if(viewPager.getCurrentItem() == PAGE_PHOTO){
-            ((NewPhotoList)pageList.get(viewPager.getCurrentItem())).onActivityReenter(resultCode,data);
+        if (viewPager.getCurrentItem() == PAGE_PHOTO) {
+            ((NewPhotoList) pageList.get(viewPager.getCurrentItem())).onActivityReenter(resultCode, data);
+        }else if(viewPager.getCurrentItem() == PAGE_SHARE){
+            ((MediaShareList) pageList.get(viewPager.getCurrentItem())).onActivityReenter(resultCode, data);
         }
 
     }
@@ -543,7 +550,7 @@ public class NavPagerActivity extends AppCompatActivity
         lbRight.setVisibility(View.VISIBLE);
         tabLayout.setVisibility(View.VISIBLE);
         CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
-        lp.bottomMargin = Util.Dp2Px(48.0f);
+        lp.bottomMargin = Util.dip2px(48.0f);
         //if(LocalCache.ScreenWidth==540) lp.bottomMargin=76;
         //else if(LocalCache.ScreenWidth==1080) lp.bottomMargin=140;
         viewPager.setLayoutParams(lp);

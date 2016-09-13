@@ -13,6 +13,7 @@ import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
 import android.util.TypedValue;
@@ -54,7 +55,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
     TextView lbDate;
     ImageView ivBack, ivComment;
-    RelativeLayout rlChooseHeader;
+    Toolbar rlChooseHeader;
     RelativeLayout rlPanelFooter;
 
     private ImageView mReturnResize;
@@ -89,7 +90,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     Map<String, Object> imageMap = imgList.get(currentPhotoPosition);
 
-                    String imageUUID = String.valueOf(imageMap.get("resHash"));
+                    String imageUUID = String.valueOf(imageMap.get("uuid"));
                     names.add(imageUUID);
 
                     String imageTag;
@@ -143,7 +144,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             }
         }
 
-        rlChooseHeader = (RelativeLayout) findViewById(R.id.chooseHeader);
+        rlChooseHeader = (Toolbar) findViewById(R.id.chooseHeader);
         rlPanelFooter = (RelativeLayout) findViewById(R.id.panelFooter);
         lbDate = (TextView) findViewById(R.id.date);
         ivBack = (ImageView) findViewById(R.id.back);
@@ -165,7 +166,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                     if (imgList.size() > currentPhotoPosition) {
                         Intent intent = new Intent();
                         intent.setClass(PhotoSliderActivity.this, MediaShareCommentActivity.class);
-                        intent.putExtra("imageUUID", "" + imgList.get(currentPhotoPosition).get("uuid"));
+                        intent.putExtra("imageUUID", String.valueOf(imgList.get(currentPhotoPosition).get("uuid")));
                         startActivity(intent);
                     }
                 }
@@ -237,6 +238,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
         intent.putExtra(Util.CURRENT_PHOTO_POSITION, currentPhotoPosition);
         intent.putExtra(Util.CURRENT_PHOTO_DATE, lbDate.getText().toString());
+        intent.putExtra(Util.CURRENT_MEDIASHARE_TIME,getIntent().getStringExtra(Util.CURRENT_MEDIASHARE_TIME));
         setResult(RESULT_OK, intent);
 
         super.finishAfterTransition();
@@ -284,39 +286,55 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         for (int i = 0; i < imgList.size(); i++) {
             final Map<String, Object> map = imgList.get(i);
 
-            final String imageUrl = generateImageUrl(url.contains("thumb"), map);
+            final String imageUrl = generateImageUrl(isImageThumb(url), map);
 
-            if (imageUrl.equals(url)) {
+            if (url.equals(imageUrl)) {
 
-                if (mViewPager.getCurrentItem() == i && (url.contains("thumb") || map.get("cacheType").equals("local"))) {
-                    ActivityCompat.startPostponedEnterTransition(PhotoSliderActivity.this);
+                if (map.get("cacheType").equals("local")) {
 
-                    startLoadCurrentImageAfterTransition(map);
-
-                }
-
-                if (mViewPager.getCurrentItem() != i && url.contains("thumb") && !map.get("cacheType").equals("local")) {
-
-                    final String imageUUID = String.valueOf(map.get("resHash"));
-
-                    startLoadingOriginalPhoto(imageUUID);
+                    if (isCurrentViewPage(i)) {
+                        ActivityCompat.startPostponedEnterTransition(PhotoSliderActivity.this);
+                    }
 
                 } else {
 
-                    if (!map.containsKey(LOAD_FINISH)) {
-                        map.put(LOAD_FINISH, "true");
+                    if (isImageThumb(url)) {
+
+                        if (isCurrentViewPage(i)) {
+                            ActivityCompat.startPostponedEnterTransition(PhotoSliderActivity.this);
+
+                            startLoadCurrentImageAfterTransition(map);
+                        } else {
+                            final String imageUUID = String.valueOf(map.get("uuid"));
+
+                            startLoadingOriginalPhoto(imageUUID);
+                        }
+
+                    } else {
+                        if (!map.containsKey(LOAD_FINISH)) {
+                            map.put(LOAD_FINISH, "true");
+                        }
+
+                        dismissCurrentImageThumb(map);
+
+                        if (isCurrentViewPage(i) && mDialog != null && mDialog.isShowing())
+                            mDialog.dismiss();
                     }
 
-                    dismissCurrentImageThumb(map);
-
-                    if (mViewPager.getCurrentItem() == i && mDialog != null && mDialog.isShowing())
-                        mDialog.dismiss();
                 }
 
             }
 
         }
 
+    }
+
+    public boolean isCurrentViewPage(int viewPosition) {
+        return mViewPager.getCurrentItem() == viewPosition;
+    }
+
+    public boolean isImageThumb(String imageUrl) {
+        return imageUrl.contains("thumb");
     }
 
     private void startLoadCurrentImageAfterTransition(final Map<String, Object> map) {
@@ -326,7 +344,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 public void onTransitionEnd(Transition transition) {
                     super.onTransitionEnd(transition);
 
-                    startLoadingOriginalPhoto(String.valueOf(map.get("resHash")));
+                    startLoadingOriginalPhoto(String.valueOf(map.get("uuid")));
 
                     showDialog();
                 }
@@ -347,7 +365,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         int[] result = Util.formatPhotoWidthHeight(width, height);
 
-        return String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("resHash"), result[0], result[1]);
+        return String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("uuid"), result[0], result[1]);
 
     }
 
@@ -362,7 +380,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 currentUrl = generateThumbImageUrl(map);
 
             } else {
-                currentUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("resHash"));
+                currentUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("uuid"));
             }
 
         }
@@ -451,7 +469,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     defaultMainPic.setVisibility(View.INVISIBLE);
                     mainPic.setVisibility(View.VISIBLE);
-                    ViewCompat.setTransitionName(mainPic, String.valueOf(map.get("resHash")));
+                    ViewCompat.setTransitionName(mainPic, String.valueOf(map.get("uuid")));
 
                     mainPic.registerImageLoadListener(PhotoSliderActivity.this);
 
@@ -465,7 +483,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     defaultMainPic.setVisibility(View.VISIBLE);
                     mainPic.setVisibility(View.INVISIBLE);
-                    ViewCompat.setTransitionName(defaultMainPic, String.valueOf(map.get("resHash")));
+                    ViewCompat.setTransitionName(defaultMainPic, String.valueOf(map.get("uuid")));
 
                     defaultMainPic.registerImageLoadListener(PhotoSliderActivity.this);
                     mainPic.registerImageLoadListener(PhotoSliderActivity.this);
@@ -475,13 +493,13 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     int[] result = Util.formatPhotoWidthHeight(width, height);
 
-                    String thumbImageUrl = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("resHash"), result[0], result[1]);
+                    String thumbImageUrl = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("uuid"), result[0], result[1]);
 
                     mImageLoader.setShouldCache(true);
                     defaultMainPic.setTag(thumbImageUrl);
                     defaultMainPic.setImageUrl(thumbImageUrl, mImageLoader);
 
-                    String remoteUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("resHash"));
+                    String remoteUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("uuid"));
                     mainPic.setTag(remoteUrl);
 
                 }

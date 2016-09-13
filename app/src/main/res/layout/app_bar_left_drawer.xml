@@ -4,21 +4,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
     android:fitsSystemWindows="true">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:stateListAnimator="@animator/appbar_elevation">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#3F51B5"
             app:navigationIcon="@drawable/menu"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
             app:titleTextAppearance="@style/ToolbarTitle">
 
             <TextView
@@ -28,13 +25,14 @@
                 android:layout_gravity="center_vertical|end"
                 android:layout_marginRight="15dp"
                 android:text="@string/choose_text"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 android:textSize="18dp"
                 android:visibility="gone"/>
 
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
+
 
     <!--    <RelativeLayout
             android:id="@+id/chooseHeader"
@@ -75,8 +73,9 @@
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="54dp"
-        android:layout_marginTop="59dp"/>
+        android:layout_marginBottom="48dp"
+        android:layout_marginTop="?attr/actionBarSize"
+        />
 
     <android.support.design.widget.TabLayout
         android:id="@+id/tabLayout"

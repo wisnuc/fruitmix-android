@@ -46,8 +46,9 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:background="#3F52B4"
+        android:elevation="@dimen/appbar_elevation"
         app:popupTheme="@style/Theme.AppCompat.Light.NoActionBar">
 
         <ImageView
@@ -75,7 +76,7 @@
         android:id="@+id/mainGrid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="?attr/actionBarSize"
         android:numColumns="3" />
 
 </android.support.design.widget.CoordinatorLayout>

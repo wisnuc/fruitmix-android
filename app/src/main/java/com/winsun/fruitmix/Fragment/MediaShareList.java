@@ -3,6 +3,10 @@ package com.winsun.fruitmix.Fragment;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.view.ViewCompat;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -10,8 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -23,6 +27,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.AlbumPicContentActivity;
+import com.winsun.fruitmix.MediaShareCommentActivity;
 import com.winsun.fruitmix.MoreMediaActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.PhotoSliderActivity;
@@ -74,6 +79,8 @@ public class MediaShareList implements NavPagerActivity.Page {
 
     private ImageLoader mImageLoader;
 
+    private Bundle reenterState;
+
     public MediaShareList(NavPagerActivity activity_) {
         containerActivity = activity_;
 
@@ -101,7 +108,7 @@ public class MediaShareList implements NavPagerActivity.Page {
     public void reloadList() {
         List<Map<String, Object>> shareList1;
         Map<String, Object> albumItem;
-        shareList1 = new ArrayList<Map<String, Object>>();
+        shareList1 = new ArrayList<>();
 
         for (ConcurrentMap<String, String> albumRaw : LocalCache.SharesMap.values()) {
 
@@ -259,6 +266,93 @@ public class MediaShareList implements NavPagerActivity.Page {
 
     }
 
+    public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+
+        if (reenterState != null) {
+
+            int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
+            int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
+            String currentMediaShareTime = reenterState.getString(Util.CURRENT_MEDIASHARE_TIME);
+            if (initialPhotoPosition != currentPhotoPosition) {
+
+                names.clear();
+                sharedElements.clear();
+
+                int currentMediaSharePosition = findShareItemPosition(currentMediaShareTime);
+
+                String currentMediaUUIDs = String.valueOf(mShareList.get(currentMediaSharePosition).get("images"));
+
+                String currentMediaUUID = currentMediaUUIDs.split(",")[currentPhotoPosition];
+
+                View currentSharedElementView = mainListView.findViewWithTag(findMediaTagByMediaUUID(currentMediaUUID));
+
+                names.add(currentMediaUUID);
+                sharedElements.put(currentMediaUUID, currentSharedElementView);
+
+            }
+
+        }
+        reenterState = null;
+
+    }
+
+    public void onActivityReenter(int resultCode, Intent data) {
+        reenterState = new Bundle(data.getExtras());
+        int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
+        int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
+
+        if (initialPhotoPosition != currentPhotoPosition) {
+
+            ActivityCompat.postponeEnterTransition(containerActivity);
+            mainListView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    mainListView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
+                    mainListView.requestLayout();
+                    ActivityCompat.startPostponedEnterTransition(containerActivity);
+
+                    return true;
+                }
+            });
+        }
+    }
+
+    private int findShareItemPosition(String currentMediaShareTime) {
+
+        int returnPosition = 0;
+        for (int i = 0; i < mShareList.size(); i++) {
+            Map<String, Object> map = mShareList.get(i);
+            String mediashareTime = String.valueOf(map.get("mtime"));
+            if (currentMediaShareTime.equals(mediashareTime)) {
+                returnPosition = i;
+                break;
+            }
+        }
+
+        return returnPosition;
+    }
+
+    private String findMediaTagByMediaUUID(String imageUUID) {
+        String currentMediaTag;
+        ConcurrentMap<String, String> currentMedia = LocalCache.MediasMap.get(imageUUID);
+        if (currentMedia == null) {
+            currentMedia = LocalCache.LocalImagesMapKeyIsUUID.get(imageUUID);
+            currentMediaTag = currentMedia.get("thumb");
+        } else {
+
+            int w,h;
+            w = Integer.parseInt(currentMedia.get("width"));
+            h = Integer.parseInt(currentMedia.get("height"));
+
+            int[] result = Util.formatPhotoWidthHeight(w, h);
+
+            currentMediaTag = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + currentMedia.get("uuid"), result[0], result[1]);
+
+        }
+        return currentMediaTag;
+    }
+
     public View getView() {
         return view;
     }
@@ -283,19 +377,17 @@ public class MediaShareList implements NavPagerActivity.Page {
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             View view;
-            GridView gvGrid;
             final Map<String, Object> currentItem;
             ConcurrentMap<String, String> coverImg, itemImg;
             TextView lbNick, lbTime, lbAlbumTitle;
             ImageView lbAlbumShare;
-            NetworkImageView ivCover;
-            NetworkImageView ivItems[];
+            final NetworkImageView ivCover;
+            final NetworkImageView ivItems[];
             View rlAlbum, llPic1, llPic2, llPic3;
             boolean sLocal;
             int w, h, i;
-            String images[];
+            final String images[];
 
-            //add by liang.wu
             RelativeLayout mShareCountLayout;
             RelativeLayout mShareCommentLayout;
             TextView mShareCountTextView;
@@ -442,6 +534,15 @@ public class MediaShareList implements NavPagerActivity.Page {
                     llPic3.setVisibility(View.GONE);
 
                     mShareCommentLayout.setVisibility(View.VISIBLE);
+                    mShareCommentLayout.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(containerActivity, MediaShareCommentActivity.class);
+                            intent.putExtra("imageUUID", images[0]);
+                            containerActivity.startActivity(intent);
+                        }
+                    });
+
                     mShareCountLayout.setVisibility(View.GONE);
 
                     Log.i(TAG, "images[0]:" + images[0]);
@@ -498,12 +599,23 @@ public class MediaShareList implements NavPagerActivity.Page {
                     ivCover.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            LocalCache.TransActivityContainer.put("imgSliderList", getImgList((String) currentItem.get("images")));
+                            List<Map<String, Object>> imageList = getImgList(String.valueOf(currentItem.get("images")));
+
+                            LocalCache.TransActivityContainer.put("imgSliderList", imageList);
+
                             Intent intent = new Intent();
                             intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
                             intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
+                            intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, String.valueOf(currentItem.get("mtime")));
                             intent.setClass(containerActivity, PhotoSliderActivity.class);
-                            containerActivity.startActivity(intent);
+
+                            String transitionName = String.valueOf(imageList.get(0).get("uuid"));
+
+                            ViewCompat.setTransitionName(ivCover, transitionName);
+
+                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
+
+                            containerActivity.startActivity(intent, options.toBundle());
                         }
                     });
 
@@ -613,43 +725,32 @@ public class MediaShareList implements NavPagerActivity.Page {
                             @Override
                             public void onClick(View v) {
                                 Log.d("winsun", currentItem + "");
-                                if (currentItem.get("type").equals("album")) {
-                                    Intent intent = new Intent();
-                                    intent.setClass(containerActivity, AlbumPicContentActivity.class);
-                                    intent.putExtra("images", (String) currentItem.get("images"));
-                                    intent.putExtra("uuid", (String) currentItem.get("uuid"));
-                                    intent.putExtra("title", (String) currentItem.get("title"));
-                                    intent.putExtra("desc", (String) currentItem.get("desc"));
-                                    intent.putExtra("maintained", (boolean) currentItem.get("maintained"));
-                                    intent.putExtra("private", (String) currentItem.get("private"));
-                                    intent.putExtra(Util.NEED_SHOW_MENU, false);
-                                    intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
-                                    containerActivity.startActivity(intent);
-                                } else {
-                                    Log.d("winsun", getImgList("images") + "");
-                                    LocalCache.TransActivityContainer.put("imgSliderList", getImgList((String) currentItem.get("images")));
-                                    Intent intent = new Intent();
-                                    intent.putExtra(Util.INITIAL_PHOTO_POSITION, mItemPosition);
-                                    intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
-                                    intent.setClass(containerActivity, PhotoSliderActivity.class);
-                                    containerActivity.startActivity(intent);
 
-                                }
+                                List<Map<String, Object>> imageList = getImgList(String.valueOf(currentItem.get("images")));
+
+                                LocalCache.TransActivityContainer.put("imgSliderList", imageList);
+
+                                Intent intent = new Intent();
+                                intent.putExtra(Util.INITIAL_PHOTO_POSITION, mItemPosition);
+                                intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
+                                intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, String.valueOf(currentItem.get("mtime")));
+                                intent.setClass(containerActivity, PhotoSliderActivity.class);
+
+                                String transitionName = String.valueOf(imageList.get(mItemPosition).get("uuid"));
+                                View transitionView = ivItems[mItemPosition];
+
+                                ViewCompat.setTransitionName(ivItems[mItemPosition], transitionName);
+
+                                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, transitionView, transitionName);
+
+                                containerActivity.startActivity(intent, options.toBundle());
+
                             }
                         });
                     }
                 }
 
             }
-
-
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
-            });
-
 
             return view;
         }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,36 +9,44 @@
     android:orientation="vertical"
     tools:context="com.winsun.fruitmix.EquipmentSearchActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#3F52B4"
-        app:popupTheme="@style/Theme.AppCompat.Light.NoActionBar">
+        android:stateListAnimator="@animator/appbar_elevation">
 
-        <ImageView
-            android:id="@+id/back"
-            android:layout_width="30dp"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
-            android:src="@drawable/back" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/search_equipment"
-            android:textColor="@color/white"
-            android:textSize="24dp" />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#3F52B4"
+            app:popupTheme="@style/Theme.AppCompat.Light.NoActionBar">
 
-    </android.support.v7.widget.Toolbar>
+            <ImageView
+                android:id="@+id/back"
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/back"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/search_equipment"
+                android:textColor="@color/white"
+                android:textSize="24dp"/>
+
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
 
     <ExpandableListView
         android:id="@+id/equipment_expandablelist"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
         android:background="@color/white"
         android:cacheColorHint="@color/white"
         android:divider="@null"
@@ -48,6 +57,7 @@
         android:id="@+id/loading_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
         android:background="@color/white"
         android:gravity="center"
         android:orientation="vertical"
@@ -56,16 +66,16 @@
         <ProgressBar
             style="@android:style/Widget.Holo.ProgressBar"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/loading_title"
-            android:textSize="20dp"
-            android:textColor="@color/light_black"/>
+            android:textColor="@color/light_black"
+            android:textSize="20dp"/>
 
     </LinearLayout>
 
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

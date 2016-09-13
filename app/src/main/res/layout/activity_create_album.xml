@@ -10,7 +10,8 @@
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:stateListAnimator="@animator/appbar_elevation">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -25,10 +26,10 @@
 
                 <ImageView
                     android:id="@+id/back"
-                    android:layout_width="30dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/back" />
+                    android:src="@drawable/arrow_back" />
 
                 <TextView
                     android:id="@+id/layout_title"
@@ -39,7 +40,7 @@
                     android:layout_toRightOf="@+id/back"
                     android:text="@string/modify_album_text"
                     android:textColor="@color/white"
-                    android:textSize="24dp" />
+                    android:textSize="18dp" />
 
                 <TextView
                     android:id="@+id/ok"

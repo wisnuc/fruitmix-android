@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.util.Base64OutputStream;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.inputmethod.InputMethodManager;
 
 import com.winsun.fruitmix.R;
@@ -92,15 +93,11 @@ public class Util {
     public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
     public static final String CURRENT_PHOTO_POSITION = "current_photo_position";
     public static final String CURRENT_PHOTO_DATE = "current_photo_date";
+    public static final String CURRENT_MEDIASHARE_TIME = "current_mediashare_time";
 
     public static Context APPLICATION_CONTEXT = null;
 
     public static boolean loginState = false;
-
-    public static int Dp2Px(float dpValue) {
-        final float scale = LocalCache.CurrentApp.getBaseContext().getResources().getDisplayMetrics().density;
-        return (int) (dpValue * scale + 0.5f);
-    }
 
     /**
      * 根据手机的分辨率从 px(像素) 的单位 转成为 dp
@@ -108,6 +105,14 @@ public class Util {
     public static int Px2Dp(float pxValue) {
         final float scale = LocalCache.CurrentApp.getBaseContext().getResources().getDisplayMetrics().density;
         return (int) (pxValue / scale + 0.5f);
+    }
+
+    /**
+     * 将dp转化为px
+     */
+    public static int dip2px(float dip) {
+        float v = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, APPLICATION_CONTEXT.getResources().getDisplayMetrics());
+        return (int) (v + 0.5f);
     }
 
     public static String CalcSHA256OfFile(String fname) {

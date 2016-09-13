@@ -199,7 +199,8 @@
             android:id="@+id/share_count_layout"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:visibility="gone">
+            android:visibility="gone"
+            android:clickable="true">
 
             <TextView
                 android:id="@+id/share_count_textview"

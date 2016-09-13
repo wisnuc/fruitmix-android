@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -15,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -27,6 +30,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
@@ -81,12 +85,44 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private boolean isOperated = false;
 
+    private Bundle reenterState;
+
+    private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
+        @Override
+        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+            if (reenterState != null) {
+
+                int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
+                int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
+
+                if (initialPhotoPosition != currentPhotoPosition) {
+
+                    names.clear();
+                    sharedElements.clear();
+
+                    Map<String, Object> map = picList.get(currentPhotoPosition);
+
+                    String sharedElementName = String.valueOf(map.get("resHash"));
+                    View newSharedElement = mainGridView.findViewWithTag(sharedElementName);
+
+                    names.add(sharedElementName);
+                    sharedElements.put(sharedElementName, newSharedElement);
+                }
+
+                reenterState = null;
+            }
+
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
         mContext = this;
+
+        setExitSharedElementCallback(sharedElementCallback);
 
         mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
@@ -138,6 +174,33 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             setResult(200);
 
         super.onBackPressed();
+    }
+
+    @Override
+    public void onActivityReenter(int resultCode, Intent data) {
+        super.onActivityReenter(resultCode, data);
+
+        reenterState = new Bundle(data.getExtras());
+        int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
+        int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
+
+        if (initialPhotoPosition != currentPhotoPosition) {
+
+            mainGridView.smoothScrollToPosition(currentPhotoPosition);
+
+            ActivityCompat.postponeEnterTransition(AlbumPicContentActivity.this);
+            mainGridView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    mainGridView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
+                    mainGridView.requestLayout();
+                    ActivityCompat.startPostponedEnterTransition(AlbumPicContentActivity.this);
+
+                    return true;
+                }
+            });
+        }
     }
 
     private void fillPicList(String imagesStr) {
@@ -192,16 +255,15 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
     }
 
-    public void showSlider(int position,View sharedElement,String sharedElementName) {
+    public void showSlider(int position, View sharedElement, String sharedElementName) {
         LocalCache.TransActivityContainer.put("imgSliderList", picList);
         Intent intent = new Intent();
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, mShowCommentBtn);
         intent.setClass(this, PhotoSliderActivity.class);
 
-        ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this,sharedElement,sharedElementName);
-        startActivity(intent,optionsCompat.toBundle());
-//        startActivity(intent);
+        ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, sharedElement, sharedElementName);
+        startActivity(intent, optionsCompat.toBundle());
     }
 
     class PicGridViewAdapter extends BaseAdapter {
@@ -221,12 +283,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             View view;
-            TextView lbTitle;
-            GridView gvGrid;
             final Map<String, Object> currentItem;
-            final RelativeLayout mainBar;
             final NetworkImageView ivMain;
-            ImageView ivLock;
 
             if (convertView == null)
                 view = LayoutInflater.from(activity).inflate(R.layout.photo_list_cell_cell, parent, false);
@@ -235,10 +293,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             currentItem = (Map<String, Object>) this.getItem(position);
 
             ivMain = (NetworkImageView) view.findViewById(R.id.mainPic);
-            ivLock = (ImageView) view.findViewById(R.id.lock);
 
             if (currentItem.get("cacheType").equals("local")) {  // local bitmap path
-//                LocalCache.LoadLocalBitmapThumb((String) currentItem.get("thumb"), w, h, ivMain);
 
                 String url = String.valueOf(currentItem.get("thumb"));
 
@@ -248,7 +304,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 ivMain.setImageUrl(url, mImageLoader);
 
             } else if (currentItem.get("cacheType").equals("nas")) {
-//                LocalCache.LoadRemoteBitmapThumb((String) (currentItem.get("resHash")), w, h, ivMain);
 
                 int width = Integer.parseInt((String) currentItem.get("width"));
                 int height = Integer.parseInt((String) currentItem.get("height"));
@@ -268,8 +323,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 public void onClick(View v) {
 
                     String sharedElementName = (String) currentItem.get("resHash");
-                    ViewCompat.setTransitionName(ivMain,sharedElementName);
-                    activity.showSlider(position,ivMain,String.valueOf(currentItem.get("resHash")));
+                    ViewCompat.setTransitionName(ivMain, sharedElementName);
+                    activity.showSlider(position, ivMain, String.valueOf(currentItem.get("resHash")));
                 }
             });
 
@@ -484,7 +539,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     if (mPrivate) {
 
                         mediaShare.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
-                    }else {
+                    } else {
                         mediaShare.setViewer(Collections.<String>emptyList());
                     }
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,13 +8,45 @@
     android:fitsSystemWindows="true"
     tools:context="com.winsun.fruitmix.PhotoSliderActivity">
 
-    <include layout="@layout/content_main" />
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stateListAnimator="@animator/appbar_elevation">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/chooseHeader"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#2B3443"
+            android:gravity="top"
+            android:visibility="visible">
+
+            <ImageView
+                android:id="@+id/back"
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/back"/>
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="2015-01-01 00:00:00"
+                android:textColor="#FFFFFF"
+                android:textSize="18dp"/>
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
+
 
     <android.support.v4.view.ViewPager
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:layout_weight="1"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -23,34 +56,7 @@
         android:layout_margin="@dimen/fab_margin"
         android:elevation="300dp"
         android:src="@android:drawable/ic_dialog_email"
-        android:visibility="gone" />
-
-    <RelativeLayout
-        android:id="@+id/chooseHeader"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="#2B3443"
-        android:gravity="top"
-        android:visibility="visible">
-
-        <ImageView
-            android:id="@+id/back"
-            android:layout_width="30dp"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
-            android:src="@drawable/back" />
-
-        <TextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="2015-01-01 00:00:00"
-            android:textColor="#FFFFFF"
-            android:textSize="18dp" />
-    </RelativeLayout>
-
+        android:visibility="gone"/>
 
     <RelativeLayout
         android:id="@+id/panelFooter"
@@ -67,7 +73,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="20dp"
-            android:src="@drawable/comment" />
+            android:src="@drawable/comment"/>
 
     </RelativeLayout>
 
@@ -77,6 +83,6 @@
         android:layout_height="wrap_content"
         android:background="#c8000000"
         android:src="@drawable/return_resize1"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
 </android.support.design.widget.CoordinatorLayout>
