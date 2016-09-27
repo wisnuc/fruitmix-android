@@ -16,7 +16,10 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/menu"
-            app:titleTextAppearance="@style/ToolbarTitle">
+            android:theme="@style/AppTheme.AppBarOverlay"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:titleTextAppearance="@style/ToolbarTitle"
+            app:title="@string/photo_text">
 
             <TextView
                 android:id="@+id/right"
@@ -27,7 +30,7 @@
                 android:text="@string/choose_text"
                 android:textColor="@color/white"
                 android:textSize="18dp"
-                android:visibility="gone"/>
+                android:visibility="visible"/>
 
         </android.support.v7.widget.Toolbar>
 
@@ -124,7 +127,7 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="10dp"
             android:src="@drawable/add_album"
-            android:visibility="visible"
+            android:visibility="gone"
             app:borderWidth="0dp"/>
 
     </LinearLayout>

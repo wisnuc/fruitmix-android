@@ -3,10 +3,17 @@ package com.winsun.fruitmix.db;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
+import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.Comment;
-import com.winsun.fruitmix.model.OfflineTask;
+import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.parser.LocalDataParser;
+import com.winsun.fruitmix.parser.LocalMediaCommentParser;
+import com.winsun.fruitmix.parser.LocalMediaParser;
+import com.winsun.fruitmix.parser.LocalMediaShareParser;
+import com.winsun.fruitmix.parser.LocalUserParser;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -14,6 +21,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -22,6 +31,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public enum DBUtils {
 
     SINGLE_INSTANCE;
+
+    private static final String TAG = DBUtils.class.getSimpleName();
 
     private DBHelper dbHelper;
     private SQLiteDatabase database;
@@ -33,14 +44,14 @@ public enum DBUtils {
         referenceCount = new AtomicInteger();
     }
 
-    private synchronized void openWritableDB() {
+    private void openWritableDB() {
 
         referenceCount.incrementAndGet();
 
         database = dbHelper.getWritableDatabase();
     }
 
-    private synchronized void openReadableDB() {
+    private void openReadableDB() {
 
         referenceCount.incrementAndGet();
 
@@ -58,35 +69,23 @@ public enum DBUtils {
         return database.isOpen();
     }
 
-    public long insertTask(OfflineTask task) {
-
-        openWritableDB();
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.TASK_KEY_HTTP_TYPE, task.getHttpType().toString());
-        contentValues.put(DBHelper.TASK_KEY_OPERATION_TYPE, task.getOperationType().toString());
-        contentValues.put(DBHelper.TASK_KEY_REQUEST, task.getRequest());
-        contentValues.put(DBHelper.TASK_KEY_DATA, task.getData());
-        contentValues.put(DBHelper.TASK_KEY_OPERATION_COUNT, task.getOperationCount());
-
-        long returnValue = database.insert(DBHelper.TASK_TABLE_NAME, null, contentValues);
-
-        close();
-
-        return returnValue;
-    }
-
-    public long insertRemoteComment(Comment comment, String imageUUid) {
-
-        openWritableDB();
-
+    private ContentValues createCommentContentValues(Comment comment, String mediaUUID) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.COMMENT_KEY_CREATOR, comment.getCreator());
         contentValues.put(DBHelper.COMMENT_KEY_TIME, comment.getTime());
         contentValues.put(DBHelper.COMMENT_KEY_FORMAT_TIME, comment.getFormatTime());
         contentValues.put(DBHelper.COMMENT_KEY_SHARE_ID, comment.getShareId());
         contentValues.put(DBHelper.COMMENT_KEY_TEXT, comment.getText());
-        contentValues.put(DBHelper.COMMENT_IMAGE_UUID, imageUUid);
+        contentValues.put(DBHelper.COMMENT_IMAGE_UUID, mediaUUID);
+
+        return contentValues;
+    }
+
+    public long insertRemoteComment(Comment comment, String imageUUid) {
+
+        openWritableDB();
+
+        ContentValues contentValues = createCommentContentValues(comment, imageUUid);
 
         long returnValue = database.insert(DBHelper.REMOTE_COMMENT_TABLE_NAME, null, contentValues);
 
@@ -99,13 +98,7 @@ public enum DBUtils {
 
         openWritableDB();
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.COMMENT_KEY_CREATOR, comment.getCreator());
-        contentValues.put(DBHelper.COMMENT_KEY_TIME, comment.getTime());
-        contentValues.put(DBHelper.COMMENT_KEY_FORMAT_TIME, comment.getFormatTime());
-        contentValues.put(DBHelper.COMMENT_KEY_SHARE_ID, comment.getShareId());
-        contentValues.put(DBHelper.COMMENT_KEY_TEXT, comment.getText());
-        contentValues.put(DBHelper.COMMENT_IMAGE_UUID, imageUUid);
+        ContentValues contentValues = createCommentContentValues(comment, imageUUid);
 
         long returnValue = database.insert(DBHelper.LOCAL_COMMENT_TABLE_NAME, null, contentValues);
 
@@ -114,13 +107,11 @@ public enum DBUtils {
         return returnValue;
     }
 
-    public long insertLocalShare(MediaShare mediaShare) {
-
-        openWritableDB();
+    private ContentValues createMediaShareContentValues(MediaShare mediaShare) {
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.SHARE_KEY_UUID, mediaShare.getUuid());
-        contentValues.put(DBHelper.SHARE_KEY_CREATOR, mediaShare.getCreator());
+        contentValues.put(DBHelper.SHARE_KEY_CREATOR_UUID, mediaShare.getCreatorUUID());
         contentValues.put(DBHelper.SHARE_KEY_TIME, mediaShare.getTime());
         contentValues.put(DBHelper.SHARE_KEY_TITLE, mediaShare.getTitle());
         contentValues.put(DBHelper.SHARE_KEY_DESC, mediaShare.getDesc());
@@ -131,7 +122,7 @@ public enum DBUtils {
             builder.append(",");
         }
 
-        contentValues.put(DBHelper.SHARE_KEY_DIGEST, builder.toString());
+        contentValues.put(DBHelper.SHARE_KEY__IMAGE_DIGESTS, builder.toString());
 
         builder.setLength(0);
         for (String viewer : mediaShare.getViewer()) {
@@ -139,7 +130,7 @@ public enum DBUtils {
             builder.append(",");
         }
 
-        contentValues.put(DBHelper.SHARE_KEY_VIEWER, builder.toString());
+        contentValues.put(DBHelper.SHARE_KEY_VIEWERS, builder.toString());
 
         builder.setLength(0);
         for (String maintainer : mediaShare.getMaintainer()) {
@@ -147,14 +138,168 @@ public enum DBUtils {
             builder.append(",");
         }
 
-        contentValues.put(DBHelper.SHARE_KEY_MAINTAINER, builder.toString());
+        contentValues.put(DBHelper.SHARE_KEY_MAINTAINERS, builder.toString());
+
         contentValues.put(DBHelper.SHARE_KEY_IS_ALBUM, mediaShare.isAlbum() ? 1 : 0);
+        contentValues.put(DBHelper.SHARE_KEY_IS_ARCHIVED, mediaShare.isArchived() ? 1 : 0);
+        contentValues.put(DBHelper.SHARE_KEY_IS_DATE, mediaShare.getDate());
+        contentValues.put(DBHelper.SHARE_KEY_IS_COVER_IMAGE_DIGEST, mediaShare.getCoverImageDigest());
+        contentValues.put(DBHelper.SHARE_KEY_IS_LOCKED, mediaShare.isLocked() ? 1 : 0);
+
+        return contentValues;
+    }
+
+    public long insertLocalShare(MediaShare mediaShare) {
+
+        openWritableDB();
+
+        ContentValues contentValues = createMediaShareContentValues(mediaShare);
 
         long returnValue = database.insert(DBHelper.LOCAL_SHARE_TABLE_NAME, null, contentValues);
 
         close();
 
         return returnValue;
+    }
+
+    public long insertRemoteMediaShare(MediaShare mediaShare) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues = createMediaShareContentValues(mediaShare);
+
+        returnValue = database.insert(DBHelper.REMOTE_SHARE_TABLE_NAME, null, contentValues);
+
+        close();
+
+        return returnValue;
+
+    }
+
+    public long insertRemoteMediaShares(ConcurrentMap<String, MediaShare> mediaShares) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+        ContentValues contentValues;
+
+        for (MediaShare mediaShare : mediaShares.values()) {
+
+            contentValues = createMediaShareContentValues(mediaShare);
+
+            returnValue = database.insert(DBHelper.REMOTE_SHARE_TABLE_NAME, null, contentValues);
+        }
+
+        close();
+
+        return returnValue;
+    }
+
+    private ContentValues createUesrContentValues(User user) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.USER_KEY_USERNAME, user.getUserName());
+        contentValues.put(DBHelper.USER_KEY_UUID, user.getUuid());
+        contentValues.put(DBHelper.USER_KEY_AVATAR, user.getAvatar());
+        contentValues.put(DBHelper.USER_KEY_EMAIL, user.getEmail());
+        contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR, user.getDefaultAvatar());
+        contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR_BG_COLOR, user.getDefaultAvatarBgColor());
+
+        return contentValues;
+    }
+
+    public long insertRemoteUsers(ConcurrentMap<String, User> users) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues;
+
+        for (User user : users.values()) {
+
+            contentValues = createUesrContentValues(user);
+
+            returnValue = database.insert(DBHelper.REMOTE_USER_TABLE_NAME, null, contentValues);
+        }
+
+        close();
+
+        return returnValue;
+    }
+
+    private ContentValues createMediaContentValues(Media media) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.MEDIA_KEY_UUID, media.getUuid());
+        contentValues.put(DBHelper.MEDIA_KEY_TIME, media.getTime());
+        contentValues.put(DBHelper.MEDIA_KEY_WIDTH, media.getWidth());
+        contentValues.put(DBHelper.MEDIA_KEY_HEIGHT, media.getHeight());
+        contentValues.put(DBHelper.MEDIA_KEY_THUMB, media.getThumb());
+        contentValues.put(DBHelper.MEDIA_KEY_LOCAL, media.isLocal() ? 1 : 0);
+        contentValues.put(DBHelper.MEDIA_KEY_TITLE, media.getTitle());
+        contentValues.put(DBHelper.MEDIA_KEY_BELONGING_MEDIASHARE_UUID, media.getBelongingMediaShareUUID());
+        contentValues.put(DBHelper.MEDIA_KEY_UPLOADED, media.isUploaded() ? 1 : 0);
+
+        return contentValues;
+    }
+
+    public long insertRemoteMedias(ConcurrentMap<String, Media> medias) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues;
+
+        for (Media media : medias.values()) {
+
+            contentValues = createMediaContentValues(media);
+
+            returnValue = database.insert(DBHelper.REMOTE_MEDIA_TABLE_NAME, null, contentValues);
+        }
+
+        close();
+
+        return returnValue;
+
+    }
+
+    public long insertLocalMediaMap(ConcurrentMap<String, Media> medias) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues;
+
+        for (Media media : medias.values()) {
+            contentValues = createMediaContentValues(media);
+
+            returnValue = database.insert(DBHelper.LOCAL_MEDIA_TABLE_NAME, null, contentValues);
+        }
+
+        close();
+
+        return returnValue;
+
+    }
+
+    public long insertLocalMedia(Media media) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues = createMediaContentValues(media);
+
+        returnValue = database.insert(DBHelper.LOCAL_MEDIA_TABLE_NAME, null, contentValues);
+
+
+        close();
+
+        return returnValue;
+
     }
 
     public long deleteTask(int id) {
@@ -179,6 +324,17 @@ public enum DBUtils {
         return returnValue;
     }
 
+    public long deleteRemoteCommentByUUid(String uuid) {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.REMOTE_COMMENT_TABLE_NAME, DBHelper.COMMENT_IMAGE_UUID + " = ?", new String[]{uuid});
+
+        close();
+
+        return returnValue;
+    }
+
     public long deleteAllRemoteComment() {
 
         openWritableDB();
@@ -190,7 +346,7 @@ public enum DBUtils {
         return returnValue;
     }
 
-    public long deleteLocalComment(int id) {
+    public long deleteLocalComment(long id) {
 
         openWritableDB();
 
@@ -258,35 +414,82 @@ public enum DBUtils {
         return returnValue;
     }
 
-    public List<OfflineTask> getAllOfflineTask() {
+    public long deleteRemoteShare(int id) {
 
-        openReadableDB();
+        openWritableDB();
 
-        List<OfflineTask> list = new ArrayList<>();
-
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.TASK_TABLE_NAME, null);
-        while (cursor.moveToNext()) {
-            OfflineTask offlineTask = new OfflineTask();
-            offlineTask.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.TASK_KEY_ID)));
-            offlineTask.setHttpType(OfflineTask.HttpType.valueOf(cursor.getString(cursor.getColumnIndex(DBHelper.TASK_KEY_HTTP_TYPE))));
-            offlineTask.setOperationType(OfflineTask.OperationType.valueOf(cursor.getString(cursor.getColumnIndex(DBHelper.TASK_KEY_OPERATION_TYPE))));
-            offlineTask.setRequest(cursor.getString(cursor.getColumnIndex(DBHelper.TASK_KEY_REQUEST)));
-            offlineTask.setData(cursor.getString(cursor.getColumnIndex(DBHelper.TASK_KEY_DATA)));
-            offlineTask.setOperationCount(cursor.getInt(cursor.getColumnIndex(DBHelper.TASK_KEY_OPERATION_COUNT)));
-            list.add(offlineTask);
-        }
-        cursor.close();
+        long returnValue = database.delete(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.SHARE_KEY_ID + " = ?", new String[]{String.valueOf(id)});
 
         close();
 
-        return list;
+        return returnValue;
+
     }
 
-    public Map<String, List<Comment>> getAllLocalImageComment() {
+
+    public long deleteRemoteShareByUUid(String UUid) {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{UUid});
+
+        close();
+
+        return returnValue;
+    }
+
+    public long deleteAllRemoteShare() {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.REMOTE_SHARE_TABLE_NAME, null, null);
+
+        close();
+
+        return returnValue;
+    }
+
+    public long deleteAllRemoteUser() {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.REMOTE_USER_TABLE_NAME, null, null);
+
+        close();
+
+        return returnValue;
+    }
+
+    public long deleteAllRemoteMedia() {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.REMOTE_MEDIA_TABLE_NAME, null, null);
+
+        close();
+
+        return returnValue;
+    }
+
+    public long deleteAllLocalMedia() {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.LOCAL_MEDIA_TABLE_NAME, null, null);
+
+        close();
+
+        return returnValue;
+    }
+
+    public Map<String, List<Comment>> getAllLocalImageCommentKeyIsImageUUID() {
 
         openReadableDB();
 
         Map<String, List<Comment>> map = new HashMap<>();
+
+        LocalDataParser<Comment> parser = new LocalMediaCommentParser();
+
         Cursor cursor = database.rawQuery("select * from " + DBHelper.LOCAL_COMMENT_TABLE_NAME, null);
         while (cursor.moveToNext()) {
             String imageUuid = cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_IMAGE_UUID));
@@ -294,25 +497,13 @@ public enum DBUtils {
             if (map.containsKey(imageUuid)) {
 
                 commentList = map.get(imageUuid);
-                Comment comment = new Comment();
-                comment.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.COMMENT_KEY_ID)));
-                comment.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_CREATOR)));
-                comment.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TIME)));
-                comment.setFormatTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_FORMAT_TIME)));
-                comment.setShareId(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_SHARE_ID)));
-                comment.setText(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TEXT)));
-                commentList.add(comment);
+
+                commentList.add(parser.parse(cursor));
 
             } else {
                 commentList = new ArrayList<>();
-                Comment comment = new Comment();
-                comment.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.COMMENT_KEY_ID)));
-                comment.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_CREATOR)));
-                comment.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TIME)));
-                comment.setFormatTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_FORMAT_TIME)));
-                comment.setShareId(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_SHARE_ID)));
-                comment.setText(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TEXT)));
-                commentList.add(comment);
+
+                commentList.add(parser.parse(cursor));
 
                 map.put(imageUuid, commentList);
             }
@@ -329,18 +520,12 @@ public enum DBUtils {
         openReadableDB();
 
         List<Comment> commentList = new ArrayList<>();
+        LocalDataParser<Comment> parser = new LocalMediaCommentParser();
         Cursor cursor = database.rawQuery("select * from " + DBHelper.LOCAL_COMMENT_TABLE_NAME + " where " + DBHelper.COMMENT_IMAGE_UUID + " = ?", new String[]{uuid});
 
         while (cursor.moveToNext()) {
 
-            Comment comment = new Comment();
-            comment.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.COMMENT_KEY_ID)));
-            comment.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_CREATOR)));
-            comment.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TIME)));
-            comment.setFormatTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_FORMAT_TIME)));
-            comment.setShareId(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_SHARE_ID)));
-            comment.setText(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TEXT)));
-            commentList.add(comment);
+            commentList.add(parser.parse(cursor));
 
         }
         cursor.close();
@@ -355,17 +540,11 @@ public enum DBUtils {
         openReadableDB();
 
         List<Comment> commentList = new ArrayList<>();
+        LocalDataParser<Comment> parser = new LocalMediaCommentParser();
         Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_COMMENT_TABLE_NAME + " where " + DBHelper.COMMENT_IMAGE_UUID + " = ?", new String[]{uuid});
         while (cursor.moveToNext()) {
 
-            Comment comment = new Comment();
-            comment.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.COMMENT_KEY_ID)));
-            comment.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_CREATOR)));
-            comment.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TIME)));
-            comment.setFormatTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_FORMAT_TIME)));
-            comment.setShareId(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_SHARE_ID)));
-            comment.setText(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TEXT)));
-            commentList.add(comment);
+            commentList.add(parser.parse(cursor));
 
         }
         cursor.close();
@@ -375,11 +554,12 @@ public enum DBUtils {
         return commentList;
     }
 
-    public Map<String, List<Comment>> getAllRemoteImageComment() {
+    public Map<String, List<Comment>> getAllRemoteImageCommentKeyIsImageUUID() {
 
         openReadableDB();
 
         Map<String, List<Comment>> map = new HashMap<>();
+        LocalDataParser<Comment> parser = new LocalMediaCommentParser();
         Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_COMMENT_TABLE_NAME, null);
         while (cursor.moveToNext()) {
             String imageUuid = cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_IMAGE_UUID));
@@ -387,25 +567,11 @@ public enum DBUtils {
             if (map.containsKey(imageUuid)) {
 
                 commentList = map.get(imageUuid);
-                Comment comment = new Comment();
-                comment.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.COMMENT_KEY_ID)));
-                comment.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_CREATOR)));
-                comment.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TIME)));
-                comment.setFormatTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_FORMAT_TIME)));
-                comment.setShareId(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_SHARE_ID)));
-                comment.setText(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TEXT)));
-                commentList.add(comment);
+                commentList.add(parser.parse(cursor));
 
             } else {
                 commentList = new ArrayList<>();
-                Comment comment = new Comment();
-                comment.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.COMMENT_KEY_ID)));
-                comment.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_CREATOR)));
-                comment.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TIME)));
-                comment.setFormatTime(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_FORMAT_TIME)));
-                comment.setShareId(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_SHARE_ID)));
-                comment.setText(cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_KEY_TEXT)));
-                commentList.add(comment);
+                commentList.add(parser.parse(cursor));
 
                 map.put(imageUuid, commentList);
             }
@@ -417,58 +583,16 @@ public enum DBUtils {
         return map;
     }
 
-    public List<MediaShare> getAllLocalAlbum() {
-
-        openReadableDB();
-
-        List<MediaShare> list = new ArrayList<>();
-
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOCAL_SHARE_TABLE_NAME, null);
-        while (cursor.moveToNext()) {
-            boolean isAlbum = cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_ALBUM)) == 1;
-            if (!isAlbum)
-                continue;
-
-            MediaShare mediaShare = new MediaShare();
-            mediaShare.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_ID)));
-            mediaShare.setUuid(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_UUID)));
-            mediaShare.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_CREATOR)));
-            mediaShare.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_TIME)));
-            mediaShare.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_TITLE)));
-            mediaShare.setDesc(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_DESC)));
-            mediaShare.setImageDigests(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_DIGEST)).split(",")));
-            mediaShare.setViewer(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_VIEWER)).split(",")));
-            mediaShare.setMaintainer(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_MAINTAINER)).split(",")));
-            mediaShare.setAlbum(true);
-            list.add(mediaShare);
-        }
-        cursor.close();
-
-        close();
-
-        return list;
-    }
-
     public List<MediaShare> getAllLocalShare() {
 
         openReadableDB();
 
         List<MediaShare> list = new ArrayList<>();
-
+        LocalDataParser<MediaShare> parser = new LocalMediaShareParser();
         Cursor cursor = database.rawQuery("select * from " + DBHelper.LOCAL_SHARE_TABLE_NAME, null);
         while (cursor.moveToNext()) {
-            MediaShare mediaShare = new MediaShare();
-            mediaShare.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_ID)));
-            mediaShare.setUuid(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_UUID)));
-            mediaShare.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_CREATOR)));
-            mediaShare.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_TIME)));
-            mediaShare.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_TITLE)));
-            mediaShare.setDesc(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_DESC)));
-            mediaShare.setImageDigests(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_DIGEST)).split(",")));
-            mediaShare.setViewer(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_VIEWER)).split(",")));
-            mediaShare.setMaintainer(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_MAINTAINER)).split(",")));
-            mediaShare.setAlbum(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_ALBUM)) == 1);
-            list.add(mediaShare);
+
+            list.add(parser.parse(cursor));
         }
         cursor.close();
 
@@ -483,17 +607,9 @@ public enum DBUtils {
 
         Cursor cursor = database.rawQuery("select * from " + DBHelper.LOCAL_SHARE_TABLE_NAME + " where " + DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
         MediaShare mediaShare = new MediaShare();
+        LocalDataParser<MediaShare> parser = new LocalMediaShareParser();
         while (cursor.moveToNext()) {
-            mediaShare.setId(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_ID)));
-            mediaShare.setUuid(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_UUID)));
-            mediaShare.setCreator(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_CREATOR)));
-            mediaShare.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_TIME)));
-            mediaShare.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_TITLE)));
-            mediaShare.setDesc(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_DESC)));
-            mediaShare.setImageDigests(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_DIGEST)).split(",")));
-            mediaShare.setViewer(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_VIEWER)).split(",")));
-            mediaShare.setMaintainer(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_MAINTAINER)).split(",")));
-            mediaShare.setAlbum(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_ALBUM)) == 1);
+            mediaShare = parser.parse(cursor);
         }
         cursor.close();
 
@@ -502,56 +618,164 @@ public enum DBUtils {
         return mediaShare;
     }
 
-    public long updateLocalShare(MediaShare mediaShare, String Uuid) {
+    public List<MediaShare> getAllRemoteShare() {
+
+        openReadableDB();
+
+        List<MediaShare> mediaShares = new ArrayList<>();
+        LocalDataParser<MediaShare> parser = new LocalMediaShareParser();
+
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_SHARE_TABLE_NAME, null);
+        while (cursor.moveToNext()) {
+
+            MediaShare mediaShare = parser.parse(cursor);
+
+            mediaShares.add(mediaShare);
+        }
+        cursor.close();
+
+        close();
+
+        return mediaShares;
+    }
+
+    public MediaShare getRemoteShareByUuid(String uuid) {
+
+        openReadableDB();
+
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_SHARE_TABLE_NAME + " where " + DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
+        MediaShare mediaShare = new MediaShare();
+
+        LocalDataParser<MediaShare> parser = new LocalMediaShareParser();
+
+        while (cursor.moveToNext()) {
+            mediaShare = parser.parse(cursor);
+        }
+        cursor.close();
+
+        close();
+
+        return mediaShare;
+    }
+
+    public List<User> getAllRemoteUser() {
+        openReadableDB();
+
+        List<User> users = new ArrayList<>();
+
+        LocalDataParser<User> parser = new LocalUserParser();
+
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_USER_TABLE_NAME, null);
+
+        while (cursor.moveToNext()) {
+
+            User user = parser.parse(cursor);
+
+            users.add(user);
+        }
+
+        cursor.close();
+
+        close();
+
+        return users;
+    }
+
+    public List<Media> getAllRemoteMedia() {
+        openReadableDB();
+
+        List<Media> medias = new ArrayList<>();
+
+        LocalDataParser<Media> parser = new LocalMediaParser();
+
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_MEDIA_TABLE_NAME, null);
+
+        while (cursor.moveToNext()) {
+
+            Media media = parser.parse(cursor);
+
+            medias.add(media);
+        }
+
+        cursor.close();
+
+        close();
+
+        return medias;
+    }
+
+    public List<Media> getAllLocalMedia() {
+        openReadableDB();
+
+        List<Media> medias = new ArrayList<>();
+
+        LocalDataParser<Media> parser = new LocalMediaParser();
+
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOCAL_MEDIA_TABLE_NAME, null);
+
+        while (cursor.moveToNext()) {
+
+            Media media = parser.parse(cursor);
+
+            medias.add(media);
+        }
+
+        cursor.close();
+
+        close();
+
+        return medias;
+    }
+
+    public long updateLocalShare(MediaShare mediaShare) {
 
         openWritableDB();
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.SHARE_KEY_UUID, mediaShare.getUuid());
-        contentValues.put(DBHelper.SHARE_KEY_CREATOR, mediaShare.getCreator());
-        contentValues.put(DBHelper.SHARE_KEY_TIME, mediaShare.getTime());
-        contentValues.put(DBHelper.SHARE_KEY_TITLE, mediaShare.getTitle());
-        contentValues.put(DBHelper.SHARE_KEY_DESC, mediaShare.getDesc());
-        StringBuilder builder = new StringBuilder();
-        for (String image : mediaShare.getImageDigests()) {
-            builder.append(image);
-            builder.append(",");
-        }
+        ContentValues contentValues = createMediaShareContentValues(mediaShare);
 
-        contentValues.put(DBHelper.SHARE_KEY_DIGEST, builder.toString());
-
-        builder.setLength(0);
-        for (String viewer : mediaShare.getViewer()) {
-            builder.append(viewer);
-            builder.append(",");
-        }
-
-        contentValues.put(DBHelper.SHARE_KEY_VIEWER, builder.toString());
-
-        builder.setLength(0);
-        for (String maintainer : mediaShare.getMaintainer()) {
-            builder.append(maintainer);
-            builder.append(",");
-        }
-
-        contentValues.put(DBHelper.SHARE_KEY_MAINTAINER, builder.toString());
-        contentValues.put(DBHelper.SHARE_KEY_IS_ALBUM, mediaShare.isAlbum() ? 1 : 0);
-
-        long returnValue = database.update(DBHelper.LOCAL_SHARE_TABLE_NAME, contentValues, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{Uuid});
+        long returnValue = database.update(DBHelper.LOCAL_SHARE_TABLE_NAME, contentValues, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{mediaShare.getUuid()});
 
         close();
 
         return returnValue;
     }
 
-    public long modifyOperationCount(int operationCount, int id) {
+    public long updateRemoteShare(MediaShare mediaShare) {
 
         openWritableDB();
 
-        //database.execSQL("update " + DBHelper.TABLE_NAME + " set " + DBHelper.KEY_OPERATION_COUNT + " = " + operationCount + " where " + DBHelper.KEY_ID + " = " + id);
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.TASK_KEY_OPERATION_COUNT, operationCount);
-        long returnValue = database.update(DBHelper.TASK_TABLE_NAME, contentValues, DBHelper.TASK_KEY_ID + " = ?", new String[]{String.valueOf(id)});
+        ContentValues contentValues = createMediaShareContentValues(mediaShare);
+
+        long returnValue = database.update(DBHelper.REMOTE_SHARE_TABLE_NAME, contentValues, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{mediaShare.getUuid()});
+
+        close();
+
+        return returnValue;
+    }
+
+
+    public long updateRemoteMedia(Media media) {
+
+        openWritableDB();
+
+        ContentValues contentValues = createMediaContentValues(media);
+
+        long returnValue = database.update(DBHelper.REMOTE_MEDIA_TABLE_NAME, contentValues, DBHelper.MEDIA_KEY_UUID + " = ?", new String[]{media.getUuid()});
+
+        close();
+
+        return returnValue;
+    }
+
+    public long updateLocalMedia(Media media) {
+
+        openWritableDB();
+
+        ContentValues contentValues = createMediaContentValues(media);
+
+        long returnValue = database.update(DBHelper.LOCAL_MEDIA_TABLE_NAME, contentValues, DBHelper.MEDIA_KEY_UUID + " = ?", new String[]{media.getUuid()});
+
+        Log.i(TAG, "update local media media uuid:" + media.getUuid());
 
         close();
 

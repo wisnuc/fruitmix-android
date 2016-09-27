@@ -4,12 +4,7 @@ import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.User;
-import com.winsun.fruitmix.parser.MediaCommentDataParserFactory;
-import com.winsun.fruitmix.parser.MediaDataParserFactory;
-import com.winsun.fruitmix.parser.ParserFactory;
 import com.winsun.fruitmix.parser.RemoteDataParser;
-import com.winsun.fruitmix.parser.MediaShareDataParserFactory;
-import com.winsun.fruitmix.parser.UserDataParserFactory;
 
 import static org.junit.Assert.*;
 

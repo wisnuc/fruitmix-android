@@ -238,6 +238,7 @@
     <string name="operating_title">Operating</string>
     <string name="no_comment_content">Please write comment!</string>
     <string name="check_more_photos">Check more photos</string>
+    <string name="load_finish">Load Finish</string>
 
     <string name="setting_album">Setting Ablum</string>
     <string name="edit_photo">Edit Photo</string>

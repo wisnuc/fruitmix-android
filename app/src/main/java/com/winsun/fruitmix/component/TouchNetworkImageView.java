@@ -25,7 +25,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLoader.ImageContainer;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
-import com.winsun.fruitmix.interfaces.IImageLoadListener;
+import com.android.volley.toolbox.IImageLoadListener;
 
 /**
  * Handles fetching an image from a URL as well as the life-cycle of the

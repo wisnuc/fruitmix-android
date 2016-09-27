@@ -17,10 +17,6 @@ public class MainActivity extends AppCompatActivity {
 
         Util.APPLICATION_CONTEXT = getApplicationContext();
 
-        LocalCache.Init(this);
-
-        LocalCache.LoadLocalData();
-
         Intent intent = new Intent();
         intent.setClass(MainActivity.this, SplashScreenActivity.class);
         startActivity(intent);

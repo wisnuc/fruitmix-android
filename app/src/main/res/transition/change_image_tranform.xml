@@ -3,7 +3,6 @@
 
     <changeImageTransform/>
     <changeBounds/>
-    <changeClipBounds/>
     <changeTransform/>
 
 </transitionSet>

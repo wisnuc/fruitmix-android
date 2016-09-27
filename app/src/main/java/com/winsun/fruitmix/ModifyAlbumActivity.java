@@ -1,30 +1,32 @@
 package com.winsun.fruitmix;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationTargetType;
+import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.ConcurrentMap;
+import java.util.List;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -40,14 +42,18 @@ public class ModifyAlbumActivity extends AppCompatActivity {
     TextView btOK;
     ImageView ivBack;
 
-    String mSelectedImageUUIDStr;
+    List<String> mSelectedImageUUIDStr;
 
     private String mMediaShareUuid;
-    private ConcurrentMap<String, String> mAblumMap;
+    private MediaShare mAblumMap;
 
     private Context mContext;
 
     private ProgressDialog mDialog;
+
+    private LocalBroadcastManager localBroadcastManager;
+    private CustomReceiver customReceiver;
+    private IntentFilter filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,27 +64,22 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         mContext = this;
 
         mMediaShareUuid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
-        mAblumMap = LocalCache.SharesMap.get(mMediaShareUuid);
-        mSelectedImageUUIDStr = mAblumMap.get("images");
-        Log.d("winsun", mSelectedImageUUIDStr);
+        mAblumMap = LocalCache.RemoteMediaShareMapKeyIsUUID.get(mMediaShareUuid);
+        mSelectedImageUUIDStr = mAblumMap.getImageDigests();
 
         tfTitle = (TextInputEditText) findViewById(R.id.title_edit);
         mTitleLayout = (TextInputLayout) findViewById(R.id.title_textlayout);
-        mTitleLayout.setHint(mAblumMap.get("title"));
+        mTitleLayout.setHint(mAblumMap.getTitle());
+
         tfDesc = (TextInputEditText) findViewById(R.id.desc);
-        tfDesc.setText(mAblumMap.get("desc"));
+        tfDesc.setText(mAblumMap.getDesc());
+
         ckPublic = (CheckBox) findViewById(R.id.sPublic);
-        if (mAblumMap.get("private").equals("true")) {
-            ckPublic.setChecked(false);
-        } else {
-            ckPublic.setChecked(true);
-        }
+        ckPublic.setChecked(!mAblumMap.getViewer().isEmpty());
+
         ckSetMaintainer = (CheckBox) findViewById(R.id.set_maintainer);
-        if (mAblumMap.get("maintained").equals("false")) {
-            ckSetMaintainer.setChecked(false);
-        } else {
-            ckSetMaintainer.setChecked(true);
-        }
+        ckSetMaintainer.setChecked(mAblumMap.getMaintainer().contains(FNAS.userUUID));
+
         btOK = (TextView) findViewById(R.id.ok);
         ivBack = (ImageView) findViewById(R.id.back);
 
@@ -109,105 +110,30 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                 title = tfTitle.getText().toString();
                 desc = tfDesc.getText().toString();
 
+                mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
-                new AsyncTask<Object, Object, Boolean>() {
+                if (sPublic) {
+                    mAblumMap.setViewer(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+                } else mAblumMap.setViewer(Collections.<String>emptyList());
 
-                    @Override
-                    protected void onPreExecute() {
-                        super.onPreExecute();
+                if (sSetMaintainer) {
+                    mAblumMap.setMaintainer(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+                } else {
+                    mAblumMap.setMaintainer(Collections.singletonList(FNAS.userUUID));
+                }
+                mAblumMap.setTitle(title);
+                mAblumMap.setDesc(desc);
 
-                        mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
-                    }
+                Intent intent = new Intent(Util.OPERATION);
+                intent.putExtra(Util.OPERATION_TYPE, OperationType.MODIFY.name());
+                if (Util.getNetworkState(mContext)) {
+                    intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+                } else {
+                    intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+                }
+                intent.putExtra(Util.OPERATION_MEDIASHARE, mAblumMap);
+                localBroadcastManager.sendBroadcast(intent);
 
-                    @Override
-                    protected Boolean doInBackground(Object... params) {
-                        String data, viewers, maintainers;
-                        String[] selectedUIDArr;
-                        int i;
-
-                        selectedUIDArr = mSelectedImageUUIDStr.split(",");
-                        data = "";
-                        for (i = 0; i < selectedUIDArr.length; i++) {
-                            data += ",{\\\"type\\\":\\\"media\\\",\\\"digest\\\":\\\"" + selectedUIDArr[i] + "\\\"}";
-                        }
-
-                        viewers = "";
-                        if (sPublic) {
-                            for (String key : LocalCache.UsersMap.keySet()) {
-                                viewers += ",\\\"" + key + "\\\"";
-                            }
-                        } else viewers = ",";
-
-                        if (sSetMaintainer) {
-                            maintainers = viewers;
-                        } else {
-                            maintainers = ",";
-                        }
-
-                        if (Util.getNetworkState(mContext)) {
-
-                            data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mMediaShareUuid + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"false\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + title + "\\\", \\\"desc\\\":\\\"" + desc + "\\\"}], \\\"viewers\\\":[" + viewers.substring(1) + "], \\\"maintainers\\\":[" + maintainers.substring(1) + "]}}]\"}";
-
-                            Log.d("winsun", data);
-                            try {
-                                FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
-                                FNAS.retrieveShareMap();
-                                return true;
-                            } catch (Exception e) {
-                                return false;
-                            }
-                        } else {
-
-                            DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-
-                            MediaShare mediaShare = dbUtils.getLocalShareByUuid(mMediaShareUuid);
-
-                            mediaShare.setTitle(title);
-                            mediaShare.setDesc(desc);
-
-                            if (sPublic) {
-                                mediaShare.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
-                            }else mediaShare.setViewer(new ArrayList<String>());
-
-
-                            if (sSetMaintainer) {
-                                mediaShare.setMaintainer(new ArrayList<>(LocalCache.UsersMap.keySet()));
-                            } else {
-                                mediaShare.setMaintainer(Collections.singletonList(FNAS.userUUID));
-                            }
-
-                            dbUtils.updateLocalShare(mediaShare, mediaShare.getUuid());
-
-                            FNAS.loadLocalShare();
-
-                            return true;
-                        }
-
-
-                    }
-
-                    @Override
-                    protected void onPostExecute(Boolean sSuccess) {
-
-                        mDialog.dismiss();
-
-                        if (sSuccess) {
-
-                            if (!Util.getNetworkState(mContext)) {
-                                LocalBroadcastManager mBroadcastManager = LocalBroadcastManager.getInstance(mContext);
-                                mBroadcastManager.sendBroadcast(new Intent(Util.LOCAL_SHARE_CHANGED));
-                            }
-
-                            getIntent().putExtra(Util.UPDATED_ALBUM_TITLE, title);
-                            setResult(RESULT_OK, getIntent());
-                            finish();
-                        } else {
-                            setResult(RESULT_CANCELED);
-                            finish();
-                        }
-                    }
-
-                }.execute();
             }
         });
 
@@ -217,11 +143,62 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        localBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+        customReceiver = new CustomReceiver();
+        filter = new IntentFilter(Util.LOCAL_SHARE_MODIFIED);
+        filter.addAction(Util.REMOTE_SHARE_MODIFIED);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        localBroadcastManager.registerReceiver(customReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        localBroadcastManager.unregisterReceiver(customReceiver);
     }
 
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    private class CustomReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (mDialog != null && mDialog.isShowing())
+                mDialog.dismiss();
+
+            String result = intent.getStringExtra(Util.OPERATION_RESULT);
+
+            OperationResult operationResult = OperationResult.valueOf(result);
+
+            if (intent.getAction().equals(Util.LOCAL_SHARE_MODIFIED) || intent.getAction().equals(Util.REMOTE_SHARE_MODIFIED)) {
+
+                switch (operationResult) {
+                    case SUCCEED:
+                        MediaShare mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
+                        getIntent().putExtra(Util.UPDATED_ALBUM_TITLE, mediaShare.getTitle());
+                        ModifyAlbumActivity.this.setResult(RESULT_OK, getIntent());
+                        finish();
+                        break;
+                    case FAIL:
+                        ModifyAlbumActivity.this.setResult(RESULT_CANCELED);
+                        finish();
+                        break;
+                }
+
+            }
+
+        }
     }
 
 }

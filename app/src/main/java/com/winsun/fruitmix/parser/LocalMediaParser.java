@@ -2,6 +2,7 @@ package com.winsun.fruitmix.parser;
 
 import android.database.Cursor;
 
+import com.winsun.fruitmix.db.DBHelper;
 import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.Media;
 
@@ -14,8 +15,19 @@ import java.util.List;
 public class LocalMediaParser implements LocalDataParser<Media> {
 
     @Override
-    public List<Media> parse(Cursor cursor) {
+    public Media parse(Cursor cursor) {
 
-        return new ArrayList<>();
+        Media media = new Media();
+        media.setUuid(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_UUID)));
+        media.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_TIME)));
+        media.setWidth(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_WIDTH)));
+        media.setHeight(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_HEIGHT)));
+        media.setThumb(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_THUMB)));
+        media.setLocal(cursor.getInt(cursor.getColumnIndex(DBHelper.MEDIA_KEY_LOCAL)) == 1);
+        media.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_TITLE)));
+        media.setBelongingMediaShareUUID(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_BELONGING_MEDIASHARE_UUID)));
+        media.setUploaded(cursor.getInt(cursor.getColumnIndex(DBHelper.MEDIA_KEY_UPLOADED)) == 1);
+
+        return media;
     }
 }

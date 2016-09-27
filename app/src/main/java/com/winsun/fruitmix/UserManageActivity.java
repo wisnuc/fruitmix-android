@@ -10,18 +10,15 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.LocalCache;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,7 +35,7 @@ public class UserManageActivity extends Activity implements View.OnClickListener
     @BindView(R.id.user_list_empty)
     TextView mUserListEmpty;
 
-    private List<Map<String, String>> mUserMapList;
+    private List<User> mUserList;
 
     private Context mContext;
 
@@ -53,21 +50,21 @@ public class UserManageActivity extends Activity implements View.OnClickListener
 
         mContext = this;
 
-        if (LocalCache.UsersMap != null && !LocalCache.UsersMap.isEmpty()) {
+        if (LocalCache.RemoteUserMapKeyIsUUID != null && !LocalCache.RemoteUserMapKeyIsUUID.isEmpty()) {
 
             mUserListEmpty.setVisibility(View.GONE);
             mUserListView.setVisibility(View.VISIBLE);
 
-            mUserMapList = new ArrayList<>();
+            mUserList = new ArrayList<>();
 
-            for (Map.Entry<String, ConcurrentMap<String, String>> map : LocalCache.UsersMap.entrySet()) {
-                mUserMapList.add(map.getValue());
+            for (User user : LocalCache.RemoteUserMapKeyIsUUID.values()) {
+                mUserList.add(user);
             }
 
-            Collections.sort(mUserMapList, new Comparator<Map<String, String>>() {
+            Collections.sort(mUserList, new Comparator<User>() {
                 @Override
-                public int compare(Map<String, String> lhs, Map<String, String> rhs) {
-                    return Collator.getInstance(Locale.CHINESE).compare(lhs.get("name"), (rhs.get("name")));
+                public int compare(User lhs, User rhs) {
+                    return Collator.getInstance(Locale.CHINESE).compare(lhs.getUserName(), (rhs.getUserName()));
                 }
             });
 
@@ -100,12 +97,12 @@ public class UserManageActivity extends Activity implements View.OnClickListener
     private class UserListAdapter extends BaseAdapter {
         @Override
         public int getCount() {
-            return mUserMapList == null ? 0 : mUserMapList.size();
+            return mUserList == null ? 0 : mUserList.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return mUserListEmpty == null ? null : mUserMapList.get(position);
+            return mUserListEmpty == null ? null : mUserList.get(position);
         }
 
         @Override
@@ -124,7 +121,7 @@ public class UserManageActivity extends Activity implements View.OnClickListener
                 viewHolder = (ViewHolder) convertView.getTag();
             }
 
-            viewHolder.refreshView(mUserMapList.get(position));
+            viewHolder.refreshView(mUserList.get(position));
 
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -155,17 +152,17 @@ public class UserManageActivity extends Activity implements View.OnClickListener
             ButterKnife.bind(this, view);
         }
 
-        public void refreshView(Map<String, String> userMap) {
-            mUserName.setText(userMap.get("name"));
-            if (userMap.containsKey("email")) {
+        public void refreshView(User user) {
+            mUserName.setText(user.getUserName());
+            if (user.getEmail().length() > 0) {
                 mUserEmail.setVisibility(View.VISIBLE);
-                mUserEmail.setText(userMap.get("email"));
+                mUserEmail.setText(user.getEmail());
             } else {
                 mUserEmail.setVisibility(View.GONE);
             }
 
             StringBuilder stringBuilder = new StringBuilder();
-            String[] splitStrings = userMap.get("name").split(" ");
+            String[] splitStrings = user.getUserName().split(" ");
             for (String splitString : splitStrings) {
                 stringBuilder.append(splitString.substring(0, 1));
             }

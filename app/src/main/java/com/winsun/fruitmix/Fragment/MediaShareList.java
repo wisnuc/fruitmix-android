@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewCompat;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -14,7 +15,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -34,9 +34,14 @@ import com.winsun.fruitmix.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Comment;
+import com.winsun.fruitmix.model.Media;
+import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.RequestQueueInstance;
+import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.OperationTargetType;
+import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONArray;
@@ -49,8 +54,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by Administrator on 2016/4/19.
@@ -65,7 +68,8 @@ public class MediaShareList implements NavPagerActivity.Page {
     LinearLayout mNoContentLayout;
 
     public ListView mainListView;
-    List<Map<String, Object>> mShareList;
+
+    List<MediaShare> mediaShareList;
 
     Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
     ShareListViewAdapter mAdapter;
@@ -80,6 +84,8 @@ public class MediaShareList implements NavPagerActivity.Page {
     private ImageLoader mImageLoader;
 
     private Bundle reenterState;
+
+    private List<String> mMediaUUIDWhichHaveStartedLoadComment;
 
     public MediaShareList(NavPagerActivity activity_) {
         containerActivity = activity_;
@@ -103,104 +109,50 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
 
+        mMediaUUIDWhichHaveStartedLoadComment = new ArrayList<>();
+
+        mLoadCommentCount = 0;
+        mLoadCommentTotal = 0;
+
     }
 
     public void reloadList() {
-        List<Map<String, Object>> shareList1;
-        Map<String, Object> albumItem;
-        shareList1 = new ArrayList<>();
+        List<MediaShare> mediaShareList1;
 
-        for (ConcurrentMap<String, String> albumRaw : LocalCache.SharesMap.values()) {
+        mediaShareList1 = new ArrayList<>();
 
-            if (albumRaw.get("del").equals("1")) continue;
+        for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
 
-            String creator = albumRaw.get("creator");
-
-//            Log.i("ShareList",creator+"");
-//            Log.i("ShareList",LocalCache.UsersMap.get(creator).get("name")+"");
-
-            if (!LocalCache.UsersMap.containsKey(creator)) {
-                continue;
+            if (!mediaShare.isArchived() && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID())) {
+                mediaShareList1.add(mediaShare);
             }
 
-            albumItem = new HashMap<String, Object>();
-
-            Map<String, String> map = LocalCache.UsersMap.get(creator);
-            String avatar = map.get("avatar");
-            if (avatar.equals("defaultAvatar.jpg")) {
-                albumItem.put("avatar", map.get("avatar_default"));
-                albumItem.put("avatar_default_color", map.get("avatar_default_color"));
-            } else {
-                albumItem.put("avatar", avatar);
-                albumItem.put("avatar_default_color", map.get("avatar_default_color"));
-            }
-
-            albumItem.put("type", albumRaw.get("type"));
-            albumItem.put("uuid", albumRaw.get("uuid"));
-            albumItem.put("date", albumRaw.get("date"));
-            albumItem.put("mtime", albumRaw.get("mtime"));
-            albumItem.put("creator", albumRaw.get("creator"));
-            StringBuilder images = new StringBuilder("");
-            for (String image : albumRaw.get("images").split(",")) {
-
-                if (LocalCache.MediasMap.containsKey(image) || LocalCache.LocalImagesMapKeyIsUUID.containsKey(image)) {
-                    images.append(image);
-                    images.append(",");
-                } else {
-                    images.append("");
-                }
-            }
-            albumItem.put("images", images.toString());
-
-            if (albumRaw.get("maintained").equals("false")) {
-                albumItem.put("maintained", false);
-            } else {
-                albumItem.put("maintained", true);
-            }
-            albumItem.put("private", albumRaw.get("private"));
-
-            albumItem.put("creatorNick", LocalCache.UsersMap.get(albumRaw.get("creator")).get("name"));
-            if (albumRaw.get("type").equals("album")) {
-                albumItem.put("title", albumRaw.get("title"));
-                if (albumItem.get("images").equals("")) {
-                    albumItem.put("imageCount", 0);
-                } else {
-                    albumItem.put("imageCount", ((String) albumItem.get("images")).split(",").length);
-                }
-
-                if (((String) albumItem.get("images")).contains(","))
-                    albumItem.put("coverImg", ((String) albumItem.get("images")).substring(0, ((String) albumItem.get("images")).indexOf(",")));
-                else
-                    albumItem.put("coverImg", albumItem.get("images"));
-
-            }
-
-            shareList1.add(albumItem);
         }
 
-        Collections.sort(shareList1, new Comparator() {
+        for (MediaShare mediaShare : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
+
+            if (!mediaShare.isArchived() && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID())) {
+                mediaShareList1.add(mediaShare);
+            }
+
+        }
+
+        Collections.sort(mediaShareList1, new Comparator<MediaShare>() {
             @Override
-            public int compare(Object lhs, Object rhs) {
-                Map<String, Object> map1, map2;
-                map1 = (Map<String, Object>) lhs;
-                map2 = (Map<String, Object>) rhs;
+            public int compare(MediaShare lhs, MediaShare rhs) {
+                long mtime1 = Long.parseLong(lhs.getTime());
+                long mtime2 = Long.parseLong(rhs.getTime());
 
-                long mtime1 = Long.parseLong(String.valueOf(map2.get("mtime")));
-                long mtime2 = Long.parseLong(String.valueOf(map1.get("mtime")));
-
-                if (mtime1 - mtime2 > 0) {
+                if (mtime1 < mtime2)
                     return 1;
-                } else if (mtime1 - mtime2 < 0) {
+                else if (mtime1 > mtime2)
                     return -1;
-                } else
-                    return 0;
+                else return 0;
 
             }
         });
 
-        mShareList = shareList1;
-
-        Log.d(TAG, "mShareList " + mShareList);
+        mediaShareList = mediaShareList1;
 
     }
 
@@ -212,11 +164,9 @@ public class MediaShareList implements NavPagerActivity.Page {
         reloadList();
 
         mMapKeyIsImageUUIDValueIsComments.clear();
-        mLoadCommentCount = 0;
-        mLoadCommentTotal = 0;
 
         mLoadingLayout.setVisibility(View.INVISIBLE);
-        if (mShareList.size() == 0) {
+        if (mediaShareList.size() == 0) {
             mNoContentLayout.setVisibility(View.VISIBLE);
             mainListView.setVisibility(View.INVISIBLE);
         } else {
@@ -224,39 +174,37 @@ public class MediaShareList implements NavPagerActivity.Page {
             mainListView.setVisibility(View.VISIBLE);
             ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
 
-            loadLocalCommentList();
+        }
 
-            if (Util.getNetworkState(containerActivity)) {
+        loadRemoteComment();
 
-                List<String> imageUUIDList = new ArrayList<>(mShareList.size());
+        refreshRemoteComment();
+        refreshLocalComment();
+    }
 
-                for (Map<String, Object> map : mShareList) {
-                    if (!map.get("type").equals("album")) {
-                        String[] images = map.get("images").toString().split(",");
-                        if (images.length == 1) {
+    public void loadRemoteComment() {
 
-                            ConcurrentMap<String, String> imageMap = LocalCache.MediasMap.get(images[0]);
+        for (MediaShare mediaShare : mediaShareList) {
+            if (!mediaShare.isAlbum()) {
+                List<String> imageDigests = mediaShare.getImageDigests();
+                if (imageDigests.size() == 1) {
 
-                            if (imageMap != null && imageMap.containsKey("uuid")) {
-                                String uuid = imageMap.get("uuid");
-                                if (!imageUUIDList.contains(uuid)) {
-                                    mLoadCommentTotal++;
-                                    loadCommentList(uuid);
+                    Media media = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(0));
 
-                                    Log.i(TAG, "load image comment,image uuid:" + uuid);
-                                    imageUUIDList.add(uuid);
-                                }
+                    if (media != null) {
+                        String uuid = media.getUuid();
+                        if (!mMediaUUIDWhichHaveStartedLoadComment.contains(uuid)) {
+                            mLoadCommentTotal++;
+                            loadCommentList(uuid);
 
-                            }
-
+                            Log.i(TAG, "load image comment,image uuid:" + uuid);
+                            mMediaUUIDWhichHaveStartedLoadComment.add(uuid);
                         }
+
                     }
+
                 }
-
-            } else {
-                loadRemoteCommentList();
             }
-
         }
     }
 
@@ -280,9 +228,9 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                 int currentMediaSharePosition = findShareItemPosition(currentMediaShareTime);
 
-                String currentMediaUUIDs = String.valueOf(mShareList.get(currentMediaSharePosition).get("images"));
+                List<String> currentMediaUUIDs = mediaShareList.get(currentMediaSharePosition).getImageDigests();
 
-                String currentMediaUUID = currentMediaUUIDs.split(",")[currentPhotoPosition];
+                String currentMediaUUID = currentMediaUUIDs.get(currentPhotoPosition);
 
                 View currentSharedElementView = mainListView.findViewWithTag(findMediaTagByMediaUUID(currentMediaUUID));
 
@@ -303,7 +251,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         if (initialPhotoPosition != currentPhotoPosition) {
 
-            ActivityCompat.postponeEnterTransition(containerActivity);
+/*            ActivityCompat.postponeEnterTransition(containerActivity);
             mainListView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
@@ -314,16 +262,17 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                     return true;
                 }
-            });
+            });*/
+            ActivityCompat.startPostponedEnterTransition(containerActivity);
         }
     }
 
     private int findShareItemPosition(String currentMediaShareTime) {
 
         int returnPosition = 0;
-        for (int i = 0; i < mShareList.size(); i++) {
-            Map<String, Object> map = mShareList.get(i);
-            String mediashareTime = String.valueOf(map.get("mtime"));
+        for (int i = 0; i < mediaShareList.size(); i++) {
+            MediaShare mediaShare = mediaShareList.get(i);
+            String mediashareTime = mediaShare.getTime();
             if (currentMediaShareTime.equals(mediashareTime)) {
                 returnPosition = i;
                 break;
@@ -335,19 +284,19 @@ public class MediaShareList implements NavPagerActivity.Page {
 
     private String findMediaTagByMediaUUID(String imageUUID) {
         String currentMediaTag;
-        ConcurrentMap<String, String> currentMedia = LocalCache.MediasMap.get(imageUUID);
+        Media currentMedia = LocalCache.RemoteMediaMapKeyIsUUID.get(imageUUID);
         if (currentMedia == null) {
-            currentMedia = LocalCache.LocalImagesMapKeyIsUUID.get(imageUUID);
-            currentMediaTag = currentMedia.get("thumb");
+            currentMedia = LocalCache.LocalMediaMapKeyIsUUID.get(imageUUID);
+            currentMediaTag = currentMedia.getThumb();
         } else {
 
-            int w,h;
-            w = Integer.parseInt(currentMedia.get("width"));
-            h = Integer.parseInt(currentMedia.get("height"));
+            int w, h;
+            w = Integer.parseInt(currentMedia.getWidth());
+            h = Integer.parseInt(currentMedia.getHeight());
 
             int[] result = Util.formatPhotoWidthHeight(w, h);
 
-            currentMediaTag = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + currentMedia.get("uuid"), result[0], result[1]);
+            currentMediaTag = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + currentMedia.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
 
         }
         return currentMediaTag;
@@ -370,15 +319,15 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         @Override
         public int getCount() {
-            if (container.mShareList == null) return 0;
-            return container.mShareList.size();
+            if (container.mediaShareList == null) return 0;
+            return container.mediaShareList.size();
         }
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             View view;
-            final Map<String, Object> currentItem;
-            ConcurrentMap<String, String> coverImg, itemImg;
+            final MediaShare currentItem;
+            Media coverImg, itemImg;
             TextView lbNick, lbTime, lbAlbumTitle;
             ImageView lbAlbumShare;
             final NetworkImageView ivCover;
@@ -386,7 +335,7 @@ public class MediaShareList implements NavPagerActivity.Page {
             View rlAlbum, llPic1, llPic2, llPic3;
             boolean sLocal;
             int w, h, i;
-            final String images[];
+            final List<String> imageDigests;
 
             RelativeLayout mShareCountLayout;
             RelativeLayout mShareCommentLayout;
@@ -394,6 +343,7 @@ public class MediaShareList implements NavPagerActivity.Page {
             TextView mShareCommentTextView;
             TextView mShareCommentCountTextView;
             TextView mAvator;
+            ImageView commentShare;
 
             String nickName;
 
@@ -401,9 +351,9 @@ public class MediaShareList implements NavPagerActivity.Page {
                 view = LayoutInflater.from(container.containerActivity).inflate(R.layout.share_list_cell, parent, false);
             else view = convertView;
 
-            currentItem = (Map<String, Object>) this.getItem(position);
+            currentItem = (MediaShare) this.getItem(position);
 
-            nickName = currentItem.get("creatorNick").toString();
+            nickName = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreatorUUID()).getUserName();
 
             lbNick = (TextView) view.findViewById(R.id.nick);
             lbTime = (TextView) view.findViewById(R.id.time);
@@ -417,17 +367,20 @@ public class MediaShareList implements NavPagerActivity.Page {
             mShareCommentCountTextView = (TextView) view.findViewById(R.id.share_comment_count_textview);
 
             lbNick.setText(nickName);
-            lbTime.setText(Util.formatTime(containerActivity, Long.parseLong(String.valueOf(currentItem.get("mtime")))));
+            lbTime.setText(Util.formatTime(containerActivity, Long.parseLong(currentItem.getTime())));
 
-            mAvator.setText(String.valueOf(currentItem.get("avatar")));
+            User user = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreatorUUID());
+
+            String avatar;
             int color = 0;
-            if (currentItem.containsKey("avatar_default_color") && currentItem.get("avatar_default_color") != null) {
-                color = Integer.valueOf(String.valueOf(currentItem.get("avatar_default_color")));
-            } else {
-                color = new Random().nextInt(3);
-                currentItem.put("avatar_default_color", color);
+
+            avatar = user.getAvatar();
+            color = Integer.valueOf(user.getDefaultAvatarBgColor());
+            if (avatar.equals("defaultAvatar.jpg")) {
+                avatar = user.getDefaultAvatar();
             }
 
+            mAvator.setText(avatar);
             switch (color) {
                 case 0:
                     mAvator.setBackgroundResource(R.drawable.user_portrait_bg_blue);
@@ -456,7 +409,7 @@ public class MediaShareList implements NavPagerActivity.Page {
             ivItems[7] = (NetworkImageView) view.findViewById(R.id.mainPic7);
             ivItems[8] = (NetworkImageView) view.findViewById(R.id.mainPic8);
 
-            if (currentItem.get("type").equals("album")) {
+            if (currentItem.isAlbum()) {
                 rlAlbum.setVisibility(View.VISIBLE);
                 llPic1.setVisibility(View.GONE);
                 llPic2.setVisibility(View.GONE);
@@ -468,20 +421,20 @@ public class MediaShareList implements NavPagerActivity.Page {
                 lbAlbumShare.setVisibility(View.VISIBLE);
                 lbAlbumTitle.setVisibility(View.VISIBLE);
 
-                Log.i(TAG, currentItem.get("images").toString());
-                lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.share_album_title), currentItem.get("title"), currentItem.get("imageCount")));
 
-                coverImg = LocalCache.MediasMap.get(String.valueOf(currentItem.get("coverImg")));
+                lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.share_album_title), currentItem.getTitle(), String.valueOf(currentItem.getImageDigests().size())));
+
+                coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
                 if (coverImg != null) sLocal = false;
                 else {
-                    coverImg = LocalCache.LocalImagesMapKeyIsUUID.get(String.valueOf(currentItem.get("coverImg")));
+                    coverImg = LocalCache.LocalMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
                     sLocal = true;
                 }
                 if (coverImg != null) {
 
                     if (sLocal) {
 
-                        String url = String.valueOf(coverImg.get("thumb"));
+                        String url = String.valueOf(coverImg.getThumb());
 
                         mImageLoader.setShouldCache(false);
                         ivCover.setTag(url);
@@ -490,7 +443,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                     } else {
 
-                        String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + coverImg.get("uuid"));
+                        String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + coverImg.getUuid());
 
                         mImageLoader.setShouldCache(true);
                         ivCover.setTag(url);
@@ -508,12 +461,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                     public void onClick(View v) {
                         Intent intent = new Intent();
                         intent.setClass(containerActivity, AlbumPicContentActivity.class);
-                        intent.putExtra("images", (String) currentItem.get("images"));
-                        intent.putExtra("uuid", (String) currentItem.get("uuid"));
-                        intent.putExtra("title", (String) currentItem.get("title"));
-                        intent.putExtra("desc", (String) currentItem.get("desc"));
-                        intent.putExtra("maintained", (boolean) currentItem.get("maintained"));
-                        intent.putExtra("private", (String) currentItem.get("private"));
+                        intent.putExtra(Util.KEY_MEDIASHARE, currentItem);
                         intent.putExtra(Util.NEED_SHOW_MENU, false);
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                         containerActivity.startActivity(intent);
@@ -525,38 +473,29 @@ public class MediaShareList implements NavPagerActivity.Page {
                 lbAlbumShare.setVisibility(View.GONE);
                 lbAlbumTitle.setVisibility(View.GONE);
 
-                images = currentItem.get("images").toString().split(",");
+                imageDigests = currentItem.getImageDigests();
 
-                if (images.length == 1) {
+                if (imageDigests.size() == 1) {
                     rlAlbum.setVisibility(View.VISIBLE);
                     llPic1.setVisibility(View.GONE);
                     llPic2.setVisibility(View.GONE);
                     llPic3.setVisibility(View.GONE);
 
                     mShareCommentLayout.setVisibility(View.VISIBLE);
-                    mShareCommentLayout.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(containerActivity, MediaShareCommentActivity.class);
-                            intent.putExtra("imageUUID", images[0]);
-                            containerActivity.startActivity(intent);
-                        }
-                    });
-
                     mShareCountLayout.setVisibility(View.GONE);
 
-                    Log.i(TAG, "images[0]:" + images[0]);
-                    itemImg = LocalCache.MediasMap.get(images[0]);
+                    Log.i(TAG, "images[0]:" + imageDigests.get(0));
+                    itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(0));
                     if (itemImg != null) sLocal = false;
                     else {
-                        itemImg = LocalCache.LocalImagesMapKeyIsUUID.get(images[0]);
+                        itemImg = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigests.get(0));
                         sLocal = true;
                     }
 
                     if (itemImg != null) {
                         if (sLocal) {
 
-                            String url = String.valueOf(itemImg.get("thumb"));
+                            String url = itemImg.getThumb();
 
                             mImageLoader.setShouldCache(false);
                             ivCover.setTag(url);
@@ -566,7 +505,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                         } else {
 
-                            String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + itemImg.get("uuid"));
+                            String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + itemImg.getUuid());
 
                             mImageLoader.setShouldCache(true);
                             ivCover.setTag(url);
@@ -576,8 +515,9 @@ public class MediaShareList implements NavPagerActivity.Page {
                         }
 
                         mShareCommentTextView = (TextView) view.findViewById(R.id.share_comment_textview);
+                        commentShare = (ImageView) view.findViewById(R.id.comment_share);
 
-                        String uuid = itemImg.get("uuid");
+                        String uuid = itemImg.getUuid();
                         if (commentMap.containsKey(uuid)) {
                             List<Comment> commentList = commentMap.get(uuid);
                             if (commentList.size() != 0) {
@@ -591,6 +531,45 @@ public class MediaShareList implements NavPagerActivity.Page {
                             mShareCommentTextView.setText("");
                             mShareCommentCountTextView.setText("0");
                         }
+
+                        if (!mShareCommentTextView.getText().equals("")) {
+                            mShareCommentTextView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(containerActivity, MediaShareCommentActivity.class);
+                                    intent.putExtra(Util.IMAGE_UUID, imageDigests.get(0));
+                                    intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
+                                    intent.putExtra(Util.KEY_SHOW_SOFT_INPUT_WHEN_ENTER, false);
+
+                                    String transitionName = String.valueOf(imageDigests.get(0));
+
+                                    ViewCompat.setTransitionName(ivCover, transitionName);
+
+                                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
+
+                                    containerActivity.startActivity(intent, options.toBundle());
+                                }
+                            });
+                        }
+
+                        commentShare.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(containerActivity, MediaShareCommentActivity.class);
+                                intent.putExtra(Util.IMAGE_UUID, imageDigests.get(0));
+                                intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
+                                intent.putExtra(Util.KEY_SHOW_SOFT_INPUT_WHEN_ENTER, true);
+
+                                String transitionName = String.valueOf(imageDigests.get(0));
+
+                                ViewCompat.setTransitionName(ivCover, transitionName);
+
+                                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
+
+                                containerActivity.startActivity(intent, options.toBundle());
+                            }
+                        });
+
                     } else {
                         ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
                         ivCover.setImageUrl(null, mImageLoader);
@@ -599,17 +578,18 @@ public class MediaShareList implements NavPagerActivity.Page {
                     ivCover.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            List<Map<String, Object>> imageList = getImgList(String.valueOf(currentItem.get("images")));
-
-                            LocalCache.TransActivityContainer.put("imgSliderList", imageList);
+                            ArrayList<Media> imageList = (ArrayList<Media>) getImgList(currentItem.getImageDigests());
 
                             Intent intent = new Intent();
                             intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
                             intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
-                            intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, String.valueOf(currentItem.get("mtime")));
+                            intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
+                            intent.putExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, false);
+
+                            intent.putParcelableArrayListExtra(Util.KEY_MEDIA_LIST, imageList);
                             intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                            String transitionName = String.valueOf(imageList.get(0).get("uuid"));
+                            String transitionName = String.valueOf(imageList.get(0).getUuid());
 
                             ViewCompat.setTransitionName(ivCover, transitionName);
 
@@ -621,14 +601,15 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                 } else {
 
-                    if (images.length <= 3) {
+                    if (imageDigests.size() <= 3) {
 
                         rlAlbum.setVisibility(View.GONE);
                         llPic1.setVisibility(View.VISIBLE);
                         llPic2.setVisibility(View.GONE);
                         llPic3.setVisibility(View.GONE);
 
-                    } else if (images.length <= 6) {
+                    } else if (imageDigests.size() <= 6) {
+
                         rlAlbum.setVisibility(View.GONE);
                         llPic1.setVisibility(View.VISIBLE);
                         llPic2.setVisibility(View.VISIBLE);
@@ -641,7 +622,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                         llPic3.setVisibility(View.VISIBLE);
 
                         TextView mCheckMorePhoto = (TextView) view.findViewById(R.id.check_more_photos);
-                        if (images.length > 9) {
+                        if (imageDigests.size() > 9) {
                             mCheckMorePhoto.setVisibility(View.VISIBLE);
                             mCheckMorePhoto.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
                             mCheckMorePhoto.getPaint().setAntiAlias(true);
@@ -650,7 +631,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                                 @Override
                                 public void onClick(View v) {
                                     Intent intent = new Intent(containerActivity, MoreMediaActivity.class);
-                                    intent.putExtra("images", currentItem.get("images").toString());
+                                    intent.putExtra(Util.KEY_MEDIASHARE, currentItem);
                                     containerActivity.startActivity(intent);
                                 }
                             });
@@ -665,9 +646,9 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                     mShareCountTextView = (TextView) view.findViewById(R.id.share_count_textview);
 
-                    String shareCountText = String.format(containerActivity.getString(R.string.share_comment_count), images.length);
-                    int start = shareCountText.indexOf(String.valueOf(images.length));
-                    int end = start + String.valueOf(images.length).length();
+                    String shareCountText = String.format(containerActivity.getString(R.string.share_comment_count), String.valueOf(imageDigests.size()));
+                    int start = shareCountText.indexOf(String.valueOf(imageDigests.size()));
+                    int end = start + String.valueOf(imageDigests.size()).length();
                     SpannableStringBuilder builder = new SpannableStringBuilder(shareCountText);
                     ForegroundColorSpan span = new ForegroundColorSpan(containerActivity.getResources().getColor(R.color.light_black));
                     ForegroundColorSpan beforeSpan = new ForegroundColorSpan(containerActivity.getResources().getColor(R.color.light_gray));
@@ -678,22 +659,22 @@ public class MediaShareList implements NavPagerActivity.Page {
                     mShareCountTextView.setText(builder);
 
                     for (i = 0; i < 9; i++) {
-                        if (i >= images.length) {
+                        if (i >= imageDigests.size()) {
                             ivItems[i].setVisibility(View.INVISIBLE);
                             continue;
                         }
                         ivItems[i].setVisibility(View.VISIBLE);
-                        itemImg = LocalCache.MediasMap.get(images[i]);
+                        itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(i));
                         if (itemImg != null) sLocal = false;
                         else {
-                            itemImg = LocalCache.LocalImagesMapKeyIsUUID.get(images[i]);
+                            itemImg = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigests.get(i));
                             sLocal = true;
                         }
 
                         if (itemImg != null) {
                             if (sLocal) {
 
-                                String url = itemImg.get("thumb");
+                                String url = itemImg.getThumb();
 
                                 mImageLoader.setShouldCache(false);
                                 ivItems[i].setTag(url);
@@ -702,12 +683,12 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                             } else {
 
-                                w = Integer.parseInt(itemImg.get("width"));
-                                h = Integer.parseInt(itemImg.get("height"));
+                                w = Integer.parseInt(itemImg.getWidth());
+                                h = Integer.parseInt(itemImg.getHeight());
 
                                 int[] result = Util.formatPhotoWidthHeight(w, h);
 
-                                String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + itemImg.get("uuid"), result[0], result[1]);
+                                String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + itemImg.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
 
                                 mImageLoader.setShouldCache(true);
                                 ivItems[i].setTag(url);
@@ -726,17 +707,17 @@ public class MediaShareList implements NavPagerActivity.Page {
                             public void onClick(View v) {
                                 Log.d("winsun", currentItem + "");
 
-                                List<Map<String, Object>> imageList = getImgList(String.valueOf(currentItem.get("images")));
+                                List<Media> imageList = getImgList(currentItem.getImageDigests());
 
                                 LocalCache.TransActivityContainer.put("imgSliderList", imageList);
 
                                 Intent intent = new Intent();
                                 intent.putExtra(Util.INITIAL_PHOTO_POSITION, mItemPosition);
                                 intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
-                                intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, String.valueOf(currentItem.get("mtime")));
+                                intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
                                 intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                                String transitionName = String.valueOf(imageList.get(mItemPosition).get("uuid"));
+                                String transitionName = String.valueOf(imageList.get(mItemPosition).getUuid());
                                 View transitionView = ivItems[mItemPosition];
 
                                 ViewCompat.setTransitionName(ivItems[mItemPosition], transitionName);
@@ -763,176 +744,92 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         @Override
         public Object getItem(int position) {
-            return container.mShareList.get(position);
+            return container.mediaShareList.get(position);
         }
 
-        public List<Map<String, Object>> getImgList(String imagesStr) {
-            List<Map<String, Object>> picList;
-            Map<String, Object> picItem;
-            ConcurrentMap<String, String> picItemRaw;
-            String[] stArr;
+        public List<Media> getImgList(List<String> imageDigests) {
+            List<Media> picList;
+            Media picItem;
+            Media picItemRaw;
 
-            picList = new ArrayList<Map<String, Object>>();
-            if (!imagesStr.equals("")) {
-                stArr = imagesStr.split(",");
-                Log.i(TAG, "stArr[0]" + stArr[0]);
-                for (String aStArr : stArr) {
-                    picItem = new HashMap<String, Object>();
-                    picItemRaw = LocalCache.MediasMap.get(aStArr);
-                    if (picItemRaw != null) {
-                        picItem.put("cacheType", "nas");
-                        picItem.put("resID", "" + R.drawable.default_img);
-                        picItem.put("resHash", picItemRaw.get("uuid"));
-                        picItem.put("width", picItemRaw.get("width"));
-                        picItem.put("height", picItemRaw.get("height"));
-                        picItem.put("uuid", picItemRaw.get("uuid"));
-                        picItem.put("mtime", picItemRaw.get("mtime"));
-                        picItem.put("selected", "0");
-                        picItem.put("locked", "1");
-                        picList.add(picItem);
-                    } else {
-                        picItemRaw = LocalCache.LocalImagesMapKeyIsUUID.get(aStArr);
-                        if (picItemRaw != null) {
-                            picItem.put("cacheType", "local");
-                            picItem.put("resID", "" + R.drawable.default_img);
-                            picItem.put("thumb", picItemRaw.get("thumb"));
-                            picItem.put("width", picItemRaw.get("width"));
-                            picItem.put("height", picItemRaw.get("height"));
-                            picItem.put("uuid", picItemRaw.get("uuid"));
-                            picItem.put("mtime", picItemRaw.get("mtime"));
-                            picItem.put("selected", "0");
-                            picItem.put("locked", "1");
-                            picList.add(picItem);
-                        }
-                    }
+            picList = new ArrayList<>();
+
+            for (String aStArr : imageDigests) {
+                picItem = new Media();
+                picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
+                if (picItemRaw != null) {
+                    picItem.setLocal(false);
+                } else {
+                    picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
+                    picItem.setLocal(true);
+                    picItem.setThumb(picItemRaw.getThumb());
                 }
+
+                picItem.setUuid(picItemRaw.getUuid());
+                picItem.setWidth(picItemRaw.getWidth());
+                picItem.setHeight(picItemRaw.getHeight());
+                picItem.setTime(picItemRaw.getTime());
+                picItem.setSelected(false);
+
+                picList.add(picItem);
             }
+
 
             return picList;
         }
     }
 
-    private void loadLocalCommentList() {
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                dbUtils = DBUtils.SINGLE_INSTANCE;
-
-
-                Map<String, List<Comment>> localMap = dbUtils.getAllLocalImageComment();
-                mMapKeyIsImageUUIDValueIsComments.putAll(localMap);
-
-                return true;
-            }
-
-            @Override
-            protected void onPostExecute(Boolean aBoolean) {
-
-                mAdapter.commentMap.clear();
-                mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);
-                mAdapter.notifyDataSetChanged();
-            }
-        }.execute();
-    }
-
-    private void loadRemoteCommentList() {
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                dbUtils = DBUtils.SINGLE_INSTANCE;
-
-
-                Map<String, List<Comment>> remoteMap = dbUtils.getAllRemoteImageComment();
-
-                for (Map.Entry<String, List<Comment>> entry : remoteMap.entrySet()) {
-
-                    String imageUUid = entry.getKey();
-                    if (mMapKeyIsImageUUIDValueIsComments.containsKey(imageUUid)) {
-                        List<Comment> list = mMapKeyIsImageUUIDValueIsComments.get(imageUUid);
-
-                        list.addAll(entry.getValue());
-
-                    } else {
-
-                        mMapKeyIsImageUUIDValueIsComments.put(imageUUid, entry.getValue());
-
-                    }
-
-                }
-
-                return true;
-            }
-
-            @Override
-            protected void onPostExecute(Boolean aBoolean) {
-
-                mAdapter.commentMap.clear();
-                mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);
-                mAdapter.notifyDataSetChanged();
-            }
-        }.execute();
-    }
-
 
     private void loadCommentList(String imageUuid) {
 
-        new AsyncTask<String, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(String... params) {
+        containerActivity.retrieveRemoteMediaComment(imageUuid);
 
-                String str;
-                JSONArray json;
-                List<Comment> commentList;
+    }
 
-                try {
+    public void refreshRemoteComment() {
+        mLoadCommentCount++;
+        if (mLoadCommentCount == mLoadCommentTotal) {
 
-                    commentList = mMapKeyIsImageUUIDValueIsComments.get(params[0]);
-                    if (commentList == null) {
-                        commentList = new ArrayList<>();
-                        mMapKeyIsImageUUIDValueIsComments.put(params[0], commentList);
-                    } else {
-                        return true;
-                    }
+            Log.i(TAG, "load remote comment finish");
 
-                    str = FNAS.RemoteCall(String.format(containerActivity.getString(R.string.photo_comment_url), Util.MEDIA_PARAMETER + "/" + params[0]));
-                    json = new JSONArray(str);
+            for (Map.Entry<String, Comment> entry : LocalCache.RemoteMediaCommentMapKeyIsImageUUID.entrySet()) {
+                List<Comment> comments;
 
-                    dbUtils = DBUtils.SINGLE_INSTANCE;
+                String imageUUID = entry.getKey();
 
-                    for (int i = 0; i < json.length(); i++) {
-                        Comment comment = new Comment();
-                        comment.setCreator(json.getJSONObject(i).getString("creator"));
-                        comment.setTime(json.getJSONObject(i).getString("datatime"));
-                        comment.setFormatTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(Long.parseLong(json.getJSONObject(i).getString("datatime")))));
-                        comment.setShareId(json.getJSONObject(i).getString("shareid"));
-                        comment.setText(json.getJSONObject(i).getString("text"));
-                        commentList.add(comment);
-
-                        dbUtils.insertRemoteComment(comment, params[0]);
-                    }
-
-                    Log.d(TAG, "mMapKeyIsImageUUIDValueIsComments:" + mMapKeyIsImageUUIDValueIsComments);
-                    return true;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
+                if (!mMapKeyIsImageUUIDValueIsComments.containsKey(imageUUID)) {
+                    comments = new ArrayList<>();
+                    mMapKeyIsImageUUIDValueIsComments.put(imageUUID, comments);
+                } else {
+                    comments = mMapKeyIsImageUUIDValueIsComments.get(imageUUID);
                 }
 
+                comments.add(entry.getValue());
             }
 
-            @Override
-            protected void onPostExecute(Boolean aBoolean) {
+            mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);
+            mAdapter.notifyDataSetChanged();
+        }
+    }
 
-                mLoadCommentCount++;
-                if (mLoadCommentCount == mLoadCommentTotal) {
-                    mAdapter.commentMap.clear();
-                    mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);
-                    mAdapter.notifyDataSetChanged();
-                }
+    public void refreshLocalComment() {
+        for (Map.Entry<String, Comment> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
+            List<Comment> comments;
 
+            String imageUUID = entry.getKey();
+
+            if (!mMapKeyIsImageUUIDValueIsComments.containsKey(imageUUID)) {
+                comments = new ArrayList<>();
+                mMapKeyIsImageUUIDValueIsComments.put(imageUUID, comments);
+            } else {
+                comments = mMapKeyIsImageUUIDValueIsComments.get(imageUUID);
             }
-        }.execute(imageUuid);
 
+            comments.add(entry.getValue());
+        }
+
+        mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);
+        mAdapter.notifyDataSetChanged();
     }
 }
 

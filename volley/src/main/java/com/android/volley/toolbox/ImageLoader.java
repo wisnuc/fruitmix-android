@@ -290,17 +290,12 @@ public class ImageLoader {
             @Override
             public void onResponse(Bitmap response) {
                 onGetImageSuccess(cacheKey, response);
-
-
-                Log.i(TAG,"onGetImageSuccess requestUrl:" + requestUrl);
             }
 
         }, maxWidth, maxHeight, scaleType, Config.RGB_565, new ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 onGetImageError(cacheKey, error);
-
-                Log.i(TAG,"onGetImageSuccess requestUrl:" + requestUrl);
             }
         }) {
             @Override

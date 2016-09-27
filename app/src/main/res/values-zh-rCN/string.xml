@@ -75,7 +75,7 @@
     <string name="select_nothing">未选择内容，请进行选择</string>
     <string name="no_comment_content">请填写内容</string>
     <string name="check_more_photos">查看更多照片</string>
-
+    <string name="load_finish">加载完成</string>
 
     <!-- album menu-->
     <string name="setting_album">设置相册</string>

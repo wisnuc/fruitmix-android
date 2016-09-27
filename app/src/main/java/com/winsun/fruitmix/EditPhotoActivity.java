@@ -2,9 +2,10 @@ package com.winsun.fruitmix;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
@@ -23,18 +24,20 @@ import android.widget.Toast;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
-import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationTargetType;
+import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -58,16 +61,17 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     private Context mContext;
     private EditPhotoAdapter mAdapter;
 
-    private String mImages;
-    private List<Map<String, Object>> mPhotoList;
-
-    private List<String> mPhotoUuidListOriginal;
-
-    private String mMediaShareUUid;
+    private MediaShare mediaShare;
+    private MediaShare modifiedMediaShare;
+    private List<Media> mPhotoList;
 
     private ImageLoader mImageLoader;
 
     private ProgressDialog mDialog;
+
+    private LocalBroadcastManager localBroadcastManager;
+    private CustomReceiver customReceiver;
+    private IntentFilter filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,8 +92,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         mContext = this;
 
-        mImages = getIntent().getStringExtra("images");
-        mMediaShareUUid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
+        mediaShare = getIntent().getParcelableExtra(Util.KEY_MEDIASHARE);
 
         mManager = new GridLayoutManager(mContext, mSpanCount);
         mEditPhotoRecyclerView.setLayoutManager(mManager);
@@ -99,13 +102,28 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         mEditPhotoRecyclerView.setAdapter(mAdapter);
 
         mPhotoList = new ArrayList<>();
-        fillPhotoList(mImages);
+        fillPhotoList(mediaShare.getImageDigests().toArray(new String[mPhotoList.size()]));
         mAdapter.notifyDataSetChanged();
 
-        mPhotoUuidListOriginal = new ArrayList<>(mPhotoList.size());
-        for (Map<String, Object> map : mPhotoList) {
-            mPhotoUuidListOriginal.add((String) map.get("uuid"));
-        }
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        customReceiver = new CustomReceiver();
+        filter = new IntentFilter(Util.LOCAL_SHARE_MODIFIED);
+        filter.addAction(Util.PHOTO_IN_MEDIASHARE_MODIFIED);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        localBroadcastManager.registerReceiver(customReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        localBroadcastManager.unregisterReceiver(customReceiver);
     }
 
     @Override
@@ -113,43 +131,30 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
-    private void fillPhotoList(String selectedImageUUIDStr) {
+    private void fillPhotoList(String[] selectedImageUUIDs) {
 
-        if (!selectedImageUUIDStr.equals("")) {
-            String[] stArr = selectedImageUUIDStr.split(",");
-            Map<String, Object> picItem;
-            ConcurrentMap<String, String> picItemRaw;
-            for (String aStArr : stArr) {
-                picItem = new HashMap<>();
-                picItemRaw = LocalCache.MediasMap.get(aStArr);
-                if (picItemRaw != null) {
-                    picItem.put("cacheType", "nas");
-                    picItem.put("resID", "" + R.drawable.default_img);
-                    picItem.put("resHash", picItemRaw.get("uuid"));
-                    picItem.put("width", picItemRaw.get("width"));
-                    picItem.put("height", picItemRaw.get("height"));
-                    picItem.put("uuid", picItemRaw.get("uuid"));
-                    picItem.put("mtime", picItemRaw.get("lastModified"));
-                    picItem.put("selected", "0");
-                    picItem.put("locked", "1");
-                    mPhotoList.add(picItem);
-                } else {
-                    picItemRaw = LocalCache.LocalImagesMapKeyIsUUID.get(aStArr);
-                    if (picItemRaw != null) {
-                        picItem.put("cacheType", "local");
-                        picItem.put("resID", "" + R.drawable.default_img);
-                        picItem.put("thumb", picItemRaw.get("thumb"));
-                        picItem.put("width", picItemRaw.get("width"));
-                        picItem.put("height", picItemRaw.get("height"));
-                        picItem.put("uuid", picItemRaw.get("uuid"));
-                        picItem.put("mtime", picItemRaw.get("lastModified"));
-                        picItem.put("selected", "0");
-                        picItem.put("locked", "1");
-                        mPhotoList.add(picItem);
-                    }
-                }
+        Media picItem;
+        Media picItemRaw;
+        for (String aStArr : selectedImageUUIDs) {
+            picItem = new Media();
+            picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
+            if (picItemRaw != null) {
+                picItem.setLocal(false);
+            } else {
+                picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
+                picItem.setLocal(true);
+                picItem.setThumb(picItemRaw.getThumb());
             }
+
+            picItem.setUuid(picItemRaw.getUuid());
+            picItem.setWidth(picItemRaw.getWidth());
+            picItem.setHeight(picItemRaw.getHeight());
+            picItem.setTime(picItemRaw.getTime());
+            picItem.setSelected(false);
+
+            mPhotoList.add(picItem);
         }
+
     }
 
     @Override
@@ -165,148 +170,38 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 break;
             case R.id.finish:
 
-                final StringBuilder stringBuilder = new StringBuilder("{\"commands\": \"[");
+                mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
-                final List<String> photoUuidList = new ArrayList<>(mPhotoList.size());
-                for (Map<String, Object> map : mPhotoList) {
-                    photoUuidList.add((String) map.get("uuid"));
+                Intent operationIntent = new Intent(Util.OPERATION);
+
+                modifiedMediaShare = mediaShare.cloneFromParameter(mediaShare);
+
+                List<String> imageDigests = new ArrayList<>(mPhotoList.size());
+                for (Media media : mPhotoList)
+                    imageDigests.add(media.getUuid());
+
+                modifiedMediaShare.setImageDigests(imageDigests);
+                if (!imageDigests.isEmpty()) {
+                    modifiedMediaShare.setCoverImageDigest(imageDigests.get(0));
+                } else {
+                    modifiedMediaShare.setCoverImageDigest("");
                 }
 
-                for (String string : mPhotoUuidListOriginal) {
-                    if (!photoUuidList.contains(string)) {
-                        stringBuilder.append("{\\\"op\\\":\\\"remove\\\",\\\"path\\\":\\\"").append(mMediaShareUUid).append("\\\",\\\"value\\\":{\\\"digest\\\":\\\"").append(string).append("\\\"}},");
-                    }
+                if (Util.getNetworkState(mContext)) {
+
+                    operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.EDIT_PHOTO_IN_MEDIASHARE.name());
+                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+                    operationIntent.putExtra(Util.OPERATION_ORIGINAL_MEDIASHARE_WHEN_EDIT_PHOTO, mediaShare);
+                    operationIntent.putExtra(Util.OPERATION_MODIFIED_MEDIASHARE_WHEN_EDIT_PHOTO, modifiedMediaShare);
+                    localBroadcastManager.sendBroadcast(operationIntent);
+
+                } else {
+
+                    operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.MODIFY.name());
+                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+                    operationIntent.putExtra(Util.OPERATION_MEDIASHARE, modifiedMediaShare);
+                    localBroadcastManager.sendBroadcast(operationIntent);
                 }
-
-                for (String string : photoUuidList) {
-                    if (!mPhotoUuidListOriginal.contains(string)) {
-                        stringBuilder.append("{\\\"op\\\":\\\"add\\\",\\\"path\\\":\\\"").append(mMediaShareUUid).append("\\\",\\\"value\\\":{\\\"type\\\":\\\"media\\\",\\\"digest\\\":\\\"").append(string).append("\\\"}},");
-                    }
-                }
-
-                if (stringBuilder.lastIndexOf(",") != -1) {
-                    stringBuilder.replace(stringBuilder.lastIndexOf(","), stringBuilder.length(), "]\"}");
-
-
-                    new AsyncTask<Object, Object, Boolean>() {
-
-                        @Override
-                        protected void onPreExecute() {
-                            super.onPreExecute();
-
-//                            Snackbar.make(mAddPhoto, getString(R.string.patch_now), Snackbar.LENGTH_LONG).show();
-//                            Toast.makeText(mContext, getString(R.string.patch_now), Toast.LENGTH_SHORT).show();
-
-                            mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
-                        }
-
-                        @Override
-                        protected Boolean doInBackground(Object... params) {
-
-                            if (Util.getNetworkState(mContext)) {
-                                try {
-
-                                    boolean uploadFileResult = true;
-                                    int uploadSucceedCount = 0;
-
-                                    for (String string : photoUuidList) {
-                                        if (!mPhotoUuidListOriginal.contains(string)) {
-                                            if (!FNAS.isPhotoInMediaMap(string)) {
-
-                                                if (LocalCache.LocalImagesMapKeyIsUUID.containsKey(string)) {
-                                                    String thumb = LocalCache.LocalImagesMapKeyIsUUID.get(string).get("thumb");
-
-                                                    ConcurrentMap<String, String> map = LocalCache.LocalImagesMapKeyIsThumb.get(thumb);
-
-                                                    Log.i(TAG, "thumb:" + thumb + "hash:" + string);
-                                                    if (!map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) || map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("false")) {
-                                                        uploadFileResult = FNAS.UploadFile(map.get("thumb"));
-                                                        Log.i(TAG, "digest:" + string + "uploadFileResult:" + uploadFileResult);
-                                                        if (!uploadFileResult){
-                                                            break;
-                                                        }else {
-                                                            uploadSucceedCount++;
-                                                        }
-
-                                                    }
-                                                }
-
-                                            }
-                                        }
-                                    }
-
-                                    if (uploadSucceedCount > 0) {
-                                        LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMapKeyIsThumb);
-                                        Intent intent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
-                                        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(mContext);
-                                        broadcastManager.sendBroadcast(intent);
-                                    }
-
-                                    if (!uploadFileResult)
-                                        return false;
-
-                                    FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, stringBuilder.toString());
-                                    FNAS.retrieveShareMap();
-                                    return true;
-                                } catch (Exception e) {
-                                    return false;
-                                }
-                            } else {
-
-                                DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-
-                                MediaShare mediaShare = dbUtils.getLocalShareByUuid(mMediaShareUUid);
-
-                                mediaShare.setImageDigests(photoUuidList);
-                                dbUtils.updateLocalShare(mediaShare, mMediaShareUUid);
-                                FNAS.loadLocalShare();
-                                return true;
-                            }
-
-                        }
-
-                        @Override
-                        protected void onPostExecute(Boolean sSuccess) {
-
-                            mDialog.dismiss();
-
-                            if (sSuccess) {
-//                                Snackbar.make(mAddPhoto, "Patch Success", Snackbar.LENGTH_LONG).show();
-                                Toast.makeText(mContext, getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
-
-                                if(!Util.getNetworkState(mContext)){
-                                    LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(mContext);
-                                    broadcastManager.sendBroadcast(new Intent(Util.LOCAL_SHARE_CHANGED));
-                                }
-
-                                stringBuilder.setLength(0);
-                                for (Map<String, Object> map : mPhotoList) {
-                                    stringBuilder.append(map.get("uuid"));
-                                    stringBuilder.append(",");
-                                }
-
-                                int position = stringBuilder.lastIndexOf(",");
-                                if (position != -1) {
-                                    stringBuilder.replace(position, position + 1, "");
-                                }
-                                getIntent().putExtra(Util.NEW_ALBUM_CONTENT, stringBuilder.toString());
-                                setResult(RESULT_OK, getIntent());
-                                finish();
-
-                            } else {
-//                                Snackbar.make(mAddPhoto, "Patch Fail", Snackbar.LENGTH_LONG).show();
-                                Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
-
-                                setResult(RESULT_CANCELED, getIntent());
-                                finish();
-                            }
-
-                        }
-
-                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-                }
-
 
                 break;
             default:
@@ -319,7 +214,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         if (requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            String selectedImageUUIDStr = data.getStringExtra("mSelectedImageUUIDStr");
+            String[] selectedImageUUIDStr = data.getStringArrayExtra(Util.KEY_SELECTED_IMAGE_UUID_ARRAY);
             fillPhotoList(selectedImageUUIDStr);
             mAdapter.notifyDataSetChanged();
         }
@@ -333,7 +228,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         @BindView(R.id.del_photo_layout)
         FrameLayout mDelPhotoLayout;
 
-        private Map<String, Object> mMap;
+        private Media mMap;
         private int width, height;
 
         public EditPhotoViewHolder(View view) {
@@ -345,23 +240,23 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         public void refreshView(final int position) {
             mMap = mPhotoList.get(position);
 
-            if (mMap.get("cacheType").equals("local")) {
+            if (mMap.isLocal()) {
 
-                String url = String.valueOf(mMap.get("thumb"));
+                String url = mMap.getThumb();
 
                 mImageLoader.setShouldCache(false);
                 mPhotoItem.setTag(url);
                 mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoItem.setImageUrl(url, mImageLoader);
 
-            } else if (mMap.get("cacheType").equals("nas")) {
+            } else {
 
-                width = Integer.parseInt((String) mMap.get("width"));
-                height = Integer.parseInt((String) mMap.get("height"));
+                width = Integer.parseInt(mMap.getWidth());
+                height = Integer.parseInt(mMap.getHeight());
 
                 int[] result = Util.formatPhotoWidthHeight(width, height);
 
-                String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + mMap.get("resHash"), result[0], result[1]);
+                String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + mMap.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
 
                 mImageLoader.setShouldCache(true);
                 mPhotoItem.setTag(url);
@@ -401,5 +296,33 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             holder.refreshView(position);
         }
 
+    }
+
+    private class CustomReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (mDialog != null && mDialog.isShowing())
+                mDialog.dismiss();
+
+            String result = intent.getStringExtra(Util.OPERATION_RESULT);
+
+            OperationResult operationResult = OperationResult.valueOf(result);
+
+            switch (operationResult) {
+                case SUCCEED:
+                    Toast.makeText(mContext, getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
+                    getIntent().putExtra(Util.KEY_MEDIASHARE, modifiedMediaShare);
+                    EditPhotoActivity.this.setResult(RESULT_OK, getIntent());
+                    finish();
+                    break;
+                case FAIL:
+                    Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+                    EditPhotoActivity.this.setResult(RESULT_CANCELED, getIntent());
+                    finish();
+                    break;
+            }
+
+        }
     }
 }

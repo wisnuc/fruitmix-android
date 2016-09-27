@@ -3,14 +3,27 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.Util;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  */
 public class DeleteRemoteMediaShareService extends IntentService {
+
+    private static final String TAG = DeleteRemoteMediaShareService.class.getSimpleName();
+
     private static final String ACTION_DELETE_REMOTE_SHARE = "com.winsun.fruitmix.services.action.delete.remote.share";
 
     // TODO: Rename parameters
@@ -49,7 +62,46 @@ public class DeleteRemoteMediaShareService extends IntentService {
      * parameters.
      */
     private void handleActionDeleteRemoteShare(MediaShare mediaShare) {
+        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
 
+        Intent intent = new Intent(Util.REMOTE_SHARE_DELETED);
+
+        String data;
+
+        if (mediaShare.isLocked()) {
+
+            intent.putExtra(Util.OPERATION_RESULT, OperationResult.LOCAL_MEDIASHARE_UPLOADING.name());
+        } else {
+
+            data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mediaShare.getUuid() + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"true\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mediaShare.getTitle() + "\\\", \\\"desc\\\":\\\"" + mediaShare.getDesc() + "\\\"}], \\\"viewers\\\":[]}}]\"}";
+            try {
+                String result = FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
+
+                if (result.length() > 0) {
+                    intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+
+                    Log.i(TAG, "delete remote mediashare which source is network succeed");
+
+                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+                    long dbResult = dbUtils.deleteRemoteShareByUUid(mediaShare.getUuid());
+
+                    Log.i(TAG, "delete remote mediashare which source is db result:" + dbResult);
+
+                    MediaShare mapResult = LocalCache.RemoteMediaShareMapKeyIsUUID.remove(mediaShare.getUuid());
+
+                    Log.i(TAG, "delete remote mediashare in map result:" + (mapResult != null ? "true" : "false"));
+                }
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+                intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+
+                Log.i(TAG, "delete remote mediashare fail");
+            }
+        }
+
+        broadcastManager.sendBroadcast(intent);
     }
-
 }

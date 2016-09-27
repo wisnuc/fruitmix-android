@@ -1,16 +1,19 @@
 package com.winsun.fruitmix.util;
 
+import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Base64;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.model.Comment;
+import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
-import com.winsun.fruitmix.services.CreateRemoteCommentService;
-import com.winsun.fruitmix.services.CreateRemoteMediaService;
-import com.winsun.fruitmix.services.CreateRemoteMediaShareService;
+import com.winsun.fruitmix.model.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,11 +31,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by Administrator on 2016/4/22.
@@ -92,43 +95,45 @@ public class FNAS {
         String uuid;
         JSONArray json;
         JSONObject itemRaw;
-        ConcurrentMap<String, String> item;
+        User item;
 
         json = new JSONArray(str);
         for (int i = 0; i < json.length(); i++) {
             itemRaw = json.getJSONObject(i);
             uuid = itemRaw.getString("uuid");
-            if (LocalCache.UsersMap.containsKey(uuid)) {
-                item = LocalCache.UsersMap.get(uuid);
+            if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(uuid)) {
+                item = LocalCache.RemoteUserMapKeyIsUUID.get(uuid);
             } else {
-                item = new ConcurrentHashMap<>();
+                item = new User();
             }
 
-            item.put("name", itemRaw.getString("username"));
-            item.put("uuid", itemRaw.getString("uuid"));
-            item.put("avatar", itemRaw.getString("avatar"));
+            item.setUserName(itemRaw.getString("username"));
+            item.setUuid(itemRaw.getString("uuid"));
+            item.setAvatar(itemRaw.getString("avatar"));
             if (itemRaw.has("email")) {
-                item.put("email", itemRaw.getString("email"));
+                item.setEmail(itemRaw.getString("email"));
             }
 
             StringBuilder stringBuilder = new StringBuilder();
-            String[] splitStrings = item.get("name").split(" ");
+            String[] splitStrings = item.getUserName().split(" ");
             for (String splitString : splitStrings) {
                 stringBuilder.append(splitString.substring(0, 1).toUpperCase());
             }
-            if (!item.containsKey("avatar_default")) {
-                item.put("avatar_default", stringBuilder.toString());
+            if (item.getDefaultAvatar() == null || item.getDefaultAvatar().equals("")) {
+                item.setDefaultAvatar(stringBuilder.toString());
             }
-            if (!item.containsKey("avatar_default_color")) {
-                item.put("avatar_default_color", String.valueOf(new Random().nextInt(3)));
+            if (item.getDefaultAvatarBgColor() == null || item.getDefaultAvatarBgColor().equals("")) {
+                item.setDefaultAvatarBgColor(String.valueOf(new Random().nextInt(3)));
             }
 
-            LocalCache.UsersMap.put(item.get("uuid"), item); // save all user info
+            LocalCache.RemoteUserMapKeyIsUUID.put(item.getUuid(), item); // save all user info
 
         }
 
-        LocalCache.SetGlobalHashMap(Util.USER_MAP_NAME, LocalCache.UsersMap);
-        Log.d("winsun", "UsersMap " + LocalCache.UsersMap);
+        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        dbUtils.insertRemoteUsers(LocalCache.RemoteUserMapKeyIsUUID);
+
+        Log.d("winsun", "RemoteUserMapKeyIsUUID " + LocalCache.RemoteUserMapKeyIsUUID);
     }
 
     public static String loadMedia() throws Exception {
@@ -142,43 +147,45 @@ public class FNAS {
         String mtime;
         JSONArray json;
         JSONObject itemRaw;
-        ConcurrentMap<String, String> item;
+        Media item;
 
         json = new JSONArray(str);
 
         if (json.length() != 0) {
-            LocalCache.MediasMap.clear();
+            LocalCache.RemoteMediaMapKeyIsUUID.clear();
         }
 
         for (int i = 0; i < json.length(); i++) {
             itemRaw = json.getJSONObject(i);
             if (itemRaw.getString("kind").equals("image")) {
-                item = new ConcurrentHashMap<>();
-                item.put("uuid", "" + itemRaw.getString("hash"));
-                item.put("mtime", "1916-01-01 00:00:00");
+                item = new Media();
+                item.setUuid(itemRaw.getString("hash"));
+                item.setTime("1916-01-01 00:00:00");
                 if (itemRaw.has("width")) {
 
-                    item.put("width", itemRaw.getString("width"));
-                    item.put("height", itemRaw.getString("height"));
+                    item.setWidth(itemRaw.getString("width"));
+                    item.setHeight(itemRaw.getString("height"));
 
                 } else if (itemRaw.getJSONObject("detail").has("width")) {
-                    item.put("width", itemRaw.getJSONObject("detail").getString("width"));
-                    item.put("height", itemRaw.getJSONObject("detail").getString("height"));
+                    item.setWidth(itemRaw.getJSONObject("detail").getString("width"));
+                    item.setHeight(itemRaw.getJSONObject("detail").getString("height"));
                 } else {
-                    item.put("width", itemRaw.getJSONObject("detail").getJSONObject("exif").getString("ExifImageWidth"));
-                    item.put("height", itemRaw.getJSONObject("detail").getJSONObject("exif").getString("ExifImageHeight"));
+                    item.setWidth(itemRaw.getJSONObject("detail").getJSONObject("exif").getString("ExifImageWidth"));
+                    item.setHeight(itemRaw.getJSONObject("detail").getJSONObject("exif").getString("ExifImageHeight"));
                     if (itemRaw.getJSONObject("detail").has("exif") && itemRaw.getJSONObject("detail").getJSONObject("exif").has("CreateDate")) {
                         mtime = itemRaw.getJSONObject("detail").getJSONObject("exif").getString("CreateDate");
-                        item.put("mtime", mtime.substring(0, 4) + "-" + mtime.substring(5, 7) + "-" + mtime.substring(8));
-                    } else item.put("mtime", "1916-01-01 00:00:00");
+                        item.setTime(mtime.substring(0, 4) + "-" + mtime.substring(5, 7) + "-" + mtime.substring(8));
+                    } else item.setTime("1916-01-01 00:00:00");
                 }
-                LocalCache.MediasMap.put(item.get("uuid"), item);
+                LocalCache.RemoteMediaMapKeyIsUUID.put(item.getUuid(), item);
 
             }
         }
 
-        LocalCache.SetGlobalHashMap(Util.MEDIA_MAP_NAME, LocalCache.MediasMap);
-        Log.d("winsun", "MediasMap " + LocalCache.MediasMap);
+        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        dbUtils.insertRemoteMedias(LocalCache.RemoteMediaMapKeyIsUUID);
+
+        Log.d("winsun", "RemoteMediaMapKeyIsUUID " + LocalCache.RemoteMediaMapKeyIsUUID);
 
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
         manager.sendBroadcast(new Intent(Util.REMOTE_PHOTO_LOADED));
@@ -188,117 +195,112 @@ public class FNAS {
         return FNAS.RemoteCall(Util.MEDIASHARE_PARAMETER);
     }
 
-    public static void fillShareMapByJsonString(String str) throws JSONException {
+    public static String loadRemoteMediaComment(Context context, String mediaUUID) throws Exception {
+        return FNAS.RemoteCall(String.format(context.getString(R.string.photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID));
+    }
 
-        String uuid, imgStr;
-        JSONArray json, jsonArr;
-        JSONObject itemRaw;
-        ConcurrentMap<String, String> item;
+    public static String loadToken(Context context, String gateway, String userUUID, String userPassword) throws Exception {
 
-        json = new JSONArray(str);
-
-        if (json.length() != 0) {
-            LocalCache.SharesMap.clear();
+        HttpURLConnection conn;
+        String str = "";
+        conn = (HttpURLConnection) (new URL(gateway + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
+        conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((userUUID + ":" + userPassword).getBytes(), Base64.DEFAULT));
+        conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
+        if (conn.getResponseCode() != 200) {
+            throw new NetworkErrorException();
+        } else {
+            str = FNAS.ReadFull(conn.getInputStream());
         }
 
-        for (int i = 0; i < json.length(); i++) {
-            itemRaw = json.getJSONObject(i);
-            Log.d("winsun", "" + itemRaw);
-            uuid = itemRaw.getString("uuid");
-            if (LocalCache.SharesMap.containsKey(uuid)) {
-                item = LocalCache.SharesMap.get(uuid);
-            } else item = new ConcurrentHashMap<>();
-            item.put("_id", itemRaw.getJSONObject("latest").getString("_id"));
-            if (itemRaw.getJSONObject("latest").has("creator"))
-                item.put("creator", itemRaw.getJSONObject("latest").getString("creator"));
-            else
-                item.put("creator", itemRaw.getJSONObject("latest").getJSONArray("maintainers").getString(0));
-            item.put("album", itemRaw.getJSONObject("latest").getString("album"));
-            item.put("mtime", itemRaw.getJSONObject("latest").getString("mtime"));
-            item.put("uuid", uuid);
-            item.put("del", itemRaw.getJSONObject("latest").getString("archived").equals("true") ? "1" : "0"); // 1 means deleted,0 means not deleted,（archived是服务端是否已删标志）
-            item.put("date", new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(itemRaw.getJSONObject("latest").getString("mtime")))));
-            if (itemRaw.getJSONObject("latest").getString("album").equals("true")) {
-                item.put("type", "album");
-                item.put("title", itemRaw.getJSONObject("latest").getJSONArray("tags").getJSONObject(0).getString("albumname"));
-                item.put("desc", itemRaw.getJSONObject("latest").getJSONArray("tags").getJSONObject(0).getString("desc"));
-            } else item.put("type", "set");
-            imgStr = "";
-            jsonArr = itemRaw.getJSONObject("latest").getJSONArray("contents");
-            if (jsonArr.length() > 0) {
-                for (int j = 0; j < jsonArr.length(); j++)
-                    imgStr += "," + jsonArr.getJSONObject(j).getString("digest").toLowerCase();
-                if (imgStr.length() > 1) imgStr = imgStr.substring(1);
-                item.put("images", imgStr);
-                item.put("coverImg", jsonArr.getJSONObject(0).getString("digest").toLowerCase());
-            } else {
-                item.put("images", "");
-                item.put("coverImg", "");
+        return str;
+    }
+
+    public static void loadDeviceId() throws Exception {
+        String str;
+        if (LocalCache.DeviceID == null || LocalCache.DeviceID.equals("")) {
+            str = FNAS.PostRemoteCall("/library/", "");
+            LocalCache.DeviceID = str.replace("\"", "");
+            LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
+        }
+        Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
+    }
+
+    public static void loadData(Context context) {
+
+        retrieveUserMap(context);
+
+        retrieveMediaMap(context);
+
+        retrieveShareMap(context);
+
+        retrieveLocalMediaCommentMap(context);
+    }
+
+    public static void retrieveUserMap(Context context) {
+
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_USER.name());
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+        localBroadcastManager.sendBroadcast(intent);
+
+    }
+
+    public static void retrieveMediaMap(Context context) {
+
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIA.name());
+        localBroadcastManager.sendBroadcast(intent);
+
+        intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIA.name());
+        localBroadcastManager.sendBroadcast(intent);
+    }
+
+    public static void retrieveShareMap(Context context) {
+
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+        localBroadcastManager.sendBroadcast(intent);
+
+        intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+        localBroadcastManager.sendBroadcast(intent);
+    }
+
+    public static void retrieveLocalMediaCommentMap(Context context) {
+
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+        localBroadcastManager.sendBroadcast(intent);
+
+    }
+
+    public static void startUploadAllLocalPhoto(Context context) {
+
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+
+        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+
+            if (!media.isUploaded()) {
+                Intent intent = new Intent(Util.OPERATION);
+                intent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
+                intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIA.name());
+                intent.putExtra(Util.OPERATION_MEDIA, media);
+                localBroadcastManager.sendBroadcast(intent);
             }
-            if (itemRaw.getJSONObject("latest").getJSONArray("viewers").length() <= 1 && itemRaw.getJSONObject("latest").getJSONArray("maintainers").length() <= 1)
-                item.put("private", "true");
-            else item.put("private", "false"); // 1 means private,0 means public
-
-            boolean isMaintainer = false;
-            JSONArray jsonArray = itemRaw.getJSONObject("latest").getJSONArray("maintainers");
-            for (int k = 0; k < jsonArray.length(); k++) {
-                if (jsonArray.getString(k).equals(userUUID)) {
-                    isMaintainer = true;
-                }
-            }
-            item.put("maintained", isMaintainer ? "true" : "false");
-
-            item.put("locked", "false");
-
-            LocalCache.SharesMap.put(uuid, item);
 
         }
-
-    }
-
-    public static void retrieveUserMap() {
-        try {
-            fillUserMapByJsonString(loadUser());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void retrieveMediaMap() {
-        try {
-            fillMediaMapByJsonString(loadMedia());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void retrieveShareMap() {
-        try {
-            fillShareMapByJsonString(loadRemoteShare());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        loadLocalShare();
-
-        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
-        manager.sendBroadcast(new Intent(Util.SHARE_LOADED));
-
-        LocalCache.SetGlobalHashMap(Util.SHARE_MAP_NAME, LocalCache.SharesMap);
-        Log.d("winsun", "SharesMap " + LocalCache.SharesMap);
-    }
-
-    public static void loadData() {
-
-        deleteAllRemoteCommentIfNetworkConnected();
-
-        retrieveUserMap();
-
-        retrieveMediaMap();
-
-        CreateRemoteMediaService.startActionCreateRemoteMedia(Util.APPLICATION_CONTEXT);
-
-        retrieveShareMap();
 
     }
 
@@ -307,16 +309,13 @@ public class FNAS {
         HttpURLConnection conn;
         String str = "";
 
-        while (JWT == null) Thread.sleep(500);
-
         conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
         conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         conn.setUseCaches(false);
         conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
         Log.d(TAG, "NAS GET: " + (Gateway + req));
-        if (conn.getResponseCode() == 200) {
-            str = FNAS.ReadFull(conn.getInputStream());
-        }
+        str = FNAS.ReadFull(conn.getInputStream());
+
 
         return str;
     }
@@ -326,8 +325,6 @@ public class FNAS {
         HttpURLConnection conn;
         OutputStream outStream;
         String str;
-
-        while (JWT == null) Thread.sleep(500);
 
         conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
         conn.setRequestMethod(Util.HTTP_POST_METHOD);
@@ -359,8 +356,6 @@ public class FNAS {
         HttpURLConnection conn;
         OutputStream outStream;
         String str;
-
-        while (JWT == null) Thread.sleep(500);
 
         conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
         conn.setRequestMethod(Util.HTTP_PATCH_METHOD);
@@ -455,14 +450,20 @@ public class FNAS {
     }
 
     public static void restoreLocalPhotoUploadState() {
-        for (ConcurrentMap<String, String> map : LocalCache.LocalImagesMapKeyIsThumb.values()) {
-            map.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, "false");
+
+        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+
+        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+            media.restoreUploadState();
+
+            dbUtils.updateLocalMedia(media);
         }
-        LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMapKeyIsThumb);
+
     }
 
+
     public static boolean UploadFile(String fname) {
-        ConcurrentMap<String, String> localHashMap;
+        Media localHashMap;
 
         String hash, url, boundary;
         BufferedOutputStream outStream;
@@ -474,8 +475,8 @@ public class FNAS {
         try {
             while (JWT == null) Thread.sleep(500);
             // calc SHA256
-            localHashMap = LocalCache.LocalImagesMapKeyIsThumb.get(fname);
-            hash = localHashMap.get("uuid");
+            localHashMap = LocalCache.LocalMediaMapKeyIsThumb.get(fname);
+            hash = localHashMap.getUuid();
 
             Log.i(TAG, "thumb:" + fname + "hash:" + hash);
 
@@ -545,11 +546,11 @@ public class FNAS {
     }
 
     public static boolean isPhotoInMediaMap(String imageUUID) {
-        return LocalCache.MediasMap.containsKey(imageUUID);
+        return LocalCache.RemoteMediaMapKeyIsUUID.containsKey(imageUUID);
     }
 
     public static void delShareInDocumentsMapById(String uuid) {
-        LocalCache.SharesMap.remove(uuid);
+        LocalCache.RemoteMediaShareMapKeyIsUUID.remove(uuid);
     }
 
     public static void loadLocalShare() {
@@ -557,46 +558,10 @@ public class FNAS {
         DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
         List<MediaShare> mediaShareList = dbUtils.getAllLocalShare();
-        ConcurrentMap<String, String> item;
 
         for (MediaShare mediaShare : mediaShareList) {
 
-            if (LocalCache.SharesMap.containsKey(mediaShare.getUuid())) {
-                item = LocalCache.SharesMap.get(mediaShare.getUuid());
-            } else item = new ConcurrentHashMap<>();
-
-            item.put("_id", "");
-            item.put("creator", FNAS.userUUID);
-            if (mediaShare.isAlbum()) {
-                item.put("type", "album");
-            } else {
-                item.put("type", "set");
-            }
-            item.put("mtime", mediaShare.getTime());
-            item.put("uuid", mediaShare.getUuid());
-            item.put("del", "0"); // 本地存在，判断是否需要显示（archived是服务端是否已删标志）
-            item.put("date", new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(System.currentTimeMillis())));
-            item.put("title", mediaShare.getTitle());
-            item.put("desc", mediaShare.getDesc());
-
-            StringBuilder builder = new StringBuilder();
-            for (String digest : mediaShare.getImageDigests()) {
-                builder.append(digest);
-                builder.append(",");
-            }
-
-            item.put("images", builder.toString());
-
-            item.put("coverImg", mediaShare.getImageDigests().get(0).toLowerCase());
-
-            item.put("private", String.valueOf(mediaShare.isPrivate()));
-
-            item.put("maintained", String.valueOf(mediaShare.isMaintained()));
-            item.put("local", "true");
-
-            Log.i(TAG, "local share:" + item.toString());
-
-            LocalCache.SharesMap.put(mediaShare.getUuid(), item);
+            LocalCache.RemoteMediaShareMapKeyIsUUID.put(mediaShare.getUuid(), mediaShare);
 
         }
 
@@ -612,18 +577,46 @@ public class FNAS {
 
                     DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-                    if (!dbUtils.getAllLocalShare().isEmpty()) {
+                    List<MediaShare> mediaShares = dbUtils.getAllLocalShare();
+                    Map<String, List<Comment>> comments = dbUtils.getAllLocalImageCommentKeyIsImageUUID();
+
+                    Intent intent = new Intent(Util.OPERATION);
+                    intent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
+                    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+
+                    if (!mediaShares.isEmpty()) {
 
                         Log.i(TAG, "start local share task");
 
-                        CreateRemoteMediaShareService.startActionCreateRemoteMediaShareTask(context);
+                        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+
+                        for (MediaShare mediaShare : mediaShares) {
+
+                            intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
+                            localBroadcastManager.sendBroadcast(intent);
+
+                        }
+
                     }
 
-                    if (!dbUtils.getAllLocalImageComment().isEmpty()) {
+                    if (!comments.isEmpty()) {
 
                         Log.i(TAG, "start local comment task");
 
-                        CreateRemoteCommentService.startActionCreateRemoteCommentTask(context);
+                        intent.removeExtra(Util.OPERATION_TARGET_TYPE);
+                        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
+
+                        for (Map.Entry<String, List<Comment>> entry : comments.entrySet()) {
+                            for (Comment comment : entry.getValue()) {
+
+                                intent.putExtra(Util.OPERATION_COMMENT, comment);
+                                intent.putExtra(Util.OPERATION_IMAGE_UUID, entry.getKey());
+                                localBroadcastManager.sendBroadcast(intent);
+
+                            }
+
+                        }
+
                     }
 
                 }

@@ -17,6 +17,8 @@ import android.widget.LinearLayout;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
+import com.winsun.fruitmix.model.Media;
+import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -26,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,8 +46,8 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
     private Context mContext;
     private MorePhotoAdapter mAdapter;
 
-    private String mImages;
-    private List<Map<String, Object>> mPhotos;
+    private MediaShare mediaShare;
+    private List<Media> mPhotos;
 
     private ImageLoader mImageLoader;
 
@@ -67,7 +68,7 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
 
         mContext = this;
 
-        mImages = getIntent().getStringExtra("images");
+        mediaShare = getIntent().getParcelableExtra(Util.KEY_MEDIASHARE);
 
         mManager = new GridLayoutManager(mContext, mSpanCount);
         mMorePhotoRecyclerView.setLayoutManager(mManager);
@@ -77,7 +78,7 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
         mMorePhotoRecyclerView.setAdapter(mAdapter);
 
         mPhotos = new ArrayList<>();
-        fillPhotoList(mImages);
+        fillPhotoList(mediaShare.getImageDigests());
         mAdapter.notifyDataSetChanged();
 
     }
@@ -87,47 +88,34 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
-    private void fillPhotoList(String selectedUIDStr) {
+    private void fillPhotoList(List<String> imageDigests) {
 
         mPhotos.clear();
 
-        if (!selectedUIDStr.equals("")) {
-            String[] stArr = selectedUIDStr.split(",");
-            Map<String, Object> picItem;
-            ConcurrentMap<String, String> picItemRaw;
-            for (String str : stArr) {
-                picItem = new HashMap<>();
-                picItemRaw = LocalCache.MediasMap.get(str);
-                if (picItemRaw != null) {
-                    picItem.put("cacheType", "nas");
-                    picItem.put("resID", "" + R.drawable.default_img);
-                    picItem.put("resHash", picItemRaw.get("uuid"));
-                    picItem.put("thumb", picItemRaw.get("thumb"));
-                    picItem.put("width", picItemRaw.get("width"));
-                    picItem.put("height", picItemRaw.get("height"));
-                    picItem.put("uuid", picItemRaw.get("uuid"));
-                    picItem.put("mtime", picItemRaw.get("lastModified"));
-                    picItem.put("selected", "0");
-                    picItem.put("locked", "1");
-                    mPhotos.add(picItem);
-                } else {
-                    picItemRaw = LocalCache.LocalImagesMapKeyIsUUID.get(str);
-                    if (picItemRaw != null) {
-                        picItem.put("cacheType", "local");
-                        picItem.put("resID", "" + R.drawable.default_img);
-                        picItem.put("thumb", picItemRaw.get("thumb"));
-                        picItem.put("resHash", picItemRaw.get("uuid"));
-                        picItem.put("width", picItemRaw.get("width"));
-                        picItem.put("height", picItemRaw.get("height"));
-                        picItem.put("uuid", picItemRaw.get("uuid"));
-                        picItem.put("mtime", picItemRaw.get("lastModified"));
-                        picItem.put("selected", "0");
-                        picItem.put("locked", "1");
-                        mPhotos.add(picItem);
-                    }
-                }
+        //TODO:clean code:move load media to Media,so does MediaShare
+        Media picItem;
+        Media picItemRaw;
+        for (String str : imageDigests) {
+            picItem = new Media();
+            picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(str);
+            if (picItemRaw != null) {
+                picItem.setLocal(false);
+            } else {
+                picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(str);
+
+                picItem.setLocal(true);
+                picItem.setThumb(picItemRaw.getThumb());
             }
+
+            picItem.setUuid(picItemRaw.getUuid());
+            picItem.setWidth(picItemRaw.getWidth());
+            picItem.setHeight(picItemRaw.getHeight());
+            picItem.setTime(picItemRaw.getTime());
+            picItem.setSelected(false);
+
+            mPhotos.add(picItem);
         }
+
     }
 
     @Override
@@ -147,7 +135,7 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
         @BindView(R.id.more_photo_item_layout)
         LinearLayout mMorelPhotoItemLayout;
 
-        private Map<String, Object> mMap;
+        private Media media;
         private int width, height;
 
         public MorePhotoViewHolder(View view) {
@@ -157,27 +145,27 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
         }
 
         public void refreshView(final int position) {
-            mMap = mPhotos.get(position);
+            media = mPhotos.get(position);
 
-            if (mMap.get("cacheType").equals("local")) {  // local bitmap path
+            if (media.isLocal()) {  // local bitmap path
 //                LocalCache.LoadLocalBitmapThumb((String) mMap.get("thumb"), width, height, mPhotoItem);
 
-                String url = String.valueOf(mMap.get("thumb"));
+                String url = media.getThumb();
 
                 mImageLoader.setShouldCache(false);
                 mPhotoItem.setTag(url);
                 mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoItem.setImageUrl(url, mImageLoader);
 
-            } else if (mMap.get("cacheType").equals("nas")) {
+            } else {
 //                LocalCache.LoadRemoteBitmapThumb((String) (mMap.get("resHash")), width, height, mPhotoItem);
 
-                width = Integer.parseInt((String) mMap.get("width"));
-                height = Integer.parseInt((String) mMap.get("height"));
+                width = Integer.parseInt(media.getWidth());
+                height = Integer.parseInt(media.getHeight());
 
                 int[] result = Util.formatPhotoWidthHeight(width, height);
 
-                String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + mMap.get("resHash"), result[0], result[1]);
+                String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
 //                String url = FNAS.Gateway + "/media/" + mMap.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
 
                 mImageLoader.setShouldCache(true);

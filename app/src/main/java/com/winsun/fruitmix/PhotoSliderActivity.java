@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
@@ -16,7 +17,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,12 +31,12 @@ import android.widget.TextView;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
-import com.winsun.fruitmix.interfaces.IImageLoadListener;
+import com.android.volley.toolbox.IImageLoadListener;
 import com.winsun.fruitmix.component.TouchNetworkImageView;
+import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.HashMap;
@@ -49,7 +49,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
     public static final String TAG = PhotoSliderActivity.class.getSimpleName();
 
-    public List<Map<String, Object>> imgList;
+    private List<Media> mediaList;
     private int initialPhotoPosition;
     private int currentPhotoPosition;
 
@@ -74,9 +74,9 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
     private boolean mShowCommentBtn = false;
 
-    private boolean transitionEnd = false;
-
     private boolean willReturn = false;
+
+    private boolean transitionMediaNeedShowThumb = true;
 
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
@@ -88,15 +88,15 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                     names.clear();
                     sharedElements.clear();
 
-                    Map<String, Object> imageMap = imgList.get(currentPhotoPosition);
+                    Media media = mediaList.get(currentPhotoPosition);
 
-                    String imageUUID = String.valueOf(imageMap.get("uuid"));
+                    String imageUUID = media.getUuid();
                     names.add(imageUUID);
 
                     String imageTag;
 
-                    boolean isThumb = imageMap.containsKey(LOAD_FINISH) && imageMap.get(LOAD_FINISH) == "true";
-                    imageTag = generateImageUrl(isThumb, imageMap);
+                    boolean isThumb = media.isLoaded();
+                    imageTag = generateImageUrl(isThumb, media);
 
                     sharedElements.put(imageUUID, mViewPager.findViewWithTag(imageTag));
 
@@ -128,6 +128,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         initialPhotoPosition = getIntent().getIntExtra(Util.INITIAL_PHOTO_POSITION, 0);
 
         mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
+
+        mediaList = getIntent().getParcelableArrayListExtra(Util.KEY_MEDIA_LIST);
+
+        transitionMediaNeedShowThumb = getIntent().getBooleanExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, true);
 
         if (getShowPhotoReturnTipsValue()) {
             setShowPhotoReturnTipsValue(false);
@@ -163,11 +167,23 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 @Override
                 public void onClick(View v) {
 
-                    if (imgList.size() > currentPhotoPosition) {
+                    if (mediaList.size() > currentPhotoPosition) {
+
+                        String imageUUID = mediaList.get(currentPhotoPosition).getUuid();
+
                         Intent intent = new Intent();
                         intent.setClass(PhotoSliderActivity.this, MediaShareCommentActivity.class);
-                        intent.putExtra("imageUUID", String.valueOf(imgList.get(currentPhotoPosition).get("uuid")));
-                        startActivity(intent);
+                        intent.putExtra(Util.IMAGE_UUID, imageUUID);
+
+                        intent.putExtra(Util.INITIAL_PHOTO_POSITION, currentPhotoPosition);
+
+                        View view = mViewPager.getChildAt(currentPhotoPosition).findViewById(R.id.mainPic);
+
+                        ViewCompat.setTransitionName(view, imageUUID);
+
+                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(PhotoSliderActivity.this, view, imageUUID);
+
+                        startActivity(intent, options.toBundle());
                     }
                 }
             });
@@ -186,8 +202,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             }
         });
 
-        imgList = (List<Map<String, Object>>) LocalCache.TransActivityContainer.get("imgSliderList");
-
         mViewPager = (ViewPager) findViewById(R.id.viewPager);
         myAdapter = new MyAdapter(this);
         mViewPager.setAdapter(myAdapter);
@@ -199,9 +213,9 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 Log.d(TAG, "onPageSelected:" + position);
                 setPosition(position);
 
-                Map<String, Object> map = imgList.get(position);
+                Media media = mediaList.get(position);
 
-                if (!map.containsKey(LOAD_FINISH) && mViewPager.getCurrentItem() == position) {
+                if (!media.isLoaded() && mViewPager.getCurrentItem() == position) {
                     if (mDialog == null || !mDialog.isShowing()) {
                         mDialog = ProgressDialog.show(mContext, mContext.getString(R.string.loading_title), mContext.getString(R.string.loading_message), true, true, new DialogInterface.OnCancelListener() {
                             @Override
@@ -220,6 +234,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         finishActivity();
     }
 
@@ -238,7 +253,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
         intent.putExtra(Util.CURRENT_PHOTO_POSITION, currentPhotoPosition);
         intent.putExtra(Util.CURRENT_PHOTO_DATE, lbDate.getText().toString());
-        intent.putExtra(Util.CURRENT_MEDIASHARE_TIME,getIntent().getStringExtra(Util.CURRENT_MEDIASHARE_TIME));
+        intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, getIntent().getStringExtra(Util.CURRENT_MEDIASHARE_TIME));
         setResult(RESULT_OK, intent);
 
         super.finishAfterTransition();
@@ -264,14 +279,14 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     public void setPosition(int position) {
         currentPhotoPosition = position;
 
-        if (imgList.size() > position && position > -1) {
-            Log.d(TAG, "image:" + imgList.get(position));
+        if (mediaList.size() > position && position > -1) {
+            Log.d(TAG, "image:" + mediaList.get(position));
 
-            String title = (String) imgList.get(position).get("mtime");
+            String title = mediaList.get(position).getTime();
             if (title == null || title.contains("1916-01-01")) {
                 lbDate.setText(getString(R.string.unknown_time_text));
             } else {
-                lbDate.setText((String) imgList.get(position).get("mtime"));
+                lbDate.setText(title);
             }
         }
 
@@ -283,17 +298,17 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         if (url == null)
             return;
 
-        for (int i = 0; i < imgList.size(); i++) {
-            final Map<String, Object> map = imgList.get(i);
+        for (int i = 0; i < mediaList.size(); i++) {
+            final Media media = mediaList.get(i);
 
-            final String imageUrl = generateImageUrl(isImageThumb(url), map);
+            final String imageUrl = generateImageUrl(isImageThumb(url), media);
 
             if (url.equals(imageUrl)) {
 
-                if (map.get("cacheType").equals("local")) {
+                if (media.isLocal()) {
 
                     if (isCurrentViewPage(i)) {
-                        ActivityCompat.startPostponedEnterTransition(PhotoSliderActivity.this);
+                        ActivityCompat.startPostponedEnterTransition(this);
                     }
 
                 } else {
@@ -301,21 +316,27 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                     if (isImageThumb(url)) {
 
                         if (isCurrentViewPage(i)) {
-                            ActivityCompat.startPostponedEnterTransition(PhotoSliderActivity.this);
+                            ActivityCompat.startPostponedEnterTransition(this);
 
-                            startLoadCurrentImageAfterTransition(map);
+                            startLoadCurrentImageAfterTransition(media);
                         } else {
-                            final String imageUUID = String.valueOf(map.get("uuid"));
+                            final String imageUUID = media.getUuid();
 
                             startLoadingOriginalPhoto(imageUUID);
                         }
 
                     } else {
-                        if (!map.containsKey(LOAD_FINISH)) {
-                            map.put(LOAD_FINISH, "true");
+
+                        if (!transitionMediaNeedShowThumb) {
+                            ActivityCompat.startPostponedEnterTransition(this);
+                            transitionMediaNeedShowThumb = true;
+                        }else {
+                            dismissCurrentImageThumb(media);
                         }
 
-                        dismissCurrentImageThumb(map);
+                        if (!media.isLoaded()) {
+                            media.setLoaded(true);
+                        }
 
                         if (isCurrentViewPage(i) && mDialog != null && mDialog.isShowing())
                             mDialog.dismiss();
@@ -337,14 +358,14 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         return imageUrl.contains("thumb");
     }
 
-    private void startLoadCurrentImageAfterTransition(final Map<String, Object> map) {
+    private void startLoadCurrentImageAfterTransition(final Media media) {
         if (Util.checkRunningOnLollipopOrHigher()) {
             getWindow().getSharedElementEnterTransition().addListener(new CustomTransitionListener() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
                     super.onTransitionEnd(transition);
 
-                    startLoadingOriginalPhoto(String.valueOf(map.get("uuid")));
+                    startLoadingOriginalPhoto(media.getUuid());
 
                     showDialog();
                 }
@@ -352,35 +373,35 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         }
     }
 
-    private void dismissCurrentImageThumb(Map<String, Object> currentImageMap) {
-        String thumbImageUrl = generateThumbImageUrl(currentImageMap);
+    private void dismissCurrentImageThumb(Media media) {
+        String thumbImageUrl = generateThumbImageUrl(media);
         final TouchNetworkImageView defaultMainPic = (TouchNetworkImageView) mViewPager.findViewWithTag(thumbImageUrl);
         defaultMainPic.setVisibility(View.INVISIBLE);
     }
 
-    private String generateThumbImageUrl(Map<String, Object> map) {
+    private String generateThumbImageUrl(Media media) {
 
-        int width = Integer.parseInt(String.valueOf(map.get("width")));
-        int height = Integer.parseInt(String.valueOf(map.get("height")));
+        int width = Integer.parseInt(media.getWidth());
+        int height = Integer.parseInt(media.getHeight());
 
         int[] result = Util.formatPhotoWidthHeight(width, height);
 
-        return String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("uuid"), result[0], result[1]);
+        return String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
 
     }
 
-    private String generateImageUrl(boolean isThumb, Map<String, Object> map) {
+    private String generateImageUrl(boolean isThumb, Media media) {
         String currentUrl;
-        if (map.get("cacheType").equals("local")) {
-            currentUrl = String.valueOf(map.get("thumb"));
+        if (media.isLocal()) {
+            currentUrl = String.valueOf(media.getThumb());
         } else {
 
             if (isThumb) {
 
-                currentUrl = generateThumbImageUrl(map);
+                currentUrl = generateThumbImageUrl(media);
 
             } else {
-                currentUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("uuid"));
+                currentUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid());
             }
 
         }
@@ -461,19 +482,24 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             final TouchNetworkImageView mainPic = (TouchNetworkImageView) view.findViewById(R.id.mainPic);
 
-            if (imgList.size() > position && position > -1) {
+            if (mediaList.size() > position && position > -1) {
 
-                Map<String, Object> map = imgList.get(position);
+                Media media = mediaList.get(position);
 
-                if (map.get("cacheType").equals("local")) {
+                int screenHeight = Util.calcScreenWidth(PhotoSliderActivity.this);
+                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) defaultMainPic.getLayoutParams();
+                layoutParams.height = screenHeight;
+                defaultMainPic.setLayoutParams(layoutParams);
+
+                if (media.isLocal()) {
 
                     defaultMainPic.setVisibility(View.INVISIBLE);
                     mainPic.setVisibility(View.VISIBLE);
-                    ViewCompat.setTransitionName(mainPic, String.valueOf(map.get("uuid")));
+                    ViewCompat.setTransitionName(mainPic, media.getUuid());
 
                     mainPic.registerImageLoadListener(PhotoSliderActivity.this);
 
-                    String localImageUrl = String.valueOf(map.get("thumb"));
+                    String localImageUrl = media.getThumb();
 
                     mImageLoader.setShouldCache(false);
                     mainPic.setTag(localImageUrl);
@@ -481,26 +507,37 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 } else {
 
-                    defaultMainPic.setVisibility(View.VISIBLE);
-                    mainPic.setVisibility(View.INVISIBLE);
-                    ViewCompat.setTransitionName(defaultMainPic, String.valueOf(map.get("uuid")));
-
-                    defaultMainPic.registerImageLoadListener(PhotoSliderActivity.this);
                     mainPic.registerImageLoadListener(PhotoSliderActivity.this);
-
-                    int width = Integer.parseInt(String.valueOf(map.get("width")));
-                    int height = Integer.parseInt(String.valueOf(map.get("height")));
-
-                    int[] result = Util.formatPhotoWidthHeight(width, height);
-
-                    String thumbImageUrl = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("uuid"), result[0], result[1]);
-
-                    mImageLoader.setShouldCache(true);
-                    defaultMainPic.setTag(thumbImageUrl);
-                    defaultMainPic.setImageUrl(thumbImageUrl, mImageLoader);
-
-                    String remoteUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + map.get("uuid"));
+                    String remoteUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid());
                     mainPic.setTag(remoteUrl);
+
+                    if (transitionMediaNeedShowThumb) {
+                        defaultMainPic.setVisibility(View.VISIBLE);
+                        mainPic.setVisibility(View.INVISIBLE);
+                        ViewCompat.setTransitionName(defaultMainPic, media.getUuid());
+
+                        defaultMainPic.registerImageLoadListener(PhotoSliderActivity.this);
+
+                        int width = Integer.parseInt(media.getWidth());
+                        int height = Integer.parseInt(media.getHeight());
+
+                        int[] result = Util.formatPhotoWidthHeight(width, height);
+
+                        String thumbImageUrl = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
+
+                        mImageLoader.setShouldCache(true);
+                        defaultMainPic.setTag(thumbImageUrl);
+                        defaultMainPic.setImageUrl(thumbImageUrl, mImageLoader);
+
+                    } else {
+
+                        mainPic.setVisibility(View.VISIBLE);
+                        defaultMainPic.setVisibility(View.INVISIBLE);
+
+                        ViewCompat.setTransitionName(mainPic,media.getUuid());
+                        mImageLoader.setShouldCache(true);
+                        mainPic.setImageUrl(remoteUrl,mImageLoader);
+                    }
 
                 }
 
@@ -567,10 +604,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         @Override
         public int getCount() {
-            if (imgList.size() == 0) {
+            if (mediaList.size() == 0) {
                 return 0;
             } else {
-                return imgList.size();
+                return mediaList.size();
             }
         }
 

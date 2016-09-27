@@ -4,9 +4,13 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
 /**
@@ -14,7 +18,9 @@ import com.winsun.fruitmix.util.Util;
  * a service on a separate handler thread.
  */
 public class CreateLocalMediaShareService extends IntentService {
-    // TODO: Rename actions, choose action names that describe tasks that this
+
+    private static final String TAG = CreateLocalMediaShareService.class.getSimpleName();
+
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_CREATE_SHARE = "com.winsun.fruitmix.services.action.create.share";
 
@@ -34,6 +40,7 @@ public class CreateLocalMediaShareService extends IntentService {
     // TODO: Customize helper method
     public static void startActionCreateLocalShare(Context context, MediaShare mediaShare) {
         Intent intent = new Intent(context, CreateLocalMediaShareService.class);
+        intent.setAction(ACTION_CREATE_SHARE);
         intent.putExtra(EXTRA_SHARE, mediaShare);
         context.startService(intent);
     }
@@ -55,13 +62,27 @@ public class CreateLocalMediaShareService extends IntentService {
     private void handleActionCreateShare(MediaShare mediaShare) {
 
         DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-        dbUtils.insertLocalShare(mediaShare);
-
-        if(Util.getNetworkState(Util.APPLICATION_CONTEXT))
-            CreateRemoteMediaShareService.startActionCreateRemoteMediaShareTask(Util.APPLICATION_CONTEXT);
+        long returnValue = dbUtils.insertLocalShare(mediaShare);
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
-        Intent intent = new Intent(Util.CREATE_LOCAL_SHARE_FINISH);
+        Intent intent = new Intent(Util.LOCAL_SHARE_CREATED);
+
+        if(returnValue > 0){
+            intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+            intent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare);
+
+            Log.i(TAG,"insert local mediashare succeed");
+
+            MediaShare mapResult = LocalCache.LocalMediaShareMapKeyIsUUID.put(mediaShare.getUuid(),mediaShare);
+
+            Log.i(TAG,"insert local media share to map result:" + (mapResult != null?"true":"false"));
+
+        }else {
+            intent.putExtra(Util.OPERATION_RESULT,OperationResult.FAIL.name());
+
+            Log.i(TAG,"insert local mediashare fail");
+        }
+
         broadcastManager.sendBroadcast(intent);
 
     }

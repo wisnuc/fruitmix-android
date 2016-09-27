@@ -14,9 +14,14 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.services.CreateRemoteMediaService;
+import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.model.Comment;
+import com.winsun.fruitmix.model.Media;
+import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.model.User;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -40,14 +45,19 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class LocalCache {
 
+    private static final String TAG = LocalCache.class.getSimpleName();
+
     public static String CacheRootPath;
     static Application CurrentApp;
 
-    public static ConcurrentMap<String, ConcurrentMap<String, String>> SharesMap = null;
-    public static ConcurrentMap<String, ConcurrentMap<String, String>> UsersMap = null;
-    public static ConcurrentMap<String, ConcurrentMap<String, String>> MediasMap = null;
-    public static ConcurrentMap<String, ConcurrentMap<String, String>> LocalImagesMapKeyIsThumb = null;
-    public static ConcurrentMap<String, ConcurrentMap<String, String>> LocalImagesMapKeyIsUUID = null;
+    public static ConcurrentMap<String, Comment> RemoteMediaCommentMapKeyIsImageUUID = null;
+    public static ConcurrentMap<String, Comment> LocalMediaCommentMapKeyIsImageUUID = null;
+    public static ConcurrentMap<String, MediaShare> RemoteMediaShareMapKeyIsUUID = null;
+    public static ConcurrentMap<String, MediaShare> LocalMediaShareMapKeyIsUUID = null;
+    public static ConcurrentMap<String, User> RemoteUserMapKeyIsUUID = null;
+    public static ConcurrentMap<String, Media> RemoteMediaMapKeyIsUUID = null;
+    public static ConcurrentMap<String, Media> LocalMediaMapKeyIsThumb = null;
+    public static ConcurrentMap<String, Media> LocalMediaMapKeyIsUUID = null;
 
     public static String DeviceID = null;
 
@@ -69,36 +79,26 @@ public class LocalCache {
 
     public static void CleanAll() {
 
-        LocalCache.DropGlobalData(Util.SHARE_MAP_NAME);
-        LocalCache.DropGlobalData("albumsMap");
-        LocalCache.DropGlobalData(Util.USER_MAP_NAME);
-        LocalCache.DropGlobalData(Util.MEDIA_MAP_NAME);
         LocalCache.DropGlobalData(Util.DEVICE_ID_MAP_NAME);
-        LocalCache.DropGlobalData(Util.LOCAL_COMMENT_MAP);
-
-        SharesMap = LocalCache.GetGlobalHashMap(Util.SHARE_MAP_NAME);
-        UsersMap = LocalCache.GetGlobalHashMap(Util.USER_MAP_NAME);
-        MediasMap = LocalCache.GetGlobalHashMap(Util.MEDIA_MAP_NAME);
-        LocalImagesMapKeyIsThumb = LocalCache.GetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME);
-        BuildLocalImagesMapsKeyIsUUID();
 
         DeviceID = null;
 
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-        dbUtils.deleteAllLocalShare();
-        dbUtils.deleteAllLocalComment();
-        dbUtils.deleteAllRemoteComment();
-    }
+        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+        instance.doOneTaskInCachedThread(new Runnable() {
+            @Override
+            public void run() {
+                DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+                dbUtils.deleteAllLocalShare();
+                dbUtils.deleteAllLocalComment();
+                dbUtils.deleteAllRemoteComment();
+                dbUtils.deleteAllRemoteShare();
+                dbUtils.deleteAllRemoteUser();
+                dbUtils.deleteAllRemoteMedia();
+                dbUtils.deleteAllLocalMedia();
+            }
+        });
 
 
-    public static void BuildLocalImagesMapsKeyIsUUID() {
-        ConcurrentMap<String, String> itemRaw;
-
-        LocalCache.LocalImagesMapKeyIsUUID = new ConcurrentHashMap<>();
-        for (String key : LocalCache.LocalImagesMapKeyIsThumb.keySet()) {
-            itemRaw = LocalCache.LocalImagesMapKeyIsThumb.get(key);
-            LocalCache.LocalImagesMapKeyIsUUID.put(itemRaw.get("uuid"), itemRaw);
-        }
     }
 
     public static boolean Init(Activity activity) {
@@ -107,19 +107,71 @@ public class LocalCache {
 
         TransActivityContainer = new HashMap<>();
 
-        SharesMap = LocalCache.GetGlobalHashMap(Util.SHARE_MAP_NAME);
-        UsersMap = LocalCache.GetGlobalHashMap(Util.USER_MAP_NAME);
-        MediasMap = LocalCache.GetGlobalHashMap(Util.MEDIA_MAP_NAME);
-        LocalImagesMapKeyIsThumb = LocalCache.GetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME);
+        RemoteMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
+        LocalMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
+        RemoteMediaShareMapKeyIsUUID = new ConcurrentHashMap<>();
+        LocalMediaShareMapKeyIsUUID = new ConcurrentHashMap<>();
+        RemoteUserMapKeyIsUUID = new ConcurrentHashMap<>();
+        RemoteMediaMapKeyIsUUID = new ConcurrentHashMap<>();
+        LocalMediaMapKeyIsThumb = new ConcurrentHashMap<>();
         BuildLocalImagesMapsKeyIsUUID();
-        DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
-
-        Log.i("LocalCache", SharesMap.toString());
-        Log.i("LocalCache", UsersMap.toString());
-        Log.i("LocalCache", MediasMap.toString());
-        Log.i("LocalCache", LocalImagesMapKeyIsThumb.toString());
 
         return true;
+    }
+
+    public static ConcurrentMap<String, MediaShare> BuildMediaShareMapKeyIsUUID(List<MediaShare> mediaShares) {
+
+        ConcurrentMap<String, MediaShare> mediaShareConcurrentMap = new ConcurrentHashMap<>(mediaShares.size());
+        for (MediaShare mediaShare : mediaShares) {
+            mediaShareConcurrentMap.put(mediaShare.getUuid(), mediaShare);
+        }
+        return mediaShareConcurrentMap;
+    }
+
+    public static ConcurrentMap<String, User> BuildRemoteUserMapKeyIsUUID(List<User> users) {
+
+        ConcurrentMap<String, User> userConcurrentMap = new ConcurrentHashMap<>(users.size());
+        for (User user : users) {
+            userConcurrentMap.put(user.getUuid(), user);
+        }
+        return userConcurrentMap;
+    }
+
+    public static ConcurrentMap<String, Media> BuildMediaMapKeyIsUUID(List<Media> medias) {
+
+        ConcurrentMap<String, Media> mediaConcurrentMap = new ConcurrentHashMap<>(medias.size());
+        for (Media media : medias) {
+            mediaConcurrentMap.put(media.getUuid(), media);
+        }
+        return mediaConcurrentMap;
+    }
+
+    public static ConcurrentMap<String, Media> BuildMediaMapKeyIsThumb(List<Media> medias) {
+
+        ConcurrentMap<String, Media> mediaConcurrentMap = new ConcurrentHashMap<>(medias.size());
+        for (Media media : medias) {
+            mediaConcurrentMap.put(media.getThumb(), media);
+        }
+        return mediaConcurrentMap;
+    }
+
+    public static void BuildLocalImagesMapsKeyIsUUID() {
+        Media itemRaw;
+
+        LocalCache.LocalMediaMapKeyIsUUID = new ConcurrentHashMap<>();
+        for (String key : LocalCache.LocalMediaMapKeyIsThumb.keySet()) {
+            itemRaw = LocalCache.LocalMediaMapKeyIsThumb.get(key);
+            LocalCache.LocalMediaMapKeyIsUUID.put(itemRaw.getUuid(), itemRaw);
+        }
+    }
+
+    public static ConcurrentMap<String, Comment> BuildRemoteMediaCommentsAboutOneMedia(List<Comment> comments, String mediaUUID) {
+
+        ConcurrentMap<String, Comment> commentConcurrentMap = new ConcurrentHashMap<>(comments.size());
+        for (Comment comment : comments) {
+            commentConcurrentMap.put(mediaUUID, comment);
+        }
+        return commentConcurrentMap;
     }
 
     public static String GetInnerTempFile() {
@@ -130,38 +182,6 @@ public class LocalCache {
         new File(tempFile).renameTo(new File(CacheRootPath + "/thumbCache/" + key));
 
         return true;
-    }
-
-    public static void LoadLocalData() {
-
-        List<Map<String, String>> localPhotoList;
-        int i;
-        Map<String, String> itemRaw;
-        ConcurrentMap<String, String> item;
-
-        localPhotoList = LocalCache.PhotoList("Camera");
-
-        for (i = 0; i < localPhotoList.size(); i++) {
-            itemRaw = localPhotoList.get(i);
-            if (LocalImagesMapKeyIsThumb.containsKey(itemRaw.get("thumb"))) continue;
-
-            String uuid = Util.CalcSHA256OfFile(itemRaw.get("thumb"));
-
-            item = new ConcurrentHashMap<>();
-            item.put("thumb", itemRaw.get("thumb"));
-            item.put("width", itemRaw.get("width"));
-            item.put("height", itemRaw.get("height"));
-            item.put("mtime", itemRaw.get("lastModified"));
-            item.put(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS, "false");
-            item.put("uuid", uuid);
-            LocalImagesMapKeyIsThumb.put(itemRaw.get("thumb"), item);
-            LocalImagesMapKeyIsUUID.put(uuid, item);
-        }
-
-        LocalCache.SetGlobalHashMap(Util.LOCAL_IMAGE_MAP_NAME, LocalCache.LocalImagesMapKeyIsThumb);
-        Log.d("winsun", "LocalImagesMapKeyIsThumb " + LocalCache.LocalImagesMapKeyIsThumb);
-
-        CreateRemoteMediaService.startActionCreateRemoteMedia(Util.APPLICATION_CONTEXT);
     }
 
     // get thumb bitmap
@@ -459,7 +479,10 @@ public class LocalCache {
 
 
         cr = CurrentApp.getContentResolver();
-        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "='" + bucketName + "'", null, null);
+//        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "='" + bucketName + "'", null, null);
+
+        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, null, null, null);
+
 
         imageList = new ArrayList<Map<String, String>>();
         if (!cursor.moveToFirst()) return imageList;
@@ -512,16 +535,16 @@ public class LocalCache {
         mEditor.apply();
     }
 
-    public static ConcurrentMap<String, ConcurrentMap<String, String>> GetGlobalHashMap(String name) {
+    public static ConcurrentMap<String, MediaShare> GetGlobalMediaShareHashMap(String name) {
         String strData;
         ObjectInputStream ois;
-        ConcurrentHashMap<String, ConcurrentMap<String, String>> dataList;
+        ConcurrentHashMap<String, MediaShare> dataList;
 
         try {
             strData = GetGlobalData(name);
             if (strData == null || strData.equals("")) return new ConcurrentHashMap<>();
             ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decode(strData, Base64.DEFAULT)));
-            dataList = (ConcurrentHashMap<String, ConcurrentMap<String, String>>) ois.readObject();
+            dataList = (ConcurrentHashMap<String, MediaShare>) ois.readObject();
             ois.close();
             return dataList;
         } catch (Exception e) {
@@ -530,7 +553,75 @@ public class LocalCache {
         }
     }
 
-    public static void SetGlobalHashMap(String name, ConcurrentMap<String, ConcurrentMap<String, String>> data) {
+    public static void SetMediaShareGlobalHashMap(String name, ConcurrentMap<String, MediaShare> data) {
+        ByteArrayOutputStream baos;
+        ObjectOutputStream oos;
+
+        try {
+            baos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(baos);
+            oos.reset();
+            oos.writeObject(data);
+            oos.close();
+            SetGlobalData(name, new String(Base64.encode(baos.toByteArray(), Base64.DEFAULT)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static ConcurrentMap<String, Media> GetGlobalMediaHashMap(String name) {
+        String strData;
+        ObjectInputStream ois;
+        ConcurrentHashMap<String, Media> dataList;
+
+        try {
+            strData = GetGlobalData(name);
+            if (strData == null || strData.equals("")) return new ConcurrentHashMap<>();
+            ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decode(strData, Base64.DEFAULT)));
+            dataList = (ConcurrentHashMap<String, Media>) ois.readObject();
+            ois.close();
+            return dataList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ConcurrentHashMap<>();
+        }
+    }
+
+    public static void SetGlobalMediaHashMap(String name, ConcurrentMap<String, Media> data) {
+        ByteArrayOutputStream baos;
+        ObjectOutputStream oos;
+
+        try {
+            baos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(baos);
+            oos.reset();
+            oos.writeObject(data);
+            oos.close();
+            SetGlobalData(name, new String(Base64.encode(baos.toByteArray(), Base64.DEFAULT)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static ConcurrentMap<String, User> GetGlobalUserHashMap(String name) {
+        String strData;
+        ObjectInputStream ois;
+        ConcurrentHashMap<String, User> dataList;
+
+        try {
+            strData = GetGlobalData(name);
+            if (strData == null || strData.equals("")) return new ConcurrentHashMap<>();
+            ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decode(strData, Base64.DEFAULT)));
+            dataList = (ConcurrentHashMap<String, User>) ois.readObject();
+            ois.close();
+            return dataList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ConcurrentHashMap<>();
+        }
+    }
+
+    public static void SetGlobalUserHashMap(String name, ConcurrentMap<String, User> data) {
         ByteArrayOutputStream baos;
         ObjectOutputStream oos;
 

@@ -24,10 +24,8 @@ public class RemoteMediaShareParser implements RemoteDataParser<MediaShare> {
 
         List<MediaShare> mediaShares = new ArrayList<>();
 
-        JSONArray jsonArray, jsonArr;
+        JSONArray jsonArray;
         JSONObject itemRaw;
-
-        MediaShare mediaShare;
 
         try {
             jsonArray = new JSONArray(json);
@@ -35,16 +33,18 @@ public class RemoteMediaShareParser implements RemoteDataParser<MediaShare> {
             for (int i = 0; i < jsonArray.length(); i++) {
 
                 itemRaw = jsonArray.getJSONObject(i);
-                Log.d("winsun", "" + itemRaw);
 
-                mediaShare = new MediaShare();
+                Log.d("winsun", "" + itemRaw);
+                JSONArray jsonArr;
+
+                MediaShare mediaShare = new MediaShare();
 
                 mediaShare.setUuid(itemRaw.getString("uuid"));
 
                 if (itemRaw.getJSONObject("latest").has("creator"))
-                    mediaShare.setCreator(itemRaw.getJSONObject("latest").getString("creator"));
+                    mediaShare.setCreatorUUID(itemRaw.getJSONObject("latest").getString("creator"));
                 else
-                    mediaShare.setCreator(itemRaw.getJSONObject("latest").getJSONArray("maintainers").getString(0));
+                    mediaShare.setCreatorUUID(itemRaw.getJSONObject("latest").getJSONArray("maintainers").getString(0));
 
                 if (itemRaw.getJSONObject("latest").getString("album").equals("true")) {
                     mediaShare.setAlbum(true);
@@ -78,6 +78,7 @@ public class RemoteMediaShareParser implements RemoteDataParser<MediaShare> {
                     mediaShare.setCoverImageDigest(imageDigests.get(0));
                 } else {
                     mediaShare.setImageDigests(Collections.<String>emptyList());
+                    mediaShare.setCoverImageDigest("");
                 }
 
                 jsonArr = itemRaw.getJSONObject("latest").getJSONArray("viewers");
@@ -102,16 +103,9 @@ public class RemoteMediaShareParser implements RemoteDataParser<MediaShare> {
                     mediaShare.setMaintainer(Collections.<String>emptyList());
                 }
 
-                if (mediaShare.getViewer().size() <= 1 && mediaShare.getMaintainer().size() <= 1)
-                    mediaShare.setPrivate(true);
-                else mediaShare.setPrivate(false);
-
-                mediaShare.setMaintained(mediaShare.getMaintainer().contains(FNAS.userUUID));
-
                 mediaShare.setLocked(false);
 
                 mediaShares.add(mediaShare);
-
             }
 
         } catch (JSONException e) {

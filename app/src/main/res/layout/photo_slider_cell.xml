@@ -28,8 +28,8 @@
 
     <com.winsun.fruitmix.component.TouchNetworkImageView
         android:id="@+id/default_main_pic"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="match_parent"
+        android:layout_height="00dp"
         android:src="@drawable/placeholder_photo"
         android:layout_centerInParent="true"
         android:scaleType="centerCrop"

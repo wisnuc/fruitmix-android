@@ -46,48 +46,38 @@
             android:theme="@android:style/Theme.Translucent"/>
         <activity
             android:name=".Test2Activity"
-            android:label="@string/title_activity_test2"
-            />
+            android:label="@string/title_activity_test2"/>
         <activity
             android:name=".PhotoSliderActivity"
-            android:label="@string/title_activity_test2"
-            />
+            android:label="@string/title_activity_test2"/>
         <activity
             android:name=".Test3Activity"
-            android:label="@string/title_activity_test3"
-            />
+            android:label="@string/title_activity_test3"/>
         <activity
             android:name=".ImageZoomActivity"
-            android:label="@string/title_activity_test3"
-            />
+            android:label="@string/title_activity_test3"/>
         <activity
             android:name=".CreateAlbumActivity"
             android:label="@string/title_activity_test3"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ModifyAlbumActivity"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".AlbumPicContentActivity"
             android:label="@string/title_activity_test3"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".SplashScreenActivity"
             android:label="@string/title_activity_test3"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".MediaShareCommentActivity"
-            android:label="@string/title_activity_test3"
             android:screenOrientation="portrait"
-            />
+            android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name=".NewAlbumPicChooseActivity"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".Test4Activity"
             android:label="@string/title_activity_test4"/>
@@ -99,8 +89,7 @@
             android:screenOrientation="portrait"/>
         <activity
             android:name=".EquipmentSearchActivity"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".LoginActivity"
             android:screenOrientation="portrait"
@@ -108,8 +97,7 @@
         <activity android:name=".GalleryTestActivity"/>
         <activity
             android:name=".EditPhotoActivity"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait"/>
 
         <service
             android:name=".services.CreateRemoteMediaShareService"
@@ -117,14 +105,10 @@
         <service
             android:name=".services.CreateRemoteCommentService"
             android:exported="false"/>
-        <service
-            android:name=".services.CreateRemoteMediaService"
-            android:exported="false"/>
 
         <activity
             android:name=".MoreMediaActivity"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait"/>
 
         <service
             android:name=".services.CreateLocalMediaShareService"
@@ -139,8 +123,62 @@
             android:name=".services.CreateLocalCommentService"
             android:exported="false"/>
         <service
-            android:name=".services.RetrieveRemoteDataService"
+            android:name=".services.RetrieveRemoteMediaShareService"
             android:exported="false"/>
+        <service
+            android:name=".services.ButlerService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".services.ModifyMediaInRemoteMediaShareService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".services.RetrieveNewLocalMediaInCameraService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".services.DeleteLocalMediaShareService"
+            android:exported="false"/>
+        <service
+            android:name=".services.ModifyLocalMediaShareService"
+            android:exported="false"/>
+        <service
+            android:name=".services.RetrieveLocalMediaCommentService"
+            android:exported="false"/>
+        <service
+            android:name=".services.DeleteLocalCommentService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".services.RetrieveLocalMediaService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".services.RetrieveLocalMediaShareService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".services.RetrieveRemoteMediaService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".services.RetrieveRemoteMediaCommentService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".services.RetrieveRemoteUserService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".services.RetrieveTokenService"
+            android:exported="false">
+        </service>
+        <service
+            android:name=".services.RetrieveDeviceIdService"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

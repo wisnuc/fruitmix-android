@@ -60,6 +60,8 @@ public class NetworkImageView extends ImageView {
      */
     private ImageContainer mImageContainer;
 
+    private IImageLoadListener mImageLoadListener;
+
     public NetworkImageView(Context context) {
         this(context, null);
     }
@@ -105,6 +107,14 @@ public class NetworkImageView extends ImageView {
      */
     public void setErrorImageResId(int errorImage) {
         mErrorImageId = errorImage;
+    }
+
+    public void registerImageLoadListener(IImageLoadListener loadListener) {
+        mImageLoadListener = loadListener;
+    }
+
+    public void unregisterImageLoadListener() {
+        mImageLoadListener = null;
     }
 
     /**
@@ -187,6 +197,17 @@ public class NetworkImageView extends ImageView {
 
                         if (response.getBitmap() != null && getTag().equals(mUrl)) {
                             setImageBitmap(response.getBitmap());
+
+                            post(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    if (mImageLoadListener != null) {
+                                        mImageLoadListener.onImageLoadFinish(mUrl, NetworkImageView.this);
+                                    }
+                                }
+                            });
+
                         } else if (mDefaultImageId != 0) {
                             setImageResource(mDefaultImageId);
                         }

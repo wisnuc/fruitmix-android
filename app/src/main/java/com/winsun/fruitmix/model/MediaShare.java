@@ -2,16 +2,18 @@ package com.winsun.fruitmix.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Administrator on 2016/7/16.
  */
-public class MediaShare implements Parcelable{
+public class MediaShare implements Parcelable {
 
     private int id;
     private String uuid;
-    private String creator;
+    private String creatorUUID;
     private String time;
     private String title;
     private String desc;
@@ -22,17 +24,19 @@ public class MediaShare implements Parcelable{
     private boolean isArchived;
     private String date;
     private String coverImageDigest;
-    private boolean isPrivate;
-    private boolean isMaintained;
     private boolean isLocked;
 
     public MediaShare() {
+        imageDigests = new ArrayList<>();
+        viewer = new ArrayList<>();
+        maintainer = new ArrayList<>();
+
     }
 
     protected MediaShare(Parcel in) {
         id = in.readInt();
         uuid = in.readString();
-        creator = in.readString();
+        creatorUUID = in.readString();
         time = in.readString();
         title = in.readString();
         desc = in.readString();
@@ -43,8 +47,6 @@ public class MediaShare implements Parcelable{
         isArchived = in.readByte() != 0;
         date = in.readString();
         coverImageDigest = in.readString();
-        isPrivate = in.readByte() != 0;
-        isMaintained = in.readByte() != 0;
         isLocked = in.readByte() != 0;
     }
 
@@ -52,7 +54,7 @@ public class MediaShare implements Parcelable{
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
         dest.writeString(uuid);
-        dest.writeString(creator);
+        dest.writeString(creatorUUID);
         dest.writeString(time);
         dest.writeString(title);
         dest.writeString(desc);
@@ -63,8 +65,6 @@ public class MediaShare implements Parcelable{
         dest.writeByte((byte) (isArchived ? 1 : 0));
         dest.writeString(date);
         dest.writeString(coverImageDigest);
-        dest.writeByte((byte) (isPrivate ? 1 : 0));
-        dest.writeByte((byte) (isMaintained ? 1 : 0));
         dest.writeByte((byte) (isLocked ? 1 : 0));
     }
 
@@ -101,12 +101,12 @@ public class MediaShare implements Parcelable{
         this.uuid = uuid;
     }
 
-    public String getCreator() {
-        return creator;
+    public String getCreatorUUID() {
+        return creatorUUID;
     }
 
-    public void setCreator(String creator) {
-        this.creator = creator;
+    public void setCreatorUUID(String creatorUUID) {
+        this.creatorUUID = creatorUUID;
     }
 
     public String getTime() {
@@ -197,19 +197,23 @@ public class MediaShare implements Parcelable{
         this.date = date;
     }
 
-    public boolean isPrivate() {
-        return isPrivate;
+    public MediaShare cloneFromParameter(MediaShare mediaShare) {
+        MediaShare cloneMediaShare = new MediaShare();
+        cloneMediaShare.setUuid(mediaShare.getUuid());
+        cloneMediaShare.setCreatorUUID(mediaShare.getCreatorUUID());
+        cloneMediaShare.setTime(mediaShare.getTime());
+        cloneMediaShare.setTitle(mediaShare.getTitle());
+        cloneMediaShare.setDesc(mediaShare.getDesc());
+        cloneMediaShare.setImageDigests(mediaShare.getImageDigests());
+        cloneMediaShare.setViewer(mediaShare.getViewer());
+        cloneMediaShare.setMaintainer(mediaShare.getMaintainer());
+        cloneMediaShare.setAlbum(mediaShare.isAlbum);
+        cloneMediaShare.setArchived(mediaShare.isArchived);
+        cloneMediaShare.setDate(mediaShare.getDate());
+        cloneMediaShare.setCoverImageDigest(mediaShare.getCoverImageDigest());
+        cloneMediaShare.setLocked(mediaShare.isLocked);
+
+        return cloneMediaShare;
     }
 
-    public void setPrivate(boolean aPrivate) {
-        isPrivate = aPrivate;
-    }
-
-    public boolean isMaintained() {
-        return isMaintained;
-    }
-
-    public void setMaintained(boolean maintained) {
-        isMaintained = maintained;
-    }
 }

@@ -1,13 +1,9 @@
 package com.winsun.fruitmix.Fragment;
 
 import android.app.Activity;
-import android.app.ActivityOptions;
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.ViewCompat;
@@ -16,13 +12,11 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -36,24 +30,19 @@ import com.winsun.fruitmix.CreateAlbumActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
-import com.winsun.fruitmix.model.MediaShare;
-import com.winsun.fruitmix.services.CreateRemoteMediaShareService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -99,8 +88,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
     private Map<Integer, Media> mMapKeyIsPhotoPositionValueIsPhoto;
-
-    private ProgressDialog mDialog;
 
     private int mScreenWidth;
 
@@ -189,7 +176,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         mLoadingLayout.setVisibility(View.VISIBLE);
 
-        LocalCache.LoadLocalData();
         reloadData();
 
         mLoadingLayout.setVisibility(View.INVISIBLE);
@@ -212,6 +198,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
         clearSelectedPhoto();
 
     }
+
 
     private void setupFastJumper() {
         mLinearScrollCalculator = new LinearScrollCalculator(mRecyclerView) {
@@ -276,10 +263,8 @@ public class NewPhotoList implements NavPagerActivity.Page {
     }
 
     private void calcScreenWidth() {
-        DisplayMetrics metric = new DisplayMetrics();
-        containerActivity.getWindowManager().getDefaultDisplay().getMetrics(metric);
 
-        mScreenWidth = metric.widthPixels;
+        mScreenWidth = Util.calcScreenWidth(containerActivity);
     }
 
     private void calcPhotoItemWidth() {
@@ -302,13 +287,13 @@ public class NewPhotoList implements NavPagerActivity.Page {
         mMapKeyIsPhotoPositionValueIsPhotoDate.clear();
         mMapKeyIsPhotoPositionValueIsPhoto.clear();
 
-        for (ConcurrentMap<String, String> map : LocalCache.LocalImagesMapKeyIsThumb.values()) {
+        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
 
-            if (map.containsKey(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS) && map.get(Util.KEY_LOCAL_PHOTO_UPLOAD_SUCCESS).equals("true")) {
+            if (media.isUploaded()) {
                 continue;
             }
 
-            date = map.get("mtime").substring(0, 10);
+            date = media.getTime().substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
                 mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
             } else {
@@ -317,20 +302,21 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
             }
 
-            Media media = new Media();
-            media.setUuid(map.get("uuid"));
-            media.setWidth(map.get("width"));
-            media.setHeight(map.get("height"));
-            media.setLocal(true);
-            media.setTime(map.get("mtime"));
-            media.setTitle(date);
-            media.setThumb(map.get("thumb"));
-            mediaList.add(media);
+            Media localMedia = new Media();
+            localMedia.setUuid(media.getUuid());
+            localMedia.setWidth(media.getWidth());
+            localMedia.setHeight(media.getHeight());
+            localMedia.setLocal(true);
+            localMedia.setTime(media.getTime());
+            localMedia.setTitle(date);
+            localMedia.setThumb(media.getThumb());
+            localMedia.setSelected(false);
+            mediaList.add(localMedia);
         }
 
-        for (ConcurrentMap<String, String> map : LocalCache.MediasMap.values()) {
+        for (Media media : LocalCache.RemoteMediaMapKeyIsUUID.values()) {
 
-            date = map.get("mtime").substring(0, 10);
+            date = media.getTime().substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
                 mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
             } else {
@@ -339,15 +325,16 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
             }
 
-            Media media = new Media();
-            media.setUuid(map.get("uuid"));
-            media.setWidth(map.get("width"));
-            media.setHeight(map.get("height"));
-            media.setLocal(false);
-            media.setTime(map.get("mtime").replace("T", " ").replace("Z", " "));
-            media.setThumb("");
-            media.setTitle(date);
-            mediaList.add(media);
+            Media remoteMedia = new Media();
+            remoteMedia.setUuid(media.getUuid());
+            remoteMedia.setWidth(media.getWidth());
+            remoteMedia.setHeight(media.getHeight());
+            remoteMedia.setLocal(false);
+            remoteMedia.setTime(media.getTime());
+            remoteMedia.setThumb(media.getThumb());
+            remoteMedia.setTitle(date);
+            remoteMedia.setSelected(false);
+            mediaList.add(remoteMedia);
         }
 
         Collections.sort(mPhotoDateGroups, new Comparator<String>() {
@@ -388,25 +375,18 @@ public class NewPhotoList implements NavPagerActivity.Page {
     }
 
     @NonNull
-    public String getSelectedImageUUIDString() {
+    public List<String> getSelectedImageUUIDs() {
 
-        StringBuilder builder = new StringBuilder();
+        List<String> selectedImageUUIDs = new ArrayList<>();
         for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Media media : mediaList) {
                 if (media.isSelected()) {
-                    builder.append(",");
-                    builder.append(media.getUuid());
+                    selectedImageUUIDs.add(media.getUuid());
                 }
             }
         }
 
-        String selectedUID = "";
-        if (builder.length() >= 1) {
-            selectedUID = builder.substring(1);
-        }
-
-        Log.i(TAG, "selectUID" + selectedUID);
-        return selectedUID;
+        return selectedImageUUIDs;
     }
 
     private void clearSelectedPhoto() {
@@ -430,104 +410,13 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     }
 
-    public void createAlbum(String selectUID) {
+    public void createAlbum(List<String> selectUUIDs) {
         Intent intent = new Intent();
         intent.setClass(containerActivity, CreateAlbumActivity.class);
-        intent.putExtra("selectedUIDStr", selectUID);
+        intent.putExtra(Util.KEY_SELECTED_IMAGE_UUID_ARRAY, selectUUIDs.toArray(new String[selectUUIDs.size()]));
         containerActivity.startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
     }
 
-    public void createShare(final String selectUID) {
-        new AsyncTask<Object, Object, Boolean>() {
-
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-
-                mDialog = ProgressDialog.show(containerActivity, containerActivity.getString(R.string.operating_title), containerActivity.getString(R.string.loading_message), true, false);
-            }
-
-            @Override
-            protected Boolean doInBackground(Object... params) {
-                String data, viewers, selectUUID;
-                String[] selectedUIDArr;
-                int i;
-
-                selectUUID = selectUID;
-                selectedUIDArr = selectUUID.split(",");
-                data = "";
-                for (i = 0; i < selectedUIDArr.length; i++) {
-                    data += ",{\\\"type\\\":\\\"media\\\",\\\"digest\\\":\\\"" + selectedUIDArr[i] + "\\\"}";
-                }
-
-                viewers = "";
-                for (String key : LocalCache.UsersMap.keySet()) {
-                    viewers += ",\\\"" + key + "\\\"";
-                }
-                if (viewers.length() == 0) {
-                    viewers += ",";
-                }
-                Log.i("winsun viewer:", viewers);
-
-                createAlbumInLocalAlbumDatabase(true, false, "", "", selectUUID);
-                FNAS.loadLocalShare();
-
-                return true;
-
-            }
-
-            @Override
-            protected void onPostExecute(Boolean sSuccess) {
-
-                mDialog.dismiss();
-
-                if (Util.getNetworkState(containerActivity)) {
-                    CreateRemoteMediaShareService.startActionCreateRemoteMediaShareTask(containerActivity);
-                }
-                if (sSuccess) {
-                    if (containerActivity instanceof NavPagerActivity) {
-                        ((NavPagerActivity) containerActivity).onActivityResult(Util.KEY_CREATE_SHARE_REQUEST_CODE, Activity.RESULT_OK, null);
-                    }
-
-                } else {
-                    Snackbar.make(mRecyclerView, containerActivity.getString(R.string.operation_fail), Snackbar.LENGTH_SHORT).show();
-                }
-            }
-
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-
-    private void createAlbumInLocalAlbumDatabase(boolean isPublic, boolean otherMaintianer, String title, String desc, String digest) {
-
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-
-        MediaShare mediaShare = new MediaShare();
-        mediaShare.setUuid(Util.createLocalUUid());
-
-        Log.i(TAG, "create share digest:" + digest);
-
-        mediaShare.setImageDigests(Arrays.asList(digest.split(",")));
-        mediaShare.setTitle(title);
-        mediaShare.setDesc(desc);
-
-
-        if (isPublic) {
-            mediaShare.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
-        } else mediaShare.setViewer(new ArrayList<String>());
-
-        if (otherMaintianer) {
-            mediaShare.setMaintainer(new ArrayList<>(LocalCache.UsersMap.keySet()));
-        } else {
-            mediaShare.setMaintainer(Collections.singletonList(FNAS.userUUID));
-        }
-
-        mediaShare.setCreator(FNAS.userUUID);
-        mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
-        mediaShare.setAlbum(false);
-        dbUtils.insertLocalShare(mediaShare);
-
-    }
 
     @Override
     public void onDidAppear() {
@@ -574,18 +463,19 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             mRecyclerView.smoothScrollToPosition(findPhotoPositionInRecyclerView(currentPhotoDate, currentPhotoPosition));
 
-            ActivityCompat.postponeEnterTransition(containerActivity);
+            ActivityCompat.startPostponedEnterTransition(containerActivity);
+
+/*            ActivityCompat.postponeEnterTransition(containerActivity);
             mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
                     mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                     // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
                     mRecyclerView.requestLayout();
-                    ActivityCompat.startPostponedEnterTransition(containerActivity);
 
                     return true;
                 }
-            });
+            });*/
         }
 
     }
@@ -618,7 +508,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            tag = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), result[0], result[1]);
+            tag = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
         }
         return tag;
     }
@@ -847,7 +737,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                 int[] result = Util.formatPhotoWidthHeight(width, height);
 
-                String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), result[0], result[1]);
+                String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
 
                 mImageLoader.setShouldCache(true);
                 mPhotoIv.setTag(url);
@@ -922,35 +812,21 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                         int position = 0;
 
-                        List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(media.getTitle());
-                        List<Map<String, Object>> imgList = new ArrayList<>(mediaList.size());
-                        Map<String, Object> map;
+                        ArrayList<Media> mediaList = (ArrayList<Media>) mMapKeyIsDateValueIsPhotoList.get(media.getTitle());
                         for (int i = 0; i < mediaList.size(); i++) {
                             Media media1 = mediaList.get(i);
-                            map = new HashMap<>();
-                            map.put("cacheType", media1.isLocal() ? "local" : "nas");
-                            map.put("resID", R.drawable.default_img);
-                            map.put("resHash", media1.getUuid());
-                            map.put("thumb", media1.getThumb());
-                            map.put("width", media1.getWidth());
-                            map.put("height", media1.getHeight());
-                            map.put("uuid", media1.getUuid());
-                            map.put("mtime", media1.getTime());
-                            map.put("selected", media1.isSelected() ? "1" : "0");
-                            map.put("locked", "1");
-                            imgList.add(map);
 
                             if (media.getUuid().equals(media1.getUuid())) {
                                 position = i;
                             }
                         }
 
-                        LocalCache.TransActivityContainer.put("imgSliderList", imgList);
                         Intent intent = new Intent();
 
 //                        Log.i(TAG, "photo pos:" + position);
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
+                        intent.putParcelableArrayListExtra(Util.KEY_MEDIA_LIST, mediaList);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
                         ViewCompat.setTransitionName(mPhotoIv, media.getUuid());
@@ -1050,5 +926,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         }
     }
+
 
 }

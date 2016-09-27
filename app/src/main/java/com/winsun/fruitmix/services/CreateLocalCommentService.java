@@ -3,14 +3,22 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Comment;
+import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.Util;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  */
 public class CreateLocalCommentService extends IntentService {
+
+    private static final String TAG = CreateLocalCommentService.class.getSimpleName();
 
     private static final String ACTION_CREATE_LOCAL_COMMENT = "com.winsun.fruitmix.services.action.create.local.comment";
 
@@ -30,8 +38,8 @@ public class CreateLocalCommentService extends IntentService {
     public static void startActionCreateLocalComment(Context context, String imageUUID, Comment comment) {
         Intent intent = new Intent(context, CreateLocalCommentService.class);
         intent.setAction(ACTION_CREATE_LOCAL_COMMENT);
-        intent.putExtra(EXTRA_IMAGE_UUID,imageUUID);
-        intent.putExtra(EXTRA_COMMENT,comment);
+        intent.putExtra(EXTRA_IMAGE_UUID, imageUUID);
+        intent.putExtra(EXTRA_COMMENT, comment);
         context.startService(intent);
     }
 
@@ -40,8 +48,8 @@ public class CreateLocalCommentService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_CREATE_LOCAL_COMMENT.equals(action)) {
-                final String imageUUID = intent.getStringExtra(EXTRA_IMAGE_UUID);
-                final Comment comment = intent.getParcelableExtra(EXTRA_COMMENT);
+                String imageUUID = intent.getStringExtra(EXTRA_IMAGE_UUID);
+                Comment comment = intent.getParcelableExtra(EXTRA_COMMENT);
                 handleActionCreateLocalComment(imageUUID, comment);
             }
         }
@@ -53,6 +61,33 @@ public class CreateLocalCommentService extends IntentService {
      */
     private void handleActionCreateLocalComment(String imageUUID, Comment comment) {
 
+        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        long returnValue = dbUtils.insertLocalComment(comment, imageUUID);
+
+        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
+        Intent intent = new Intent(Util.LOCAL_COMMENT_CREATED);
+
+        if (returnValue > 0) {
+
+            Log.i(TAG, "insert local comment succeed");
+
+            comment.setId(returnValue);
+
+            Comment mapResult = LocalCache.LocalMediaCommentMapKeyIsImageUUID.put(imageUUID, comment);
+
+            Log.i(TAG, "insert local media comment to map result:" + (mapResult != null ? "true" : "false"));
+
+            intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+            intent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
+            intent.putExtra(Util.OPERATION_COMMENT, comment);
+
+        } else {
+
+            Log.i(TAG, "insert local comment fail");
+
+            intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+        }
+        broadcastManager.sendBroadcast(intent);
     }
 
 }

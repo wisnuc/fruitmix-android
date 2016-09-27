@@ -180,10 +180,10 @@ public class FNAS {
             }
             else item = new HashMap<String, String>();
             item.put("_id", itemRaw.getJSONObject("latest").getString("_id"));
-            if(itemRaw.getJSONObject("latest").has("creator"))
-                item.put("creator", itemRaw.getJSONObject("latest").getString("creator"));
+            if(itemRaw.getJSONObject("latest").has("creatorUUID"))
+                item.put("creatorUUID", itemRaw.getJSONObject("latest").getString("creatorUUID"));
             else
-                item.put("creator", itemRaw.getJSONObject("latest").getJSONArray("maintainers").getString(0));
+                item.put("creatorUUID", itemRaw.getJSONObject("latest").getJSONArray("maintainers").getString(0));
             item.put("album", itemRaw.getJSONObject("latest").getString("album"));
             item.put("mtime", itemRaw.getJSONObject("latest").getString("mtime"));
             item.put("uuid", uuid);

@@ -13,6 +13,8 @@ import android.widget.Toast;
 import com.winsun.fruitmix.Fragment.NewPhotoList;
 import com.winsun.fruitmix.util.Util;
 
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -61,24 +63,26 @@ public class NewAlbumPicChooseActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                String selectImageUUIDString = getSelectedImageUUIDString();
-                if (selectImageUUIDString.equals("")) {
+                List<String> selectImageUUIDs = getSelectedImageUUIDs();
+                if (selectImageUUIDs.size() == 0) {
                     Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 Intent intent = getIntent();
 
+                String[] selectedImageUUIDList = selectImageUUIDs.toArray(new String[selectImageUUIDs.size()]);
+
                 if (intent.getBooleanExtra(Util.EDIT_PHOTO, false)) {
 
-                    getIntent().putExtra("mSelectedImageUUIDStr", selectImageUUIDString);
+                    getIntent().putExtra(Util.KEY_SELECTED_IMAGE_UUID_ARRAY,selectedImageUUIDList);
                     setResult(RESULT_OK, intent);
                     finish();
 
                 } else {
                     intent = new Intent();
                     intent.setClass(NewAlbumPicChooseActivity.this, CreateAlbumActivity.class);
-                    intent.putExtra("mSelectedImageUUIDStr", selectImageUUIDString);
+                    intent.putExtra(Util.KEY_SELECTED_IMAGE_UUID_ARRAY, selectedImageUUIDList);
                     startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
                 }
 
@@ -100,8 +104,8 @@ public class NewAlbumPicChooseActivity extends Activity {
     }
 
 
-    public String getSelectedImageUUIDString() {
-        return mNewPhotoList.getSelectedImageUUIDString();
+    public List<String> getSelectedImageUUIDs() {
+        return mNewPhotoList.getSelectedImageUUIDs();
     }
 
 }

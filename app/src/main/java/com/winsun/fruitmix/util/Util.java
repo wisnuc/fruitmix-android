@@ -2,33 +2,28 @@ package com.winsun.fruitmix.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
-import android.os.IBinder;
-import android.os.ParcelUuid;
-import android.util.Base64OutputStream;
-import android.util.Log;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewCompat;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.model.Media;
 
-import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.security.MessageDigest;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.UUID;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Created by Administrator on 2016/4/29.
@@ -46,21 +41,58 @@ public class Util {
     public static final String PASSWORD = "password";
     public static final String EDIT_PHOTO = "edit_photo";
     public static final String UPDATED_ALBUM_TITLE = "updated_album_title";
-    public static final String NEW_ALBUM_CONTENT = "new_album_content";
-    public static final String LOCAL_COMMENT_MAP = "local_comment_map";
-    public static final String LOCAL_SHARE_CHANGED = "local_share_changed";
-    public static final String LOCAL_COMMENT_CHANGED = "local_comment_changed";
+    public static final String IMAGE_UUID = "image_uuid";
+
+    public static final String LOCAL_SHARE_CREATED = "local_share_created";
+    public static final String LOCAL_SHARE_MODIFIED = "local_share_modified";
+    public static final String LOCAL_SHARE_DELETED = "local_share_deleted";
+
+    public static final String REMOTE_SHARE_CREATED = "remote_share_created";
+    public static final String REMOTE_SHARE_MODIFIED = "remote_share_modified";
+    public static final String REMOTE_SHARE_DELETED = "remote_share_deleted";
+
+    public static final String LOCAL_COMMENT_CREATED = "local_comment_created";
+    public static final String REMOTE_COMMENT_CREATED = "remote_comment_created";
+    public static final String LOCAL_COMMENT_DELETED = "local_comment_deleted";
+
+    public static final String NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED = "new_local_media_in_camera_retrieved";
+
+    public static final String PHOTO_IN_MEDIASHARE_MODIFIED = "photo_in_mediashare_modidfied";
+
+    public static final String LOCAL_MEDIA_COMMENT_RETRIEVED = "local_media_comment_retrieved";
+    public static final String REMOTE_MEDIA_COMMENT_RETRIEVED = "remote_media_comment_retrieved";
+    public static final String REMOTE_MEDIA_SHARE_RETRIEVED = "remote_media_share_retrieved";
+    public static final String LOCAL_MEDIA_SHARE_RETRIEVED = "local_media_share_retrieved";
+    public static final String LOCAL_MEDIA_RETRIEVED = "local_media_retrieved";
+    public static final String REMOTE_MEDIA_RETRIEVED = "remote_media_retrieved";
+    public static final String REMOTE_USER_RETRIEVED = "remote_user_retrieved";
+    public static final String REMOTE_TOKEN_RETRIEVED = "remote_token_retrieved";
+    public static final String REMOTE_DEVICEID_RETRIEVED = "remote_deviceid_retrieved";
+
     public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
     public static final String REMOTE_PHOTO_LOADED = "remote_photo_loaded";
-    public static final String SHARE_LOADED = "share_loaded";
+    public static final String MEDIASHARE_LOADED = "mediashare_loaded";
+
+    public static final String OPERATION = "operation";
+    public static final String OPERATION_RESULT = "operation_result";
+    public static final String OPERATION_TYPE = "operation_type";
+    public static final String OPERATION_TARGET_TYPE = "operation_target_type";
+    public static final String OPERATION_RESOURCE_TYPE = "operation_resource_type";
+    public static final String OPERATION_IMAGE_UUID = "operation_image_uuid";
+    public static final String OPERATION_COMMENT = "operation_comment";
+    public static final String OPERATION_MEDIA = "operatin_media";
+    public static final String OPERATION_MEDIASHARE = "operation_mediashare";
+    public static final String OPERATION_ORIGINAL_MEDIASHARE_WHEN_EDIT_PHOTO = "operation_original_mediashare";
+    public static final String OPERATION_MODIFIED_MEDIASHARE_WHEN_EDIT_PHOTO = "operation_modified_mediashare";
+    public static final String OPERATION_LOCAL_MEDIASHARE_UUID = "operation_local_mediashare_uuid";
+    public static final String OPERATION_LOCAL_MEDIASHARE_LOCKED = "operation_local_mediashare_locked";
+
     public static final String NEED_SHOW_MENU = "need_show_menu";
     public static final String KEY_LOCAL_PHOTO_UPLOAD_SUCCESS = "key_local_photo_upload_success";
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
     public static final String KEY_AUTHORIZATION = "Authorization";
     public static final String KEY_JWT_HEAD = "JWT ";
     public static final String KEY_BASE_HEAD = "Basic ";
-
-    public static final String CREATE_LOCAL_SHARE_FINISH = "create_local_share_finish";
 
     public static final int KEY_MODIFY_ALBUM_REQUEST_CODE = 100;
     public static final int KEY_EDIT_PHOTO_REQUEST_CODE = 101;
@@ -88,12 +120,21 @@ public class Util {
     public static final String HTTP_POST_METHOD = "POST";
     public static final String HTTP_PATCH_METHOD = "PATCH";
 
-    public static final int HTTP_CONNECT_TIMEOUT = 15 * 1000;
+    public static final int HTTP_CONNECT_TIMEOUT = 10 * 1000;
 
     public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
     public static final String CURRENT_PHOTO_POSITION = "current_photo_position";
     public static final String CURRENT_PHOTO_DATE = "current_photo_date";
     public static final String CURRENT_MEDIASHARE_TIME = "current_mediashare_time";
+
+    public static final String KEY_MEDIASHARE = "key_mediashare";
+    public static final String KEY_MEDIA_LIST = "key_media_list";
+
+    public static final String KEY_SELECTED_IMAGE_UUID_ARRAY = "key_selected_image_uuid_array";
+
+    public static final String KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB = "key_transition_photo_need_show_thumb";
+
+    public static final String KEY_SHOW_SOFT_INPUT_WHEN_ENTER = "key_show_soft_input_when_enter";
 
     public static Context APPLICATION_CONTEXT = null;
 
@@ -113,6 +154,13 @@ public class Util {
     public static int dip2px(float dip) {
         float v = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, APPLICATION_CONTEXT.getResources().getDisplayMetrics());
         return (int) (v + 0.5f);
+    }
+
+    public static int calcScreenWidth(Activity activity) {
+        DisplayMetrics metric = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metric);
+
+        return metric.widthPixels;
     }
 
     public static String CalcSHA256OfFile(String fname) {
@@ -226,8 +274,13 @@ public class Util {
         }
     }
 
+    public static void showSoftInput(Activity activity, View view){
+        InputMethodManager methodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        methodManager.showSoftInput(view,0);
+    }
+
     public static int[] formatPhotoWidthHeight(int width, int height) {
-        if (width >= height) {
+/*        if (width >= height) {
             width = width * 200 / height;
             height = 200;
         } else {
@@ -238,12 +291,41 @@ public class Util {
         if (width / height > 2)
             width = 200;
         else if (height / width > 2)
-            height = 200;
+            height = 200;*/
 
-        return new int[]{width, height};
+        return new int[]{200, 200};
     }
 
-    public static boolean checkRunningOnLollipopOrHigher(){
+    public static boolean checkRunningOnLollipopOrHigher() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    }
+
+    public static boolean uploadImageDigestsIfNotUpload(Context context, List<String> imageDigests) {
+        boolean uploadFileResult = true;
+        int uploadSucceedCount = 0;
+        Media media;
+
+        for (String imageDigest : imageDigests) {
+
+            media = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigest);
+            if (media != null) {
+                uploadFileResult = media.uploadIfNotDone();
+
+                if (!uploadFileResult)
+                    break;
+                else {
+                    uploadSucceedCount++;
+                }
+            }
+
+        }
+
+        if (uploadSucceedCount > 0) {
+
+            Intent localPhotoIntent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(localPhotoIntent);
+        }
+
+        return uploadFileResult;
     }
 }

@@ -1,20 +1,25 @@
 package com.winsun.fruitmix;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.ExecutorServiceInstance;
+import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationTargetType;
+import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONObject;
@@ -26,6 +31,9 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Created by Administrator on 2016/5/9.
@@ -46,6 +54,12 @@ public class SplashScreenActivity extends Activity {
 
     public static final int DELAY_TIME_MILLISECOND = 3 * 1000;
 
+    private LocalBroadcastManager localBroadcastManager;
+    private IntentFilter filter;
+    private CustomReceiver customReceiver;
+
+    private boolean mRemoteUserLoaded;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,9 +68,30 @@ public class SplashScreenActivity extends Activity {
 
         mContext = this;
 
+        LocalCache.Init(this);
         mHandler = new CustomHandler(this);
         mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
 
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        filter = new IntentFilter(Util.REMOTE_TOKEN_RETRIEVED);
+        filter.addAction(Util.REMOTE_DEVICEID_RETRIEVED);
+        filter.addAction(Util.REMOTE_USER_RETRIEVED);
+        customReceiver = new CustomReceiver();
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        localBroadcastManager.registerReceiver(customReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        localBroadcastManager.unregisterReceiver(customReceiver);
     }
 
     private void welcome() {
@@ -83,119 +118,13 @@ public class SplashScreenActivity extends Activity {
      */
     private void login() {
 
-        new AsyncTask<String, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(String... params) {
-
-                HttpURLConnection conn;
-                String str;
-                try {
-                    conn = (HttpURLConnection) (new URL(mGateway + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
-                    conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((mUuid + ":" + mPassword).getBytes(), Base64.DEFAULT));
-                    conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
-                    if (conn.getResponseCode() != 200) {
-
-                        FNAS.Gateway = mGateway;
-                        FNAS.JWT = mToken;
-                        FNAS.userUUID = mUuid;
-                        Util.loginState = false;
-
-                        LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
-
-                        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-                        instance.doOneTaskInCachedThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    FNAS.loadData();
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
-                                }
-                            }
-                        });
-
-                        return false;
-
-                    } else {
-
-                        Log.i(TAG, "login success");
-
-                        FNAS.Gateway = mGateway;
-                        FNAS.userUUID = mUuid;
-
-                        str = FNAS.ReadFull(conn.getInputStream());
-                        FNAS.JWT = new JSONObject(str).getString("token");
-
-                        Util.loginState = true;
-
-                        if (LocalCache.DeviceID == null || LocalCache.DeviceID.equals("")) {
-                            str = FNAS.PostRemoteCall("/library/", "");
-                            LocalCache.DeviceID = str.replace("\"", "");
-                            LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
-                        }
-                        Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
-
-
-                        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-                        instance.doOneTaskInCachedThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    FNAS.loadData();
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
-                                }
-                            }
-                        });
-
-                        FNAS.checkLocalShareAndComment(mContext);
-
-                        return true;
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-
-                    Util.loginState = false;
-
-                    FNAS.Gateway = mGateway;
-                    FNAS.JWT = mToken;
-                    FNAS.userUUID = mUuid;
-
-                    LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
-
-                    ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-                    instance.doOneTaskInCachedThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                FNAS.loadData();
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-                        }
-                    });
-
-                    return false;
-
-                }
-
-            }
-
-            @Override
-            protected void onPostExecute(Boolean aBoolean) {
-                if (!aBoolean) {
-                    Toast.makeText(Util.APPLICATION_CONTEXT, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
-                }
-
-                Intent intent = new Intent(SplashScreenActivity.this, NavPagerActivity.class);
-                intent.putExtra(Util.EQUIPMENT_CHILD_NAME, LocalCache.getUserNameValue(mContext));
-                startActivity(intent);
-                finish();
-
-            }
-
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_TOKEN.name());
+        intent.putExtra(Util.GATEWAY, mGateway);
+        intent.putExtra(Util.USER_UUID, mUuid);
+        intent.putExtra(Util.PASSWORD, mPassword);
+        localBroadcastManager.sendBroadcast(intent);
 
     }
 
@@ -249,6 +178,75 @@ public class SplashScreenActivity extends Activity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+
+        }
+    }
+
+    private class CustomReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (intent.getAction().equals(Util.REMOTE_TOKEN_RETRIEVED)) {
+
+                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT));
+
+                FNAS.userUUID = mUuid;
+                FNAS.Gateway = mGateway;
+
+                switch (result) {
+                    case SUCCEED:
+
+                        Intent operationIntent = new Intent(Util.OPERATION);
+                        operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
+                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_DEVICEID.name());
+                        localBroadcastManager.sendBroadcast(operationIntent);
+
+                        break;
+                    case FAIL:
+
+                        Util.loginState = false;
+
+
+                        FNAS.JWT = mToken;
+
+                        LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
+
+                        Toast.makeText(Util.APPLICATION_CONTEXT, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
+
+                        FNAS.retrieveUserMap(mContext);
+
+                        break;
+                }
+
+            } else if (intent.getAction().equals(Util.REMOTE_DEVICEID_RETRIEVED)) {
+
+                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT));
+                switch (result) {
+                    case SUCCEED:
+                        Log.i(TAG, "login success");
+                        Util.loginState = true;
+
+                        break;
+                    case FAIL:
+                        Util.loginState = false;
+                        LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
+                        Toast.makeText(Util.APPLICATION_CONTEXT, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
+
+                        break;
+                }
+
+                FNAS.Gateway = mGateway;
+                FNAS.userUUID = mUuid;
+                FNAS.retrieveUserMap(mContext);
+
+            } else if (intent.getAction().equals(Util.REMOTE_USER_RETRIEVED)) {
+
+                Intent jumpIntent = new Intent(SplashScreenActivity.this, NavPagerActivity.class);
+                jumpIntent.putExtra(Util.EQUIPMENT_CHILD_NAME, LocalCache.getUserNameValue(mContext));
+                startActivity(jumpIntent);
+                finish();
+
             }
 
         }

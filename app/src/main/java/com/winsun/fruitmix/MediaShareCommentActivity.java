@@ -8,7 +8,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.WindowCompat;
+import android.transition.Transition;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,11 +29,18 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.db.DBUtils;
+import com.android.volley.toolbox.IImageLoadListener;
 import com.winsun.fruitmix.model.Comment;
+import com.winsun.fruitmix.model.Media;
+import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.RequestQueueInstance;
-import com.winsun.fruitmix.services.CreateRemoteCommentService;
+import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationTargetType;
+import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONArray;
@@ -42,20 +53,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Created by Administrator on 2016/5/9.
  */
-public class MediaShareCommentActivity extends Activity {
+public class MediaShareCommentActivity extends Activity implements IImageLoadListener {
 
     public static final String TAG = MediaShareCommentActivity.class.getSimpleName();
 
     ImageView ivBack, ivSend;
     NetworkImageView ivMain;
-    Map<String, Object> imageData;
+    Media media;
     List<Comment> commentData;
     EditText tfContent;
 
@@ -63,13 +73,12 @@ public class MediaShareCommentActivity extends Activity {
 
     String mCommment;
 
-    private DBUtils dbUtils;
-
     private Context mContext;
 
     private CustomBroadCastReceiver mReceiver;
     private LocalBroadcastManager mManager;
     private CommentListViewAdapter mAdapter;
+    private IntentFilter filter;
 
     private ProgressDialog mDialog;
 
@@ -77,9 +86,13 @@ public class MediaShareCommentActivity extends Activity {
 
     private ImageLoader mImageLoader;
 
+    private boolean showSoftInputWhenEnter = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        ConcurrentMap<String, String> imageRaw;
+        Media imageRaw;
+
+        ActivityCompat.postponeEnterTransition(this);
 
         super.onCreate(savedInstanceState);
 
@@ -96,7 +109,11 @@ public class MediaShareCommentActivity extends Activity {
 
         mReceiver = new CustomBroadCastReceiver();
         mManager = LocalBroadcastManager.getInstance(this);
-        mManager.registerReceiver(mReceiver, new IntentFilter(Util.LOCAL_COMMENT_CHANGED));
+        filter = new IntentFilter(Util.REMOTE_COMMENT_CREATED);
+        filter.addAction(Util.LOCAL_COMMENT_CREATED);
+        filter.addAction(Util.LOCAL_MEDIA_COMMENT_RETRIEVED);
+        filter.addAction(Util.REMOTE_MEDIA_COMMENT_RETRIEVED);
+        filter.addAction(Util.LOCAL_COMMENT_DELETED);
 
         lvComment = (ListView) findViewById(R.id.comment_list);
         mAdapter = new CommentListViewAdapter();
@@ -109,54 +126,57 @@ public class MediaShareCommentActivity extends Activity {
         ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                finishActivity();
             }
         });
 
         commentData = new ArrayList<>();
 
-        String imageUUID = getIntent().getStringExtra("imageUUID");
-        imageRaw = LocalCache.MediasMap.get(imageUUID);
-        if (imageRaw == null) {
-            imageRaw = LocalCache.LocalImagesMapKeyIsUUID.get(imageUUID);
+        showSoftInputWhenEnter = getIntent().getBooleanExtra(Util.KEY_SHOW_SOFT_INPUT_WHEN_ENTER, false);
 
-            imageData = new HashMap<String, Object>();
-            imageData.put("uuid", imageRaw.get("uuid"));
-            imageData.put("width", imageRaw.get("width"));
-            imageData.put("height", imageRaw.get("height"));
-            imageData.put("cacheType", "local");
-            imageData.put("thumb", imageRaw.get("thumb"));
+        media = new Media();
+        String imageUUID = getIntent().getStringExtra(Util.IMAGE_UUID);
+        imageRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(imageUUID);
+        if (imageRaw == null) {
+            imageRaw = LocalCache.LocalMediaMapKeyIsUUID.get(imageUUID);
+
+            media.setLocal(true);
+            media.setThumb(imageRaw.getThumb());
         } else {
-            imageData = new HashMap<String, Object>();
-            imageData.put("uuid", imageRaw.get("uuid"));
-            imageData.put("width", imageRaw.get("width"));
-            imageData.put("height", imageRaw.get("height"));
-            imageData.put("cacheType", "nas");
-            imageData.put("resHash", imageRaw.get("uuid"));
+
+            media.setLocal(false);
         }
 
+        media.setUuid(imageRaw.getUuid());
+        media.setWidth(imageRaw.getWidth());
+        media.setHeight(imageRaw.getHeight());
+        media.setSelected(false);
 
-        for (ConcurrentMap<String, String> shareRaw : LocalCache.SharesMap.values()) {
+        for (MediaShare shareRaw : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
 
             Log.d("winsun", "sss1 " + shareRaw);
-            if (shareRaw.containsKey("images") && shareRaw.get("images").contains((String) imageData.get("uuid"))) {
-                Log.d("winsun", "ssss " + shareRaw.get("uuid"));
-                imageData.put("shareInstance", shareRaw.get("uuid"));
+            if (shareRaw.getImageDigests().contains(media.getUuid())) {
+                Log.d("winsun", "ssss " + shareRaw.getUuid());
+
+                media.setBelongingMediaShareUUID(shareRaw.getUuid());
                 break;
             }
         }
 
         ivMain = (NetworkImageView) findViewById(R.id.mainPic);
+        ivMain.registerImageLoadListener(this);
 
-        if (imageData.get("cacheType").equals("local")) {
-            String url = String.valueOf(imageData.get("thumb"));
+        ivMain.setTransitionName(media.getUuid());
+
+        if (media.isLocal()) {
+            String url = media.getThumb();
 
             mImageLoader.setShouldCache(false);
             ivMain.setTag(url);
             ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
             ivMain.setImageUrl(url, mImageLoader);
         } else {
-            String url = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + imageData.get("resHash"));
+            String url = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid());
 
             mImageLoader.setShouldCache(true);
             ivMain.setTag(url);
@@ -179,51 +199,55 @@ public class MediaShareCommentActivity extends Activity {
                     return;
                 }
 
-                Log.d("winsun", tfContent.getText() + "");
-                new AsyncTask<Object, Object, Boolean>() {
+                Log.d(TAG, tfContent.getText() + "");
+                Log.i(TAG, "onClick: mediaUUID:" + media.getUuid());
 
-                    @Override
-                    protected void onPreExecute() {
-                        super.onPreExecute();
-
-                        mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
-
-                    }
-
-                    @Override
-                    protected Boolean doInBackground(Object... params) {
-
-                        createCommentInLocalCommentDatabase(String.valueOf(imageData.get("uuid")), String.valueOf(imageData.get("shareInstance")), mCommment);
-
-                        if (Util.getNetworkState(mContext)) {
-                            CreateRemoteCommentService.startActionCreateRemoteCommentTask(mContext);
-                        }
-
-                        return true;
-
-                    }
-
-                    @Override
-                    protected void onPostExecute(Boolean sSuccess) {
-
-                        if (sSuccess) {
-                            reloadList();
-
-                            tfContent.setText("");
-
-                        } else {
-                            //Snackbar.make(ivSend, getString(R.string.operation_fail), Snackbar.LENGTH_SHORT).show();
-                            Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
-
-                            tfContent.setText("");
-                        }
-
-                    }
-
-                }.execute();
+                mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+                Intent operationIntent = new Intent(Util.OPERATION);
+                operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
+                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
+                operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, media.getUuid());
+                operationIntent.putExtra(Util.OPERATION_COMMENT, generateComment(media.getBelongingMediaShareUUID(), mCommment));
+                mManager.sendBroadcast(operationIntent);
             }
         });
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mManager.registerReceiver(mReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        mManager.unregisterReceiver(mReceiver);
+    }
+
+    @Override
+    public void onBackPressed() {
+        finishActivity();
+    }
+
+    private void finishActivity() {
+        ActivityCompat.finishAfterTransition(this);
+    }
+
+    @Override
+    public void finishAfterTransition() {
+        Intent intent = new Intent();
+
+        int initialPhotoPosition = getIntent().getIntExtra(Util.INITIAL_PHOTO_POSITION, 0);
+
+        intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
+        intent.putExtra(Util.CURRENT_PHOTO_POSITION, initialPhotoPosition);
+        setResult(RESULT_OK, intent);
+
+        super.finishAfterTransition();
     }
 
     @Override
@@ -231,8 +255,7 @@ public class MediaShareCommentActivity extends Activity {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
-    private void createCommentInLocalCommentDatabase(String imageUUid, String shareId, String commentText) {
-        dbUtils = DBUtils.SINGLE_INSTANCE;
+    private Comment generateComment(String shareId, String commentText) {
 
         Comment commentItem = new Comment();
         commentItem.setCreator(FNAS.userUUID);
@@ -240,108 +263,48 @@ public class MediaShareCommentActivity extends Activity {
         commentItem.setFormatTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
         commentItem.setShareId(shareId);
         commentItem.setText(commentText);
-        commentData.add(commentItem);
 
-        String uuid = String.valueOf(imageUUid);
-
-        Log.i(TAG, "create uuid" + uuid);
-
-        dbUtils.insertLocalComment(commentItem, uuid);
-
+        return commentItem;
     }
 
     public void reloadList() {
-        new AsyncTask<Object, Object, Boolean>() {
 
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
+        commentData.clear();
 
-                if (mDialog == null) {
-                    mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
-                } else if (!mDialog.isShowing()) {
-                    mDialog.show();
-                }
-            }
-
-            @Override
-            protected Boolean doInBackground(Object... params) {
-                String str;
-                Comment commentItem;
-                JSONArray json;
-                int i;
-
-                try {
-
-                    commentData.clear();
-
-                    String uuid = String.valueOf(imageData.get("uuid"));
-
-                    if (Util.getNetworkState(mContext)) {
-
-                        str = FNAS.RemoteCall(String.format(getString(R.string.photo_comment_url), Util.MEDIA_PARAMETER + "/" + imageData.get("uuid")));
-                        json = new JSONArray(str);
-                        for (i = 0; i < json.length(); i++) {
-                            commentItem = new Comment();
-                            commentItem.setCreator(json.getJSONObject(i).getString("creator"));
-                            commentItem.setTime(json.getJSONObject(i).getString("datatime"));
-                            commentItem.setFormatTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(Long.parseLong(json.getJSONObject(i).getString("datatime")))));
-                            commentItem.setShareId(json.getJSONObject(i).getString("shareid"));
-                            commentItem.setText(json.getJSONObject(i).getString("text"));
-                            commentData.add(commentItem);
-                        }
-                    } else {
-
-                        commentData.addAll(dbUtils.getRemoteImageCommentByUUid(uuid));
-                    }
-
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                    commentData.addAll(dbUtils.getLocalImageCommentByUUid(uuid));
-
-                    Collections.sort(commentData, new Comparator<Comment>() {
-                        @Override
-                        public int compare(Comment lhs, Comment rhs) {
-
-                            long mtime1 = Long.parseLong(lhs.getTime());
-                            long mtime2 = Long.parseLong(rhs.getTime());
-                            if (mtime1 < mtime2)
-                                return 1;
-                            else if (mtime1 > mtime2)
-                                return -1;
-                            else return 0;
-
-                        }
-                    });
-                    Log.d(TAG, commentData + "");
-                    return true;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-
-            }
-
-            @Override
-            protected void onPostExecute(Boolean sSuccess) {
-
-                if (mDialog != null && mDialog.isShowing())
-                    mDialog.dismiss();
-
-                mAdapter.commentList.clear();
-                mAdapter.commentList.addAll(commentData);
-                ((BaseAdapter) (lvComment.getAdapter())).notifyDataSetChanged();
-            }
-
-        }.execute();
-    }
-
-    private class CustomBroadCastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Util.LOCAL_COMMENT_CHANGED)) {
-                reloadList();
+        for (Map.Entry<String, Comment> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
+            if (entry.getKey().equals(media.getUuid())) {
+                commentData.add(entry.getValue());
             }
         }
+
+        for (Map.Entry<String, Comment> entry : LocalCache.RemoteMediaCommentMapKeyIsImageUUID.entrySet()) {
+            if (entry.getKey().equals(media.getUuid())) {
+                commentData.add(entry.getValue());
+            }
+        }
+
+        Collections.sort(commentData, new Comparator<Comment>() {
+            @Override
+            public int compare(Comment lhs, Comment rhs) {
+
+                long mtime1 = Long.parseLong(lhs.getTime());
+                long mtime2 = Long.parseLong(rhs.getTime());
+                if (mtime1 < mtime2)
+                    return 1;
+                else if (mtime1 > mtime2)
+                    return -1;
+                else return 0;
+
+            }
+        });
+        Log.d(TAG, commentData + "");
+
+        mAdapter.commentList.clear();
+        mAdapter.commentList.addAll(commentData);
+        ((BaseAdapter) (lvComment.getAdapter())).notifyDataSetChanged();
+
+
+
     }
 
     class CommentListViewAdapter extends BaseAdapter {
@@ -390,10 +353,10 @@ public class MediaShareCommentActivity extends Activity {
             }
 
             if (currentItem != null) {
-                ConcurrentMap<String, String> map = LocalCache.UsersMap.get(currentItem.getCreator());
-                ivAvatar.setText(map.get("avatar_default"));
+                User map = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreator());
+                ivAvatar.setText(map.getDefaultAvatar());
 
-                int color = Integer.parseInt(map.get("avatar_default_color"));
+                int color = Integer.parseInt(map.getDefaultAvatarBgColor());
                 switch (color) {
                     case 0:
                         ivAvatar.setBackgroundResource(R.drawable.user_portrait_bg_blue);
@@ -421,5 +384,111 @@ public class MediaShareCommentActivity extends Activity {
             return commentList.get(position);
         }
     }
+
+    @Override
+    public void onImageLoadFinish(String url, View view) {
+        ActivityCompat.startPostponedEnterTransition(this);
+
+        if (showSoftInputWhenEnter) {
+            showSoftInputAfterTransitionEnd();
+        }
+
+    }
+
+    private void showSoftInputAfterTransitionEnd() {
+        if (Util.checkRunningOnLollipopOrHigher()) {
+            getWindow().getSharedElementEnterTransition().addListener(new CustomTransitionListener() {
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    super.onTransitionEnd(transition);
+
+                    tfContent.requestFocus();
+                    Util.showSoftInput(MediaShareCommentActivity.this, tfContent);
+                }
+            });
+        }
+    }
+
+    private class CustomBroadCastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Util.LOCAL_COMMENT_DELETED)) {
+
+                Log.i(TAG, "local comment changed");
+
+                if (mDialog != null && mDialog.isShowing())
+                    mDialog.dismiss();
+
+                if (intent.getStringExtra(Util.OPERATION_RESULT).equals(OperationResult.SUCCEED.name())) {
+                    reloadList();
+                }
+
+            } else if (intent.getAction().equals(Util.REMOTE_COMMENT_CREATED)) {
+
+                String result = intent.getStringExtra(Util.OPERATION_RESULT);
+
+                OperationResult operationResult = OperationResult.valueOf(result);
+
+                switch (operationResult) {
+                    case SUCCEED:
+
+                        Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
+                        String imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
+                        Intent operationIntent = new Intent(Util.OPERATION);
+                        operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.DELETE.name());
+                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
+                        operationIntent.putExtra(Util.OPERATION_COMMENT, comment);
+                        operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
+                        mManager.sendBroadcast(operationIntent);
+
+                        break;
+                    case FAIL:
+
+                        if (mDialog != null && mDialog.isShowing())
+                            mDialog.dismiss();
+
+                        Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+                        break;
+                }
+
+            } else if (intent.getAction().equals(Util.LOCAL_COMMENT_CREATED)) {
+
+
+                String result = intent.getStringExtra(Util.OPERATION_RESULT);
+
+                OperationResult operationResult = OperationResult.valueOf(result);
+
+                switch (operationResult) {
+                    case SUCCEED:
+
+                        Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
+
+                        if (Util.getNetworkState(mContext)) {
+                            Intent operationIntent = new Intent(Util.OPERATION);
+                            operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
+                            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
+                            operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, intent.getStringExtra(Util.OPERATION_IMAGE_UUID));
+                            operationIntent.putExtra(Util.OPERATION_COMMENT, comment);
+                            mManager.sendBroadcast(operationIntent);
+                        }
+
+                        tfContent.setText("");
+                        break;
+                    case FAIL:
+
+                        if (mDialog != null && mDialog.isShowing())
+                            mDialog.dismiss();
+
+                        Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+                        tfContent.setText("");
+                        break;
+                }
+
+            } else if (intent.getAction().equals(Util.LOCAL_MEDIA_COMMENT_RETRIEVED) || intent.getAction().equals(Util.REMOTE_MEDIA_COMMENT_RETRIEVED)) {
+                reloadList();
+            }
+        }
+    }
+
 }
 

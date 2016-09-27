@@ -8,7 +8,7 @@ import android.os.Parcelable;
  */
 public class Comment implements Parcelable {
 
-    private int id;
+    private long id;
     private String creator;
     private String time;
     private String formatTime;
@@ -28,7 +28,7 @@ public class Comment implements Parcelable {
     }
 
     protected Comment(Parcel in) {
-        id = in.readInt();
+        id = in.readLong();
         creator = in.readString();
         time = in.readString();
         formatTime = in.readString();
@@ -38,7 +38,7 @@ public class Comment implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
+        dest.writeLong(id);
         dest.writeString(creator);
         dest.writeString(time);
         dest.writeString(formatTime);
@@ -63,11 +63,11 @@ public class Comment implements Parcelable {
         }
     };
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

@@ -9,6 +9,6 @@ import java.util.List;
  */
 public interface LocalDataParser<T> {
 
-    List<T> parse(Cursor cursor);
+    T parse(Cursor cursor);
 
 }

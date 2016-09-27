@@ -1,13 +1,16 @@
 package com.winsun.fruitmix;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -17,11 +20,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,12 +30,14 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
-import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationTargetType;
+import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -42,7 +45,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -59,17 +61,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     Toolbar mToolBar;
 
-    List<Map<String, Object>> picList;
+    ArrayList<Media> mediaList;
 
     private MenuItem mPrivatePublicMenu;
 
-    private String mUuid;
-    private String mTitle;
-    private String mDesc;
-    private String imagesStr;
-    private boolean mMaintained;
-    private boolean mPrivate;
-    private boolean mIsLocked;
+    private MediaShare mediaShare;
 
     private Context mContext;
 
@@ -87,6 +83,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private Bundle reenterState;
 
+    private LocalBroadcastManager localBroadcastManager;
+    private CustomReceiver customReceiver;
+    private IntentFilter filter;
+
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -100,9 +100,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     names.clear();
                     sharedElements.clear();
 
-                    Map<String, Object> map = picList.get(currentPhotoPosition);
+                    Media media = mediaList.get(currentPhotoPosition);
 
-                    String sharedElementName = String.valueOf(map.get("resHash"));
+                    String sharedElementName = media.getUuid();
                     View newSharedElement = mainGridView.findViewWithTag(sharedElementName);
 
                     names.add(sharedElementName);
@@ -131,17 +131,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
 
-        imagesStr = getIntent().getStringExtra("images");
-        mUuid = getIntent().getStringExtra("uuid");
-        mTitle = getIntent().getStringExtra("title");
-        mDesc = getIntent().getStringExtra("desc");
-        mMaintained = getIntent().getBooleanExtra("maintained", false);
-        mIsLocked = getIntent().getBooleanExtra("local", false);
+        mediaShare = getIntent().getParcelableExtra(Util.KEY_MEDIASHARE);
         mShowMenu = getIntent().getBooleanExtra(Util.NEED_SHOW_MENU, true);
-
         mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
-
-        mPrivate = getIntent().getStringExtra("private").equals("true");
 
         setContentView(R.layout.activity_album_pic_content);
 
@@ -157,21 +149,41 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         mainGridView.setAdapter(new PicGridViewAdapter(this));
 
         mTitleTextView = (TextView) findViewById(R.id.title);
-        mTitleTextView.setText(mTitle);
+        mTitleTextView.setText(mediaShare.getTitle());
 
         mToolBar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        picList = new ArrayList<Map<String, Object>>();
-        fillPicList(imagesStr);
+        mediaList = new ArrayList<>();
+        fillPicList(mediaShare.getImageDigests());
         ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
+
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        customReceiver = new CustomReceiver();
+        filter = new IntentFilter(Util.LOCAL_SHARE_DELETED);
+        filter.addAction(Util.REMOTE_SHARE_DELETED);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        localBroadcastManager.registerReceiver(customReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        localBroadcastManager.unregisterReceiver(customReceiver);
     }
 
     @Override
     public void onBackPressed() {
         if (isOperated)
-            setResult(200);
+            setResult(RESULT_OK);
 
         super.onBackPressed();
     }
@@ -188,78 +200,60 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             mainGridView.smoothScrollToPosition(currentPhotoPosition);
 
-            ActivityCompat.postponeEnterTransition(AlbumPicContentActivity.this);
+/*            ActivityCompat.postponeEnterTransition(AlbumPicContentActivity.this);
             mainGridView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
                     mainGridView.getViewTreeObserver().removeOnPreDrawListener(this);
                     // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
                     mainGridView.requestLayout();
-                    ActivityCompat.startPostponedEnterTransition(AlbumPicContentActivity.this);
+
 
                     return true;
                 }
-            });
+            });*/
+            ActivityCompat.startPostponedEnterTransition(AlbumPicContentActivity.this);
         }
     }
 
-    private void fillPicList(String imagesStr) {
+    private void fillPicList(List<String> imageDigests) {
 
-        Map<String, Object> picItem;
-        ConcurrentMap<String, String> picItemRaw;
-        String[] stArr;
+        Media picItemRaw;
 
-        picList.clear();
+        mediaList.clear();
+        Media media;
 
-        if (!imagesStr.equals("")) {
-            stArr = imagesStr.split(",");
+        for (String aStArr : imageDigests) {
+            media = new Media();
+            picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
 
-            Log.i(TAG, "imageStr[0]:" + stArr[0]);
+            Log.i(TAG, "media has it or not:" + (picItemRaw != null ? "true" : "false"));
 
-            for (String aStArr : stArr) {
-                picItem = new HashMap<String, Object>();
-                picItemRaw = LocalCache.MediasMap.get(aStArr);
+            if (picItemRaw == null) {
+                picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
 
-                Log.i(TAG, "media has it or not:" + (picItemRaw != null ? "true" : "false"));
-
-                if (picItemRaw != null) {
-                    picItem.put("cacheType", "nas");
-                    picItem.put("resID", "" + R.drawable.default_img);
-                    picItem.put("resHash", picItemRaw.get("uuid"));
-                    picItem.put("width", picItemRaw.get("width"));
-                    picItem.put("height", picItemRaw.get("height"));
-                    picItem.put("uuid", picItemRaw.get("uuid"));
-                    picItem.put("mtime", picItemRaw.get("mtime"));
-                    picItem.put("selected", "0");
-                    picItem.put("locked", "1");
-                    picList.add(picItem);
-                } else {
-                    picItemRaw = LocalCache.LocalImagesMapKeyIsUUID.get(aStArr);
-
-                    Log.i(TAG, "localimagesMap2 has it or not:" + (picItemRaw != null ? "true" : "false"));
-
-                    if (picItemRaw != null) {
-                        picItem.put("cacheType", "local");
-                        picItem.put("resID", "" + R.drawable.default_img);
-                        picItem.put("thumb", picItemRaw.get("thumb"));
-                        picItem.put("width", picItemRaw.get("width"));
-                        picItem.put("height", picItemRaw.get("height"));
-                        picItem.put("uuid", picItemRaw.get("uuid"));
-                        picItem.put("mtime", picItemRaw.get("mtime"));
-                        picItem.put("selected", "0");
-                        picItem.put("locked", "1");
-                        picList.add(picItem);
-                    }
-                }
+                media.setLocal(true);
+                media.setThumb(picItemRaw.getThumb());
+            } else {
+                media.setLocal(false);
             }
+
+            media.setUuid(picItemRaw.getUuid());
+            media.setWidth(picItemRaw.getWidth());
+            media.setHeight(picItemRaw.getHeight());
+            media.setTime(picItemRaw.getTime());
+            media.setSelected(false);
+
+            mediaList.add(media);
+
         }
     }
 
     public void showSlider(int position, View sharedElement, String sharedElementName) {
-        LocalCache.TransActivityContainer.put("imgSliderList", picList);
         Intent intent = new Intent();
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, mShowCommentBtn);
+        intent.putParcelableArrayListExtra(Util.KEY_MEDIA_LIST, mediaList);
         intent.setClass(this, PhotoSliderActivity.class);
 
         ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, sharedElement, sharedElementName);
@@ -276,41 +270,41 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            if (activity.picList == null) return 0;
-            return activity.picList.size();
+            if (activity.mediaList == null) return 0;
+            return activity.mediaList.size();
         }
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             View view;
-            final Map<String, Object> currentItem;
+            final Media currentItem;
             final NetworkImageView ivMain;
 
             if (convertView == null)
                 view = LayoutInflater.from(activity).inflate(R.layout.photo_list_cell_cell, parent, false);
             else view = convertView;
 
-            currentItem = (Map<String, Object>) this.getItem(position);
+            currentItem = (Media) this.getItem(position);
 
             ivMain = (NetworkImageView) view.findViewById(R.id.mainPic);
 
-            if (currentItem.get("cacheType").equals("local")) {  // local bitmap path
+            if (currentItem.isLocal()) {  // local bitmap path
 
-                String url = String.valueOf(currentItem.get("thumb"));
+                String url = String.valueOf(currentItem.getThumb());
 
                 mImageLoader.setShouldCache(false);
                 ivMain.setTag(url);
                 ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
                 ivMain.setImageUrl(url, mImageLoader);
 
-            } else if (currentItem.get("cacheType").equals("nas")) {
+            } else {
 
-                int width = Integer.parseInt((String) currentItem.get("width"));
-                int height = Integer.parseInt((String) currentItem.get("height"));
+                int width = Integer.parseInt(currentItem.getWidth());
+                int height = Integer.parseInt(currentItem.getHeight());
 
                 int[] result = Util.formatPhotoWidthHeight(width, height);
 
-                String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + currentItem.get("resHash"), result[0], result[1]);
+                String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + currentItem.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
 
                 mImageLoader.setShouldCache(true);
                 ivMain.setTag(url);
@@ -322,9 +316,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
 
-                    String sharedElementName = (String) currentItem.get("resHash");
+                    String sharedElementName = currentItem.getUuid();
                     ViewCompat.setTransitionName(ivMain, sharedElementName);
-                    activity.showSlider(position, ivMain, String.valueOf(currentItem.get("resHash")));
+                    activity.showSlider(position, ivMain, currentItem.getUuid());
                 }
             });
 
@@ -339,7 +333,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         @Override
         public Object getItem(int position) {
-            return activity.picList.get(position);
+            return activity.mediaList.get(position);
         }
     }
 
@@ -352,7 +346,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             mPrivatePublicMenu = menu.findItem(R.id.set_private_public);
 
-            if (mPrivate) {
+            if (mediaShare.getViewer().isEmpty()) {
                 mPrivatePublicMenu.setTitle(getString(R.string.set_public));
             } else {
                 mPrivatePublicMenu.setTitle(getString(R.string.set_private));
@@ -370,21 +364,21 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        Log.i("islock", mIsLocked + "");
+        Log.i("islock", mediaShare.isLocked() + "");
 
         if (Util.getNetworkState(mContext)) {
-            if (mIsLocked) {
+            if (mediaShare.isLocked()) {
                 Toast.makeText(mContext, getString(R.string.share_uploading), Toast.LENGTH_SHORT).show();
                 return true;
             }
         } else {
-            if (!mIsLocked) {
+            if (!mediaShare.isLocked()) {
                 Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                 return true;
             }
         }
 
-        if (!mMaintained) {
+        if (!mediaShare.getMaintainer().contains(FNAS.userUUID)) {
             Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
 
             return true;
@@ -394,13 +388,12 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.setting_album:
                 intent = new Intent(this, ModifyAlbumActivity.class);
-                intent.putExtra(Util.MEDIASHARE_UUID, mUuid);
+                intent.putExtra(Util.MEDIASHARE_UUID, mediaShare.getUuid());
                 startActivityForResult(intent, Util.KEY_MODIFY_ALBUM_REQUEST_CODE);
                 break;
             case R.id.edit_photo:
                 intent = new Intent(this, EditPhotoActivity.class);
-                intent.putExtra("images", imagesStr);
-                intent.putExtra(Util.MEDIASHARE_UUID, mUuid);
+                intent.putExtra(Util.KEY_MEDIASHARE, mediaShare);
                 startActivityForResult(intent, Util.KEY_EDIT_PHOTO_REQUEST_CODE);
                 break;
             case R.id.set_private_public:
@@ -420,161 +413,112 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == Util.KEY_EDIT_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
-            fillPicList(data.getStringExtra(Util.NEW_ALBUM_CONTENT));
+
+            MediaShare mediaShare = data.getParcelableExtra(Util.KEY_MEDIASHARE);
+
+            fillPicList(mediaShare.getImageDigests());
             ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
         } else if (requestCode == Util.KEY_MODIFY_ALBUM_REQUEST_CODE && resultCode == RESULT_OK) {
-            mTitle = data.getStringExtra(Util.UPDATED_ALBUM_TITLE);
-            mTitleTextView.setText(mTitle);
+            String title = data.getStringExtra(Util.UPDATED_ALBUM_TITLE);
+            mediaShare.setTitle(title);
+            mTitleTextView.setText(mediaShare.getTitle());
         }
 
         isOperated = true;
     }
 
     private void deleteCurrentAblum() {
-        new AsyncTask<Object, Object, Boolean>() {
 
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
+        mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
 
-                mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
-            }
-
-            @Override
-            protected Boolean doInBackground(Object... params) {
-                String data;
-
-                if (Util.getNetworkState(mContext)) {
-
-                    data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mUuid + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"true\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mTitle + "\\\", \\\"desc\\\":\\\"" + mDesc + "\\\"}], \\\"viewers\\\":[]}}]\"}";
-                    try {
-                        FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
-                        FNAS.retrieveShareMap();
-                        return true;
-                    } catch (Exception e) {
-
-                        e.printStackTrace();
-
-                        return false;
-                    }
-
-                } else {
-
-
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-
-                    dbUtils.deleteLocalShareByUUid(mUuid);
-
-                    FNAS.delShareInDocumentsMapById(mUuid);
-
-                    return true;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Boolean sSuccess) {
-
-                mDialog.dismiss();
-
-                if (sSuccess) {
-                    setResult(200);
-                } else {
-                    Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
-                }
-
-                finish();
-
-            }
-
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-
-    }
-
-    private void deleteAlbumInLocalMap(String uuid) {
-
-        if (LocalCache.SharesMap.containsKey(uuid)) {
-            Map<String, String> map = LocalCache.SharesMap.get(uuid);
-            map.put("del", "1");
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE, OperationType.DELETE.name());
+        if (Util.getNetworkState(mContext)) {
+            intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+        } else {
+            intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
         }
+
+        intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
+        localBroadcastManager.sendBroadcast(intent);
 
     }
 
     private void setPublicPrivate() {
-        new AsyncTask<Object, Object, Boolean>() {
 
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
+        MediaShare cloneMediaShare = mediaShare.cloneFromParameter(mediaShare);
 
-                mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
-            }
+        if (cloneMediaShare.getViewer().isEmpty()) {
+            cloneMediaShare.setViewer(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+        } else {
+            cloneMediaShare.setViewer(Collections.<String>emptyList());
+        }
 
-            @Override
-            protected Boolean doInBackground(Object... params) {
-                String data;
+        mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
 
-                if (Util.getNetworkState(mContext)) {
-                    data = "";
-                    if (mPrivate) {
-                        for (String key : LocalCache.UsersMap.keySet()) {
-                            data += ",\\\"" + key + "\\\"";
-                        }
-                    } else data = ",";
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE, OperationType.MODIFY.name());
+        if (Util.getNetworkState(mContext)) {
+            intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+        } else {
+            intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+        }
 
-                    data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mUuid + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"false\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mTitle + "\\\", \\\"desc\\\":\\\"" + mDesc + "\\\"}], \\\"viewers\\\":[" + data.substring(1) + "]}}]\"}";
-                    try {
-                        FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
-                        FNAS.retrieveShareMap();
-                        return true;
-                    } catch (Exception e) {
-                        return false;
-                    }
-                } else {
+        intent.putExtra(Util.OPERATION_MEDIASHARE, cloneMediaShare);
+        localBroadcastManager.sendBroadcast(intent);
 
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-
-                    MediaShare mediaShare = dbUtils.getLocalShareByUuid(mUuid);
-
-                    if (mPrivate) {
-
-                        mediaShare.setViewer(new ArrayList<>(LocalCache.UsersMap.keySet()));
-                    } else {
-                        mediaShare.setViewer(Collections.<String>emptyList());
-                    }
-
-                    dbUtils.updateLocalShare(mediaShare, mediaShare.getUuid());
-
-                    FNAS.loadLocalShare();
-                    return true;
-                }
-
-            }
-
-            @Override
-            protected void onPostExecute(Boolean sSuccess) {
-
-                mDialog.dismiss();
-
-                if (sSuccess) {
-                    Toast.makeText(mContext, getString(R.string.setting_succeed), Toast.LENGTH_SHORT).show();
-
-                    mPrivate = !mPrivate;
-                    if (mPrivate) {
-                        mPrivatePublicMenu.setTitle(getString(R.string.set_public));
-                    } else {
-                        mPrivatePublicMenu.setTitle(getString(R.string.set_private));
-                    }
-
-                    isOperated = true;
-
-                } else {
-                    Toast.makeText(mContext, getString(R.string.setting_fail), Toast.LENGTH_SHORT).show();
-
-                }
-            }
-
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    private class CustomReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (mDialog != null && mDialog.isShowing())
+                mDialog.dismiss();
+
+            if (intent.getAction().equals(Util.LOCAL_SHARE_DELETED) || intent.getAction().equals(Util.REMOTE_SHARE_DELETED)) {
+
+                String result = intent.getStringExtra(Util.OPERATION_RESULT);
+
+                OperationResult operationResult = OperationResult.valueOf(result);
+
+                switch (operationResult) {
+                    case SUCCEED:
+                        ((Activity) mContext).setResult(RESULT_OK);
+                        break;
+                    case FAIL:
+                        Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+                        break;
+                }
+
+                finish();
+
+            } else if (intent.getAction().equals(Util.LOCAL_SHARE_MODIFIED) || intent.getAction().equals(Util.REMOTE_SHARE_MODIFIED)) {
+
+                String result = intent.getStringExtra(Util.OPERATION_RESULT);
+
+                OperationResult operationResult = OperationResult.valueOf(result);
+
+                switch (operationResult) {
+                    case SUCCEED:
+                        Toast.makeText(mContext, getString(R.string.setting_succeed), Toast.LENGTH_SHORT).show();
+
+                        if (mediaShare.getViewer().isEmpty()) {
+                            mPrivatePublicMenu.setTitle(getString(R.string.set_public));
+                        } else {
+                            mPrivatePublicMenu.setTitle(getString(R.string.set_private));
+                        }
+
+                        isOperated = true;
+
+                        break;
+                    case FAIL:
+                        Toast.makeText(mContext, getString(R.string.setting_fail), Toast.LENGTH_SHORT).show();
+                        break;
+                }
+
+            }
+
+        }
+    }
 }

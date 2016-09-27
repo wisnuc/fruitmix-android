@@ -1,13 +1,16 @@
 package com.winsun.fruitmix;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -19,9 +22,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Equipment;
-import com.winsun.fruitmix.model.ExecutorServiceInstance;
+import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
@@ -70,6 +72,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private static final int DATA_CHANGE = 0x0001;
 
+    private LocalBroadcastManager localBroadcastManager;
+    private IntentFilter filter;
+    private CustomReceiver customReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,7 +88,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         mUserExpandableLists = new ArrayList<>();
         mEquipments = new ArrayList<>();
 
-        Equipment equipment = new Equipment("Winsuc Appliction 140 By Wu", "192.168.5.140", 6666);
+        Equipment equipment = new Equipment("Winsuc Appliction 131 By Wu", "192.168.5.131", 6666);
         getUserList(equipment);
 
         mHandler = new CustomHandler(this, getMainLooper());
@@ -113,11 +119,17 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        IntentFilter filter = new IntentFilter(Util.REMOTE_USER_RETRIEVED);
+        customReceiver = new CustomReceiver();
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        localBroadcastManager.registerReceiver(customReceiver,filter);
 
         discoverService(mContext);
     }
@@ -127,14 +139,16 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         super.onPause();
 
+        localBroadcastManager.unregisterReceiver(customReceiver);
+
         try {
             stopDiscoverServices(mContext, mListener);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -263,7 +277,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         public void refreshView(int groupPosition, boolean isExpanded) {
             Equipment equipment = mAdapter.equipmentList.get(groupPosition);
-            if(equipment == null){
+            if (equipment == null) {
                 return;
             }
             mGroupName.setText(mAdapter.equipmentList.get(groupPosition).getServiceName());
@@ -492,6 +506,12 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                     break;
                 default:
             }
+        }
+    }
+
+    private class CustomReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
         }
     }
 }

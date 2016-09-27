@@ -1,12 +1,14 @@
 package com.winsun.fruitmix;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -15,10 +17,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.ExecutorServiceInstance;
+import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationTargetType;
+import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONObject;
@@ -57,7 +61,10 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     private String mUserUUid;
     private String mPwd;
     private String mGateway;
-    private String mJwt;
+
+    private LocalBroadcastManager localBroadcastManager;
+    private IntentFilter filter;
+    private CustomReceiver customReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +107,26 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                 break;
         }
 
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        filter = new IntentFilter(Util.REMOTE_TOKEN_RETRIEVED);
+        filter.addAction(Util.REMOTE_DEVICEID_RETRIEVED);
+        filter.addAction(Util.REMOTE_USER_RETRIEVED);
+        customReceiver = new CustomReceiver();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        localBroadcastManager.registerReceiver(customReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        localBroadcastManager.unregisterReceiver(customReceiver);
     }
 
     @Override
@@ -117,7 +144,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                 Util.hideSoftInput(LoginActivity.this);
 
                 mPwd = mPwdEdit.getText().toString();
-                login(mLoginBtn);
+                login();
                 break;
             default:
         }
@@ -134,96 +161,16 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
     /**
      * use uuid and password to login
-     *
-     * @param view show Snackbar when error occurs
      */
-    private void login(final View view) {
+    private void login() {
 
-        new AsyncTask<String, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(String... params) {
-
-                HttpURLConnection conn;
-                String str;
-                try {
-                    conn = (HttpURLConnection) (new URL(mGateway + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
-                    conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((mUserUUid + ":" + mPwd).getBytes(), Base64.DEFAULT));
-                    if (conn.getResponseCode() != 200) {
-
-                        Util.loginState = false;
-                        return false;
-
-                    } else {
-
-                        if (!mUserUUid.equals(FNAS.userUUID)) {
-                            LocalCache.CleanAll();
-                            LocalCache.Init(LoginActivity.this);
-                        }
-
-                        FNAS.Gateway = mGateway;
-                        FNAS.userUUID = mUserUUid;
-
-                        str = FNAS.ReadFull(conn.getInputStream());
-                        mJwt = new JSONObject(str).getString("token"); // get token
-                        FNAS.JWT = mJwt;
-
-                        Util.loginState = true;
-
-                        if (LocalCache.DeviceID == null || LocalCache.DeviceID.equals("")) {
-                            //SetGlobalData("deviceID", UUID.randomUUID().toString());
-                            str = FNAS.PostRemoteCall("/library/", "");
-                            LocalCache.DeviceID = str.replace("\"", "");
-                            LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
-                        } // get deviceID
-                        Log.d("uuid", LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
-
-                        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-                        instance.doOneTaskInCachedThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    FNAS.loadData();
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
-                                }
-                            }
-                        });
-
-                        LocalCache.saveGateway(mGateway, mContext);
-                        LocalCache.saveJwt(mJwt, mContext);
-                        setGroupNameUserName(mEquipmentGroupName, mEquipmentChildName);
-                        setUuidPassword(mUserUUid, mPwd);
-
-                        FNAS.checkLocalShareAndComment(mContext);
-
-                        Intent intent = new Intent(mContext, NavPagerActivity.class);
-                        intent.putExtra(Util.EQUIPMENT_CHILD_NAME, mEquipmentChildName);
-                        startActivity(intent);
-
-                        setResult(RESULT_OK);
-
-                        finish();
-
-                        return true;
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-
-                    Util.loginState = false;
-                    return false;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Boolean aBoolean) {
-
-                if (!aBoolean) {
-                    Snackbar.make(view, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
-                }
-
-            }
-        }.execute();
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_TOKEN.name());
+        intent.putExtra(Util.GATEWAY, mGateway);
+        intent.putExtra(Util.USER_UUID, mUserUUid);
+        intent.putExtra(Util.PASSWORD, mPwd);
+        localBroadcastManager.sendBroadcast(intent);
 
     }
 
@@ -246,5 +193,76 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         editor.putString(Util.PASSWORD, password);
         editor.apply();
     }
+
+    private class CustomReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (intent.getAction().equals(Util.REMOTE_TOKEN_RETRIEVED)) {
+
+                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT));
+
+                switch (result) {
+                    case SUCCEED:
+
+                        if (!mUserUUid.equals(FNAS.userUUID)) {
+                            LocalCache.CleanAll();
+                        }
+
+                        LocalCache.Init(LoginActivity.this);
+
+                        FNAS.Gateway = mGateway;
+                        FNAS.userUUID = mUserUUid;
+
+                        Intent operationIntent = new Intent(Util.OPERATION);
+                        operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
+                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_DEVICEID.name());
+                        localBroadcastManager.sendBroadcast(operationIntent);
+
+                        break;
+                    case FAIL:
+                        Util.loginState = false;
+                        Snackbar.make(mLoginBtn, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
+                        break;
+                }
+
+            } else if (intent.getAction().equals(Util.REMOTE_DEVICEID_RETRIEVED)) {
+
+                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT));
+
+                switch (result) {
+                    case SUCCEED:
+
+                        Util.loginState = true;
+
+                        FNAS.retrieveUserMap(mContext);
+
+                        LocalCache.saveGateway(FNAS.Gateway, mContext);
+                        LocalCache.saveJwt(LocalCache.DeviceID, mContext);
+                        setGroupNameUserName(mEquipmentGroupName, mEquipmentChildName);
+                        setUuidPassword(FNAS.userUUID, mPwd);
+
+
+                        break;
+                    case FAIL:
+                        Util.loginState = false;
+                        Snackbar.make(mLoginBtn, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
+
+                        break;
+                }
+
+            } else if (intent.getAction().equals(Util.REMOTE_USER_RETRIEVED)) {
+
+                Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
+                jumpIntent.putExtra(Util.EQUIPMENT_CHILD_NAME, mEquipmentChildName);
+                startActivity(jumpIntent);
+                LoginActivity.this.setResult(RESULT_OK);
+                finish();
+
+            }
+
+        }
+    }
+
 
 }

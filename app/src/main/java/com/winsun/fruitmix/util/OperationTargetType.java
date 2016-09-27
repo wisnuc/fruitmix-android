@@ -1,0 +1,10 @@
+package com.winsun.fruitmix.util;
+
+/**
+ * Created by Administrator on 2016/9/18.
+ */
+public enum OperationTargetType {
+
+    LOCAL_USER, REMOTE_USER, REMOTE_MEDIA, LOCAL_MEDIA, REMOTE_MEDIASHARE, LOCAL_MEDIASHARE, LOCAL_MEDIA_COMMENT, REMOTE_MEDIA_COMMENT,REMOTE_TOKEN,REMOTE_DEVICEID,LOCAL_MEDIA_IN_CAMERA
+
+}
