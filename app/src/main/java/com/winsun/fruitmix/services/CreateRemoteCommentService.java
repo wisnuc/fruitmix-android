@@ -79,7 +79,7 @@ public class CreateRemoteCommentService extends IntentService {
         boolean returnValue = Util.uploadImageDigestsIfNotUpload(this, Collections.singletonList(mediaUUID));
 
         if (!returnValue) {
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
             mManager.sendBroadcast(intent);
 
             return;
@@ -104,7 +104,7 @@ public class CreateRemoteCommentService extends IntentService {
 
                 Log.i(TAG,"insert remote media comment to map result:" + (mapResult != null?"true":"false"));
 
-                intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
                 intent.putExtra(Util.OPERATION_IMAGE_UUID,mediaUUID);
                 intent.putExtra(Util.OPERATION_COMMENT,comment);
 
@@ -114,7 +114,7 @@ public class CreateRemoteCommentService extends IntentService {
         } catch (Exception ex) {
             ex.printStackTrace();
 
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 
             Log.i(TAG,"insert remote comment fail");
         }

@@ -277,7 +277,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 @Override
                 public void onClick(final View v) {
 
-                    MediaShare cloneMediaShare = currentItem.cloneFromParameter(currentItem);
+                    MediaShare cloneMediaShare = currentItem.cloneMyself();
 
                     if (cloneMediaShare.getViewer().isEmpty()) {
                         cloneMediaShare.setViewer(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));

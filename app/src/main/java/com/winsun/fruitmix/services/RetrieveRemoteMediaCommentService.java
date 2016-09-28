@@ -100,7 +100,7 @@ public class RetrieveRemoteMediaCommentService extends IntentService {
             Log.i(TAG, "retrieve remote media comment from network");
 
             Intent intent = new Intent(Util.REMOTE_MEDIA_COMMENT_RETRIEVED);
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
             localBroadcastManager.sendBroadcast(intent);
 
         } catch (Exception e) {
@@ -117,7 +117,7 @@ public class RetrieveRemoteMediaCommentService extends IntentService {
             Log.i(TAG, "retrieve remote media comment from db");
 
             Intent intent = new Intent(Util.REMOTE_MEDIA_COMMENT_RETRIEVED);
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
             localBroadcastManager.sendBroadcast(intent);
         }
 

@@ -7,10 +7,8 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Media;
-import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
-import com.winsun.fruitmix.parser.RemoteMediaShareParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
@@ -96,7 +94,7 @@ public class RetrieveRemoteMediaService extends IntentService {
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
         Intent intent = new Intent(Util.REMOTE_MEDIA_RETRIEVED);
-        intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+        intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
         localBroadcastManager.sendBroadcast(intent);
 
     }

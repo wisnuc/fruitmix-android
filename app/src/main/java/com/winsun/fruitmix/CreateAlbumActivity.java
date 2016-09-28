@@ -123,8 +123,8 @@ public class CreateAlbumActivity extends AppCompatActivity {
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
                 Intent intent = new Intent(Util.OPERATION);
-                intent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
-                intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+                intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
                 intent.putExtra(Util.OPERATION_MEDIASHARE, generateMediaShare(sPublic, sSetMaintainer, title, desc, mSelectedImageUUIDArray));
                 localBroadcastManager.sendBroadcast(intent);
 
@@ -204,7 +204,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
                 if (mDialog != null && mDialog.isShowing())
                     mDialog.dismiss();
 
-                String result = intent.getStringExtra(Util.OPERATION_RESULT);
+                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
 
                 OperationResult operationResult = OperationResult.valueOf(result);
 
@@ -213,8 +213,8 @@ public class CreateAlbumActivity extends AppCompatActivity {
                         if (Util.getNetworkState(mContext)) {
                             MediaShare mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
                             Intent operationIntent = new Intent(Util.OPERATION);
-                            operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
-                            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+                            operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
                             operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
                             localBroadcastManager.sendBroadcast(operationIntent);
                         }

@@ -67,7 +67,7 @@ public class ButlerService extends Service {
         public void onReceive(Context context, Intent intent) {
 
             if (intent.getAction().equals(Util.OPERATION)) {
-                String type = intent.getStringExtra(Util.OPERATION_TYPE);
+                String type = intent.getStringExtra(Util.OPERATION_TYPE_NAME);
 
                 OperationType operationType = OperationType.valueOf(type);
 
@@ -94,7 +94,7 @@ public class ButlerService extends Service {
     }
 
     private void handleCreateOperation(Intent intent) {
-        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE);
+        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE_NAME);
 
         OperationTargetType targetType = OperationTargetType.valueOf(type);
 
@@ -143,7 +143,7 @@ public class ButlerService extends Service {
 
 
     private void handleModifyOperation(Intent intent) {
-        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE);
+        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE_NAME);
 
         OperationTargetType targetType = OperationTargetType.valueOf(type);
 
@@ -175,7 +175,7 @@ public class ButlerService extends Service {
     }
 
     private void handleDeleteOperation(Intent intent) {
-        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE);
+        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE_NAME);
 
         OperationTargetType targetType = OperationTargetType.valueOf(type);
 
@@ -184,12 +184,11 @@ public class ButlerService extends Service {
         MediaShare mediaShare;
         Comment comment;
         String imageUUID;
-        String localMediaShareUUID;
 
         switch (targetType) {
             case LOCAL_MEDIASHARE:
-                localMediaShareUUID = intent.getStringExtra(Util.OPERATION_LOCAL_MEDIASHARE_UUID);
-                DeleteLocalMediaShareService.startActionDeleteLocalShare(this, localMediaShareUUID, intent.getBooleanExtra(Util.OPERATION_LOCAL_MEDIASHARE_LOCKED, false));
+                mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
+                DeleteLocalMediaShareService.startActionDeleteLocalShare(this,mediaShare);
                 break;
             case REMOTE_MEDIASHARE:
                 mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
@@ -205,7 +204,7 @@ public class ButlerService extends Service {
 
 
     private void handleGetOperation(Intent intent) {
-        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE);
+        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE_NAME);
 
         OperationTargetType targetType = OperationTargetType.valueOf(type);
 

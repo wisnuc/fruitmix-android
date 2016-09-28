@@ -74,9 +74,6 @@ public class MediaShareList implements NavPagerActivity.Page {
     Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
     ShareListViewAdapter mAdapter;
 
-    int mLoadCommentCount = 0;
-    int mLoadCommentTotal = 0;
-
     private DBUtils dbUtils;
 
     private RequestQueue mRequestQueue;
@@ -110,9 +107,6 @@ public class MediaShareList implements NavPagerActivity.Page {
         mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
 
         mMediaUUIDWhichHaveStartedLoadComment = new ArrayList<>();
-
-        mLoadCommentCount = 0;
-        mLoadCommentTotal = 0;
 
     }
 
@@ -194,7 +188,6 @@ public class MediaShareList implements NavPagerActivity.Page {
                     if (media != null) {
                         String uuid = media.getUuid();
                         if (!mMediaUUIDWhichHaveStartedLoadComment.contains(uuid)) {
-                            mLoadCommentTotal++;
                             loadCommentList(uuid);
 
                             Log.i(TAG, "load image comment,image uuid:" + uuid);
@@ -307,12 +300,12 @@ public class MediaShareList implements NavPagerActivity.Page {
     }
 
 
-    class ShareListViewAdapter extends BaseAdapter {
+    private class ShareListViewAdapter extends BaseAdapter {
 
         MediaShareList container;
         Map<String, List<Comment>> commentMap;
 
-        public ShareListViewAdapter(MediaShareList container_) {
+        ShareListViewAdapter(MediaShareList container_) {
             container = container_;
             commentMap = new HashMap<>();
         }
@@ -787,29 +780,27 @@ public class MediaShareList implements NavPagerActivity.Page {
     }
 
     public void refreshRemoteComment() {
-        mLoadCommentCount++;
-        if (mLoadCommentCount == mLoadCommentTotal) {
 
-            Log.i(TAG, "load remote comment finish");
+        for (Map.Entry<String, Comment> entry : LocalCache.RemoteMediaCommentMapKeyIsImageUUID.entrySet()) {
+            List<Comment> comments;
 
-            for (Map.Entry<String, Comment> entry : LocalCache.RemoteMediaCommentMapKeyIsImageUUID.entrySet()) {
-                List<Comment> comments;
+            String imageUUID = entry.getKey();
 
-                String imageUUID = entry.getKey();
-
-                if (!mMapKeyIsImageUUIDValueIsComments.containsKey(imageUUID)) {
-                    comments = new ArrayList<>();
-                    mMapKeyIsImageUUIDValueIsComments.put(imageUUID, comments);
-                } else {
-                    comments = mMapKeyIsImageUUIDValueIsComments.get(imageUUID);
-                }
-
-                comments.add(entry.getValue());
+            if (!mMapKeyIsImageUUIDValueIsComments.containsKey(imageUUID)) {
+                comments = new ArrayList<>();
+                mMapKeyIsImageUUIDValueIsComments.put(imageUUID, comments);
+            } else {
+                comments = mMapKeyIsImageUUIDValueIsComments.get(imageUUID);
             }
 
+            comments.add(entry.getValue());
+        }
+
+        if (mMapKeyIsImageUUIDValueIsComments.size() != 0) {
             mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);
             mAdapter.notifyDataSetChanged();
-        }
+        } 
+
     }
 
     public void refreshLocalComment() {

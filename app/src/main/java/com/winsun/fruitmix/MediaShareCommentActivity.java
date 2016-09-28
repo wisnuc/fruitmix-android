@@ -1,26 +1,28 @@
 package com.winsun.fruitmix;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewCompat;
-import android.support.v4.view.WindowCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,8 +30,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
-import com.winsun.fruitmix.db.DBUtils;
 import com.android.volley.toolbox.IImageLoadListener;
+import com.winsun.fruitmix.component.EditTextPreIme;
 import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
@@ -43,8 +45,6 @@ import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
-import org.json.JSONArray;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,22 +54,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Created by Administrator on 2016/5/9.
  */
-public class MediaShareCommentActivity extends Activity implements IImageLoadListener {
+public class MediaShareCommentActivity extends AppCompatActivity implements IImageLoadListener {
 
     public static final String TAG = MediaShareCommentActivity.class.getSimpleName();
+
+    Toolbar toolbar;
+    CollapsingToolbarLayout collapsingToolbarLayout;
+    AppBarLayout appBarLayout;
 
     ImageView ivBack, ivSend;
     NetworkImageView ivMain;
     Media media;
     List<Comment> commentData;
-    EditText tfContent;
+    EditTextPreIme tfContent;
 
-    ListView lvComment;
+    RecyclerView lvComment;
 
     String mCommment;
 
@@ -77,7 +83,7 @@ public class MediaShareCommentActivity extends Activity implements IImageLoadLis
 
     private CustomBroadCastReceiver mReceiver;
     private LocalBroadcastManager mManager;
-    private CommentListViewAdapter mAdapter;
+    private CommentRecyclerViewAdapter mAdapter;
     private IntentFilter filter;
 
     private ProgressDialog mDialog;
@@ -115,18 +121,42 @@ public class MediaShareCommentActivity extends Activity implements IImageLoadLis
         filter.addAction(Util.REMOTE_MEDIA_COMMENT_RETRIEVED);
         filter.addAction(Util.LOCAL_COMMENT_DELETED);
 
-        lvComment = (ListView) findViewById(R.id.comment_list);
-        mAdapter = new CommentListViewAdapter();
+        lvComment = (RecyclerView) findViewById(R.id.comment_list);
+
+        LinearLayoutManager manager = new LinearLayoutManager(mContext);
+        lvComment.setLayoutManager(manager);
+        lvComment.setItemAnimator(new DefaultItemAnimator());
+        mAdapter = new CommentRecyclerViewAdapter();
         lvComment.setAdapter(mAdapter);
 
         ivBack = (ImageView) findViewById(R.id.back);
         ivSend = (ImageView) findViewById(R.id.send);
-        tfContent = (EditText) findViewById(R.id.send_text);
+        tfContent = (EditTextPreIme) findViewById(R.id.send_text);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar_layout);
+
+        setSupportActionBar(toolbar);
+        collapsingToolbarLayout.setTitle(getString(R.string.comment_text));
+        collapsingToolbarLayout.setExpandedTitleColor(ContextCompat.getColor(mContext, R.color.white));
+        collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedToolbarTitle);
 
         ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finishActivity();
+            }
+        });
+
+        tfContent.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    appBarLayout.setExpanded(false);
+                } else {
+                    appBarLayout.setExpanded(true);
+                }
             }
         });
 
@@ -204,8 +234,8 @@ public class MediaShareCommentActivity extends Activity implements IImageLoadLis
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
                 Intent operationIntent = new Intent(Util.OPERATION);
-                operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
-                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
+                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
                 operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, media.getUuid());
                 operationIntent.putExtra(Util.OPERATION_COMMENT, generateComment(media.getBelongingMediaShareUUID(), mCommment));
                 mManager.sendBroadcast(operationIntent);
@@ -230,7 +260,11 @@ public class MediaShareCommentActivity extends Activity implements IImageLoadLis
 
     @Override
     public void onBackPressed() {
+
+        super.onBackPressed();
+
         finishActivity();
+
     }
 
     private void finishActivity() {
@@ -301,46 +335,57 @@ public class MediaShareCommentActivity extends Activity implements IImageLoadLis
 
         mAdapter.commentList.clear();
         mAdapter.commentList.addAll(commentData);
-        ((BaseAdapter) (lvComment.getAdapter())).notifyDataSetChanged();
-
-
+        mAdapter.notifyDataSetChanged();
 
     }
 
-    class CommentListViewAdapter extends BaseAdapter {
+    private class CommentRecyclerViewAdapter extends RecyclerView.Adapter<CommentRecyclerViewHolder> {
 
         List<Comment> commentList;
 
-        public CommentListViewAdapter() {
+        CommentRecyclerViewAdapter() {
             commentList = new ArrayList<>();
         }
 
         @Override
-        public int getCount() {
+        public int getItemCount() {
             if (commentList == null) return 0;
             return commentList.size();
         }
 
         @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            View view;
-            TextView ivAvatar;
-            TextView lbComment, lbDate;
-            View vNormal, vHeader;
-            final Comment currentItem;
+        public CommentRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(mContext).inflate(R.layout.share_comment_cell, parent, false);
 
-            if (convertView == null)
-                view = LayoutInflater.from(MediaShareCommentActivity.this).inflate(R.layout.share_comment_cell, parent, false);
-            else view = convertView;
+            return new CommentRecyclerViewHolder(view);
+        }
 
-            vNormal = view.findViewById(R.id.normal);
-            vHeader = view.findViewById(R.id.header);
+        @Override
+        public void onBindViewHolder(CommentRecyclerViewHolder holder, int position) {
+            holder.refreshView(commentList.get(position));
+        }
+    }
 
-            ivAvatar = (TextView) view.findViewById(R.id.avatar);
-            lbComment = (TextView) view.findViewById(R.id.comment);
-            lbDate = (TextView) view.findViewById(R.id.date);
+    class CommentRecyclerViewHolder extends RecyclerView.ViewHolder {
 
-            currentItem = (Comment) this.getItem(position);
+        @BindView(R.id.avatar)
+        TextView ivAvatar;
+        @BindView(R.id.comment)
+        TextView lbComment;
+        @BindView(R.id.date)
+        TextView lbDate;
+        @BindView(R.id.normal)
+        View vNormal;
+        @BindView(R.id.header)
+        View vHeader;
+
+        CommentRecyclerViewHolder(View view) {
+            super(view);
+
+            ButterKnife.bind(this, view);
+        }
+
+        public void refreshView(Comment currentItem) {
 
             if (currentItem == null) {
                 vNormal.setVisibility(View.GONE);
@@ -369,21 +414,9 @@ public class MediaShareCommentActivity extends Activity implements IImageLoadLis
                         break;
                 }
             }
-
-            return view;
-        }
-
-        @Override
-        public long getItemId(int position) {
-
-            return position;
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return commentList.get(position);
         }
     }
+
 
     @Override
     public void onImageLoadFinish(String url, View view) {
@@ -419,13 +452,13 @@ public class MediaShareCommentActivity extends Activity implements IImageLoadLis
                 if (mDialog != null && mDialog.isShowing())
                     mDialog.dismiss();
 
-                if (intent.getStringExtra(Util.OPERATION_RESULT).equals(OperationResult.SUCCEED.name())) {
+                if (intent.getStringExtra(Util.OPERATION_RESULT_NAME).equals(OperationResult.SUCCEED.name())) {
                     reloadList();
                 }
 
             } else if (intent.getAction().equals(Util.REMOTE_COMMENT_CREATED)) {
 
-                String result = intent.getStringExtra(Util.OPERATION_RESULT);
+                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
 
                 OperationResult operationResult = OperationResult.valueOf(result);
 
@@ -435,8 +468,8 @@ public class MediaShareCommentActivity extends Activity implements IImageLoadLis
                         Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
                         String imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
                         Intent operationIntent = new Intent(Util.OPERATION);
-                        operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.DELETE.name());
-                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
+                        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
+                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
                         operationIntent.putExtra(Util.OPERATION_COMMENT, comment);
                         operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
                         mManager.sendBroadcast(operationIntent);
@@ -454,7 +487,7 @@ public class MediaShareCommentActivity extends Activity implements IImageLoadLis
             } else if (intent.getAction().equals(Util.LOCAL_COMMENT_CREATED)) {
 
 
-                String result = intent.getStringExtra(Util.OPERATION_RESULT);
+                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
 
                 OperationResult operationResult = OperationResult.valueOf(result);
 
@@ -465,8 +498,8 @@ public class MediaShareCommentActivity extends Activity implements IImageLoadLis
 
                         if (Util.getNetworkState(mContext)) {
                             Intent operationIntent = new Intent(Util.OPERATION);
-                            operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
-                            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
+                            operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
                             operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, intent.getStringExtra(Util.OPERATION_IMAGE_UUID));
                             operationIntent.putExtra(Util.OPERATION_COMMENT, comment);
                             mManager.sendBroadcast(operationIntent);

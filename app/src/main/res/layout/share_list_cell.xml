@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    card_view:cardCornerRadius="2dp"
-    card_view:cardElevation="2dp">
+                                    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    card_view:cardCornerRadius="2dp"
+                                    card_view:cardElevation="2dp">
 
     <!-- Main Content View -->
     <LinearLayout
@@ -27,7 +27,7 @@
                 android:gravity="center"
                 android:text="@string/name_abbreviations"
                 android:textColor="@color/white"
-                android:textSize="18dp" />
+                android:textSize="18dp"/>
 
             <TextView
                 android:id="@+id/nick"
@@ -37,7 +37,7 @@
                 android:layout_toRightOf="@+id/avatar"
                 android:text="@string/admin_default_name"
                 android:textColor="@color/light_black"
-                android:textSize="15dp" />
+                android:textSize="15dp"/>
 
             <TextView
                 android:id="@+id/time"
@@ -48,7 +48,7 @@
                 android:layout_toRightOf="@+id/avatar"
                 android:text="@string/share_item_date"
                 android:textColor="@color/light_gray"
-                android:textSize="10dp" />
+                android:textSize="10dp"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -64,7 +64,7 @@
                 android:layout_marginTop="2dp"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
-                android:src="@drawable/placeholder_photo" />
+                android:src="@drawable/placeholder_photo"/>
 
             <ImageView
                 android:id="@+id/album_share"
@@ -75,7 +75,7 @@
                 android:layout_margin="12dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/album_share"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/album_title"
@@ -87,7 +87,7 @@
                 android:gravity="center"
                 android:text=""
                 android:textColor="#FFFFFF"
-                android:textSize="15dp" />
+                android:textSize="15dp"/>
         </RelativeLayout>
 
         <LinearLayout
@@ -103,7 +103,7 @@
                 android:layout_margin="1dp"
                 android:layout_weight="1"
                 android:scaleType="centerCrop"
-                android:src="@drawable/default_img" />
+                android:src="@drawable/default_img"/>
 
             <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/mainPic1"
@@ -112,7 +112,7 @@
                 android:layout_margin="1dp"
                 android:layout_weight="1"
                 android:scaleType="centerCrop"
-                android:src="@drawable/default_img" />
+                android:src="@drawable/default_img"/>
 
             <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/mainPic2"
@@ -121,7 +121,7 @@
                 android:layout_margin="1dp"
                 android:layout_weight="1"
                 android:scaleType="centerCrop"
-                android:src="@drawable/default_img" />
+                android:src="@drawable/default_img"/>
 
         </LinearLayout>
 
@@ -138,7 +138,7 @@
                 android:layout_margin="1dp"
                 android:layout_weight="1"
                 android:scaleType="centerCrop"
-                android:src="@drawable/default_img" />
+                android:src="@drawable/default_img"/>
 
             <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/mainPic4"
@@ -147,7 +147,7 @@
                 android:layout_margin="1dp"
                 android:layout_weight="1"
                 android:scaleType="centerCrop"
-                android:src="@drawable/default_img" />
+                android:src="@drawable/default_img"/>
 
             <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/mainPic5"
@@ -156,7 +156,7 @@
                 android:layout_margin="1dp"
                 android:layout_weight="1"
                 android:scaleType="centerCrop"
-                android:src="@drawable/default_img" />
+                android:src="@drawable/default_img"/>
 
         </LinearLayout>
 
@@ -173,7 +173,7 @@
                 android:layout_margin="1dp"
                 android:layout_weight="1"
                 android:scaleType="centerCrop"
-                android:src="@drawable/default_img" />
+                android:src="@drawable/default_img"/>
 
             <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/mainPic7"
@@ -182,7 +182,7 @@
                 android:layout_margin="1dp"
                 android:layout_weight="1"
                 android:scaleType="centerCrop"
-                android:src="@drawable/default_img" />
+                android:src="@drawable/default_img"/>
 
             <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/mainPic8"
@@ -191,7 +191,7 @@
                 android:layout_margin="1dp"
                 android:layout_weight="1"
                 android:scaleType="centerCrop"
-                android:src="@drawable/default_img" />
+                android:src="@drawable/default_img"/>
 
         </LinearLayout>
 
@@ -199,8 +199,8 @@
             android:id="@+id/share_count_layout"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:visibility="gone"
-            android:clickable="true">
+            android:clickable="true"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/share_count_textview"
@@ -210,18 +210,18 @@
                 android:layout_marginLeft="18dp"
                 android:gravity="center"
                 android:text="@string/share_comment_count"
-                android:textSize="14dp" />
+                android:textSize="14dp"/>
 
             <TextView
                 android:id="@+id/check_more_photos"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:layout_marginRight="18dp"
                 android:text="@string/check_more_photos"
-                android:textSize="14dp"
                 android:textColor="@color/light_black"
+                android:textSize="14dp"
                 android:visibility="gone"/>
 
 
@@ -242,26 +242,34 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:textColor="@color/light_black"
-                android:textSize="15dp" />
+                android:textSize="15dp"/>
 
-            <TextView
-                android:id="@+id/share_comment_count_textview"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:text="0"
-                android:textColor="@color/light_gray"
-                android:textSize="13dp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <ImageView
-                android:id="@+id/comment_share"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="16dp"
-                android:layout_toLeftOf="@id/share_comment_count_textview"
-                android:background="@drawable/comment_share" />
+                <ImageView
+                    android:id="@+id/comment_share"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="16dp"
+                    android:background="@drawable/comment_share"/>
+
+                <TextView
+                    android:id="@+id/share_comment_count_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/light_gray"
+                    android:textSize="13dp"/>
+
+
+            </LinearLayout>
+
 
         </RelativeLayout>
 

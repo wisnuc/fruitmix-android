@@ -7,22 +7,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
-import com.winsun.fruitmix.model.User;
-import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteMediaShareJSONObjectParser;
-import com.winsun.fruitmix.parser.RemoteMediaShareParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONObject;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -86,7 +78,7 @@ public class CreateRemoteMediaShareService extends IntentService {
         boolean returnValue = Util.uploadImageDigestsIfNotUpload(this, mediaShare.getImageDigests());
 
         if (!returnValue) {
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
             mManager.sendBroadcast(intent);
 
             return;
@@ -149,8 +141,7 @@ public class CreateRemoteMediaShareService extends IntentService {
 
                 Log.i(TAG, "insert remote mediashare which source is network succeed");
 
-                intent.putExtra(Util.OPERATION_LOCAL_MEDIASHARE_UUID, mediaShare.getUuid());
-                intent.putExtra(Util.OPERATION_LOCAL_MEDIASHARE_LOCKED,mediaShare.isLocked());
+                intent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare.cloneMyself());
 
                 RemoteMediaShareJSONObjectParser parser = new RemoteMediaShareJSONObjectParser();
 
@@ -168,7 +159,7 @@ public class CreateRemoteMediaShareService extends IntentService {
 
                 Log.i(TAG, "insert remote mediashare to map result:" + (mapResult != null ? "true" : "false"));
 
-                intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
 
             }
 
@@ -176,7 +167,7 @@ public class CreateRemoteMediaShareService extends IntentService {
             ex.printStackTrace();
 
             if(result.length() == 0){
-                intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
                 Log.i(TAG, "insert remote mediashare fail");
 
             }

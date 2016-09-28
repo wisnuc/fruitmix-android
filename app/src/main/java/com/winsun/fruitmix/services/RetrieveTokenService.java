@@ -4,19 +4,12 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Base64;
-import android.util.Log;
 
-import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONObject;
-
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -89,12 +82,12 @@ public class RetrieveTokenService extends IntentService {
                 FNAS.JWT = new JSONObject(str).getString("token");
             }
 
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
 
         } catch (Exception e) {
             e.printStackTrace();
 
-            intent.putExtra(Util.OPERATION_RESULT,OperationResult.FAIL.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME,OperationResult.FAIL.name());
         }
 
         localBroadcastManager.sendBroadcast(intent);

@@ -270,8 +270,8 @@ public class NavPagerActivity extends AppCompatActivity
 
     private void retrieveLocalMediaInCamera() {
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIA_IN_CAMERA.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_IN_CAMERA.name());
 
         mManager.sendBroadcast(intent);
     }
@@ -279,8 +279,8 @@ public class NavPagerActivity extends AppCompatActivity
     public void retrieveRemoteMediaComment(String mediaUUID) {
 
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
         intent.putExtra(Util.OPERATION_IMAGE_UUID, mediaUUID);
         mManager.sendBroadcast(intent);
     }
@@ -320,8 +320,8 @@ public class NavPagerActivity extends AppCompatActivity
     public void createShare(List<String> selectUUIDs) {
 
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
 
         intent.putExtra(Util.OPERATION_MEDIASHARE, generateMediaShare(selectUUIDs));
         mManager.sendBroadcast(intent);
@@ -337,11 +337,11 @@ public class NavPagerActivity extends AppCompatActivity
         mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.MODIFY.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.MODIFY.name());
         if (Util.getNetworkState(mContext)) {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
         } else {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
         }
         intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
         mManager.sendBroadcast(intent);
@@ -357,11 +357,11 @@ public class NavPagerActivity extends AppCompatActivity
         mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.DELETE.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
         if (Util.getNetworkState(mContext)) {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
         } else {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
         }
         intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
         mManager.sendBroadcast(intent);
@@ -499,7 +499,7 @@ public class NavPagerActivity extends AppCompatActivity
 
             if (intent.getAction().equals(Util.LOCAL_SHARE_CREATED)) {
 
-                String result = intent.getStringExtra(Util.OPERATION_RESULT);
+                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
 
                 OperationResult operationResult = OperationResult.valueOf(result);
 
@@ -509,8 +509,8 @@ public class NavPagerActivity extends AppCompatActivity
                         if (Util.getNetworkState(mContext)) {
                             MediaShare mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
                             Intent operationIntent = new Intent(Util.OPERATION);
-                            operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
-                            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+                            operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
                             operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
                             mManager.sendBroadcast(operationIntent);
                         }
@@ -530,20 +530,18 @@ public class NavPagerActivity extends AppCompatActivity
 
                 Log.i(TAG, "remote share created");
 
-                String result = intent.getStringExtra(Util.OPERATION_RESULT);
+                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
 
                 OperationResult operationResult = OperationResult.valueOf(result);
 
                 switch (operationResult) {
                     case SUCCEED:
 
-                        String localMediaShareUUID = intent.getStringExtra(Util.OPERATION_LOCAL_MEDIASHARE_UUID);
-                        boolean localMediaShareLocked = intent.getBooleanExtra(Util.OPERATION_LOCAL_MEDIASHARE_LOCKED,false);
+                        MediaShare mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
                         Intent operationIntent = new Intent(Util.OPERATION);
-                        operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.DELETE.name());
-                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
-                        operationIntent.putExtra(Util.OPERATION_LOCAL_MEDIASHARE_UUID, localMediaShareUUID);
-                        operationIntent.putExtra(Util.OPERATION_LOCAL_MEDIASHARE_LOCKED,localMediaShareLocked);
+                        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
+                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
+                        operationIntent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare);
                         mManager.sendBroadcast(operationIntent);
 
                         break;
@@ -561,7 +559,7 @@ public class NavPagerActivity extends AppCompatActivity
 
                 dismissDialog();
 
-                String result = intent.getStringExtra(Util.OPERATION_RESULT);
+                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
 
                 OperationResult operationResult = OperationResult.valueOf(result);
 
@@ -587,15 +585,15 @@ public class NavPagerActivity extends AppCompatActivity
                         break;
                 }
 
-            } else if (intent.getAction().equals(Util.REMOTE_COMMENT_CREATED) && intent.getStringExtra(Util.OPERATION_RESULT).equals(OperationResult.SUCCEED.name())) {
+            } else if (intent.getAction().equals(Util.REMOTE_COMMENT_CREATED) && intent.getStringExtra(Util.OPERATION_RESULT_NAME).equals(OperationResult.SUCCEED.name())) {
 
                 Log.i(TAG, "remote comment created");
 
                 Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
                 String imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
                 Intent operationIntent = new Intent(Util.OPERATION);
-                operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.DELETE.name());
-                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
+                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
+                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
                 operationIntent.putExtra(Util.OPERATION_COMMENT, comment);
                 operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
                 mManager.sendBroadcast(operationIntent);
@@ -604,7 +602,7 @@ public class NavPagerActivity extends AppCompatActivity
 
                 Log.i(TAG, "local comment changed");
 
-                if (intent.getStringExtra(Util.OPERATION_RESULT).equals(OperationResult.SUCCEED.name())) {
+                if (intent.getStringExtra(Util.OPERATION_RESULT_NAME).equals(OperationResult.SUCCEED.name())) {
                     pageList.get(PAGE_SHARE).refreshView();
                 }
 
@@ -612,8 +610,8 @@ public class NavPagerActivity extends AppCompatActivity
                 Log.i(TAG, "local photo upload state changed");
 
                 Intent operationIntent = new Intent(Util.OPERATION);
-                operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIA.name());
+                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA.name());
                 mManager.sendBroadcast(operationIntent);
 
             } else if (intent.getAction().equals(Util.REMOTE_MEDIA_RETRIEVED)) {
@@ -633,7 +631,7 @@ public class NavPagerActivity extends AppCompatActivity
 
             } else if (intent.getAction().equals(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED)) {
 
-                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT));
+                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
 
                 if (result == OperationResult.SUCCEED) {
 
@@ -656,8 +654,8 @@ public class NavPagerActivity extends AppCompatActivity
                 pageList.get(PAGE_SHARE).refreshView();
 
                 Intent operationIntent = new Intent(Util.OPERATION);
-                operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
-                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
                 for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
 
                     operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
@@ -666,12 +664,12 @@ public class NavPagerActivity extends AppCompatActivity
                 }
             } else if (intent.getAction().equals(Util.LOCAL_MEDIA_COMMENT_RETRIEVED)) {
                 Log.i(TAG, "local media comment loaded");
-                pageList.get(PAGE_SHARE).refreshView();
+                ((MediaShareList)pageList.get(PAGE_SHARE)).refreshLocalComment();
 
                 Intent operationResult = new Intent(Util.OPERATION);
-                operationResult.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
-                operationResult.removeExtra(Util.OPERATION_TARGET_TYPE);
-                operationResult.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
+                operationResult.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                operationResult.removeExtra(Util.OPERATION_TARGET_TYPE_NAME);
+                operationResult.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
 
                 for (Map.Entry<String, Comment> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
 
@@ -683,7 +681,7 @@ public class NavPagerActivity extends AppCompatActivity
 
                 Log.i(TAG, "remote media comment loaded ");
 
-                pageList.get(PAGE_SHARE).refreshView();
+                ((MediaShareList)pageList.get(PAGE_SHARE)).refreshRemoteComment();
 
             }
         }

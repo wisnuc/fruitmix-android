@@ -5,16 +5,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
@@ -22,18 +19,11 @@ import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 /**
  * Created by Administrator on 2016/5/9.
@@ -119,8 +109,8 @@ public class SplashScreenActivity extends Activity {
     private void login() {
 
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_TOKEN.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_TOKEN.name());
         intent.putExtra(Util.GATEWAY, mGateway);
         intent.putExtra(Util.USER_UUID, mUuid);
         intent.putExtra(Util.PASSWORD, mPassword);
@@ -189,7 +179,7 @@ public class SplashScreenActivity extends Activity {
 
             if (intent.getAction().equals(Util.REMOTE_TOKEN_RETRIEVED)) {
 
-                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT));
+                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
 
                 FNAS.userUUID = mUuid;
                 FNAS.Gateway = mGateway;
@@ -198,8 +188,8 @@ public class SplashScreenActivity extends Activity {
                     case SUCCEED:
 
                         Intent operationIntent = new Intent(Util.OPERATION);
-                        operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_DEVICEID.name());
+                        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_DEVICEID.name());
                         localBroadcastManager.sendBroadcast(operationIntent);
 
                         break;
@@ -221,7 +211,7 @@ public class SplashScreenActivity extends Activity {
 
             } else if (intent.getAction().equals(Util.REMOTE_DEVICEID_RETRIEVED)) {
 
-                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT));
+                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
                 switch (result) {
                     case SUCCEED:
                         Log.i(TAG, "login success");

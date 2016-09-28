@@ -13,9 +13,6 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
@@ -70,7 +67,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
 
         if (mediaShare.isLocked()) {
 
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.LOCAL_MEDIASHARE_UPLOADING.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.LOCAL_MEDIASHARE_UPLOADING.name());
         } else {
 
             data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mediaShare.getUuid() + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"true\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mediaShare.getTitle() + "\\\", \\\"desc\\\":\\\"" + mediaShare.getDesc() + "\\\"}], \\\"viewers\\\":[]}}]\"}";
@@ -78,7 +75,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
                 String result = FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
 
                 if (result.length() > 0) {
-                    intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+                    intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
 
                     Log.i(TAG, "delete remote mediashare which source is network succeed");
 
@@ -96,7 +93,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
 
                 e.printStackTrace();
 
-                intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 
                 Log.i(TAG, "delete remote mediashare fail");
             }

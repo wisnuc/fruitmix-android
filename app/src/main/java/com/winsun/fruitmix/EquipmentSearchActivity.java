@@ -120,7 +120,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        IntentFilter filter = new IntentFilter(Util.REMOTE_USER_RETRIEVED);
+        filter = new IntentFilter(Util.REMOTE_USER_RETRIEVED);
         customReceiver = new CustomReceiver();
 
     }

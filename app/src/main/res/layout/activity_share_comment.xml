@@ -1,71 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    >
 
-    <RelativeLayout
-        android:id="@+id/chooseHeader"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="#3F52B4">
-
-        <ImageView
-            android:id="@+id/back"
-            android:layout_width="30dp"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
-            android:src="@drawable/back" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="@string/comment_text"
-            android:textColor="#FFFFFF"
-            android:textSize="24dp" />
-    </RelativeLayout>
-
-    <com.android.volley.toolbox.NetworkImageView
-        android:id="@+id/mainPic"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:layout_below="@+id/chooseHeader"
-        android:layout_marginBottom="2dp"
-        android:layout_marginTop="2dp"
-        android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
-        android:src="@drawable/placeholder_photo" />
+        android:fitsSystemWindows="true">
 
-    <ListView
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:contentScrim="#3F52B4"
+            app:expandedTitleMarginEnd="64dp"
+            app:expandedTitleMarginStart="48dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <com.android.volley.toolbox.NetworkImageView
+                android:id="@+id/mainPic"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/placeholder_photo"
+                app:layout_collapseMode="parallax"
+                app:layout_collapseParallaxMultiplier="0.7"
+                />
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin">
+
+                <ImageView
+                    android:id="@+id/back"
+                    android:layout_width="30dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:src="@drawable/back"/>
+
+
+            </android.support.v7.widget.Toolbar>
+
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/comment_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/panel_send"
-        android:layout_below="@+id/mainPic"
+        android:layout_height="match_parent"
         android:divider="#808080"
-        android:orientation="horizontal">
-
-    </ListView>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
     <RelativeLayout
         android:id="@+id/panel_send"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom"
         android:background="#FFFFFF">
 
-        <EditText
+        <com.winsun.fruitmix.component.EditTextPreIme
             android:id="@+id/send_text"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginRight="60dp"
             android:hint="@string/send_comment_hint"
-            android:textColorHint="@color/comment_hint"
+            android:lines="2"
             android:textColor="@color/black"
-            android:textSize="15dp"
-            android:lines="2" />
+            android:textColorHint="@color/comment_hint"
+            android:textSize="15dp"/>
 
         <ImageView
             android:id="@+id/send"
@@ -78,7 +89,16 @@
             android:paddingRight="15dp"
             android:paddingTop="20dp"
             android:scaleType="fitXY"
-            android:src="@drawable/send_select" />
+            android:src="@drawable/send_select"/>
     </RelativeLayout>
 
-</RelativeLayout>
+
+</android.support.design.widget.CoordinatorLayout>
+
+
+
+
+
+
+
+

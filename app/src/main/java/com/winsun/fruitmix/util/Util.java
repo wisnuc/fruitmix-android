@@ -70,14 +70,11 @@ public class Util {
     public static final String REMOTE_DEVICEID_RETRIEVED = "remote_deviceid_retrieved";
 
     public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
-    public static final String REMOTE_PHOTO_LOADED = "remote_photo_loaded";
-    public static final String MEDIASHARE_LOADED = "mediashare_loaded";
 
     public static final String OPERATION = "operation";
-    public static final String OPERATION_RESULT = "operation_result";
-    public static final String OPERATION_TYPE = "operation_type";
-    public static final String OPERATION_TARGET_TYPE = "operation_target_type";
-    public static final String OPERATION_RESOURCE_TYPE = "operation_resource_type";
+    public static final String OPERATION_RESULT_NAME = "operation_result";
+    public static final String OPERATION_TYPE_NAME = "operation_type";
+    public static final String OPERATION_TARGET_TYPE_NAME = "operation_target_type_name";
     public static final String OPERATION_IMAGE_UUID = "operation_image_uuid";
     public static final String OPERATION_COMMENT = "operation_comment";
     public static final String OPERATION_MEDIA = "operatin_media";

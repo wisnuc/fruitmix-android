@@ -5,6 +5,10 @@ import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.parser.RemoteDataParser;
+import com.winsun.fruitmix.parser.RemoteMediaCommentParser;
+import com.winsun.fruitmix.parser.RemoteMediaParser;
+import com.winsun.fruitmix.parser.RemoteMediaShareParser;
+import com.winsun.fruitmix.parser.RemoteUserParser;
 
 import static org.junit.Assert.*;
 
@@ -67,8 +71,7 @@ public class RemoteDataParserUnitTest {
                 "    \"detail\": {}\n" +
                 "  }]";
 
-        ParserFactory<Media> parserFactory = new MediaDataParserFactory();
-        RemoteDataParser<Media> remoteDataParser = parserFactory.createRemoteDataParser();
+        RemoteDataParser<Media> remoteDataParser = new RemoteMediaParser();
 
         List<Media> medias = remoteDataParser.parse(json);
 
@@ -183,8 +186,7 @@ public class RemoteDataParserUnitTest {
                 "    }\n" +
                 "  }]";
 
-        ParserFactory<MediaShare> shareParserFactory = new MediaShareDataParserFactory();
-        RemoteDataParser<MediaShare> shareParser = shareParserFactory.createRemoteDataParser();
+        RemoteDataParser<MediaShare> shareParser = new RemoteMediaShareParser();
 
         List<MediaShare> shares = shareParser.parse(json);
 
@@ -224,8 +226,8 @@ public class RemoteDataParserUnitTest {
                 "  }\n" +
                 "]";
 
-        ParserFactory<User> parserFactory = new UserDataParserFactory();
-        RemoteDataParser<User> parser = parserFactory.createRemoteDataParser();
+
+        RemoteDataParser<User> parser = new RemoteUserParser();
 
         List<User> users = parser.parse(json);
 
@@ -257,8 +259,7 @@ public class RemoteDataParserUnitTest {
                 "  }\n" +
                 "]";
 
-        ParserFactory<Comment> parserFactory = new MediaCommentDataParserFactory();
-        RemoteDataParser<Comment> remoteDataParser = parserFactory.createRemoteDataParser();
+        RemoteDataParser<Comment> remoteDataParser = new RemoteMediaCommentParser();
 
         List<Comment> comments = remoteDataParser.parse(json);
 

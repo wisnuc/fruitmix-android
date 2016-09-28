@@ -71,7 +71,7 @@ public class RetrieveLocalMediaCommentService extends IntentService {
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
         Intent intent = new Intent(Util.LOCAL_MEDIA_COMMENT_RETRIEVED);
-        intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+        intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
         localBroadcastManager.sendBroadcast(intent);
 
     }

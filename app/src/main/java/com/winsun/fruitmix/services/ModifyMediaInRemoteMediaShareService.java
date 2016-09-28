@@ -7,7 +7,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -96,7 +95,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
 
         if (!Util.uploadImageDigestsIfNotUpload(this, differentPhotoUUIDsInModifiedMediashare)) {
 
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 
             Log.i(TAG, "edit photo in remote mediashare fail");
 
@@ -121,7 +120,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
                 String result = FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, stringBuilder.toString());
 
                 if (result.length() > 0) {
-                    intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+                    intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
 
                     Log.i(TAG, "modify media in remote mediashare which source is network succeed");
 
@@ -140,7 +139,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
 
                 e.printStackTrace();
 
-                intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 
                 Log.i(TAG, "edit photo in remote mediashare fail");
             }

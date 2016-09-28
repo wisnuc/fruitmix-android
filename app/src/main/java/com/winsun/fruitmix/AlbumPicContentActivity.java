@@ -432,11 +432,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
 
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.DELETE.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
         if (Util.getNetworkState(mContext)) {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
         } else {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
         }
 
         intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
@@ -446,7 +446,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private void setPublicPrivate() {
 
-        MediaShare cloneMediaShare = mediaShare.cloneFromParameter(mediaShare);
+        MediaShare cloneMediaShare = mediaShare.cloneMyself();
 
         if (cloneMediaShare.getViewer().isEmpty()) {
             cloneMediaShare.setViewer(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
@@ -457,11 +457,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
 
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.MODIFY.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.MODIFY.name());
         if (Util.getNetworkState(mContext)) {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
         } else {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
         }
 
         intent.putExtra(Util.OPERATION_MEDIASHARE, cloneMediaShare);
@@ -478,7 +478,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             if (intent.getAction().equals(Util.LOCAL_SHARE_DELETED) || intent.getAction().equals(Util.REMOTE_SHARE_DELETED)) {
 
-                String result = intent.getStringExtra(Util.OPERATION_RESULT);
+                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
 
                 OperationResult operationResult = OperationResult.valueOf(result);
 
@@ -495,7 +495,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             } else if (intent.getAction().equals(Util.LOCAL_SHARE_MODIFIED) || intent.getAction().equals(Util.REMOTE_SHARE_MODIFIED)) {
 
-                String result = intent.getStringExtra(Util.OPERATION_RESULT);
+                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
 
                 OperationResult operationResult = OperationResult.valueOf(result);
 

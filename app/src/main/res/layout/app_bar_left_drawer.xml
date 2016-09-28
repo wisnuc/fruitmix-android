@@ -18,7 +18,7 @@
             app:navigationIcon="@drawable/menu"
             android:theme="@style/AppTheme.AppBarOverlay"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:titleTextAppearance="@style/ToolbarTitle"
+            app:titleTextAppearance="@style/CollapsedToolbarTitle"
             app:title="@string/photo_text">
 
             <TextView

@@ -115,9 +115,9 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
         }
         Intent intent = new Intent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED);
         if(retrieveMediaCount > 0){
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
         }else {
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
         }
         localBroadcastManager.sendBroadcast(intent);
     }

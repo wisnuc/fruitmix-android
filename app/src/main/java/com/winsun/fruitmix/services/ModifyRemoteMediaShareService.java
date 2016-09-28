@@ -67,11 +67,11 @@ public class ModifyRemoteMediaShareService extends IntentService {
         String maintainers;
 
         if (mediaShare.isLocked()) {
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.LOCAL_MEDIASHARE_UPLOADING.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.LOCAL_MEDIASHARE_UPLOADING.name());
 
         } else if (!Util.uploadImageDigestsIfNotUpload(this,mediaShare.getImageDigests())) {
 
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 
         } else {
 
@@ -96,7 +96,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
                 String result = FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, viewers);
 
                 if(result.length() > 0){
-                    intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+                    intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
                     intent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare);
 
                     Log.i(TAG,"modify remote share succeed");
@@ -117,7 +117,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
                 e.printStackTrace();
 
-                intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 
                 Log.i(TAG,"modify remote share fail");
             }

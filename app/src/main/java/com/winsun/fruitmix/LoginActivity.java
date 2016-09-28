@@ -9,26 +9,18 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
-
-import org.json.JSONObject;
-
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -165,8 +157,8 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     private void login() {
 
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_TOKEN.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_TOKEN.name());
         intent.putExtra(Util.GATEWAY, mGateway);
         intent.putExtra(Util.USER_UUID, mUserUUid);
         intent.putExtra(Util.PASSWORD, mPwd);
@@ -200,7 +192,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
             if (intent.getAction().equals(Util.REMOTE_TOKEN_RETRIEVED)) {
 
-                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT));
+                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
 
                 switch (result) {
                     case SUCCEED:
@@ -215,8 +207,8 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                         FNAS.userUUID = mUserUUid;
 
                         Intent operationIntent = new Intent(Util.OPERATION);
-                        operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_DEVICEID.name());
+                        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_DEVICEID.name());
                         localBroadcastManager.sendBroadcast(operationIntent);
 
                         break;
@@ -228,7 +220,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
             } else if (intent.getAction().equals(Util.REMOTE_DEVICEID_RETRIEVED)) {
 
-                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT));
+                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
 
                 switch (result) {
                     case SUCCEED:

@@ -90,7 +90,7 @@ public class DeleteLocalCommentService extends IntentService {
 
             Log.i(TAG, "delete local comment in map result:" + result);
 
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
             intent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
             intent.putExtra(Util.OPERATION_COMMENT, comment);
 
@@ -98,7 +98,7 @@ public class DeleteLocalCommentService extends IntentService {
 
             Log.i(TAG, "delete local comment fail");
 
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 
         }
 

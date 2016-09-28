@@ -174,7 +174,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                 Intent operationIntent = new Intent(Util.OPERATION);
 
-                modifiedMediaShare = mediaShare.cloneFromParameter(mediaShare);
+                modifiedMediaShare = mediaShare.cloneMyself();
 
                 List<String> imageDigests = new ArrayList<>(mPhotoList.size());
                 for (Media media : mPhotoList)
@@ -189,16 +189,16 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                 if (Util.getNetworkState(mContext)) {
 
-                    operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.EDIT_PHOTO_IN_MEDIASHARE.name());
-                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+                    operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.EDIT_PHOTO_IN_MEDIASHARE.name());
+                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
                     operationIntent.putExtra(Util.OPERATION_ORIGINAL_MEDIASHARE_WHEN_EDIT_PHOTO, mediaShare);
                     operationIntent.putExtra(Util.OPERATION_MODIFIED_MEDIASHARE_WHEN_EDIT_PHOTO, modifiedMediaShare);
                     localBroadcastManager.sendBroadcast(operationIntent);
 
                 } else {
 
-                    operationIntent.putExtra(Util.OPERATION_TYPE, OperationType.MODIFY.name());
-                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+                    operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.MODIFY.name());
+                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
                     operationIntent.putExtra(Util.OPERATION_MEDIASHARE, modifiedMediaShare);
                     localBroadcastManager.sendBroadcast(operationIntent);
                 }
@@ -305,7 +305,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             if (mDialog != null && mDialog.isShowing())
                 mDialog.dismiss();
 
-            String result = intent.getStringExtra(Util.OPERATION_RESULT);
+            String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
 
             OperationResult operationResult = OperationResult.valueOf(result);
 

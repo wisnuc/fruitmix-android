@@ -51,7 +51,7 @@
         android:elevation="@dimen/appbar_elevation"
         android:theme="@style/AppTheme.AppBarOverlay"
         app:popupTheme="@style/AppTheme.PopupOverlay"
-        app:titleTextAppearance="@style/ToolbarTitle">
+        app:titleTextAppearance="@style/CollapsedToolbarTitle">
 
         <ImageView
             android:id="@+id/back"
@@ -67,11 +67,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:ellipsize="end"
-            android:singleLine="true"
+            android:maxLines="1"
             android:text="@string/album_content_text"
             android:textColor="@color/white"
             android:textSize="24dp"/>
-
     </android.support.v7.widget.Toolbar>
 
     <GridView

@@ -63,12 +63,12 @@ public class RetrieveDeviceIdService extends IntentService {
         try {
             FNAS.loadDeviceId();
 
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
 
         } catch (Exception e) {
             e.printStackTrace();
 
-            intent.putExtra(Util.OPERATION_RESULT,OperationResult.FAIL.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME,OperationResult.FAIL.name());
         }
 
         localBroadcastManager.sendBroadcast(intent);

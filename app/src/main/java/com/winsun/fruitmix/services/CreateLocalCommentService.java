@@ -77,7 +77,7 @@ public class CreateLocalCommentService extends IntentService {
 
             Log.i(TAG, "insert local media comment to map result:" + (mapResult != null ? "true" : "false"));
 
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
             intent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
             intent.putExtra(Util.OPERATION_COMMENT, comment);
 
@@ -85,7 +85,7 @@ public class CreateLocalCommentService extends IntentService {
 
             Log.i(TAG, "insert local comment fail");
 
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
         }
         broadcastManager.sendBroadcast(intent);
     }

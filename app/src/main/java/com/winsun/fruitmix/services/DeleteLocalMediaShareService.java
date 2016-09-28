@@ -7,6 +7,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
@@ -26,6 +27,8 @@ public class DeleteLocalMediaShareService extends IntentService {
 
     private static final String EXTRA_LOCAL_MEDIASHARE_LOCKED = "com.winsun.fruitmix.services.extra.local_mediashare_locked";
 
+    private static final String EXTRA_MEDIASHARE = "com.winsun.fruitmix.services.extra.mediashare";
+
     public DeleteLocalMediaShareService() {
         super("DeleteLocalMediaShareService");
     }
@@ -36,11 +39,10 @@ public class DeleteLocalMediaShareService extends IntentService {
      *
      * @see IntentService
      */
-    public static void startActionDeleteLocalShare(Context context, String localMediaShareUUID,boolean localMediaShareLocked) {
+    public static void startActionDeleteLocalShare(Context context, MediaShare mediaShare) {
         Intent intent = new Intent(context, DeleteLocalMediaShareService.class);
         intent.setAction(ACTION_DELETE_LOCAL_SHARE);
-        intent.putExtra(EXTRA_LOCAL_MEDIASHARE_UUID, localMediaShareUUID);
-        intent.putExtra(EXTRA_LOCAL_MEDIASHARE_LOCKED,localMediaShareLocked);
+        intent.putExtra(EXTRA_MEDIASHARE,mediaShare);
         context.startService(intent);
     }
 
@@ -49,8 +51,8 @@ public class DeleteLocalMediaShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_DELETE_LOCAL_SHARE.equals(action)) {
-                String localMediaShareUUID = intent.getStringExtra(EXTRA_LOCAL_MEDIASHARE_UUID);
-                handleActionDeleteLocalShare(localMediaShareUUID,intent.getBooleanExtra(EXTRA_LOCAL_MEDIASHARE_LOCKED,false));
+                MediaShare mediaShare = intent.getParcelableExtra(EXTRA_MEDIASHARE);
+                handleActionDeleteLocalShare(mediaShare);
             }
         }
     }
@@ -59,31 +61,31 @@ public class DeleteLocalMediaShareService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionDeleteLocalShare(String localMediaShareUUID,boolean localMediaShareLocked) {
+    private void handleActionDeleteLocalShare(MediaShare mediaShare) {
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
         Intent intent = new Intent(Util.LOCAL_SHARE_DELETED);
 
-        if (!localMediaShareLocked) {
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.NO_NETWORK.name());
+        if (!mediaShare.isLocked()) {
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.NO_NETWORK.name());
         } else {
 
             DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-            long value = dbUtils.deleteLocalShareByUUid(localMediaShareUUID);
+            long value = dbUtils.deleteLocalShareByUUid(mediaShare.getUuid());
 
             if (value > 0) {
 
-                intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
 
                 Log.i(TAG, "delete local mediashare succeed");
 
-                MediaShare mapResult = LocalCache.LocalMediaShareMapKeyIsUUID.remove(localMediaShareUUID);
+                MediaShare mapResult = LocalCache.LocalMediaShareMapKeyIsUUID.remove(mediaShare.getUuid());
 
                 Log.i(TAG, "delete local media share in map result:" + (mapResult != null ? "true" : "false"));
 
             } else {
-                intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 
                 Log.i(TAG, "delete local mediashare fail");
             }

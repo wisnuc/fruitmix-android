@@ -125,11 +125,11 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                 mAblumMap.setDesc(desc);
 
                 Intent intent = new Intent(Util.OPERATION);
-                intent.putExtra(Util.OPERATION_TYPE, OperationType.MODIFY.name());
+                intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.MODIFY.name());
                 if (Util.getNetworkState(mContext)) {
-                    intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+                    intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
                 } else {
-                    intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+                    intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
                 }
                 intent.putExtra(Util.OPERATION_MEDIASHARE, mAblumMap);
                 localBroadcastManager.sendBroadcast(intent);
@@ -177,7 +177,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
             if (mDialog != null && mDialog.isShowing())
                 mDialog.dismiss();
 
-            String result = intent.getStringExtra(Util.OPERATION_RESULT);
+            String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
 
             OperationResult operationResult = OperationResult.valueOf(result);
 

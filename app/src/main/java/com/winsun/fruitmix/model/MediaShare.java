@@ -197,21 +197,21 @@ public class MediaShare implements Parcelable {
         this.date = date;
     }
 
-    public MediaShare cloneFromParameter(MediaShare mediaShare) {
+    public MediaShare cloneMyself() {
         MediaShare cloneMediaShare = new MediaShare();
-        cloneMediaShare.setUuid(mediaShare.getUuid());
-        cloneMediaShare.setCreatorUUID(mediaShare.getCreatorUUID());
-        cloneMediaShare.setTime(mediaShare.getTime());
-        cloneMediaShare.setTitle(mediaShare.getTitle());
-        cloneMediaShare.setDesc(mediaShare.getDesc());
-        cloneMediaShare.setImageDigests(mediaShare.getImageDigests());
-        cloneMediaShare.setViewer(mediaShare.getViewer());
-        cloneMediaShare.setMaintainer(mediaShare.getMaintainer());
-        cloneMediaShare.setAlbum(mediaShare.isAlbum);
-        cloneMediaShare.setArchived(mediaShare.isArchived);
-        cloneMediaShare.setDate(mediaShare.getDate());
-        cloneMediaShare.setCoverImageDigest(mediaShare.getCoverImageDigest());
-        cloneMediaShare.setLocked(mediaShare.isLocked);
+        cloneMediaShare.setUuid(getUuid());
+        cloneMediaShare.setCreatorUUID(getCreatorUUID());
+        cloneMediaShare.setTime(getTime());
+        cloneMediaShare.setTitle(getTitle());
+        cloneMediaShare.setDesc(getDesc());
+        cloneMediaShare.setImageDigests(getImageDigests());
+        cloneMediaShare.setViewer(getViewer());
+        cloneMediaShare.setMaintainer(getMaintainer());
+        cloneMediaShare.setAlbum(isAlbum());
+        cloneMediaShare.setArchived(isArchived());
+        cloneMediaShare.setDate(getDate());
+        cloneMediaShare.setCoverImageDigest(getCoverImageDigest());
+        cloneMediaShare.setLocked(isLocked());
 
         return cloneMediaShare;
     }

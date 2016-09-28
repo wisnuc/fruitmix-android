@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.MediaShare;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
@@ -68,7 +67,7 @@ public class CreateLocalMediaShareService extends IntentService {
         Intent intent = new Intent(Util.LOCAL_SHARE_CREATED);
 
         if(returnValue > 0){
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
             intent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare);
 
             Log.i(TAG,"insert local mediashare succeed");
@@ -78,7 +77,7 @@ public class CreateLocalMediaShareService extends IntentService {
             Log.i(TAG,"insert local media share to map result:" + (mapResult != null?"true":"false"));
 
         }else {
-            intent.putExtra(Util.OPERATION_RESULT,OperationResult.FAIL.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME,OperationResult.FAIL.name());
 
             Log.i(TAG,"insert local mediashare fail");
         }

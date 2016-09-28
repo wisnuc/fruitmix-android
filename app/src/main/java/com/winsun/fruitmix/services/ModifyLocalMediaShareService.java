@@ -8,13 +8,8 @@ import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.MediaShare;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -67,7 +62,7 @@ public class ModifyLocalMediaShareService extends IntentService {
         Intent intent = new Intent(Util.LOCAL_SHARE_MODIFIED);
 
         if (!mediaShare.isLocked()) {
-            intent.putExtra(Util.OPERATION_RESULT, OperationResult.NO_NETWORK.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.NO_NETWORK.name());
         } else {
 
             DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
@@ -76,13 +71,13 @@ public class ModifyLocalMediaShareService extends IntentService {
 
             if (returnValue > 0) {
 
-                intent.putExtra(Util.OPERATION_RESULT, OperationResult.SUCCEED.name());
+                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
                 intent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare);
 
                 Log.i(TAG,"modify local share succeed");
 
             } else {
-                intent.putExtra(Util.OPERATION_RESULT, OperationResult.FAIL.name());
+                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 
                 Log.i(TAG,"modify local share fail");
             }

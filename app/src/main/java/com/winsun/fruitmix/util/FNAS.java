@@ -31,8 +31,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -142,55 +140,6 @@ public class FNAS {
 
     }
 
-    public static void fillMediaMapByJsonString(String str) throws JSONException {
-
-        String mtime;
-        JSONArray json;
-        JSONObject itemRaw;
-        Media item;
-
-        json = new JSONArray(str);
-
-        if (json.length() != 0) {
-            LocalCache.RemoteMediaMapKeyIsUUID.clear();
-        }
-
-        for (int i = 0; i < json.length(); i++) {
-            itemRaw = json.getJSONObject(i);
-            if (itemRaw.getString("kind").equals("image")) {
-                item = new Media();
-                item.setUuid(itemRaw.getString("hash"));
-                item.setTime("1916-01-01 00:00:00");
-                if (itemRaw.has("width")) {
-
-                    item.setWidth(itemRaw.getString("width"));
-                    item.setHeight(itemRaw.getString("height"));
-
-                } else if (itemRaw.getJSONObject("detail").has("width")) {
-                    item.setWidth(itemRaw.getJSONObject("detail").getString("width"));
-                    item.setHeight(itemRaw.getJSONObject("detail").getString("height"));
-                } else {
-                    item.setWidth(itemRaw.getJSONObject("detail").getJSONObject("exif").getString("ExifImageWidth"));
-                    item.setHeight(itemRaw.getJSONObject("detail").getJSONObject("exif").getString("ExifImageHeight"));
-                    if (itemRaw.getJSONObject("detail").has("exif") && itemRaw.getJSONObject("detail").getJSONObject("exif").has("CreateDate")) {
-                        mtime = itemRaw.getJSONObject("detail").getJSONObject("exif").getString("CreateDate");
-                        item.setTime(mtime.substring(0, 4) + "-" + mtime.substring(5, 7) + "-" + mtime.substring(8));
-                    } else item.setTime("1916-01-01 00:00:00");
-                }
-                LocalCache.RemoteMediaMapKeyIsUUID.put(item.getUuid(), item);
-
-            }
-        }
-
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-        dbUtils.insertRemoteMedias(LocalCache.RemoteMediaMapKeyIsUUID);
-
-        Log.d("winsun", "RemoteMediaMapKeyIsUUID " + LocalCache.RemoteMediaMapKeyIsUUID);
-
-        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
-        manager.sendBroadcast(new Intent(Util.REMOTE_PHOTO_LOADED));
-    }
-
     public static String loadRemoteShare() throws Exception {
         return FNAS.RemoteCall(Util.MEDIASHARE_PARAMETER);
     }
@@ -239,8 +188,8 @@ public class FNAS {
     public static void retrieveUserMap(Context context) {
 
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_USER.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_USER.name());
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
         localBroadcastManager.sendBroadcast(intent);
 
@@ -251,13 +200,13 @@ public class FNAS {
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
 
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIA.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA.name());
         localBroadcastManager.sendBroadcast(intent);
 
         intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIA.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA.name());
         localBroadcastManager.sendBroadcast(intent);
     }
 
@@ -266,21 +215,21 @@ public class FNAS {
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
 
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
         localBroadcastManager.sendBroadcast(intent);
 
         intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIASHARE.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
         localBroadcastManager.sendBroadcast(intent);
     }
 
     public static void retrieveLocalMediaCommentMap(Context context) {
 
         Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
         localBroadcastManager.sendBroadcast(intent);
 
@@ -294,8 +243,8 @@ public class FNAS {
 
             if (!media.isUploaded()) {
                 Intent intent = new Intent(Util.OPERATION);
-                intent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
-                intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIA.name());
+                intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA.name());
                 intent.putExtra(Util.OPERATION_MEDIA, media);
                 localBroadcastManager.sendBroadcast(intent);
             }
@@ -581,14 +530,14 @@ public class FNAS {
                     Map<String, List<Comment>> comments = dbUtils.getAllLocalImageCommentKeyIsImageUUID();
 
                     Intent intent = new Intent(Util.OPERATION);
-                    intent.putExtra(Util.OPERATION_TYPE, OperationType.CREATE.name());
+                    intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
                     LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
 
                     if (!mediaShares.isEmpty()) {
 
                         Log.i(TAG, "start local share task");
 
-                        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIASHARE.name());
+                        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
 
                         for (MediaShare mediaShare : mediaShares) {
 
@@ -603,8 +552,8 @@ public class FNAS {
 
                         Log.i(TAG, "start local comment task");
 
-                        intent.removeExtra(Util.OPERATION_TARGET_TYPE);
-                        intent.putExtra(Util.OPERATION_TARGET_TYPE, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
+                        intent.removeExtra(Util.OPERATION_TARGET_TYPE_NAME);
+                        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
 
                         for (Map.Entry<String, List<Comment>> entry : comments.entrySet()) {
                             for (Comment comment : entry.getValue()) {
