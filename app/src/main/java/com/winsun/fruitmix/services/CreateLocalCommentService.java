@@ -12,6 +12,9 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
@@ -73,9 +76,14 @@ public class CreateLocalCommentService extends IntentService {
 
             comment.setId(returnValue);
 
-            Comment mapResult = LocalCache.LocalMediaCommentMapKeyIsImageUUID.put(imageUUID, comment);
+            List<Comment> comments = new ArrayList<>();
+            LocalCache.LocalMediaCommentMapKeyIsImageUUID.putIfAbsent(imageUUID,comments);
 
-            Log.i(TAG, "insert local media comment to map result:" + (mapResult != null ? "true" : "false"));
+            comments = LocalCache.LocalMediaCommentMapKeyIsImageUUID.get(imageUUID);
+
+            boolean mapResult = comments.add(comment);
+
+            Log.i(TAG, "insert local media comment to map result:" + mapResult);
 
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
             intent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);

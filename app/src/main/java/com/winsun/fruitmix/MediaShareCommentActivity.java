@@ -11,6 +11,7 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,7 +19,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -94,6 +97,12 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
     private boolean showSoftInputWhenEnter = false;
 
+    private GestureDetectorCompat gestureDetectorCompat;
+    private GestureListener gestureListener;
+
+    private boolean isExpanded = false;
+    private boolean isRecyclerViewScrollToEnd = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Media imageRaw;
@@ -128,6 +137,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         lvComment.setItemAnimator(new DefaultItemAnimator());
         mAdapter = new CommentRecyclerViewAdapter();
         lvComment.setAdapter(mAdapter);
+        lvComment.addOnScrollListener(new RecyclerScrollListener());
 
         ivBack = (ImageView) findViewById(R.id.back);
         ivSend = (ImageView) findViewById(R.id.send);
@@ -141,6 +151,17 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         collapsingToolbarLayout.setTitle(getString(R.string.comment_text));
         collapsingToolbarLayout.setExpandedTitleColor(ContextCompat.getColor(mContext, R.color.white));
         collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedToolbarTitle);
+
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (verticalOffset == 0) {
+                    isExpanded = true;
+                } else {
+                    isExpanded = false;
+                }
+            }
+        });
 
         ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -242,6 +263,9 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
             }
         });
 
+        gestureListener = new GestureListener();
+        gestureDetectorCompat = new GestureDetectorCompat(mContext, gestureListener);
+
     }
 
     @Override
@@ -285,6 +309,59 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
     }
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        gestureDetectorCompat.onTouchEvent(ev);
+        return super.dispatchTouchEvent(ev);
+    }
+
+    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+
+
+            if (e1 != null && e2 != null && e2.getY() - e1.getY() > 20 && isExpanded) {
+
+                finishActivity();
+
+            } else if (e1 != null && e2 != null && e1.getY() - e2.getY() > 20 && isRecyclerViewScrollToEnd) {
+
+                tfContent.requestFocus();
+                Util.showSoftInput(MediaShareCommentActivity.this, tfContent);
+                isRecyclerViewScrollToEnd = false;
+
+                //TODO:optimize fling effect
+            }
+
+            return false;
+
+        }
+    }
+
+    private class RecyclerScrollListener extends RecyclerView.OnScrollListener {
+
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                RecyclerView.LayoutManager layoutManager = lvComment.getLayoutManager();
+                if (layoutManager instanceof LinearLayoutManager) {
+                    LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
+
+                    int lastItemPosition = linearLayoutManager.findLastCompletelyVisibleItemPosition();
+                    if (lastItemPosition + 1 == mAdapter.getItemCount()) {
+                        isRecyclerViewScrollToEnd = true;
+                    } else {
+                        isRecyclerViewScrollToEnd = false;
+                    }
+
+                }
+            }
+
+        }
+    }
+
+    @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
@@ -305,15 +382,15 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         commentData.clear();
 
-        for (Map.Entry<String, Comment> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
+        for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
             if (entry.getKey().equals(media.getUuid())) {
-                commentData.add(entry.getValue());
+                commentData.addAll(entry.getValue());
             }
         }
 
-        for (Map.Entry<String, Comment> entry : LocalCache.RemoteMediaCommentMapKeyIsImageUUID.entrySet()) {
+        for (Map.Entry<String, List<Comment>> entry : LocalCache.RemoteMediaCommentMapKeyIsImageUUID.entrySet()) {
             if (entry.getKey().equals(media.getUuid())) {
-                commentData.add(entry.getValue());
+                commentData.addAll(entry.getValue());
             }
         }
 

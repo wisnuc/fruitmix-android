@@ -50,8 +50,8 @@ public class LocalCache {
     public static String CacheRootPath;
     static Application CurrentApp;
 
-    public static ConcurrentMap<String, Comment> RemoteMediaCommentMapKeyIsImageUUID = null;
-    public static ConcurrentMap<String, Comment> LocalMediaCommentMapKeyIsImageUUID = null;
+    public static ConcurrentMap<String, List<Comment>> RemoteMediaCommentMapKeyIsImageUUID = null;
+    public static ConcurrentMap<String, List<Comment>> LocalMediaCommentMapKeyIsImageUUID = null;
     public static ConcurrentMap<String, MediaShare> RemoteMediaShareMapKeyIsUUID = null;
     public static ConcurrentMap<String, MediaShare> LocalMediaShareMapKeyIsUUID = null;
     public static ConcurrentMap<String, User> RemoteUserMapKeyIsUUID = null;

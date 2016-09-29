@@ -781,42 +781,32 @@ public class MediaShareList implements NavPagerActivity.Page {
 
     public void refreshRemoteComment() {
 
-        for (Map.Entry<String, Comment> entry : LocalCache.RemoteMediaCommentMapKeyIsImageUUID.entrySet()) {
-            List<Comment> comments;
+        for (Map.Entry<String, List<Comment>> entry : LocalCache.RemoteMediaCommentMapKeyIsImageUUID.entrySet()) {
+            List<Comment> comments = new ArrayList<>();
 
             String imageUUID = entry.getKey();
 
-            if (!mMapKeyIsImageUUIDValueIsComments.containsKey(imageUUID)) {
-                comments = new ArrayList<>();
-                mMapKeyIsImageUUIDValueIsComments.put(imageUUID, comments);
-            } else {
-                comments = mMapKeyIsImageUUIDValueIsComments.get(imageUUID);
-            }
+            comments.addAll(entry.getValue());
 
-            comments.add(entry.getValue());
+            mMapKeyIsImageUUIDValueIsComments.put(imageUUID, comments);
         }
 
         if (mMapKeyIsImageUUIDValueIsComments.size() != 0) {
             mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);
             mAdapter.notifyDataSetChanged();
-        } 
+        }
 
     }
 
     public void refreshLocalComment() {
-        for (Map.Entry<String, Comment> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
-            List<Comment> comments;
+        for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
+            List<Comment> comments = new ArrayList<>();
 
             String imageUUID = entry.getKey();
 
-            if (!mMapKeyIsImageUUIDValueIsComments.containsKey(imageUUID)) {
-                comments = new ArrayList<>();
-                mMapKeyIsImageUUIDValueIsComments.put(imageUUID, comments);
-            } else {
-                comments = mMapKeyIsImageUUIDValueIsComments.get(imageUUID);
-            }
+            comments.addAll(entry.getValue());
 
-            comments.add(entry.getValue());
+            mMapKeyIsImageUUIDValueIsComments.put(imageUUID, comments);
         }
 
         mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);

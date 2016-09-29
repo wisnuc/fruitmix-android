@@ -14,7 +14,9 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -100,9 +102,15 @@ public class CreateRemoteCommentService extends IntentService {
 
                 Log.i(TAG, "insert remote media comment which source is db result:"+dbResult);
 
-                Comment mapResult = LocalCache.RemoteMediaCommentMapKeyIsImageUUID.put(mediaUUID,comment);
+                List<Comment> comments = new ArrayList<>();
 
-                Log.i(TAG,"insert remote media comment to map result:" + (mapResult != null?"true":"false"));
+                LocalCache.RemoteMediaCommentMapKeyIsImageUUID.putIfAbsent(mediaUUID,comments);
+
+                comments = LocalCache.RemoteMediaCommentMapKeyIsImageUUID.get(mediaUUID);
+
+                boolean mapResult = comments.add(comment);
+
+                Log.i(TAG,"insert remote media comment to map result:" + mapResult);
 
                 intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
                 intent.putExtra(Util.OPERATION_IMAGE_UUID,mediaUUID);

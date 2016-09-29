@@ -18,7 +18,7 @@
         android:scrollbarSize="3dp"
         android:scrollbarStyle="insideInset"
         android:scrollbarThumbVertical="@color/gray"
-        android:visibility="visible"
+        android:visibility="invisible"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context="com.winsun.fruitmix.Test2Activity" />
 
@@ -29,7 +29,7 @@
         android:background="@color/white"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="invisible">
+        android:visibility="visible">
 
         <ProgressBar
             style="@android:style/Widget.Holo.ProgressBar"

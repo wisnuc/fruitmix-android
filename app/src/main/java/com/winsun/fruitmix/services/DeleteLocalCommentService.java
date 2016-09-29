@@ -12,6 +12,9 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
@@ -82,10 +85,17 @@ public class DeleteLocalCommentService extends IntentService {
             Log.i(TAG, "delete local comment in db succeed");
 
             boolean result = false;
-            for (Comment comment1 : LocalCache.LocalMediaCommentMapKeyIsImageUUID.values()) {
-                if (comment.getId() == comment1.getId()) {
-                    result = LocalCache.LocalMediaCommentMapKeyIsImageUUID.remove(imageUUID, comment1);
+            for (List<Comment> comments : LocalCache.LocalMediaCommentMapKeyIsImageUUID.values()) {
+                Iterator<Comment> iterator = comments.iterator();
+                while (iterator.hasNext()) {
+                    Comment comment1 = iterator.next();
+                    if (comment1.getId() == comment.getId()){
+                        iterator.remove();
+                        result = true;
+                    }
+
                 }
+
             }
 
             Log.i(TAG, "delete local comment in map result:" + result);

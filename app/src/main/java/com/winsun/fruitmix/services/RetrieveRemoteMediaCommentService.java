@@ -85,8 +85,6 @@ public class RetrieveRemoteMediaCommentService extends IntentService {
             RemoteDataParser<Comment> parser = new RemoteMediaCommentParser();
             comments = parser.parse(json);
 
-            mediaCommentConcurrentMap = LocalCache.BuildRemoteMediaCommentsAboutOneMedia(comments, mediaUUID);
-
             dbUtils.deleteRemoteCommentByUUid(mediaUUID);
 
             for (Comment comment : comments) {
@@ -95,7 +93,7 @@ public class RetrieveRemoteMediaCommentService extends IntentService {
 
             LocalCache.RemoteMediaCommentMapKeyIsImageUUID.remove(mediaUUID);
 
-            LocalCache.RemoteMediaCommentMapKeyIsImageUUID.putAll(mediaCommentConcurrentMap);
+            LocalCache.RemoteMediaCommentMapKeyIsImageUUID.putIfAbsent(mediaUUID,comments);
 
             Log.i(TAG, "retrieve remote media comment from network");
 
@@ -108,11 +106,9 @@ public class RetrieveRemoteMediaCommentService extends IntentService {
 
             comments = dbUtils.getRemoteImageCommentByUUid(mediaUUID);
 
-            mediaCommentConcurrentMap = LocalCache.BuildRemoteMediaCommentsAboutOneMedia(comments, mediaUUID);
-
             LocalCache.RemoteMediaCommentMapKeyIsImageUUID.remove(mediaUUID);
 
-            LocalCache.RemoteMediaCommentMapKeyIsImageUUID.putAll(mediaCommentConcurrentMap);
+            LocalCache.RemoteMediaCommentMapKeyIsImageUUID.putIfAbsent(mediaUUID,comments);
 
             Log.i(TAG, "retrieve remote media comment from db");
 

@@ -57,16 +57,14 @@ public class RetrieveLocalMediaCommentService extends IntentService {
 
         DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
 
-        Map<String,List<Comment>> localCommentMap = dbUtils.getAllLocalImageCommentKeyIsImageUUID();
+        Map<String, List<Comment>> localCommentMap = dbUtils.getAllLocalImageCommentKeyIsImageUUID();
 
         LocalCache.LocalMediaCommentMapKeyIsImageUUID.clear();
 
-        for (Map.Entry<String,List<Comment>> entry:localCommentMap.entrySet()){
+        for (Map.Entry<String, List<Comment>> entry : localCommentMap.entrySet()) {
 
-            for (Comment comment:entry.getValue()){
+            LocalCache.LocalMediaCommentMapKeyIsImageUUID.put(entry.getKey(), entry.getValue());
 
-                LocalCache.LocalMediaCommentMapKeyIsImageUUID.put(entry.getKey(),comment);
-            }
         }
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);

@@ -671,11 +671,14 @@ public class NavPagerActivity extends AppCompatActivity
                 operationResult.removeExtra(Util.OPERATION_TARGET_TYPE_NAME);
                 operationResult.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
 
-                for (Map.Entry<String, Comment> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
+                for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
 
-                    operationResult.putExtra(Util.OPERATION_COMMENT, entry.getValue());
-                    operationResult.putExtra(Util.OPERATION_IMAGE_UUID, entry.getKey());
-                    mManager.sendBroadcast(operationResult);
+                    for(Comment comment:entry.getValue()){
+                        operationResult.putExtra(Util.OPERATION_COMMENT, comment);
+                        operationResult.putExtra(Util.OPERATION_IMAGE_UUID, entry.getKey());
+                        mManager.sendBroadcast(operationResult);
+                    }
+
                 }
             } else if (intent.getAction().equals(Util.REMOTE_MEDIA_COMMENT_RETRIEVED)) {
 
