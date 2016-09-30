@@ -211,7 +211,6 @@ public class ButlerService extends Service {
         if (targetType != OperationTargetType.REMOTE_MEDIA_COMMENT)
             Log.i(TAG, "handle get operation target type:" + targetType);
 
-        //TODO: replace enum to enum.original
         String imageUUID;
 
         switch (targetType) {

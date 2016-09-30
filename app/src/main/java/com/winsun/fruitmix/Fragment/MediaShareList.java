@@ -331,12 +331,12 @@ public class MediaShareList implements NavPagerActivity.Page {
             final List<String> imageDigests;
 
             RelativeLayout mShareCountLayout;
-            RelativeLayout mShareCommentLayout;
+            LinearLayout mShareCommentLayout;
             TextView mShareCountTextView;
             TextView mShareCommentTextView;
             TextView mShareCommentCountTextView;
             TextView mAvator;
-            ImageView commentShare;
+            LinearLayout mCommentLayout;
 
             String nickName;
 
@@ -355,7 +355,7 @@ public class MediaShareList implements NavPagerActivity.Page {
             lbAlbumShare = (ImageView) view.findViewById(R.id.album_share);
 
             mShareCountLayout = (RelativeLayout) view.findViewById(R.id.share_count_layout);
-            mShareCommentLayout = (RelativeLayout) view.findViewById(R.id.share_comment_layout);
+            mShareCommentLayout = (LinearLayout) view.findViewById(R.id.share_comment_layout);
             mAvator = (TextView) view.findViewById(R.id.avatar);
             mShareCommentCountTextView = (TextView) view.findViewById(R.id.share_comment_count_textview);
 
@@ -508,7 +508,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                         }
 
                         mShareCommentTextView = (TextView) view.findViewById(R.id.share_comment_textview);
-                        commentShare = (ImageView) view.findViewById(R.id.comment_share);
+                        mCommentLayout = (LinearLayout) view.findViewById(R.id.comment_layout);
 
                         String uuid = itemImg.getUuid();
                         if (commentMap.containsKey(uuid)) {
@@ -545,7 +545,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                             });
                         }
 
-                        commentShare.setOnClickListener(new View.OnClickListener() {
+                        mCommentLayout.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 Intent intent = new Intent(containerActivity, MediaShareCommentActivity.class);

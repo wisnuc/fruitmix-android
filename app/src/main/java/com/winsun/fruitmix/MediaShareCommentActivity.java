@@ -5,9 +5,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -24,7 +26,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,6 +73,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
     Toolbar toolbar;
     CollapsingToolbarLayout collapsingToolbarLayout;
     AppBarLayout appBarLayout;
+    CoordinatorLayout coordinatorLayout;
 
     ImageView ivBack, ivSend;
     NetworkImageView ivMain;
@@ -102,6 +105,8 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
     private boolean isExpanded = false;
     private boolean isRecyclerViewScrollToEnd = false;
+
+    private boolean isRecyclerViewScrollToEndTemp = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,6 +151,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar_layout);
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
 
         setSupportActionBar(toolbar);
         collapsingToolbarLayout.setTitle(getString(R.string.comment_text));
@@ -156,9 +162,20 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
                 if (verticalOffset == 0) {
+
                     isExpanded = true;
+
                 } else {
+
                     isExpanded = false;
+
+                    isRecyclerViewScrollToEndTemp = isRecyclerViewScrollToEnd;
+                    isRecyclerViewScrollToEnd = false;
+
+                    LinearLayoutManager linearLayoutManager = (LinearLayoutManager) lvComment.getLayoutManager();
+                    if (isRecyclerViewScrollToEndTemp) {
+                        linearLayoutManager.scrollToPosition(mAdapter.getItemCount() - 1);
+                    }
                 }
             }
         });
@@ -241,6 +258,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
             @Override
             public void onClick(View v) {
 
+                tfContent.clearFocus();
                 Util.hideSoftInput(MediaShareCommentActivity.this);
 
                 mCommment = tfContent.getText() + "";
@@ -267,6 +285,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         gestureDetectorCompat = new GestureDetectorCompat(mContext, gestureListener);
 
     }
+
 
     @Override
     protected void onResume() {
@@ -327,9 +346,8 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
                 tfContent.requestFocus();
                 Util.showSoftInput(MediaShareCommentActivity.this, tfContent);
-                isRecyclerViewScrollToEnd = false;
 
-                //TODO:optimize fling effect
+                //TODO:研究共享元素转场动画，是否支持灵活自定义，以及卡顿问题
             }
 
             return false;
