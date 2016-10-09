@@ -139,13 +139,13 @@ public class AlbumList implements NavPagerActivity.Page {
 
         reloadList();
 
-        mLoadingLayout.setVisibility(View.INVISIBLE);
+        mLoadingLayout.setVisibility(View.GONE);
         ivAdd.setVisibility(View.VISIBLE);
         if (mediaShareList.size() == 0) {
             mNoContentLayout.setVisibility(View.VISIBLE);
-            mainListView.setVisibility(View.INVISIBLE);
+            mainListView.setVisibility(View.GONE);
         } else {
-            mNoContentLayout.setVisibility(View.INVISIBLE);
+            mNoContentLayout.setVisibility(View.GONE);
             mainListView.setVisibility(View.VISIBLE);
             ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
             mainListView.setSelection(0);

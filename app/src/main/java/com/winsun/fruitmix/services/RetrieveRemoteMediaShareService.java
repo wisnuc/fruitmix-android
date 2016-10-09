@@ -113,4 +113,9 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
     }
 
+    public static void handleActionRetrieveRemoteMediaShareStaticMethod(){
+        RetrieveRemoteMediaShareService service = new RetrieveRemoteMediaShareService();
+        service.handleActionRetrieveRemoteMediaShare();
+    }
+
 }

@@ -45,7 +45,7 @@ public class RetrieveDeviceIdService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_RetrieveDeviceId.equals(action)) {
-                handleActionRetrieveDevicedId();
+                handleActionRetrieveDeviceId();
             }
         }
     }
@@ -54,9 +54,7 @@ public class RetrieveDeviceIdService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionRetrieveDevicedId() {
-
-
+    private void handleActionRetrieveDeviceId() {
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
         Intent intent = new Intent(Util.REMOTE_DEVICEID_RETRIEVED);
 
@@ -74,4 +72,8 @@ public class RetrieveDeviceIdService extends IntentService {
         localBroadcastManager.sendBroadcast(intent);
     }
 
+    public static void handleActionRetrieveDeviceIdStaticMethod(){
+        RetrieveDeviceIdService service = new RetrieveDeviceIdService();
+        service.handleActionRetrieveDeviceId();
+    }
 }

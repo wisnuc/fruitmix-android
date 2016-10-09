@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOverlay;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -178,16 +179,16 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         reloadData();
 
-        mLoadingLayout.setVisibility(View.INVISIBLE);
+        mLoadingLayout.setVisibility(View.GONE);
         if (mPhotoDateGroups.size() == 0) {
             mNoContentLayout.setVisibility(View.VISIBLE);
-            mRecyclerView.setVisibility(View.INVISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
 
             for (IPhotoListListener listener : mPhotoListListeners)
                 listener.onNoPhotoItem(true);
 
         } else {
-            mNoContentLayout.setVisibility(View.INVISIBLE);
+            mNoContentLayout.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
             mPhotoRecycleAdapter.notifyDataSetChanged();
 
@@ -464,6 +465,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             mRecyclerView.smoothScrollToPosition(findPhotoPositionInRecyclerView(currentPhotoDate, currentPhotoPosition));
 
             ActivityCompat.startPostponedEnterTransition(containerActivity);
+
 
 /*            ActivityCompat.postponeEnterTransition(containerActivity);
             mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -770,7 +772,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 } else {
                     photoParams.setMargins(0, 0, 0, 0);
                     mPhotoIv.setLayoutParams(photoParams);
-                    mPhotoSelectedIv.setVisibility(View.INVISIBLE);
+                    mPhotoSelectedIv.setVisibility(View.GONE);
                 }
             } else {
 
@@ -779,7 +781,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 RelativeLayout.LayoutParams photoParams = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
                 photoParams.setMargins(0, 0, 0, 0);
                 mPhotoIv.setLayoutParams(photoParams);
-                mPhotoSelectedIv.setVisibility(View.INVISIBLE);
+                mPhotoSelectedIv.setVisibility(View.GONE);
             }
 
             mPhotoIv.setOnClickListener(new View.OnClickListener() {
@@ -796,7 +798,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                         } else {
                             params.setMargins(0, 0, 0, 0);
                             mPhotoIv.setLayoutParams(params);
-                            mPhotoSelectedIv.setVisibility(View.INVISIBLE);
+                            mPhotoSelectedIv.setVisibility(View.GONE);
                         }
 
                         media.setSelected(!selected);

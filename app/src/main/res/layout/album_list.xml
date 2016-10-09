@@ -12,7 +12,7 @@
         package="com.winsun.fruitmix"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context="com.winsun.fruitmix.Test2Activity" />
 
@@ -44,7 +44,7 @@
         android:layout_marginBottom="60dp"
         android:layout_marginRight="30dp"
         android:src="@drawable/add_album"
-        android:visibility="invisible" />
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/loading_layout"

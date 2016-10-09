@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.OperationResult;
@@ -19,7 +20,9 @@ import org.json.JSONObject;
  * helper methods.
  */
 public class RetrieveTokenService extends IntentService {
-    // TODO: Rename actions, choose action names that describe tasks that this
+    
+    public static final String TAG = RetrieveTokenService.class.getSimpleName();
+    
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_RETRIEVE_TOKEN = "com.winsun.fruitmix.services.action.retrieve.token";
 
@@ -92,5 +95,14 @@ public class RetrieveTokenService extends IntentService {
 
         localBroadcastManager.sendBroadcast(intent);
 
+        Log.i(TAG, "handleActionRetrieveToken: send broadcast finish");
+
+    }
+
+    public static void handleActionRetrieveTokenStaticMethod(String gateway, String userUUID, String userPassword){
+
+        RetrieveTokenService retrieveTokenService = new RetrieveTokenService();
+
+        retrieveTokenService.handleActionRetrieveToken(gateway,userUUID,userPassword);
     }
 }

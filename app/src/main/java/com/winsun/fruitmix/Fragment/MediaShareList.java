@@ -6,16 +6,19 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewCompat;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.transition.Transition;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -38,6 +41,7 @@ import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationTargetType;
@@ -66,6 +70,7 @@ public class MediaShareList implements NavPagerActivity.Page {
     View view;
     LinearLayout mLoadingLayout;
     LinearLayout mNoContentLayout;
+    FrameLayout mShareListFrameLayout;
 
     public ListView mainListView;
 
@@ -73,8 +78,6 @@ public class MediaShareList implements NavPagerActivity.Page {
 
     Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
     ShareListViewAdapter mAdapter;
-
-    private DBUtils dbUtils;
 
     private RequestQueue mRequestQueue;
 
@@ -103,6 +106,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         mLoadingLayout = (LinearLayout) view.findViewById(R.id.loading_layout);
         mNoContentLayout = (LinearLayout) view.findViewById(R.id.no_content_layout);
+        mShareListFrameLayout = (FrameLayout) view.findViewById(R.id.share_list_framelayout);
 
         mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
 
@@ -159,12 +163,12 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         mMapKeyIsImageUUIDValueIsComments.clear();
 
-        mLoadingLayout.setVisibility(View.INVISIBLE);
+        mLoadingLayout.setVisibility(View.GONE);
         if (mediaShareList.size() == 0) {
             mNoContentLayout.setVisibility(View.VISIBLE);
-            mainListView.setVisibility(View.INVISIBLE);
+            mainListView.setVisibility(View.GONE);
         } else {
-            mNoContentLayout.setVisibility(View.INVISIBLE);
+            mNoContentLayout.setVisibility(View.GONE);
             mainListView.setVisibility(View.VISIBLE);
             ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
 
@@ -257,6 +261,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                 }
             });*/
             ActivityCompat.startPostponedEnterTransition(containerActivity);
+
         }
     }
 
@@ -643,9 +648,9 @@ public class MediaShareList implements NavPagerActivity.Page {
                     int start = shareCountText.indexOf(String.valueOf(imageDigests.size()));
                     int end = start + String.valueOf(imageDigests.size()).length();
                     SpannableStringBuilder builder = new SpannableStringBuilder(shareCountText);
-                    ForegroundColorSpan span = new ForegroundColorSpan(containerActivity.getResources().getColor(R.color.light_black));
-                    ForegroundColorSpan beforeSpan = new ForegroundColorSpan(containerActivity.getResources().getColor(R.color.light_gray));
-                    ForegroundColorSpan afterSpan = new ForegroundColorSpan(containerActivity.getResources().getColor(R.color.light_gray));
+                    ForegroundColorSpan span = new ForegroundColorSpan(ContextCompat.getColor(containerActivity, R.color.light_black));
+                    ForegroundColorSpan beforeSpan = new ForegroundColorSpan(ContextCompat.getColor(containerActivity, R.color.light_gray));
+                    ForegroundColorSpan afterSpan = new ForegroundColorSpan(ContextCompat.getColor(containerActivity, R.color.light_gray));
                     builder.setSpan(beforeSpan, 0, start, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
                     builder.setSpan(span, start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                     builder.setSpan(afterSpan, end, shareCountText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);

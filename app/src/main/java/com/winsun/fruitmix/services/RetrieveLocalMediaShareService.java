@@ -79,4 +79,9 @@ public class RetrieveLocalMediaShareService extends IntentService {
         localBroadcastManager.sendBroadcast(intent);
     }
 
+    public static void handleActionRetrieveLocalMediaShareStaticMethod(){
+        RetrieveLocalMediaShareService service = new RetrieveLocalMediaShareService();
+        service.handleActionRetrieveLocalMediaShare();
+    }
+
 }

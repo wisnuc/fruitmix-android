@@ -59,27 +59,22 @@ public class SplashScreenActivity extends Activity {
         mContext = this;
 
         LocalCache.Init(this);
-        mHandler = new CustomHandler(this);
-        mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
         filter = new IntentFilter(Util.REMOTE_TOKEN_RETRIEVED);
         filter.addAction(Util.REMOTE_DEVICEID_RETRIEVED);
         filter.addAction(Util.REMOTE_USER_RETRIEVED);
         customReceiver = new CustomReceiver();
-    }
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
         localBroadcastManager.registerReceiver(customReceiver, filter);
+
+        mHandler = new CustomHandler(this);
+        mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
     }
 
+
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
 
         localBroadcastManager.unregisterReceiver(customReceiver);
     }
@@ -184,6 +179,8 @@ public class SplashScreenActivity extends Activity {
                 FNAS.userUUID = mUuid;
                 FNAS.Gateway = mGateway;
 
+                Log.i(TAG, "onReceive: remote token retrieve:" + result.name());
+
                 switch (result) {
                     case SUCCEED:
 
@@ -196,7 +193,6 @@ public class SplashScreenActivity extends Activity {
                     case FAIL:
 
                         Util.loginState = false;
-
 
                         FNAS.JWT = mToken;
 

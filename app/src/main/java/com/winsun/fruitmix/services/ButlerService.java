@@ -18,6 +18,8 @@ import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
+import java.util.concurrent.Callable;
+
 public class ButlerService extends Service {
 
     private static final String TAG = ButlerService.class.getSimpleName();
@@ -213,12 +215,20 @@ public class ButlerService extends Service {
 
         String imageUUID;
 
+        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+
         switch (targetType) {
             case LOCAL_MEDIA:
                 RetrieveLocalMediaService.startActionRetrieveLocalMedia(this);
                 break;
             case LOCAL_MEDIASHARE:
-                RetrieveLocalMediaShareService.startActionRetrieveMediaShare(this);
+//                RetrieveLocalMediaShareService.startActionRetrieveMediaShare(this);
+                instance.doOneTaskInCachedThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        RetrieveLocalMediaShareService.handleActionRetrieveLocalMediaShareStaticMethod();
+                    }
+                });
                 break;
             case LOCAL_MEDIA_COMMENT:
                 RetrieveLocalMediaCommentService.startActionRetrieveLocalComment(this);
@@ -230,23 +240,50 @@ public class ButlerService extends Service {
                 RetrieveRemoteMediaService.startActionRetrieveRemoteMedia(this);
                 break;
             case REMOTE_MEDIASHARE:
-                RetrieveRemoteMediaShareService.startActionRetrieveRemoteMediaShare(this);
+//                RetrieveRemoteMediaShareService.startActionRetrieveRemoteMediaShare(this);
+                instance.doOneTaskInCachedThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        RetrieveRemoteMediaShareService.handleActionRetrieveRemoteMediaShareStaticMethod();
+                    }
+                });
                 break;
             case REMOTE_MEDIA_COMMENT:
                 imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
                 RetrieveRemoteMediaCommentService.startActionRetrieveRemoteMediaComment(this, imageUUID);
                 break;
             case REMOTE_DEVICEID:
-                RetrieveDeviceIdService.startActionRetrieveDeviceId(this);
+//                RetrieveDeviceIdService.startActionRetrieveDeviceId(this);
+                instance.doOneTaskInCachedThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        RetrieveDeviceIdService.handleActionRetrieveDeviceIdStaticMethod();
+                    }
+                });
                 break;
             case REMOTE_TOKEN:
-                String gateway = intent.getStringExtra(Util.GATEWAY);
-                String userUUID = intent.getStringExtra(Util.USER_UUID);
-                String userPassword = intent.getStringExtra(Util.PASSWORD);
-                RetrieveTokenService.startActionRetrieveToken(this, gateway, userUUID, userPassword);
+                final String gateway = intent.getStringExtra(Util.GATEWAY);
+                final String userUUID = intent.getStringExtra(Util.USER_UUID);
+                final String userPassword = intent.getStringExtra(Util.PASSWORD);
+
+//                RetrieveTokenService.startActionRetrieveToken(this, gateway, userUUID, userPassword);
+                instance.doOneTaskInCachedThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        RetrieveTokenService.handleActionRetrieveTokenStaticMethod(gateway,userUUID,userPassword);
+                    }
+                });
+
                 break;
             case LOCAL_MEDIA_IN_CAMERA:
-                RetrieveNewLocalMediaInCameraService.startActionRetrieveNewLocalMediaInCamera(this);
+                instance.doOneTaskInCachedThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        RetrieveNewLocalMediaInCameraService.handleActionRetrieveLocalMediaStaticMethod();
+                    }
+                });
+
+//                RetrieveNewLocalMediaInCameraService.startActionRetrieveNewLocalMediaInCamera(this);
                 break;
         }
     }

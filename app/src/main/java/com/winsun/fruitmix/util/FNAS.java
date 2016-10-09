@@ -161,6 +161,8 @@ public class FNAS {
             str = FNAS.ReadFull(conn.getInputStream());
         }
 
+        Log.i(TAG, "loadToken: " + str);
+
         return str;
     }
 

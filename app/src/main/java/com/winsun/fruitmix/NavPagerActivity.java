@@ -30,6 +30,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.animation.BounceInterpolator;
+import android.view.animation.CycleInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -151,6 +152,8 @@ public class NavPagerActivity extends AppCompatActivity
         intentFilter.addAction(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED);
         intentFilter.addAction(Util.LOCAL_MEDIA_COMMENT_RETRIEVED);
         intentFilter.addAction(Util.REMOTE_MEDIA_COMMENT_RETRIEVED);
+        mManager.registerReceiver(mReceiver, intentFilter);
+
 
         instance = ExecutorServiceInstance.SINGLE_INSTANCE;
         instance.startFixedThreadPool();
@@ -199,7 +202,6 @@ public class NavPagerActivity extends AppCompatActivity
                 mUserAvatar.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
                 break;
         }
-
 
         shareList = new MediaShareList(this);
         photoList = new NewPhotoList(this);
@@ -291,8 +293,6 @@ public class NavPagerActivity extends AppCompatActivity
 
         mNavPageBar.registerOnTabChangedListener(this);
 
-        mManager.registerReceiver(mReceiver, intentFilter);
-
         if (viewPager.getCurrentItem() == PAGE_PHOTO && mLocalMediaLoaded) {
             retrieveLocalMediaInCamera();
         }
@@ -300,8 +300,8 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
 
         mNavPageBar.unregisterOnTabChangedListener(this);
 
@@ -627,6 +627,7 @@ public class NavPagerActivity extends AppCompatActivity
                 Log.i(TAG, "local media loaded");
 
                 mLocalMediaLoaded = true;
+
                 retrieveLocalMediaInCamera();
 
             } else if (intent.getAction().equals(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED)) {

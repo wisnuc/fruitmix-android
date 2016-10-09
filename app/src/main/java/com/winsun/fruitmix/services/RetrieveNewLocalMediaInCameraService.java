@@ -122,4 +122,8 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
         localBroadcastManager.sendBroadcast(intent);
     }
 
+    public static void handleActionRetrieveLocalMediaStaticMethod(){
+        RetrieveNewLocalMediaInCameraService service = new RetrieveNewLocalMediaInCameraService();
+        service.handleActionRetrieveLocalMedia();
+    }
 }

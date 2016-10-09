@@ -34,6 +34,10 @@ public enum ExecutorServiceInstance {
         return fixedThreadPool.submit(callable);
     }
 
+    public void doOnTaskInFixedThreadPool(Runnable runnable){
+        fixedThreadPool.execute(runnable);
+    }
+
     public void startFixedThreadPool(){
         fixedThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
     }
