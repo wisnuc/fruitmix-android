@@ -147,32 +147,11 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
         public void refreshView(final int position) {
             media = mPhotos.get(position);
 
-            if (media.isLocal()) {  // local bitmap path
-//                LocalCache.LoadLocalBitmapThumb((String) mMap.get("thumb"), width, height, mPhotoItem);
-
-                String url = media.getThumb();
-
-                mImageLoader.setShouldCache(false);
-                mPhotoItem.setTag(url);
-                mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
-                mPhotoItem.setImageUrl(url, mImageLoader);
-
-            } else {
-//                LocalCache.LoadRemoteBitmapThumb((String) (mMap.get("resHash")), width, height, mPhotoItem);
-
-                width = Integer.parseInt(media.getWidth());
-                height = Integer.parseInt(media.getHeight());
-
-                int[] result = Util.formatPhotoWidthHeight(width, height);
-
-                String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
-//                String url = FNAS.Gateway + "/media/" + mMap.get("resHash") + "?type=thumb&width=" + result[0] + "&height=" + result[1];
-
-                mImageLoader.setShouldCache(true);
-                mPhotoItem.setTag(url);
-                mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
-                mPhotoItem.setImageUrl(url, mImageLoader);
-            }
+            String imageUrl = media.getImageThumbUrl(mContext);
+            mImageLoader.setShouldCache(!media.isLocal());
+            mPhotoItem.setTag(imageUrl);
+            mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
+            mPhotoItem.setImageUrl(imageUrl, mImageLoader);
 
             mMorelPhotoItemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override

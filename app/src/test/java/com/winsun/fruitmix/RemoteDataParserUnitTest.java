@@ -31,51 +31,27 @@ public class RemoteDataParserUnitTest {
 
         String json = "[\n" +
                 "  {\n" +
-                "    \"hash\": \"820cf6f1e3efa5007f36909df9822ee4966d8bedeae12ab73f647d0db45df06d\",\n" +
-                "    \"kind\": \"image\",\n" +
-                "    \"type\": \"jpg\",\n" +
-                "    \"height\": 200,\n" +
-                "    \"width\": 200,\n" +
-                "    \"detail\": {}\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"hash\": \"1141f04e565f4e41c4e2eba140715b935d943b4f3c392dd1fa008edb427e8026\",\n" +
-                "    \"kind\": \"image\",\n" +
-                "    \"type\": \"jpg\",\n" +
-                "    \"height\": 200,\n" +
-                "    \"width\": 200,\n" +
-                "    \"detail\": {}\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"hash\": \"bd3f40934856999cb872ff8db54b7f953bdcaed094eb4930464a1e7a21ed3c77\",\n" +
-                "    \"kind\": \"image\",\n" +
-                "    \"type\": \"jpg\",\n" +
-                "    \"height\": 200,\n" +
-                "    \"width\": 200,\n" +
-                "    \"detail\": {}\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"hash\": \"321920dbf7091dbcc614e4ede30f0f4cdc9b40fe11d7e6d8ed0d1f495c1b0252\",\n" +
-                "    \"kind\": \"image\",\n" +
-                "    \"type\": \"jpg\",\n" +
-                "    \"height\": 200,\n" +
-                "    \"width\": 200,\n" +
-                "    \"detail\": {}\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"hash\": \"2cb17a7e37e48e5a320fe7eff2a8a568d48bf027a1117b553848641f743c1834\",\n" +
-                "    \"kind\": \"image\",\n" +
-                "    \"type\": \"jpg\",\n" +
-                "    \"height\": 200,\n" +
-                "    \"width\": 200,\n" +
-                "    \"detail\": {}\n" +
-                "  }]";
+                "    \"digest\": \"ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16\",\n" +
+                "    \"type\": \"JPEG\",\n" +
+                "    \"width\": 1601,\n" +
+                "    \"height\": 1601,\n" +
+                "    \"datetime\": null,\n" +
+                "    \"extended\": false\n" +
+                "  }\n" +
+                "]";
 
         RemoteDataParser<Media> remoteDataParser = new RemoteMediaParser();
 
         List<Media> medias = remoteDataParser.parse(json);
 
         assertFalse(medias.size() == 0);
+
+        Media media = medias.get(0);
+        assertEquals(media.getUuid(),"ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16");
+        assertEquals(media.getWidth(),"1601");
+        assertEquals(media.getHeight(),"1601");
+        assertEquals(media.getTime(),"1916-01-01 00:00:00");
+
     }
 
     @Test

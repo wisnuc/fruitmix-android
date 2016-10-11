@@ -105,6 +105,7 @@ public class Util {
     public static final String USER_PARAMETER = "/users";
     public static final String TOKEN_PARAMETER = "/token";
     public static final String LOGIN_PARAMETER = "/login";
+    public static final String DEVICE_ID_PARAMETER = "/libraries";
 
     public static final String FRUITMIX_SHAREDPREFERENCE_NAME = "fruitMix";
 

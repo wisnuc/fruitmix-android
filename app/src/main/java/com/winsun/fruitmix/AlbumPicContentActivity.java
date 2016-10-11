@@ -288,29 +288,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             ivMain = (NetworkImageView) view.findViewById(R.id.mainPic);
 
-            if (currentItem.isLocal()) {  // local bitmap path
-
-                String url = String.valueOf(currentItem.getThumb());
-
-                mImageLoader.setShouldCache(false);
-                ivMain.setTag(url);
-                ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
-                ivMain.setImageUrl(url, mImageLoader);
-
-            } else {
-
-                int width = Integer.parseInt(currentItem.getWidth());
-                int height = Integer.parseInt(currentItem.getHeight());
-
-                int[] result = Util.formatPhotoWidthHeight(width, height);
-
-                String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + currentItem.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
-
-                mImageLoader.setShouldCache(true);
-                ivMain.setTag(url);
-                ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
-                ivMain.setImageUrl(url, mImageLoader);
-            }
+            String imageUrl = currentItem.getImageThumbUrl(mContext);
+            mImageLoader.setShouldCache(!currentItem.isLocal());
+            ivMain.setTag(imageUrl);
+            ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
+            ivMain.setImageUrl(imageUrl, mImageLoader);
 
             ivMain.setOnClickListener(new View.OnClickListener() {
                 @Override

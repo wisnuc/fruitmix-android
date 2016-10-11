@@ -240,29 +240,11 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         public void refreshView(final int position) {
             mMap = mPhotoList.get(position);
 
-            if (mMap.isLocal()) {
-
-                String url = mMap.getThumb();
-
-                mImageLoader.setShouldCache(false);
-                mPhotoItem.setTag(url);
-                mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
-                mPhotoItem.setImageUrl(url, mImageLoader);
-
-            } else {
-
-                width = Integer.parseInt(mMap.getWidth());
-                height = Integer.parseInt(mMap.getHeight());
-
-                int[] result = Util.formatPhotoWidthHeight(width, height);
-
-                String url = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + mMap.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
-
-                mImageLoader.setShouldCache(true);
-                mPhotoItem.setTag(url);
-                mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
-                mPhotoItem.setImageUrl(url, mImageLoader);
-            }
+            String imageUrl = mMap.getImageThumbUrl(mContext);
+            mImageLoader.setShouldCache(!mMap.isLocal());
+            mPhotoItem.setTag(imageUrl);
+            mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
+            mPhotoItem.setImageUrl(imageUrl, mImageLoader);
 
             mDelPhotoLayout.setOnClickListener(new View.OnClickListener() {
                 @Override

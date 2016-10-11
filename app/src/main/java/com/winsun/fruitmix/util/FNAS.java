@@ -42,9 +42,11 @@ public class FNAS {
 
     public static final String TAG = FNAS.class.getSimpleName();
 
-    public static String Gateway = "http://192.168.5.132";
+    public static String Gateway = "http://192.168.5.98";
     public static String JWT = null;
     public static String userUUID = null;
+
+    public static String PORT = "3721";
 
     public static String ReadFull(InputStream ins) {
         String result = "";
@@ -152,7 +154,7 @@ public class FNAS {
 
         HttpURLConnection conn;
         String str = "";
-        conn = (HttpURLConnection) (new URL(gateway + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
+        conn = (HttpURLConnection) (new URL(gateway + ":" + FNAS.PORT + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
         conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((userUUID + ":" + userPassword).getBytes(), Base64.DEFAULT));
         conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
         if (conn.getResponseCode() != 200) {
@@ -166,14 +168,14 @@ public class FNAS {
         return str;
     }
 
-    public static void loadDeviceId() throws Exception {
-        String str;
+    public static String loadDeviceId() throws Exception {
+        String str = "";
         if (LocalCache.DeviceID == null || LocalCache.DeviceID.equals("")) {
-            str = FNAS.PostRemoteCall("/library/", "");
-            LocalCache.DeviceID = str.replace("\"", "");
-            LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
+            str = FNAS.PostRemoteCall(Util.DEVICE_ID_PARAMETER, "");
         }
-        Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
+
+        return str;
+
     }
 
     public static void loadData(Context context) {
@@ -260,11 +262,11 @@ public class FNAS {
         HttpURLConnection conn;
         String str = "";
 
-        conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
+        conn = (HttpURLConnection) (new URL(Gateway + ":" + FNAS.PORT + req).openConnection());
         conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         conn.setUseCaches(false);
         conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
-        Log.d(TAG, "NAS GET: " + (Gateway + req));
+        Log.d(TAG, "NAS GET: " + (Gateway + ":" + FNAS.PORT + req));
         str = FNAS.ReadFull(conn.getInputStream());
 
 
@@ -277,7 +279,7 @@ public class FNAS {
         OutputStream outStream;
         String str;
 
-        conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
+        conn = (HttpURLConnection) (new URL(Gateway + ":" + PORT + req).openConnection());
         conn.setRequestMethod(Util.HTTP_POST_METHOD);
         conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         conn.setDoInput(true);// 允许输入
@@ -293,9 +295,9 @@ public class FNAS {
         outStream.write(str.getBytes());
         outStream.flush();
 
-        Log.d(TAG, "NAS POST: " + (Gateway + req) + " " + conn.getResponseCode() + " " + str);
+        Log.d(TAG, "NAS POST: " + (Gateway + ":" + PORT + req) + " " + conn.getResponseCode() + " " + str);
         str = FNAS.ReadFull(conn.getInputStream());
-        Log.d(TAG, "NAS POST END: " + (Gateway + req) + " " + str);
+        Log.d(TAG, "NAS POST END: " + (Gateway + ":" + PORT + req) + " " + str);
 
         outStream.close();
         conn.disconnect();
@@ -308,7 +310,7 @@ public class FNAS {
         OutputStream outStream;
         String str;
 
-        conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
+        conn = (HttpURLConnection) (new URL(Gateway + ":" + FNAS.PORT + req).openConnection());
         conn.setRequestMethod(Util.HTTP_PATCH_METHOD);
         conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         conn.setDoInput(true);// 允许输入
@@ -325,9 +327,9 @@ public class FNAS {
         outStream.flush();
 
 
-        Log.d("winsun", "NAS PATCH: " + (Gateway + req) + " " + conn.getResponseCode() + " " + str);
+        Log.d("winsun", "NAS PATCH: " + (Gateway + ":" + FNAS.PORT + req) + " " + conn.getResponseCode() + " " + str);
         str = FNAS.ReadFull(conn.getInputStream());
-        Log.d("winsun", "NAS PATCH END: " + (Gateway + req) + " " + str);
+        Log.d("winsun", "NAS PATCH END: " + (Gateway + ":" + FNAS.PORT + req) + " " + str);
 
         outStream.close();
         conn.disconnect();
@@ -346,10 +348,10 @@ public class FNAS {
         try {
             buffer = new byte[4096];
             tempFile = LocalCache.GetInnerTempFile();
-            conn = (HttpURLConnection) (new URL(Gateway + req).openConnection());
+            conn = (HttpURLConnection) (new URL(Gateway + ":" + FNAS.PORT + req).openConnection());
             conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
             conn.setConnectTimeout(15 * 1000);
-            Log.d("winsun", Gateway + req + "  " + JWT);
+            Log.d("winsun", Gateway + ":" + FNAS.PORT + req + "  " + JWT);
             bin = new BufferedInputStream(conn.getInputStream());
             bout = new BufferedOutputStream(new FileOutputStream(tempFile));
             while (true) {
@@ -360,7 +362,7 @@ public class FNAS {
             bin.close();
             bout.close();
             LocalCache.MoveTempFileToThumbCache(tempFile, key);
-            Log.d("winsun", Gateway + req + "  Success!");
+            Log.d("winsun", Gateway + ":" + FNAS.PORT + req + "  Success!");
             return 1;
         } catch (Exception e) {
             e.printStackTrace();
@@ -432,7 +434,7 @@ public class FNAS {
             Log.i(TAG, "thumb:" + fname + "hash:" + hash);
 
             // head
-            url = Gateway + "/library/" + LocalCache.DeviceID + "?hash=" + hash;
+            url = Gateway + ":" + FNAS.PORT + Util.DEVICE_ID_PARAMETER + "/" + LocalCache.DeviceID;
             Log.d(TAG, "Photo UP: " + url);
             boundary = java.util.UUID.randomUUID().toString();
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
@@ -465,8 +467,22 @@ public class FNAS {
             is.close();
             outStream.write("\r\n".getBytes());
 
+            sb = new StringBuilder();
+            sb.append("--");
+            sb.append(boundary);
+            sb.append("\r\n");
+            sb.append("Content-Disposition: form-data; name=\""
+                    + "sha256" + "\"");
+            sb.append("\r\n");
+            sb.append("\r\n");
+            sb.append(hash);
+            sb.append("\r\n");
+            byte[] data = sb.toString().getBytes();
+            outStream.write(data);
+
             outStream.write(("--" + boundary + "--\r\n").getBytes());
             outStream.flush();
+            outStream.close();
 
             resCode = conn.getResponseCode();
             Log.d(TAG, "UP END1: " + resCode);
@@ -479,10 +495,10 @@ public class FNAS {
             InputStreamReader isReader = new InputStreamReader(in);
             BufferedReader bufReader = new BufferedReader(isReader);
             String line = null;
-            String data = "";
+            String dataString = "";
 
             while ((line = bufReader.readLine()) != null)
-                data += line;
+                dataString += line;
 
             outStream.close();
             conn.disconnect();

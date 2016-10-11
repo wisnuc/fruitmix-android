@@ -83,7 +83,7 @@ public class SplashScreenActivity extends Activity {
         mGateway = LocalCache.getGateway(mContext);
         mUuid = LocalCache.getUuidValue(mContext);
         mPassword = LocalCache.getPasswordValue(mContext);
-        mToken = LocalCache.getJWT(mContext);
+        mToken = LocalCache.getToken(mContext);
 
         if (mUuid != null && mPassword != null && mGateway != null && mToken != null) {
 

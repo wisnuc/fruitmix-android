@@ -285,18 +285,8 @@ public class MediaShareList implements NavPagerActivity.Page {
         Media currentMedia = LocalCache.RemoteMediaMapKeyIsUUID.get(imageUUID);
         if (currentMedia == null) {
             currentMedia = LocalCache.LocalMediaMapKeyIsUUID.get(imageUUID);
-            currentMediaTag = currentMedia.getThumb();
-        } else {
-
-            int w, h;
-            w = Integer.parseInt(currentMedia.getWidth());
-            h = Integer.parseInt(currentMedia.getHeight());
-
-            int[] result = Util.formatPhotoWidthHeight(w, h);
-
-            currentMediaTag = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + currentMedia.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
-
         }
+        currentMediaTag = currentMedia.getImageThumbUrl(containerActivity);
         return currentMediaTag;
     }
 
@@ -441,7 +431,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                     } else {
 
-                        String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + coverImg.getUuid());
+                        String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + coverImg.getUuid());
 
                         mImageLoader.setShouldCache(true);
                         ivCover.setTag(url);
@@ -503,7 +493,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                         } else {
 
-                            String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + itemImg.getUuid());
+                            String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + itemImg.getUuid());
 
                             mImageLoader.setShouldCache(true);
                             ivCover.setTag(url);
@@ -663,36 +653,17 @@ public class MediaShareList implements NavPagerActivity.Page {
                         }
                         ivItems[i].setVisibility(View.VISIBLE);
                         itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(i));
-                        if (itemImg != null) sLocal = false;
-                        else {
+                        if (itemImg == null)
                             itemImg = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigests.get(i));
-                            sLocal = true;
-                        }
 
                         if (itemImg != null) {
-                            if (sLocal) {
 
-                                String url = itemImg.getThumb();
+                            String imageUrl = itemImg.getImageThumbUrl(containerActivity);
+                            mImageLoader.setShouldCache(!itemImg.isLocal());
+                            ivItems[i].setTag(imageUrl);
+                            ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
+                            ivItems[i].setImageUrl(imageUrl, mImageLoader);
 
-                                mImageLoader.setShouldCache(false);
-                                ivItems[i].setTag(url);
-                                ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
-                                ivItems[i].setImageUrl(url, mImageLoader);
-
-                            } else {
-
-                                w = Integer.parseInt(itemImg.getWidth());
-                                h = Integer.parseInt(itemImg.getHeight());
-
-                                int[] result = Util.formatPhotoWidthHeight(w, h);
-
-                                String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + itemImg.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
-
-                                mImageLoader.setShouldCache(true);
-                                ivItems[i].setTag(url);
-                                ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
-                                ivItems[i].setImageUrl(url, mImageLoader);
-                            }
                         } else {
                             ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
                             ivItems[i].setImageUrl(null, mImageLoader);

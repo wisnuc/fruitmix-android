@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.parser;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.util.LocalCache;
 
@@ -17,6 +19,8 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class RemoteMediaParser implements RemoteDataParser<Media> {
 
+    public static final String TAG = RemoteMediaParser.class.getSimpleName();
+
     @Override
     public List<Media> parse(String json) {
 
@@ -32,30 +36,22 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 itemRaw = jsonArray.getJSONObject(i);
-                if (itemRaw.getString("kind").equals("image")) {
 
-                    media = new Media();
+                media = new Media();
 
-                    media.setUuid(itemRaw.getString("hash"));
+                media.setUuid(itemRaw.getString("digest"));
+                media.setWidth(itemRaw.getString("width"));
+                media.setHeight(itemRaw.getString("height"));
+
+                String dateTime = itemRaw.getString("datetime");
+                if (dateTime.equals("null")) {
                     media.setTime("1916-01-01 00:00:00");
-                    if (itemRaw.has("width")) {
-                        media.setWidth(itemRaw.getString("width"));
-                        media.setHeight(itemRaw.getString("height"));
-                    } else if (itemRaw.getJSONObject("detail").has("width")) {
-                        media.setWidth(itemRaw.getJSONObject("detail").getString("width"));
-                        media.setHeight(itemRaw.getJSONObject("detail").getString("height"));
-                    } else {
-                        media.setWidth(itemRaw.getJSONObject("detail").getJSONObject("exif").getString("ExifImageWidth"));
-                        media.setHeight(itemRaw.getJSONObject("detail").getJSONObject("exif").getString("ExifImageHeight"));
-                        if (itemRaw.getJSONObject("detail").has("exif") && itemRaw.getJSONObject("detail").getJSONObject("exif").has("CreateDate")) {
-                            time = itemRaw.getJSONObject("detail").getJSONObject("exif").getString("CreateDate");
-                            media.setTime(time.substring(0, 4) + "-" + time.substring(5, 7) + "-" + time.substring(8));
-                        } else media.setTime("1916-01-01 00:00:00");
-                    }
-
-                    medias.add(media);
-
+                } else {
+                    media.setTime(dateTime.substring(0, 4) + "-" + dateTime.substring(5, 7) + "-" + dateTime.substring(8, 10));
                 }
+
+                medias.add(media);
+
             }
         } catch (JSONException e) {
             e.printStackTrace();

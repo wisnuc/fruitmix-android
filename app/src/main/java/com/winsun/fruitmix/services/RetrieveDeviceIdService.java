@@ -4,10 +4,14 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import org.json.JSONObject;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -17,7 +21,9 @@ import com.winsun.fruitmix.util.Util;
  * helper methods.
  */
 public class RetrieveDeviceIdService extends IntentService {
-    // TODO: Rename actions, choose action names that describe tasks that this
+
+    public static final String TAG = RetrieveDeviceIdService.class.getSimpleName();
+
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_RetrieveDeviceId = "com.winsun.fruitmix.services.action.retrieve.deviceId";
 
@@ -58,16 +64,33 @@ public class RetrieveDeviceIdService extends IntentService {
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
         Intent intent = new Intent(Util.REMOTE_DEVICEID_RETRIEVED);
 
-        try {
-            FNAS.loadDeviceId();
+        LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
+        if(LocalCache.DeviceID != null && !LocalCache.DeviceID.equals("")){
 
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        }else {
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME,OperationResult.FAIL.name());
+            try {
+                String str = FNAS.loadDeviceId();
+
+                if (str.length() > 0) {
+                    LocalCache.DeviceID = new JSONObject(str).getString("uuid");
+                }
+
+                LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
+                Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
+
+                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                intent.putExtra(Util.OPERATION_RESULT_NAME,OperationResult.FAIL.name());
+            }
         }
+
+
 
         localBroadcastManager.sendBroadcast(intent);
     }

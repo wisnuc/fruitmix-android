@@ -230,29 +230,12 @@ public class AlbumList implements NavPagerActivity.Page {
 
             if (coverImg != null) {
 
-                if (sLocal) {  // local bitmap path
+                String imageUrl = coverImg.getImageThumbUrl(containerActivity);
+                mImageLoader.setShouldCache(!coverImg.isLocal());
+                ivMainPic.setTag(imageUrl);
+                ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivMainPic.setImageUrl(imageUrl, mImageLoader);
 
-                    String url = coverImg.getThumb();
-
-                    mImageLoader.setShouldCache(false);
-                    ivMainPic.setTag(url);
-                    ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
-                    ivMainPic.setImageUrl(url, mImageLoader);
-
-                } else {
-
-                    w = Integer.parseInt(coverImg.getWidth());
-                    h = Integer.parseInt(coverImg.getHeight());
-
-                    int[] result = Util.formatPhotoWidthHeight(w, h);
-
-                    String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + coverImg.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
-
-                    mImageLoader.setShouldCache(true);
-                    ivMainPic.setTag(url);
-                    ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
-                    ivMainPic.setImageUrl(url, mImageLoader);
-                }
             } else {
                 ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
                 ivMainPic.setImageUrl(null, mImageLoader);

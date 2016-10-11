@@ -88,7 +88,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         mUserExpandableLists = new ArrayList<>();
         mEquipments = new ArrayList<>();
 
-        Equipment equipment = new Equipment("Winsuc Appliction 131 By Wu", "192.168.5.131", 6666);
+        Equipment equipment = new Equipment("Winsuc Appliction 131 By Wu", "192.168.5.98", 6666);
         getUserList(equipment);
 
         mHandler = new CustomHandler(this, getMainLooper());
@@ -129,7 +129,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     protected void onResume() {
         super.onResume();
 
-        localBroadcastManager.registerReceiver(customReceiver,filter);
+        localBroadcastManager.registerReceiver(customReceiver, filter);
 
         discoverService(mContext);
     }
@@ -438,8 +438,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 String str;
 
                 try {
-                    Log.i(TAG, "login url:" + Util.HTTP + equipment.getHost() + Util.LOGIN_PARAMETER);
-                    conn = (HttpURLConnection) (new URL(Util.HTTP + equipment.getHost() + Util.LOGIN_PARAMETER)).openConnection();
+                    Log.i(TAG, "login url:" + Util.HTTP + equipment.getHost() + ":" + FNAS.PORT + Util.LOGIN_PARAMETER);
+                    conn = (HttpURLConnection) (new URL(Util.HTTP + equipment.getHost() + ":"  + FNAS.PORT + Util.LOGIN_PARAMETER)).openConnection();
                     Log.i(TAG, "response code" + conn.getResponseCode() + "");
                     str = FNAS.ReadFull(conn.getInputStream());
                     json = new JSONArray(str);

@@ -7,6 +7,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
@@ -84,6 +85,8 @@ public class RetrieveTokenService extends IntentService {
             if (str.length() > 0) {
                 FNAS.JWT = new JSONObject(str).getString("token");
             }
+
+            LocalCache.saveToken(FNAS.JWT);
 
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
 

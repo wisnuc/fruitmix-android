@@ -230,7 +230,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                         FNAS.retrieveUserMap(mContext);
 
                         LocalCache.saveGateway(FNAS.Gateway, mContext);
-                        LocalCache.saveJwt(LocalCache.DeviceID, mContext);
+
                         setGroupNameUserName(mEquipmentGroupName, mEquipmentChildName);
                         setUuidPassword(FNAS.userUUID, mPwd);
 

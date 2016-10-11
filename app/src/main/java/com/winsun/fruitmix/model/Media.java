@@ -1,11 +1,14 @@
 package com.winsun.fruitmix.model;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.Util;
 
 /**
  * Created by Administrator on 2016/7/28.
@@ -163,7 +166,7 @@ public class Media implements Parcelable {
 
             Log.i(TAG, "upload file:" + thumb + "result:" + uploaded);
 
-            if(uploaded){
+            if (uploaded) {
                 DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
                 dbUtils.updateLocalMedia(this);
             }
@@ -173,15 +176,44 @@ public class Media implements Parcelable {
         return uploaded;
     }
 
-    public void restoreUploadState(){
+    public void restoreUploadState() {
         uploaded = false;
     }
 
-    public boolean isUploaded(){
+    public boolean isUploaded() {
         return uploaded;
     }
 
     public void setUploaded(boolean uploaded) {
         this.uploaded = uploaded;
+    }
+
+    public String getImageThumbUrl(Context context) {
+
+        String imageUrl;
+        if (isLocal()) {
+            imageUrl = getThumb();
+        } else {
+
+            int width = Integer.parseInt(getWidth());
+            int height = Integer.parseInt(getHeight());
+
+            int[] result = Util.formatPhotoWidthHeight(width, height);
+
+            imageUrl = String.format(context.getString(R.string.thumb_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid(),
+                    String.valueOf(result[0]), String.valueOf(result[1]));
+        }
+        return imageUrl;
+    }
+
+    public String getImageOriginalUrl(Context context) {
+
+        String imageUrl;
+        if (isLocal()) {
+            imageUrl = getThumb();
+        } else {
+            imageUrl = String.format(context.getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid());
+        }
+        return imageUrl;
     }
 }

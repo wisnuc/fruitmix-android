@@ -330,7 +330,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                         if (!transitionMediaNeedShowThumb) {
                             ActivityCompat.startPostponedEnterTransition(this);
                             transitionMediaNeedShowThumb = true;
-                        }else {
+                        } else {
                             dismissCurrentImageThumb(media);
                         }
 
@@ -374,36 +374,18 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     }
 
     private void dismissCurrentImageThumb(Media media) {
-        String thumbImageUrl = generateThumbImageUrl(media);
+        String thumbImageUrl = media.getImageThumbUrl(mContext);
         final TouchNetworkImageView defaultMainPic = (TouchNetworkImageView) mViewPager.findViewWithTag(thumbImageUrl);
         defaultMainPic.setVisibility(View.INVISIBLE);
     }
 
-    private String generateThumbImageUrl(Media media) {
-
-        int width = Integer.parseInt(media.getWidth());
-        int height = Integer.parseInt(media.getHeight());
-
-        int[] result = Util.formatPhotoWidthHeight(width, height);
-
-        return String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
-
-    }
-
     private String generateImageUrl(boolean isThumb, Media media) {
         String currentUrl;
-        if (media.isLocal()) {
-            currentUrl = String.valueOf(media.getThumb());
+
+        if (isThumb) {
+            currentUrl = media.getImageThumbUrl(mContext);
         } else {
-
-            if (isThumb) {
-
-                currentUrl = generateThumbImageUrl(media);
-
-            } else {
-                currentUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid());
-            }
-
+            currentUrl = media.getImageOriginalUrl(mContext);
         }
 
         return currentUrl;
@@ -423,7 +405,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
     private void startLoadingOriginalPhoto(final String imageUUID) {
 
-        final String remoteUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + imageUUID);
+        final String remoteUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + imageUUID);
 
         final TouchNetworkImageView mainPic = (TouchNetworkImageView) mViewPager.findViewWithTag(remoteUrl);
 
@@ -491,54 +473,28 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 layoutParams.height = screenHeight;
                 defaultMainPic.setLayoutParams(layoutParams);
 
-                if (media.isLocal()) {
+                mainPic.registerImageLoadListener(PhotoSliderActivity.this);
+                String originalImageUrl = media.getImageOriginalUrl(mContext);
+                mainPic.setTag(originalImageUrl);
 
+                mImageLoader.setShouldCache(!media.isLocal());
+
+                if(transitionMediaNeedShowThumb && !media.isLocal()){
+
+                    defaultMainPic.setVisibility(View.VISIBLE);
+                    mainPic.setVisibility(View.INVISIBLE);
+                    ViewCompat.setTransitionName(defaultMainPic, media.getUuid());
+                    defaultMainPic.registerImageLoadListener(PhotoSliderActivity.this);
+
+                    String thumbImageUrl = media.getImageThumbUrl(mContext);
+                    defaultMainPic.setTag(thumbImageUrl);
+                    defaultMainPic.setImageUrl(thumbImageUrl, mImageLoader);
+
+                }else {
                     defaultMainPic.setVisibility(View.INVISIBLE);
                     mainPic.setVisibility(View.VISIBLE);
                     ViewCompat.setTransitionName(mainPic, media.getUuid());
-
-                    mainPic.registerImageLoadListener(PhotoSliderActivity.this);
-
-                    String localImageUrl = media.getThumb();
-
-                    mImageLoader.setShouldCache(false);
-                    mainPic.setTag(localImageUrl);
-                    mainPic.setImageUrl(localImageUrl, mImageLoader);
-
-                } else {
-
-                    mainPic.registerImageLoadListener(PhotoSliderActivity.this);
-                    String remoteUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid());
-                    mainPic.setTag(remoteUrl);
-
-                    if (transitionMediaNeedShowThumb) {
-                        defaultMainPic.setVisibility(View.VISIBLE);
-                        mainPic.setVisibility(View.INVISIBLE);
-                        ViewCompat.setTransitionName(defaultMainPic, media.getUuid());
-
-                        defaultMainPic.registerImageLoadListener(PhotoSliderActivity.this);
-
-                        int width = Integer.parseInt(media.getWidth());
-                        int height = Integer.parseInt(media.getHeight());
-
-                        int[] result = Util.formatPhotoWidthHeight(width, height);
-
-                        String thumbImageUrl = String.format(getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
-
-                        mImageLoader.setShouldCache(true);
-                        defaultMainPic.setTag(thumbImageUrl);
-                        defaultMainPic.setImageUrl(thumbImageUrl, mImageLoader);
-
-                    } else {
-
-                        mainPic.setVisibility(View.VISIBLE);
-                        defaultMainPic.setVisibility(View.INVISIBLE);
-
-                        ViewCompat.setTransitionName(mainPic,media.getUuid());
-                        mImageLoader.setShouldCache(true);
-                        mainPic.setImageUrl(remoteUrl,mImageLoader);
-                    }
-
+                    mainPic.setImageUrl(originalImageUrl,mImageLoader);
                 }
 
                 mainPic.setOnTouchListener(new View.OnTouchListener() {

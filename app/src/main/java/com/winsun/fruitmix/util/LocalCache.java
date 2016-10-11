@@ -675,16 +675,16 @@ public class LocalCache {
         return sp.getString(Util.GATEWAY, null);
     }
 
-    public static void saveJwt(String jwt, Context context) {
+    public static void saveToken(String jwt) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
-        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        sp = CurrentApp.getApplicationContext().getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
         editor.putString(Util.JWT, jwt);
         editor.apply();
     }
 
-    public static String getJWT(Context context) {
+    public static String getToken(Context context) {
         SharedPreferences sp;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
 

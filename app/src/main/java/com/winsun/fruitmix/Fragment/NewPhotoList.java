@@ -10,14 +10,12 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOverlay;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -497,22 +495,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
     }
 
     private String findPhotoTag(Media media) {
-        String tag = "";
-        if (media.isLocal()) {
-
-            tag = media.getThumb();
-
-        } else if (!media.isLocal()) {
-
-
-            int width = Integer.parseInt(media.getWidth());
-            int height = Integer.parseInt(media.getHeight());
-
-            int[] result = Util.formatPhotoWidthHeight(width, height);
-
-            tag = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
-        }
-        return tag;
+        return media.getImageThumbUrl(containerActivity);
     }
 
     private class PhotoRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -722,32 +705,13 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             mImageLoader.setTag(position);
 
-            if (media.isLocal() && !mIsFling) {
-
-                String url = media.getThumb();
-
-                mImageLoader.setShouldCache(false);
-                mPhotoIv.setTag(url);
+            if(!mIsFling){
+                String imageUrl = media.getImageThumbUrl(containerActivity);
+                mImageLoader.setShouldCache(!media.isLocal());
+                mPhotoIv.setTag(imageUrl);
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
-                mPhotoIv.setImageUrl(url, mImageLoader);
-
-            } else if (!media.isLocal() && !mIsFling) {
-
-
-                int width = Integer.parseInt(media.getWidth());
-                int height = Integer.parseInt(media.getHeight());
-
-                int[] result = Util.formatPhotoWidthHeight(width, height);
-
-                String url = String.format(containerActivity.getString(R.string.thumb_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid(), String.valueOf(result[0]), String.valueOf(result[1]));
-
-                mImageLoader.setShouldCache(true);
-                mPhotoIv.setTag(url);
-                mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
-                mPhotoIv.setImageUrl(url, mImageLoader);
-
-
-            } else if (mIsFling) {
+                mPhotoIv.setImageUrl(imageUrl, mImageLoader);
+            }else {
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(null, mImageLoader);
             }

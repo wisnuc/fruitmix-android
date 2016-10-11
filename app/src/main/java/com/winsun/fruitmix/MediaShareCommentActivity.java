@@ -244,7 +244,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
             ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
             ivMain.setImageUrl(url, mImageLoader);
         } else {
-            String url = String.format(getString(R.string.original_photo_url), FNAS.Gateway + Util.MEDIA_PARAMETER + "/" + media.getUuid());
+            String url = String.format(getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + media.getUuid());
 
             mImageLoader.setShouldCache(true);
             ivMain.setTag(url);
