@@ -239,10 +239,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     }
 
     private void finishActivity() {
-        if (Util.checkRunningOnLollipopOrHigher())
-            finishAfterTransition();
-        else
-            finish();
+        supportFinishAfterTransition();
     }
 
     @Override

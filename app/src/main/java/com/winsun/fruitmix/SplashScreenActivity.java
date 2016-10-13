@@ -71,10 +71,11 @@ public class SplashScreenActivity extends Activity {
         mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
     }
 
-
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
+
+        Log.i(TAG, "onDestroy: ");
 
         localBroadcastManager.unregisterReceiver(customReceiver);
     }

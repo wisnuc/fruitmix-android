@@ -9,12 +9,15 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.parser.RemoteMediaShareJSONObjectParser;
+import com.winsun.fruitmix.parser.RemoteMediaShareParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONObject;
+
+import java.util.List;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -87,50 +90,67 @@ public class CreateRemoteMediaShareService extends IntentService {
         String[] digests = new String[mediaShare.getImageDigests().size()];
         mediaShare.getImageDigests().toArray(digests);
 
-        String data, viewers, maintainers;
-        int i;
-
-        data = "";
-        for (i = 0; i < digests.length; i++) {
-            data += ",{\\\"type\\\":\\\"media\\\",\\\"digest\\\":\\\"" + digests[i] + "\\\"}";
-        }
-
-        viewers = "";
-        for (String key : mediaShare.getViewer()) {
-            viewers += ",\\\"" + key + "\\\"";
-        }
-        if (viewers.length() == 0) {
-            viewers += ",";
-        }
-        Log.i(TAG, "winsun viewer:" + viewers);
-
-        maintainers = "";
-        for (String key : mediaShare.getMaintainer()) {
-            maintainers += ",\\\"" + key + "\\\"";
-        }
-
-        Log.i(TAG, "winsun maintainers:" + maintainers);
+        String data;
 
         StringBuilder builder = new StringBuilder();
         builder.append("{\"album\":");
-        builder.append(String.valueOf(mediaShare.isAlbum()));
-        builder.append(", \"archived\":false,\"maintainers\":\"[");
-        builder.append(maintainers.substring(1));
-        builder.append("]\",\"viewers\":\"[");
-        builder.append(viewers.substring(1));
-        builder.append("]\",\"tags\":[{");
-        if (mediaShare.isAlbum()) {
-            builder.append("\"albumname\":\"");
+        if(mediaShare.isAlbum()){
+            builder.append("{\"title\":\"");
             builder.append(mediaShare.getTitle());
-            builder.append("\",\"desc\":\"");
+            builder.append("\",\"text\":\"");
             builder.append(mediaShare.getDesc());
-            builder.append("\"");
+            builder.append("\"}");
+        }else {
+            builder.append("null");
         }
-        builder.append("}],\"contents\":\"[");
-        builder.append(data.substring(1));
-        builder.append("]\"}");
 
+        builder.append(",");
+
+        builder.append("\"sticky\":");
+        builder.append(mediaShare.isSticky());
+
+        builder.append(",");
+
+        builder.append("\"viewers\":[");
+        StringBuilder viewersBuilder = new StringBuilder();
+        for (String viewer:mediaShare.getViewers()){
+            viewersBuilder.append(",");
+            viewersBuilder.append("\"");
+            viewersBuilder.append(viewer);
+            viewersBuilder.append("\"");
+        }
+        viewersBuilder.append("]");
+        builder.append(viewersBuilder.toString().substring(1));
+
+        builder.append(",");
+
+        builder.append("\"maintainers\":[");
+        StringBuilder maintainersBuilder = new StringBuilder();
+        for (String maintainer :mediaShare.getMaintainers()){
+            maintainersBuilder.append(",");
+            maintainersBuilder.append("\"");
+            maintainersBuilder.append(maintainer);
+            maintainersBuilder.append("\"");
+        }
+        maintainersBuilder.append("]");
+        builder.append(maintainersBuilder.toString().substring(1));
+
+        builder.append(",");
+
+        builder.append("\"contents\":[");
+        StringBuilder contentsBuilder = new StringBuilder();
+        for (String content :mediaShare.getImageDigests()){
+            contentsBuilder.append(",");
+            contentsBuilder.append("\"");
+            contentsBuilder.append(content);
+            contentsBuilder.append("\"");
+        }
+        contentsBuilder.append("]");
+        builder.append(contentsBuilder.toString().substring(1));
+
+        builder.append("}");
         data = builder.toString();
+        Log.i(TAG, "handleActionCreateRemoteMediaShareTask: request json:" + data);
 
         String result = "";
 
@@ -145,10 +165,10 @@ public class CreateRemoteMediaShareService extends IntentService {
 
                 RemoteMediaShareJSONObjectParser parser = new RemoteMediaShareJSONObjectParser();
 
-                String remoteMediaShareUUID = parser.getRemoteMediaShareUUID(new JSONObject(result));
+                String  mediaShareUUID = parser.getRemoteMediaShare(new JSONObject(result)).getUuid();
 
-                mediaShare.setUuid(remoteMediaShareUUID);
-                mediaShare.setLocked(false);
+                mediaShare.setUuid(mediaShareUUID);
+                mediaShare.setLocal(false);
 
                 DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
                 long dbResult = dbUtils.insertRemoteMediaShare(mediaShare);
@@ -169,7 +189,6 @@ public class CreateRemoteMediaShareService extends IntentService {
             if(result.length() == 0){
                 intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
                 Log.i(TAG, "insert remote mediashare fail");
-
             }
 
         }

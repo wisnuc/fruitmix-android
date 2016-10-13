@@ -58,109 +58,77 @@ public class RemoteDataParserUnitTest {
     public void parseRemoteShareTest() {
         String json = "[\n" +
                 "  {\n" +
-                "    \"uuid\": \"6417e99e-1aa3-4e2a-88ff-58f000aafb55\",\n" +
-                "    \"latest\": {\n" +
-                "      \"_id\": \"57a821a51c6d7a2500b469e7\",\n" +
+                "    \"digest\": \"afd6d9f46d5284d5b9153e5807e6d2d7e07757a676515a78ce219aed0f09bdd7\",\n" +
+                "    \"doc\": {\n" +
+                "      \"doctype\": \"mediashare\",\n" +
                 "      \"docversion\": \"1.0\",\n" +
-                "      \"creator\": \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\",\n" +
-                "      \"album\": true,\n" +
-                "      \"sticky\": false,\n" +
-                "      \"archived\": false,\n" +
-                "      \"mtime\": 1470636453734,\n" +
+                "      \"uuid\": \"0336459b-d541-45d3-8f54-26b64ba9e600\",\n" +
+                "      \"author\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
+                "      \"maintainers\": [],\n" +
+                "      \"viewers\": [\n" +
+                "        \"e5f23cb9-1852-475d-937d-162d2554e22c\"\n" +
+                "      ],\n" +
+                "      \"album\": {\n" +
+                "        \"title\": \"test\",\n" +
+                "        \"text\": \"text\"\n" +
+                "      },\n" +
+                "      \"sticky\": true,\n" +
+                "      \"ctime\": 1476242504219,\n" +
+                "      \"mtime\": 1476242504219,\n" +
                 "      \"contents\": [\n" +
                 "        {\n" +
-                "          \"type\": \"media\",\n" +
-                "          \"digest\": \"a1109f6870507048e8b4b87c870b958d80d3c5c80ffef5aceeb93647387bd793\",\n" +
-                "          \"ctime\": 1470636453734,\n" +
-                "          \"creator\": \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\"\n" +
+                "          \"author\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
+                "          \"digest\": \"ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16\",\n" +
+                "          \"time\": 1476242504219\n" +
                 "        }\n" +
-                "      ],\n" +
-                "      \"tags\": [\n" +
-                "        {\n" +
-                "          \"albumname\": \"未命名 2016-08-08\",\n" +
-                "          \"desc\": \"\"\n" +
-                "        }\n" +
-                "      ],\n" +
-                "      \"viewers\": [\n" +
-                "        \"\"\n" +
-                "      ],\n" +
-                "      \"maintainers\": [\n" +
-                "        \"062446c8-e57b-4834-8c71-390552667766\"\n" +
                 "      ]\n" +
                 "    }\n" +
                 "  },\n" +
                 "  {\n" +
-                "    \"uuid\": \"b939f3b6-537b-40c4-ae31-1b3144d3978b\",\n" +
-                "    \"latest\": {\n" +
-                "      \"_id\": \"57ad80871c6d7a2500b46a31\",\n" +
+                "    \"digest\": \"81551c323de559e02219ea60246015efcb3b7f738378c7befc8a0d81180f2805\",\n" +
+                "    \"doc\": {\n" +
+                "      \"doctype\": \"mediashare\",\n" +
                 "      \"docversion\": \"1.0\",\n" +
-                "      \"creator\": \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\",\n" +
-                "      \"album\": false,\n" +
-                "      \"sticky\": false,\n" +
-                "      \"archived\": false,\n" +
-                "      \"mtime\": 1470988423506,\n" +
-                "      \"contents\": [\n" +
-                "        {\n" +
-                "          \"type\": \"media\",\n" +
-                "          \"digest\": \"7ea0425b90f8fe7b47a1e20168848be02dd7e9bf463c4ad2d8acf1c49a00ff4a\",\n" +
-                "          \"ctime\": 1470988423506,\n" +
-                "          \"creator\": \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "          \"type\": \"media\",\n" +
-                "          \"digest\": \"848f4ffa5e4d444fd2defe700aaed90952dacfc7bc047963879bcc7cd8028b05\",\n" +
-                "          \"ctime\": 1470988423506,\n" +
-                "          \"creator\": \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\"\n" +
-                "        },\n" +
-                "        {\n" +
-                "          \"type\": \"media\",\n" +
-                "          \"digest\": \"7a344a3bc77816143ca955365e508a4a5fa4e6a1d046f4e0ff1f5e344703d050\",\n" +
-                "          \"ctime\": 1470988423506,\n" +
-                "          \"creator\": \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\"\n" +
-                "        }\n" +
-                "      ],\n" +
-                "      \"tags\": [\n" +
-                "        null\n" +
-                "      ],\n" +
-                "      \"viewers\": [\n" +
-                "        \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\",\n" +
-                "        \"cfa09650-e370-4cfa-8691-7160dae07098\"\n" +
-                "      ],\n" +
-                "      \"maintainers\": [\n" +
-                "        \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\"\n" +
-                "      ]\n" +
-                "    }\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"uuid\": \"0761de51-1f37-44da-a101-d7ed34aa15da\",\n" +
-                "    \"latest\": {\n" +
-                "      \"_id\": \"57ba69001c6d7a2500b46c53\",\n" +
-                "      \"docversion\": \"1.0\",\n" +
-                "      \"creator\": \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\",\n" +
-                "      \"album\": true,\n" +
-                "      \"sticky\": false,\n" +
-                "      \"archived\": true,\n" +
-                "      \"mtime\": 1471834368241,\n" +
-                "      \"contents\": [\n" +
-                "        {\n" +
-                "          \"creator\": \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\",\n" +
-                "          \"ctime\": 1470989158383,\n" +
-                "          \"digest\": \"ad0be5e28b0158a29475c4eb5830f6346f9e458440d508262e52e31e6817a1f8\",\n" +
-                "          \"type\": \"media\"\n" +
-                "        }\n" +
-                "      ],\n" +
-                "      \"tags\": [\n" +
-                "        {\n" +
-                "          \"albumname\": \"未命名 2016-08-12\",\n" +
-                "          \"desc\": \"\"\n" +
-                "        }\n" +
-                "      ],\n" +
+                "      \"uuid\": \"1ea4e86d-a136-46f5-bf7c-ae51a0e6493c\",\n" +
+                "      \"author\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
+                "      \"maintainers\": [],\n" +
                 "      \"viewers\": [],\n" +
-                "      \"maintainers\": [\n" +
-                "        \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\"\n" +
+                "      \"album\": null,\n" +
+                "      \"sticky\": false,\n" +
+                "      \"ctime\": 1476181623560,\n" +
+                "      \"mtime\": 1476181623560,\n" +
+                "      \"contents\": [\n" +
+                "        {\n" +
+                "          \"author\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
+                "          \"digest\": \"7803e8fa1b804d40d412bcd28737e3ae027768ecc559b51a284fbcadcd0e21be\",\n" +
+                "          \"time\": 1476181623559\n" +
+                "        }\n" +
                 "      ]\n" +
                 "    }\n" +
-                "  }]";
+                "  },\n" +
+                "  {\n" +
+                "    \"digest\": \"06eb37e9a96d401c32491b2e4af026ecd56e63554c3c86c7e7e207b48bab2c36\",\n" +
+                "    \"doc\": {\n" +
+                "      \"doctype\": \"mediashare\",\n" +
+                "      \"docversion\": \"1.0\",\n" +
+                "      \"uuid\": \"eba00fe9-2d26-4c35-9f40-3f3295f5690f\",\n" +
+                "      \"author\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
+                "      \"maintainers\": [],\n" +
+                "      \"viewers\": [],\n" +
+                "      \"album\": null,\n" +
+                "      \"sticky\": false,\n" +
+                "      \"ctime\": 1476236841293,\n" +
+                "      \"mtime\": 1476236841293,\n" +
+                "      \"contents\": [\n" +
+                "        {\n" +
+                "          \"author\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
+                "          \"digest\": \"7803e8fa1b804d40d412bcd28737e3ae027768ecc559b51a284fbcadcd0e21be\",\n" +
+                "          \"time\": 1476236841293\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  }\n" +
+                "]";
 
         RemoteDataParser<MediaShare> shareParser = new RemoteMediaShareParser();
 
@@ -175,31 +143,32 @@ public class RemoteDataParserUnitTest {
 
         String json = "[\n" +
                 "  {\n" +
-                "    \"username\": \"admin\",\n" +
-                "    \"uuid\": \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\",\n" +
-                "    \"avatar\": \"defaultAvatar.jpg\",\n" +
-                "    \"isAdmin\": true,\n" +
+                "    \"uuid\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
+                "    \"username\": \"Alice\",\n" +
+                "    \"avatar\": null,\n" +
+                "    \"email\": null,\n" +
                 "    \"isFirstUser\": true,\n" +
-                "    \"type\": \"user\"\n" +
+                "    \"isAdmin\": true,\n" +
+                "    \"home\": \"b9aa7c34-8b86-4306-9042-396cf8fa1a9c\",\n" +
+                "    \"library\": \"f97f9e1f-848b-4ed4-bd47-1ddfa82b2777\"\n" +
                 "  },\n" +
                 "  {\n" +
-                "    \"username\": \"1\",\n" +
-                "    \"uuid\": \"cfa09650-e370-4cfa-8691-7160dae07098\",\n" +
-                "    \"avatar\": \"defaultAvatar.jpg\",\n" +
-                "    \"email\": \"1\",\n" +
-                "    \"isAdmin\": false,\n" +
-                "    \"isFirstUser\": false,\n" +
-                "    \"type\": \"user\"\n" +
+                "    \"uuid\": \"e5f23cb9-1852-475d-937d-162d2554e22c\",\n" +
+                "    \"username\": \"Bob\",\n" +
+                "    \"avatar\": null,\n" +
+                "    \"email\": null,\n" +
+                "    \"isAdmin\": true,\n" +
+                "    \"home\": \"ed1d9638-8130-4077-9ed8-05be641a9ab4\",\n" +
+                "    \"library\": \"c18aa308-ab32-4e2d-bc34-0c6385711b55\"\n" +
                 "  },\n" +
                 "  {\n" +
-                "    \"username\": \"2\",\n" +
-                "    \"uuid\": \"e1993040-d40f-4b4a-abad-0d1adb71bd9b\",\n" +
-                "    \"avatar\": \"defaultAvatar.jpg\",\n" +
-                "    \"email\": \"\",\n" +
-                "    \"isAdmin\": false,\n" +
-                "    \"isFirstUser\": false,\n" +
-                "    \"type\": \"user\"\n" +
-                "  }\n" +
+                "    \"uuid\": \"1f4faecf-1bb5-4ff1-ab41-bd44a0cd0809\",\n" +
+                "    \"username\": \"Charlie\",\n" +
+                "    \"avatar\": null,\n" +
+                "    \"email\": null,\n" +
+                "    \"home\": \"6bd8cbad-3c7d-4a32-831b-0fadf3c8ef53\",\n" +
+                "    \"library\": \"1ec6533f-fab8-4fad-8e76-adc76f80aa2f\"\n" +
+                "  }" +
                 "]";
 
 
@@ -208,6 +177,12 @@ public class RemoteDataParserUnitTest {
         List<User> users = parser.parse(json);
 
         assertFalse(users.size() == 0);
+
+        User user = users.get(0);
+        assertEquals(user.getUuid(),"5da92303-33a1-4f79-8d8f-a7b6becde6c3");
+        assertEquals(user.getUserName(),"Alice");
+        assertEquals(user.getHome(),"b9aa7c34-8b86-4306-9042-396cf8fa1a9c");
+        assertEquals(user.getLibrary(),"f97f9e1f-848b-4ed4-bd47-1ddfa82b2777");
 
     }
 

@@ -16,6 +16,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -462,20 +463,21 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             mRecyclerView.smoothScrollToPosition(findPhotoPositionInRecyclerView(currentPhotoDate, currentPhotoPosition));
 
-            ActivityCompat.startPostponedEnterTransition(containerActivity);
 
+//            ActivityCompat.startPostponedEnterTransition(containerActivity);
 
-/*            ActivityCompat.postponeEnterTransition(containerActivity);
+            ActivityCompat.postponeEnterTransition(containerActivity);
             mRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
                     mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                     // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
                     mRecyclerView.requestLayout();
+                    ActivityCompat.startPostponedEnterTransition(containerActivity);
 
                     return true;
                 }
-            });*/
+            });
         }
 
     }

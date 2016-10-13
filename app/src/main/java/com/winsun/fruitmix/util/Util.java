@@ -117,6 +117,7 @@ public class Util {
 
     public static final String HTTP_POST_METHOD = "POST";
     public static final String HTTP_PATCH_METHOD = "PATCH";
+    public static final String HTTP_DELETE_METHOD = "DELETE";
 
     public static final int HTTP_CONNECT_TIMEOUT = 10 * 1000;
 

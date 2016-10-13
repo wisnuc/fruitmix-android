@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -174,7 +175,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         }
 
-        loadRemoteComment();
+//        loadRemoteComment();
 
         refreshRemoteComment();
         refreshLocalComment();
@@ -246,9 +247,22 @@ public class MediaShareList implements NavPagerActivity.Page {
         int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
         int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
 
-        if (initialPhotoPosition != currentPhotoPosition) {
+        ActivityCompat.postponeEnterTransition(containerActivity);
+        mainListView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                mainListView.getViewTreeObserver().removeOnPreDrawListener(this);
+                // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
+                mainListView.requestLayout();
+                ActivityCompat.startPostponedEnterTransition(containerActivity);
 
-/*            ActivityCompat.postponeEnterTransition(containerActivity);
+                return true;
+            }
+        });
+
+/*        if (initialPhotoPosition != currentPhotoPosition) {
+
+            ActivityCompat.postponeEnterTransition(containerActivity);
             mainListView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
@@ -259,10 +273,10 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                     return true;
                 }
-            });*/
+            });
             ActivityCompat.startPostponedEnterTransition(containerActivity);
 
-        }
+        }*/
     }
 
     private int findShareItemPosition(String currentMediaShareTime) {

@@ -173,7 +173,7 @@ public class PhotoList implements NavPagerActivity.Page{
             item.put("height", itemRaw.get("height"));
             item.put("mtime", itemRaw.get("lastModified"));
             item.put("selected", "0");
-            item.put("locked", "1");
+            item.put("local", "1");
             if(!localHashMap.containsKey(itemRaw.get("thumb"))) {
                 localHashObj=new HashMap<String, String>();
                 localHashObj.put("digest", Util.CalcSHA256OfFile(itemRaw.get("thumb")));
@@ -247,7 +247,7 @@ public class PhotoList implements NavPagerActivity.Page{
             imageItem.put("uuid", itemRaw.get("uuid"));
             imageItem.put("mtime", itemRaw.get("mtime"));
             imageItem.put("selected", "0");
-            imageItem.put("locked", "1");
+            imageItem.put("local", "1");
             ((List<Map<String, Object>>)(dateItem.get("images"))).add(imageItem);
         }*/
 
@@ -272,7 +272,7 @@ public class PhotoList implements NavPagerActivity.Page{
             imageItem.put("uuid", itemRaw.get("uuid"));
             imageItem.put("mtime", itemRaw.get("mtime").replace("T", " ").replace("Z", " "));
             imageItem.put("selected", "0");
-            imageItem.put("locked", "1");
+            imageItem.put("local", "1");
             ((List<Map<String, Object>>)(dateItem.get("images"))).add(imageItem);
         }
 
@@ -329,7 +329,7 @@ public class PhotoList implements NavPagerActivity.Page{
                             item.put("resHash", "" + itemRaw.getString("hash"));
                             item.put("mtime", itemRaw.getString("changetime"));
                             item.put("selected", "0");
-                            item.put("locked", "1");
+                            item.put("local", "1");
                             try {
                                 item.put("width", itemRaw.getJSONObject("detail").getString("width"));
                                 item.put("height", itemRaw.getJSONObject("detail").getString("height"));
@@ -595,7 +595,7 @@ public class PhotoList implements NavPagerActivity.Page{
             });
 
             if(container.containerActivity.sInChooseMode) {
-                if(currentItem.get("locked").equals("1")) ivLock.setVisibility(View.VISIBLE);
+                if(currentItem.get("local").equals("1")) ivLock.setVisibility(View.VISIBLE);
                 else ivLock.setVisibility(View.GONE);
                 if(currentItem.get("selected").equals("1")) ivSelect.setVisibility(View.VISIBLE);
                 else ivSelect.setVisibility(View.GONE);

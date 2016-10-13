@@ -241,7 +241,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 ivMainPic.setImageUrl(null, mImageLoader);
             }
 
-            if (currentItem.getViewer().isEmpty()) {
+            if (currentItem.getViewers().isEmpty()) {
                 ivLock.setVisibility(View.GONE);
                 lbShare.setText(containerActivity.getString(R.string.public_text));
             } else {
@@ -262,10 +262,10 @@ public class AlbumList implements NavPagerActivity.Page {
 
                     MediaShare cloneMediaShare = currentItem.cloneMyself();
 
-                    if (cloneMediaShare.getViewer().isEmpty()) {
-                        cloneMediaShare.setViewer(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+                    if (cloneMediaShare.getViewers().isEmpty()) {
+                        cloneMediaShare.setViewers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
                     } else {
-                        cloneMediaShare.setViewer(Collections.<String>emptyList());
+                        cloneMediaShare.setViewers(Collections.<String>emptyList());
                     }
 
                     containerActivity.modifyMediaShare(cloneMediaShare);

@@ -176,19 +176,19 @@ public class CreateAlbumActivity extends AppCompatActivity {
         mediaShare.setDesc(desc);
 
         if (isPublic) {
-            mediaShare.setViewer(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
-        } else mediaShare.setViewer(Collections.<String>emptyList());
+            mediaShare.setViewers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+        } else mediaShare.setViewers(Collections.<String>emptyList());
 
         if (otherMaintianer) {
-            mediaShare.setMaintainer(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+            mediaShare.setMaintainers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
         } else {
-            mediaShare.setMaintainer(Collections.singletonList(FNAS.userUUID));
+            mediaShare.setMaintainers(Collections.singletonList(FNAS.userUUID));
         }
 
         mediaShare.setCreatorUUID(FNAS.userUUID);
         mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
         mediaShare.setAlbum(true);
-        mediaShare.setLocked(true);
+        mediaShare.setLocal(true);
         mediaShare.setArchived(false);
         mediaShare.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(mediaShare.getTime()))));
 

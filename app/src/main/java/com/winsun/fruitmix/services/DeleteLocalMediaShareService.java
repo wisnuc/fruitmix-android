@@ -7,7 +7,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
@@ -66,7 +65,7 @@ public class DeleteLocalMediaShareService extends IntentService {
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
         Intent intent = new Intent(Util.LOCAL_SHARE_DELETED);
 
-        if (!mediaShare.isLocked()) {
+        if (!mediaShare.isLocal()) {
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.NO_NETWORK.name());
         } else {
 

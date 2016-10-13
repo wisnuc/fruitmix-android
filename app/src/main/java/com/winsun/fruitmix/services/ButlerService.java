@@ -126,6 +126,7 @@ public class ButlerService extends Service {
                 instance = ExecutorServiceInstance.SINGLE_INSTANCE;
                 UploadMediaTask task = new UploadMediaTask(media);
                 instance.doOneTaskInFixedThreadPool(task);
+
                 break;
             case REMOTE_MEDIASHARE:
 

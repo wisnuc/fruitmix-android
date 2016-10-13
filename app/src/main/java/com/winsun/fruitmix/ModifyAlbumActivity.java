@@ -75,10 +75,10 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         tfDesc.setText(mAblumMap.getDesc());
 
         ckPublic = (CheckBox) findViewById(R.id.sPublic);
-        ckPublic.setChecked(!mAblumMap.getViewer().isEmpty());
+        ckPublic.setChecked(!mAblumMap.getViewers().isEmpty());
 
         ckSetMaintainer = (CheckBox) findViewById(R.id.set_maintainer);
-        ckSetMaintainer.setChecked(mAblumMap.getMaintainer().contains(FNAS.userUUID));
+        ckSetMaintainer.setChecked(mAblumMap.getMaintainers().contains(FNAS.userUUID));
 
         btOK = (TextView) findViewById(R.id.ok);
         ivBack = (ImageView) findViewById(R.id.back);
@@ -113,13 +113,13 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
                 if (sPublic) {
-                    mAblumMap.setViewer(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
-                } else mAblumMap.setViewer(Collections.<String>emptyList());
+                    mAblumMap.setViewers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+                } else mAblumMap.setViewers(Collections.<String>emptyList());
 
                 if (sSetMaintainer) {
-                    mAblumMap.setMaintainer(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+                    mAblumMap.setMaintainers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
                 } else {
-                    mAblumMap.setMaintainer(Collections.singletonList(FNAS.userUUID));
+                    mAblumMap.setMaintainers(Collections.singletonList(FNAS.userUUID));
                 }
                 mAblumMap.setTitle(title);
                 mAblumMap.setDesc(desc);

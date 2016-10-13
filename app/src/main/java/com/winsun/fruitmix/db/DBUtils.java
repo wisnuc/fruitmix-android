@@ -17,11 +17,9 @@ import com.winsun.fruitmix.parser.LocalUserParser;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -125,7 +123,7 @@ public enum DBUtils {
         contentValues.put(DBHelper.SHARE_KEY__IMAGE_DIGESTS, builder.toString());
 
         builder.setLength(0);
-        for (String viewer : mediaShare.getViewer()) {
+        for (String viewer : mediaShare.getViewers()) {
             builder.append(viewer);
             builder.append(",");
         }
@@ -133,7 +131,7 @@ public enum DBUtils {
         contentValues.put(DBHelper.SHARE_KEY_VIEWERS, builder.toString());
 
         builder.setLength(0);
-        for (String maintainer : mediaShare.getMaintainer()) {
+        for (String maintainer : mediaShare.getMaintainers()) {
             builder.append(maintainer);
             builder.append(",");
         }
@@ -144,7 +142,7 @@ public enum DBUtils {
         contentValues.put(DBHelper.SHARE_KEY_IS_ARCHIVED, mediaShare.isArchived() ? 1 : 0);
         contentValues.put(DBHelper.SHARE_KEY_IS_DATE, mediaShare.getDate());
         contentValues.put(DBHelper.SHARE_KEY_IS_COVER_IMAGE_DIGEST, mediaShare.getCoverImageDigest());
-        contentValues.put(DBHelper.SHARE_KEY_IS_LOCKED, mediaShare.isLocked() ? 1 : 0);
+        contentValues.put(DBHelper.SHARE_KEY_IS_LOCKED, mediaShare.isLocal() ? 1 : 0);
 
         return contentValues;
     }

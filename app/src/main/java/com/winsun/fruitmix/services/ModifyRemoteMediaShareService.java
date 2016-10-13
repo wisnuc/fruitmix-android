@@ -66,7 +66,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
         String viewers;
         String maintainers;
 
-        if (mediaShare.isLocked()) {
+        if (mediaShare.isLocal()) {
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.LOCAL_MEDIASHARE_UPLOADING.name());
 
         } else if (!Util.uploadImageDigestsIfNotUpload(this,mediaShare.getImageDigests())) {
@@ -76,7 +76,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
         } else {
 
             viewers = "";
-            for (String key : mediaShare.getViewer()) {
+            for (String key : mediaShare.getViewers()) {
                 viewers += ",\\\"" + key + "\\\"";
             }
             if (viewers.length() == 0) {
@@ -85,7 +85,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
             Log.i(TAG, "winsun viewer:" + viewers);
 
             maintainers = "";
-            for (String key : mediaShare.getMaintainer()) {
+            for (String key : mediaShare.getMaintainers()) {
                 maintainers += ",\\\"" + key + "\\\"";
             }
 

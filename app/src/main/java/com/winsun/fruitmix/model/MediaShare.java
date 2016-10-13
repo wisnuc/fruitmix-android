@@ -18,18 +18,20 @@ public class MediaShare implements Parcelable {
     private String title;
     private String desc;
     private List<String> imageDigests;
-    private List<String> viewer;
-    private List<String> maintainer;
+    private List<String> viewers;
+    private List<String> maintainers;
     private boolean isAlbum;
     private boolean isArchived;
     private String date;
     private String coverImageDigest;
-    private boolean isLocked;
+    private boolean isLocal;
+    private String shareDigest;
+    private boolean sticky;
 
     public MediaShare() {
         imageDigests = new ArrayList<>();
-        viewer = new ArrayList<>();
-        maintainer = new ArrayList<>();
+        viewers = new ArrayList<>();
+        maintainers = new ArrayList<>();
 
     }
 
@@ -41,13 +43,13 @@ public class MediaShare implements Parcelable {
         title = in.readString();
         desc = in.readString();
         imageDigests = in.createStringArrayList();
-        viewer = in.createStringArrayList();
-        maintainer = in.createStringArrayList();
+        viewers = in.createStringArrayList();
+        maintainers = in.createStringArrayList();
         isAlbum = in.readByte() != 0;
         isArchived = in.readByte() != 0;
         date = in.readString();
         coverImageDigest = in.readString();
-        isLocked = in.readByte() != 0;
+        isLocal = in.readByte() != 0;
     }
 
     @Override
@@ -59,13 +61,13 @@ public class MediaShare implements Parcelable {
         dest.writeString(title);
         dest.writeString(desc);
         dest.writeStringList(imageDigests);
-        dest.writeStringList(viewer);
-        dest.writeStringList(maintainer);
+        dest.writeStringList(viewers);
+        dest.writeStringList(maintainers);
         dest.writeByte((byte) (isAlbum ? 1 : 0));
         dest.writeByte((byte) (isArchived ? 1 : 0));
         dest.writeString(date);
         dest.writeString(coverImageDigest);
-        dest.writeByte((byte) (isLocked ? 1 : 0));
+        dest.writeByte((byte) (isLocal ? 1 : 0));
     }
 
     @Override
@@ -133,20 +135,20 @@ public class MediaShare implements Parcelable {
         this.desc = desc;
     }
 
-    public List<String> getViewer() {
-        return viewer;
+    public List<String> getViewers() {
+        return viewers;
     }
 
-    public void setViewer(List<String> viewer) {
-        this.viewer = viewer;
+    public void setViewers(List<String> viewers) {
+        this.viewers = viewers;
     }
 
-    public List<String> getMaintainer() {
-        return maintainer;
+    public List<String> getMaintainers() {
+        return maintainers;
     }
 
-    public void setMaintainer(List<String> maintainer) {
-        this.maintainer = maintainer;
+    public void setMaintainers(List<String> maintainers) {
+        this.maintainers = maintainers;
     }
 
     public List<String> getImageDigests() {
@@ -165,12 +167,12 @@ public class MediaShare implements Parcelable {
         this.coverImageDigest = coverImageDigest;
     }
 
-    public boolean isLocked() {
-        return isLocked;
+    public boolean isLocal() {
+        return isLocal;
     }
 
-    public void setLocked(boolean locked) {
-        isLocked = locked;
+    public void setLocal(boolean local) {
+        isLocal = local;
     }
 
     public boolean isAlbum() {
@@ -197,6 +199,22 @@ public class MediaShare implements Parcelable {
         this.date = date;
     }
 
+    public String getShareDigest() {
+        return shareDigest;
+    }
+
+    public void setShareDigest(String shareDigest) {
+        this.shareDigest = shareDigest;
+    }
+
+    public boolean isSticky() {
+        return sticky;
+    }
+
+    public void setSticky(boolean sticky) {
+        this.sticky = sticky;
+    }
+
     public MediaShare cloneMyself() {
         MediaShare cloneMediaShare = new MediaShare();
         cloneMediaShare.setUuid(getUuid());
@@ -205,13 +223,13 @@ public class MediaShare implements Parcelable {
         cloneMediaShare.setTitle(getTitle());
         cloneMediaShare.setDesc(getDesc());
         cloneMediaShare.setImageDigests(getImageDigests());
-        cloneMediaShare.setViewer(getViewer());
-        cloneMediaShare.setMaintainer(getMaintainer());
+        cloneMediaShare.setViewers(getViewers());
+        cloneMediaShare.setMaintainers(getMaintainers());
         cloneMediaShare.setAlbum(isAlbum());
         cloneMediaShare.setArchived(isArchived());
         cloneMediaShare.setDate(getDate());
         cloneMediaShare.setCoverImageDigest(getCoverImageDigest());
-        cloneMediaShare.setLocked(isLocked());
+        cloneMediaShare.setLocal(isLocal());
 
         return cloneMediaShare;
     }

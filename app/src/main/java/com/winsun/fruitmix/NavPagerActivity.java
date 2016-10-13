@@ -30,7 +30,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.animation.BounceInterpolator;
-import android.view.animation.CycleInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -305,7 +304,6 @@ public class NavPagerActivity extends AppCompatActivity
 
         mNavPageBar.unregisterOnTabChangedListener(this);
 
-        mManager.unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -315,6 +313,8 @@ public class NavPagerActivity extends AppCompatActivity
         photoList.removePhotoListListener(this);
 
         instance.shutdownFixedThreadPool();
+
+        mManager.unregisterReceiver(mReceiver);
     }
 
     public void createShare(List<String> selectUUIDs) {
@@ -328,7 +328,7 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     public void modifyMediaShare(MediaShare mediaShare) {
-        if (!mediaShare.getMaintainer().contains(FNAS.userUUID)) {
+        if (!mediaShare.getMaintainers().contains(FNAS.userUUID)) {
             Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
 
             return;
@@ -348,11 +348,11 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     public void deleteMediaShare(MediaShare mediaShare) {
-        if (!mediaShare.getMaintainer().contains(FNAS.userUUID)) {
+/*        if (!mediaShare.getMaintainers().contains(FNAS.userUUID)) {
             Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
 
             return;
-        }
+        }*/
 
         mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
@@ -376,14 +376,14 @@ public class NavPagerActivity extends AppCompatActivity
         mediaShare.setCoverImageDigest(selectUUIDs.get(0));
         mediaShare.setTitle("");
         mediaShare.setDesc("");
-        mediaShare.setViewer(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
-        mediaShare.setMaintainer(Collections.singletonList(FNAS.userUUID));
+        mediaShare.setViewers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+        mediaShare.setMaintainers(Collections.singletonList(FNAS.userUUID));
         mediaShare.setCreatorUUID(FNAS.userUUID);
         mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
         mediaShare.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(mediaShare.getTime()))));
         mediaShare.setArchived(false);
         mediaShare.setAlbum(false);
-        mediaShare.setLocked(true);
+        mediaShare.setLocal(true);
 
         return mediaShare;
 

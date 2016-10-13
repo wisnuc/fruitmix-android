@@ -275,17 +275,31 @@ public class FNAS {
 
     // create object and store it to the server
     public static String PostRemoteCall(String req, String data) throws Exception {
+        return RemoteCallMethod(Util.HTTP_POST_METHOD, req, data);
+    }
+
+    // modify data and save it
+    public static String PatchRemoteCall(String req, String data) throws Exception {
+        return RemoteCallMethod(Util.HTTP_PATCH_METHOD, req, data);
+    }
+
+    public static String DeleteRemoteCall(String req,String data) throws Exception{
+        return RemoteCallMethod(Util.HTTP_DELETE_METHOD,req,data);
+    }
+
+    private static String RemoteCallMethod(String httpMethod, String req, String data) throws Exception {
         HttpURLConnection conn;
         OutputStream outStream;
         String str;
 
-        conn = (HttpURLConnection) (new URL(Gateway + ":" + PORT + req).openConnection());
-        conn.setRequestMethod(Util.HTTP_POST_METHOD);
+        conn = (HttpURLConnection) (new URL(Gateway + ":" + FNAS.PORT + req).openConnection());
+        conn.setRequestMethod(httpMethod);
         conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         conn.setDoInput(true);// 允许输入
         conn.setDoOutput(true);// 允许输出
         conn.setUseCaches(false);
         conn.setRequestProperty("Connection", "keep-alive");
+        conn.setRequestProperty("Accept", "*/*");
         conn.setRequestProperty("Charsert", "UTF-8");
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
@@ -295,41 +309,9 @@ public class FNAS {
         outStream.write(str.getBytes());
         outStream.flush();
 
-        Log.d(TAG, "NAS POST: " + (Gateway + ":" + PORT + req) + " " + conn.getResponseCode() + " " + str);
+        Log.d("winsun", "NAS " + httpMethod + " : " + (Gateway + ":" + FNAS.PORT + req) + " " + conn.getResponseCode() + " " + str);
         str = FNAS.ReadFull(conn.getInputStream());
-        Log.d(TAG, "NAS POST END: " + (Gateway + ":" + PORT + req) + " " + str);
-
-        outStream.close();
-        conn.disconnect();
-        return str;
-    }
-
-    // modify data and save it
-    public static String PatchRemoteCall(String req, String data) throws Exception {
-        HttpURLConnection conn;
-        OutputStream outStream;
-        String str;
-
-        conn = (HttpURLConnection) (new URL(Gateway + ":" + FNAS.PORT + req).openConnection());
-        conn.setRequestMethod(Util.HTTP_PATCH_METHOD);
-        conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
-        conn.setDoInput(true);// 允许输入
-        conn.setDoOutput(true);// 允许输出
-        conn.setUseCaches(false);
-        conn.setRequestProperty("Connection", "keep-alive");
-        conn.setRequestProperty("Accept", "*/*");
-        conn.setRequestProperty("Content-Type", "application/json");
-        conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
-        outStream = new BufferedOutputStream(conn.getOutputStream());
-        if (data == null) str = "";
-        else str = data;
-        outStream.write(str.getBytes());
-        outStream.flush();
-
-
-        Log.d("winsun", "NAS PATCH: " + (Gateway + ":" + FNAS.PORT + req) + " " + conn.getResponseCode() + " " + str);
-        str = FNAS.ReadFull(conn.getInputStream());
-        Log.d("winsun", "NAS PATCH END: " + (Gateway + ":" + FNAS.PORT + req) + " " + str);
+        Log.d("winsun", "NAS " + httpMethod + " END: " + (Gateway + ":" + FNAS.PORT + req) + " " + str);
 
         outStream.close();
         conn.disconnect();
@@ -486,24 +468,20 @@ public class FNAS {
 
             resCode = conn.getResponseCode();
             Log.d(TAG, "UP END1: " + resCode);
-            if (resCode == 200) return true;
+            if (resCode == 200) {
+
+                String result = ReadFull(conn.getInputStream());
+
+                Log.i(TAG, "UploadFile: result" + result);
+
+                return true;
+            }
             if (resCode == 404) {
                 LocalCache.DropGlobalData(Util.DEVICE_ID_MAP_NAME);
                 System.exit(0);
             }
-            InputStream in = conn.getInputStream();
-            InputStreamReader isReader = new InputStreamReader(in);
-            BufferedReader bufReader = new BufferedReader(isReader);
-            String line = null;
-            String dataString = "";
 
-            while ((line = bufReader.readLine()) != null)
-                dataString += line;
-
-            outStream.close();
             conn.disconnect();
-
-            Log.d(TAG, "UP END: " + resCode + " " + data);
 
         } catch (Exception e) {
             e.printStackTrace();

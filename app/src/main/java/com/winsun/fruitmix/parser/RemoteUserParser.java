@@ -16,7 +16,7 @@ import java.util.Random;
 public class RemoteUserParser implements RemoteDataParser<User> {
 
     @Override
-    public List<User> parse(String json)  {
+    public List<User> parse(String json) {
 
         List<User> users = new ArrayList<>();
         String uuid;
@@ -33,7 +33,14 @@ public class RemoteUserParser implements RemoteDataParser<User> {
                 uuid = itemRaw.getString("uuid");
                 user.setUuid(uuid);
                 user.setUserName(itemRaw.getString("username"));
-                user.setAvatar(itemRaw.getString("avatar"));
+
+                String avatar = itemRaw.getString("avatar");
+                if(avatar.equals("null")){
+                    user.setAvatar("defaultAvatar.jpg");
+                }else {
+                    user.setAvatar(avatar);
+                }
+
                 if (itemRaw.has("email")) {
                     user.setEmail(itemRaw.getString("email"));
                 }
@@ -48,6 +55,9 @@ public class RemoteUserParser implements RemoteDataParser<User> {
                 if (user.getDefaultAvatarBgColor() == null) {
                     user.setDefaultAvatarBgColor(String.valueOf(new Random().nextInt(3)));
                 }
+
+                user.setHome(itemRaw.getString("home"));
+                user.setLibrary(itemRaw.getString("library"));
 
                 users.add(user);
 

@@ -11,6 +11,8 @@ public class User {
     private String email;
     private String defaultAvatar;
     private String defaultAvatarBgColor;
+    private String home;
+    private String library;
 
     public String getUserName() {
         return userName;
@@ -58,5 +60,21 @@ public class User {
 
     public void setDefaultAvatarBgColor(String defaultAvatarBgColor) {
         this.defaultAvatarBgColor = defaultAvatarBgColor;
+    }
+
+    public String getHome() {
+        return home;
+    }
+
+    public void setHome(String home) {
+        this.home = home;
+    }
+
+    public String getLibrary() {
+        return library;
+    }
+
+    public void setLibrary(String library) {
+        this.library = library;
     }
 }

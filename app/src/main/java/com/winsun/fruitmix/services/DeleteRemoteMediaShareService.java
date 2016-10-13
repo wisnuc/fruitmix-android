@@ -63,31 +63,29 @@ public class DeleteRemoteMediaShareService extends IntentService {
 
         Intent intent = new Intent(Util.REMOTE_SHARE_DELETED);
 
-        String data;
-
-        if (mediaShare.isLocked()) {
+        if (mediaShare.isLocal()) {
 
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.LOCAL_MEDIASHARE_UPLOADING.name());
         } else {
 
-            data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mediaShare.getUuid() + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"true\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mediaShare.getTitle() + "\\\", \\\"desc\\\":\\\"" + mediaShare.getDesc() + "\\\"}], \\\"viewers\\\":[]}}]\"}";
+//            data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mediaShare.getUuid() + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"true\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mediaShare.getTitle() + "\\\", \\\"desc\\\":\\\"" + mediaShare.getDesc() + "\\\"}], \\\"viewers\\\":[]}}]\"}";
+
             try {
-                String result = FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, data);
+                FNAS.DeleteRemoteCall(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid(), "");
 
-                if (result.length() > 0) {
-                    intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
 
-                    Log.i(TAG, "delete remote mediashare which source is network succeed");
+                Log.i(TAG, "delete remote mediashare which source is network succeed");
 
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                    long dbResult = dbUtils.deleteRemoteShareByUUid(mediaShare.getUuid());
+                DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+                long dbResult = dbUtils.deleteRemoteShareByUUid(mediaShare.getUuid());
 
-                    Log.i(TAG, "delete remote mediashare which source is db result:" + dbResult);
+                Log.i(TAG, "delete remote mediashare which source is db result:" + dbResult);
 
-                    MediaShare mapResult = LocalCache.RemoteMediaShareMapKeyIsUUID.remove(mediaShare.getUuid());
+                MediaShare mapResult = LocalCache.RemoteMediaShareMapKeyIsUUID.remove(mediaShare.getUuid());
 
-                    Log.i(TAG, "delete remote mediashare in map result:" + (mapResult != null ? "true" : "false"));
-                }
+                Log.i(TAG, "delete remote mediashare in map result:" + (mapResult != null ? "true" : "false"));
+
 
             } catch (Exception e) {
 

@@ -328,7 +328,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             mPrivatePublicMenu = menu.findItem(R.id.set_private_public);
 
-            if (mediaShare.getViewer().isEmpty()) {
+            if (mediaShare.getViewers().isEmpty()) {
                 mPrivatePublicMenu.setTitle(getString(R.string.set_public));
             } else {
                 mPrivatePublicMenu.setTitle(getString(R.string.set_private));
@@ -346,21 +346,21 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        Log.i("islock", mediaShare.isLocked() + "");
+        Log.i("islock", mediaShare.isLocal() + "");
 
         if (Util.getNetworkState(mContext)) {
-            if (mediaShare.isLocked()) {
+            if (mediaShare.isLocal()) {
                 Toast.makeText(mContext, getString(R.string.share_uploading), Toast.LENGTH_SHORT).show();
                 return true;
             }
         } else {
-            if (!mediaShare.isLocked()) {
+            if (!mediaShare.isLocal()) {
                 Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                 return true;
             }
         }
 
-        if (!mediaShare.getMaintainer().contains(FNAS.userUUID)) {
+        if (!mediaShare.getMaintainers().contains(FNAS.userUUID)) {
             Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
 
             return true;
@@ -430,10 +430,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         MediaShare cloneMediaShare = mediaShare.cloneMyself();
 
-        if (cloneMediaShare.getViewer().isEmpty()) {
-            cloneMediaShare.setViewer(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+        if (cloneMediaShare.getViewers().isEmpty()) {
+            cloneMediaShare.setViewers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
         } else {
-            cloneMediaShare.setViewer(Collections.<String>emptyList());
+            cloneMediaShare.setViewers(Collections.<String>emptyList());
         }
 
         mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
@@ -485,7 +485,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     case SUCCEED:
                         Toast.makeText(mContext, getString(R.string.setting_succeed), Toast.LENGTH_SHORT).show();
 
-                        if (mediaShare.getViewer().isEmpty()) {
+                        if (mediaShare.getViewers().isEmpty()) {
                             mPrivatePublicMenu.setTitle(getString(R.string.set_public));
                         } else {
                             mPrivatePublicMenu.setTitle(getString(R.string.set_private));

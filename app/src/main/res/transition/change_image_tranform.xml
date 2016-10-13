@@ -9,8 +9,5 @@
         android:duration="500"
         android:interpolator="@android:interpolator/linear_out_slow_in"/>
 
-    <changeTransform
-        android:duration="500"
-        android:interpolator="@android:interpolator/linear_out_slow_in"/>
 
 </transitionSet>
