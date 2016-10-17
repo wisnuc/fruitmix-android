@@ -30,15 +30,29 @@ public class RemoteDataParserUnitTest {
     public void parseRemoteMediaTest() {
 
         String json = "[\n" +
-                "  {\n" +
-                "    \"digest\": \"ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16\",\n" +
-                "    \"type\": \"JPEG\",\n" +
-                "    \"width\": 1601,\n" +
-                "    \"height\": 1601,\n" +
-                "    \"datetime\": null,\n" +
-                "    \"extended\": false\n" +
-                "  }\n" +
+                "    {\n" +
+                "        \"digest\": \"ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16\",\n" +
+                "        \"type\": \"JPEG\",\n" +
+                "        \"format\": \"JPEG\",\n" +
+                "        \"width\": 1601,\n" +
+                "        \"height\": 1601,\n" +
+                "        \"size\": 321176,\n" +
+                "        \"sharing\": 1\n" +
+                "    },\n" +
+                "    {\n" +
+                "        \"digest\": \"65fac2a5c61906c851727076cc25d2da54d0a908ec492b8307be595f83bb7705\",\n" +
+                "        \"type\": \"JPEG\",\n" +
+                "        \"format\": \"JPEG\",\n" +
+                "        \"width\": 3024,\n" +
+                "        \"height\": 4032,\n" +
+                "        \"exifDateTime\": \"2016:10:13 16:42:16\",\n" +
+                "        \"exifMake\": \"LGE\",\n" +
+                "        \"exifModel\": \"Nexus 5X\",\n" +
+                "        \"size\": 2204833,\n" +
+                "        \"sharing\": 1\n" +
+                "    }\n" +
                 "]";
+
 
         RemoteDataParser<Media> remoteDataParser = new RemoteMediaParser();
 
@@ -50,7 +64,10 @@ public class RemoteDataParserUnitTest {
         assertEquals(media.getUuid(),"ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16");
         assertEquals(media.getWidth(),"1601");
         assertEquals(media.getHeight(),"1601");
-        assertEquals(media.getTime(),"1916-01-01 00:00:00");
+        assertEquals(media.getTime(),"1916-01-01");
+
+        media = medias.get(1);
+        assertEquals(media.getTime(),"2016-10-13");
 
     }
 
@@ -135,6 +152,10 @@ public class RemoteDataParserUnitTest {
         List<MediaShare> shares = shareParser.parse(json);
 
         assertFalse(shares.size() == 0);
+
+        MediaShare mediaShare = shares.get(0);
+        assertEquals(mediaShare.isSticky(),true);
+        assertEquals(mediaShare.getShareDigest(),"afd6d9f46d5284d5b9153e5807e6d2d7e07757a676515a78ce219aed0f09bdd7");
 
     }
 

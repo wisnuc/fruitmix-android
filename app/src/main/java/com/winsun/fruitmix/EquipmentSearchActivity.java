@@ -88,7 +88,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         mUserExpandableLists = new ArrayList<>();
         mEquipments = new ArrayList<>();
 
-        Equipment equipment = new Equipment("Winsuc Appliction 98 By Wu", "192.168.5.98", 6666);
+        Equipment equipment = new Equipment("Winsuc Appliction 192 By Wu", "192.168.5.192", 6666);
         getUserList(equipment);
 
         mHandler = new CustomHandler(this, getMainLooper());

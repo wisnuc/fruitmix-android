@@ -9,15 +9,12 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.parser.RemoteMediaShareJSONObjectParser;
-import com.winsun.fruitmix.parser.RemoteMediaShareParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONObject;
-
-import java.util.List;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -78,7 +75,7 @@ public class CreateRemoteMediaShareService extends IntentService {
 
         Intent intent = new Intent(Util.REMOTE_SHARE_CREATED);
 
-        boolean returnValue = Util.uploadImageDigestsIfNotUpload(this, mediaShare.getImageDigests());
+        boolean returnValue = Util.uploadImageDigestsIfNotUpload(this, mediaShare.getMediaDigestInMediaShareContents());
 
         if (!returnValue) {
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
@@ -86,9 +83,6 @@ public class CreateRemoteMediaShareService extends IntentService {
 
             return;
         }
-
-        String[] digests = new String[mediaShare.getImageDigests().size()];
-        mediaShare.getImageDigests().toArray(digests);
 
         String data;
 
@@ -139,14 +133,16 @@ public class CreateRemoteMediaShareService extends IntentService {
 
         builder.append("\"contents\":[");
         StringBuilder contentsBuilder = new StringBuilder();
-        for (String content :mediaShare.getImageDigests()){
+        for (String content :mediaShare.getMediaDigestInMediaShareContents()){
             contentsBuilder.append(",");
             contentsBuilder.append("\"");
             contentsBuilder.append(content);
             contentsBuilder.append("\"");
         }
         contentsBuilder.append("]");
-        builder.append(contentsBuilder.toString().substring(1));
+        if(contentsBuilder.length() > 1){
+            builder.append(contentsBuilder.toString().substring(1));
+        }
 
         builder.append("}");
         data = builder.toString();
@@ -165,17 +161,14 @@ public class CreateRemoteMediaShareService extends IntentService {
 
                 RemoteMediaShareJSONObjectParser parser = new RemoteMediaShareJSONObjectParser();
 
-                String  mediaShareUUID = parser.getRemoteMediaShare(new JSONObject(result)).getUuid();
-
-                mediaShare.setUuid(mediaShareUUID);
-                mediaShare.setLocal(false);
+                MediaShare newMediaShare = parser.getRemoteMediaShare(new JSONObject(result));
 
                 DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                long dbResult = dbUtils.insertRemoteMediaShare(mediaShare);
+                long dbResult = dbUtils.insertRemoteMediaShare(newMediaShare);
 
                 Log.i(TAG, "insert remote mediashare which source is db result:" + dbResult);
 
-                MediaShare mapResult = LocalCache.RemoteMediaShareMapKeyIsUUID.put(mediaShare.getUuid(), mediaShare);
+                MediaShare mapResult = LocalCache.RemoteMediaShareMapKeyIsUUID.put(newMediaShare.getUuid(), newMediaShare);
 
                 Log.i(TAG, "insert remote mediashare to map result:" + (mapResult != null ? "true" : "false"));
 

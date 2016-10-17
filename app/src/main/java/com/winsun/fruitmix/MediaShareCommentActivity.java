@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -26,7 +25,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -223,7 +221,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         for (MediaShare shareRaw : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
 
             Log.d("winsun", "sss1 " + shareRaw);
-            if (shareRaw.getImageDigests().contains(media.getUuid())) {
+            if (shareRaw.getMediaShareContents().contains(media.getUuid())) {
                 Log.d("winsun", "ssss " + shareRaw.getUuid());
 
                 media.setBelongingMediaShareUUID(shareRaw.getUuid());

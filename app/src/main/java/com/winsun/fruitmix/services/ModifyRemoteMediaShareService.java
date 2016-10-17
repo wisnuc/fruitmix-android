@@ -69,7 +69,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
         if (mediaShare.isLocal()) {
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.LOCAL_MEDIASHARE_UPLOADING.name());
 
-        } else if (!Util.uploadImageDigestsIfNotUpload(this,mediaShare.getImageDigests())) {
+        } else if (!Util.uploadImageDigestsIfNotUpload(this,mediaShare.getMediaDigestInMediaShareContents())) {
 
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 

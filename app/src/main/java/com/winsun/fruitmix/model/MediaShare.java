@@ -3,7 +3,11 @@ package com.winsun.fruitmix.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.volley.toolbox.StringRequest;
+import com.winsun.fruitmix.util.FNAS;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,7 +21,7 @@ public class MediaShare implements Parcelable {
     private String time;
     private String title;
     private String desc;
-    private List<String> imageDigests;
+    private List<MediaShareContent> mediaShareContents;
     private List<String> viewers;
     private List<String> maintainers;
     private boolean isAlbum;
@@ -26,10 +30,10 @@ public class MediaShare implements Parcelable {
     private String coverImageDigest;
     private boolean isLocal;
     private String shareDigest;
-    private boolean sticky;
+    private boolean isSticky;
 
     public MediaShare() {
-        imageDigests = new ArrayList<>();
+        mediaShareContents = new ArrayList<>();
         viewers = new ArrayList<>();
         maintainers = new ArrayList<>();
 
@@ -42,7 +46,7 @@ public class MediaShare implements Parcelable {
         time = in.readString();
         title = in.readString();
         desc = in.readString();
-        imageDigests = in.createStringArrayList();
+        mediaShareContents = in.createTypedArrayList(MediaShareContent.CREATOR);
         viewers = in.createStringArrayList();
         maintainers = in.createStringArrayList();
         isAlbum = in.readByte() != 0;
@@ -60,7 +64,7 @@ public class MediaShare implements Parcelable {
         dest.writeString(time);
         dest.writeString(title);
         dest.writeString(desc);
-        dest.writeStringList(imageDigests);
+        dest.writeTypedList(mediaShareContents);
         dest.writeStringList(viewers);
         dest.writeStringList(maintainers);
         dest.writeByte((byte) (isAlbum ? 1 : 0));
@@ -135,30 +139,6 @@ public class MediaShare implements Parcelable {
         this.desc = desc;
     }
 
-    public List<String> getViewers() {
-        return viewers;
-    }
-
-    public void setViewers(List<String> viewers) {
-        this.viewers = viewers;
-    }
-
-    public List<String> getMaintainers() {
-        return maintainers;
-    }
-
-    public void setMaintainers(List<String> maintainers) {
-        this.maintainers = maintainers;
-    }
-
-    public List<String> getImageDigests() {
-        return imageDigests;
-    }
-
-    public void setImageDigests(List<String> imageDigests) {
-        this.imageDigests = imageDigests;
-    }
-
     public String getCoverImageDigest() {
         return coverImageDigest;
     }
@@ -208,11 +188,11 @@ public class MediaShare implements Parcelable {
     }
 
     public boolean isSticky() {
-        return sticky;
+        return isSticky;
     }
 
     public void setSticky(boolean sticky) {
-        this.sticky = sticky;
+        this.isSticky = sticky;
     }
 
     public MediaShare cloneMyself() {
@@ -222,9 +202,9 @@ public class MediaShare implements Parcelable {
         cloneMediaShare.setTime(getTime());
         cloneMediaShare.setTitle(getTitle());
         cloneMediaShare.setDesc(getDesc());
-        cloneMediaShare.setImageDigests(getImageDigests());
-        cloneMediaShare.setViewers(getViewers());
-        cloneMediaShare.setMaintainers(getMaintainers());
+        cloneMediaShare.initMediaShareContents(getMediaShareContents());
+        cloneMediaShare.initViewers(getViewers());
+        cloneMediaShare.initMaintainers(getMaintainers());
         cloneMediaShare.setAlbum(isAlbum());
         cloneMediaShare.setArchived(isArchived());
         cloneMediaShare.setDate(getDate());
@@ -232,6 +212,95 @@ public class MediaShare implements Parcelable {
         cloneMediaShare.setLocal(isLocal());
 
         return cloneMediaShare;
+    }
+
+    public int getViewersListSize(){
+        return viewers.size();
+    }
+
+    public boolean checkMaintainersListContainCurrentUserUUID(){
+        return maintainers.contains(FNAS.userUUID);
+    }
+
+    public int getMediaContentsListSize(){
+        return mediaShareContents.size();
+    }
+
+    public String getFirstMediaDigestInMediaContentsList(){
+        return mediaShareContents.get(0).getDigest();
+    }
+
+    public List<String> getViewers() {
+        return Collections.unmodifiableList(viewers);
+    }
+
+    public List<String> getMaintainers() {
+        return Collections.unmodifiableList(maintainers);
+    }
+
+    public List<MediaShareContent> getMediaShareContents(){
+        return Collections.unmodifiableList(mediaShareContents);
+    }
+
+    public List<String> getMediaDigestInMediaShareContents(){
+        List<String> mediaDigests = new ArrayList<>(getMediaContentsListSize());
+        for (MediaShareContent mediaShareContent:mediaShareContents){
+            mediaDigests.add(mediaShareContent.getDigest());
+        }
+
+        return mediaDigests;
+    }
+
+    public void initMediaShareContents(List<MediaShareContent> mediaShareContents){
+        this.mediaShareContents.addAll(mediaShareContents);
+    }
+
+    public void initViewers(List<String> viewers){
+        this.viewers.addAll(viewers);
+    }
+
+    public void initMaintainers(List<String> maintainers){
+        this.maintainers.addAll(maintainers);
+    }
+
+    public void addViewer(String viewer){
+        viewers.add(viewer);
+    }
+
+    public void remoteViewer(String viewer){
+        viewers.remove(viewer);
+    }
+
+    public void addMaintainer(String maintainer){
+        maintainers.add(maintainer);
+    }
+
+    public void removeMaintainer(String maintainer){
+        maintainers.remove(maintainer);
+    }
+
+    public void addMediaShareContent(MediaShareContent mediaShareContent){
+        mediaShareContents.add(mediaShareContent);
+    }
+
+    public void removeMediaShareContent(MediaShareContent mediaShareContent) {
+        mediaShareContents.remove(mediaShareContent);
+    }
+
+    public void removeMediaShareContent(int position){
+        mediaShareContents.remove(position);
+    }
+
+    public void clearViewers(){
+        viewers.clear();
+    }
+
+    public void clearMaintainers(){
+        maintainers.clear();
+    }
+
+    public void clearMediaShareContents(){
+        mediaShareContents.clear();
     }
 
 }

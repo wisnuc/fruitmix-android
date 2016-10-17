@@ -250,7 +250,7 @@ public class AlbumList implements NavPagerActivity.Page {
             }
 
             lbTitle.setText(currentItem.getTitle());
-            lbPhotoCount.setText(String.format(containerActivity.getString(R.string.photo_count), String.valueOf(currentItem.getImageDigests().size())));
+            lbPhotoCount.setText(String.format(containerActivity.getString(R.string.photo_count), String.valueOf(currentItem.getMediaShareContents().size())));
             lbDesc.setText(currentItem.getDesc());
             lbDate.setText(currentItem.getDate().substring(0, 10));
 
@@ -263,9 +263,11 @@ public class AlbumList implements NavPagerActivity.Page {
                     MediaShare cloneMediaShare = currentItem.cloneMyself();
 
                     if (cloneMediaShare.getViewers().isEmpty()) {
-                        cloneMediaShare.setViewers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+                        for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+                            cloneMediaShare.addViewer(userUUID);
+                        }
                     } else {
-                        cloneMediaShare.setViewers(Collections.<String>emptyList());
+                        cloneMediaShare.clearViewers();
                     }
 
                     containerActivity.modifyMediaShare(cloneMediaShare);

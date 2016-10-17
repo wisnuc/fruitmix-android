@@ -3,6 +3,7 @@ package com.winsun.fruitmix.parser;
 import android.util.Log;
 
 import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.model.MediaShareContent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,9 +24,11 @@ public class RemoteMediaShareJSONObjectParser {
         Log.d("winsun", "" + itemRaw);
         JSONArray jsonArr;
 
-        itemRaw = itemRaw.getJSONObject("doc");
-
         MediaShare mediaShare = new MediaShare();
+
+        mediaShare.setShareDigest(itemRaw.getString("digest"));
+
+        itemRaw = itemRaw.getJSONObject("doc");
 
         mediaShare.setUuid(itemRaw.getString("uuid"));
 
@@ -50,43 +53,52 @@ public class RemoteMediaShareJSONObjectParser {
 
         jsonArr = itemRaw.getJSONArray("contents");
         if (jsonArr.length() > 0) {
-            List<String> imageDigests = new ArrayList<>(jsonArr.length());
+
+            MediaShareContent mediaShareContent;
             for (int j = 0; j < jsonArr.length(); j++) {
-                imageDigests.add(jsonArr.getJSONObject(j).getString("digest").toLowerCase());
+
+                JSONObject jsonObject = jsonArr.getJSONObject(j);
+
+                mediaShareContent = new MediaShareContent();
+                mediaShareContent.setDigest(jsonObject.getString("digest").toLowerCase());
+                mediaShareContent.setAuthor(jsonObject.getString("author").toLowerCase());
+                mediaShareContent.setTime(jsonObject.getString("time").toLowerCase());
+
+                mediaShare.addMediaShareContent(mediaShareContent);
             }
 
-            mediaShare.setImageDigests(imageDigests);
-
-            mediaShare.setCoverImageDigest(imageDigests.get(0));
+            mediaShare.setCoverImageDigest(mediaShare.getFirstMediaDigestInMediaContentsList());
         } else {
-            mediaShare.setImageDigests(Collections.<String>emptyList());
+            mediaShare.clearMediaShareContents();
             mediaShare.setCoverImageDigest("");
         }
 
         jsonArr = itemRaw.getJSONArray("viewers");
         if (jsonArr.length() > 0) {
-            List<String> viewers = new ArrayList<>(jsonArr.length());
+
             for (int j = 0; j < jsonArr.length(); j++) {
 
-                viewers.add(jsonArr.getString(j));
+                mediaShare.addViewer(jsonArr.getString(j));
             }
-            mediaShare.setViewers(viewers);
+
         } else {
-            mediaShare.setViewers(Collections.<String>emptyList());
+            mediaShare.clearViewers();
         }
 
         jsonArr = itemRaw.getJSONArray("maintainers");
         if (jsonArr.length() > 0) {
-            List<String> maintainers = new ArrayList<>(jsonArr.length());
+
             for (int j = 0; j < jsonArr.length(); j++) {
-                maintainers.add(jsonArr.getString(j));
+                mediaShare.addMaintainer(jsonArr.getString(j));
             }
-            mediaShare.setMaintainers(maintainers);
+
         } else {
-            mediaShare.setMaintainers(Collections.<String>emptyList());
+            mediaShare.clearMaintainers();
         }
 
         mediaShare.setLocal(false);
+        mediaShare.setSticky(itemRaw.getBoolean("sticky"));
+
 
         return mediaShare;
     }

@@ -178,6 +178,10 @@
             android:name=".services.RetrieveDeviceIdService"
             android:exported="false">
         </service>
+        <service
+            android:name=".services.ModifyMediaInLocalMediaShareService"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

@@ -18,8 +18,6 @@ import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
-import java.util.concurrent.Callable;
-
 public class ButlerService extends Service {
 
     private static final String TAG = ButlerService.class.getSimpleName();
@@ -158,7 +156,6 @@ public class ButlerService extends Service {
             case LOCAL_MEDIASHARE:
                 mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
                 ModifyLocalMediaShareService.startActionModifyLocalMediaShare(this, mediaShare);
-
                 break;
             case REMOTE_MEDIASHARE:
                 mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
@@ -173,8 +170,20 @@ public class ButlerService extends Service {
         MediaShare originalMediashare = intent.getParcelableExtra(Util.OPERATION_ORIGINAL_MEDIASHARE_WHEN_EDIT_PHOTO);
         MediaShare modifiedMediashare = intent.getParcelableExtra(Util.OPERATION_MODIFIED_MEDIASHARE_WHEN_EDIT_PHOTO);
 
-        ModifyMediaInRemoteMediaShareService.startActionEditPhotoInMediaShare(this, originalMediashare, modifiedMediashare);
+        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE_NAME);
 
+        OperationTargetType targetType = OperationTargetType.valueOf(type);
+
+        Log.i(TAG, "handle modify operation target type:" + targetType);
+
+        switch (targetType) {
+            case LOCAL_MEDIASHARE:
+                ModifyMediaInLocalMediaShareService.startActionEditPhotoInMediaShare(this,originalMediashare,modifiedMediashare);
+                break;
+            case REMOTE_MEDIASHARE:
+                ModifyMediaInRemoteMediaShareService.startActionEditPhotoInMediaShare(this, originalMediashare, modifiedMediashare);
+                break;
+        }
     }
 
     private void handleDeleteOperation(Intent intent) {

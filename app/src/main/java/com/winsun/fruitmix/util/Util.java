@@ -57,7 +57,8 @@ public class Util {
 
     public static final String NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED = "new_local_media_in_camera_retrieved";
 
-    public static final String PHOTO_IN_MEDIASHARE_MODIFIED = "photo_in_mediashare_modidfied";
+    public static final String PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED = "photo_in_remote_media_share_modified";
+    public static final String PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED = "photo_in_local_media_share_modified";
 
     public static final String LOCAL_MEDIA_COMMENT_RETRIEVED = "local_media_comment_retrieved";
     public static final String REMOTE_MEDIA_COMMENT_RETRIEVED = "remote_media_comment_retrieved";

@@ -26,7 +26,6 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
 
         List<Media> medias = new ArrayList<>();
 
-        String time;
         JSONArray jsonArray;
         JSONObject itemRaw;
         Media media;
@@ -43,9 +42,10 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
                 media.setWidth(itemRaw.getString("width"));
                 media.setHeight(itemRaw.getString("height"));
 
-                String dateTime = itemRaw.getString("datetime");
-                if (dateTime.equals("null")) {
-                    media.setTime("1916-01-01 00:00:00");
+                String dateTime = itemRaw.optString("exifDateTime");
+
+                if (dateTime.equals("")) {
+                    media.setTime("1916-01-01");
                 } else {
                     media.setTime(dateTime.substring(0, 4) + "-" + dateTime.substring(5, 7) + "-" + dateTime.substring(8, 10));
                 }

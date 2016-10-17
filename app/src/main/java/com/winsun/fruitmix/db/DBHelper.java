@@ -20,10 +20,10 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String TASK_KEY_OPERATION_COUNT = "operation_count";
 
     public static final String COMMENT_KEY_ID = "id";
-    public static final String COMMENT_KEY_CREATOR = "creator";
+    public static final String COMMENT_KEY_CREATOR_UUID = "creator_uuid";
     public static final String COMMENT_KEY_FORMAT_TIME = "format_time";
     public static final String COMMENT_KEY_TIME = "time";
-    public static final String COMMENT_KEY_SHARE_ID = "share_id";
+    public static final String COMMENT_KEY_SHARE_UUID = "share_id";
     public static final String COMMENT_KEY_TEXT = "text";
     public static final String COMMENT_IMAGE_UUID = "image_uuid";
 
@@ -33,7 +33,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String SHARE_KEY_TIME = "share_time";
     public static final String SHARE_KEY_TITLE = "share_title";
     public static final String SHARE_KEY_DESC = "share_desc";
-    public static final String SHARE_KEY__IMAGE_DIGESTS = "share_digest";
     public static final String SHARE_KEY_VIEWERS = "share_viewer";
     public static final String SHARE_KEY_MAINTAINERS = "share_maintainer";
     public static final String SHARE_KEY_IS_ALBUM = "share_is_album";
@@ -41,6 +40,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String SHARE_KEY_IS_DATE = "share_key_is_date";
     public static final String SHARE_KEY_IS_COVER_IMAGE_DIGEST = "share_key_is_cover_image_digest";
     public static final String SHARE_KEY_IS_LOCKED = "share_key_is_locked";
+    public static final String SHARE_KEY_DIGEST = "share_digest";
+    public static final String SHARE_KEY_IS_STICKY = "share_is_sticky";
 
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
@@ -49,6 +50,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String USER_KEY_EMAIL = "user_email";
     public static final String USER_KEY_DEFAULT_AVATAR = "user_default_avatar";
     public static final String USER_KEY_DEFAULT_AVATAR_BG_COLOR = "user_default_avatar_bg_color";
+    public static final String USER_KEY_HOME = "home";
+    public static final String USER_KEY_LIBRARY = "library";
 
     public static final String MEDIA_KEY_ID = "id";
     public static final String MEDIA_KEY_UUID = "media_uuid";
@@ -61,6 +64,12 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String MEDIA_KEY_BELONGING_MEDIASHARE_UUID = "media_key_belonging_mediashare_uuid";
     public static final String MEDIA_KEY_UPLOADED = "media_key_uploaded";
 
+    public static final String SHARE_CONTENT_KEY_ID = "id";
+    public static final String SHARE_CONTENT_KEY_SHARE_UUID = "share_uuid";
+    public static final String SHARE_CONTENT_KEY_CREATOR_UUID = "creator_uuid";
+    public static final String SHARE_CONTENT_KEY_DIGEST = "digest";
+    public static final String SHARE_CONTENT_KEY_TIME = "time";
+
     public static final String DB_NAME = "fruitmix";
     public static final String TASK_TABLE_NAME = "task";
     public static final String REMOTE_COMMENT_TABLE_NAME = "remote_comment";
@@ -70,24 +79,53 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String REMOTE_USER_TABLE_NAME = "remote_user";
     public static final String REMOTE_MEDIA_TABLE_NAME = "remote_media";
     public static final String LOCAL_MEDIA_TABLE_NAME = "local_media";
+    public static final String REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME = "remote_media_share_content";
+    public static final String LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME = "local_media_share_content";
 
-    public static final int DB_VERSION = 9;
+    public static final int DB_VERSION = 10;
+
+    public static final String CREATE_TABLE = "create table ";
 
     public static final String DATABASE_TASK_CREATE = "create table " + TASK_TABLE_NAME + " (" + TASK_KEY_ID + " integer primary key autoincrement," + TASK_KEY_HTTP_TYPE + " text not null," + TASK_KEY_OPERATION_TYPE + " text not null," + TASK_KEY_REQUEST + " text not null," + TASK_KEY_DATA + " text not null," + TASK_KEY_OPERATION_COUNT + " integer)";
 
-    public static final String DATABASE_REMOTE_COMMENT_CREATE = "create table " + REMOTE_COMMENT_TABLE_NAME + " (" + COMMENT_KEY_ID + " integer primary key autoincrement," + COMMENT_KEY_CREATOR + " text not null," + COMMENT_KEY_TIME + " text not null," + COMMENT_KEY_FORMAT_TIME + " text not null," + COMMENT_KEY_SHARE_ID + " text not null," + COMMENT_KEY_TEXT + " text not null," + COMMENT_IMAGE_UUID + " text not null)";
+    public static final String DATABASE_COMMENT_CREATE = " (" + COMMENT_KEY_ID + " integer primary key autoincrement," + COMMENT_KEY_CREATOR_UUID + " text not null," + COMMENT_KEY_TIME + " text not null," + COMMENT_KEY_FORMAT_TIME + " text not null," + COMMENT_KEY_SHARE_UUID + " text not null," + COMMENT_KEY_TEXT + " text not null," + COMMENT_IMAGE_UUID + " text not null)";
 
-    public static final String DATABASE_LOCAL_COMMENT_CREATE = "create table " + LOCAL_COMMENT_TABLE_NAME + " (" + COMMENT_KEY_ID + " integer primary key autoincrement," + COMMENT_KEY_CREATOR + " text not null," + COMMENT_KEY_TIME + " text not null," + COMMENT_KEY_FORMAT_TIME + " text not null," + COMMENT_KEY_SHARE_ID + " text not null," + COMMENT_KEY_TEXT + " text not null," + COMMENT_IMAGE_UUID + " text not null)";
+    public static final String DATABASE_REMOTE_COMMENT_CREATE = CREATE_TABLE + REMOTE_COMMENT_TABLE_NAME + DATABASE_COMMENT_CREATE;
 
-    public static final String DATABASE_LOCAL_SHARE_CREATE = "create table " + LOCAL_SHARE_TABLE_NAME + " (" + SHARE_KEY_ID + " integer primary key autoincrement," + SHARE_KEY_UUID + " text not null," + SHARE_KEY_CREATOR_UUID + " text not null," + SHARE_KEY_TIME + " text not null," + SHARE_KEY_TITLE + " text," + SHARE_KEY_DESC + " text," + SHARE_KEY__IMAGE_DIGESTS + " text not null," + SHARE_KEY_VIEWERS + " text not null," + SHARE_KEY_MAINTAINERS + " text not null," + SHARE_KEY_IS_ALBUM + " integer not null," + SHARE_KEY_IS_ARCHIVED + " integer not null," + SHARE_KEY_IS_COVER_IMAGE_DIGEST + " text not null," + SHARE_KEY_IS_DATE + " text not null," + SHARE_KEY_IS_LOCKED + " integer not null)";
+    public static final String DATABASE_LOCAL_COMMENT_CREATE = CREATE_TABLE + LOCAL_COMMENT_TABLE_NAME + DATABASE_COMMENT_CREATE;
 
-    public static final String DATABASE_REMOTE_SHARE_CREATE = "create table " + REMOTE_SHARE_TABLE_NAME + " (" + SHARE_KEY_ID + " integer primary key autoincrement," + SHARE_KEY_UUID + " text not null," + SHARE_KEY_CREATOR_UUID + " text not null," + SHARE_KEY_TIME + " text not null," + SHARE_KEY_TITLE + " text," + SHARE_KEY_DESC + " text," + SHARE_KEY__IMAGE_DIGESTS + " text not null," + SHARE_KEY_VIEWERS + " text not null," + SHARE_KEY_MAINTAINERS + " text not null," + SHARE_KEY_IS_ALBUM + " integer not null," + SHARE_KEY_IS_ARCHIVED + " integer not null," + SHARE_KEY_IS_COVER_IMAGE_DIGEST + " text not null," + SHARE_KEY_IS_DATE + " text not null," + SHARE_KEY_IS_LOCKED + " integer not null)";
+    public static final String DATABASE_SHARE_CREATE = " (" + SHARE_KEY_ID + " integer primary key autoincrement,"
+            + SHARE_KEY_UUID + " text not null," + SHARE_KEY_CREATOR_UUID + " text not null,"
+            + SHARE_KEY_TIME + " text not null," + SHARE_KEY_TITLE + " text," + SHARE_KEY_DESC + " text,"
+            + SHARE_KEY_VIEWERS + " text not null,"
+            + SHARE_KEY_MAINTAINERS + " text not null," + SHARE_KEY_IS_ALBUM + " integer not null,"
+            + SHARE_KEY_IS_ARCHIVED + " integer not null," + SHARE_KEY_IS_COVER_IMAGE_DIGEST + " text not null,"
+            + SHARE_KEY_IS_DATE + " text not null," + SHARE_KEY_IS_LOCKED + " integer not null,"
+            + SHARE_KEY_DIGEST + " text," + SHARE_KEY_IS_STICKY + " integer not null)";
 
-    public static final String DATABASE_REMOTE_MEDIA_CREATE = "create table " + REMOTE_MEDIA_TABLE_NAME + " (" + MEDIA_KEY_ID + " integer primary key autoincrement," + MEDIA_KEY_UUID + " text not null," + MEDIA_KEY_TIME + " text not null," + MEDIA_KEY_WIDTH + " text not null," + MEDIA_KEY_HEIGHT + " text not null," + MEDIA_KEY_THUMB + " text," + MEDIA_KEY_LOCAL + " integer not null," + MEDIA_KEY_TITLE + " text," + MEDIA_KEY_BELONGING_MEDIASHARE_UUID + " text," + MEDIA_KEY_UPLOADED + " integer not null)";
+    public static final String DATABASE_LOCAL_SHARE_CREATE = CREATE_TABLE + LOCAL_SHARE_TABLE_NAME + DATABASE_SHARE_CREATE;
 
-    public static final String DATABASE_LOCAL_MEDIA_CREATE = "create table " + LOCAL_MEDIA_TABLE_NAME + " (" + MEDIA_KEY_ID + " integer primary key autoincrement," + MEDIA_KEY_UUID + " text not null," + MEDIA_KEY_TIME + " text not null," + MEDIA_KEY_WIDTH + " text not null," + MEDIA_KEY_HEIGHT + " text not null," + MEDIA_KEY_THUMB + " text," + MEDIA_KEY_LOCAL + " integer not null," + MEDIA_KEY_TITLE + " text," + MEDIA_KEY_BELONGING_MEDIASHARE_UUID + " text," + MEDIA_KEY_UPLOADED + " integer not null)";
+    public static final String DATABASE_REMOTE_SHARE_CREATE = CREATE_TABLE + REMOTE_SHARE_TABLE_NAME + DATABASE_SHARE_CREATE;
 
-    public static final String DATABASE_REMOTE_USER_CREATE = "create table " + REMOTE_USER_TABLE_NAME + " (" + USER_KEY_ID + " integer primary key autoincrement," + USER_KEY_UUID + " text not null," + USER_KEY_USERNAME + " text not null," + USER_KEY_AVATAR + " text not null," + USER_KEY_EMAIL + " text," + USER_KEY_DEFAULT_AVATAR + " text not null," + USER_KEY_DEFAULT_AVATAR_BG_COLOR + " text not null)";
+    public static final String DATABASE_MEDIA_CREATE = " (" + MEDIA_KEY_ID + " integer primary key autoincrement,"
+            + MEDIA_KEY_UUID + " text not null," + MEDIA_KEY_TIME + " text not null," + MEDIA_KEY_WIDTH + " text not null,"
+            + MEDIA_KEY_HEIGHT + " text not null," + MEDIA_KEY_THUMB + " text," + MEDIA_KEY_LOCAL + " integer not null,"
+            + MEDIA_KEY_TITLE + " text," + MEDIA_KEY_BELONGING_MEDIASHARE_UUID + " text," + MEDIA_KEY_UPLOADED + " integer not null)";
+
+    public static final String DATABASE_REMOTE_MEDIA_CREATE = CREATE_TABLE + REMOTE_MEDIA_TABLE_NAME + DATABASE_MEDIA_CREATE;
+
+    public static final String DATABASE_LOCAL_MEDIA_CREATE = CREATE_TABLE + LOCAL_MEDIA_TABLE_NAME + DATABASE_MEDIA_CREATE;
+
+    public static final String DATABASE_REMOTE_USER_CREATE = CREATE_TABLE + REMOTE_USER_TABLE_NAME + " ("
+            + USER_KEY_ID + " integer primary key autoincrement," + USER_KEY_UUID + " text not null,"
+            + USER_KEY_USERNAME + " text not null," + USER_KEY_AVATAR + " text not null,"
+            + USER_KEY_EMAIL + " text," + USER_KEY_DEFAULT_AVATAR + " text not null," + USER_KEY_DEFAULT_AVATAR_BG_COLOR + " text not null,"
+            + USER_KEY_HOME + " text not null," + USER_KEY_LIBRARY + " text not null)";
+
+    public static final String DATABASE_MEDIA_SHARE_CONTENT_CREATE = " (" + SHARE_CONTENT_KEY_ID + " integer primary key autoincrement," + SHARE_CONTENT_KEY_SHARE_UUID + " text not null," + SHARE_CONTENT_KEY_CREATOR_UUID + " text not null," + SHARE_KEY_DIGEST + " text not null," + SHARE_CONTENT_KEY_TIME + " text not null)";
+
+    public static final String DATABASE_REMOTE_MEDIA_SHARE_CONTENT_CREATE = CREATE_TABLE + REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME + DATABASE_MEDIA_SHARE_CONTENT_CREATE;
+    public static final String DATABASE_LOCAL_MEDIA_SHARE_CONTENT_CREATE = CREATE_TABLE + LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME + DATABASE_MEDIA_SHARE_CONTENT_CREATE;
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -102,6 +140,8 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DATABASE_REMOTE_MEDIA_CREATE);
         db.execSQL(DATABASE_LOCAL_MEDIA_CREATE);
         db.execSQL(DATABASE_REMOTE_USER_CREATE);
+        db.execSQL(DATABASE_REMOTE_MEDIA_SHARE_CONTENT_CREATE);
+        db.execSQL(DATABASE_LOCAL_MEDIA_SHARE_CONTENT_CREATE);
     }
 
     @Override
@@ -116,6 +156,8 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + REMOTE_MEDIA_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + LOCAL_MEDIA_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + REMOTE_USER_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME);
         onCreate(db);
     }
 }

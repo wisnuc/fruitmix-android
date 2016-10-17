@@ -8,15 +8,19 @@ import android.util.Log;
 import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.Comment;
+import com.winsun.fruitmix.model.MediaShareContent;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.parser.LocalDataParser;
 import com.winsun.fruitmix.parser.LocalMediaCommentParser;
 import com.winsun.fruitmix.parser.LocalMediaParser;
 import com.winsun.fruitmix.parser.LocalMediaShareParser;
 import com.winsun.fruitmix.parser.LocalUserParser;
+import com.winsun.fruitmix.parser.MediaShareContentParser;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,40 +73,45 @@ public enum DBUtils {
 
     private ContentValues createCommentContentValues(Comment comment, String mediaUUID) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.COMMENT_KEY_CREATOR, comment.getCreator());
+        contentValues.put(DBHelper.COMMENT_KEY_CREATOR_UUID, comment.getCreator());
         contentValues.put(DBHelper.COMMENT_KEY_TIME, comment.getTime());
         contentValues.put(DBHelper.COMMENT_KEY_FORMAT_TIME, comment.getFormatTime());
-        contentValues.put(DBHelper.COMMENT_KEY_SHARE_ID, comment.getShareId());
+        contentValues.put(DBHelper.COMMENT_KEY_SHARE_UUID, comment.getShareId());
         contentValues.put(DBHelper.COMMENT_KEY_TEXT, comment.getText());
         contentValues.put(DBHelper.COMMENT_IMAGE_UUID, mediaUUID);
 
         return contentValues;
     }
 
-    public long insertRemoteComment(Comment comment, String imageUUid) {
-
+    private long insertComment(String tableName, Comment comment, String imageUUID) {
         openWritableDB();
 
-        ContentValues contentValues = createCommentContentValues(comment, imageUUid);
+        ContentValues contentValues = createCommentContentValues(comment, imageUUID);
 
-        long returnValue = database.insert(DBHelper.REMOTE_COMMENT_TABLE_NAME, null, contentValues);
+        long returnValue = database.insert(tableName, null, contentValues);
 
         close();
 
         return returnValue;
     }
 
+    public long insertRemoteComment(Comment comment, String imageUUid) {
+        return insertComment(DBHelper.REMOTE_COMMENT_TABLE_NAME, comment, imageUUid);
+    }
+
     public long insertLocalComment(Comment comment, String imageUUid) {
 
-        openWritableDB();
+        return insertComment(DBHelper.LOCAL_COMMENT_TABLE_NAME, comment, imageUUid);
+    }
 
-        ContentValues contentValues = createCommentContentValues(comment, imageUUid);
+    private ContentValues createMediaShareContentContentValues(MediaShareContent mediaShareContent, String mediaShareUUID) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.SHARE_CONTENT_KEY_SHARE_UUID, mediaShareUUID);
+        contentValues.put(DBHelper.SHARE_CONTENT_KEY_DIGEST, mediaShareContent.getDigest());
+        contentValues.put(DBHelper.SHARE_CONTENT_KEY_CREATOR_UUID, mediaShareContent.getAuthor());
+        contentValues.put(DBHelper.SHARE_CONTENT_KEY_TIME, mediaShareContent.getTime());
 
-        long returnValue = database.insert(DBHelper.LOCAL_COMMENT_TABLE_NAME, null, contentValues);
-
-        close();
-
-        return returnValue;
+        return contentValues;
     }
 
     private ContentValues createMediaShareContentValues(MediaShare mediaShare) {
@@ -115,14 +124,7 @@ public enum DBUtils {
         contentValues.put(DBHelper.SHARE_KEY_DESC, mediaShare.getDesc());
 
         StringBuilder builder = new StringBuilder();
-        for (String image : mediaShare.getImageDigests()) {
-            builder.append(image);
-            builder.append(",");
-        }
 
-        contentValues.put(DBHelper.SHARE_KEY__IMAGE_DIGESTS, builder.toString());
-
-        builder.setLength(0);
         for (String viewer : mediaShare.getViewers()) {
             builder.append(viewer);
             builder.append(",");
@@ -143,51 +145,50 @@ public enum DBUtils {
         contentValues.put(DBHelper.SHARE_KEY_IS_DATE, mediaShare.getDate());
         contentValues.put(DBHelper.SHARE_KEY_IS_COVER_IMAGE_DIGEST, mediaShare.getCoverImageDigest());
         contentValues.put(DBHelper.SHARE_KEY_IS_LOCKED, mediaShare.isLocal() ? 1 : 0);
+        contentValues.put(DBHelper.SHARE_KEY_DIGEST, mediaShare.getShareDigest());
+        contentValues.put(DBHelper.SHARE_KEY_IS_STICKY, mediaShare.isSticky() ? 1 : 0);
 
         return contentValues;
     }
 
-    public long insertLocalShare(MediaShare mediaShare) {
-
+    private long insertMediaShareContent(String mediashareContentTableName,MediaShareContent mediaShareContent,String mediashareUUID){
         openWritableDB();
 
-        ContentValues contentValues = createMediaShareContentValues(mediaShare);
+        ContentValues contentValues = createMediaShareContentContentValues(mediaShareContent,mediashareUUID);
 
-        long returnValue = database.insert(DBHelper.LOCAL_SHARE_TABLE_NAME, null, contentValues);
+        long returnValue = database.insert(mediashareContentTableName,null,contentValues);
 
         close();
 
         return returnValue;
     }
 
-    public long insertRemoteMediaShare(MediaShare mediaShare) {
-
-        openWritableDB();
-
-        long returnValue = 0;
-
-        ContentValues contentValues = createMediaShareContentValues(mediaShare);
-
-        returnValue = database.insert(DBHelper.REMOTE_SHARE_TABLE_NAME, null, contentValues);
-
-        close();
-
-        return returnValue;
-
+    public long insertLocalMediaShareContent(MediaShareContent mediaShareContent,String mediashareUUID){
+        return insertMediaShareContent(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME,mediaShareContent,mediashareUUID);
     }
 
-    public long insertRemoteMediaShares(ConcurrentMap<String, MediaShare> mediaShares) {
+    public long insertRemoteMediaShareContent(MediaShareContent mediaShareContent,String mediashareUUID){
+        return insertMediaShareContent(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,mediaShareContent,mediashareUUID);
+    }
 
+    private long insertMediaShare(String mediashareContentTableName,String mediashareTableName, Collection<MediaShare> mediashares) {
         openWritableDB();
 
         long returnValue = 0;
-        ContentValues contentValues;
 
-        for (MediaShare mediaShare : mediaShares.values()) {
+        ContentValues contentValue;
 
-            contentValues = createMediaShareContentValues(mediaShare);
+        for (MediaShare mediashare : mediashares) {
 
-            returnValue = database.insert(DBHelper.REMOTE_SHARE_TABLE_NAME, null, contentValues);
+            for (MediaShareContent mediashareContent : mediashare.getMediaShareContents()) {
+                contentValue = createMediaShareContentContentValues(mediashareContent, mediashare.getUuid());
+
+                database.insert(mediashareContentTableName, null, contentValue);
+            }
+
+            ContentValues contentValues = createMediaShareContentValues(mediashare);
+
+            returnValue = database.insert(mediashareTableName, null, contentValues);
         }
 
         close();
@@ -195,7 +196,23 @@ public enum DBUtils {
         return returnValue;
     }
 
-    private ContentValues createUesrContentValues(User user) {
+    public long insertLocalShare(MediaShare mediaShare) {
+
+        return insertMediaShare(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME,DBHelper.LOCAL_SHARE_TABLE_NAME, Collections.singletonList(mediaShare));
+    }
+
+    public long insertRemoteMediaShare(MediaShare mediaShare) {
+
+        return insertMediaShare(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,DBHelper.REMOTE_SHARE_TABLE_NAME, Collections.singletonList(mediaShare));
+
+    }
+
+    public long insertRemoteMediaShares(ConcurrentMap<String, MediaShare> mediaShares) {
+
+        return insertMediaShare(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,DBHelper.REMOTE_SHARE_TABLE_NAME, mediaShares.values());
+    }
+
+    private ContentValues createUserContentValues(User user) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.USER_KEY_USERNAME, user.getUserName());
         contentValues.put(DBHelper.USER_KEY_UUID, user.getUuid());
@@ -203,6 +220,8 @@ public enum DBUtils {
         contentValues.put(DBHelper.USER_KEY_EMAIL, user.getEmail());
         contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR, user.getDefaultAvatar());
         contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR_BG_COLOR, user.getDefaultAvatarBgColor());
+        contentValues.put(DBHelper.USER_KEY_HOME, user.getHome());
+        contentValues.put(DBHelper.USER_KEY_LIBRARY, user.getLibrary());
 
         return contentValues;
     }
@@ -217,7 +236,7 @@ public enum DBUtils {
 
         for (User user : users.values()) {
 
-            contentValues = createUesrContentValues(user);
+            contentValues = createUserContentValues(user);
 
             returnValue = database.insert(DBHelper.REMOTE_USER_TABLE_NAME, null, contentValues);
         }
@@ -263,26 +282,6 @@ public enum DBUtils {
 
     }
 
-    public long insertLocalMediaMap(ConcurrentMap<String, Media> medias) {
-
-        openWritableDB();
-
-        long returnValue = 0;
-
-        ContentValues contentValues;
-
-        for (Media media : medias.values()) {
-            contentValues = createMediaContentValues(media);
-
-            returnValue = database.insert(DBHelper.LOCAL_MEDIA_TABLE_NAME, null, contentValues);
-        }
-
-        close();
-
-        return returnValue;
-
-    }
-
     public long insertLocalMedia(Media media) {
 
         openWritableDB();
@@ -293,6 +292,17 @@ public enum DBUtils {
 
         returnValue = database.insert(DBHelper.LOCAL_MEDIA_TABLE_NAME, null, contentValues);
 
+
+        close();
+
+        return returnValue;
+
+    }
+
+    private long deleteAllDataInTable(String tableName) {
+        openWritableDB();
+
+        long returnValue = database.delete(tableName, null, null);
 
         close();
 
@@ -335,13 +345,7 @@ public enum DBUtils {
 
     public long deleteAllRemoteComment() {
 
-        openWritableDB();
-
-        long returnValue = database.delete(DBHelper.REMOTE_COMMENT_TABLE_NAME, null, null);
-
-        close();
-
-        return returnValue;
+        return deleteAllDataInTable(DBHelper.REMOTE_COMMENT_TABLE_NAME);
     }
 
     public long deleteLocalComment(long id) {
@@ -368,33 +372,34 @@ public enum DBUtils {
 
     public long deleteAllLocalComment() {
 
+        return deleteAllDataInTable(DBHelper.LOCAL_COMMENT_TABLE_NAME);
+    }
+
+    private long deleteMediaShareContentByID(String mediashareContentTableName,String id){
         openWritableDB();
 
-        long returnValue = database.delete(DBHelper.LOCAL_COMMENT_TABLE_NAME, null, null);
+        long returnValue = database.delete(mediashareContentTableName,DBHelper.SHARE_CONTENT_KEY_ID + " = ?",new String[]{id});
 
         close();
 
         return returnValue;
     }
 
-    public long deleteLocalShare(int id) {
-
-        openWritableDB();
-
-        long returnValue = database.delete(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.SHARE_KEY_ID + " = ?", new String[]{String.valueOf(id)});
-
-        close();
-
-        return returnValue;
-
+    public long deleteLocalMediaShareContentByID(String id){
+        return deleteMediaShareContentByID(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME,id);
     }
 
+    public long deleteRemoteMediaShareContentByID(String id){
+        return deleteMediaShareContentByID(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,id);
+    }
 
-    public long deleteLocalShareByUUid(String UUid) {
+    public long deleteLocalShareByUUid(String uuid) {
 
         openWritableDB();
 
-        long returnValue = database.delete(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{UUid});
+        database.delete(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, DBHelper.SHARE_CONTENT_KEY_SHARE_UUID + " = ?", new String[]{uuid});
+
+        long returnValue = database.delete(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
 
         close();
 
@@ -405,6 +410,7 @@ public enum DBUtils {
 
         openWritableDB();
 
+        database.delete(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME,null,null);
         long returnValue = database.delete(DBHelper.LOCAL_SHARE_TABLE_NAME, null, null);
 
         close();
@@ -412,24 +418,12 @@ public enum DBUtils {
         return returnValue;
     }
 
-    public long deleteRemoteShare(int id) {
+    public long deleteRemoteShareByUUid(String uuid) {
 
         openWritableDB();
 
-        long returnValue = database.delete(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.SHARE_KEY_ID + " = ?", new String[]{String.valueOf(id)});
-
-        close();
-
-        return returnValue;
-
-    }
-
-
-    public long deleteRemoteShareByUUid(String UUid) {
-
-        openWritableDB();
-
-        long returnValue = database.delete(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{UUid});
+        database.delete(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, DBHelper.SHARE_CONTENT_KEY_SHARE_UUID + " = ?", new String[]{uuid});
+        long returnValue = database.delete(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
 
         close();
 
@@ -440,6 +434,7 @@ public enum DBUtils {
 
         openWritableDB();
 
+        database.delete(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,null,null);
         long returnValue = database.delete(DBHelper.REMOTE_SHARE_TABLE_NAME, null, null);
 
         close();
@@ -449,35 +444,31 @@ public enum DBUtils {
 
     public long deleteAllRemoteUser() {
 
-        openWritableDB();
-
-        long returnValue = database.delete(DBHelper.REMOTE_USER_TABLE_NAME, null, null);
-
-        close();
-
-        return returnValue;
+        return deleteAllDataInTable(DBHelper.REMOTE_USER_TABLE_NAME);
     }
 
     public long deleteAllRemoteMedia() {
 
-        openWritableDB();
-
-        long returnValue = database.delete(DBHelper.REMOTE_MEDIA_TABLE_NAME, null, null);
-
-        close();
-
-        return returnValue;
+        return deleteAllDataInTable(DBHelper.REMOTE_MEDIA_TABLE_NAME);
     }
 
     public long deleteAllLocalMedia() {
 
-        openWritableDB();
+        return deleteAllDataInTable(DBHelper.LOCAL_MEDIA_TABLE_NAME);
+    }
 
-        long returnValue = database.delete(DBHelper.LOCAL_MEDIA_TABLE_NAME, null, null);
+    private List<MediaShareContent> getMediaShareContents(String mediashareContentTableName,String mediashareUUID) {
 
-        close();
 
-        return returnValue;
+        List<MediaShareContent> mediashareContents = new ArrayList<>();
+        MediaShareContentParser parser = new MediaShareContentParser();
+        Cursor cursor = database.rawQuery("select * from " + mediashareContentTableName + " where " + DBHelper.SHARE_CONTENT_KEY_SHARE_UUID + " = ?", new String[]{mediashareUUID});
+        while (cursor.moveToNext()) {
+            mediashareContents.add(parser.parse(cursor));
+        }
+        cursor.close();
+
+        return mediashareContents;
     }
 
     public Map<String, List<Comment>> getAllLocalImageCommentKeyIsImageUUID() {
@@ -594,6 +585,11 @@ public enum DBUtils {
         }
         cursor.close();
 
+        for (MediaShare mediaShare:list){
+
+            mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME,mediaShare.getUuid()));
+        }
+
         close();
 
         return list;
@@ -611,6 +607,8 @@ public enum DBUtils {
         }
         cursor.close();
 
+        mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME,mediaShare.getUuid()));
+
         close();
 
         return mediaShare;
@@ -626,11 +624,15 @@ public enum DBUtils {
         Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_SHARE_TABLE_NAME, null);
         while (cursor.moveToNext()) {
 
-            MediaShare mediaShare = parser.parse(cursor);
-
-            mediaShares.add(mediaShare);
+            mediaShares.add(parser.parse(cursor));
         }
         cursor.close();
+
+        for (MediaShare mediaShare:mediaShares){
+
+            mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,mediaShare.getUuid()));
+        }
+
 
         close();
 
@@ -650,6 +652,8 @@ public enum DBUtils {
             mediaShare = parser.parse(cursor);
         }
         cursor.close();
+
+        mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,mediaShare.getUuid()));
 
         close();
 

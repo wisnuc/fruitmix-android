@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.model.MediaShareContent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -168,21 +170,35 @@ public class CreateAlbumActivity extends AppCompatActivity {
         MediaShare mediaShare = new MediaShare();
         mediaShare.setUuid(Util.createLocalUUid());
 
-        Log.i(TAG, "create album digest:" + digests);
+        Log.i(TAG, "create album digest:" + digests.toString());
 
-        mediaShare.setImageDigests(Arrays.asList(digests));
+        List<MediaShareContent> mediaShareContents = new ArrayList<>();
+        for (String digest:digests){
+            MediaShareContent mediaShareContent = new MediaShareContent();
+            mediaShareContent.setDigest(digest);
+            mediaShareContent.setAuthor(FNAS.userUUID);
+            mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
+            mediaShareContents.add(mediaShareContent);
+        }
+
+        mediaShare.initMediaShareContents(mediaShareContents);
         mediaShare.setCoverImageDigest(digests[0]);
         mediaShare.setTitle(title);
         mediaShare.setDesc(desc);
 
         if (isPublic) {
-            mediaShare.setViewers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
-        } else mediaShare.setViewers(Collections.<String>emptyList());
+            for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+                mediaShare.addViewer(userUUID);
+            }
+        } else mediaShare.clearViewers();
 
         if (otherMaintianer) {
-            mediaShare.setMaintainers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+            for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+                mediaShare.addMaintainer(userUUID);
+            }
         } else {
-            mediaShare.setMaintainers(Collections.singletonList(FNAS.userUUID));
+            mediaShare.clearMaintainers();
+            mediaShare.addMaintainer(FNAS.userUUID);
         }
 
         mediaShare.setCreatorUUID(FNAS.userUUID);

@@ -23,14 +23,15 @@ public class LocalMediaShareParser implements LocalDataParser<MediaShare>{
         mediaShare.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_TIME)));
         mediaShare.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_TITLE)));
         mediaShare.setDesc(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_DESC)));
-        mediaShare.setImageDigests(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY__IMAGE_DIGESTS)).split(",")));
-        mediaShare.setViewers(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_VIEWERS)).split(",")));
-        mediaShare.setMaintainers(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_MAINTAINERS)).split(",")));
+        mediaShare.initViewers(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_VIEWERS)).split(",")));
+        mediaShare.initMaintainers(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_MAINTAINERS)).split(",")));
         mediaShare.setAlbum(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_ALBUM)) == 1);
         mediaShare.setArchived(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_ARCHIVED)) == 1);
         mediaShare.setDate(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_DATE)));
         mediaShare.setCoverImageDigest(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_COVER_IMAGE_DIGEST)));
         mediaShare.setLocal(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_LOCKED)) == 1);
+        mediaShare.setShareDigest(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_DIGEST)));
+        mediaShare.setSticky(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_STICKY)) == 1);
 
         return mediaShare;
     }

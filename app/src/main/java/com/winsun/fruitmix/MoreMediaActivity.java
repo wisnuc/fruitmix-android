@@ -78,7 +78,7 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
         mMorePhotoRecyclerView.setAdapter(mAdapter);
 
         mPhotos = new ArrayList<>();
-        fillPhotoList(mediaShare.getImageDigests());
+        fillPhotoList(mediaShare.getMediaDigestInMediaShareContents());
         mAdapter.notifyDataSetChanged();
 
     }

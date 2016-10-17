@@ -156,7 +156,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mediaList = new ArrayList<>();
-        fillPicList(mediaShare.getImageDigests());
+        fillPicList(mediaShare.getMediaDigestInMediaShareContents());
         ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
@@ -398,7 +398,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             MediaShare mediaShare = data.getParcelableExtra(Util.KEY_MEDIASHARE);
 
-            fillPicList(mediaShare.getImageDigests());
+            fillPicList(mediaShare.getMediaDigestInMediaShareContents());
             ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
         } else if (requestCode == Util.KEY_MODIFY_ALBUM_REQUEST_CODE && resultCode == RESULT_OK) {
             String title = data.getStringExtra(Util.UPDATED_ALBUM_TITLE);
@@ -431,9 +431,12 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         MediaShare cloneMediaShare = mediaShare.cloneMyself();
 
         if (cloneMediaShare.getViewers().isEmpty()) {
-            cloneMediaShare.setViewers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+            for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+                cloneMediaShare.addViewer(userUUID);
+            }
+
         } else {
-            cloneMediaShare.setViewers(Collections.<String>emptyList());
+            cloneMediaShare.clearViewers();
         }
 
         mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);

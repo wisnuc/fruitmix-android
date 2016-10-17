@@ -65,7 +65,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
         mMediaShareUuid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
         mAblumMap = LocalCache.RemoteMediaShareMapKeyIsUUID.get(mMediaShareUuid);
-        mSelectedImageUUIDStr = mAblumMap.getImageDigests();
+        mSelectedImageUUIDStr = mAblumMap.getMediaDigestInMediaShareContents();
 
         tfTitle = (TextInputEditText) findViewById(R.id.title_edit);
         mTitleLayout = (TextInputLayout) findViewById(R.id.title_textlayout);
@@ -113,13 +113,17 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
                 if (sPublic) {
-                    mAblumMap.setViewers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
-                } else mAblumMap.setViewers(Collections.<String>emptyList());
+                    for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+                        mAblumMap.addViewer(userUUID);
+                    }
+                } else mAblumMap.clearViewers();
 
                 if (sSetMaintainer) {
-                    mAblumMap.setMaintainers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
+                    for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+                        mAblumMap.addMaintainer(userUUID);
+                    }
                 } else {
-                    mAblumMap.setMaintainers(Collections.singletonList(FNAS.userUUID));
+                    mAblumMap.clearMaintainers();
                 }
                 mAblumMap.setTitle(title);
                 mAblumMap.setDesc(desc);

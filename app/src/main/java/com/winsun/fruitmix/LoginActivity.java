@@ -197,7 +197,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                 switch (result) {
                     case SUCCEED:
 
-                        if (!mUserUUid.equals(FNAS.userUUID)) {
+                        if (!mGateway.equals(FNAS.Gateway)) {
                             LocalCache.CleanAll();
                         }
 

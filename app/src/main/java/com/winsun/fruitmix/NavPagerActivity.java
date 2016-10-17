@@ -43,6 +43,7 @@ import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.model.MediaShareContent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
@@ -113,6 +114,8 @@ public class NavPagerActivity extends AppCompatActivity
 
     private boolean mLocalMediaLoaded = false;
 
+    private boolean onCreate = false;
+
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -151,7 +154,6 @@ public class NavPagerActivity extends AppCompatActivity
         intentFilter.addAction(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED);
         intentFilter.addAction(Util.LOCAL_MEDIA_COMMENT_RETRIEVED);
         intentFilter.addAction(Util.REMOTE_MEDIA_COMMENT_RETRIEVED);
-        mManager.registerReceiver(mReceiver, intentFilter);
 
 
         instance = ExecutorServiceInstance.SINGLE_INSTANCE;
@@ -265,8 +267,6 @@ public class NavPagerActivity extends AppCompatActivity
 
         photoList.addPhotoListListener(this);
 
-        FNAS.retrieveMediaMap(mContext);
-        FNAS.retrieveLocalMediaCommentMap(mContext);
     }
 
     private void retrieveLocalMediaInCamera() {
@@ -296,6 +296,22 @@ public class NavPagerActivity extends AppCompatActivity
             retrieveLocalMediaInCamera();
         }
 
+        mManager.registerReceiver(mReceiver, intentFilter);
+
+        if(!onCreate){
+            FNAS.retrieveMediaMap(mContext);
+            FNAS.retrieveLocalMediaCommentMap(mContext);
+
+            onCreate = true;
+        }
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        mManager.unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -314,7 +330,7 @@ public class NavPagerActivity extends AppCompatActivity
 
         instance.shutdownFixedThreadPool();
 
-        mManager.unregisterReceiver(mReceiver);
+
     }
 
     public void createShare(List<String> selectUUIDs) {
@@ -348,11 +364,11 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     public void deleteMediaShare(MediaShare mediaShare) {
-/*        if (!mediaShare.getMaintainers().contains(FNAS.userUUID)) {
+        if (!mediaShare.getMaintainers().contains(FNAS.userUUID)) {
             Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
 
             return;
-        }*/
+        }
 
         mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
@@ -372,12 +388,25 @@ public class NavPagerActivity extends AppCompatActivity
 
         MediaShare mediaShare = new MediaShare();
         mediaShare.setUuid(Util.createLocalUUid());
-        mediaShare.setImageDigests(selectUUIDs);
+
+        List<MediaShareContent> mediaShareContents = new ArrayList<>();
+        for (String digest:selectUUIDs){
+            MediaShareContent mediaShareContent = new MediaShareContent();
+            mediaShareContent.setDigest(digest);
+            mediaShareContent.setAuthor(FNAS.userUUID);
+            mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
+            mediaShareContents.add(mediaShareContent);
+        }
+
+        mediaShare.initMediaShareContents(mediaShareContents);
+
         mediaShare.setCoverImageDigest(selectUUIDs.get(0));
         mediaShare.setTitle("");
         mediaShare.setDesc("");
-        mediaShare.setViewers(new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.keySet()));
-        mediaShare.setMaintainers(Collections.singletonList(FNAS.userUUID));
+        for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+            mediaShare.addViewer(userUUID);
+        }
+        mediaShare.addMaintainer(FNAS.userUUID);
         mediaShare.setCreatorUUID(FNAS.userUUID);
         mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
         mediaShare.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(mediaShare.getTime()))));

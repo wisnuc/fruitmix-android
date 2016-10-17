@@ -2,17 +2,14 @@ package com.winsun.fruitmix.Fragment;
 
 import android.content.Intent;
 import android.graphics.Paint;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewCompat;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
-import android.transition.Transition;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,26 +33,18 @@ import com.winsun.fruitmix.MoreMediaActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.User;
-import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
-import org.json.JSONArray;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -185,7 +174,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         for (MediaShare mediaShare : mediaShareList) {
             if (!mediaShare.isAlbum()) {
-                List<String> imageDigests = mediaShare.getImageDigests();
+                List<String> imageDigests = mediaShare.getMediaDigestInMediaShareContents();
                 if (imageDigests.size() == 1) {
 
                     Media media = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(0));
@@ -226,7 +215,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                 int currentMediaSharePosition = findShareItemPosition(currentMediaShareTime);
 
-                List<String> currentMediaUUIDs = mediaShareList.get(currentMediaSharePosition).getImageDigests();
+                List<String> currentMediaUUIDs = mediaShareList.get(currentMediaSharePosition).getMediaDigestInMediaShareContents();
 
                 String currentMediaUUID = currentMediaUUIDs.get(currentPhotoPosition);
 
@@ -424,7 +413,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                 lbAlbumTitle.setVisibility(View.VISIBLE);
 
 
-                lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.share_album_title), currentItem.getTitle(), String.valueOf(currentItem.getImageDigests().size())));
+                lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.share_album_title), currentItem.getTitle(), String.valueOf(currentItem.getMediaShareContents().size())));
 
                 coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
                 if (coverImg != null) sLocal = false;
@@ -475,7 +464,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                 lbAlbumShare.setVisibility(View.GONE);
                 lbAlbumTitle.setVisibility(View.GONE);
 
-                imageDigests = currentItem.getImageDigests();
+                imageDigests = currentItem.getMediaDigestInMediaShareContents();
 
                 if (imageDigests.size() == 1) {
                     rlAlbum.setVisibility(View.VISIBLE);
@@ -580,7 +569,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                     ivCover.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ArrayList<Media> imageList = (ArrayList<Media>) getImgList(currentItem.getImageDigests());
+                            ArrayList<Media> imageList = (ArrayList<Media>) getImgList(currentItem.getMediaDigestInMediaShareContents());
 
                             Intent intent = new Intent();
                             intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
@@ -690,7 +679,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                             public void onClick(View v) {
                                 Log.d("winsun", currentItem + "");
 
-                                List<Media> imageList = getImgList(currentItem.getImageDigests());
+                                List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
 
                                 LocalCache.TransActivityContainer.put("imgSliderList", imageList);
 

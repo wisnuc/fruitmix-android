@@ -24,7 +24,7 @@ import java.util.List;
  * TODO: Customize class - update intent actions, extra parameters and static
  * helper methods.
  */
-public class ModifyMediaInRemoteMediaShareService extends IntentService {
+public class ModifyMediaInLocalMediaShareService extends IntentService {
 
     private static final String TAG = ModifyMediaInLocalMediaShareService.class.getSimpleName();
 
@@ -35,7 +35,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
     private static final String EXTRA_ORIGINAL_MEDIASHARE = "com.winsun.fruitmix.services.extra.original_mediashare";
     private static final String EXTRA_MODIFIED_MEDIASHARE = "com.winsun.fruitmix.services.extra.modified_mediashare";
 
-    public ModifyMediaInRemoteMediaShareService() {
+    public ModifyMediaInLocalMediaShareService() {
         super("EditPhotoInMediaShareService");
     }
 
@@ -48,11 +48,11 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionEditPhotoInMediaShare(Context context, MediaShare originalMediashare, MediaShare modifiedMediashare) {
+    public static void startActionEditPhotoInMediaShare(Context context, MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
         Intent intent = new Intent(context, ModifyMediaInLocalMediaShareService.class);
         intent.setAction(ACTION_MODIFY_MEDIA);
-        intent.putExtra(EXTRA_ORIGINAL_MEDIASHARE, originalMediashare);
-        intent.putExtra(EXTRA_MODIFIED_MEDIASHARE, modifiedMediashare);
+        intent.putExtra(EXTRA_ORIGINAL_MEDIASHARE, originalMediaShare);
+        intent.putExtra(EXTRA_MODIFIED_MEDIASHARE, modifiedMediaShare);
         context.startService(intent);
     }
 
@@ -61,9 +61,9 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_MODIFY_MEDIA.equals(action)) {
-                MediaShare originalMediashare = intent.getParcelableExtra(EXTRA_ORIGINAL_MEDIASHARE);
-                MediaShare modifiedMediashare = intent.getParcelableExtra(EXTRA_MODIFIED_MEDIASHARE);
-                handleActionModifyMedia(originalMediashare, modifiedMediashare);
+                MediaShare originalMediaShare = intent.getParcelableExtra(EXTRA_ORIGINAL_MEDIASHARE);
+                MediaShare modifiedMediaShare = intent.getParcelableExtra(EXTRA_MODIFIED_MEDIASHARE);
+                handleActionModifyMedia(originalMediaShare, modifiedMediaShare);
             }
         }
     }
@@ -81,74 +81,32 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
         List<MediaShareContent> differentContentsInModifiedMediaShare = findDifferentMediaShareContentInFirstMediaShareContents(modifiedMediaShareContents, originalMediaShareContents);
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        Intent intent = new Intent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED);
+        Intent intent = new Intent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED);
 
-        List<String> differentDigestsInModifiedMediaShare = new ArrayList<>();
+        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        long dbResult = 0;
+
+        for (MediaShareContent mediaShareContent : differentContentsInOriginalMediaShare) {
+            dbResult = dbUtils.deleteLocalMediaShareContentByID(mediaShareContent.getId());
+        }
+
         for (MediaShareContent mediaShareContent : differentContentsInModifiedMediaShare) {
-            differentDigestsInModifiedMediaShare.add(mediaShareContent.getDigest());
+            dbResult = dbUtils.insertLocalMediaShareContent(mediaShareContent, modifiedMediaShare.getUuid());
         }
 
-        if (!Util.uploadImageDigestsIfNotUpload(this, differentDigestsInModifiedMediaShare)) {
+        if(dbResult > 0){
+            Log.i(TAG, "modify media in local mediashare which source is network result:" + dbResult);
 
+            MediaShare mapResult = LocalCache.LocalMediaShareMapKeyIsUUID.put(modifiedMediaShare.getUuid(), modifiedMediaShare);
+
+            Log.i(TAG, "modify media in local mediashare in map result:" + (mapResult != null ? "true" : "false"));
+
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+
+        }else {
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
-
-            Log.i(TAG, "edit photo in remote mediashare fail");
-
-        } else {
-
-            StringBuilder stringBuilder = new StringBuilder("{\"commands\": \"[");
-
-            for (MediaShareContent mediaShareContent : differentContentsInOriginalMediaShare) {
-                stringBuilder.append("{\\\"op\\\":\\\"remove\\\",\\\"path\\\":\\\"").append(modifiedMediaShare.getUuid()).append("\\\",\\\"value\\\":{\\\"digest\\\":\\\"").append(mediaShareContent.getDigest()).append("\\\"}},");
-
-            }
-
-            for (MediaShareContent mediaShareContent : differentContentsInModifiedMediaShare) {
-                stringBuilder.append("{\\\"op\\\":\\\"add\\\",\\\"path\\\":\\\"").append(modifiedMediaShare.getUuid()).append("\\\",\\\"value\\\":{\\\"type\\\":\\\"media\\\",\\\"digest\\\":\\\"").append(mediaShareContent.getDigest()).append("\\\"}},");
-
-            }
-
-            if (stringBuilder.lastIndexOf(",") != -1)
-                stringBuilder.replace(stringBuilder.lastIndexOf(","), stringBuilder.length(), "]\"}");
-
-            try {
-                String result = FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, stringBuilder.toString());
-
-                if (result.length() > 0) {
-                    intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
-
-                    Log.i(TAG, "modify media in remote mediashare which source is network succeed");
-
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-
-                    long dbResult = 0;
-
-                    for (MediaShareContent mediaShareContent : differentContentsInOriginalMediaShare) {
-                        dbResult = dbUtils.deleteRemoteMediaShareContentByID(mediaShareContent.getId());
-                    }
-
-                    for (MediaShareContent mediaShareContent : differentContentsInModifiedMediaShare) {
-                        dbResult = dbUtils.insertRemoteMediaShareContent(mediaShareContent, modifiedMediaShare.getUuid());
-                    }
-
-                    Log.i(TAG, "modify media in remote mediashare which source is network result:" + dbResult);
-
-                    MediaShare mapResult = LocalCache.RemoteMediaShareMapKeyIsUUID.put(modifiedMediaShare.getUuid(), modifiedMediaShare);
-
-                    Log.i(TAG, "modify media in remote mediashare in map result:" + (mapResult != null ? "true" : "false"));
-                }
-
-
-            } catch (Exception e) {
-
-                e.printStackTrace();
-
-                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
-
-                Log.i(TAG, "edit photo in remote mediashare fail");
-            }
-
         }
+
         localBroadcastManager.sendBroadcast(intent);
 
 
@@ -175,3 +133,4 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
         return differentMediaShareContents;
     }
 }
+
