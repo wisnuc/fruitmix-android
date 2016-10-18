@@ -82,7 +82,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME = "remote_media_share_content";
     public static final String LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME = "local_media_share_content";
 
-    public static final int DB_VERSION = 10;
+    public static final int DB_VERSION = 11;
 
     public static final String CREATE_TABLE = "create table ";
 
@@ -122,7 +122,9 @@ public class DBHelper extends SQLiteOpenHelper {
             + USER_KEY_EMAIL + " text," + USER_KEY_DEFAULT_AVATAR + " text not null," + USER_KEY_DEFAULT_AVATAR_BG_COLOR + " text not null,"
             + USER_KEY_HOME + " text not null," + USER_KEY_LIBRARY + " text not null)";
 
-    public static final String DATABASE_MEDIA_SHARE_CONTENT_CREATE = " (" + SHARE_CONTENT_KEY_ID + " integer primary key autoincrement," + SHARE_CONTENT_KEY_SHARE_UUID + " text not null," + SHARE_CONTENT_KEY_CREATOR_UUID + " text not null," + SHARE_KEY_DIGEST + " text not null," + SHARE_CONTENT_KEY_TIME + " text not null)";
+    public static final String DATABASE_MEDIA_SHARE_CONTENT_CREATE = " (" + SHARE_CONTENT_KEY_ID + " integer primary key autoincrement,"
+            + SHARE_CONTENT_KEY_SHARE_UUID + " text not null," + SHARE_CONTENT_KEY_CREATOR_UUID + " text not null,"
+            + SHARE_CONTENT_KEY_DIGEST + " text not null," + SHARE_CONTENT_KEY_TIME + " text not null)";
 
     public static final String DATABASE_REMOTE_MEDIA_SHARE_CONTENT_CREATE = CREATE_TABLE + REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME + DATABASE_MEDIA_SHARE_CONTENT_CREATE;
     public static final String DATABASE_LOCAL_MEDIA_SHARE_CONTENT_CREATE = CREATE_TABLE + LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME + DATABASE_MEDIA_SHARE_CONTENT_CREATE;

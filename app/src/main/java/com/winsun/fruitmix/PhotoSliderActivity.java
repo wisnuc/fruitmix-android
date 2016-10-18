@@ -6,8 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
@@ -43,36 +41,39 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.BindView;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class PhotoSliderActivity extends AppCompatActivity implements IImageLoadListener {
 
     public static final String TAG = PhotoSliderActivity.class.getSimpleName();
 
+    @BindView(R.id.date)
+    TextView lbDate;
+    @BindView(R.id.back)
+    ImageView ivBack;
+    @BindView(R.id.comment)
+    ImageView ivComment;
+    @BindView(R.id.chooseHeader)
+    Toolbar rlChooseHeader;
+    @BindView(R.id.panelFooter)
+    RelativeLayout rlPanelFooter;
+    @BindView(R.id.return_resize)
+    ImageView mReturnResize;
+    @BindView(R.id.viewPager)
+    ViewPager mViewPager;
+
     private List<Media> mediaList;
     private int initialPhotoPosition;
     private int currentPhotoPosition;
 
-    TextView lbDate;
-    ImageView ivBack, ivComment;
-    Toolbar rlChooseHeader;
-    RelativeLayout rlPanelFooter;
-
-    private ImageView mReturnResize;
-    private MyAdapter myAdapter;
-    private ViewPager mViewPager;
-
-    boolean sInEdit;
+    private boolean sInEdit;
 
     private ImageLoader mImageLoader;
-    private RequestQueue mRequestQueue;
 
     private Context mContext;
 
     private ProgressDialog mDialog;
-    private static final String LOAD_FINISH = "load_finish";
-
-    private boolean mShowCommentBtn = false;
 
     private boolean willReturn = false;
 
@@ -96,7 +97,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                     String imageTag;
 
                     boolean isThumb = media.isLoaded();
-                    imageTag = generateImageUrl(isThumb, media);
+                    imageTag = getImageUrl(isThumb, media);
 
                     sharedElements.put(imageUUID, mViewPager.findViewWithTag(imageTag));
 
@@ -118,41 +119,17 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         mContext = this;
 
-        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
+        initImageLoader();
 
         initialPhotoPosition = getIntent().getIntExtra(Util.INITIAL_PHOTO_POSITION, 0);
 
-        mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
+        boolean mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
 
         mediaList = getIntent().getParcelableArrayListExtra(Util.KEY_MEDIA_LIST);
 
         transitionMediaNeedShowThumb = getIntent().getBooleanExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, true);
 
-        if (getShowPhotoReturnTipsValue()) {
-            setShowPhotoReturnTipsValue(false);
-
-            mReturnResize = (ImageView) findViewById(R.id.return_resize1);
-            if (mReturnResize != null) {
-                mReturnResize.setVisibility(View.VISIBLE);
-                mReturnResize.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mReturnResize.setVisibility(View.GONE);
-                    }
-                });
-            }
-        }
-
-        rlChooseHeader = (Toolbar) findViewById(R.id.chooseHeader);
-        rlPanelFooter = (RelativeLayout) findViewById(R.id.panelFooter);
-        lbDate = (TextView) findViewById(R.id.date);
-        ivBack = (ImageView) findViewById(R.id.back);
-        ivComment = (ImageView) findViewById(R.id.comment);
+        refreshReturnResizeVisibility();
 
         ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -161,6 +138,39 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             }
         });
 
+        initCommentBtn(mShowCommentBtn);
+
+        sInEdit = true;
+
+        initViewPager();
+
+        setPosition(initialPhotoPosition);
+    }
+
+    private void initViewPager() {
+        MyAdapter myAdapter = new MyAdapter(this);
+        mViewPager.setAdapter(myAdapter);
+        mViewPager.setCurrentItem(initialPhotoPosition, false);
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+
+            @Override
+            public void onPageSelected(int position) {
+                Log.d(TAG, "onPageSelected:" + position);
+                setPosition(position);
+
+                Media media = mediaList.get(position);
+
+                if (!media.isLoaded() && mViewPager.getCurrentItem() == position) {
+                    if (mDialog == null || !mDialog.isShowing()) {
+                        showDialog();
+                    }
+                }
+            }
+
+        });
+    }
+
+    private void initCommentBtn(boolean mShowCommentBtn) {
         if (mShowCommentBtn) {
             ivComment.setVisibility(View.VISIBLE);
             ivComment.setOnClickListener(new View.OnClickListener() {
@@ -190,46 +200,32 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         } else {
             ivComment.setVisibility(View.GONE);
         }
+    }
 
-        sInEdit = true;
+    private void refreshReturnResizeVisibility() {
+        if (getShowPhotoReturnTipsValue()) {
+            setShowPhotoReturnTipsValue(false);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, getString(R.string.replace_action), Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        mViewPager = (ViewPager) findViewById(R.id.viewPager);
-        myAdapter = new MyAdapter(this);
-        mViewPager.setAdapter(myAdapter);
-        mViewPager.setCurrentItem(initialPhotoPosition, false);
-        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-
-            @Override
-            public void onPageSelected(int position) {
-                Log.d(TAG, "onPageSelected:" + position);
-                setPosition(position);
-
-                Media media = mediaList.get(position);
-
-                if (!media.isLoaded() && mViewPager.getCurrentItem() == position) {
-                    if (mDialog == null || !mDialog.isShowing()) {
-                        mDialog = ProgressDialog.show(mContext, mContext.getString(R.string.loading_title), mContext.getString(R.string.loading_message), true, true, new DialogInterface.OnCancelListener() {
-                            @Override
-                            public void onCancel(DialogInterface dialog) {
-                                finish();
-                            }
-                        });
+            mReturnResize = (ImageView) findViewById(R.id.return_resize);
+            if (mReturnResize != null) {
+                mReturnResize.setVisibility(View.VISIBLE);
+                mReturnResize.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mReturnResize.setVisibility(View.GONE);
                     }
-                }
+                });
             }
+        }
+    }
 
-        });
-
-        setPosition(initialPhotoPosition);
+    private void initImageLoader() {
+        RequestQueue mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
     }
 
     @Override
@@ -256,14 +252,12 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         super.finishAfterTransition();
     }
 
-    //add by liang.wu
     private boolean getShowPhotoReturnTipsValue() {
         SharedPreferences sp;
         sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         return sp.getBoolean(Util.SHOW_PHOTO_RETURN_TIPS, true);
     }
 
-    //add by liang.wu
     private void setShowPhotoReturnTipsValue(boolean value) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
@@ -298,7 +292,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         for (int i = 0; i < mediaList.size(); i++) {
             final Media media = mediaList.get(i);
 
-            final String imageUrl = generateImageUrl(isImageThumb(url), media);
+            final String imageUrl = getImageUrl(isImageThumb(url), media);
 
             if (url.equals(imageUrl)) {
 
@@ -376,7 +370,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         defaultMainPic.setVisibility(View.INVISIBLE);
     }
 
-    private String generateImageUrl(boolean isThumb, Media media) {
+    private String getImageUrl(boolean isThumb, Media media) {
         String currentUrl;
 
         if (isThumb) {
@@ -414,29 +408,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         mainPic.setImageUrl(remoteUrl, mImageLoader);
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.left_drawer, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
 
     private class MyAdapter extends PagerAdapter {
         private PhotoSliderActivity activity;
@@ -501,6 +472,11 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         //Log.d("winsun", "aa "+event.getAction());
+                        handleTouchEvent(event);
+                        return false;
+                    }
+
+                    private void handleTouchEvent(MotionEvent event) {
                         if (event.getAction() == MotionEvent.ACTION_DOWN) {
                             x = event.getRawX();
                             y = event.getRawY();
@@ -517,18 +493,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                             else if (!mainPic.isZoomed()) {
                                 mainPic.setTranslationY(0);
                                 if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
-                                    sInEdit = !sInEdit;
-                                    if (sInEdit) {
-                                        rlChooseHeader.setVisibility(View.VISIBLE);
-                                        rlPanelFooter.setVisibility(View.VISIBLE);
-                                    } else {
-                                        rlChooseHeader.setVisibility(View.GONE);
-                                        rlPanelFooter.setVisibility(View.GONE);
-                                    }
+                                    convertEditState();
                                 }
                             }
                         }
-                        return false;
                     }
                 });
 
@@ -541,6 +509,17 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             return view;
 
 
+        }
+
+        private void convertEditState() {
+            sInEdit = !sInEdit;
+            if (sInEdit) {
+                rlChooseHeader.setVisibility(View.VISIBLE);
+                rlPanelFooter.setVisibility(View.VISIBLE);
+            } else {
+                rlChooseHeader.setVisibility(View.GONE);
+                rlPanelFooter.setVisibility(View.GONE);
+            }
         }
 
         @Override

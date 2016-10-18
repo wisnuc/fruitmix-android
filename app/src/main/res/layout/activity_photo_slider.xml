@@ -48,16 +48,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"/>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:elevation="300dp"
-        android:src="@android:drawable/ic_dialog_email"
-        android:visibility="gone"/>
-
     <RelativeLayout
         android:id="@+id/panelFooter"
         android:layout_width="match_parent"
@@ -78,11 +68,11 @@
     </RelativeLayout>
 
     <ImageView
-        android:id="@+id/return_resize1"
+        android:id="@+id/return_resize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#c8000000"
-        android:src="@drawable/return_resize1"
+        android:src="@drawable/return_resize"
         android:visibility="gone"/>
 
 </android.support.design.widget.CoordinatorLayout>

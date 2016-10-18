@@ -57,7 +57,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     public static final String TAG = NewPhotoList.class.getSimpleName();
 
-    Activity containerActivity;
+    private Activity containerActivity;
     private View view;
 
     @BindView(R.id.photo_recyclerview)
@@ -69,8 +69,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
     LinearLayout mNoContentLayout;
 
     private int mSpanCount = 3;
-    private int mSpanMaxCount = 6;
-    private int mSpanMinCount = 2;
 
     private PhotoRecycleAdapter mPhotoRecycleAdapter;
 
@@ -92,7 +90,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
     private int mScreenWidth;
 
     private boolean mIsFling = false;
-    private NewPhotoListScrollListener mScrollListener;
 
     private boolean mSelectMode = false;
 
@@ -103,7 +100,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
     private int mAdapterItemTotalCount;
 
     private boolean mHasFlung = false;
-    private RequestQueue mRequestQueue;
 
     private ImageLoader mImageLoader;
 
@@ -118,12 +114,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
         view = View.inflate(containerActivity, R.layout.new_photo_layout, null);
         ButterKnife.bind(this, view);
 
-        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
+        initImageLoader();
 
         mPhotoDateGroups = new ArrayList<>();
         mMapKeyIsDateValueIsPhotoList = new HashMap<>();
@@ -137,7 +128,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         mPinchScaleDetector = new ScaleGestureDetector(containerActivity, new PinchScaleListener());
 
-        mScrollListener = new NewPhotoListScrollListener();
+        NewPhotoListScrollListener mScrollListener = new NewPhotoListScrollListener();
         mRecyclerView.addOnScrollListener(mScrollListener);
         mRecyclerView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -155,6 +146,15 @@ public class NewPhotoList implements NavPagerActivity.Page {
         mRecyclerView.setAdapter(mPhotoRecycleAdapter);
         setupLayoutManager();
 
+    }
+
+    private void initImageLoader() {
+        RequestQueue mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
     }
 
     public void addPhotoListListener(IPhotoListListener listListener) {
@@ -570,7 +570,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 return VIEW_TYPE_CONTENT;
         }
 
-        public int getSpanSize(int position) {
+        int getSpanSize(int position) {
             if (getItemViewType(position) == VIEW_TYPE_HEAD) {
                 return mSpanCount;
             } else {
@@ -578,7 +578,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             }
         }
 
-        public int getItemHeight(int position) {
+        int getItemHeight(int position) {
             if (getItemViewType(position) == VIEW_TYPE_HEAD) {
                 return mItemWidth;
             } else {
@@ -586,7 +586,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             }
         }
 
-        public String getSectionForPosition(int position) {
+        String getSectionForPosition(int position) {
             String title;
 
             if (position < 0) {
@@ -623,7 +623,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
         @BindView(R.id.photo_title_layout)
         LinearLayout mPhotoTitleLayout;
 
-        public PhotoGroupHolder(View view) {
+        PhotoGroupHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
         }
@@ -695,7 +695,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         View view;
 
-        public PhotoHolder(View view) {
+        PhotoHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
             this.view = view;
@@ -729,24 +729,19 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             if (mSelectMode) {
                 boolean selected = media.isSelected();
-                RelativeLayout.LayoutParams photoParams = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
                 if (selected) {
                     int selectMargin = Util.dip2px(20);
-                    photoParams.setMargins(selectMargin, selectMargin, selectMargin, selectMargin);
-                    mPhotoIv.setLayoutParams(photoParams);
+                    setPhotoIvLayoutParams(selectMargin);
                     mPhotoSelectedIv.setVisibility(View.VISIBLE);
                 } else {
-                    photoParams.setMargins(0, 0, 0, 0);
-                    mPhotoIv.setLayoutParams(photoParams);
+                    setPhotoIvLayoutParams(0);
                     mPhotoSelectedIv.setVisibility(View.GONE);
                 }
             } else {
 
                 media.setSelected(false);
 
-                RelativeLayout.LayoutParams photoParams = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
-                photoParams.setMargins(0, 0, 0, 0);
-                mPhotoIv.setLayoutParams(photoParams);
+                setPhotoIvLayoutParams(0);
                 mPhotoSelectedIv.setVisibility(View.GONE);
             }
 
@@ -755,15 +750,13 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 public void onClick(View v) {
                     if (mSelectMode) {
                         boolean selected = media.isSelected();
-                        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
+
                         if (selected) {
                             int selectMargin = Util.dip2px(20);
-                            params.setMargins(selectMargin, selectMargin, selectMargin, selectMargin);
-                            mPhotoIv.setLayoutParams(params);
+                            setPhotoIvLayoutParams(selectMargin);
                             mPhotoSelectedIv.setVisibility(View.VISIBLE);
                         } else {
-                            params.setMargins(0, 0, 0, 0);
-                            mPhotoIv.setLayoutParams(params);
+                            setPhotoIvLayoutParams(0);
                             mPhotoSelectedIv.setVisibility(View.GONE);
                         }
 
@@ -781,13 +774,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
                         int position = 0;
 
                         ArrayList<Media> mediaList = (ArrayList<Media>) mMapKeyIsDateValueIsPhotoList.get(media.getTitle());
-                        for (int i = 0; i < mediaList.size(); i++) {
-                            Media media1 = mediaList.get(i);
-
-                            if (media.getUuid().equals(media1.getUuid())) {
-                                position = i;
-                            }
-                        }
+                        position = getPosition(position, mediaList, media);
 
                         Intent intent = new Intent();
 
@@ -827,6 +814,23 @@ public class NewPhotoList implements NavPagerActivity.Page {
             });
 
         }
+
+        private void setPhotoIvLayoutParams(int margin) {
+            RelativeLayout.LayoutParams photoParams = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
+            photoParams.setMargins(margin,margin,margin,margin);
+            mPhotoIv.setLayoutParams(photoParams);
+        }
+
+        private int getPosition(int position, ArrayList<Media> mediaList, Media media) {
+            for (int i = 0; i < mediaList.size(); i++) {
+                Media media1 = mediaList.get(i);
+
+                if (media.getUuid().equals(media1.getUuid())) {
+                    position = i;
+                }
+            }
+            return position;
+        }
     }
 
     private class NewPhotoListScrollListener extends RecyclerView.OnScrollListener {
@@ -851,6 +855,8 @@ public class NewPhotoList implements NavPagerActivity.Page {
     }
 
     private class PinchScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        private int mSpanMaxCount = 6;
+        private int mSpanMinCount = 2;
 
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {

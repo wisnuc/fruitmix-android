@@ -59,7 +59,6 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Created by Administrator on 2016/5/9.
@@ -119,29 +118,11 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         mContext = this;
 
         mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
+        initImageLoader();
 
-        mReceiver = new CustomBroadCastReceiver();
-        mManager = LocalBroadcastManager.getInstance(this);
-        filter = new IntentFilter(Util.REMOTE_COMMENT_CREATED);
-        filter.addAction(Util.LOCAL_COMMENT_CREATED);
-        filter.addAction(Util.LOCAL_MEDIA_COMMENT_RETRIEVED);
-        filter.addAction(Util.REMOTE_MEDIA_COMMENT_RETRIEVED);
-        filter.addAction(Util.LOCAL_COMMENT_DELETED);
+        initFilterForReceiver();
 
         lvComment = (RecyclerView) findViewById(R.id.comment_list);
-
-        LinearLayoutManager manager = new LinearLayoutManager(mContext);
-        lvComment.setLayoutManager(manager);
-        lvComment.setItemAnimator(new DefaultItemAnimator());
-        mAdapter = new CommentRecyclerViewAdapter();
-        lvComment.setAdapter(mAdapter);
-        lvComment.addOnScrollListener(new RecyclerScrollListener());
-
         ivBack = (ImageView) findViewById(R.id.back);
         ivSend = (ImageView) findViewById(R.id.send);
         tfContent = (EditTextPreIme) findViewById(R.id.send_text);
@@ -150,6 +131,13 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar_layout);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
+
+        LinearLayoutManager manager = new LinearLayoutManager(mContext);
+        lvComment.setLayoutManager(manager);
+        lvComment.setItemAnimator(new DefaultItemAnimator());
+        mAdapter = new CommentRecyclerViewAdapter();
+        lvComment.setAdapter(mAdapter);
+        lvComment.addOnScrollListener(new RecyclerScrollListener());
 
         setSupportActionBar(toolbar);
         collapsingToolbarLayout.setTitle(getString(R.string.comment_text));
@@ -200,6 +188,58 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         showSoftInputWhenEnter = getIntent().getBooleanExtra(Util.KEY_SHOW_SOFT_INPUT_WHEN_ENTER, false);
 
+        createMediaByImageUUID();
+
+        loadMedia();
+
+        reloadList();
+
+        ivSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                tfContent.clearFocus();
+                Util.hideSoftInput(MediaShareCommentActivity.this);
+
+                mCommment = tfContent.getText() + "";
+
+                if (mCommment.isEmpty()) {
+                    Toast.makeText(mContext, getString(R.string.no_comment_content), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Log.d(TAG, tfContent.getText() + "");
+                Log.i(TAG, "onClick: mediaUUID:" + media.getUuid());
+
+                mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+                Intent operationIntent = new Intent(Util.OPERATION);
+                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
+                operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, media.getUuid());
+                operationIntent.putExtra(Util.OPERATION_COMMENT, createComment(media.getBelongingMediaShareUUID(), mCommment));
+                mManager.sendBroadcast(operationIntent);
+            }
+        });
+
+        gestureListener = new GestureListener();
+        gestureDetectorCompat = new GestureDetectorCompat(mContext, gestureListener);
+
+    }
+
+    private void loadMedia() {
+        ivMain = (NetworkImageView) findViewById(R.id.mainPic);
+        ivMain.registerImageLoadListener(this);
+        ivMain.setTransitionName(media.getUuid());
+
+        mImageLoader.setShouldCache(!media.isLocal());
+        String url = media.getImageOriginalUrl(this);
+        ivMain.setTag(url);
+        ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
+        ivMain.setImageUrl(url,mImageLoader);
+    }
+
+    private void createMediaByImageUUID() {
+        Media imageRaw;
         media = new Media();
         String imageUUID = getIntent().getStringExtra(Util.IMAGE_UUID);
         imageRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(imageUUID);
@@ -228,60 +268,24 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                 break;
             }
         }
+    }
 
-        ivMain = (NetworkImageView) findViewById(R.id.mainPic);
-        ivMain.registerImageLoadListener(this);
+    private void initFilterForReceiver() {
+        mReceiver = new CustomBroadCastReceiver();
+        mManager = LocalBroadcastManager.getInstance(this);
+        filter = new IntentFilter(Util.REMOTE_COMMENT_CREATED);
+        filter.addAction(Util.LOCAL_COMMENT_CREATED);
+        filter.addAction(Util.LOCAL_MEDIA_COMMENT_RETRIEVED);
+        filter.addAction(Util.REMOTE_MEDIA_COMMENT_RETRIEVED);
+        filter.addAction(Util.LOCAL_COMMENT_DELETED);
+    }
 
-        ivMain.setTransitionName(media.getUuid());
-
-        if (media.isLocal()) {
-            String url = media.getThumb();
-
-            mImageLoader.setShouldCache(false);
-            ivMain.setTag(url);
-            ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
-            ivMain.setImageUrl(url, mImageLoader);
-        } else {
-            String url = String.format(getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + media.getUuid());
-
-            mImageLoader.setShouldCache(true);
-            ivMain.setTag(url);
-            ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
-            ivMain.setImageUrl(url, mImageLoader);
-        }
-
-        reloadList();
-
-        ivSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                tfContent.clearFocus();
-                Util.hideSoftInput(MediaShareCommentActivity.this);
-
-                mCommment = tfContent.getText() + "";
-
-                if (mCommment.isEmpty()) {
-                    Toast.makeText(mContext, getString(R.string.no_comment_content), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                Log.d(TAG, tfContent.getText() + "");
-                Log.i(TAG, "onClick: mediaUUID:" + media.getUuid());
-
-                mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
-                Intent operationIntent = new Intent(Util.OPERATION);
-                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
-                operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, media.getUuid());
-                operationIntent.putExtra(Util.OPERATION_COMMENT, generateComment(media.getBelongingMediaShareUUID(), mCommment));
-                mManager.sendBroadcast(operationIntent);
-            }
-        });
-
-        gestureListener = new GestureListener();
-        gestureDetectorCompat = new GestureDetectorCompat(mContext, gestureListener);
-
+    private void initImageLoader() {
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
     }
 
 
@@ -377,12 +381,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         }
     }
 
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-    }
-
-    private Comment generateComment(String shareId, String commentText) {
+    private Comment createComment(String shareId, String commentText) {
 
         Comment commentItem = new Comment();
         commentItem.setCreator(FNAS.userUUID);
@@ -398,6 +397,17 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         commentData.clear();
 
+        fillCommentData();
+
+        sortCommentData();
+
+        mAdapter.commentList.clear();
+        mAdapter.commentList.addAll(commentData);
+        mAdapter.notifyDataSetChanged();
+
+    }
+
+    private void fillCommentData() {
         for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
             if (entry.getKey().equals(media.getUuid())) {
                 commentData.addAll(entry.getValue());
@@ -409,27 +419,24 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                 commentData.addAll(entry.getValue());
             }
         }
+    }
 
+    private void sortCommentData() {
         Collections.sort(commentData, new Comparator<Comment>() {
             @Override
             public int compare(Comment lhs, Comment rhs) {
 
-                long mtime1 = Long.parseLong(lhs.getTime());
-                long mtime2 = Long.parseLong(rhs.getTime());
-                if (mtime1 < mtime2)
+                long time1 = Long.parseLong(lhs.getTime());
+                long time2 = Long.parseLong(rhs.getTime());
+                if (time1 < time2)
                     return 1;
-                else if (mtime1 > mtime2)
+                else if (time1 > time2)
                     return -1;
                 else return 0;
 
             }
         });
         Log.d(TAG, commentData + "");
-
-        mAdapter.commentList.clear();
-        mAdapter.commentList.addAll(commentData);
-        mAdapter.notifyDataSetChanged();
-
     }
 
     private class CommentRecyclerViewAdapter extends RecyclerView.Adapter<CommentRecyclerViewHolder> {
@@ -480,15 +487,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         public void refreshView(Comment currentItem) {
 
-            if (currentItem == null) {
-                vNormal.setVisibility(View.GONE);
-                vHeader.setVisibility(View.VISIBLE);
-            } else {
-                vNormal.setVisibility(View.VISIBLE);
-                vHeader.setVisibility(View.GONE);
-                lbComment.setText(currentItem.getText());
-                lbDate.setText(currentItem.getFormatTime());
-            }
+            refreshViewVisibility(currentItem);
 
             if (currentItem != null) {
                 User map = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreator());
@@ -506,6 +505,18 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                         ivAvatar.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
                         break;
                 }
+            }
+        }
+
+        private void refreshViewVisibility(Comment currentItem) {
+            if (currentItem == null) {
+                vNormal.setVisibility(View.GONE);
+                vHeader.setVisibility(View.VISIBLE);
+            } else {
+                vNormal.setVisibility(View.VISIBLE);
+                vHeader.setVisibility(View.GONE);
+                lbComment.setText(currentItem.getText());
+                lbDate.setText(currentItem.getFormatTime());
             }
         }
     }

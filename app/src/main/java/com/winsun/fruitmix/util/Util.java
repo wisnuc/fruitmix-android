@@ -110,10 +110,6 @@ public class Util {
 
     public static final String FRUITMIX_SHAREDPREFERENCE_NAME = "fruitMix";
 
-    public static final String SHARE_MAP_NAME = "sharesMap";
-    public static final String MEDIA_MAP_NAME = "mediasMap";
-    public static final String USER_MAP_NAME = "usersMap";
-    public static final String LOCAL_IMAGE_MAP_NAME = "localImagesMap";
     public static final String DEVICE_ID_MAP_NAME = "deviceID";
 
     public static final String HTTP_POST_METHOD = "POST";

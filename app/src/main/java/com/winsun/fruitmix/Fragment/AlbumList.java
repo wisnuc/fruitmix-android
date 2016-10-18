@@ -35,6 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by Administrator on 2016/4/19.
  */
@@ -42,20 +45,23 @@ public class AlbumList implements NavPagerActivity.Page {
 
     public static final String TAG = AlbumList.class.getSimpleName();
 
-    NavPagerActivity containerActivity;
-    View view;
+    private NavPagerActivity containerActivity;
+    private View view;
+
+    @BindView(R.id.add_album)
     ImageView ivAdd;
+    @BindView(R.id.loading_layout)
     LinearLayout mLoadingLayout;
+    @BindView(R.id.no_content_layout)
     LinearLayout mNoContentLayout;
 
     private ListView mainListView;
 
-    List<MediaShare> mediaShareList;
+    private List<MediaShare> mediaShareList;
 
     private long mDownTime = 0;
     private double mDiffTimeMilliSecond = 200;
 
-    private RequestQueue mRequestQueue;
 
     private ImageLoader mImageLoader;
 
@@ -66,20 +72,12 @@ public class AlbumList implements NavPagerActivity.Page {
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
                 R.layout.album_list, null);
 
-        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
+        ButterKnife.bind(view);
 
-        mainListView = (ListView) view.findViewById(R.id.mainList);
+        initImageLoader();
+
         mainListView.setAdapter(new AlbumListViewAdapter(this));
 
-        mLoadingLayout = (LinearLayout) view.findViewById(R.id.loading_layout);
-        mNoContentLayout = (LinearLayout) view.findViewById(R.id.no_content_layout);
-
-        ivAdd = (ImageView) view.findViewById(R.id.add_album);
         ivAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,45 +90,57 @@ public class AlbumList implements NavPagerActivity.Page {
 
     }
 
+    private void initImageLoader() {
+        RequestQueue mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
+    }
+
 
     public void reloadList() {
-        List<MediaShare> mediaShareList1;
-        mediaShareList1 = new ArrayList<>();
+        List<MediaShare> mediaShareList;
+        mediaShareList = new ArrayList<>();
 
-        for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
+        fillMediaShareList(mediaShareList);
 
-            if (mediaShare.isAlbum() && !mediaShare.isArchived()) {
+        sortMediaShareList(mediaShareList);
 
-                mediaShareList1.add(mediaShare);
+        this.mediaShareList = mediaShareList;
+    }
 
-            }
-        }
-
-
-        for (MediaShare mediaShare : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
-
-            if (mediaShare.isAlbum() && !mediaShare.isArchived()) {
-
-                mediaShareList1.add(mediaShare);
-
-            }
-        }
-
-        Collections.sort(mediaShareList1, new Comparator<MediaShare>() {
+    private void sortMediaShareList(List<MediaShare> mediaShareList) {
+        Collections.sort(mediaShareList, new Comparator<MediaShare>() {
             @Override
             public int compare(MediaShare lhs, MediaShare rhs) {
 
-                long mtime1 = Long.parseLong(lhs.getTime());
-                long mtime2 = Long.parseLong(rhs.getTime());
-                if (mtime1 < mtime2)
+                long time1 = Long.parseLong(lhs.getTime());
+                long time2 = Long.parseLong(rhs.getTime());
+                if (time1 < time2)
                     return 1;
-                else if (mtime1 > mtime2)
+                else if (time1 > time2)
                     return -1;
                 else return 0;
             }
         });
+    }
 
-        mediaShareList = mediaShareList1;
+    private void fillMediaShareList(List<MediaShare> mediaShareList) {
+        for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
+
+            if (mediaShare.isAlbum() && !mediaShare.isArchived()) {
+                mediaShareList.add(mediaShare);
+            }
+        }
+
+        for (MediaShare mediaShare : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
+
+            if (mediaShare.isAlbum() && !mediaShare.isArchived()) {
+                mediaShareList.add(mediaShare);
+            }
+        }
     }
 
     public void refreshView() {
@@ -166,12 +176,7 @@ public class AlbumList implements NavPagerActivity.Page {
     private class AlbumListViewAdapter extends BaseAdapter {
 
         AlbumList container;
-        RelativeLayout lastMainbar;
-
-        public static final int LOCAL_ITEM_WITH_NETWORK = 0;
-        public static final int SUCCEED = 1;
-        public static final int REMOTE_ITEM_WITHOUT_NETWORK = 2;
-        public static final int EXCEPTION = 3;
+        RelativeLayout lastMainBar;
 
         AlbumListViewAdapter(AlbumList container_) {
             container = container_;
@@ -189,12 +194,10 @@ public class AlbumList implements NavPagerActivity.Page {
             final MediaShare currentItem;
             final RelativeLayout mainBar;
             NetworkImageView ivMainPic;
-            ImageView ivRecommand, ivCreate, ivLock;
-            TextView lbHot, lbTitle, lbDesc, lbDate, lbOwner, lbPhotoCount;
+            ImageView ivLock;
+            TextView lbTitle, lbDesc, lbDate, lbOwner, lbPhotoCount;
             TextView lbDelete, lbShare;
             Media coverImg;
-            final boolean sLocal;
-            int w, h;
 
 
             if (convertView == null)
@@ -205,10 +208,8 @@ public class AlbumList implements NavPagerActivity.Page {
 
             mainBar = (RelativeLayout) view.findViewById(R.id.mainBar);
             ivMainPic = (NetworkImageView) view.findViewById(R.id.mainPic);
-            ivRecommand = (ImageView) view.findViewById(R.id.recommand);
-            ivCreate = (ImageView) view.findViewById(R.id.create);
+
             ivLock = (ImageView) view.findViewById(R.id.lock);
-            lbHot = (TextView) view.findViewById(R.id.hot);
             lbTitle = (TextView) view.findViewById(R.id.title);
             lbPhotoCount = (TextView) view.findViewById(R.id.photo_count_tv);
             lbDesc = (TextView) view.findViewById(R.id.desc);
@@ -222,10 +223,8 @@ public class AlbumList implements NavPagerActivity.Page {
 
             //check image
             coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
-            if (coverImg != null) sLocal = false;
-            else {
+            if (coverImg == null) {
                 coverImg = LocalCache.LocalMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
-                sLocal = true;
             }
 
             if (coverImg != null) {
@@ -241,7 +240,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 ivMainPic.setImageUrl(null, mImageLoader);
             }
 
-            if (currentItem.getViewers().isEmpty()) {
+            if (currentItem.getViewersListSize() == 0) {
                 ivLock.setVisibility(View.GONE);
                 lbShare.setText(containerActivity.getString(R.string.public_text));
             } else {
@@ -262,7 +261,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                     MediaShare cloneMediaShare = currentItem.cloneMyself();
 
-                    if (cloneMediaShare.getViewers().isEmpty()) {
+                    if (cloneMediaShare.getViewersListSize() == 0) {
                         for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
                             cloneMediaShare.addViewer(userUUID);
                         }
@@ -294,8 +293,8 @@ public class AlbumList implements NavPagerActivity.Page {
                     margin = Util.dip2px(100);
                     switch (event.getAction() & MotionEvent.ACTION_MASK) {
                         case MotionEvent.ACTION_DOWN:
-                            if (lastMainbar != null) lastMainbar.setTranslationX(0.0f);
-                            lastMainbar = mainBar;
+                            if (lastMainBar != null) lastMainBar.setTranslationX(0.0f);
+                            lastMainBar = mainBar;
                             x = event.getRawX() - mainBar.getTranslationX();
                             y = event.getRawY();
                             lastX = x;

@@ -54,9 +54,6 @@
             android:name=".Test3Activity"
             android:label="@string/title_activity_test3"/>
         <activity
-            android:name=".ImageZoomActivity"
-            android:label="@string/title_activity_test3"/>
-        <activity
             android:name=".CreateAlbumActivity"
             android:label="@string/title_activity_test3"
             android:screenOrientation="portrait"/>

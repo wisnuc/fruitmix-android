@@ -41,11 +41,12 @@ import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
@@ -55,10 +56,13 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     public static final String TAG = AlbumPicContentActivity.class.getSimpleName();
 
+    @BindView(R.id.mainGrid)
     GridView mainGridView;
+    @BindView(R.id.back)
     ImageView ivBack;
+    @BindView(R.id.title)
     TextView mTitleTextView;
-
+    @BindView(R.id.toolbar)
     Toolbar mToolBar;
 
     ArrayList<Media> mediaList;
@@ -137,7 +141,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_album_pic_content);
 
-        ivBack = (ImageView) findViewById(R.id.back);
+        ButterKnife.bind(this);
+
         ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,13 +150,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             }
         });
 
-        mainGridView = (GridView) findViewById(R.id.mainGrid);
         mainGridView.setAdapter(new PicGridViewAdapter(this));
 
-        mTitleTextView = (TextView) findViewById(R.id.title);
         mTitleTextView.setText(mediaShare.getTitle());
 
-        mToolBar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
@@ -249,7 +251,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
     }
 
-    public void showSlider(int position, View sharedElement, String sharedElementName) {
+    public void showPhotoSlider(int position, View sharedElement, String sharedElementName) {
         Intent intent = new Intent();
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, mShowCommentBtn);
@@ -300,7 +302,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                     String sharedElementName = currentItem.getUuid();
                     ViewCompat.setTransitionName(ivMain, sharedElementName);
-                    activity.showSlider(position, ivMain, currentItem.getUuid());
+                    activity.showPhotoSlider(position, ivMain, currentItem.getUuid());
                 }
             });
 
@@ -328,7 +330,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             mPrivatePublicMenu = menu.findItem(R.id.set_private_public);
 
-            if (mediaShare.getViewers().isEmpty()) {
+            if (mediaShare.getViewersListSize() == 0) {
                 mPrivatePublicMenu.setTitle(getString(R.string.set_public));
             } else {
                 mPrivatePublicMenu.setTitle(getString(R.string.set_private));
@@ -360,7 +362,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             }
         }
 
-        if (!mediaShare.getMaintainers().contains(FNAS.userUUID)) {
+        if (!mediaShare.checkMaintainersListContainCurrentUserUUID()) {
             Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
 
             return true;
@@ -382,7 +384,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 setPublicPrivate();
                 break;
             case R.id.delete_album:
-                deleteCurrentAblum();
+                deleteCurrentAlbum();
                 break;
             default:
         }
@@ -409,7 +411,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         isOperated = true;
     }
 
-    private void deleteCurrentAblum() {
+    private void deleteCurrentAlbum() {
 
         mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
 
@@ -430,7 +432,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         MediaShare cloneMediaShare = mediaShare.cloneMyself();
 
-        if (cloneMediaShare.getViewers().isEmpty()) {
+        if (cloneMediaShare.getViewersListSize() == 0) {
             for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
                 cloneMediaShare.addViewer(userUUID);
             }
@@ -488,7 +490,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     case SUCCEED:
                         Toast.makeText(mContext, getString(R.string.setting_succeed), Toast.LENGTH_SHORT).show();
 
-                        if (mediaShare.getViewers().isEmpty()) {
+                        if (mediaShare.getViewersListSize() == 0) {
                             mPrivatePublicMenu.setTitle(getString(R.string.set_public));
                         } else {
                             mPrivatePublicMenu.setTitle(getString(R.string.set_private));

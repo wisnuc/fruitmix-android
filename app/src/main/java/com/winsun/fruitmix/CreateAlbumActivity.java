@@ -35,6 +35,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
@@ -44,12 +46,21 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
     public static final String TAG = CreateAlbumActivity.class.getSimpleName();
 
+    @BindView(R.id.title_textlayout)
     TextInputLayout mTitleLayout;
-    TextInputEditText tfTitle, tfDesc;
+    @BindView(R.id.title_edit)
+    TextInputEditText tfTitle;
+    @BindView(R.id.desc)
+    TextInputEditText tfDesc;
+    @BindView(R.id.sPublic)
     CheckBox ckPublic;
+    @BindView(R.id.set_maintainer)
     CheckBox ckSetMaintainer;
+    @BindView(R.id.ok)
     TextView btOK;
+    @BindView(R.id.back)
     ImageView ivBack;
+    @BindView(R.id.layout_title)
     TextView mLayoutTitle;
 
     String[] mSelectedImageUUIDArray;
@@ -74,14 +85,8 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_create_album);
 
-        tfTitle = (TextInputEditText) findViewById(R.id.title_edit);
-        mTitleLayout = (TextInputLayout) findViewById(R.id.title_textlayout);
-        tfDesc = (TextInputEditText) findViewById(R.id.desc);
-        ckPublic = (CheckBox) findViewById(R.id.sPublic);
-        btOK = (TextView) findViewById(R.id.ok);
-        ivBack = (ImageView) findViewById(R.id.back);
-        ckSetMaintainer = (CheckBox) findViewById(R.id.set_maintainer);
-        mLayoutTitle = (TextView) findViewById(R.id.layout_title);
+        ButterKnife.bind(this);
+
         mLayoutTitle.setText(getString(R.string.create_album_text));
 
         mTitle = String.format(getString(R.string.title_hint), new SimpleDateFormat("yyyy-MM-dd", Locale.SIMPLIFIED_CHINESE).format(new Date(System.currentTimeMillis())));
@@ -182,7 +187,9 @@ public class CreateAlbumActivity extends AppCompatActivity {
         }
 
         mediaShare.initMediaShareContents(mediaShareContents);
+
         mediaShare.setCoverImageDigest(digests[0]);
+
         mediaShare.setTitle(title);
         mediaShare.setDesc(desc);
 

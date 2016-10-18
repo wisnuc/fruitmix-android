@@ -39,16 +39,12 @@ public class SplashScreenActivity extends Activity {
 
     private Context mContext;
 
-    private CustomHandler mHandler;
     public static final int WELCOME = 0x0010;
 
     public static final int DELAY_TIME_MILLISECOND = 3 * 1000;
 
     private LocalBroadcastManager localBroadcastManager;
-    private IntentFilter filter;
     private CustomReceiver customReceiver;
-
-    private boolean mRemoteUserLoaded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,22 +56,24 @@ public class SplashScreenActivity extends Activity {
 
         LocalCache.Init(this);
 
+        initFilterForReceiver();
+
+        CustomHandler mHandler = new CustomHandler(this);
+        mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
+    }
+
+    private void initFilterForReceiver() {
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        filter = new IntentFilter(Util.REMOTE_TOKEN_RETRIEVED);
+        IntentFilter filter = new IntentFilter(Util.REMOTE_TOKEN_RETRIEVED);
         filter.addAction(Util.REMOTE_DEVICEID_RETRIEVED);
         filter.addAction(Util.REMOTE_USER_RETRIEVED);
         customReceiver = new CustomReceiver();
         localBroadcastManager.registerReceiver(customReceiver, filter);
-
-        mHandler = new CustomHandler(this);
-        mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        Log.i(TAG, "onDestroy: ");
 
         localBroadcastManager.unregisterReceiver(customReceiver);
     }
@@ -175,67 +173,79 @@ public class SplashScreenActivity extends Activity {
 
             if (intent.getAction().equals(Util.REMOTE_TOKEN_RETRIEVED)) {
 
-                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
-
-                FNAS.userUUID = mUuid;
-                FNAS.Gateway = mGateway;
-
-                Log.i(TAG, "onReceive: remote token retrieve:" + result.name());
-
-                switch (result) {
-                    case SUCCEED:
-
-                        Intent operationIntent = new Intent(Util.OPERATION);
-                        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_DEVICEID.name());
-                        localBroadcastManager.sendBroadcast(operationIntent);
-
-                        break;
-                    case FAIL:
-
-                        Util.loginState = false;
-
-                        FNAS.JWT = mToken;
-
-                        LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
-
-                        Toast.makeText(Util.APPLICATION_CONTEXT, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
-
-                        FNAS.retrieveUserMap(mContext);
-
-                        break;
-                }
+                handleRemoteTokenRetrieved(intent);
 
             } else if (intent.getAction().equals(Util.REMOTE_DEVICEID_RETRIEVED)) {
 
-                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
-                switch (result) {
-                    case SUCCEED:
-                        Log.i(TAG, "login success");
-                        Util.loginState = true;
-
-                        break;
-                    case FAIL:
-                        Util.loginState = false;
-                        LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
-                        Toast.makeText(Util.APPLICATION_CONTEXT, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
-
-                        break;
-                }
-
-                FNAS.Gateway = mGateway;
-                FNAS.userUUID = mUuid;
-                FNAS.retrieveUserMap(mContext);
+                handleRemoteDeviceIDRetrieved(intent);
 
             } else if (intent.getAction().equals(Util.REMOTE_USER_RETRIEVED)) {
 
-                Intent jumpIntent = new Intent(SplashScreenActivity.this, NavPagerActivity.class);
-                jumpIntent.putExtra(Util.EQUIPMENT_CHILD_NAME, LocalCache.getUserNameValue(mContext));
-                startActivity(jumpIntent);
-                finish();
+                startNavPagerActivity();
 
             }
 
+        }
+
+        private void startNavPagerActivity() {
+            Intent jumpIntent = new Intent(SplashScreenActivity.this, NavPagerActivity.class);
+            jumpIntent.putExtra(Util.EQUIPMENT_CHILD_NAME, LocalCache.getUserNameValue(mContext));
+            startActivity(jumpIntent);
+            finish();
+        }
+
+        private void handleRemoteDeviceIDRetrieved(Intent intent) {
+            OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
+            switch (result) {
+                case SUCCEED:
+                    Log.i(TAG, "login success");
+                    Util.loginState = true;
+
+                    break;
+                case FAIL:
+                    Util.loginState = false;
+                    LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
+                    Toast.makeText(Util.APPLICATION_CONTEXT, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
+
+                    break;
+            }
+
+            FNAS.Gateway = mGateway;
+            FNAS.userUUID = mUuid;
+            FNAS.retrieveUserMap(mContext);
+        }
+
+        private void handleRemoteTokenRetrieved(Intent intent) {
+            OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
+
+            FNAS.userUUID = mUuid;
+            FNAS.Gateway = mGateway;
+
+            Log.i(TAG, "onReceive: remote token retrieve:" + result.name());
+
+            switch (result) {
+                case SUCCEED:
+
+                    Intent operationIntent = new Intent(Util.OPERATION);
+                    operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_DEVICEID.name());
+                    localBroadcastManager.sendBroadcast(operationIntent);
+
+                    break;
+                case FAIL:
+
+                    Util.loginState = false;
+
+                    FNAS.JWT = mToken;
+
+                    LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
+
+                    Toast.makeText(Util.APPLICATION_CONTEXT, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
+
+                    FNAS.retrieveUserMap(mContext);
+
+                    break;
+            }
         }
     }
 

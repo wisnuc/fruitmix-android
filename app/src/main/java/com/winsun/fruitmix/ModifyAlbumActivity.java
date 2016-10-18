@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
@@ -35,11 +37,20 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  */
 public class ModifyAlbumActivity extends AppCompatActivity {
 
+
+    @BindView(R.id.title_textlayout)
     TextInputLayout mTitleLayout;
-    TextInputEditText tfTitle, tfDesc;
+    @BindView(R.id.title_edit)
+    TextInputEditText tfTitle;
+    @BindView(R.id.desc)
+    TextInputEditText tfDesc;
+    @BindView(R.id.sPublic)
     CheckBox ckPublic;
+    @BindView(R.id.set_maintainer)
     CheckBox ckSetMaintainer;
+    @BindView(R.id.ok)
     TextView btOK;
+    @BindView(R.id.back)
     ImageView ivBack;
 
     List<String> mSelectedImageUUIDStr;
@@ -61,27 +72,21 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_create_album);
 
+        ButterKnife.bind(this);
+
         mContext = this;
 
         mMediaShareUuid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
         mAblumMap = LocalCache.RemoteMediaShareMapKeyIsUUID.get(mMediaShareUuid);
         mSelectedImageUUIDStr = mAblumMap.getMediaDigestInMediaShareContents();
 
-        tfTitle = (TextInputEditText) findViewById(R.id.title_edit);
-        mTitleLayout = (TextInputLayout) findViewById(R.id.title_textlayout);
         mTitleLayout.setHint(mAblumMap.getTitle());
 
-        tfDesc = (TextInputEditText) findViewById(R.id.desc);
         tfDesc.setText(mAblumMap.getDesc());
 
-        ckPublic = (CheckBox) findViewById(R.id.sPublic);
-        ckPublic.setChecked(!mAblumMap.getViewers().isEmpty());
+        ckPublic.setChecked(mAblumMap.getViewersListSize() != 0);
 
-        ckSetMaintainer = (CheckBox) findViewById(R.id.set_maintainer);
-        ckSetMaintainer.setChecked(mAblumMap.getMaintainers().contains(FNAS.userUUID));
-
-        btOK = (TextView) findViewById(R.id.ok);
-        ivBack = (ImageView) findViewById(R.id.back);
+        ckSetMaintainer.setChecked(mAblumMap.checkMaintainersListContainCurrentUserUUID());
 
         ckPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -167,11 +172,6 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         super.onPause();
 
         localBroadcastManager.unregisterReceiver(customReceiver);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     private class CustomReceiver extends BroadcastReceiver {

@@ -33,7 +33,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class MoreMediaActivity extends AppCompatActivity implements View.OnClickListener {
+public class MoreMediaActivity extends AppCompatActivity {
     public static final String TAG = MoreMediaActivity.class.getSimpleName();
 
     @BindView(R.id.back)
@@ -47,7 +47,7 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
     private MorePhotoAdapter mAdapter;
 
     private MediaShare mediaShare;
-    private List<Media> mPhotos;
+    private ArrayList<Media> mPhotos;
 
     private ImageLoader mImageLoader;
 
@@ -58,13 +58,14 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
 
         ButterKnife.bind(this);
 
-        mImageLoader = new ImageLoader(RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue(), ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
+        initImageLoader();
 
-        mBack.setOnClickListener(this);
+        mBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         mContext = this;
 
@@ -83,6 +84,14 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
 
     }
 
+    private void initImageLoader() {
+        mImageLoader = new ImageLoader(RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue(), ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
+    }
+
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
@@ -92,7 +101,6 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
 
         mPhotos.clear();
 
-        //TODO:clean code:move load media to Media,so does MediaShare
         Media picItem;
         Media picItemRaw;
         for (String str : imageDigests) {
@@ -117,17 +125,6 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
         }
 
     }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.back:
-                finish();
-                break;
-            default:
-        }
-    }
-
 
     class MorePhotoViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.photo_item)
@@ -156,10 +153,11 @@ public class MoreMediaActivity extends AppCompatActivity implements View.OnClick
             mMorelPhotoItemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    LocalCache.TransActivityContainer.put("imgSliderList", mPhotos);
+
                     Intent intent = new Intent();
                     intent.putExtra(Util.INITIAL_PHOTO_POSITION, getAdapterPosition());
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
+                    intent.putParcelableArrayListExtra(Util.KEY_MEDIA_LIST, mPhotos);
                     intent.setClass(mContext, PhotoSliderActivity.class);
                     startActivity(intent);
                 }

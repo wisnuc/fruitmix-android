@@ -61,8 +61,6 @@ public class LocalCache {
 
     public static String DeviceID = null;
 
-    public static Map<String, Object> TransActivityContainer;
-
     public static boolean DeleteFile(File file) {
         File[] files;
         int i;
@@ -104,8 +102,6 @@ public class LocalCache {
     public static boolean Init(Activity activity) {
 
         CurrentApp = activity.getApplication();
-
-        TransActivityContainer = new HashMap<>();
 
         RemoteMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
         LocalMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
@@ -533,120 +529,6 @@ public class LocalCache {
         mEditor = sp.edit();
         mEditor.putString(name, null);
         mEditor.apply();
-    }
-
-    public static ConcurrentMap<String, MediaShare> GetGlobalMediaShareHashMap(String name) {
-        String strData;
-        ObjectInputStream ois;
-        ConcurrentHashMap<String, MediaShare> dataList;
-
-        try {
-            strData = GetGlobalData(name);
-            if (strData == null || strData.equals("")) return new ConcurrentHashMap<>();
-            ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decode(strData, Base64.DEFAULT)));
-            dataList = (ConcurrentHashMap<String, MediaShare>) ois.readObject();
-            ois.close();
-            return dataList;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ConcurrentHashMap<>();
-        }
-    }
-
-    public static void SetMediaShareGlobalHashMap(String name, ConcurrentMap<String, MediaShare> data) {
-        ByteArrayOutputStream baos;
-        ObjectOutputStream oos;
-
-        try {
-            baos = new ByteArrayOutputStream();
-            oos = new ObjectOutputStream(baos);
-            oos.reset();
-            oos.writeObject(data);
-            oos.close();
-            SetGlobalData(name, new String(Base64.encode(baos.toByteArray(), Base64.DEFAULT)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static ConcurrentMap<String, Media> GetGlobalMediaHashMap(String name) {
-        String strData;
-        ObjectInputStream ois;
-        ConcurrentHashMap<String, Media> dataList;
-
-        try {
-            strData = GetGlobalData(name);
-            if (strData == null || strData.equals("")) return new ConcurrentHashMap<>();
-            ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decode(strData, Base64.DEFAULT)));
-            dataList = (ConcurrentHashMap<String, Media>) ois.readObject();
-            ois.close();
-            return dataList;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ConcurrentHashMap<>();
-        }
-    }
-
-    public static void SetGlobalMediaHashMap(String name, ConcurrentMap<String, Media> data) {
-        ByteArrayOutputStream baos;
-        ObjectOutputStream oos;
-
-        try {
-            baos = new ByteArrayOutputStream();
-            oos = new ObjectOutputStream(baos);
-            oos.reset();
-            oos.writeObject(data);
-            oos.close();
-            SetGlobalData(name, new String(Base64.encode(baos.toByteArray(), Base64.DEFAULT)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static ConcurrentMap<String, User> GetGlobalUserHashMap(String name) {
-        String strData;
-        ObjectInputStream ois;
-        ConcurrentHashMap<String, User> dataList;
-
-        try {
-            strData = GetGlobalData(name);
-            if (strData == null || strData.equals("")) return new ConcurrentHashMap<>();
-            ois = new ObjectInputStream(new ByteArrayInputStream(Base64.decode(strData, Base64.DEFAULT)));
-            dataList = (ConcurrentHashMap<String, User>) ois.readObject();
-            ois.close();
-            return dataList;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ConcurrentHashMap<>();
-        }
-    }
-
-    public static void SetGlobalUserHashMap(String name, ConcurrentMap<String, User> data) {
-        ByteArrayOutputStream baos;
-        ObjectOutputStream oos;
-
-        try {
-            baos = new ByteArrayOutputStream();
-            oos = new ObjectOutputStream(baos);
-            oos.reset();
-            oos.writeObject(data);
-            oos.close();
-            SetGlobalData(name, new String(Base64.encode(baos.toByteArray(), Base64.DEFAULT)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void clearGatewayUuidPasswordToken(Context context) {
-        SharedPreferences sp;
-        SharedPreferences.Editor editor;
-        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        editor = sp.edit();
-        editor.putString(Util.GATEWAY, null);
-        editor.putString(Util.USER_UUID, null);
-        editor.putString(Util.PASSWORD, null);
-        editor.putString(Util.JWT, null);
-        editor.apply();
     }
 
     public static void clearToken(Context context) {

@@ -68,20 +68,6 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
-        mediaShares = dbUtils.getAllRemoteShare();
-
-        mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
-
-        LocalCache.RemoteMediaShareMapKeyIsUUID.clear();
-
-        LocalCache.RemoteMediaShareMapKeyIsUUID.putAll(mediaShareConcurrentMap);
-
-        Log.i(TAG, "retrieve remote media share from db");
-
-        Intent intent = new Intent(Util.REMOTE_MEDIA_SHARE_RETRIEVED);
-        intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
-        localBroadcastManager.sendBroadcast(intent);
-
         try {
 
             String json = FNAS.loadRemoteShare();
@@ -90,26 +76,28 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
             RemoteDataParser<MediaShare> parser = new RemoteMediaShareParser();
             mediaShares = parser.parse(json);
+            mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
 
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            mediaShares = dbUtils.getAllRemoteShare();
             mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
 
             dbUtils.deleteAllRemoteShare();
             dbUtils.insertRemoteMediaShares(mediaShareConcurrentMap);
 
-            LocalCache.RemoteMediaShareMapKeyIsUUID.clear();
-
-            LocalCache.RemoteMediaShareMapKeyIsUUID.putAll(mediaShareConcurrentMap);
-
-            Log.i(TAG, "retrieve remote media share from network");
-
-            intent = new Intent(Util.REMOTE_MEDIA_SHARE_RETRIEVED);
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
-            localBroadcastManager.sendBroadcast(intent);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-
         }
+
+        LocalCache.RemoteMediaShareMapKeyIsUUID.clear();
+
+        LocalCache.RemoteMediaShareMapKeyIsUUID.putAll(mediaShareConcurrentMap);
+
+        Log.i(TAG, "retrieve remote media share from network");
+
+        Intent intent = new Intent(Util.REMOTE_MEDIA_SHARE_RETRIEVED);
+        intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+        localBroadcastManager.sendBroadcast(intent);
 
     }
 

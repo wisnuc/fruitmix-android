@@ -122,11 +122,6 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     }
 
     @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-    }
-
-    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.back:

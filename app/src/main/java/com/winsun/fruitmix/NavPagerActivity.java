@@ -44,6 +44,7 @@ import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.MediaShareContent;
+import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
@@ -52,12 +53,12 @@ import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class NavPagerActivity extends AppCompatActivity
@@ -65,34 +66,32 @@ public class NavPagerActivity extends AppCompatActivity
 
     public static final String TAG = NavPagerActivity.class.getSimpleName();
 
-    public Toolbar toolbar;
-    //    public RelativeLayout chooseHeader;
-    public TabLayout tabLayout;
-    public FloatingActionButton fab;
-    public TextView lbRight;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.tabLayout)
+    TabLayout tabLayout;
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
+    @BindView(R.id.right)
+    TextView lbRight;
+    @BindView(R.id.viewPager)
     ViewPager viewPager;
-//    ImageView ivBack;
-//    TextView ivSelectCount;
+    @BindView(R.id.btmenu)
+    LinearLayout llBtMenu;
+    @BindView(R.id.bt_album)
+    ImageView ivBtAlbum;
+    @BindView(R.id.bt_share)
+    ImageView ivBtShare;
+    @BindView(R.id.album_balloon)
+    ImageView mAlbumBalloon;
+    @BindView(R.id.drawer_layout)
+    DrawerLayout mDrawerLayout;
 
-    public LinearLayout llBtMenu;
-    public ImageView ivBtAlbum, ivBtShare;
-
-    public List<Page> pageList;
-    AlbumList albumList;
-    NewPhotoList photoList;
-    MediaShareList shareList;
-
-    public boolean sInChooseMode = false;
-
-    //add by liang.wu
-    private ImageView mAlbumBalloon;
-    private TextView mUserNameTextView;
-    private TextView mUserAvatar;
-
-    NavPageBar mNavPageBar;
-
-    private NavigationView mNavigationView;
-    private DrawerLayout mDrawerLayout;
+    private List<Page> pageList;
+    private AlbumList albumList;
+    private NewPhotoList photoList;
+    private MediaShareList shareList;
+    private NavPageBar mNavPageBar;
 
     private LocalBroadcastManager mManager;
     private CustomBroadReceiver mReceiver;
@@ -111,6 +110,8 @@ public class NavPagerActivity extends AppCompatActivity
     private static final int PAGE_ALBUM = 2;
 
     private ExecutorServiceInstance instance;
+
+    private boolean sInChooseMode = false;
 
     private boolean mLocalMediaLoaded = false;
 
@@ -137,6 +138,87 @@ public class NavPagerActivity extends AppCompatActivity
 
         setExitSharedElementCallback(sharedElementCallback);
 
+        ButterKnife.bind(this);
+
+        initFilterForReceiver();
+
+        instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+        instance.startFixedThreadPool();
+
+        setSupportActionBar(toolbar);
+
+/*        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.setDrawerListener(toggle);
+        toggle.syncState();*/
+
+        initNavigationView();
+
+        initPageList();
+
+        initViewPager();
+
+        mNavPageBar = new NavPageBar(tabLayout, viewPager);
+        viewPager.setCurrentItem(PAGE_PHOTO);
+
+        ivBtAlbum.setOnClickListener(this);
+        ivBtShare.setOnClickListener(this);
+        fab.setOnClickListener(this);
+        lbRight.setOnClickListener(this);
+
+        photoList.addPhotoListListener(this);
+
+    }
+
+    private void initNavigationView() {
+        NavigationView mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
+
+        User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
+
+        String userName = user.getUserName();
+        TextView mUserNameTextView = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.user_name_textview);
+        mUserNameTextView.setText(userName);
+
+        TextView mUserAvatar = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.avatar);
+        mUserAvatar.setText(user.getDefaultAvatar());
+        int color = Integer.parseInt(user.getDefaultAvatarBgColor());
+        switch (color) {
+            case 0:
+                mUserAvatar.setBackgroundResource(R.drawable.user_portrait_bg_blue);
+                break;
+            case 1:
+                mUserAvatar.setBackgroundResource(R.drawable.user_portrait_bg_green);
+                break;
+            case 2:
+                mUserAvatar.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
+                break;
+        }
+    }
+
+    private void initViewPager() {
+        MyAdapter myAdapter = new MyAdapter();
+        viewPager.setAdapter(myAdapter);
+        viewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                if (mLocalMediaLoaded)
+                    onDidAppear(position);
+            }
+        });
+    }
+
+    private void initPageList() {
+        shareList = new MediaShareList(this);
+        photoList = new NewPhotoList(this);
+        albumList = new AlbumList(this);
+        pageList = new ArrayList<Page>();
+        pageList.add(shareList);
+        pageList.add(photoList);
+        pageList.add(albumList);
+    }
+
+    private void initFilterForReceiver() {
         mManager = LocalBroadcastManager.getInstance(this);
         mReceiver = new CustomBroadReceiver();
         intentFilter = new IntentFilter(Util.REMOTE_SHARE_CREATED);
@@ -154,119 +236,6 @@ public class NavPagerActivity extends AppCompatActivity
         intentFilter.addAction(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED);
         intentFilter.addAction(Util.LOCAL_MEDIA_COMMENT_RETRIEVED);
         intentFilter.addAction(Util.REMOTE_MEDIA_COMMENT_RETRIEVED);
-
-
-        instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-        instance.startFixedThreadPool();
-
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        chooseHeader = (RelativeLayout) findViewById(R.id.chooseHeader);
-//        ivBack = (ImageView) findViewById(R.id.back);
-//        ivSelectCount = (TextView) findViewById(R.id.select_count_tv);
-
-        setSupportActionBar(toolbar);
-
-        llBtMenu = (LinearLayout) findViewById(R.id.btmenu);
-        ivBtAlbum = (ImageView) findViewById(R.id.bt_album);
-        ivBtShare = (ImageView) findViewById(R.id.bt_share);
-        lbRight = (TextView) findViewById(R.id.right);
-
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-/*        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawerLayout.setDrawerListener(toggle);
-        toggle.syncState();*/
-        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
-        mNavigationView.setNavigationItemSelectedListener(this);
-
-        String userName = getIntent().getStringExtra(Util.EQUIPMENT_CHILD_NAME);
-        mUserNameTextView = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.user_name_textview);
-        mUserNameTextView.setText(userName);
-
-        mUserAvatar = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.avatar);
-        StringBuilder stringBuilder = new StringBuilder();
-        String[] splitStrings = userName.split(" ");
-        for (String splitString : splitStrings) {
-            stringBuilder.append(splitString.substring(0, 1).toUpperCase());
-        }
-        mUserAvatar.setText(stringBuilder.toString());
-        int color = new Random().nextInt(3);
-        switch (color) {
-            case 0:
-                mUserAvatar.setBackgroundResource(R.drawable.user_portrait_bg_blue);
-                break;
-            case 1:
-                mUserAvatar.setBackgroundResource(R.drawable.user_portrait_bg_green);
-                break;
-            case 2:
-                mUserAvatar.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
-                break;
-        }
-
-        shareList = new MediaShareList(this);
-        photoList = new NewPhotoList(this);
-        albumList = new AlbumList(this);
-        pageList = new ArrayList<Page>();
-        pageList.add(shareList);
-        pageList.add(photoList);
-        pageList.add(albumList);
-
-        final MyAdapter myAdapter = new MyAdapter();
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
-        viewPager.setAdapter(myAdapter);
-        viewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-
-            @Override
-            public void onPageSelected(int position) {
-                if (mLocalMediaLoaded)
-                    onDidAppear(position);
-            }
-
-        });
-
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-        mNavPageBar = new NavPageBar(tabLayout, viewPager);
-
-        viewPager.setCurrentItem(PAGE_PHOTO);
-
-        ivBtAlbum.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                List<String> selectUUIDs = photoList.getSelectedImageUUIDs();
-                if (selectUUIDs.size() == 0) {
-                    Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                photoList.createAlbum(selectUUIDs);
-                hideChooseHeader();
-            }
-        });
-
-        ivBtShare.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                List<String> selectUUIDs = photoList.getSelectedImageUUIDs();
-                if (selectUUIDs.size() == 0) {
-                    Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
-
-                createShare(selectUUIDs);
-
-            }
-        });
-
-        fab.setOnClickListener(this);
-        lbRight.setOnClickListener(this);
-
-        photoList.addPhotoListListener(this);
-
     }
 
     private void retrieveLocalMediaInCamera() {
@@ -301,6 +270,7 @@ public class NavPagerActivity extends AppCompatActivity
         if(!onCreate){
             FNAS.retrieveMediaMap(mContext);
             FNAS.retrieveLocalMediaCommentMap(mContext);
+            FNAS.retrieveShareMap(mContext);
 
             onCreate = true;
         }
@@ -333,18 +303,18 @@ public class NavPagerActivity extends AppCompatActivity
 
     }
 
-    public void createShare(List<String> selectUUIDs) {
+    public void doCreateShareFunction(List<String> selectUUIDs) {
 
         Intent intent = new Intent(Util.OPERATION);
         intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
         intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
 
-        intent.putExtra(Util.OPERATION_MEDIASHARE, generateMediaShare(selectUUIDs));
+        intent.putExtra(Util.OPERATION_MEDIASHARE, createMediaShare(selectUUIDs));
         mManager.sendBroadcast(intent);
     }
 
     public void modifyMediaShare(MediaShare mediaShare) {
-        if (!mediaShare.getMaintainers().contains(FNAS.userUUID)) {
+        if (!mediaShare.checkMaintainersListContainCurrentUserUUID()) {
             Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
 
             return;
@@ -364,7 +334,7 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     public void deleteMediaShare(MediaShare mediaShare) {
-        if (!mediaShare.getMaintainers().contains(FNAS.userUUID)) {
+        if (!mediaShare.checkMaintainersListContainCurrentUserUUID()) {
             Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
 
             return;
@@ -384,7 +354,7 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
 
-    private MediaShare generateMediaShare(List<String> selectUUIDs) {
+    private MediaShare createMediaShare(List<String> selectUUIDs) {
 
         MediaShare mediaShare = new MediaShare();
         mediaShare.setUuid(Util.createLocalUUid());
@@ -432,22 +402,46 @@ public class NavPagerActivity extends AppCompatActivity
 
     @Override
     public void onClick(View v) {
+        List<String> selectUUIDs;
         switch (v.getId()) {
-            case R.id.fab:
-                if (sMenuUnfolding) {
-                    sMenuUnfolding = false;
-                    collapseFab();
-
-                } else {
-                    sMenuUnfolding = true;
-                    extendFab();
+            case R.id.bt_album:
+                selectUUIDs = photoList.getSelectedImageUUIDs();
+                if (selectUUIDs.size() == 0) {
+                    Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                photoList.createAlbum(selectUUIDs);
+                hideChooseHeader();
+                break;
+            case R.id.bt_share:
+                selectUUIDs = photoList.getSelectedImageUUIDs();
+                if (selectUUIDs.size() == 0) {
+                    Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+
+                doCreateShareFunction(selectUUIDs);
+                break;
+            case R.id.fab:
+                refreshFabState();
                 break;
             case R.id.right:
-
                 showChooseHeader();
                 break;
             default:
+        }
+    }
+
+    private void refreshFabState() {
+        if (sMenuUnfolding) {
+            sMenuUnfolding = false;
+            collapseFab();
+        } else {
+            sMenuUnfolding = true;
+            extendFab();
         }
     }
 
@@ -528,128 +522,32 @@ public class NavPagerActivity extends AppCompatActivity
 
             if (intent.getAction().equals(Util.LOCAL_SHARE_CREATED)) {
 
-                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
-
-                OperationResult operationResult = OperationResult.valueOf(result);
-
-                switch (operationResult) {
-                    case SUCCEED:
-
-                        if (Util.getNetworkState(mContext)) {
-                            MediaShare mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
-                            Intent operationIntent = new Intent(Util.OPERATION);
-                            operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-                            operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-                            mManager.sendBroadcast(operationIntent);
-                        }
-
-                        onActivityResult(Util.KEY_CREATE_SHARE_REQUEST_CODE, Activity.RESULT_OK, null);
-                        break;
-                    case FAIL:
-
-                        dismissDialog();
-
-                        Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
-
-                        break;
-                }
+                handleLocalShareCreated(intent);
 
             } else if (intent.getAction().equals(Util.REMOTE_SHARE_CREATED)) {
 
-                Log.i(TAG, "remote share created");
-
-                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
-
-                OperationResult operationResult = OperationResult.valueOf(result);
-
-                switch (operationResult) {
-                    case SUCCEED:
-
-                        MediaShare mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
-                        Intent operationIntent = new Intent(Util.OPERATION);
-                        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
-                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
-                        operationIntent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare);
-                        mManager.sendBroadcast(operationIntent);
-
-                        break;
-                    case FAIL:
-
-                        dismissDialog();
-
-                        Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
-
-                        break;
-                }
-
+                handleRemoteShareCreated(intent);
 
             } else if (intent.getAction().equals(Util.LOCAL_SHARE_DELETED) || intent.getAction().equals(Util.REMOTE_SHARE_MODIFIED) || intent.getAction().equals(Util.REMOTE_SHARE_DELETED) || intent.getAction().equals(Util.LOCAL_SHARE_MODIFIED)) {
 
-                dismissDialog();
+                handleLocalShareModifiedDeletedOrRemoteShareModifiedDeleted(intent);
 
-                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
+            } else if (intent.getAction().equals(Util.REMOTE_COMMENT_CREATED)) {
 
-                OperationResult operationResult = OperationResult.valueOf(result);
-
-                switch (operationResult) {
-                    case SUCCEED:
-                        Toast.makeText(mContext, getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
-
-                        pageList.get(PAGE_ALBUM).refreshView();
-                        pageList.get(PAGE_SHARE).refreshView();
-
-                        break;
-                    case LOCAL_MEDIASHARE_UPLOADING:
-                        Toast.makeText(mContext, getString(R.string.share_uploading), Toast.LENGTH_SHORT).show();
-
-                        break;
-                    case NO_NETWORK:
-                        Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-
-                        break;
-                    case FAIL:
-                        Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
-
-                        break;
-                }
-
-            } else if (intent.getAction().equals(Util.REMOTE_COMMENT_CREATED) && intent.getStringExtra(Util.OPERATION_RESULT_NAME).equals(OperationResult.SUCCEED.name())) {
-
-                Log.i(TAG, "remote comment created");
-
-                Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
-                String imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
-                Intent operationIntent = new Intent(Util.OPERATION);
-                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
-                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
-                operationIntent.putExtra(Util.OPERATION_COMMENT, comment);
-                operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
-                mManager.sendBroadcast(operationIntent);
+                handleRemoteCommentCreated(intent);
 
             } else if (intent.getAction().equals(Util.LOCAL_COMMENT_DELETED)) {
 
-                Log.i(TAG, "local comment changed");
-
-                if (intent.getStringExtra(Util.OPERATION_RESULT_NAME).equals(OperationResult.SUCCEED.name())) {
-                    pageList.get(PAGE_SHARE).refreshView();
-                }
+                handleLocalCommentDeleted(intent);
 
             } else if (intent.getAction().equals(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED)) {
-                Log.i(TAG, "local photo upload state changed");
 
-                Intent operationIntent = new Intent(Util.OPERATION);
-                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA.name());
-                mManager.sendBroadcast(operationIntent);
+                handleLocalPhotoUploadStateChanged();
 
             } else if (intent.getAction().equals(Util.REMOTE_MEDIA_RETRIEVED)) {
                 Log.i(TAG, "remote media loaded");
 
                 pageList.get(PAGE_PHOTO).refreshView();
-
-                FNAS.retrieveShareMap(mContext);
-
 
             } else if (intent.getAction().equals(Util.LOCAL_MEDIA_RETRIEVED)) {
 
@@ -661,17 +559,7 @@ public class NavPagerActivity extends AppCompatActivity
 
             } else if (intent.getAction().equals(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED)) {
 
-                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
-
-                if (result == OperationResult.SUCCEED) {
-
-                    Log.i(TAG, "new local media in camera loaded");
-
-                    pageList.get(PAGE_PHOTO).refreshView();
-                }
-
-                FNAS.startUploadAllLocalPhoto(mContext);
-
+                handleNewLocalMediaInCaremaRetrieved(intent);
 
             } else if (intent.getAction().equals(Util.REMOTE_MEDIA_SHARE_RETRIEVED)) {
                 Log.i(TAG, "remote share loaded");
@@ -683,39 +571,179 @@ public class NavPagerActivity extends AppCompatActivity
                 pageList.get(PAGE_ALBUM).refreshView();
                 pageList.get(PAGE_SHARE).refreshView();
 
-                Intent operationIntent = new Intent(Util.OPERATION);
-                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-                for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
-
-                    operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-                    mManager.sendBroadcast(operationIntent);
-
-                }
+                doCreateMediaShareInLocalMediaShareMapFunction();
             } else if (intent.getAction().equals(Util.LOCAL_MEDIA_COMMENT_RETRIEVED)) {
                 Log.i(TAG, "local media comment loaded");
                 ((MediaShareList)pageList.get(PAGE_SHARE)).refreshLocalComment();
 
-                Intent operationResult = new Intent(Util.OPERATION);
-                operationResult.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                operationResult.removeExtra(Util.OPERATION_TARGET_TYPE_NAME);
-                operationResult.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
-
-                for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
-
-                    for(Comment comment:entry.getValue()){
-                        operationResult.putExtra(Util.OPERATION_COMMENT, comment);
-                        operationResult.putExtra(Util.OPERATION_IMAGE_UUID, entry.getKey());
-                        mManager.sendBroadcast(operationResult);
-                    }
-
-                }
+                doCreateRemoteMediaCommentInLocalMediaCommentMapFunction();
             } else if (intent.getAction().equals(Util.REMOTE_MEDIA_COMMENT_RETRIEVED)) {
 
                 Log.i(TAG, "remote media comment loaded ");
 
                 ((MediaShareList)pageList.get(PAGE_SHARE)).refreshRemoteComment();
 
+            }
+        }
+
+        private void doCreateRemoteMediaCommentInLocalMediaCommentMapFunction() {
+            Intent operationResult = new Intent(Util.OPERATION);
+            operationResult.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+            operationResult.removeExtra(Util.OPERATION_TARGET_TYPE_NAME);
+            operationResult.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
+
+            for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
+
+                for(Comment comment:entry.getValue()){
+                    operationResult.putExtra(Util.OPERATION_COMMENT, comment);
+                    operationResult.putExtra(Util.OPERATION_IMAGE_UUID, entry.getKey());
+                    mManager.sendBroadcast(operationResult);
+                }
+
+            }
+        }
+
+        private void doCreateMediaShareInLocalMediaShareMapFunction() {
+            Intent operationIntent = new Intent(Util.OPERATION);
+            operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
+            for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
+
+                operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
+                mManager.sendBroadcast(operationIntent);
+
+            }
+        }
+
+        private void handleNewLocalMediaInCaremaRetrieved(Intent intent) {
+            OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
+
+            if (result == OperationResult.SUCCEED) {
+
+                Log.i(TAG, "new local media in camera loaded");
+
+                pageList.get(PAGE_PHOTO).refreshView();
+            }
+
+            FNAS.startUploadAllLocalPhoto(mContext);
+        }
+
+        private void handleLocalPhotoUploadStateChanged() {
+            Log.i(TAG, "local photo upload state changed");
+
+            Intent operationIntent = new Intent(Util.OPERATION);
+            operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA.name());
+            mManager.sendBroadcast(operationIntent);
+        }
+
+        private void handleLocalCommentDeleted(Intent intent) {
+            Log.i(TAG, "local comment changed");
+
+            if (intent.getStringExtra(Util.OPERATION_RESULT_NAME).equals(OperationResult.SUCCEED.name())) {
+                pageList.get(PAGE_SHARE).refreshView();
+            }
+        }
+
+        private void handleRemoteCommentCreated(Intent intent) {
+            if (intent.getStringExtra(Util.OPERATION_RESULT_NAME).equals(OperationResult.SUCCEED.name())){
+                Log.i(TAG, "remote comment created");
+
+                Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
+                String imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
+                Intent operationIntent = new Intent(Util.OPERATION);
+                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
+                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
+                operationIntent.putExtra(Util.OPERATION_COMMENT, comment);
+                operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
+                mManager.sendBroadcast(operationIntent);
+            }
+        }
+
+        private void handleLocalShareModifiedDeletedOrRemoteShareModifiedDeleted(Intent intent) {
+            dismissDialog();
+
+            String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
+
+            OperationResult operationResult = OperationResult.valueOf(result);
+
+            switch (operationResult) {
+                case SUCCEED:
+                    Toast.makeText(mContext, getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
+
+                    pageList.get(PAGE_ALBUM).refreshView();
+                    pageList.get(PAGE_SHARE).refreshView();
+
+                    break;
+                case LOCAL_MEDIASHARE_UPLOADING:
+                    Toast.makeText(mContext, getString(R.string.share_uploading), Toast.LENGTH_SHORT).show();
+
+                    break;
+                case NO_NETWORK:
+                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+
+                    break;
+                case FAIL:
+                    Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+
+                    break;
+            }
+        }
+
+        private void handleRemoteShareCreated(Intent intent) {
+            Log.i(TAG, "remote share created");
+
+            String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
+
+            OperationResult operationResult = OperationResult.valueOf(result);
+
+            switch (operationResult) {
+                case SUCCEED:
+
+                    MediaShare mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
+                    Intent operationIntent = new Intent(Util.OPERATION);
+                    operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
+                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
+                    operationIntent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare);
+                    mManager.sendBroadcast(operationIntent);
+
+                    break;
+                case FAIL:
+
+                    dismissDialog();
+
+                    Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+
+                    break;
+            }
+        }
+
+        private void handleLocalShareCreated(Intent intent) {
+            String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
+
+            OperationResult operationResult = OperationResult.valueOf(result);
+
+            switch (operationResult) {
+                case SUCCEED:
+
+                    if (Util.getNetworkState(mContext)) {
+                        MediaShare mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
+                        Intent operationIntent = new Intent(Util.OPERATION);
+                        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
+                        operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
+                        mManager.sendBroadcast(operationIntent);
+                    }
+
+                    onActivityResult(Util.KEY_CREATE_SHARE_REQUEST_CODE, Activity.RESULT_OK, null);
+                    break;
+                case FAIL:
+
+                    dismissDialog();
+
+                    Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+
+                    break;
             }
         }
     }
@@ -784,7 +812,6 @@ public class NavPagerActivity extends AppCompatActivity
         }
         pageList.get(position).onDidAppear();
 
-
     }
 
     public void setSelectCountText(String text) {
@@ -794,7 +821,6 @@ public class NavPagerActivity extends AppCompatActivity
     public void showTips() {
         if (getShowAlbumTipsValue()) {
             setShowAlbumTipsValue(false);
-            mAlbumBalloon = (ImageView) findViewById(R.id.album_balloon);
             if (mAlbumBalloon != null) {
                 mAlbumBalloon.setVisibility(View.VISIBLE);
                 mAlbumBalloon.setOnClickListener(new View.OnClickListener() {
@@ -874,34 +900,6 @@ public class NavPagerActivity extends AppCompatActivity
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.left_drawer, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-    }
-
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -966,8 +964,7 @@ public class NavPagerActivity extends AppCompatActivity
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 

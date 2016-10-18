@@ -24,7 +24,9 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  */
 public class NewAlbumPicChooseActivity extends Activity {
 
+    @BindView(R.id.back)
     ImageView ivBack;
+    @BindView(R.id.ok)
     TextView tfOK;
 
     @BindView(R.id.main_framelayout)
@@ -50,7 +52,6 @@ public class NewAlbumPicChooseActivity extends Activity {
         mNewPhotoList.setSelectMode(true);
         mNewPhotoList.refreshView();
 
-        ivBack = (ImageView) findViewById(R.id.back);
         ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,7 +59,6 @@ public class NewAlbumPicChooseActivity extends Activity {
             }
         });
 
-        tfOK = (TextView) findViewById(R.id.ok);
         tfOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -56,25 +56,19 @@ public class MediaShareList implements NavPagerActivity.Page {
 
     public static final String TAG = MediaShareList.class.getSimpleName();
 
-    NavPagerActivity containerActivity;
-    View view;
+    private NavPagerActivity containerActivity;
+    private View view;
     LinearLayout mLoadingLayout;
     LinearLayout mNoContentLayout;
     FrameLayout mShareListFrameLayout;
+    private ListView mainListView;
 
-    public ListView mainListView;
-
-    List<MediaShare> mediaShareList;
-
-    Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
-    ShareListViewAdapter mAdapter;
-
-    private RequestQueue mRequestQueue;
+    private List<MediaShare> mediaShareList;
+    private Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
+    private ShareListViewAdapter mAdapter;
 
     private ImageLoader mImageLoader;
-
     private Bundle reenterState;
-
     private List<String> mMediaUUIDWhichHaveStartedLoadComment;
 
     public MediaShareList(NavPagerActivity activity_) {
@@ -83,12 +77,7 @@ public class MediaShareList implements NavPagerActivity.Page {
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
                 R.layout.share_list2, null);
 
-        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
+        initImageLoader();
 
         mainListView = (ListView) view.findViewById(R.id.mainList);
         mAdapter = new ShareListViewAdapter(this);
@@ -99,49 +88,60 @@ public class MediaShareList implements NavPagerActivity.Page {
         mShareListFrameLayout = (FrameLayout) view.findViewById(R.id.share_list_framelayout);
 
         mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
-
         mMediaUUIDWhichHaveStartedLoadComment = new ArrayList<>();
 
     }
 
-    public void reloadList() {
-        List<MediaShare> mediaShareList1;
+    private void initImageLoader() {
+        RequestQueue mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
+    }
 
-        mediaShareList1 = new ArrayList<>();
+    private void reloadList() {
 
-        for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
+        List<MediaShare> mediaShareList = new ArrayList<>();
 
-            if (!mediaShare.isArchived() && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID())) {
-                mediaShareList1.add(mediaShare);
-            }
+        fillMediaShareList(mediaShareList);
 
-        }
+        sortMediaShareList(mediaShareList);
 
-        for (MediaShare mediaShare : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
+        this.mediaShareList = mediaShareList;
 
-            if (!mediaShare.isArchived() && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID())) {
-                mediaShareList1.add(mediaShare);
-            }
+    }
 
-        }
-
-        Collections.sort(mediaShareList1, new Comparator<MediaShare>() {
+    private void sortMediaShareList(List<MediaShare> mediaShareList) {
+        Collections.sort(mediaShareList, new Comparator<MediaShare>() {
             @Override
             public int compare(MediaShare lhs, MediaShare rhs) {
-                long mtime1 = Long.parseLong(lhs.getTime());
-                long mtime2 = Long.parseLong(rhs.getTime());
+                long time1 = Long.parseLong(lhs.getTime());
+                long time2 = Long.parseLong(rhs.getTime());
 
-                if (mtime1 < mtime2)
+                if (time1 < time2)
                     return 1;
-                else if (mtime1 > mtime2)
+                else if (time1 > time2)
                     return -1;
                 else return 0;
 
             }
         });
+    }
 
-        mediaShareList = mediaShareList1;
+    private void fillMediaShareList(List<MediaShare> mediaShareList) {
+        for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
+            if (!mediaShare.isArchived() && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID())) {
+                mediaShareList.add(mediaShare);
+            }
+        }
 
+        for (MediaShare mediaShare : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
+            if (!mediaShare.isArchived() && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID())) {
+                mediaShareList.add(mediaShare);
+            }
+        }
     }
 
 
@@ -164,35 +164,8 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         }
 
-//        loadRemoteComment();
-
         refreshRemoteComment();
         refreshLocalComment();
-    }
-
-    public void loadRemoteComment() {
-
-        for (MediaShare mediaShare : mediaShareList) {
-            if (!mediaShare.isAlbum()) {
-                List<String> imageDigests = mediaShare.getMediaDigestInMediaShareContents();
-                if (imageDigests.size() == 1) {
-
-                    Media media = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(0));
-
-                    if (media != null) {
-                        String uuid = media.getUuid();
-                        if (!mMediaUUIDWhichHaveStartedLoadComment.contains(uuid)) {
-                            loadCommentList(uuid);
-
-                            Log.i(TAG, "load image comment,image uuid:" + uuid);
-                            mMediaUUIDWhichHaveStartedLoadComment.add(uuid);
-                        }
-
-                    }
-
-                }
-            }
-        }
     }
 
     public void onDidAppear() {
@@ -333,10 +306,12 @@ public class MediaShareList implements NavPagerActivity.Page {
             TextView mShareCountTextView;
             TextView mShareCommentTextView;
             TextView mShareCommentCountTextView;
-            TextView mAvator;
+            TextView mAvatar;
             LinearLayout mCommentLayout;
 
             String nickName;
+
+            //TODO:refactor media share list code
 
             if (convertView == null)
                 view = LayoutInflater.from(container.containerActivity).inflate(R.layout.share_list_cell, parent, false);
@@ -354,7 +329,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
             mShareCountLayout = (RelativeLayout) view.findViewById(R.id.share_count_layout);
             mShareCommentLayout = (LinearLayout) view.findViewById(R.id.share_comment_layout);
-            mAvator = (TextView) view.findViewById(R.id.avatar);
+            mAvatar = (TextView) view.findViewById(R.id.avatar);
             mShareCommentCountTextView = (TextView) view.findViewById(R.id.share_comment_count_textview);
 
             lbNick.setText(nickName);
@@ -371,16 +346,16 @@ public class MediaShareList implements NavPagerActivity.Page {
                 avatar = user.getDefaultAvatar();
             }
 
-            mAvator.setText(avatar);
+            mAvatar.setText(avatar);
             switch (color) {
                 case 0:
-                    mAvator.setBackgroundResource(R.drawable.user_portrait_bg_blue);
+                    mAvatar.setBackgroundResource(R.drawable.user_portrait_bg_blue);
                     break;
                 case 1:
-                    mAvator.setBackgroundResource(R.drawable.user_portrait_bg_green);
+                    mAvatar.setBackgroundResource(R.drawable.user_portrait_bg_green);
                     break;
                 case 2:
-                    mAvator.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
+                    mAvatar.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
                     break;
             }
 
@@ -569,7 +544,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                     ivCover.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ArrayList<Media> imageList = (ArrayList<Media>) getImgList(currentItem.getMediaDigestInMediaShareContents());
+                            ArrayList<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
 
                             Intent intent = new Intent();
                             intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
@@ -679,14 +654,14 @@ public class MediaShareList implements NavPagerActivity.Page {
                             public void onClick(View v) {
                                 Log.d("winsun", currentItem + "");
 
-                                List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
-
-                                LocalCache.TransActivityContainer.put("imgSliderList", imageList);
+                                ArrayList<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
 
                                 Intent intent = new Intent();
                                 intent.putExtra(Util.INITIAL_PHOTO_POSITION, mItemPosition);
                                 intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                                 intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
+                                intent.putParcelableArrayListExtra(Util.KEY_MEDIA_LIST, imageList);
+
                                 intent.setClass(containerActivity, PhotoSliderActivity.class);
 
                                 String transitionName = String.valueOf(imageList.get(mItemPosition).getUuid());
@@ -719,8 +694,8 @@ public class MediaShareList implements NavPagerActivity.Page {
             return container.mediaShareList.get(position);
         }
 
-        public List<Media> getImgList(List<String> imageDigests) {
-            List<Media> picList;
+        public ArrayList<Media> getImgList(List<String> imageDigests) {
+            ArrayList<Media> picList;
             Media picItem;
             Media picItemRaw;
 

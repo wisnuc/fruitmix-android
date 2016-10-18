@@ -178,17 +178,6 @@ public class FNAS {
 
     }
 
-    public static void loadData(Context context) {
-
-        retrieveUserMap(context);
-
-        retrieveMediaMap(context);
-
-        retrieveShareMap(context);
-
-        retrieveLocalMediaCommentMap(context);
-    }
-
     public static void retrieveUserMap(Context context) {
 
         Intent intent = new Intent(Util.OPERATION);
@@ -268,7 +257,6 @@ public class FNAS {
         conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
         Log.d(TAG, "NAS GET: " + (Gateway + ":" + FNAS.PORT + req));
         str = FNAS.ReadFull(conn.getInputStream());
-
 
         return str;
     }

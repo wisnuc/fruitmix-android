@@ -159,11 +159,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     }
 
     @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-    }
-
-    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.back:
@@ -358,10 +353,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
             @Override
             public void onServiceFound(NsdServiceInfo serviceInfo) {
-                // 发现网络服务时就会触发该事件
-                // 可以通过switch或if获取那些你真正关心的服务
-                Log.i(TAG, "Service resolved: " + serviceInfo);
 
+                Log.i(TAG, "Service resolved: " + serviceInfo);
 
                 if (serviceInfo.getServiceName().toLowerCase().contains("wisnuc")) {
                     resolveService(serviceInfo);
@@ -398,7 +391,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 Log.i(TAG, "onServiceResolved Service info:" + serviceInfo);
 
                 for (Equipment equipment : mEquipments) {
-                    if (serviceInfo.getServiceName().equals(equipment.getServiceName())) {
+                    if (equipment == null || serviceInfo.getServiceName().equals(equipment.getServiceName())) {
                         return;
                     }
                 }

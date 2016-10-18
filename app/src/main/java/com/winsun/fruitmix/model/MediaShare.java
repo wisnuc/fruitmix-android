@@ -36,7 +36,6 @@ public class MediaShare implements Parcelable {
         mediaShareContents = new ArrayList<>();
         viewers = new ArrayList<>();
         maintainers = new ArrayList<>();
-
     }
 
     protected MediaShare(Parcel in) {
@@ -54,6 +53,8 @@ public class MediaShare implements Parcelable {
         date = in.readString();
         coverImageDigest = in.readString();
         isLocal = in.readByte() != 0;
+        shareDigest = in.readString();
+        isSticky = in.readByte() != 0;
     }
 
     @Override
@@ -72,6 +73,8 @@ public class MediaShare implements Parcelable {
         dest.writeString(date);
         dest.writeString(coverImageDigest);
         dest.writeByte((byte) (isLocal ? 1 : 0));
+        dest.writeString(shareDigest);
+        dest.writeByte((byte) (isSticky ? 1 : 0));
     }
 
     @Override
@@ -267,7 +270,7 @@ public class MediaShare implements Parcelable {
         viewers.add(viewer);
     }
 
-    public void remoteViewer(String viewer){
+    public void removeViewer(String viewer){
         viewers.remove(viewer);
     }
 
