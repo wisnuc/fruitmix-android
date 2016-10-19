@@ -26,7 +26,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.view.animation.BounceInterpolator;
@@ -42,6 +41,7 @@ import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.model.Comment;
+import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.MediaShareContent;
 import com.winsun.fruitmix.model.User;
@@ -59,7 +59,6 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class NavPagerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, NavPageBar.OnTabChangedListener, View.OnClickListener, IPhotoListListener {
@@ -114,6 +113,7 @@ public class NavPagerActivity extends AppCompatActivity
     private boolean sInChooseMode = false;
 
     private boolean mLocalMediaLoaded = false;
+    private boolean mRemoteMediaLoaded = false;
 
     private boolean onCreate = false;
 
@@ -261,14 +261,14 @@ public class NavPagerActivity extends AppCompatActivity
 
         mNavPageBar.registerOnTabChangedListener(this);
 
-        if (viewPager.getCurrentItem() == PAGE_PHOTO && mLocalMediaLoaded) {
+        if (viewPager.getCurrentItem() == PAGE_PHOTO && mLocalMediaLoaded & mRemoteMediaLoaded) {
             retrieveLocalMediaInCamera();
         }
 
         mManager.registerReceiver(mReceiver, intentFilter);
 
-        if(!onCreate){
-            FNAS.retrieveMediaMap(mContext);
+        if (!onCreate) {
+            FNAS.retrieveLocalMediaMap(mContext);
             FNAS.retrieveLocalMediaCommentMap(mContext);
             FNAS.retrieveShareMap(mContext);
 
@@ -313,8 +313,8 @@ public class NavPagerActivity extends AppCompatActivity
         mManager.sendBroadcast(intent);
     }
 
-    public void modifyMediaShare(MediaShare mediaShare) {
-        if (!mediaShare.checkMaintainersListContainCurrentUserUUID()) {
+    public void modifyMediaShare(MediaShare mediaShare,String requestData) {
+        if (!checkPermissionToOperate(mediaShare)) {
             Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
 
             return;
@@ -330,11 +330,16 @@ public class NavPagerActivity extends AppCompatActivity
             intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
         }
         intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
+        intent.putExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA,requestData);
         mManager.sendBroadcast(intent);
     }
 
+    private boolean checkPermissionToOperate(MediaShare mediaShare) {
+        return mediaShare.checkMaintainersListContainCurrentUserUUID() || mediaShare.getCreatorUUID().equals(FNAS.userUUID);
+    }
+
     public void deleteMediaShare(MediaShare mediaShare) {
-        if (!mediaShare.checkMaintainersListContainCurrentUserUUID()) {
+        if (!checkPermissionToOperate(mediaShare)) {
             Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
 
             return;
@@ -360,7 +365,7 @@ public class NavPagerActivity extends AppCompatActivity
         mediaShare.setUuid(Util.createLocalUUid());
 
         List<MediaShareContent> mediaShareContents = new ArrayList<>();
-        for (String digest:selectUUIDs){
+        for (String digest : selectUUIDs) {
             MediaShareContent mediaShareContent = new MediaShareContent();
             mediaShareContent.setDigest(digest);
             mediaShareContent.setAuthor(FNAS.userUUID);
@@ -373,7 +378,7 @@ public class NavPagerActivity extends AppCompatActivity
         mediaShare.setCoverImageDigest(selectUUIDs.get(0));
         mediaShare.setTitle("");
         mediaShare.setDesc("");
-        for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+        for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
             mediaShare.addViewer(userUUID);
         }
         mediaShare.addMaintainer(FNAS.userUUID);
@@ -549,13 +554,17 @@ public class NavPagerActivity extends AppCompatActivity
 
                 pageList.get(PAGE_PHOTO).refreshView();
 
+                mRemoteMediaLoaded = true;
+
+                retrieveLocalMediaInCamera();
+
             } else if (intent.getAction().equals(Util.LOCAL_MEDIA_RETRIEVED)) {
 
                 Log.i(TAG, "local media loaded");
 
                 mLocalMediaLoaded = true;
 
-                retrieveLocalMediaInCamera();
+                FNAS.retrieveRemoteMediaMap(mContext);
 
             } else if (intent.getAction().equals(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED)) {
 
@@ -574,14 +583,14 @@ public class NavPagerActivity extends AppCompatActivity
                 doCreateMediaShareInLocalMediaShareMapFunction();
             } else if (intent.getAction().equals(Util.LOCAL_MEDIA_COMMENT_RETRIEVED)) {
                 Log.i(TAG, "local media comment loaded");
-                ((MediaShareList)pageList.get(PAGE_SHARE)).refreshLocalComment();
+                ((MediaShareList) pageList.get(PAGE_SHARE)).refreshLocalComment();
 
                 doCreateRemoteMediaCommentInLocalMediaCommentMapFunction();
             } else if (intent.getAction().equals(Util.REMOTE_MEDIA_COMMENT_RETRIEVED)) {
 
                 Log.i(TAG, "remote media comment loaded ");
 
-                ((MediaShareList)pageList.get(PAGE_SHARE)).refreshRemoteComment();
+                ((MediaShareList) pageList.get(PAGE_SHARE)).refreshRemoteComment();
 
             }
         }
@@ -594,7 +603,7 @@ public class NavPagerActivity extends AppCompatActivity
 
             for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
 
-                for(Comment comment:entry.getValue()){
+                for (Comment comment : entry.getValue()) {
                     operationResult.putExtra(Util.OPERATION_COMMENT, comment);
                     operationResult.putExtra(Util.OPERATION_IMAGE_UUID, entry.getKey());
                     mManager.sendBroadcast(operationResult);
@@ -646,7 +655,7 @@ public class NavPagerActivity extends AppCompatActivity
         }
 
         private void handleRemoteCommentCreated(Intent intent) {
-            if (intent.getStringExtra(Util.OPERATION_RESULT_NAME).equals(OperationResult.SUCCEED.name())){
+            if (intent.getStringExtra(Util.OPERATION_RESULT_NAME).equals(OperationResult.SUCCEED.name())) {
                 Log.i(TAG, "remote comment created");
 
                 Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
@@ -704,7 +713,7 @@ public class NavPagerActivity extends AppCompatActivity
                     Intent operationIntent = new Intent(Util.OPERATION);
                     operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
                     operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
-                    operationIntent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare);
+                    operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
                     mManager.sendBroadcast(operationIntent);
 
                     break;
@@ -889,7 +898,7 @@ public class NavPagerActivity extends AppCompatActivity
         lbRight.setVisibility(View.VISIBLE);
         tabLayout.setVisibility(View.VISIBLE);
         CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
-        lp.bottomMargin = Util.dip2px(48.0f);
+        lp.bottomMargin = Util.dip2px(this,48.0f);
         //if(LocalCache.ScreenWidth==540) lp.bottomMargin=76;
         //else if(LocalCache.ScreenWidth==1080) lp.bottomMargin=140;
         viewPager.setLayoutParams(lp);
@@ -941,7 +950,7 @@ public class NavPagerActivity extends AppCompatActivity
                 protected Void doInBackground(Void... params) {
 
                     LocalCache.clearToken(mContext);
-                    FNAS.restoreLocalPhotoUploadState();
+                    FNAS.restoreLocalPhotoUploadState(mContext);
 
                     instance.shutdownFixedThreadPoolNow();
 

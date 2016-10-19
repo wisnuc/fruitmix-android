@@ -49,6 +49,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by Administrator on 2016/4/19.
  */
@@ -58,10 +61,15 @@ public class MediaShareList implements NavPagerActivity.Page {
 
     private NavPagerActivity containerActivity;
     private View view;
+
+    @BindView(R.id.loading_layout)
     LinearLayout mLoadingLayout;
+    @BindView(R.id.no_content_layout)
     LinearLayout mNoContentLayout;
+    @BindView(R.id.share_list_framelayout)
     FrameLayout mShareListFrameLayout;
-    private ListView mainListView;
+    @BindView(R.id.mainList)
+    ListView mainListView;
 
     private List<MediaShare> mediaShareList;
     private Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
@@ -69,7 +77,6 @@ public class MediaShareList implements NavPagerActivity.Page {
 
     private ImageLoader mImageLoader;
     private Bundle reenterState;
-    private List<String> mMediaUUIDWhichHaveStartedLoadComment;
 
     public MediaShareList(NavPagerActivity activity_) {
         containerActivity = activity_;
@@ -77,23 +84,19 @@ public class MediaShareList implements NavPagerActivity.Page {
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
                 R.layout.share_list2, null);
 
+        ButterKnife.bind(this,view);
+
         initImageLoader();
 
-        mainListView = (ListView) view.findViewById(R.id.mainList);
         mAdapter = new ShareListViewAdapter(this);
         mainListView.setAdapter(mAdapter);
 
-        mLoadingLayout = (LinearLayout) view.findViewById(R.id.loading_layout);
-        mNoContentLayout = (LinearLayout) view.findViewById(R.id.no_content_layout);
-        mShareListFrameLayout = (FrameLayout) view.findViewById(R.id.share_list_framelayout);
-
         mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
-        mMediaUUIDWhichHaveStartedLoadComment = new ArrayList<>();
 
     }
 
     private void initImageLoader() {
-        RequestQueue mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(containerActivity).getRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
         headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
@@ -290,47 +293,107 @@ public class MediaShareList implements NavPagerActivity.Page {
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             View view;
-            final MediaShare currentItem;
-            Media coverImg, itemImg;
-            TextView lbNick, lbTime, lbAlbumTitle;
-            ImageView lbAlbumShare;
-            final NetworkImageView ivCover;
-            final NetworkImageView ivItems[];
-            View rlAlbum, llPic1, llPic2, llPic3;
-            boolean sLocal;
-            int w, h, i;
-            final List<String> imageDigests;
+            MediaShareListViewHolder viewHolder;
 
-            RelativeLayout mShareCountLayout;
-            LinearLayout mShareCommentLayout;
-            TextView mShareCountTextView;
-            TextView mShareCommentTextView;
-            TextView mShareCommentCountTextView;
-            TextView mAvatar;
-            LinearLayout mCommentLayout;
-
-            String nickName;
-
-            //TODO:refactor media share list code
-
-            if (convertView == null)
+            if (convertView == null) {
                 view = LayoutInflater.from(container.containerActivity).inflate(R.layout.share_list_cell, parent, false);
-            else view = convertView;
+                viewHolder = new MediaShareListViewHolder(view);
+                view.setTag(viewHolder);
+            }else {
+                view = convertView;
+                viewHolder = (MediaShareListViewHolder) view.getTag();
+            }
 
-            currentItem = (MediaShare) this.getItem(position);
+            MediaShare currentItem = (MediaShare) getItem(position);
+            viewHolder.refreshView(currentItem,commentMap);
+
+            return view;
+        }
+
+        @Override
+        public long getItemId(int position) {
+
+            return position;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return container.mediaShareList.get(position);
+        }
+
+
+    }
+
+    class MediaShareListViewHolder{
+
+        MediaShare currentItem;
+        Media coverImg, itemImg;
+
+        @BindView(R.id.nick)
+        TextView lbNick;
+        @BindView(R.id.time)
+        TextView lbTime;
+        @BindView(R.id.album_title)
+        TextView lbAlbumTitle;
+        @BindView(R.id.album_share)
+        ImageView lbAlbumShare;
+        @BindView(R.id.cover_img)
+        NetworkImageView ivCover;
+        @BindView(R.id.album_row)
+        View rlAlbum;
+        @BindView(R.id.pic_row1)
+        View llPic1;
+        @BindView(R.id.pic_row2)
+        View llPic2;
+        @BindView(R.id.pic_row3)
+        View llPic3;
+        @BindView(R.id.share_count_layout)
+        RelativeLayout mShareCountLayout;
+        @BindView(R.id.share_comment_layout)
+        LinearLayout mShareCommentLayout;
+        @BindView(R.id.share_count_textview)
+        TextView mShareCountTextView;
+        @BindView(R.id.share_comment_textview)
+        TextView mShareCommentTextView;
+        @BindView(R.id.share_comment_count_textview)
+        TextView mShareCommentCountTextView;
+        @BindView(R.id.avatar)
+        TextView mAvatar;
+        @BindView(R.id.comment_layout)
+        LinearLayout mCommentLayout;
+        @BindView(R.id.check_more_photos)
+        TextView mCheckMorePhoto;
+
+        NetworkImageView ivItems[];
+
+        boolean sLocal;
+        int w, h, i;
+        List<String> imageDigests;
+
+        String nickName;
+
+        MediaShareListViewHolder(View view){
+
+            ButterKnife.bind(this,view);
+
+            ivItems = new NetworkImageView[9];
+            ivItems[0] = (NetworkImageView) view.findViewById(R.id.mainPic0);
+            ivItems[1] = (NetworkImageView) view.findViewById(R.id.mainPic1);
+            ivItems[2] = (NetworkImageView) view.findViewById(R.id.mainPic2);
+            ivItems[3] = (NetworkImageView) view.findViewById(R.id.mainPic3);
+            ivItems[4] = (NetworkImageView) view.findViewById(R.id.mainPic4);
+            ivItems[5] = (NetworkImageView) view.findViewById(R.id.mainPic5);
+            ivItems[6] = (NetworkImageView) view.findViewById(R.id.mainPic6);
+            ivItems[7] = (NetworkImageView) view.findViewById(R.id.mainPic7);
+            ivItems[8] = (NetworkImageView) view.findViewById(R.id.mainPic8);
+
+        }
+
+        void refreshView(MediaShare mediaShare,Map<String,List<Comment>> commentMap){
+
+            currentItem = mediaShare;
 
             nickName = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreatorUUID()).getUserName();
-
-            lbNick = (TextView) view.findViewById(R.id.nick);
-            lbTime = (TextView) view.findViewById(R.id.time);
-            ivCover = (NetworkImageView) view.findViewById(R.id.cover_img);
-            lbAlbumTitle = (TextView) view.findViewById(R.id.album_title);
-            lbAlbumShare = (ImageView) view.findViewById(R.id.album_share);
-
-            mShareCountLayout = (RelativeLayout) view.findViewById(R.id.share_count_layout);
-            mShareCommentLayout = (LinearLayout) view.findViewById(R.id.share_comment_layout);
-            mAvatar = (TextView) view.findViewById(R.id.avatar);
-            mShareCommentCountTextView = (TextView) view.findViewById(R.id.share_comment_count_textview);
 
             lbNick.setText(nickName);
             lbTime.setText(Util.formatTime(containerActivity, Long.parseLong(currentItem.getTime())));
@@ -359,23 +422,8 @@ public class MediaShareList implements NavPagerActivity.Page {
                     break;
             }
 
-            rlAlbum = view.findViewById(R.id.album_row);
-            llPic1 = view.findViewById(R.id.pic_row1);
-            llPic2 = view.findViewById(R.id.pic_row2);
-            llPic3 = view.findViewById(R.id.pic_row3);
-
-            ivItems = new NetworkImageView[9];
-            ivItems[0] = (NetworkImageView) view.findViewById(R.id.mainPic0);
-            ivItems[1] = (NetworkImageView) view.findViewById(R.id.mainPic1);
-            ivItems[2] = (NetworkImageView) view.findViewById(R.id.mainPic2);
-            ivItems[3] = (NetworkImageView) view.findViewById(R.id.mainPic3);
-            ivItems[4] = (NetworkImageView) view.findViewById(R.id.mainPic4);
-            ivItems[5] = (NetworkImageView) view.findViewById(R.id.mainPic5);
-            ivItems[6] = (NetworkImageView) view.findViewById(R.id.mainPic6);
-            ivItems[7] = (NetworkImageView) view.findViewById(R.id.mainPic7);
-            ivItems[8] = (NetworkImageView) view.findViewById(R.id.mainPic8);
-
             if (currentItem.isAlbum()) {
+
                 rlAlbum.setVisibility(View.VISIBLE);
                 llPic1.setVisibility(View.GONE);
                 llPic2.setVisibility(View.GONE);
@@ -386,37 +434,20 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                 lbAlbumShare.setVisibility(View.VISIBLE);
                 lbAlbumTitle.setVisibility(View.VISIBLE);
-
-
                 lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.share_album_title), currentItem.getTitle(), String.valueOf(currentItem.getMediaShareContents().size())));
 
                 coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
-                if (coverImg != null) sLocal = false;
-                else {
+                if (coverImg == null) {
                     coverImg = LocalCache.LocalMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
-                    sLocal = true;
                 }
                 if (coverImg != null) {
 
-                    if (sLocal) {
+                    String imageUrl = coverImg.getImageOriginalUrl(containerActivity);
+                    mImageLoader.setShouldCache(!coverImg.isLocal());
+                    ivCover.setTag(imageUrl);
+                    ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                    ivCover.setImageUrl(imageUrl, mImageLoader);
 
-                        String url = String.valueOf(coverImg.getThumb());
-
-                        mImageLoader.setShouldCache(false);
-                        ivCover.setTag(url);
-                        ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                        ivCover.setImageUrl(url, mImageLoader);
-
-                    } else {
-
-                        String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + coverImg.getUuid());
-
-                        mImageLoader.setShouldCache(true);
-                        ivCover.setTag(url);
-                        ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                        ivCover.setImageUrl(url, mImageLoader);
-
-                    }
                 } else {
                     ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
                     ivCover.setImageUrl(null, mImageLoader);
@@ -452,36 +483,17 @@ public class MediaShareList implements NavPagerActivity.Page {
 
                     Log.i(TAG, "images[0]:" + imageDigests.get(0));
                     itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(0));
-                    if (itemImg != null) sLocal = false;
-                    else {
+                    if (itemImg == null) {
                         itemImg = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigests.get(0));
-                        sLocal = true;
                     }
 
                     if (itemImg != null) {
-                        if (sLocal) {
 
-                            String url = itemImg.getThumb();
-
-                            mImageLoader.setShouldCache(false);
-                            ivCover.setTag(url);
-                            ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                            ivCover.setImageUrl(url, mImageLoader);
-
-
-                        } else {
-
-                            String url = String.format(containerActivity.getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + itemImg.getUuid());
-
-                            mImageLoader.setShouldCache(true);
-                            ivCover.setTag(url);
-                            ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                            ivCover.setImageUrl(url, mImageLoader);
-
-                        }
-
-                        mShareCommentTextView = (TextView) view.findViewById(R.id.share_comment_textview);
-                        mCommentLayout = (LinearLayout) view.findViewById(R.id.comment_layout);
+                        String imageUrl = itemImg.getImageOriginalUrl(containerActivity);
+                        mImageLoader.setShouldCache(!itemImg.isLocal());
+                        ivCover.setTag(imageUrl);
+                        ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                        ivCover.setImageUrl(imageUrl, mImageLoader);
 
                         String uuid = itemImg.getUuid();
                         if (commentMap.containsKey(uuid)) {
@@ -587,7 +599,6 @@ public class MediaShareList implements NavPagerActivity.Page {
                         llPic2.setVisibility(View.VISIBLE);
                         llPic3.setVisibility(View.VISIBLE);
 
-                        TextView mCheckMorePhoto = (TextView) view.findViewById(R.id.check_more_photos);
                         if (imageDigests.size() > 9) {
                             mCheckMorePhoto.setVisibility(View.VISIBLE);
                             mCheckMorePhoto.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
@@ -610,19 +621,7 @@ public class MediaShareList implements NavPagerActivity.Page {
                     mShareCommentLayout.setVisibility(View.GONE);
                     mShareCountLayout.setVisibility(View.VISIBLE);
 
-                    mShareCountTextView = (TextView) view.findViewById(R.id.share_count_textview);
-
-                    String shareCountText = String.format(containerActivity.getString(R.string.share_comment_count), String.valueOf(imageDigests.size()));
-                    int start = shareCountText.indexOf(String.valueOf(imageDigests.size()));
-                    int end = start + String.valueOf(imageDigests.size()).length();
-                    SpannableStringBuilder builder = new SpannableStringBuilder(shareCountText);
-                    ForegroundColorSpan span = new ForegroundColorSpan(ContextCompat.getColor(containerActivity, R.color.light_black));
-                    ForegroundColorSpan beforeSpan = new ForegroundColorSpan(ContextCompat.getColor(containerActivity, R.color.light_gray));
-                    ForegroundColorSpan afterSpan = new ForegroundColorSpan(ContextCompat.getColor(containerActivity, R.color.light_gray));
-                    builder.setSpan(beforeSpan, 0, start, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-                    builder.setSpan(span, start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-                    builder.setSpan(afterSpan, end, shareCountText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    mShareCountTextView.setText(builder);
+                    setShareCountText();
 
                     for (i = 0; i < 9; i++) {
                         if (i >= imageDigests.size()) {
@@ -679,22 +678,23 @@ public class MediaShareList implements NavPagerActivity.Page {
                 }
 
             }
-
-            return view;
         }
 
-        @Override
-        public long getItemId(int position) {
-
-            return position;
+        private void setShareCountText() {
+            String shareCountText = String.format(containerActivity.getString(R.string.share_comment_count), String.valueOf(imageDigests.size()));
+            int start = shareCountText.indexOf(String.valueOf(imageDigests.size()));
+            int end = start + String.valueOf(imageDigests.size()).length();
+            SpannableStringBuilder builder = new SpannableStringBuilder(shareCountText);
+            ForegroundColorSpan span = new ForegroundColorSpan(ContextCompat.getColor(containerActivity, R.color.light_black));
+            ForegroundColorSpan beforeSpan = new ForegroundColorSpan(ContextCompat.getColor(containerActivity, R.color.light_gray));
+            ForegroundColorSpan afterSpan = new ForegroundColorSpan(ContextCompat.getColor(containerActivity, R.color.light_gray));
+            builder.setSpan(beforeSpan, 0, start, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            builder.setSpan(span, start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+            builder.setSpan(afterSpan, end, shareCountText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            mShareCountTextView.setText(builder);
         }
 
-        @Override
-        public Object getItem(int position) {
-            return container.mediaShareList.get(position);
-        }
-
-        public ArrayList<Media> getImgList(List<String> imageDigests) {
+        ArrayList<Media> getImgList(List<String> imageDigests) {
             ArrayList<Media> picList;
             Media picItem;
             Media picItemRaw;
@@ -721,17 +721,10 @@ public class MediaShareList implements NavPagerActivity.Page {
                 picList.add(picItem);
             }
 
-
             return picList;
         }
     }
 
-
-    private void loadCommentList(String imageUuid) {
-
-        containerActivity.retrieveRemoteMediaComment(imageUuid);
-
-    }
 
     public void refreshRemoteComment() {
 

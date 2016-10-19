@@ -128,7 +128,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         setExitSharedElementCallback(sharedElementCallback);
 
-        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mRequestQueue = RequestQueueInstance.getInstance(mContext).getRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
         headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
@@ -362,7 +362,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             }
         }
 
-        if (!mediaShare.checkMaintainersListContainCurrentUserUUID()) {
+        if (!checkPermissionToOperate()) {
             Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
 
             return true;
@@ -390,6 +390,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    private boolean checkPermissionToOperate() {
+        return mediaShare.checkMaintainersListContainCurrentUserUUID() || mediaShare.getCreatorUUID().equals(FNAS.userUUID);
     }
 
     @Override
@@ -431,15 +435,29 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     private void setPublicPrivate() {
 
         MediaShare cloneMediaShare = mediaShare.cloneMyself();
+        String requestData;
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[");
 
         if (cloneMediaShare.getViewersListSize() == 0) {
+
+
             for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
                 cloneMediaShare.addViewer(userUUID);
             }
 
+            stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare("add"));
+
         } else {
+
+            stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare("delete"));
+
             cloneMediaShare.clearViewers();
         }
+
+        stringBuilder.append("]");
+        requestData = stringBuilder.toString();
 
         mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
 
@@ -452,6 +470,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
 
         intent.putExtra(Util.OPERATION_MEDIASHARE, cloneMediaShare);
+        intent.putExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA,requestData);
         localBroadcastManager.sendBroadcast(intent);
 
     }

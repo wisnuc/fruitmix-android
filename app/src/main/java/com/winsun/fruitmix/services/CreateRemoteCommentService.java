@@ -97,7 +97,7 @@ public class CreateRemoteCommentService extends IntentService {
 
                 Log.i(TAG,"insert remote comment which source is network succeed");
 
-                DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+                DBUtils dbUtils = DBUtils.getInstance(this);
                 long dbResult = dbUtils.insertRemoteComment(comment,mediaUUID);
 
                 Log.i(TAG, "insert remote media comment which source is db result:"+dbResult);

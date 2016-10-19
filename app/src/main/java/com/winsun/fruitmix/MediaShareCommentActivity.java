@@ -117,7 +117,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         mContext = this;
 
-        mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        mRequestQueue = RequestQueueInstance.getInstance(this).getRequestQueue();
         initImageLoader();
 
         initFilterForReceiver();

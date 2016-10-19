@@ -63,7 +63,7 @@ public class RetrieveLocalMediaService extends IntentService {
         List<Media> medias;
 
         ConcurrentMap<String, Media> mediaConcurrentMap;
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        DBUtils dbUtils = DBUtils.getInstance(this);
 
         medias = dbUtils.getAllLocalMedia();
 

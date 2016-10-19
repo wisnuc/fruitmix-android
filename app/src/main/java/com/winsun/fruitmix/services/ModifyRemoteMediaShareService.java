@@ -6,6 +6,7 @@ import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
@@ -23,8 +24,9 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
     private static final String ACTION_MODIFY_REMOTE_MEDIA_SHARE = "com.winsun.fruitmix.services.action.modify.remote.share";
 
-    // TODO: Rename parameters
     private static final String EXTRA_MEDIA_SHARE = "com.winsun.fruitmix.services.extra.share";
+
+    private static final String EXTRA_REQUEST_DATA = "com.wisnun.fruitmix.services.extra.request.data";
 
     public ModifyRemoteMediaShareService() {
         super("ModifyRemoteMediaShareService");
@@ -36,10 +38,11 @@ public class ModifyRemoteMediaShareService extends IntentService {
      *
      * @see IntentService
      */
-    public static void startActionModifyRemoteMediaShare(Context context, MediaShare mediaShare) {
+    public static void startActionModifyRemoteMediaShare(Context context, MediaShare mediaShare,String requestData) {
         Intent intent = new Intent(context, ModifyRemoteMediaShareService.class);
         intent.setAction(ACTION_MODIFY_REMOTE_MEDIA_SHARE);
         intent.putExtra(EXTRA_MEDIA_SHARE, mediaShare);
+        intent.putExtra(EXTRA_REQUEST_DATA,requestData);
         context.startService(intent);
     }
 
@@ -48,8 +51,9 @@ public class ModifyRemoteMediaShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_MODIFY_REMOTE_MEDIA_SHARE.equals(action)) {
-                final MediaShare mediaShare = intent.getParcelableExtra(EXTRA_MEDIA_SHARE);
-                handleActionModifyRemoteShare(mediaShare);
+                MediaShare mediaShare = intent.getParcelableExtra(EXTRA_MEDIA_SHARE);
+                String requestData = intent.getStringExtra(EXTRA_REQUEST_DATA);
+                handleActionModifyRemoteShare(mediaShare,requestData);
             }
         }
     }
@@ -58,13 +62,10 @@ public class ModifyRemoteMediaShareService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionModifyRemoteShare(MediaShare mediaShare) {
+    private void handleActionModifyRemoteShare(MediaShare mediaShare,String requestData) {
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
 
         Intent intent = new Intent(Util.REMOTE_SHARE_MODIFIED);
-
-        String viewers;
-        String maintainers;
 
         if (mediaShare.isLocal()) {
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.LOCAL_MEDIASHARE_UPLOADING.name());
@@ -75,25 +76,8 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
         } else {
 
-            viewers = "";
-            for (String key : mediaShare.getViewers()) {
-                viewers += ",\\\"" + key + "\\\"";
-            }
-            if (viewers.length() == 0) {
-                viewers += ",";
-            }
-            Log.i(TAG, "winsun viewer:" + viewers);
-
-            maintainers = "";
-            for (String key : mediaShare.getMaintainers()) {
-                maintainers += ",\\\"" + key + "\\\"";
-            }
-
-            Log.i(TAG, "winsun maintainers:" + maintainers);
-
-            viewers = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mediaShare.getUuid() + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"false\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + maintainers.substring(1) + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mediaShare.getTitle() + "\\\", \\\"desc\\\":\\\"" + mediaShare.getDesc() + "\\\"}], \\\"viewers\\\":[" + viewers.substring(1) + "]}}]\"}";
             try {
-                String result = FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, viewers);
+                String result = FNAS.PostRemoteCall(String.format(getString(R.string.update_mediashare_url),Util.MEDIASHARE_PARAMETER,mediaShare.getUuid()), requestData);
 
                 if(result.length() > 0){
                     intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
@@ -101,7 +85,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
                     Log.i(TAG,"modify remote share succeed");
 
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+                    DBUtils dbUtils = DBUtils.getInstance(this);
                     long dbResult = dbUtils.updateRemoteShare(mediaShare);
 
                     Log.i(TAG, "modify media in remote mediashare which source is network result:" + dbResult);

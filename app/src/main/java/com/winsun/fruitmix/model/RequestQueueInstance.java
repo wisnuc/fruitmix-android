@@ -4,23 +4,30 @@ import android.content.Context;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
-import com.winsun.fruitmix.util.Util;
 
 /**
  * Created by Administrator on 2016/8/4.
  */
-public enum RequestQueueInstance {
+public class RequestQueueInstance {
 
-    REQUEST_QUEUE_INSTANCE;
+    private RequestQueue requestQueue;
 
-    private RequestQueue mRequestQueue;
+    private static RequestQueueInstance instance;
 
-    RequestQueueInstance() {
-        mRequestQueue = Volley.newRequestQueue(Util.APPLICATION_CONTEXT);
+    private RequestQueueInstance(Context context) {
+        requestQueue = Volley.newRequestQueue(context.getApplicationContext());
     }
 
-    public RequestQueue getmRequestQueue() {
-        return mRequestQueue;
+    public static RequestQueueInstance getInstance(Context context){
+        if(instance == null){
+            instance = new RequestQueueInstance(context);
+        }
+        return instance;
+    }
+
+
+    public RequestQueue getRequestQueue() {
+        return requestQueue;
     }
 
 }

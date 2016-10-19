@@ -148,7 +148,7 @@ public class UserManageActivity extends Activity implements View.OnClickListener
         @BindView(R.id.del_user)
         ImageView mDelUser;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             ButterKnife.bind(this, view);
         }
 

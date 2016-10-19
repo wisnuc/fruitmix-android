@@ -72,11 +72,9 @@ public class RetrieveRemoteMediaCommentService extends IntentService {
 
         List<Comment> comments;
 
-        ConcurrentMap<String, Comment> mediaCommentConcurrentMap;
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        DBUtils dbUtils = DBUtils.getInstance(this);
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-
 
         try {
 

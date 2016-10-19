@@ -85,7 +85,7 @@ public class MoreMediaActivity extends AppCompatActivity {
     }
 
     private void initImageLoader() {
-        mImageLoader = new ImageLoader(RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue(), ImageLruCache.instance());
+        mImageLoader = new ImageLoader(RequestQueueInstance.getInstance(this).getRequestQueue(), ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
         headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);

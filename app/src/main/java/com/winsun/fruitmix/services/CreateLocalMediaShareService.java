@@ -60,10 +60,10 @@ public class CreateLocalMediaShareService extends IntentService {
      */
     private void handleActionCreateShare(MediaShare mediaShare) {
 
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        DBUtils dbUtils = DBUtils.getInstance(this);
         long returnValue = dbUtils.insertLocalShare(mediaShare);
 
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
+        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
         Intent intent = new Intent(Util.LOCAL_SHARE_CREATED);
 
         if(returnValue > 0){

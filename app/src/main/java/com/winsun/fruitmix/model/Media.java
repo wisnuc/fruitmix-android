@@ -8,6 +8,7 @@ import android.util.Log;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 /**
@@ -28,6 +29,7 @@ public class Media implements Parcelable {
     private boolean loaded;
     private String belongingMediaShareUUID;
     private boolean uploaded;
+    private boolean sharing;
 
     public Media() {
 
@@ -159,23 +161,6 @@ public class Media implements Parcelable {
         this.belongingMediaShareUUID = belongingMediaShareUUID;
     }
 
-    public synchronized boolean uploadIfNotDone() {
-
-        if (!uploaded) {
-            uploaded = FNAS.UploadFile(thumb);
-
-            Log.i(TAG, "upload file:" + thumb + "result:" + uploaded);
-
-            if (uploaded) {
-                DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-                dbUtils.updateLocalMedia(this);
-            }
-
-        }
-
-        return uploaded;
-    }
-
     public void restoreUploadState() {
         uploaded = false;
     }
@@ -186,6 +171,41 @@ public class Media implements Parcelable {
 
     public void setUploaded(boolean uploaded) {
         this.uploaded = uploaded;
+    }
+
+    public boolean isSharing() {
+        return sharing;
+    }
+
+    public void setSharing(boolean sharing) {
+        this.sharing = sharing;
+    }
+
+    public synchronized boolean uploadIfNotDone(Context context) {
+
+        DBUtils dbUtils = DBUtils.getInstance(context);
+
+        if (LocalCache.RemoteMediaMapKeyIsUUID.containsKey(getUuid())) {
+
+            Log.i(TAG, "upload file is already uploaded");
+
+            uploaded = true;
+
+            dbUtils.updateLocalMedia(this);
+        }
+
+        if (!uploaded) {
+            uploaded = FNAS.UploadFile(thumb);
+
+            Log.i(TAG, "upload file:" + thumb + "result:" + uploaded);
+
+            if (uploaded) {
+                dbUtils.updateLocalMedia(this);
+            }
+
+        }
+
+        return uploaded;
     }
 
     public String getImageThumbUrl(Context context) {

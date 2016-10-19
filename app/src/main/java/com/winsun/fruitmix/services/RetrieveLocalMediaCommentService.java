@@ -55,7 +55,7 @@ public class RetrieveLocalMediaCommentService extends IntentService {
      */
     private void handleActionRetrieveLocalComment() {
 
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        DBUtils dbUtils = DBUtils.getInstance(this);
 
         Map<String, List<Comment>> localCommentMap = dbUtils.getAllLocalImageCommentKeyIsImageUUID();
 

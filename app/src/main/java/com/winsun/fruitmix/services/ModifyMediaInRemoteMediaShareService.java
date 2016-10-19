@@ -3,9 +3,11 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.MediaShareContent;
@@ -16,6 +18,7 @@ import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -61,9 +64,9 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_MODIFY_MEDIA.equals(action)) {
-                MediaShare originalMediashare = intent.getParcelableExtra(EXTRA_ORIGINAL_MEDIASHARE);
-                MediaShare modifiedMediashare = intent.getParcelableExtra(EXTRA_MODIFIED_MEDIASHARE);
-                handleActionModifyMedia(originalMediashare, modifiedMediashare);
+                MediaShare originalMediaShare = intent.getParcelableExtra(EXTRA_ORIGINAL_MEDIASHARE);
+                MediaShare modifiedMediaShare = intent.getParcelableExtra(EXTRA_MODIFIED_MEDIASHARE);
+                handleActionModifyMedia(originalMediaShare, modifiedMediaShare);
             }
         }
     }
@@ -96,30 +99,19 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
 
         } else {
 
-            StringBuilder stringBuilder = new StringBuilder("{\"commands\": \"[");
 
-            for (MediaShareContent mediaShareContent : differentContentsInOriginalMediaShare) {
-                stringBuilder.append("{\\\"op\\\":\\\"remove\\\",\\\"path\\\":\\\"").append(modifiedMediaShare.getUuid()).append("\\\",\\\"value\\\":{\\\"digest\\\":\\\"").append(mediaShareContent.getDigest()).append("\\\"}},");
+            String data = getData(differentContentsInOriginalMediaShare, differentContentsInModifiedMediaShare);
 
-            }
-
-            for (MediaShareContent mediaShareContent : differentContentsInModifiedMediaShare) {
-                stringBuilder.append("{\\\"op\\\":\\\"add\\\",\\\"path\\\":\\\"").append(modifiedMediaShare.getUuid()).append("\\\",\\\"value\\\":{\\\"type\\\":\\\"media\\\",\\\"digest\\\":\\\"").append(mediaShareContent.getDigest()).append("\\\"}},");
-
-            }
-
-            if (stringBuilder.lastIndexOf(",") != -1)
-                stringBuilder.replace(stringBuilder.lastIndexOf(","), stringBuilder.length(), "]\"}");
 
             try {
-                String result = FNAS.PatchRemoteCall(Util.MEDIASHARE_PARAMETER, stringBuilder.toString());
+                String result = FNAS.PostRemoteCall(String.format(getString(R.string.update_mediashare_url),Util.MEDIASHARE_PARAMETER,modifiedMediaShare.getUuid()), data);
 
                 if (result.length() > 0) {
                     intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
 
                     Log.i(TAG, "modify media in remote mediashare which source is network succeed");
 
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+                    DBUtils dbUtils = DBUtils.getInstance(this);
 
                     long dbResult = 0;
 
@@ -152,6 +144,30 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
         localBroadcastManager.sendBroadcast(intent);
 
 
+    }
+
+    @NonNull
+    private String getData(List<MediaShareContent> differentContentsInOriginalMediaShare, List<MediaShareContent> differentContentsInModifiedMediaShare) {
+        StringBuilder stringBuilder = new StringBuilder("[");
+        stringBuilder.append("{\"op\":\"delete\",\"path\":\"contents\",\"value\":[");
+        for (MediaShareContent mediaShareContent : differentContentsInOriginalMediaShare) {
+
+            stringBuilder.append("\"");
+            stringBuilder.append(mediaShareContent.getDigest());
+            stringBuilder.append("\",");
+
+        }
+        stringBuilder.append("]},");
+
+        stringBuilder.append("{\"op\":\"add\",\"path\":\"contents\",\"value\":[");
+        for (MediaShareContent mediaShareContent : differentContentsInModifiedMediaShare) {
+
+            stringBuilder.append("\"");
+            stringBuilder.append(mediaShareContent.getDigest());
+            stringBuilder.append("\",");
+        }
+        stringBuilder.append("]}]");
+        return stringBuilder.toString();
     }
 
     private List<MediaShareContent> findDifferentMediaShareContentInFirstMediaShareContents(List<MediaShareContent> firstMediaShareContents, List<MediaShareContent> secondMediaShareContents) {

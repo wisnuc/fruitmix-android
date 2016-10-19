@@ -50,6 +50,9 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
                     media.setTime(dateTime.substring(0, 4) + "-" + dateTime.substring(5, 7) + "-" + dateTime.substring(8, 10));
                 }
 
+                String sharing = itemRaw.getString("sharing");
+                media.setSharing(sharing.equals("1"));
+
                 medias.add(media);
 
             }

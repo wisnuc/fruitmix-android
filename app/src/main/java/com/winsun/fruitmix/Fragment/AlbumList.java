@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.Fragment;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -54,8 +55,8 @@ public class AlbumList implements NavPagerActivity.Page {
     LinearLayout mLoadingLayout;
     @BindView(R.id.no_content_layout)
     LinearLayout mNoContentLayout;
-
-    private ListView mainListView;
+    @BindView(R.id.mainList)
+    ListView mainListView;
 
     private List<MediaShare> mediaShareList;
 
@@ -72,7 +73,7 @@ public class AlbumList implements NavPagerActivity.Page {
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
                 R.layout.album_list, null);
 
-        ButterKnife.bind(view);
+        ButterKnife.bind(this,view);
 
         initImageLoader();
 
@@ -91,7 +92,7 @@ public class AlbumList implements NavPagerActivity.Page {
     }
 
     private void initImageLoader() {
-        RequestQueue mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(containerActivity).getRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
         headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
@@ -176,7 +177,6 @@ public class AlbumList implements NavPagerActivity.Page {
     private class AlbumListViewAdapter extends BaseAdapter {
 
         AlbumList container;
-        RelativeLayout lastMainBar;
 
         AlbumListViewAdapter(AlbumList container_) {
             container = container_;
@@ -191,37 +191,74 @@ public class AlbumList implements NavPagerActivity.Page {
         @Override
         public View getView(final int position, final View convertView, ViewGroup parent) {
             View view;
-            final MediaShare currentItem;
-            final RelativeLayout mainBar;
-            NetworkImageView ivMainPic;
-            ImageView ivLock;
-            TextView lbTitle, lbDesc, lbDate, lbOwner, lbPhotoCount;
-            TextView lbDelete, lbShare;
-            Media coverImg;
+            AlbumListViewHolder viewHolder;
 
-
-            if (convertView == null)
+            if (convertView == null) {
                 view = LayoutInflater.from(container.containerActivity).inflate(R.layout.album_list_cell, parent, false);
-            else view = convertView;
+                viewHolder = new AlbumListViewHolder(view);
+                view.setTag(viewHolder);
+            } else {
+                view = convertView;
+                viewHolder = (AlbumListViewHolder) view.getTag();
+            }
 
-            currentItem = (MediaShare) this.getItem(position);
+            MediaShare currentItem = (MediaShare) getItem(position);
+            viewHolder.refreshView(currentItem);
 
-            mainBar = (RelativeLayout) view.findViewById(R.id.mainBar);
-            ivMainPic = (NetworkImageView) view.findViewById(R.id.mainPic);
+            return view;
+        }
 
-            ivLock = (ImageView) view.findViewById(R.id.lock);
-            lbTitle = (TextView) view.findViewById(R.id.title);
-            lbPhotoCount = (TextView) view.findViewById(R.id.photo_count_tv);
-            lbDesc = (TextView) view.findViewById(R.id.desc);
-            lbDelete = (TextView) view.findViewById(R.id.delete);
-            lbShare = (TextView) view.findViewById(R.id.share);
-            lbDate = (TextView) view.findViewById(R.id.date);
-            lbOwner = (TextView) view.findViewById(R.id.owner);
+        @Override
+        public long getItemId(int position) {
+
+            return position;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return container.mediaShareList.get(position);
+        }
+    }
+
+    class AlbumListViewHolder {
+
+        @BindView(R.id.mainBar)
+        RelativeLayout mainBar;
+        @BindView(R.id.mainPic)
+        NetworkImageView ivMainPic;
+        @BindView(R.id.lock)
+        ImageView ivLock;
+        @BindView(R.id.title)
+        TextView lbTitle;
+        @BindView(R.id.desc)
+        TextView lbDesc;
+        @BindView(R.id.date)
+        TextView lbDate;
+        @BindView(R.id.owner)
+        TextView lbOwner;
+        @BindView(R.id.photo_count_tv)
+        TextView lbPhotoCount;
+        @BindView(R.id.delete)
+        TextView lbDelete;
+        @BindView(R.id.share)
+        TextView lbShare;
+
+        Media coverImg;
+        MediaShare currentItem;
+        RelativeLayout lastMainBar;
+
+        AlbumListViewHolder(View view) {
+
+            ButterKnife.bind(this, view);
+        }
+
+        void refreshView(MediaShare mediaShare) {
+
+            currentItem = mediaShare;
 
             //restore mainbar state
             mainBar.setTranslationX(0.0f);
 
-            //check image
             coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
             if (coverImg == null) {
                 coverImg = LocalCache.LocalMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
@@ -261,15 +298,9 @@ public class AlbumList implements NavPagerActivity.Page {
 
                     MediaShare cloneMediaShare = currentItem.cloneMyself();
 
-                    if (cloneMediaShare.getViewersListSize() == 0) {
-                        for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
-                            cloneMediaShare.addViewer(userUUID);
-                        }
-                    } else {
-                        cloneMediaShare.clearViewers();
-                    }
+                    String requestData = createRequestData(cloneMediaShare);
 
-                    containerActivity.modifyMediaShare(cloneMediaShare);
+                    containerActivity.modifyMediaShare(cloneMediaShare,requestData);
 
                 }
             });
@@ -290,7 +321,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     int margin;
-                    margin = Util.dip2px(100);
+                    margin = Util.dip2px(containerActivity,100);
                     switch (event.getAction() & MotionEvent.ACTION_MASK) {
                         case MotionEvent.ACTION_DOWN:
                             if (lastMainBar != null) lastMainBar.setTranslationX(0.0f);
@@ -336,20 +367,33 @@ public class AlbumList implements NavPagerActivity.Page {
                 }
 
             });
-
-
-            return view;
         }
 
-        @Override
-        public long getItemId(int position) {
+        @NonNull
+        private String createRequestData(MediaShare cloneMediaShare) {
+            String requestData;
 
-            return position;
-        }
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("[");
 
-        @Override
-        public Object getItem(int position) {
-            return container.mediaShareList.get(position);
+            if (cloneMediaShare.getViewersListSize() == 0) {
+
+                for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+                    cloneMediaShare.addViewer(userUUID);
+                }
+
+                stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare("add"));
+
+            } else {
+
+                stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare("delete"));
+
+                cloneMediaShare.clearViewers();
+            }
+
+            stringBuilder.append("]");
+            requestData = stringBuilder.toString();
+            return requestData;
         }
     }
 

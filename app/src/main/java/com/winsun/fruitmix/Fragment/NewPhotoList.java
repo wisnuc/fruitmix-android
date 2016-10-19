@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
@@ -62,7 +63,6 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     @BindView(R.id.photo_recyclerview)
     RecyclerView mRecyclerView;
-
     @BindView(R.id.loading_layout)
     LinearLayout mLoadingLayout;
     @BindView(R.id.no_content_layout)
@@ -112,6 +112,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
         containerActivity = activity;
 
         view = View.inflate(containerActivity, R.layout.new_photo_layout, null);
+
         ButterKnife.bind(this, view);
 
         initImageLoader();
@@ -149,7 +150,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
     }
 
     private void initImageLoader() {
-        RequestQueue mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(containerActivity).getRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
         headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
@@ -268,7 +269,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
     }
 
     private void calcPhotoItemWidth() {
-        mItemWidth = mScreenWidth / mSpanCount - Util.dip2px(5);
+        mItemWidth = mScreenWidth / mSpanCount - Util.dip2px(containerActivity,5);
     }
 
     @Override
@@ -311,6 +312,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             localMedia.setTitle(date);
             localMedia.setThumb(media.getThumb());
             localMedia.setSelected(false);
+            localMedia.setSharing(true);
             mediaList.add(localMedia);
         }
 
@@ -334,6 +336,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             remoteMedia.setThumb(media.getThumb());
             remoteMedia.setTitle(date);
             remoteMedia.setSelected(false);
+            remoteMedia.setSharing(media.isSharing());
             mediaList.add(remoteMedia);
         }
 
@@ -707,13 +710,13 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             mImageLoader.setTag(position);
 
-            if(!mIsFling){
+            if (!mIsFling) {
                 String imageUrl = media.getImageThumbUrl(containerActivity);
                 mImageLoader.setShouldCache(!media.isLocal());
                 mPhotoIv.setTag(imageUrl);
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(imageUrl, mImageLoader);
-            }else {
+            } else {
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(null, mImageLoader);
             }
@@ -722,7 +725,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             params.height = mItemWidth;
 
-            int normalMargin = Util.dip2px(2.5f);
+            int normalMargin = Util.dip2px(containerActivity,2.5f);
 
             params.setMargins(normalMargin, normalMargin, normalMargin, normalMargin);
             view.setLayoutParams(params);
@@ -730,7 +733,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             if (mSelectMode) {
                 boolean selected = media.isSelected();
                 if (selected) {
-                    int selectMargin = Util.dip2px(20);
+                    int selectMargin = Util.dip2px(containerActivity,20);
                     setPhotoIvLayoutParams(selectMargin);
                     mPhotoSelectedIv.setVisibility(View.VISIBLE);
                 } else {
@@ -749,10 +752,16 @@ public class NewPhotoList implements NavPagerActivity.Page {
                 @Override
                 public void onClick(View v) {
                     if (mSelectMode) {
+
+                        if (!media.isSharing()) {
+                            Toast.makeText(containerActivity, containerActivity.getString(R.string.photo_not_sharing), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
                         boolean selected = media.isSelected();
 
                         if (selected) {
-                            int selectMargin = Util.dip2px(20);
+                            int selectMargin = Util.dip2px(containerActivity,20);
                             setPhotoIvLayoutParams(selectMargin);
                             mPhotoSelectedIv.setVisibility(View.VISIBLE);
                         } else {
@@ -817,7 +826,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         private void setPhotoIvLayoutParams(int margin) {
             RelativeLayout.LayoutParams photoParams = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
-            photoParams.setMargins(margin,margin,margin,margin);
+            photoParams.setMargins(margin, margin, margin, margin);
             mPhotoIv.setLayoutParams(photoParams);
         }
 
@@ -871,7 +880,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             float newSpan = detector.getCurrentSpan();
 
-            if (newSpan > mOldSpan + Util.dip2px(2)) {
+            if (newSpan > mOldSpan + Util.dip2px(containerActivity,2)) {
 
                 if (mSpanCount > mSpanMinCount) {
                     mSpanCount--;
@@ -884,7 +893,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                 Log.i(TAG, "pinch more");
 
-            } else if (mOldSpan > newSpan + Util.dip2px(2)) {
+            } else if (mOldSpan > newSpan + Util.dip2px(containerActivity,2)) {
 
                 if (mSpanCount < mSpanMaxCount) {
                     mSpanCount++;

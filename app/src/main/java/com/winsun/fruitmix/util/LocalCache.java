@@ -75,7 +75,7 @@ public class LocalCache {
         return file.delete();
     }
 
-    public static void CleanAll() {
+    public static void CleanAll(final Context context) {
 
         LocalCache.DropGlobalData(Util.DEVICE_ID_MAP_NAME);
 
@@ -85,7 +85,7 @@ public class LocalCache {
         instance.doOneTaskInCachedThread(new Runnable() {
             @Override
             public void run() {
-                DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+                DBUtils dbUtils = DBUtils.getInstance(context);
                 dbUtils.deleteAllLocalShare();
                 dbUtils.deleteAllLocalComment();
                 dbUtils.deleteAllRemoteComment();

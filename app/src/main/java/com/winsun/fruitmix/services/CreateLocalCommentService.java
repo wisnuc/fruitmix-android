@@ -64,7 +64,7 @@ public class CreateLocalCommentService extends IntentService {
      */
     private void handleActionCreateLocalComment(String imageUUID, Comment comment) {
 
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        DBUtils dbUtils = DBUtils.getInstance(this);
         long returnValue = dbUtils.insertLocalComment(comment, imageUUID);
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);

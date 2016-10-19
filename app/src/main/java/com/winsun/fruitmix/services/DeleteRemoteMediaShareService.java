@@ -77,7 +77,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
 
                 Log.i(TAG, "delete remote mediashare which source is network succeed");
 
-                DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+                DBUtils dbUtils = DBUtils.getInstance(this);
                 long dbResult = dbUtils.deleteRemoteShareByUUid(mediaShare.getUuid());
 
                 Log.i(TAG, "delete remote mediashare which source is db result:" + dbResult);

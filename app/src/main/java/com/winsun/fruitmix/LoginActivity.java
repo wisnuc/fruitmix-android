@@ -193,7 +193,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                     case SUCCEED:
 
                         if (!mGateway.equals(FNAS.Gateway)) {
-                            LocalCache.CleanAll();
+                            LocalCache.CleanAll(LoginActivity.this);
                         }
 
                         LocalCache.Init(LoginActivity.this);

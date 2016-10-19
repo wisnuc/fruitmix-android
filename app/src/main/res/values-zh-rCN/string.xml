@@ -76,6 +76,10 @@
     <string name="no_comment_content">请填写内容</string>
     <string name="check_more_photos">查看更多照片</string>
     <string name="load_finish">加载完成</string>
+    <string name="photo_not_sharing">对不起，该照片不能被分享</string>
+    <string name="modify_nothing_about_mediashare">未做任何修改，请进行操作</string>
+
+
 
     <!-- album menu-->
     <string name="setting_album">设置相册</string>

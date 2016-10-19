@@ -58,14 +58,14 @@ public class ModifyLocalMediaShareService extends IntentService {
      */
     private void handleActionModifyLocalShare(MediaShare mediaShare) {
 
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
+        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
         Intent intent = new Intent(Util.LOCAL_SHARE_MODIFIED);
 
         if (!mediaShare.isLocal()) {
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.NO_NETWORK.name());
         } else {
 
-            DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+            DBUtils dbUtils = DBUtils.getInstance(this);
 
             long returnValue = dbUtils.updateLocalShare(mediaShare);
 

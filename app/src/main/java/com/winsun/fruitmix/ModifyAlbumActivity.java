@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.LocalBroadcastManager;
@@ -15,22 +16,19 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.winsun.fruitmix.model.MediaShare;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Created by Administrator on 2016/4/28.
@@ -115,23 +113,10 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                 title = tfTitle.getText().toString();
                 desc = tfDesc.getText().toString();
 
+                String requestData = createRequestData(sPublic, sSetMaintainer, title, desc);
+                if (requestData == null) return;
+
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
-
-                if (sPublic) {
-                    for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
-                        mAblumMap.addViewer(userUUID);
-                    }
-                } else mAblumMap.clearViewers();
-
-                if (sSetMaintainer) {
-                    for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
-                        mAblumMap.addMaintainer(userUUID);
-                    }
-                } else {
-                    mAblumMap.clearMaintainers();
-                }
-                mAblumMap.setTitle(title);
-                mAblumMap.setDesc(desc);
 
                 Intent intent = new Intent(Util.OPERATION);
                 intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.MODIFY.name());
@@ -141,6 +126,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                     intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
                 }
                 intent.putExtra(Util.OPERATION_MEDIASHARE, mAblumMap);
+                intent.putExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA,requestData);
                 localBroadcastManager.sendBroadcast(intent);
 
             }
@@ -158,6 +144,73 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         filter = new IntentFilter(Util.LOCAL_SHARE_MODIFIED);
         filter.addAction(Util.REMOTE_SHARE_MODIFIED);
 
+    }
+
+    @Nullable
+    private String createRequestData(boolean sPublic, boolean sSetMaintainer, String title, String desc) {
+        String requestData;
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[");
+
+        boolean isPublic = mAblumMap.getViewersListSize() != 0;
+        if (sPublic != isPublic) {
+            if (sPublic) {
+
+                for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+                    mAblumMap.addViewer(userUUID);
+                }
+
+                stringBuilder.append(mAblumMap.createStringOperateViewersInMediaShare("add"));
+
+            } else {
+
+                stringBuilder.append(mAblumMap.createStringOperateViewersInMediaShare("delete"));
+
+                mAblumMap.clearViewers();
+            }
+
+        }
+
+        boolean isMaintained = mAblumMap.checkMaintainersListContainCurrentUserUUID();
+
+        if (sSetMaintainer != isMaintained) {
+
+            if (sSetMaintainer) {
+
+                for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+                    mAblumMap.addMaintainer(userUUID);
+                }
+
+                stringBuilder.append(mAblumMap.createStringOperateMaintainersInMediaShare("add"));
+
+            } else {
+
+                stringBuilder.append(mAblumMap.createStringOperateMaintainersInMediaShare("delete"));
+
+                mAblumMap.clearMaintainers();
+            }
+
+        }
+
+        if (!mAblumMap.getTitle().equals(title) || !mAblumMap.getDesc().equals(desc)) {
+
+            mAblumMap.setTitle(title);
+            mAblumMap.setDesc(desc);
+
+            stringBuilder.append(mAblumMap.createStringReplaceTitleTextAboutMediaShare());
+
+        }
+
+        stringBuilder.append("]");
+
+        if (stringBuilder.length() == 2) {
+            Toast.makeText(mContext, getString(R.string.modify_nothing_about_mediashare), Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        requestData = stringBuilder.toString();
+        return requestData;
     }
 
     @Override

@@ -10,6 +10,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewCompat;
 import android.util.DisplayMetrics;
+import android.util.StringBuilderPrinter;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -18,8 +19,10 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.model.Media;
 
 import java.io.FileInputStream;
+import java.io.StringReader;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -112,11 +115,10 @@ public class Util {
 
     public static final String DEVICE_ID_MAP_NAME = "deviceID";
 
-    public static final String HTTP_POST_METHOD = "POST";
-    public static final String HTTP_PATCH_METHOD = "PATCH";
-    public static final String HTTP_DELETE_METHOD = "DELETE";
-
-    public static final int HTTP_CONNECT_TIMEOUT = 10 * 1000;
+    static final String HTTP_POST_METHOD = "POST";
+    static final String HTTP_PATCH_METHOD = "PATCH";
+    static final String HTTP_DELETE_METHOD = "DELETE";
+    static final int HTTP_CONNECT_TIMEOUT = 10 * 1000;
 
     public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
     public static final String CURRENT_PHOTO_POSITION = "current_photo_position";
@@ -132,7 +134,7 @@ public class Util {
 
     public static final String KEY_SHOW_SOFT_INPUT_WHEN_ENTER = "key_show_soft_input_when_enter";
 
-    public static Context APPLICATION_CONTEXT = null;
+    public static final String KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA = "key_modify_remote_mediashare_request_data";
 
     public static boolean loginState = false;
 
@@ -147,8 +149,8 @@ public class Util {
     /**
      * 将dp转化为px
      */
-    public static int dip2px(float dip) {
-        float v = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, APPLICATION_CONTEXT.getResources().getDisplayMetrics());
+    public static int dip2px(Context context,float dip) {
+        float v = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, context.getResources().getDisplayMetrics());
         return (int) (v + 0.5f);
     }
 
@@ -305,7 +307,7 @@ public class Util {
 
             media = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigest);
             if (media != null) {
-                uploadFileResult = media.uploadIfNotDone();
+                uploadFileResult = media.uploadIfNotDone(context);
 
                 if (!uploadFileResult)
                     break;
@@ -324,4 +326,5 @@ public class Util {
 
         return uploadFileResult;
     }
+
 }

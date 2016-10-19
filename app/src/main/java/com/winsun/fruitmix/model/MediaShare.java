@@ -7,6 +7,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.winsun.fruitmix.util.FNAS;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,6 +56,51 @@ public class MediaShare implements Parcelable {
         isLocal = in.readByte() != 0;
         shareDigest = in.readString();
         isSticky = in.readByte() != 0;
+    }
+
+    public String createStringOperateViewersInMediaShare(String op){
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{\"op\":\"");
+        stringBuilder.append(op);
+        stringBuilder.append("\",\"path\":\"");
+        stringBuilder.append("viewers");
+        stringBuilder.append("\",\"value\":[");
+        for (String value : viewers) {
+            stringBuilder.append("\"");
+            stringBuilder.append(value);
+            stringBuilder.append("\",");
+        }
+        stringBuilder.append("]},");
+
+        return stringBuilder.toString();
+    }
+
+    public String createStringOperateMaintainersInMediaShare(String op){
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{\"op\":\"");
+        stringBuilder.append(op);
+        stringBuilder.append("\",\"path\":\"");
+        stringBuilder.append("maintainers");
+        stringBuilder.append("\",\"value\":[");
+        for (String value : maintainers) {
+            stringBuilder.append("\"");
+            stringBuilder.append(value);
+            stringBuilder.append("\",");
+        }
+        stringBuilder.append("]},");
+
+        return stringBuilder.toString();
+    }
+
+    public String createStringReplaceTitleTextAboutMediaShare(){
+        return  "{\"op\":\"replace\",\"path\":\"album\",\"value\":{" +
+                "\"title\":\"" +
+                title +
+                "\",\"text\":\"" +
+                desc +
+                "\"},";
     }
 
     @Override

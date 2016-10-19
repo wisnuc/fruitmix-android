@@ -94,7 +94,7 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
             media.setSelected(false);
             media.setUuid(uuid);
 
-            DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+            DBUtils dbUtils = DBUtils.getInstance(this);
 
             long returnValue = dbUtils.insertLocalMedia(media);
 

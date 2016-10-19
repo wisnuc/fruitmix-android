@@ -65,7 +65,7 @@ public class RetrieveRemoteUserService extends IntentService {
         List<User> users;
 
         ConcurrentMap<String, User> userConcurrentMap;
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        DBUtils dbUtils = DBUtils.getInstance(this);
 
         try {
 

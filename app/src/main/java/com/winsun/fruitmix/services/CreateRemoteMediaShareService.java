@@ -163,7 +163,7 @@ public class CreateRemoteMediaShareService extends IntentService {
 
                 MediaShare newMediaShare = parser.getRemoteMediaShare(new JSONObject(result));
 
-                DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+                DBUtils dbUtils = DBUtils.getInstance(this);
                 long dbResult = dbUtils.insertRemoteMediaShare(newMediaShare);
 
                 Log.i(TAG, "insert remote mediashare which source is db result:" + dbResult);

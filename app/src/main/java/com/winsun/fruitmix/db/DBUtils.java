@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.db;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
@@ -25,14 +26,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Administrator on 2016/7/8.
  */
-public enum DBUtils {
-
-    SINGLE_INSTANCE;
+public class DBUtils {
 
     private static final String TAG = DBUtils.class.getSimpleName();
 
@@ -41,9 +41,19 @@ public enum DBUtils {
 
     private AtomicInteger referenceCount;
 
-    DBUtils() {
-        dbHelper = new DBHelper(Util.APPLICATION_CONTEXT);
+    private static DBUtils dbUtils;
+
+    private DBUtils(Context context) {
+        dbHelper = new DBHelper(context.getApplicationContext());
         referenceCount = new AtomicInteger();
+    }
+
+    public static DBUtils getInstance(Context context){
+        if(dbUtils == null){
+            dbUtils = new DBUtils(context);
+        }
+
+        return dbUtils;
     }
 
     private void openWritableDB() {
@@ -151,27 +161,27 @@ public enum DBUtils {
         return contentValues;
     }
 
-    private long insertMediaShareContent(String mediashareContentTableName,MediaShareContent mediaShareContent,String mediashareUUID){
+    private long insertMediaShareContent(String mediashareContentTableName, MediaShareContent mediaShareContent, String mediashareUUID) {
         openWritableDB();
 
-        ContentValues contentValues = createMediaShareContentContentValues(mediaShareContent,mediashareUUID);
+        ContentValues contentValues = createMediaShareContentContentValues(mediaShareContent, mediashareUUID);
 
-        long returnValue = database.insert(mediashareContentTableName,null,contentValues);
+        long returnValue = database.insert(mediashareContentTableName, null, contentValues);
 
         close();
 
         return returnValue;
     }
 
-    public long insertLocalMediaShareContent(MediaShareContent mediaShareContent,String mediashareUUID){
-        return insertMediaShareContent(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME,mediaShareContent,mediashareUUID);
+    public long insertLocalMediaShareContent(MediaShareContent mediaShareContent, String mediashareUUID) {
+        return insertMediaShareContent(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShareContent, mediashareUUID);
     }
 
-    public long insertRemoteMediaShareContent(MediaShareContent mediaShareContent,String mediashareUUID){
-        return insertMediaShareContent(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,mediaShareContent,mediashareUUID);
+    public long insertRemoteMediaShareContent(MediaShareContent mediaShareContent, String mediashareUUID) {
+        return insertMediaShareContent(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShareContent, mediashareUUID);
     }
 
-    private long insertMediaShare(String mediashareContentTableName,String mediashareTableName, Collection<MediaShare> mediashares) {
+    private long insertMediaShare(String mediashareContentTableName, String mediashareTableName, Collection<MediaShare> mediashares) {
         openWritableDB();
 
         long returnValue = 0;
@@ -198,18 +208,18 @@ public enum DBUtils {
 
     public long insertLocalShare(MediaShare mediaShare) {
 
-        return insertMediaShare(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME,DBHelper.LOCAL_SHARE_TABLE_NAME, Collections.singletonList(mediaShare));
+        return insertMediaShare(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, DBHelper.LOCAL_SHARE_TABLE_NAME, Collections.singletonList(mediaShare));
     }
 
     public long insertRemoteMediaShare(MediaShare mediaShare) {
 
-        return insertMediaShare(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,DBHelper.REMOTE_SHARE_TABLE_NAME, Collections.singletonList(mediaShare));
+        return insertMediaShare(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, DBHelper.REMOTE_SHARE_TABLE_NAME, Collections.singletonList(mediaShare));
 
     }
 
     public long insertRemoteMediaShares(ConcurrentMap<String, MediaShare> mediaShares) {
 
-        return insertMediaShare(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,DBHelper.REMOTE_SHARE_TABLE_NAME, mediaShares.values());
+        return insertMediaShare(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, DBHelper.REMOTE_SHARE_TABLE_NAME, mediaShares.values());
     }
 
     private ContentValues createUserContentValues(User user) {
@@ -257,6 +267,7 @@ public enum DBUtils {
         contentValues.put(DBHelper.MEDIA_KEY_TITLE, media.getTitle());
         contentValues.put(DBHelper.MEDIA_KEY_BELONGING_MEDIASHARE_UUID, media.getBelongingMediaShareUUID());
         contentValues.put(DBHelper.MEDIA_KEY_UPLOADED, media.isUploaded() ? 1 : 0);
+        contentValues.put(DBHelper.MEDIA_KEY_SHARING, media.isSharing() ? 1 : 0);
 
         return contentValues;
     }
@@ -375,22 +386,22 @@ public enum DBUtils {
         return deleteAllDataInTable(DBHelper.LOCAL_COMMENT_TABLE_NAME);
     }
 
-    private long deleteMediaShareContentByID(String mediashareContentTableName,String id){
+    private long deleteMediaShareContentByID(String mediashareContentTableName, String id) {
         openWritableDB();
 
-        long returnValue = database.delete(mediashareContentTableName,DBHelper.SHARE_CONTENT_KEY_ID + " = ?",new String[]{id});
+        long returnValue = database.delete(mediashareContentTableName, DBHelper.SHARE_CONTENT_KEY_ID + " = ?", new String[]{id});
 
         close();
 
         return returnValue;
     }
 
-    public long deleteLocalMediaShareContentByID(String id){
-        return deleteMediaShareContentByID(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME,id);
+    public long deleteLocalMediaShareContentByID(String id) {
+        return deleteMediaShareContentByID(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, id);
     }
 
-    public long deleteRemoteMediaShareContentByID(String id){
-        return deleteMediaShareContentByID(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,id);
+    public long deleteRemoteMediaShareContentByID(String id) {
+        return deleteMediaShareContentByID(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, id);
     }
 
     public long deleteLocalShareByUUid(String uuid) {
@@ -410,7 +421,7 @@ public enum DBUtils {
 
         openWritableDB();
 
-        database.delete(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME,null,null);
+        database.delete(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, null, null);
         long returnValue = database.delete(DBHelper.LOCAL_SHARE_TABLE_NAME, null, null);
 
         close();
@@ -434,7 +445,7 @@ public enum DBUtils {
 
         openWritableDB();
 
-        database.delete(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,null,null);
+        database.delete(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, null, null);
         long returnValue = database.delete(DBHelper.REMOTE_SHARE_TABLE_NAME, null, null);
 
         close();
@@ -457,7 +468,7 @@ public enum DBUtils {
         return deleteAllDataInTable(DBHelper.LOCAL_MEDIA_TABLE_NAME);
     }
 
-    private List<MediaShareContent> getMediaShareContents(String mediashareContentTableName,String mediashareUUID) {
+    private List<MediaShareContent> getMediaShareContents(String mediashareContentTableName, String mediashareUUID) {
 
 
         List<MediaShareContent> mediashareContents = new ArrayList<>();
@@ -585,9 +596,9 @@ public enum DBUtils {
         }
         cursor.close();
 
-        for (MediaShare mediaShare:list){
+        for (MediaShare mediaShare : list) {
 
-            mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME,mediaShare.getUuid()));
+            mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShare.getUuid()));
         }
 
         close();
@@ -607,7 +618,7 @@ public enum DBUtils {
         }
         cursor.close();
 
-        mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME,mediaShare.getUuid()));
+        mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShare.getUuid()));
 
         close();
 
@@ -628,9 +639,9 @@ public enum DBUtils {
         }
         cursor.close();
 
-        for (MediaShare mediaShare:mediaShares){
+        for (MediaShare mediaShare : mediaShares) {
 
-            mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,mediaShare.getUuid()));
+            mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShare.getUuid()));
         }
 
 
@@ -653,7 +664,7 @@ public enum DBUtils {
         }
         cursor.close();
 
-        mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,mediaShare.getUuid()));
+        mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShare.getUuid()));
 
         close();
 

@@ -66,7 +66,7 @@ public class RetrieveRemoteMediaService extends IntentService {
         List<Media> medias;
 
         ConcurrentMap<String, Media> mediaConcurrentMap;
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        DBUtils dbUtils = DBUtils.getInstance(this);
 
         try {
 

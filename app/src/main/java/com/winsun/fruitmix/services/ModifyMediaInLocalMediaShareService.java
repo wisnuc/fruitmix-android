@@ -83,7 +83,7 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
         Intent intent = new Intent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED);
 
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        DBUtils dbUtils = DBUtils.getInstance(this);
         long dbResult = 0;
 
         for (MediaShareContent mediaShareContent : differentContentsInOriginalMediaShare) {

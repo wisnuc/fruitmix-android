@@ -205,7 +205,7 @@ public class SplashScreenActivity extends Activity {
                 case FAIL:
                     Util.loginState = false;
                     LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
-                    Toast.makeText(Util.APPLICATION_CONTEXT, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SplashScreenActivity.this, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
 
                     break;
             }
@@ -240,7 +240,7 @@ public class SplashScreenActivity extends Activity {
 
                     LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
 
-                    Toast.makeText(Util.APPLICATION_CONTEXT, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SplashScreenActivity.this, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
 
                     FNAS.retrieveUserMap(mContext);
 

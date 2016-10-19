@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class PhotoSliderActivity extends AppCompatActivity implements IImageLoadListener {
@@ -118,6 +119,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         setEnterSharedElementCallback(sharedElementCallback);
 
         mContext = this;
+
+        ButterKnife.bind(this);
 
         initImageLoader();
 
@@ -220,7 +223,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     }
 
     private void initImageLoader() {
-        RequestQueue mRequestQueue = RequestQueueInstance.REQUEST_QUEUE_INSTANCE.getmRequestQueue();
+        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(this).getRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
         headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);

@@ -75,66 +75,13 @@ public class FNAS {
         return result;
     }
 
-    public static long deleteAllRemoteCommentIfNetworkConnected() {
-        long result = 0;
-        if (Util.getNetworkState(Util.APPLICATION_CONTEXT)) {
-            result = DBUtils.SINGLE_INSTANCE.deleteAllRemoteComment();
-            Log.i("delete result :", result + "");
-        }
-        return result;
-    }
-
     public static String loadUser() throws Exception {
 
         return FNAS.RemoteCall(Util.USER_PARAMETER);
 
     }
 
-    public static void fillUserMapByJsonString(String str) throws JSONException {
 
-        String uuid;
-        JSONArray json;
-        JSONObject itemRaw;
-        User item;
-
-        json = new JSONArray(str);
-        for (int i = 0; i < json.length(); i++) {
-            itemRaw = json.getJSONObject(i);
-            uuid = itemRaw.getString("uuid");
-            if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(uuid)) {
-                item = LocalCache.RemoteUserMapKeyIsUUID.get(uuid);
-            } else {
-                item = new User();
-            }
-
-            item.setUserName(itemRaw.getString("username"));
-            item.setUuid(itemRaw.getString("uuid"));
-            item.setAvatar(itemRaw.getString("avatar"));
-            if (itemRaw.has("email")) {
-                item.setEmail(itemRaw.getString("email"));
-            }
-
-            StringBuilder stringBuilder = new StringBuilder();
-            String[] splitStrings = item.getUserName().split(" ");
-            for (String splitString : splitStrings) {
-                stringBuilder.append(splitString.substring(0, 1).toUpperCase());
-            }
-            if (item.getDefaultAvatar() == null || item.getDefaultAvatar().equals("")) {
-                item.setDefaultAvatar(stringBuilder.toString());
-            }
-            if (item.getDefaultAvatarBgColor() == null || item.getDefaultAvatarBgColor().equals("")) {
-                item.setDefaultAvatarBgColor(String.valueOf(new Random().nextInt(3)));
-            }
-
-            LocalCache.RemoteUserMapKeyIsUUID.put(item.getUuid(), item); // save all user info
-
-        }
-
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-        dbUtils.insertRemoteUsers(LocalCache.RemoteUserMapKeyIsUUID);
-
-        Log.d("winsun", "RemoteUserMapKeyIsUUID " + LocalCache.RemoteUserMapKeyIsUUID);
-    }
 
     public static String loadMedia() throws Exception {
 
@@ -188,7 +135,18 @@ public class FNAS {
 
     }
 
-    public static void retrieveMediaMap(Context context) {
+    public static void retrieveLocalMediaMap(Context context) {
+
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA.name());
+        localBroadcastManager.sendBroadcast(intent);
+
+    }
+
+    public static void retrieveRemoteMediaMap(Context context){
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
 
@@ -196,12 +154,8 @@ public class FNAS {
         intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
         intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA.name());
         localBroadcastManager.sendBroadcast(intent);
-
-        intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA.name());
-        localBroadcastManager.sendBroadcast(intent);
     }
+
 
     public static void retrieveShareMap(Context context) {
 
@@ -372,9 +326,9 @@ public class FNAS {
 
     }
 
-    public static void restoreLocalPhotoUploadState() {
+    public static void restoreLocalPhotoUploadState(Context context) {
 
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        DBUtils dbUtils = DBUtils.getInstance(context);
 
         for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
             media.restoreUploadState();
@@ -484,77 +438,6 @@ public class FNAS {
 
     public static void delShareInDocumentsMapById(String uuid) {
         LocalCache.RemoteMediaShareMapKeyIsUUID.remove(uuid);
-    }
-
-    public static void loadLocalShare() {
-
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-
-        List<MediaShare> mediaShareList = dbUtils.getAllLocalShare();
-
-        for (MediaShare mediaShare : mediaShareList) {
-
-            LocalCache.RemoteMediaShareMapKeyIsUUID.put(mediaShare.getUuid(), mediaShare);
-
-        }
-
-    }
-
-    public static void checkLocalShareAndComment(final Context context) {
-        if (Util.getNetworkState(context)) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-
-                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-
-                    DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
-
-                    List<MediaShare> mediaShares = dbUtils.getAllLocalShare();
-                    Map<String, List<Comment>> comments = dbUtils.getAllLocalImageCommentKeyIsImageUUID();
-
-                    Intent intent = new Intent(Util.OPERATION);
-                    intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-
-                    if (!mediaShares.isEmpty()) {
-
-                        Log.i(TAG, "start local share task");
-
-                        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-
-                        for (MediaShare mediaShare : mediaShares) {
-
-                            intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-                            localBroadcastManager.sendBroadcast(intent);
-
-                        }
-
-                    }
-
-                    if (!comments.isEmpty()) {
-
-                        Log.i(TAG, "start local comment task");
-
-                        intent.removeExtra(Util.OPERATION_TARGET_TYPE_NAME);
-                        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
-
-                        for (Map.Entry<String, List<Comment>> entry : comments.entrySet()) {
-                            for (Comment comment : entry.getValue()) {
-
-                                intent.putExtra(Util.OPERATION_COMMENT, comment);
-                                intent.putExtra(Util.OPERATION_IMAGE_UUID, entry.getKey());
-                                localBroadcastManager.sendBroadcast(intent);
-
-                            }
-
-                        }
-
-                    }
-
-                }
-            }).start();
-        }
     }
 
 }

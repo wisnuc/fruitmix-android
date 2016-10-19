@@ -62,14 +62,14 @@ public class DeleteLocalMediaShareService extends IntentService {
      */
     private void handleActionDeleteLocalShare(MediaShare mediaShare) {
 
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(Util.APPLICATION_CONTEXT);
+        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
         Intent intent = new Intent(Util.LOCAL_SHARE_DELETED);
 
         if (!mediaShare.isLocal()) {
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.NO_NETWORK.name());
         } else {
 
-            DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+            DBUtils dbUtils = DBUtils.getInstance(this);
 
             long value = dbUtils.deleteLocalShareByUUid(mediaShare.getUuid());
 

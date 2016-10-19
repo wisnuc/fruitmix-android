@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
@@ -79,7 +80,7 @@ public class ButlerService extends Service {
                         handleModifyOperation(intent);
                         break;
                     case EDIT_PHOTO_IN_MEDIASHARE:
-                        handleEditPhotoInMediashareOperation(intent);
+                        handleEditPhotoInMediaShareOperation(intent);
                         break;
                     case DELETE:
                         handleDeleteOperation(intent);
@@ -122,7 +123,7 @@ public class ButlerService extends Service {
                 media = intent.getParcelableExtra(Util.OPERATION_MEDIA);
 
                 instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-                UploadMediaTask task = new UploadMediaTask(media);
+                UploadMediaTask task = new UploadMediaTask(this,media);
                 instance.doOneTaskInFixedThreadPool(task);
 
                 break;
@@ -159,16 +160,17 @@ public class ButlerService extends Service {
                 break;
             case REMOTE_MEDIASHARE:
                 mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
-                ModifyRemoteMediaShareService.startActionModifyRemoteMediaShare(this, mediaShare);
+                String requestData = intent.getStringExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA);
+                ModifyRemoteMediaShareService.startActionModifyRemoteMediaShare(this, mediaShare,requestData);
                 break;
 
         }
     }
 
-    private void handleEditPhotoInMediashareOperation(Intent intent) {
+    private void handleEditPhotoInMediaShareOperation(Intent intent) {
 
-        MediaShare originalMediashare = intent.getParcelableExtra(Util.OPERATION_ORIGINAL_MEDIASHARE_WHEN_EDIT_PHOTO);
-        MediaShare modifiedMediashare = intent.getParcelableExtra(Util.OPERATION_MODIFIED_MEDIASHARE_WHEN_EDIT_PHOTO);
+        MediaShare originalMediaShare = intent.getParcelableExtra(Util.OPERATION_ORIGINAL_MEDIASHARE_WHEN_EDIT_PHOTO);
+        MediaShare modifiedMediaShare = intent.getParcelableExtra(Util.OPERATION_MODIFIED_MEDIASHARE_WHEN_EDIT_PHOTO);
 
         String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE_NAME);
 
@@ -178,10 +180,10 @@ public class ButlerService extends Service {
 
         switch (targetType) {
             case LOCAL_MEDIASHARE:
-                ModifyMediaInLocalMediaShareService.startActionEditPhotoInMediaShare(this,originalMediashare,modifiedMediashare);
+                ModifyMediaInLocalMediaShareService.startActionEditPhotoInMediaShare(this, originalMediaShare, modifiedMediaShare);
                 break;
             case REMOTE_MEDIASHARE:
-                ModifyMediaInRemoteMediaShareService.startActionEditPhotoInMediaShare(this, originalMediashare, modifiedMediashare);
+                ModifyMediaInRemoteMediaShareService.startActionEditPhotoInMediaShare(this, originalMediaShare, modifiedMediaShare);
                 break;
         }
     }

@@ -73,7 +73,7 @@ public class DeleteLocalCommentService extends IntentService {
     private void handleActionDeleteLocalComment(Comment comment, String imageUUID) {
         // TODO: Handle action Foo
 
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        DBUtils dbUtils = DBUtils.getInstance(this);
 
         long returnValue = dbUtils.deleteLocalComment(comment.getId());
 

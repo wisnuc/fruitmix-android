@@ -64,7 +64,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
         List<MediaShare> mediaShares;
 
         ConcurrentMap<String, MediaShare> mediaShareConcurrentMap;
-        DBUtils dbUtils = DBUtils.SINGLE_INSTANCE;
+        DBUtils dbUtils = DBUtils.getInstance(this);
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
 

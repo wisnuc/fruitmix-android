@@ -15,8 +15,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Util.APPLICATION_CONTEXT = getApplicationContext();
-
         Intent intent = new Intent();
         intent.setClass(MainActivity.this, SplashScreenActivity.class);
         startActivity(intent);
