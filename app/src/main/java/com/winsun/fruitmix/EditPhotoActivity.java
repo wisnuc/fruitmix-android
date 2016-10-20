@@ -58,7 +58,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     FloatingActionButton mAddPhoto;
 
     private int mSpanCount = 3;
-    private GridLayoutManager mManager;
     private Context mContext;
     private EditPhotoAdapter mAdapter;
 
@@ -81,22 +80,18 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         ButterKnife.bind(this);
 
-        mImageLoader = new ImageLoader(RequestQueueInstance.getInstance(this).getRequestQueue(), ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
+        mContext = this;
+
+        initImageLoader();
 
         mBack.setOnClickListener(this);
         mAddPhoto.setOnClickListener(this);
         mFinish.setOnClickListener(this);
 
-        mContext = this;
-
         mediaShare = getIntent().getParcelableExtra(Util.KEY_MEDIASHARE);
         modifiedMediaShare = mediaShare.cloneMyself();
 
-        mManager = new GridLayoutManager(mContext, mSpanCount);
+        GridLayoutManager mManager = new GridLayoutManager(mContext, mSpanCount);
         mEditPhotoRecyclerView.setLayoutManager(mManager);
         mEditPhotoRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
@@ -104,7 +99,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         mEditPhotoRecyclerView.setAdapter(mAdapter);
 
         mPhotoList = new ArrayList<>();
-        fillPhotoList(mediaShare.getMediaShareContents().toArray(new String[mPhotoList.size()]));
+        fillPhotoList(mediaShare.getMediaDigestInMediaShareContents().toArray(new String[mediaShare.getMediaContentsListSize()]));
         mAdapter.notifyDataSetChanged();
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
@@ -112,6 +107,14 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         filter = new IntentFilter(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED);
         filter.addAction(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED);
 
+    }
+
+    private void initImageLoader() {
+        mImageLoader = new ImageLoader(RequestQueueInstance.getInstance(this).getRequestQueue(), ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
     }
 
     @Override
@@ -156,14 +159,24 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
             mPhotoList.add(picItem);
 
-            MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setDigest(picItem.getUuid());
-            mediaShareContent.setAuthor(FNAS.userUUID);
-            mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
-            modifiedMediaShare.addMediaShareContent(mediaShareContent);
+            Log.i(TAG, "fillPhotoList: image uuid" + aStArr);
+
         }
 
     }
+
+    private void fillMediaShareContents(String[] selectedImageUUIDs) {
+        for (String imageUUID : selectedImageUUIDs) {
+            MediaShareContent mediaShareContent = new MediaShareContent();
+            mediaShareContent.setDigest(imageUUID);
+            mediaShareContent.setAuthor(FNAS.userUUID);
+            mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
+            modifiedMediaShare.addMediaShareContent(mediaShareContent);
+
+            Log.i(TAG, "fillMediaShareContents: image uuid:" + imageUUID);
+        }
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -177,6 +190,13 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 startActivityForResult(intent, Util.KEY_CHOOSE_PHOTO_REQUEST_CODE);
                 break;
             case R.id.finish:
+
+                int diffOriginalMediaShareContentSize = mediaShare.getDifferentMediaShareContentInCurrentMediaShare(modifiedMediaShare).size();
+                int diffModifiedMediaShareContentSize = modifiedMediaShare.getDifferentMediaShareContentInCurrentMediaShare(mediaShare).size();
+                if(diffOriginalMediaShareContentSize == 0 && diffModifiedMediaShareContentSize == 0){
+                    Toast.makeText(mContext, getString(R.string.modify_nothing_about_mediashare), Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
@@ -200,7 +220,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                 } else {
 
-
                     operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
 
                     localBroadcastManager.sendBroadcast(operationIntent);
@@ -219,6 +238,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
             String[] selectedImageUUIDStr = data.getStringArrayExtra(Util.KEY_SELECTED_IMAGE_UUID_ARRAY);
             fillPhotoList(selectedImageUUIDStr);
+            fillMediaShareContents(selectedImageUUIDStr);
+
             mAdapter.notifyDataSetChanged();
         }
     }
@@ -234,7 +255,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         private Media mMap;
         private int width, height;
 
-        public EditPhotoViewHolder(View view) {
+        EditPhotoViewHolder(View view) {
             super(view);
 
             ButterKnife.bind(this, view);
@@ -253,10 +274,13 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 @Override
                 public void onClick(View v) {
 
+                    modifiedMediaShare.removeMediaShareContent(getAdapterPosition());
+
+                    Log.i(TAG, "onClick: photo uuid" + mPhotoList.get(getAdapterPosition()).getUuid());
+
                     mPhotoList.remove(getAdapterPosition());
                     mAdapter.notifyItemRemoved(getAdapterPosition());
 
-                    modifiedMediaShare.removeMediaShareContent(getAdapterPosition());
                 }
             });
         }

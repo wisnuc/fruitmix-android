@@ -81,4 +81,22 @@ public class MediaShareContent implements Parcelable{
     public void setId(String id) {
         this.id = id;
     }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if(this == o)
+            return true;
+
+        if(o instanceof MediaShareContent){
+            return ((MediaShareContent) o).getDigest().equals(this.getDigest());
+        }
+
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return getDigest().hashCode();
+    }
 }

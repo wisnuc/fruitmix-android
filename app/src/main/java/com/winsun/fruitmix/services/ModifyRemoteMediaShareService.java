@@ -38,11 +38,11 @@ public class ModifyRemoteMediaShareService extends IntentService {
      *
      * @see IntentService
      */
-    public static void startActionModifyRemoteMediaShare(Context context, MediaShare mediaShare,String requestData) {
+    public static void startActionModifyRemoteMediaShare(Context context, MediaShare mediaShare, String requestData) {
         Intent intent = new Intent(context, ModifyRemoteMediaShareService.class);
         intent.setAction(ACTION_MODIFY_REMOTE_MEDIA_SHARE);
         intent.putExtra(EXTRA_MEDIA_SHARE, mediaShare);
-        intent.putExtra(EXTRA_REQUEST_DATA,requestData);
+        intent.putExtra(EXTRA_REQUEST_DATA, requestData);
         context.startService(intent);
     }
 
@@ -53,7 +53,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
             if (ACTION_MODIFY_REMOTE_MEDIA_SHARE.equals(action)) {
                 MediaShare mediaShare = intent.getParcelableExtra(EXTRA_MEDIA_SHARE);
                 String requestData = intent.getStringExtra(EXTRA_REQUEST_DATA);
-                handleActionModifyRemoteShare(mediaShare,requestData);
+                handleActionModifyRemoteShare(mediaShare, requestData);
             }
         }
     }
@@ -62,7 +62,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionModifyRemoteShare(MediaShare mediaShare,String requestData) {
+    private void handleActionModifyRemoteShare(MediaShare mediaShare, String requestData) {
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
 
         Intent intent = new Intent(Util.REMOTE_SHARE_MODIFIED);
@@ -70,20 +70,20 @@ public class ModifyRemoteMediaShareService extends IntentService {
         if (mediaShare.isLocal()) {
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.LOCAL_MEDIASHARE_UPLOADING.name());
 
-        } else if (!Util.uploadImageDigestsIfNotUpload(this,mediaShare.getMediaDigestInMediaShareContents())) {
+        } else if (!Util.uploadImageDigestsIfNotUpload(this, mediaShare.getMediaDigestInMediaShareContents())) {
 
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 
         } else {
 
             try {
-                String result = FNAS.PostRemoteCall(String.format(getString(R.string.update_mediashare_url),Util.MEDIASHARE_PARAMETER,mediaShare.getUuid()), requestData);
+                String result = FNAS.PostRemoteCall(String.format(getString(R.string.update_mediashare_url), Util.MEDIASHARE_PARAMETER, mediaShare.getUuid()), requestData);
 
-                if(result.length() > 0){
+                if (result.length() > 0) {
                     intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
-                    intent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare);
+                    intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
 
-                    Log.i(TAG,"modify remote share succeed");
+                    Log.i(TAG, "modify remote share succeed");
 
                     DBUtils dbUtils = DBUtils.getInstance(this);
                     long dbResult = dbUtils.updateRemoteShare(mediaShare);
@@ -94,7 +94,6 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
                     Log.i(TAG, "modify media in remote mediashare in map result:" + (mapResult != null ? "true" : "false"));
 
-
                 }
 
             } catch (Exception e) {
@@ -103,7 +102,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
                 intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 
-                Log.i(TAG,"modify remote share fail");
+                Log.i(TAG, "modify remote share fail");
             }
         }
 

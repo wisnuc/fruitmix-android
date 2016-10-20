@@ -9,7 +9,6 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.MediaShareContent;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
@@ -29,7 +28,7 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
     private static final String TAG = ModifyMediaInLocalMediaShareService.class.getSimpleName();
 
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String ACTION_MODIFY_MEDIA = "com.winsun.fruitmix.services.action.modify_media";
+    private static final String ACTION_MODIFY_MEDIA_IN_LOCAL_MEDIASHARE = "com.winsun.fruitmix.services.action.modify_media_in_local_mediashare";
 
     // TODO: Rename parameters
     private static final String EXTRA_ORIGINAL_MEDIASHARE = "com.winsun.fruitmix.services.extra.original_mediashare";
@@ -50,7 +49,7 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
     // TODO: Customize helper method
     public static void startActionEditPhotoInMediaShare(Context context, MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
         Intent intent = new Intent(context, ModifyMediaInLocalMediaShareService.class);
-        intent.setAction(ACTION_MODIFY_MEDIA);
+        intent.setAction(ACTION_MODIFY_MEDIA_IN_LOCAL_MEDIASHARE);
         intent.putExtra(EXTRA_ORIGINAL_MEDIASHARE, originalMediaShare);
         intent.putExtra(EXTRA_MODIFIED_MEDIASHARE, modifiedMediaShare);
         context.startService(intent);
@@ -60,7 +59,7 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_MODIFY_MEDIA.equals(action)) {
+            if (ACTION_MODIFY_MEDIA_IN_LOCAL_MEDIASHARE.equals(action)) {
                 MediaShare originalMediaShare = intent.getParcelableExtra(EXTRA_ORIGINAL_MEDIASHARE);
                 MediaShare modifiedMediaShare = intent.getParcelableExtra(EXTRA_MODIFIED_MEDIASHARE);
                 handleActionModifyMedia(originalMediaShare, modifiedMediaShare);
@@ -74,11 +73,8 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
      */
     private void handleActionModifyMedia(MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
 
-        List<MediaShareContent> originalMediaShareContents = originalMediaShare.getMediaShareContents();
-        List<MediaShareContent> modifiedMediaShareContents = modifiedMediaShare.getMediaShareContents();
-
-        List<MediaShareContent> differentContentsInOriginalMediaShare = findDifferentMediaShareContentInFirstMediaShareContents(originalMediaShareContents, modifiedMediaShareContents);
-        List<MediaShareContent> differentContentsInModifiedMediaShare = findDifferentMediaShareContentInFirstMediaShareContents(modifiedMediaShareContents, originalMediaShareContents);
+        List<MediaShareContent> differentContentsInOriginalMediaShare = originalMediaShare.getDifferentMediaShareContentInCurrentMediaShare(modifiedMediaShare);
+        List<MediaShareContent> differentContentsInModifiedMediaShare = modifiedMediaShare.getDifferentMediaShareContentInCurrentMediaShare(originalMediaShare);
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
         Intent intent = new Intent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED);
@@ -109,28 +105,6 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
 
         localBroadcastManager.sendBroadcast(intent);
 
-
-    }
-
-    private List<MediaShareContent> findDifferentMediaShareContentInFirstMediaShareContents(List<MediaShareContent> firstMediaShareContents, List<MediaShareContent> secondMediaShareContents) {
-        List<MediaShareContent> differentMediaShareContents = new ArrayList<>();
-        for (MediaShareContent firstMediaShareContent : firstMediaShareContents) {
-
-            int i;
-            for (i = 0; i < secondMediaShareContents.size(); i++) {
-                MediaShareContent secondMediaShareContent = secondMediaShareContents.get(i);
-
-                if (secondMediaShareContent.getDigest().equals(firstMediaShareContent.getDigest())) {
-                    break;
-                }
-            }
-
-            if (i == secondMediaShareContents.size()) {
-                differentMediaShareContents.add(firstMediaShareContent);
-            }
-
-        }
-        return differentMediaShareContents;
     }
 }
 

@@ -3,11 +3,14 @@ package com.winsun.fruitmix.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.graphics.BitmapCompat;
 import android.support.v4.view.ViewCompat;
 import android.util.DisplayMetrics;
 import android.util.StringBuilderPrinter;
@@ -95,6 +98,9 @@ public class Util {
     public static final String KEY_JWT_HEAD = "JWT ";
     public static final String KEY_BASE_HEAD = "Basic ";
 
+    public static final String ADD = "add";
+    public static final String DELETE = "delete";
+
     public static final int KEY_MODIFY_ALBUM_REQUEST_CODE = 100;
     public static final int KEY_EDIT_PHOTO_REQUEST_CODE = 101;
     public static final int KEY_CHOOSE_PHOTO_REQUEST_CODE = 102;
@@ -149,7 +155,7 @@ public class Util {
     /**
      * 将dp转化为px
      */
-    public static int dip2px(Context context,float dip) {
+    public static int dip2px(Context context, float dip) {
         float v = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, context.getResources().getDisplayMetrics());
         return (int) (v + 0.5f);
     }
@@ -272,9 +278,9 @@ public class Util {
         }
     }
 
-    public static void showSoftInput(Activity activity, View view){
+    public static void showSoftInput(Activity activity, View view) {
         InputMethodManager methodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        methodManager.showSoftInput(view,0);
+        methodManager.showSoftInput(view, 0);
     }
 
     public static int[] formatPhotoWidthHeight(int width, int height) {
@@ -325,6 +331,41 @@ public class Util {
         }
 
         return uploadFileResult;
+    }
+
+    public static Bitmap convertHorizontalBitmap(Bitmap bitmap) {
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(-1, 1);
+        return Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, true);
+
+    }
+
+    public static Bitmap convertVerticalBitmap(Bitmap bitmap) {
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(1, -1);
+        return Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, true);
+
+    }
+
+
+    public static Bitmap rotateBitmap(Bitmap bitmap, int degrees) {
+
+        //TODO: rotate and convert bitmap when load media; finish activity when user do nothing about create modify mediashare
+
+        if (degrees == 0 || null == bitmap) {
+            return bitmap;
+        }
+
+        Matrix matrix = new Matrix();
+        matrix.setRotate(degrees, bitmap.getWidth() / 2, bitmap.getHeight() / 2);
+
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
 }

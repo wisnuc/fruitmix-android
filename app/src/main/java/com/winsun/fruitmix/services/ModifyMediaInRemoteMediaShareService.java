@@ -16,10 +16,6 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
-
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
@@ -32,7 +28,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
     private static final String TAG = ModifyMediaInLocalMediaShareService.class.getSimpleName();
 
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String ACTION_MODIFY_MEDIA = "com.winsun.fruitmix.services.action.modify_media";
+    private static final String ACTION_MODIFY_MEDIA_IN_REMOTE_MEDIASHARE = "com.winsun.fruitmix.services.action.modify_media_in_remote_mediashare";
 
     // TODO: Rename parameters
     private static final String EXTRA_ORIGINAL_MEDIASHARE = "com.winsun.fruitmix.services.extra.original_mediashare";
@@ -51,11 +47,11 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionEditPhotoInMediaShare(Context context, MediaShare originalMediashare, MediaShare modifiedMediashare) {
-        Intent intent = new Intent(context, ModifyMediaInLocalMediaShareService.class);
-        intent.setAction(ACTION_MODIFY_MEDIA);
-        intent.putExtra(EXTRA_ORIGINAL_MEDIASHARE, originalMediashare);
-        intent.putExtra(EXTRA_MODIFIED_MEDIASHARE, modifiedMediashare);
+    public static void startActionEditPhotoInMediaShare(Context context, MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
+        Intent intent = new Intent(context, ModifyMediaInRemoteMediaShareService.class);
+        intent.setAction(ACTION_MODIFY_MEDIA_IN_REMOTE_MEDIASHARE);
+        intent.putExtra(EXTRA_ORIGINAL_MEDIASHARE, originalMediaShare);
+        intent.putExtra(EXTRA_MODIFIED_MEDIASHARE, modifiedMediaShare);
         context.startService(intent);
     }
 
@@ -63,7 +59,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_MODIFY_MEDIA.equals(action)) {
+            if (ACTION_MODIFY_MEDIA_IN_REMOTE_MEDIASHARE.equals(action)) {
                 MediaShare originalMediaShare = intent.getParcelableExtra(EXTRA_ORIGINAL_MEDIASHARE);
                 MediaShare modifiedMediaShare = intent.getParcelableExtra(EXTRA_MODIFIED_MEDIASHARE);
                 handleActionModifyMedia(originalMediaShare, modifiedMediaShare);
@@ -77,21 +73,18 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
      */
     private void handleActionModifyMedia(MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
 
-        List<MediaShareContent> originalMediaShareContents = originalMediaShare.getMediaShareContents();
-        List<MediaShareContent> modifiedMediaShareContents = modifiedMediaShare.getMediaShareContents();
+        MediaShare diffContentsOriginalMediaShare = originalMediaShare.cloneMyself();
+        diffContentsOriginalMediaShare.clearMediaShareContents();
+        diffContentsOriginalMediaShare.initMediaShareContents(originalMediaShare.getDifferentMediaShareContentInCurrentMediaShare(modifiedMediaShare));
 
-        List<MediaShareContent> differentContentsInOriginalMediaShare = findDifferentMediaShareContentInFirstMediaShareContents(originalMediaShareContents, modifiedMediaShareContents);
-        List<MediaShareContent> differentContentsInModifiedMediaShare = findDifferentMediaShareContentInFirstMediaShareContents(modifiedMediaShareContents, originalMediaShareContents);
+        MediaShare diffContentsModifiedMediaShare = modifiedMediaShare.cloneMyself();
+        diffContentsModifiedMediaShare.clearMediaShareContents();
+        diffContentsModifiedMediaShare.initMediaShareContents(modifiedMediaShare.getDifferentMediaShareContentInCurrentMediaShare(originalMediaShare));
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
         Intent intent = new Intent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED);
 
-        List<String> differentDigestsInModifiedMediaShare = new ArrayList<>();
-        for (MediaShareContent mediaShareContent : differentContentsInModifiedMediaShare) {
-            differentDigestsInModifiedMediaShare.add(mediaShareContent.getDigest());
-        }
-
-        if (!Util.uploadImageDigestsIfNotUpload(this, differentDigestsInModifiedMediaShare)) {
+        if (!Util.uploadImageDigestsIfNotUpload(this, diffContentsModifiedMediaShare.getMediaDigestInMediaShareContents())) {
 
             intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
 
@@ -100,11 +93,12 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
         } else {
 
 
-            String data = getData(differentContentsInOriginalMediaShare, differentContentsInModifiedMediaShare);
+            String data = getData(diffContentsOriginalMediaShare, diffContentsModifiedMediaShare);
 
+            String req = String.format(getString(R.string.update_mediashare_url), Util.MEDIASHARE_PARAMETER, modifiedMediaShare.getUuid());
 
             try {
-                String result = FNAS.PostRemoteCall(String.format(getString(R.string.update_mediashare_url),Util.MEDIASHARE_PARAMETER,modifiedMediaShare.getUuid()), data);
+                String result = FNAS.PostRemoteCall(req, data);
 
                 if (result.length() > 0) {
                     intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
@@ -115,11 +109,11 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
 
                     long dbResult = 0;
 
-                    for (MediaShareContent mediaShareContent : differentContentsInOriginalMediaShare) {
+                    for (MediaShareContent mediaShareContent : diffContentsOriginalMediaShare.getMediaShareContents()) {
                         dbResult = dbUtils.deleteRemoteMediaShareContentByID(mediaShareContent.getId());
                     }
 
-                    for (MediaShareContent mediaShareContent : differentContentsInModifiedMediaShare) {
+                    for (MediaShareContent mediaShareContent : diffContentsModifiedMediaShare.getMediaShareContents()) {
                         dbResult = dbUtils.insertRemoteMediaShareContent(mediaShareContent, modifiedMediaShare.getUuid());
                     }
 
@@ -143,51 +137,21 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
         }
         localBroadcastManager.sendBroadcast(intent);
 
-
     }
 
     @NonNull
-    private String getData(List<MediaShareContent> differentContentsInOriginalMediaShare, List<MediaShareContent> differentContentsInModifiedMediaShare) {
-        StringBuilder stringBuilder = new StringBuilder("[");
-        stringBuilder.append("{\"op\":\"delete\",\"path\":\"contents\",\"value\":[");
-        for (MediaShareContent mediaShareContent : differentContentsInOriginalMediaShare) {
+    private String getData(MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare) {
 
-            stringBuilder.append("\"");
-            stringBuilder.append(mediaShareContent.getDigest());
-            stringBuilder.append("\",");
-
+        String data = "[";
+        if(diffContentsOriginalMediaShare.getMediaContentsListSize() != 0){
+            data += diffContentsOriginalMediaShare.createStringOperateContentsInMediaShare(Util.DELETE);
         }
-        stringBuilder.append("]},");
-
-        stringBuilder.append("{\"op\":\"add\",\"path\":\"contents\",\"value\":[");
-        for (MediaShareContent mediaShareContent : differentContentsInModifiedMediaShare) {
-
-            stringBuilder.append("\"");
-            stringBuilder.append(mediaShareContent.getDigest());
-            stringBuilder.append("\",");
+        if(diffContentsModifiedMediaShare.getMediaContentsListSize() != 0){
+            data += diffContentsModifiedMediaShare.createStringOperateContentsInMediaShare(Util.ADD);
         }
-        stringBuilder.append("]}]");
-        return stringBuilder.toString();
+        data += "]";
+        return data;
+
     }
 
-    private List<MediaShareContent> findDifferentMediaShareContentInFirstMediaShareContents(List<MediaShareContent> firstMediaShareContents, List<MediaShareContent> secondMediaShareContents) {
-        List<MediaShareContent> differentMediaShareContents = new ArrayList<>();
-        for (MediaShareContent firstMediaShareContent : firstMediaShareContents) {
-
-            int i;
-            for (i = 0; i < secondMediaShareContents.size(); i++) {
-                MediaShareContent secondMediaShareContent = secondMediaShareContents.get(i);
-
-                if (secondMediaShareContent.getDigest().equals(firstMediaShareContent.getDigest())) {
-                    break;
-                }
-            }
-
-            if (i == secondMediaShareContents.size()) {
-                differentMediaShareContents.add(firstMediaShareContent);
-            }
-
-        }
-        return differentMediaShareContents;
-    }
 }

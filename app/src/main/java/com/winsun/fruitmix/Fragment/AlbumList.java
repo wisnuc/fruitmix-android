@@ -73,7 +73,7 @@ public class AlbumList implements NavPagerActivity.Page {
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
                 R.layout.album_list, null);
 
-        ButterKnife.bind(this,view);
+        ButterKnife.bind(this, view);
 
         initImageLoader();
 
@@ -255,9 +255,8 @@ public class AlbumList implements NavPagerActivity.Page {
         void refreshView(MediaShare mediaShare) {
 
             currentItem = mediaShare;
+            restoreMainBarState();
 
-            //restore mainbar state
-            mainBar.setTranslationX(0.0f);
 
             coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
             if (coverImg == null) {
@@ -296,11 +295,13 @@ public class AlbumList implements NavPagerActivity.Page {
                 @Override
                 public void onClick(final View v) {
 
+                    restoreMainBarState();
+
                     MediaShare cloneMediaShare = currentItem.cloneMyself();
 
                     String requestData = createRequestData(cloneMediaShare);
 
-                    containerActivity.modifyMediaShare(cloneMediaShare,requestData);
+                    containerActivity.modifyMediaShare(cloneMediaShare, requestData);
 
                 }
             });
@@ -308,6 +309,8 @@ public class AlbumList implements NavPagerActivity.Page {
             lbDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
+
+                    restoreMainBarState();
 
                     containerActivity.deleteMediaShare(currentItem);
 
@@ -321,7 +324,7 @@ public class AlbumList implements NavPagerActivity.Page {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     int margin;
-                    margin = Util.dip2px(containerActivity,100);
+                    margin = Util.dip2px(containerActivity, 100);
                     switch (event.getAction() & MotionEvent.ACTION_MASK) {
                         case MotionEvent.ACTION_DOWN:
                             if (lastMainBar != null) lastMainBar.setTranslationX(0.0f);
@@ -350,7 +353,7 @@ public class AlbumList implements NavPagerActivity.Page {
                             if (lastX - x > -margin + 0.5 && lastX - x < margin - 0.5) {
                                 if (vX > 30.0) mainBar.setTranslationX(margin);
                                 else if (vX < -30.0) mainBar.setTranslationX(-margin);
-                                else mainBar.setTranslationX(0.0f);
+                                else restoreMainBarState();
                             }
                             break;
                         case MotionEvent.ACTION_MOVE:
@@ -369,6 +372,11 @@ public class AlbumList implements NavPagerActivity.Page {
             });
         }
 
+        private void restoreMainBarState() {
+            //restore mainbar state
+            mainBar.setTranslationX(0.0f);
+        }
+
         @NonNull
         private String createRequestData(MediaShare cloneMediaShare) {
             String requestData;
@@ -378,15 +386,15 @@ public class AlbumList implements NavPagerActivity.Page {
 
             if (cloneMediaShare.getViewersListSize() == 0) {
 
-                for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+                for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
                     cloneMediaShare.addViewer(userUUID);
                 }
 
-                stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare("add"));
+                stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare(Util.ADD));
 
             } else {
 
-                stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare("delete"));
+                stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare(Util.DELETE));
 
                 cloneMediaShare.clearViewers();
             }

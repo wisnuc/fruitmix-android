@@ -161,15 +161,16 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                     mAblumMap.addViewer(userUUID);
                 }
 
-                stringBuilder.append(mAblumMap.createStringOperateViewersInMediaShare("add"));
+                stringBuilder.append(mAblumMap.createStringOperateViewersInMediaShare(Util.ADD));
 
             } else {
 
-                stringBuilder.append(mAblumMap.createStringOperateViewersInMediaShare("delete"));
+                stringBuilder.append(mAblumMap.createStringOperateViewersInMediaShare(Util.DELETE));
 
                 mAblumMap.clearViewers();
             }
 
+            stringBuilder.append(",");
         }
 
         boolean isMaintained = mAblumMap.checkMaintainersListContainCurrentUserUUID();
@@ -182,14 +183,16 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                     mAblumMap.addMaintainer(userUUID);
                 }
 
-                stringBuilder.append(mAblumMap.createStringOperateMaintainersInMediaShare("add"));
+                stringBuilder.append(mAblumMap.createStringOperateMaintainersInMediaShare(Util.ADD));
 
             } else {
 
-                stringBuilder.append(mAblumMap.createStringOperateMaintainersInMediaShare("delete"));
+                stringBuilder.append(mAblumMap.createStringOperateMaintainersInMediaShare(Util.DELETE));
 
                 mAblumMap.clearMaintainers();
             }
+
+            stringBuilder.append(",");
 
         }
 
@@ -200,16 +203,18 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
             stringBuilder.append(mAblumMap.createStringReplaceTitleTextAboutMediaShare());
 
+            stringBuilder.append(",");
         }
 
-        stringBuilder.append("]");
+        requestData = stringBuilder.substring(0,stringBuilder.length() - 1);
 
-        if (stringBuilder.length() == 2) {
+        requestData += "]";
+
+        if (requestData.length() == 2) {
             Toast.makeText(mContext, getString(R.string.modify_nothing_about_mediashare), Toast.LENGTH_SHORT).show();
             return null;
         }
 
-        requestData = stringBuilder.toString();
         return requestData;
     }
 

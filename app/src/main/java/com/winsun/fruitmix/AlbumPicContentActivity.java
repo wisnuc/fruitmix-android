@@ -165,6 +165,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         customReceiver = new CustomReceiver();
         filter = new IntentFilter(Util.LOCAL_SHARE_DELETED);
         filter.addAction(Util.REMOTE_SHARE_DELETED);
+        filter.addAction(Util.REMOTE_SHARE_MODIFIED);
+        filter.addAction(Util.LOCAL_SHARE_MODIFIED);
 
     }
 
@@ -447,11 +449,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 cloneMediaShare.addViewer(userUUID);
             }
 
-            stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare("add"));
+            stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare(Util.ADD));
 
         } else {
 
-            stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare("delete"));
+            stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare(Util.DELETE));
 
             cloneMediaShare.clearViewers();
         }

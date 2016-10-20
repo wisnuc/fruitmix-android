@@ -36,9 +36,9 @@ public class RemoteMediaShareJSONObjectParser {
 
         JSONObject album = itemRaw.optJSONObject("album");
 
-        if(album == null){
+        if (album == null) {
             mediaShare.setAlbum(false);
-        }else {
+        } else {
             mediaShare.setAlbum(true);
 
             mediaShare.setTitle(album.getString("title"));
@@ -61,8 +61,21 @@ public class RemoteMediaShareJSONObjectParser {
 
                 mediaShareContent = new MediaShareContent();
                 mediaShareContent.setDigest(jsonObject.getString("digest").toLowerCase());
-                mediaShareContent.setAuthor(jsonObject.getString("author").toLowerCase());
-                mediaShareContent.setTime(jsonObject.getString("time").toLowerCase());
+
+                String author = jsonObject.optString("author");
+                if (author.equals("")) {
+                    author = jsonObject.getString("creator");
+                }
+
+                mediaShareContent.setAuthor(author.toLowerCase());
+
+
+                String time = jsonObject.optString("time");
+                if (author.equals("")) {
+                    time = jsonObject.getString("ctime");
+                }
+
+                mediaShareContent.setTime(time.toLowerCase());
 
                 mediaShare.addMediaShareContent(mediaShareContent);
             }

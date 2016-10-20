@@ -179,11 +179,11 @@ public class ButlerService extends Service {
         Log.i(TAG, "handle modify operation target type:" + targetType);
 
         switch (targetType) {
-            case LOCAL_MEDIASHARE:
-                ModifyMediaInLocalMediaShareService.startActionEditPhotoInMediaShare(this, originalMediaShare, modifiedMediaShare);
-                break;
             case REMOTE_MEDIASHARE:
                 ModifyMediaInRemoteMediaShareService.startActionEditPhotoInMediaShare(this, originalMediaShare, modifiedMediaShare);
+                break;
+            case LOCAL_MEDIASHARE:
+                ModifyMediaInLocalMediaShareService.startActionEditPhotoInMediaShare(this, originalMediaShare, modifiedMediaShare);
                 break;
         }
     }

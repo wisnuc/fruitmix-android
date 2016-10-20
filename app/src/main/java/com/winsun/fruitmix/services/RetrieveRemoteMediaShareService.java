@@ -78,14 +78,14 @@ public class RetrieveRemoteMediaShareService extends IntentService {
             mediaShares = parser.parse(json);
             mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
 
+            dbUtils.deleteAllRemoteShare();
+            dbUtils.insertRemoteMediaShares(mediaShareConcurrentMap);
+
         } catch (Exception e) {
             e.printStackTrace();
 
             mediaShares = dbUtils.getAllRemoteShare();
             mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
-
-            dbUtils.deleteAllRemoteShare();
-            dbUtils.insertRemoteMediaShares(mediaShareConcurrentMap);
 
         }
 
