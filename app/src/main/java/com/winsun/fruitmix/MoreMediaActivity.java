@@ -42,13 +42,8 @@ public class MoreMediaActivity extends AppCompatActivity {
     RecyclerView mMorePhotoRecyclerView;
 
     private int mSpanCount = 3;
-    private GridLayoutManager mManager;
     private Context mContext;
-    private MorePhotoAdapter mAdapter;
-
-    private MediaShare mediaShare;
     private ArrayList<Media> mPhotos;
-
     private ImageLoader mImageLoader;
 
     @Override
@@ -69,13 +64,13 @@ public class MoreMediaActivity extends AppCompatActivity {
 
         mContext = this;
 
-        mediaShare = getIntent().getParcelableExtra(Util.KEY_MEDIASHARE);
+        MediaShare mediaShare = getIntent().getParcelableExtra(Util.KEY_MEDIASHARE);
 
-        mManager = new GridLayoutManager(mContext, mSpanCount);
+        GridLayoutManager mManager = new GridLayoutManager(mContext, mSpanCount);
         mMorePhotoRecyclerView.setLayoutManager(mManager);
         mMorePhotoRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        mAdapter = new MorePhotoAdapter();
+        MorePhotoAdapter mAdapter = new MorePhotoAdapter();
         mMorePhotoRecyclerView.setAdapter(mAdapter);
 
         mPhotos = new ArrayList<>();
@@ -120,6 +115,7 @@ public class MoreMediaActivity extends AppCompatActivity {
             picItem.setHeight(picItemRaw.getHeight());
             picItem.setTime(picItemRaw.getTime());
             picItem.setSelected(false);
+            picItem.setSharing(picItemRaw.isSharing());
 
             mPhotos.add(picItem);
         }
@@ -135,7 +131,7 @@ public class MoreMediaActivity extends AppCompatActivity {
         private Media media;
         private int width, height;
 
-        public MorePhotoViewHolder(View view) {
+        MorePhotoViewHolder(View view) {
             super(view);
 
             ButterKnife.bind(this, view);

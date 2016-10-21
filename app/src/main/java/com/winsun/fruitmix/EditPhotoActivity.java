@@ -194,8 +194,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 int diffOriginalMediaShareContentSize = mediaShare.getDifferentMediaShareContentInCurrentMediaShare(modifiedMediaShare).size();
                 int diffModifiedMediaShareContentSize = modifiedMediaShare.getDifferentMediaShareContentInCurrentMediaShare(mediaShare).size();
                 if(diffOriginalMediaShareContentSize == 0 && diffModifiedMediaShareContentSize == 0){
-                    Toast.makeText(mContext, getString(R.string.modify_nothing_about_mediashare), Toast.LENGTH_SHORT).show();
-                    return;
+
+                    finish();
                 }
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);

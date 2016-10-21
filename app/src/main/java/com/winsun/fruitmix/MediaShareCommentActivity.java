@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -67,20 +66,26 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
     public static final String TAG = MediaShareCommentActivity.class.getSimpleName();
 
+    @BindView(R.id.toolbar)
     Toolbar toolbar;
+    @BindView(R.id.collapsing_toolbar_layout)
     CollapsingToolbarLayout collapsingToolbarLayout;
     AppBarLayout appBarLayout;
-    CoordinatorLayout coordinatorLayout;
-
-    ImageView ivBack, ivSend;
+    @BindView(R.id.back)
+    ImageView ivBack;
+    @BindView(R.id.send)
+    ImageView ivSend;
+    @BindView(R.id.mainPic)
     NetworkImageView ivMain;
-    Media media;
-    List<Comment> commentData;
+    @BindView(R.id.send_text)
     EditTextPreIme tfContent;
-
+    @BindView(R.id.comment_list)
     RecyclerView lvComment;
 
-    String mCommment;
+    private Media media;
+    private List<Comment> commentData;
+
+    private String mComment;
 
     private Context mContext;
 
@@ -91,14 +96,11 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
     private ProgressDialog mDialog;
 
-    private RequestQueue mRequestQueue;
-
     private ImageLoader mImageLoader;
 
     private boolean showSoftInputWhenEnter = false;
 
     private GestureDetectorCompat gestureDetectorCompat;
-    private GestureListener gestureListener;
 
     private boolean isExpanded = false;
     private boolean isRecyclerViewScrollToEnd = false;
@@ -107,7 +109,6 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Media imageRaw;
 
         ActivityCompat.postponeEnterTransition(this);
 
@@ -117,20 +118,11 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         mContext = this;
 
-        mRequestQueue = RequestQueueInstance.getInstance(this).getRequestQueue();
+        ButterKnife.bind(this);
+
         initImageLoader();
 
         initFilterForReceiver();
-
-        lvComment = (RecyclerView) findViewById(R.id.comment_list);
-        ivBack = (ImageView) findViewById(R.id.back);
-        ivSend = (ImageView) findViewById(R.id.send);
-        tfContent = (EditTextPreIme) findViewById(R.id.send_text);
-
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
-        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar_layout);
-        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
 
         LinearLayoutManager manager = new LinearLayoutManager(mContext);
         lvComment.setLayoutManager(manager);
@@ -140,6 +132,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         lvComment.addOnScrollListener(new RecyclerScrollListener());
 
         setSupportActionBar(toolbar);
+
         collapsingToolbarLayout.setTitle(getString(R.string.comment_text));
         collapsingToolbarLayout.setExpandedTitleColor(ContextCompat.getColor(mContext, R.color.white));
         collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedToolbarTitle);
@@ -201,9 +194,9 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                 tfContent.clearFocus();
                 Util.hideSoftInput(MediaShareCommentActivity.this);
 
-                mCommment = tfContent.getText() + "";
+                mComment = tfContent.getText() + "";
 
-                if (mCommment.isEmpty()) {
+                if (mComment.isEmpty()) {
                     Toast.makeText(mContext, getString(R.string.no_comment_content), Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -216,18 +209,26 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                 operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
                 operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
                 operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, media.getUuid());
-                operationIntent.putExtra(Util.OPERATION_COMMENT, createComment(media.getBelongingMediaShareUUID(), mCommment));
+                operationIntent.putExtra(Util.OPERATION_COMMENT, createComment(media.getBelongingMediaShareUUID(), mComment));
                 mManager.sendBroadcast(operationIntent);
             }
         });
 
-        gestureListener = new GestureListener();
+        GestureListener gestureListener = new GestureListener();
         gestureDetectorCompat = new GestureDetectorCompat(mContext, gestureListener);
 
     }
 
+    private void initImageLoader() {
+        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(this).getRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
+    }
+
     private void loadMedia() {
-        ivMain = (NetworkImageView) findViewById(R.id.mainPic);
         ivMain.registerImageLoadListener(this);
         ivMain.setTransitionName(media.getUuid());
 
@@ -235,7 +236,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         String url = media.getImageOriginalUrl(this);
         ivMain.setTag(url);
         ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
-        ivMain.setImageUrl(url,mImageLoader);
+        ivMain.setImageUrl(url, mImageLoader);
     }
 
     private void createMediaByImageUUID() {
@@ -260,9 +261,8 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         for (MediaShare shareRaw : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
 
-            Log.d("winsun", "sss1 " + shareRaw);
-            if (shareRaw.getMediaShareContents().contains(media.getUuid())) {
-                Log.d("winsun", "ssss " + shareRaw.getUuid());
+            if (shareRaw.getMediaDigestInMediaShareContents().contains(media.getUuid())) {
+                Log.d(TAG, "shareRaw uuid: " + shareRaw.getUuid());
 
                 media.setBelongingMediaShareUUID(shareRaw.getUuid());
                 break;
@@ -280,14 +280,6 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         filter.addAction(Util.LOCAL_COMMENT_DELETED);
     }
 
-    private void initImageLoader() {
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
-    }
-
 
     @Override
     protected void onResume() {
@@ -301,6 +293,13 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         super.onPause();
 
         mManager.unregisterReceiver(mReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        ivMain.unregisterImageLoadListener();
     }
 
     @Override
@@ -492,19 +491,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
             if (currentItem != null) {
                 User map = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreator());
                 ivAvatar.setText(map.getDefaultAvatar());
-
-                int color = Integer.parseInt(map.getDefaultAvatarBgColor());
-                switch (color) {
-                    case 0:
-                        ivAvatar.setBackgroundResource(R.drawable.user_portrait_bg_blue);
-                        break;
-                    case 1:
-                        ivAvatar.setBackgroundResource(R.drawable.user_portrait_bg_green);
-                        break;
-                    case 2:
-                        ivAvatar.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
-                        break;
-                }
+                ivAvatar.setBackgroundResource(map.getDefaultAvatarBgColorResourceId());
             }
         }
 

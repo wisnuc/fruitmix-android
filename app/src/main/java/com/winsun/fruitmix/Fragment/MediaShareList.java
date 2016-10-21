@@ -3,6 +3,7 @@ package com.winsun.fruitmix.Fragment;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
@@ -22,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
@@ -84,7 +86,7 @@ public class MediaShareList implements NavPagerActivity.Page {
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
                 R.layout.share_list2, null);
 
-        ButterKnife.bind(this,view);
+        ButterKnife.bind(this, view);
 
         initImageLoader();
 
@@ -299,13 +301,13 @@ public class MediaShareList implements NavPagerActivity.Page {
                 view = LayoutInflater.from(container.containerActivity).inflate(R.layout.share_list_cell, parent, false);
                 viewHolder = new MediaShareListViewHolder(view);
                 view.setTag(viewHolder);
-            }else {
+            } else {
                 view = convertView;
                 viewHolder = (MediaShareListViewHolder) view.getTag();
             }
 
             MediaShare currentItem = (MediaShare) getItem(position);
-            viewHolder.refreshView(currentItem,commentMap);
+            viewHolder.refreshView(currentItem, commentMap);
 
             return view;
         }
@@ -324,7 +326,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
     }
 
-    class MediaShareListViewHolder{
+    class MediaShareListViewHolder {
 
         MediaShare currentItem;
         Media coverImg, itemImg;
@@ -366,15 +368,14 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         NetworkImageView ivItems[];
 
-        boolean sLocal;
         int w, h, i;
         List<String> imageDigests;
 
         String nickName;
 
-        MediaShareListViewHolder(View view){
+        MediaShareListViewHolder(View view) {
 
-            ButterKnife.bind(this,view);
+            ButterKnife.bind(this, view);
 
             ivItems = new NetworkImageView[9];
             ivItems[0] = (NetworkImageView) view.findViewById(R.id.mainPic0);
@@ -389,7 +390,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         }
 
-        void refreshView(MediaShare mediaShare,Map<String,List<Comment>> commentMap){
+        void refreshView(MediaShare mediaShare, Map<String, List<Comment>> commentMap) {
 
             currentItem = mediaShare;
 
@@ -401,30 +402,18 @@ public class MediaShareList implements NavPagerActivity.Page {
             User user = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreatorUUID());
 
             String avatar;
-            int color = 0;
-
             avatar = user.getAvatar();
-            color = Integer.valueOf(user.getDefaultAvatarBgColor());
             if (avatar.equals("defaultAvatar.jpg")) {
                 avatar = user.getDefaultAvatar();
             }
-
             mAvatar.setText(avatar);
-            switch (color) {
-                case 0:
-                    mAvatar.setBackgroundResource(R.drawable.user_portrait_bg_blue);
-                    break;
-                case 1:
-                    mAvatar.setBackgroundResource(R.drawable.user_portrait_bg_green);
-                    break;
-                case 2:
-                    mAvatar.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
-                    break;
-            }
+
+            mAvatar.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
 
             if (currentItem.isAlbum()) {
 
                 rlAlbum.setVisibility(View.VISIBLE);
+
                 llPic1.setVisibility(View.GONE);
                 llPic2.setVisibility(View.GONE);
                 llPic3.setVisibility(View.GONE);
@@ -514,18 +503,10 @@ public class MediaShareList implements NavPagerActivity.Page {
                             mShareCommentTextView.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    Intent intent = new Intent(containerActivity, MediaShareCommentActivity.class);
-                                    intent.putExtra(Util.IMAGE_UUID, imageDigests.get(0));
-                                    intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
-                                    intent.putExtra(Util.KEY_SHOW_SOFT_INPUT_WHEN_ENTER, false);
 
-                                    String transitionName = String.valueOf(imageDigests.get(0));
+                                    Toast.makeText(containerActivity, containerActivity.getString(R.string.coming_soon), Toast.LENGTH_SHORT).show();
 
-                                    ViewCompat.setTransitionName(ivCover, transitionName);
-
-                                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
-
-                                    containerActivity.startActivity(intent, options.toBundle());
+//                                    gotoMediaShareCommentActivity(false);
                                 }
                             });
                         }
@@ -533,18 +514,10 @@ public class MediaShareList implements NavPagerActivity.Page {
                         mCommentLayout.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Intent intent = new Intent(containerActivity, MediaShareCommentActivity.class);
-                                intent.putExtra(Util.IMAGE_UUID, imageDigests.get(0));
-                                intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
-                                intent.putExtra(Util.KEY_SHOW_SOFT_INPUT_WHEN_ENTER, true);
 
-                                String transitionName = String.valueOf(imageDigests.get(0));
+                                Toast.makeText(containerActivity, containerActivity.getString(R.string.coming_soon), Toast.LENGTH_SHORT).show();
 
-                                ViewCompat.setTransitionName(ivCover, transitionName);
-
-                                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
-
-                                containerActivity.startActivity(intent, options.toBundle());
+//                                gotoMediaShareCommentActivity(true);
                             }
                         });
 
@@ -678,6 +651,21 @@ public class MediaShareList implements NavPagerActivity.Page {
                 }
 
             }
+        }
+
+        private void gotoMediaShareCommentActivity(boolean showSoftInputWhenEnter) {
+            Intent intent = new Intent(containerActivity, MediaShareCommentActivity.class);
+            intent.putExtra(Util.IMAGE_UUID, imageDigests.get(0));
+            intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
+            intent.putExtra(Util.KEY_SHOW_SOFT_INPUT_WHEN_ENTER, showSoftInputWhenEnter);
+
+            String transitionName = String.valueOf(imageDigests.get(0));
+
+            ViewCompat.setTransitionName(ivCover, transitionName);
+
+            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
+
+            containerActivity.startActivity(intent, options.toBundle());
         }
 
         private void setShareCountText() {

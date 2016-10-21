@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
@@ -182,7 +183,9 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     if (mediaList.size() > currentPhotoPosition) {
 
-                        String imageUUID = mediaList.get(currentPhotoPosition).getUuid();
+                        Toast.makeText(mContext, mContext.getString(R.string.coming_soon), Toast.LENGTH_SHORT).show();
+
+/*                        String imageUUID = mediaList.get(currentPhotoPosition).getUuid();
 
                         Intent intent = new Intent();
                         intent.setClass(PhotoSliderActivity.this, MediaShareCommentActivity.class);
@@ -196,7 +199,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                         ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(PhotoSliderActivity.this, view, imageUUID);
 
-                        startActivity(intent, options.toBundle());
+                        startActivity(intent, options.toBundle());*/
                     }
                 }
             });
@@ -439,6 +442,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 Media media = mediaList.get(position);
 
+                Log.i(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
+
                 int screenHeight = Util.calcScreenWidth(PhotoSliderActivity.this);
                 RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) defaultMainPic.getLayoutParams();
                 layoutParams.height = screenHeight;
@@ -450,7 +455,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 mImageLoader.setShouldCache(!media.isLocal());
 
-                if(transitionMediaNeedShowThumb && !media.isLocal()){
+//                defaultMainPic.setOrientationNumber(media.getOrientationNumber());
+//                mainPic.setOrientationNumber(media.getOrientationNumber());
+
+                if (transitionMediaNeedShowThumb && !media.isLocal()) {
 
                     defaultMainPic.setVisibility(View.VISIBLE);
                     mainPic.setVisibility(View.INVISIBLE);
@@ -461,11 +469,11 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                     defaultMainPic.setTag(thumbImageUrl);
                     defaultMainPic.setImageUrl(thumbImageUrl, mImageLoader);
 
-                }else {
+                } else {
                     defaultMainPic.setVisibility(View.INVISIBLE);
                     mainPic.setVisibility(View.VISIBLE);
                     ViewCompat.setTransitionName(mainPic, media.getUuid());
-                    mainPic.setImageUrl(originalImageUrl,mImageLoader);
+                    mainPic.setImageUrl(originalImageUrl, mImageLoader);
                 }
 
                 mainPic.setOnTouchListener(new View.OnTouchListener() {

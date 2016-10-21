@@ -65,7 +65,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     @BindView(R.id.toolbar)
     Toolbar mToolBar;
 
-    ArrayList<Media> mediaList;
+    private ArrayList<Media> mediaList;
 
     private MenuItem mPrivatePublicMenu;
 
@@ -74,8 +74,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     private Context mContext;
 
     private boolean mShowMenu;
-
-    private RequestQueue mRequestQueue;
 
     private ImageLoader mImageLoader;
 
@@ -128,12 +126,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         setExitSharedElementCallback(sharedElementCallback);
 
-        mRequestQueue = RequestQueueInstance.getInstance(mContext).getRequestQueue();
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
+        initImageLoader();
 
         mediaShare = getIntent().getParcelableExtra(Util.KEY_MEDIASHARE);
         mShowMenu = getIntent().getBooleanExtra(Util.NEED_SHOW_MENU, true);
@@ -168,6 +161,15 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         filter.addAction(Util.REMOTE_SHARE_MODIFIED);
         filter.addAction(Util.LOCAL_SHARE_MODIFIED);
 
+    }
+
+    private void initImageLoader() {
+        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(mContext).getRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Map<String, String> headers = new HashMap<>();
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+        Log.i(TAG, FNAS.JWT);
+        mImageLoader.setHeaders(headers);
     }
 
     @Override

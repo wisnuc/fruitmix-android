@@ -48,10 +48,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     @BindView(R.id.back)
     ImageView mBack;
-
     @BindView(R.id.toolbar)
     Toolbar mToolBar;
-
     @BindView(R.id.equipment_expandablelist)
     ExpandableListView mEquipmentExpandableListView;
     @BindView(R.id.loading_layout)
@@ -63,7 +61,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private List<Equipment> mEquipments;
 
-    private NsdManager.DiscoveryListener mListener;
     private NsdManager mManager;
 
     private List<List<Map<String, String>>> mUserExpandableLists;
@@ -131,7 +128,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         localBroadcastManager.registerReceiver(customReceiver, filter);
 
-        discoverService(mContext);
+//        discoverService(mContext);
     }
 
     @Override
@@ -141,11 +138,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         localBroadcastManager.unregisterReceiver(customReceiver);
 
-        try {
+/*        try {
             stopDiscoverServices(mContext, mListener);
         } catch (Exception ex) {
             ex.printStackTrace();
-        }
+        }*/
 
     }
 
@@ -375,7 +372,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         };
         mManager.discoverServices("_http._tcp", NsdManager.PROTOCOL_DNS_SD, nsDicListener);
 
-        mListener = nsDicListener;
     }
 
     private void resolveService(NsdServiceInfo serviceInfo) {

@@ -17,7 +17,6 @@ import com.winsun.fruitmix.parser.LocalMediaParser;
 import com.winsun.fruitmix.parser.LocalMediaShareParser;
 import com.winsun.fruitmix.parser.LocalUserParser;
 import com.winsun.fruitmix.parser.MediaShareContentParser;
-import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -268,6 +266,7 @@ public class DBUtils {
         contentValues.put(DBHelper.MEDIA_KEY_BELONGING_MEDIASHARE_UUID, media.getBelongingMediaShareUUID());
         contentValues.put(DBHelper.MEDIA_KEY_UPLOADED, media.isUploaded() ? 1 : 0);
         contentValues.put(DBHelper.MEDIA_KEY_SHARING, media.isSharing() ? 1 : 0);
+        contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER,media.getOrientationNumber());
 
         return contentValues;
     }

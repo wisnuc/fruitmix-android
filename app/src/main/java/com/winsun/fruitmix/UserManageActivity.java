@@ -39,8 +39,6 @@ public class UserManageActivity extends Activity implements View.OnClickListener
 
     private Context mContext;
 
-    private UserListAdapter mUserListAdapter;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,7 +66,7 @@ public class UserManageActivity extends Activity implements View.OnClickListener
                 }
             });
 
-            mUserListAdapter = new UserListAdapter();
+            UserListAdapter mUserListAdapter = new UserListAdapter();
             mUserListView.setAdapter(mUserListAdapter);
 
         } else {

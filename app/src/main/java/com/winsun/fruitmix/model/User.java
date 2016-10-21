@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.model;
 
+import com.winsun.fruitmix.R;
+
 /**
  * Created by Administrator on 2016/8/26.
  */
@@ -54,12 +56,28 @@ public class User {
         this.defaultAvatar = defaultAvatar;
     }
 
+    public void setDefaultAvatarBgColor(String defaultAvatarBgColor) {
+        this.defaultAvatarBgColor = defaultAvatarBgColor;
+    }
+
     public String getDefaultAvatarBgColor() {
         return defaultAvatarBgColor;
     }
 
-    public void setDefaultAvatarBgColor(String defaultAvatarBgColor) {
-        this.defaultAvatarBgColor = defaultAvatarBgColor;
+    public int getDefaultAvatarBgColorResourceId() {
+
+        int color = Integer.parseInt(defaultAvatarBgColor);
+        switch (color) {
+            case 0:
+                return R.drawable.user_portrait_bg_blue;
+            case 1:
+                return R.drawable.user_portrait_bg_green;
+            case 2:
+                return R.drawable.user_portrait_bg_yellow;
+            default:
+                return R.drawable.user_portrait_bg_blue;
+        }
+
     }
 
     public String getHome() {

@@ -259,13 +259,14 @@
     <string name="yesterday">yesterday</string>
 
     <string name="new_thumb_photo_url">%1$s/download</string>
-    <string name="thumb_photo_url">%1$s/thumbnail?width=%2$s&amp;height=%3$s</string>
+    <string name="thumb_photo_url">%1$s/thumbnail?width=%2$s&amp;height=%3$s&amp;autoOrient=true</string>
     <string name="original_photo_url">%1$s/download</string>
     <string name="photo_comment_url">%1$s?type=comments</string>
     <string name="update_mediashare_url">%1$s/%2$s/update</string>
     <string name="photo_not_sharing">Sorry,the photo can not be shared</string>
     <string name="modify_nothing_about_mediashare">Sorry,nothing change,please check it</string>
-
+    <string name="coming_soon">Coming Soon</string>
+    
     <!-- finish add by liang.wu-->
 
 </resources>

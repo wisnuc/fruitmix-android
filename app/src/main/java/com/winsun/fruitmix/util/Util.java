@@ -333,39 +333,4 @@ public class Util {
         return uploadFileResult;
     }
 
-    public static Bitmap convertHorizontalBitmap(Bitmap bitmap) {
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
-
-        Matrix matrix = new Matrix();
-        matrix.postScale(-1, 1);
-        return Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, true);
-
-    }
-
-    public static Bitmap convertVerticalBitmap(Bitmap bitmap) {
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
-
-        Matrix matrix = new Matrix();
-        matrix.postScale(1, -1);
-        return Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, true);
-
-    }
-
-
-    public static Bitmap rotateBitmap(Bitmap bitmap, int degrees) {
-
-        //TODO: rotate and convert bitmap when load media; finish activity when user do nothing about create modify mediashare
-
-        if (degrees == 0 || null == bitmap) {
-            return bitmap;
-        }
-
-        Matrix matrix = new Matrix();
-        matrix.setRotate(degrees, bitmap.getWidth() / 2, bitmap.getHeight() / 2);
-
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-    }
-
 }

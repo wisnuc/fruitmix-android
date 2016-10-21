@@ -16,7 +16,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.util.LocalCache;
@@ -35,7 +34,6 @@ import butterknife.ButterKnife;
  */
 public class ModifyAlbumActivity extends AppCompatActivity {
 
-
     @BindView(R.id.title_textlayout)
     TextInputLayout mTitleLayout;
     @BindView(R.id.title_edit)
@@ -51,10 +49,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
     @BindView(R.id.back)
     ImageView ivBack;
 
-    List<String> mSelectedImageUUIDStr;
-
-    private String mMediaShareUuid;
-    private MediaShare mAblumMap;
+    private MediaShare mAlbumMap;
 
     private Context mContext;
 
@@ -74,17 +69,16 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
         mContext = this;
 
-        mMediaShareUuid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
-        mAblumMap = LocalCache.RemoteMediaShareMapKeyIsUUID.get(mMediaShareUuid);
-        mSelectedImageUUIDStr = mAblumMap.getMediaDigestInMediaShareContents();
+        String mMediaShareUuid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
+        mAlbumMap = LocalCache.RemoteMediaShareMapKeyIsUUID.get(mMediaShareUuid);
 
-        mTitleLayout.setHint(mAblumMap.getTitle());
+        tfTitle.setText(mAlbumMap.getTitle());
 
-        tfDesc.setText(mAblumMap.getDesc());
+        tfDesc.setText(mAlbumMap.getDesc());
 
-        ckPublic.setChecked(mAblumMap.getViewersListSize() != 0);
+        ckPublic.setChecked(mAlbumMap.getViewersListSize() != 0);
 
-        ckSetMaintainer.setChecked(mAblumMap.checkMaintainersListContainCurrentUserUUID());
+        ckSetMaintainer.setChecked(mAlbumMap.checkMaintainersListContainCurrentUserUUID());
 
         ckPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -114,7 +108,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                 desc = tfDesc.getText().toString();
 
                 String requestData = createRequestData(sPublic, sSetMaintainer, title, desc);
-                if (requestData == null) return;
+                if (requestData == null) finish();
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
@@ -125,7 +119,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                 } else {
                     intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
                 }
-                intent.putExtra(Util.OPERATION_MEDIASHARE, mAblumMap);
+                intent.putExtra(Util.OPERATION_MEDIASHARE, mAlbumMap);
                 intent.putExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA,requestData);
                 localBroadcastManager.sendBroadcast(intent);
 
@@ -153,55 +147,55 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("[");
 
-        boolean isPublic = mAblumMap.getViewersListSize() != 0;
+        boolean isPublic = mAlbumMap.getViewersListSize() != 0;
         if (sPublic != isPublic) {
             if (sPublic) {
 
                 for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-                    mAblumMap.addViewer(userUUID);
+                    mAlbumMap.addViewer(userUUID);
                 }
 
-                stringBuilder.append(mAblumMap.createStringOperateViewersInMediaShare(Util.ADD));
+                stringBuilder.append(mAlbumMap.createStringOperateViewersInMediaShare(Util.ADD));
 
             } else {
 
-                stringBuilder.append(mAblumMap.createStringOperateViewersInMediaShare(Util.DELETE));
+                stringBuilder.append(mAlbumMap.createStringOperateViewersInMediaShare(Util.DELETE));
 
-                mAblumMap.clearViewers();
+                mAlbumMap.clearViewers();
             }
 
             stringBuilder.append(",");
         }
 
-        boolean isMaintained = mAblumMap.checkMaintainersListContainCurrentUserUUID();
+        boolean isMaintained = mAlbumMap.checkMaintainersListContainCurrentUserUUID();
 
         if (sSetMaintainer != isMaintained) {
 
             if (sSetMaintainer) {
 
                 for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-                    mAblumMap.addMaintainer(userUUID);
+                    mAlbumMap.addMaintainer(userUUID);
                 }
 
-                stringBuilder.append(mAblumMap.createStringOperateMaintainersInMediaShare(Util.ADD));
+                stringBuilder.append(mAlbumMap.createStringOperateMaintainersInMediaShare(Util.ADD));
 
             } else {
 
-                stringBuilder.append(mAblumMap.createStringOperateMaintainersInMediaShare(Util.DELETE));
+                stringBuilder.append(mAlbumMap.createStringOperateMaintainersInMediaShare(Util.DELETE));
 
-                mAblumMap.clearMaintainers();
+                mAlbumMap.clearMaintainers();
             }
 
             stringBuilder.append(",");
 
         }
 
-        if (!mAblumMap.getTitle().equals(title) || !mAblumMap.getDesc().equals(desc)) {
+        if (!mAlbumMap.getTitle().equals(title) || !mAlbumMap.getDesc().equals(desc)) {
 
-            mAblumMap.setTitle(title);
-            mAblumMap.setDesc(desc);
+            mAlbumMap.setTitle(title);
+            mAlbumMap.setDesc(desc);
 
-            stringBuilder.append(mAblumMap.createStringReplaceTitleTextAboutMediaShare());
+            stringBuilder.append(mAlbumMap.createStringReplaceTitleTextAboutMediaShare());
 
             stringBuilder.append(",");
         }
@@ -211,7 +205,6 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         requestData += "]";
 
         if (requestData.length() == 2) {
-            Toast.makeText(mContext, getString(R.string.modify_nothing_about_mediashare), Toast.LENGTH_SHORT).show();
             return null;
         }
 

@@ -16,12 +16,15 @@
 package com.winsun.fruitmix.component;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 
 import com.android.volley.VolleyError;
+import com.android.volley.orientation.OrientationOperation;
+import com.android.volley.orientation.OrientationOperationFactory;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLoader.ImageContainer;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
@@ -54,6 +57,8 @@ public class TouchNetworkImageView extends TouchImageView {
      * Local copy of the ImageLoader.
      */
     private ImageLoader mImageLoader;
+
+    private int orientationNumber;
 
     /**
      * Current ImageContainer. (either in-flight or finished)
@@ -115,6 +120,10 @@ public class TouchNetworkImageView extends TouchImageView {
 
     public void unregisterImageLoadListener() {
         mImageLoadListener = null;
+    }
+
+    public void setOrientationNumber(int orientationNumber) {
+        this.orientationNumber = orientationNumber;
     }
 
     /**
@@ -198,7 +207,18 @@ public class TouchNetworkImageView extends TouchImageView {
 
                         if (response.getBitmap() != null && getTag().equals(mUrl)) {
 
-                            setImageBitmap(response.getBitmap());
+                            Log.i(TAG, "onResponse: orientationNumber:" + orientationNumber);
+
+                            Bitmap bitmap = null;
+
+                            if(orientationNumber >= 1 && orientationNumber <= 8){
+                                OrientationOperation orientationOperation = OrientationOperationFactory.createOrientationOperation(orientationNumber);
+                                bitmap = orientationOperation.handleOrientationOperate(response.getBitmap());
+                            }else {
+                                bitmap = response.getBitmap();
+                            }
+
+                            setImageBitmap(bitmap);
 
                             post(new Runnable() {
                                 @Override

@@ -19,6 +19,7 @@ package com.android.volley.toolbox;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.widget.ImageView.ScaleType;
 
 import com.android.volley.AuthFailureError;
@@ -28,6 +29,8 @@ import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyLog;
+import com.android.volley.orientation.OrientationOperation;
+import com.android.volley.orientation.OrientationOperationFactory;
 
 import java.util.Map;
 
@@ -36,6 +39,9 @@ import java.util.Map;
  * back with a decoded Bitmap.
  */
 public class ImageRequest extends Request<Bitmap> {
+
+    public static final String TAG = ImageRequest.class.getSimpleName();
+
     /** Socket timeout in milliseconds for image requests */
     public static final int DEFAULT_IMAGE_TIMEOUT_MS = 1000;
 

@@ -32,10 +32,10 @@ public class SplashScreenActivity extends Activity {
 
     public static final String TAG = SplashScreenActivity.class.getSimpleName();
 
-    String mUuid;
-    String mPassword;
-    String mGateway;
-    String mToken;
+    private String mUuid;
+    private String mPassword;
+    private String mGateway;
+    private String mToken;
 
     private Context mContext;
 

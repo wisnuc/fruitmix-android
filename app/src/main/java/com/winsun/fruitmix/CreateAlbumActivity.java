@@ -63,13 +63,11 @@ public class CreateAlbumActivity extends AppCompatActivity {
     @BindView(R.id.layout_title)
     TextView mLayoutTitle;
 
-    String[] mSelectedImageUUIDArray;
+    private String[] mSelectedImageUUIDArray;
 
     private Context mContext;
 
     private ProgressDialog mDialog;
-
-    private String mTitle;
 
     private LocalBroadcastManager localBroadcastManager;
     private CustomReceiver customReceiver;
@@ -89,7 +87,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         mLayoutTitle.setText(getString(R.string.create_album_text));
 
-        mTitle = String.format(getString(R.string.title_hint), new SimpleDateFormat("yyyy-MM-dd", Locale.SIMPLIFIED_CHINESE).format(new Date(System.currentTimeMillis())));
+        String mTitle = String.format(getString(R.string.title_hint), new SimpleDateFormat("yyyy-MM-dd", Locale.SIMPLIFIED_CHINESE).format(new Date(System.currentTimeMillis())));
         mTitleLayout.setHint(mTitle);
 
         ckPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

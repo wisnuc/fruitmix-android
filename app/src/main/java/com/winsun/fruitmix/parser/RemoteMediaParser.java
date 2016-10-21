@@ -53,6 +53,9 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
                 String sharing = itemRaw.getString("sharing");
                 media.setSharing(sharing.equals("1"));
 
+                int orientationNumber = itemRaw.optInt("exifOrientation");
+                media.setOrientationNumber(orientationNumber);
+
                 medias.add(media);
 
             }

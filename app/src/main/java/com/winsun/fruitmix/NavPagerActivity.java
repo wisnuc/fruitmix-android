@@ -41,7 +41,6 @@ import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.model.Comment;
-import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.MediaShareContent;
 import com.winsun.fruitmix.model.User;
@@ -182,18 +181,8 @@ public class NavPagerActivity extends AppCompatActivity
 
         TextView mUserAvatar = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.avatar);
         mUserAvatar.setText(user.getDefaultAvatar());
-        int color = Integer.parseInt(user.getDefaultAvatarBgColor());
-        switch (color) {
-            case 0:
-                mUserAvatar.setBackgroundResource(R.drawable.user_portrait_bg_blue);
-                break;
-            case 1:
-                mUserAvatar.setBackgroundResource(R.drawable.user_portrait_bg_green);
-                break;
-            case 2:
-                mUserAvatar.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
-                break;
-        }
+        mUserAvatar.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
+
     }
 
     private void initViewPager() {
@@ -269,7 +258,7 @@ public class NavPagerActivity extends AppCompatActivity
 
         if (!onCreate) {
             FNAS.retrieveLocalMediaMap(mContext);
-            FNAS.retrieveLocalMediaCommentMap(mContext);
+//            FNAS.retrieveLocalMediaCommentMap(mContext);
             FNAS.retrieveShareMap(mContext);
 
             onCreate = true;

@@ -30,6 +30,7 @@ public class Media implements Parcelable {
     private String belongingMediaShareUUID;
     private boolean uploaded;
     private boolean sharing;
+    private int orientationNumber;
 
     public Media() {
 
@@ -47,6 +48,7 @@ public class Media implements Parcelable {
         loaded = in.readByte() != 0;
         belongingMediaShareUUID = in.readString();
         uploaded = in.readByte() != 0;
+        orientationNumber = in.readInt();
     }
 
     @Override
@@ -62,6 +64,7 @@ public class Media implements Parcelable {
         dest.writeByte((byte) (loaded ? 1 : 0));
         dest.writeString(belongingMediaShareUUID);
         dest.writeByte((byte) (uploaded ? 1 : 0));
+        dest.writeInt(orientationNumber);
     }
 
     @Override
@@ -179,6 +182,14 @@ public class Media implements Parcelable {
 
     public void setSharing(boolean sharing) {
         this.sharing = sharing;
+    }
+
+    public int getOrientationNumber() {
+        return orientationNumber;
+    }
+
+    public void setOrientationNumber(int orientationNumber) {
+        this.orientationNumber = orientationNumber;
     }
 
     public synchronized boolean uploadIfNotDone(Context context) {

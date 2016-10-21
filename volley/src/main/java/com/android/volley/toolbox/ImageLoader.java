@@ -29,6 +29,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
+import com.android.volley.orientation.OrientationOperation;
+import com.android.volley.orientation.OrientationOperationFactory;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -343,6 +345,7 @@ public class ImageLoader {
      * @param response The bitmap that was returned from the network.
      */
     protected void onGetImageSuccess(String cacheKey, Bitmap response) {
+
         // cache the image that was fetched.
         mCache.putBitmap(cacheKey, response);
 
