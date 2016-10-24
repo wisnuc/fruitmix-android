@@ -22,7 +22,6 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -40,7 +39,7 @@ import android.widget.Scroller;
 
 public class TouchImageView extends ImageView {
 
-    private static final String DEBUG = TouchImageView.class.getSimpleName();
+    private static final String TAG = TouchImageView.class.getSimpleName();
 
     //
     // SuperMin and SuperMax multipliers. Determine how much the image can be
@@ -740,8 +739,13 @@ public class TouchImageView extends ImageView {
 
     @Override
     public boolean canScrollHorizontally(int direction) {
-        matrix.getValues(m);
+/*        matrix.getValues(m);
         float x = m[Matrix.MTRANS_X];
+
+        Log.i(TAG, "canScrollHorizontally: viewWidth " + viewWidth);
+        Log.i(TAG, "canScrollHorizontally: getImageWidth " + getImageWidth());
+        Log.i(TAG, "canScrollHorizontally: normalizedScale " + normalizedScale);
+        Log.i(TAG, "canScrollHorizontally: matchViewWidth " + matchViewWidth);
 
         if (getImageWidth() < viewWidth) {
             return false;
@@ -753,7 +757,10 @@ public class TouchImageView extends ImageView {
             return false;
         }
 
-        return true;
+        return true;*/
+
+        return isZoomed();
+
     }
 
     /**
@@ -1284,6 +1291,6 @@ public class TouchImageView extends ImageView {
     private void printMatrixInfo() {
         float[] n = new float[9];
         matrix.getValues(n);
-        Log.d(DEBUG, "Scale: " + n[Matrix.MSCALE_X] + " TransX: " + n[Matrix.MTRANS_X] + " TransY: " + n[Matrix.MTRANS_Y]);
+        Log.d(TAG, "Scale: " + n[Matrix.MSCALE_X] + " TransX: " + n[Matrix.MTRANS_X] + " TransY: " + n[Matrix.MTRANS_Y]);
     }
 }

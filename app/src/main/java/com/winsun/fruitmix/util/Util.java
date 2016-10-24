@@ -88,11 +88,8 @@ public class Util {
     public static final String OPERATION_MEDIASHARE = "operation_mediashare";
     public static final String OPERATION_ORIGINAL_MEDIASHARE_WHEN_EDIT_PHOTO = "operation_original_mediashare";
     public static final String OPERATION_MODIFIED_MEDIASHARE_WHEN_EDIT_PHOTO = "operation_modified_mediashare";
-    public static final String OPERATION_LOCAL_MEDIASHARE_UUID = "operation_local_mediashare_uuid";
-    public static final String OPERATION_LOCAL_MEDIASHARE_LOCKED = "operation_local_mediashare_locked";
 
     public static final String NEED_SHOW_MENU = "need_show_menu";
-    public static final String KEY_LOCAL_PHOTO_UPLOAD_SUCCESS = "key_local_photo_upload_success";
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
     public static final String KEY_AUTHORIZATION = "Authorization";
     public static final String KEY_JWT_HEAD = "JWT ";
@@ -333,4 +330,7 @@ public class Util {
         return uploadFileResult;
     }
 
+    public static String removeWrap(String str){
+        return str.replaceAll("\r|\n","");
+    }
 }

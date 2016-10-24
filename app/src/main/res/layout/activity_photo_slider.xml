@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
     android:fitsSystemWindows="true"
     tools:context="com.winsun.fruitmix.PhotoSliderActivity">
 
-    <android.support.design.widget.AppBarLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:stateListAnimator="@animator/appbar_elevation">
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:orientation="vertical">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/chooseHeader"
@@ -39,33 +39,34 @@
                 android:textSize="18dp"/>
         </android.support.v7.widget.Toolbar>
 
-    </android.support.design.widget.AppBarLayout>
 
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/viewPager"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"/>
+        <RelativeLayout
+            android:id="@+id/panelFooter"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_gravity="bottom"
+            android:background="#2B3443"
+            android:visibility="visible">
 
-    <RelativeLayout
-        android:id="@+id/panelFooter"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_gravity="bottom"
-        android:background="#2B3443"
-        android:visibility="visible">
+            <ImageView
+                android:id="@+id/comment"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="20dp"
+                android:src="@drawable/comment"/>
 
-        <ImageView
-            android:id="@+id/comment"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="20dp"
-            android:src="@drawable/comment"/>
+        </RelativeLayout>
 
-    </RelativeLayout>
+    </LinearLayout>
+
 
     <ImageView
         android:id="@+id/return_resize"
@@ -75,4 +76,4 @@
         android:src="@drawable/return_resize"
         android:visibility="gone"/>
 
-</android.support.design.widget.CoordinatorLayout>
+</FrameLayout>

@@ -145,6 +145,12 @@ public class NavPagerActivity extends AppCompatActivity
         instance.startFixedThreadPool();
 
         setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchDrawerOpenState();
+            }
+        });
 
 /*        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -167,6 +173,14 @@ public class NavPagerActivity extends AppCompatActivity
 
         photoList.addPhotoListListener(this);
 
+    }
+
+    private void switchDrawerOpenState() {
+        if(mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+        }else {
+            mDrawerLayout.openDrawer(GravityCompat.START);
+        }
     }
 
     private void initNavigationView() {
@@ -585,12 +599,14 @@ public class NavPagerActivity extends AppCompatActivity
         }
 
         private void doCreateRemoteMediaCommentInLocalMediaCommentMapFunction() {
-            Intent operationResult = new Intent(Util.OPERATION);
-            operationResult.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-            operationResult.removeExtra(Util.OPERATION_TARGET_TYPE_NAME);
-            operationResult.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
+
 
             for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
+
+                Intent operationResult = new Intent(Util.OPERATION);
+                operationResult.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                operationResult.removeExtra(Util.OPERATION_TARGET_TYPE_NAME);
+                operationResult.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
 
                 for (Comment comment : entry.getValue()) {
                     operationResult.putExtra(Util.OPERATION_COMMENT, comment);
@@ -602,11 +618,12 @@ public class NavPagerActivity extends AppCompatActivity
         }
 
         private void doCreateMediaShareInLocalMediaShareMapFunction() {
-            Intent operationIntent = new Intent(Util.OPERATION);
-            operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
+
             for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
 
+                Intent operationIntent = new Intent(Util.OPERATION);
+                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
                 operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
                 mManager.sendBroadcast(operationIntent);
 

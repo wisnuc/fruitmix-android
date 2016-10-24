@@ -90,9 +90,9 @@ public class CreateRemoteMediaShareService extends IntentService {
         builder.append("{\"album\":");
         if(mediaShare.isAlbum()){
             builder.append("{\"title\":\"");
-            builder.append(mediaShare.getTitle());
+            builder.append(Util.removeWrap(mediaShare.getTitle()));
             builder.append("\",\"text\":\"");
-            builder.append(mediaShare.getDesc());
+            builder.append(Util.removeWrap(mediaShare.getDesc()));
             builder.append("\"}");
         }else {
             builder.append("null");
