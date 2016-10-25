@@ -88,13 +88,13 @@ public class CreateRemoteMediaShareService extends IntentService {
 
         StringBuilder builder = new StringBuilder();
         builder.append("{\"album\":");
-        if(mediaShare.isAlbum()){
+        if (mediaShare.isAlbum()) {
             builder.append("{\"title\":\"");
             builder.append(Util.removeWrap(mediaShare.getTitle()));
             builder.append("\",\"text\":\"");
             builder.append(Util.removeWrap(mediaShare.getDesc()));
             builder.append("\"}");
-        }else {
+        } else {
             builder.append("null");
         }
 
@@ -107,41 +107,51 @@ public class CreateRemoteMediaShareService extends IntentService {
 
         builder.append("\"viewers\":[");
         StringBuilder viewersBuilder = new StringBuilder();
-        for (String viewer:mediaShare.getViewers()){
+        for (String viewer : mediaShare.getViewers()) {
             viewersBuilder.append(",");
             viewersBuilder.append("\"");
             viewersBuilder.append(viewer);
             viewersBuilder.append("\"");
         }
         viewersBuilder.append("]");
-        builder.append(viewersBuilder.toString().substring(1));
+        if (viewersBuilder.length() > 1) {
+            builder.append(viewersBuilder.toString().substring(1));
+        }else {
+            builder.append(viewersBuilder.toString());
+        }
 
         builder.append(",");
 
         builder.append("\"maintainers\":[");
         StringBuilder maintainersBuilder = new StringBuilder();
-        for (String maintainer :mediaShare.getMaintainers()){
+        for (String maintainer : mediaShare.getMaintainers()) {
             maintainersBuilder.append(",");
             maintainersBuilder.append("\"");
             maintainersBuilder.append(maintainer);
             maintainersBuilder.append("\"");
         }
         maintainersBuilder.append("]");
-        builder.append(maintainersBuilder.toString().substring(1));
+        if (maintainersBuilder.length() > 1) {
+            builder.append(maintainersBuilder.toString().substring(1));
+        }else {
+            builder.append(maintainersBuilder.toString());
+        }
 
         builder.append(",");
 
         builder.append("\"contents\":[");
         StringBuilder contentsBuilder = new StringBuilder();
-        for (String content :mediaShare.getMediaDigestInMediaShareContents()){
+        for (String content : mediaShare.getMediaDigestInMediaShareContents()) {
             contentsBuilder.append(",");
             contentsBuilder.append("\"");
             contentsBuilder.append(content);
             contentsBuilder.append("\"");
         }
         contentsBuilder.append("]");
-        if(contentsBuilder.length() > 1){
+        if (contentsBuilder.length() > 1) {
             builder.append(contentsBuilder.toString().substring(1));
+        }else {
+            builder.append(contentsBuilder.toString());
         }
 
         builder.append("}");
@@ -157,7 +167,7 @@ public class CreateRemoteMediaShareService extends IntentService {
 
                 Log.i(TAG, "insert remote mediashare which source is network succeed");
 
-                intent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare.cloneMyself());
+                intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare.cloneMyself());
 
                 RemoteMediaShareJSONObjectParser parser = new RemoteMediaShareJSONObjectParser();
 
@@ -179,7 +189,7 @@ public class CreateRemoteMediaShareService extends IntentService {
         } catch (Exception ex) {
             ex.printStackTrace();
 
-            if(result.length() == 0){
+            if (result.length() == 0) {
                 intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
                 Log.i(TAG, "insert remote mediashare fail");
             }

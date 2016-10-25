@@ -2,30 +2,35 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
 
-<!--        <item
-            android:id="@+id/person_info"
-            android:icon="@drawable/person_info"
-            android:title="@string/person_data" />
+        <!--        <item
+                    android:id="@+id/person_info"
+                    android:icon="@drawable/person_info"
+                    android:title="@string/person_data" />
+
+                <item
+                    android:id="@+id/cloud"
+                    android:icon="@drawable/cloud"
+                    android:title="@string/cloud" />
+
+                <item
+                    android:id="@+id/user_manage"
+                    android:icon="@drawable/user_manage"
+                    android:title="@string/user_manage" />
+
+                <item
+                    android:id="@+id/setting"
+                    android:icon="@drawable/setting"
+                    android:title="@string/setting" />
+
+                <item
+                    android:id="@+id/help"
+                    android:icon="@drawable/help"
+                    android:title="@string/help" />-->
 
         <item
-            android:id="@+id/cloud"
+            android:id="@+id/file"
             android:icon="@drawable/cloud"
-            android:title="@string/cloud" />
-
-        <item
-            android:id="@+id/user_manage"
-            android:icon="@drawable/user_manage"
-            android:title="@string/user_manage" />
-
-        <item
-            android:id="@+id/setting"
-            android:icon="@drawable/setting"
-            android:title="@string/setting" />
-
-        <item
-            android:id="@+id/help"
-            android:icon="@drawable/help"
-            android:title="@string/help" />-->
+            android:title="@string/file"/>
 
         <item
             android:id="@+id/logout"

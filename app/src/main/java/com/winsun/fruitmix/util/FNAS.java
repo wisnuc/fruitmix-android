@@ -157,18 +157,22 @@ public class FNAS {
     }
 
 
-    public static void retrieveShareMap(Context context) {
+    public static void retrieveLocalMediaShare(Context context) {
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
 
         Intent intent = new Intent(Util.OPERATION);
         intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-        localBroadcastManager.sendBroadcast(intent);
-
-        intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
         intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
+        localBroadcastManager.sendBroadcast(intent);
+    }
+
+    public static void retrieveRemoteMediaShare(Context context){
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
         localBroadcastManager.sendBroadcast(intent);
     }
 

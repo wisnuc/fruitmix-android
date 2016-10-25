@@ -63,8 +63,9 @@ public class AlbumList implements NavPagerActivity.Page {
     private long mDownTime = 0;
     private double mDiffTimeMilliSecond = 200;
 
-
     private ImageLoader mImageLoader;
+    private RelativeLayout lastMainBar;
+
 
     public AlbumList(NavPagerActivity activity_) {
 
@@ -245,7 +246,6 @@ public class AlbumList implements NavPagerActivity.Page {
 
         Media coverImg;
         MediaShare currentItem;
-        RelativeLayout lastMainBar;
 
         AlbumListViewHolder(View view) {
 
@@ -256,7 +256,6 @@ public class AlbumList implements NavPagerActivity.Page {
 
             currentItem = mediaShare;
             restoreMainBarState();
-
 
             coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
             if (coverImg == null) {
@@ -327,6 +326,7 @@ public class AlbumList implements NavPagerActivity.Page {
                     margin = Util.dip2px(containerActivity, 100);
                     switch (event.getAction() & MotionEvent.ACTION_MASK) {
                         case MotionEvent.ACTION_DOWN:
+
                             if (lastMainBar != null) lastMainBar.setTranslationX(0.0f);
                             lastMainBar = mainBar;
                             x = event.getRawX() - mainBar.getTranslationX();

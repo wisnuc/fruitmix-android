@@ -39,6 +39,7 @@ import com.winsun.fruitmix.Fragment.NewPhotoList;
 import com.winsun.fruitmix.Fragment.MediaShareList;
 import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.file.FileMainActivity;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.MediaShare;
@@ -176,9 +177,9 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     private void switchDrawerOpenState() {
-        if(mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
-        }else {
+        } else {
             mDrawerLayout.openDrawer(GravityCompat.START);
         }
     }
@@ -273,7 +274,8 @@ public class NavPagerActivity extends AppCompatActivity
         if (!onCreate) {
             FNAS.retrieveLocalMediaMap(mContext);
 //            FNAS.retrieveLocalMediaCommentMap(mContext);
-            FNAS.retrieveShareMap(mContext);
+            FNAS.retrieveLocalMediaShare(mContext);
+            FNAS.retrieveRemoteMediaShare(mContext);
 
             onCreate = true;
         }
@@ -316,7 +318,7 @@ public class NavPagerActivity extends AppCompatActivity
         mManager.sendBroadcast(intent);
     }
 
-    public void modifyMediaShare(MediaShare mediaShare,String requestData) {
+    public void modifyMediaShare(MediaShare mediaShare, String requestData) {
         if (!checkPermissionToOperate(mediaShare)) {
             Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
 
@@ -333,7 +335,7 @@ public class NavPagerActivity extends AppCompatActivity
             intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
         }
         intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-        intent.putExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA,requestData);
+        intent.putExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA, requestData);
         mManager.sendBroadcast(intent);
     }
 
@@ -603,12 +605,11 @@ public class NavPagerActivity extends AppCompatActivity
 
             for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
 
-                Intent operationResult = new Intent(Util.OPERATION);
-                operationResult.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                operationResult.removeExtra(Util.OPERATION_TARGET_TYPE_NAME);
-                operationResult.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
-
                 for (Comment comment : entry.getValue()) {
+                    Intent operationResult = new Intent(Util.OPERATION);
+                    operationResult.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
+                    operationResult.removeExtra(Util.OPERATION_TARGET_TYPE_NAME);
+                    operationResult.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
                     operationResult.putExtra(Util.OPERATION_COMMENT, comment);
                     operationResult.putExtra(Util.OPERATION_IMAGE_UUID, entry.getKey());
                     mManager.sendBroadcast(operationResult);
@@ -900,11 +901,16 @@ public class NavPagerActivity extends AppCompatActivity
         ivBtAlbum.setVisibility(View.GONE);
         ivBtShare.setVisibility(View.GONE);
         toolbar.setNavigationIcon(R.drawable.menu);
-        toolbar.setNavigationOnClickListener(null);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchDrawerOpenState();
+            }
+        });
         lbRight.setVisibility(View.VISIBLE);
         tabLayout.setVisibility(View.VISIBLE);
         CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
-        lp.bottomMargin = Util.dip2px(this,48.0f);
+        lp.bottomMargin = Util.dip2px(this, 48.0f);
         //if(LocalCache.ScreenWidth==540) lp.bottomMargin=76;
         //else if(LocalCache.ScreenWidth==1080) lp.bottomMargin=140;
         viewPager.setLayoutParams(lp);
@@ -977,6 +983,9 @@ public class NavPagerActivity extends AppCompatActivity
 
             }.execute();
 
+        } else if (id == R.id.file) {
+            Intent intent = new Intent(mContext, FileMainActivity.class);
+            startActivity(intent);
         }
 
         mDrawerLayout.closeDrawer(GravityCompat.START);

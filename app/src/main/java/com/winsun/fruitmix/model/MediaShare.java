@@ -73,7 +73,13 @@ public class MediaShare implements Parcelable {
             stringBuilder.append(value);
             stringBuilder.append("\",");
         }
-        returnValue = stringBuilder.substring(0, stringBuilder.length() - 1);
+
+        if (viewers.size() > 0) {
+            returnValue = stringBuilder.substring(0, stringBuilder.length() - 1);
+        } else {
+            returnValue = stringBuilder.toString();
+        }
+
         returnValue += "]}";
 
         return returnValue;
@@ -94,7 +100,13 @@ public class MediaShare implements Parcelable {
             stringBuilder.append(value);
             stringBuilder.append("\",");
         }
-        returnValue = stringBuilder.substring(0, stringBuilder.length() - 1);
+
+        if (maintainers.size() > 0) {
+            returnValue = stringBuilder.substring(0, stringBuilder.length() - 1);
+        } else {
+            returnValue = stringBuilder.toString();
+        }
+
         returnValue += "]}";
 
         return returnValue;
@@ -115,7 +127,13 @@ public class MediaShare implements Parcelable {
             stringBuilder.append(value.getDigest());
             stringBuilder.append("\",");
         }
-        returnValue = stringBuilder.substring(0, stringBuilder.length() - 1);
+
+        if (mediaShareContents.size() > 0) {
+            returnValue = stringBuilder.substring(0, stringBuilder.length() - 1);
+        } else {
+            returnValue = stringBuilder.toString();
+        }
+
         returnValue += "]}";
 
         return returnValue;

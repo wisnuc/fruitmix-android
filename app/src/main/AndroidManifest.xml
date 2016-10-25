@@ -179,6 +179,9 @@
             android:name=".services.ModifyMediaInLocalMediaShareService"
             android:exported="false">
         </service>
+
+        <activity android:name=".file.FileMainActivity">
+        </activity>
     </application>
 
 </manifest>

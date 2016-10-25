@@ -100,7 +100,9 @@
     <string name="seconds_ago">%1$s秒前</string>
     <string name="minutes_ago">%1$s分钟前</string>
     <string name="hours_ago">%1$s小时前</string>
+
     <string name="yesterday">昨天</string>
+    <string name="file">我的文件</string>
 
     <!-- finish add by liang.wu-->
 
