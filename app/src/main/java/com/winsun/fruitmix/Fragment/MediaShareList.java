@@ -154,6 +154,10 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         mLoadingLayout.setVisibility(View.VISIBLE);
 
+        if(!containerActivity.ismRemoteMediaShareLoaded()){
+            return;
+        }
+
         reloadList();
 
         mMapKeyIsImageUUIDValueIsComments.clear();

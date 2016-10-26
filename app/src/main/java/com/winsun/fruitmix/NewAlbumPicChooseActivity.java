@@ -48,8 +48,11 @@ public class NewAlbumPicChooseActivity extends Activity {
 
         mNewPhotoList = new NewPhotoList(this);
 
+        List<String> alreadySelectedImageUUIDArrayList = getIntent().getStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST);
+
         mMainFrameLayout.addView(mNewPhotoList.getView());
         mNewPhotoList.setSelectMode(true);
+        mNewPhotoList.setAlreadySelectedImageUUIDArrayList(alreadySelectedImageUUIDArrayList);
         mNewPhotoList.refreshView();
 
         ivBack.setOnClickListener(new View.OnClickListener() {
@@ -75,14 +78,14 @@ public class NewAlbumPicChooseActivity extends Activity {
 
                 if (intent.getBooleanExtra(Util.EDIT_PHOTO, false)) {
 
-                    getIntent().putExtra(Util.KEY_SELECTED_IMAGE_UUID_ARRAY,selectedImageUUIDList);
+                    getIntent().putExtra(Util.KEY_NEW_SELECTED_IMAGE_UUID_ARRAY,selectedImageUUIDList);
                     setResult(RESULT_OK, intent);
                     finish();
 
                 } else {
                     intent = new Intent();
                     intent.setClass(NewAlbumPicChooseActivity.this, CreateAlbumActivity.class);
-                    intent.putExtra(Util.KEY_SELECTED_IMAGE_UUID_ARRAY, selectedImageUUIDList);
+                    intent.putExtra(Util.KEY_NEW_SELECTED_IMAGE_UUID_ARRAY, selectedImageUUIDList);
                     startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
                 }
 

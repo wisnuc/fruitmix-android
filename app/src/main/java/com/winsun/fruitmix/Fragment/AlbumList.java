@@ -149,6 +149,10 @@ public class AlbumList implements NavPagerActivity.Page {
 
         mLoadingLayout.setVisibility(View.VISIBLE);
 
+        if(!containerActivity.ismRemoteMediaShareLoaded()){
+            return;
+        }
+
         reloadList();
 
         mLoadingLayout.setVisibility(View.GONE);

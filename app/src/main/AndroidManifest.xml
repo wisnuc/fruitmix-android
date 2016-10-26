@@ -180,8 +180,12 @@
             android:exported="false">
         </service>
 
-        <activity android:name=".file.FileMainActivity">
-        </activity>
+        <activity android:name=".file.LocalFileActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".file.FileMainActivity"
+            android:screenOrientation="portrait"/>
+
     </application>
 
 </manifest>

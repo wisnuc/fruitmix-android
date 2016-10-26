@@ -1,10 +1,12 @@
 package com.winsun.fruitmix;
 
+import com.winsun.fruitmix.file.model.AbstractRemoteFile;
 import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.parser.RemoteDataParser;
+import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.parser.RemoteMediaCommentParser;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
 import com.winsun.fruitmix.parser.RemoteMediaShareParser;
@@ -249,9 +251,62 @@ public class RemoteDataParserUnitTest {
 
         List<Comment> comments = remoteDataParser.parse(json);
 
-
         assertFalse(comments.size() == 0);
     }
 
+
+    @Test
+    public void parseRemoteFileFolderTest(){
+        String json = "[\n" +
+                "  {\n" +
+                "    \"uuid\": \"5d463eac-f73f-4987-a3e9-bb68fee726e0\",\n" +
+                "    \"type\": \"file\",\n" +
+                "    \"owner\": [\n" +
+                "      \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\"\n" +
+                "    ],\n" +
+                "    \"name\": \"7685_spec.png\",\n" +
+                "    \"mtime\": 1477386652380,\n" +
+                "    \"size\": 95516\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"uuid\": \"62584c06-0799-4d42-97e4-e40fbd563c19\",\n" +
+                "    \"type\": \"file\",\n" +
+                "    \"owner\": [\n" +
+                "      \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\"\n" +
+                "    ],\n" +
+                "    \"name\": \"ic_appifi_1 (1).png\",\n" +
+                "    \"mtime\": 1477386652508,\n" +
+                "    \"size\": 1318\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"uuid\": \"2dad4fe1-41f4-4d4d-b4c7-8d13624a7df5\",\n" +
+                "    \"type\": \"file\",\n" +
+                "    \"owner\": [\n" +
+                "      \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\"\n" +
+                "    ],\n" +
+                "    \"name\": \"naiveTest.js\",\n" +
+                "    \"mtime\": 1477386652624,\n" +
+                "    \"size\": 714\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"uuid\": \"d37368f1-624c-42d7-8c4a-330c94eefcc7\",\n" +
+                "    \"type\": \"folder\",\n" +
+                "    \"owner\": [\n" +
+                "      \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\"\n" +
+                "    ],\n" +
+                "    \"name\": \"src\"\n" +
+                "  }\n" +
+                "]";
+
+        RemoteDataParser<AbstractRemoteFile> remoteDataParser  = new RemoteFileFolderParser();
+        List<AbstractRemoteFile> abstractRemoteFiles = remoteDataParser.parse(json);
+
+        AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(0);
+        assertEquals(abstractRemoteFile.getTime(),"1477386652380");
+        assertEquals(abstractRemoteFile.getUuid(),"5d463eac-f73f-4987-a3e9-bb68fee726e0");
+        assertEquals(abstractRemoteFile.getName(),"7685_spec.png");
+        assertEquals(abstractRemoteFile.getSize(),"95516");
+
+    }
 
 }

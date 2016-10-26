@@ -238,6 +238,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             if (picItemRaw == null) {
                 picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
 
+                if(picItemRaw == null){
+                    continue;
+                }
                 media.setLocal(true);
                 media.setThumb(picItemRaw.getThumb());
             } else {

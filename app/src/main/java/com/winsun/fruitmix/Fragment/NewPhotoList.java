@@ -108,6 +108,8 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     private Bundle reenterState;
 
+    private List<String> alreadySelectedImageUUIDArrayList;
+
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
@@ -172,10 +174,18 @@ public class NewPhotoList implements NavPagerActivity.Page {
         mPhotoRecycleAdapter.notifyDataSetChanged();
     }
 
+    public void setAlreadySelectedImageUUIDArrayList(List<String> alreadySelectedImageUUIDArrayList) {
+        this.alreadySelectedImageUUIDArrayList = alreadySelectedImageUUIDArrayList;
+    }
+
     @Override
     public void refreshView() {
 
         mLoadingLayout.setVisibility(View.VISIBLE);
+
+        if (containerActivity instanceof NavPagerActivity && !((NavPagerActivity) containerActivity).ismRemoteMediaLoaded()) {
+            return;
+        }
 
         reloadData();
 
@@ -269,7 +279,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
     }
 
     private void calcPhotoItemWidth() {
-        mItemWidth = mScreenWidth / mSpanCount - Util.dip2px(containerActivity,5);
+        mItemWidth = mScreenWidth / mSpanCount - Util.dip2px(containerActivity, 5);
     }
 
     @Override
@@ -418,7 +428,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
     public void createAlbum(List<String> selectUUIDs) {
         Intent intent = new Intent();
         intent.setClass(containerActivity, CreateAlbumActivity.class);
-        intent.putExtra(Util.KEY_SELECTED_IMAGE_UUID_ARRAY, selectUUIDs.toArray(new String[selectUUIDs.size()]));
+        intent.putExtra(Util.KEY_NEW_SELECTED_IMAGE_UUID_ARRAY, selectUUIDs.toArray(new String[selectUUIDs.size()]));
         containerActivity.startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
     }
 
@@ -727,7 +737,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             params.height = mItemWidth;
 
-            int normalMargin = Util.dip2px(containerActivity,2.5f);
+            int normalMargin = Util.dip2px(containerActivity, 2.5f);
 
             params.setMargins(normalMargin, normalMargin, normalMargin, normalMargin);
             view.setLayoutParams(params);
@@ -735,7 +745,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             if (mSelectMode) {
                 boolean selected = media.isSelected();
                 if (selected) {
-                    int selectMargin = Util.dip2px(containerActivity,20);
+                    int selectMargin = Util.dip2px(containerActivity, 20);
                     setPhotoIvLayoutParams(selectMargin);
                     mPhotoSelectedIv.setVisibility(View.VISIBLE);
                 } else {
@@ -758,12 +768,15 @@ public class NewPhotoList implements NavPagerActivity.Page {
                         if (!media.isSharing()) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.photo_not_sharing), Toast.LENGTH_SHORT).show();
                             return;
+                        } else if (alreadySelectedImageUUIDArrayList != null && alreadySelectedImageUUIDArrayList.contains(media.getUuid())) {
+                            Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
+                            return;
                         }
 
                         boolean selected = media.isSelected();
 
                         if (selected) {
-                            int selectMargin = Util.dip2px(containerActivity,20);
+                            int selectMargin = Util.dip2px(containerActivity, 20);
                             setPhotoIvLayoutParams(selectMargin);
                             mPhotoSelectedIv.setVisibility(View.VISIBLE);
                         } else {
@@ -882,7 +895,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
             float newSpan = detector.getCurrentSpan();
 
-            if (newSpan > mOldSpan + Util.dip2px(containerActivity,2)) {
+            if (newSpan > mOldSpan + Util.dip2px(containerActivity, 2)) {
 
                 if (mSpanCount > mSpanMinCount) {
                     mSpanCount--;
@@ -895,7 +908,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                 Log.i(TAG, "pinch more");
 
-            } else if (mOldSpan > newSpan + Util.dip2px(containerActivity,2)) {
+            } else if (mOldSpan > newSpan + Util.dip2px(containerActivity, 2)) {
 
                 if (mSpanCount < mSpanMaxCount) {
                     mSpanCount++;

@@ -29,8 +29,6 @@ import com.winsun.fruitmix.util.Util;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -79,7 +77,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         mContext = this;
 
-        mSelectedImageUUIDArray = getIntent().getStringArrayExtra(Util.KEY_SELECTED_IMAGE_UUID_ARRAY);
+        mSelectedImageUUIDArray = getIntent().getStringArrayExtra(Util.KEY_NEW_SELECTED_IMAGE_UUID_ARRAY);
 
         setContentView(R.layout.activity_create_album);
 

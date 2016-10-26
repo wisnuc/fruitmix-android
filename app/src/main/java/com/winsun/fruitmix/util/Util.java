@@ -131,7 +131,9 @@ public class Util {
     public static final String KEY_MEDIASHARE = "key_mediashare";
     public static final String KEY_MEDIA_LIST = "key_media_list";
 
-    public static final String KEY_SELECTED_IMAGE_UUID_ARRAY = "key_selected_image_uuid_array";
+    public static final String KEY_NEW_SELECTED_IMAGE_UUID_ARRAY = "key_new_selected_image_uuid_array";
+
+    public static final String KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST = "key_already_selected_image_uuid_arraylist";
 
     public static final String KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB = "key_transition_photo_need_show_thumb";
 

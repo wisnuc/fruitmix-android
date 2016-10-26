@@ -45,12 +45,16 @@ public class RemoteFileFolderParser implements RemoteDataParser<AbstractRemoteFi
                     abstractRemoteFile = new RemoteFolder();
                 }
 
+                abstractRemoteFile.setUuid(jsonObject.getString("uuid"));
+
                 abstractRemoteFile.setName(jsonObject.getString("name"));
 
                 JSONArray ownerArray = jsonObject.getJSONArray("owner");
                 for (int j = 0;j < ownerArray.length();j++){
                     abstractRemoteFile.addOwner(ownerArray.getString(j));
                 }
+
+                abstractRemoteFiles.add(abstractRemoteFile);
 
             }
 

@@ -102,7 +102,11 @@
     <string name="hours_ago">%1$s小时前</string>
 
     <string name="yesterday">昨天</string>
-    <string name="file">我的文件</string>
+    <string name="my_file">我的文件</string>
+    <string name="file">文件</string>
+    <string name="download">下载</string>
+    <string name="select_file">选择文件</string>
+    <string name="already_select_media">对不起，该照片已在相册中</string>
 
     <!-- finish add by liang.wu-->
 

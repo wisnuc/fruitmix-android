@@ -186,6 +186,10 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 break;
             case R.id.add_album:
                 Intent intent = new Intent(mContext, NewAlbumPicChooseActivity.class);
+
+                String[] alreadySelectedImageUUIDArray = new String[mediaShare.getMediaContentsListSize()];
+                mediaShare.getMediaDigestInMediaShareContents().toArray(alreadySelectedImageUUIDArray);
+                intent.putStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST, (ArrayList<String>) mediaShare.getMediaDigestInMediaShareContents());
                 intent.putExtra(Util.EDIT_PHOTO, true);
                 startActivityForResult(intent, Util.KEY_CHOOSE_PHOTO_REQUEST_CODE);
                 break;
@@ -236,7 +240,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         if (requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            String[] selectedImageUUIDStr = data.getStringArrayExtra(Util.KEY_SELECTED_IMAGE_UUID_ARRAY);
+            String[] selectedImageUUIDStr = data.getStringArrayExtra(Util.KEY_NEW_SELECTED_IMAGE_UUID_ARRAY);
             fillPhotoList(selectedImageUUIDStr);
             fillMediaShareContents(selectedImageUUIDStr);
 
