@@ -48,6 +48,7 @@ public class Util {
     public static final String EDIT_PHOTO = "edit_photo";
     public static final String UPDATED_ALBUM_TITLE = "updated_album_title";
     public static final String IMAGE_UUID = "image_uuid";
+    public static final String FOLDER_UUID = "folder_uuid";
 
     public static final String LOCAL_SHARE_CREATED = "local_share_created";
     public static final String LOCAL_SHARE_MODIFIED = "local_share_modified";
@@ -75,6 +76,7 @@ public class Util {
     public static final String REMOTE_USER_RETRIEVED = "remote_user_retrieved";
     public static final String REMOTE_TOKEN_RETRIEVED = "remote_token_retrieved";
     public static final String REMOTE_DEVICEID_RETRIEVED = "remote_deviceid_retrieved";
+    public static final String REMOTE_FILE_RETRIEVED = "remote_file_retrieved";
 
     public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
 
@@ -113,6 +115,7 @@ public class Util {
     public static final String TOKEN_PARAMETER = "/token";
     public static final String LOGIN_PARAMETER = "/login";
     public static final String DEVICE_ID_PARAMETER = "/libraries";
+    public static final String FILE_PARAMETER = "/files";
 
     public static final String FRUITMIX_SHAREDPREFERENCE_NAME = "fruitMix";
 
@@ -129,13 +132,15 @@ public class Util {
     public static final String CURRENT_MEDIASHARE_TIME = "current_mediashare_time";
 
     public static final String KEY_MEDIASHARE = "key_mediashare";
-    public static final String KEY_MEDIA_LIST = "key_media_list";
+    public static final String KEY_MEDIA_UUID_LIST = "key_media_uuid_list";
 
     public static final String KEY_NEW_SELECTED_IMAGE_UUID_ARRAY = "key_new_selected_image_uuid_array";
 
     public static final String KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST = "key_already_selected_image_uuid_arraylist";
 
     public static final String KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB = "key_transition_photo_need_show_thumb";
+
+    public static final String KEY_NEED_TRANSITION = "key_need_transition";
 
     public static final String KEY_SHOW_SOFT_INPUT_WHEN_ENTER = "key_show_soft_input_when_enter";
 
@@ -283,7 +288,7 @@ public class Util {
     }
 
     public static int[] formatPhotoWidthHeight(int width, int height) {
-/*        if (width >= height) {
+        if (width >= height) {
             width = width * 200 / height;
             height = 200;
         } else {
@@ -291,12 +296,7 @@ public class Util {
             width = 200;
         }
 
-        if (width / height > 2)
-            width = 200;
-        else if (height / width > 2)
-            height = 200;*/
-
-        return new int[]{200, 200};
+        return new int[]{width, height};
     }
 
     public static boolean checkRunningOnLollipopOrHigher() {

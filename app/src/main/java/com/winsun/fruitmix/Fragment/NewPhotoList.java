@@ -797,22 +797,31 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
                         int position = 0;
 
-                        ArrayList<Media> mediaList = (ArrayList<Media>) mMapKeyIsDateValueIsPhotoList.get(media.getTitle());
+                        List<Media> mediaList =mMapKeyIsDateValueIsPhotoList.get(media.getTitle());
+                        LocalCache.photoSliderList.clear();
+                        LocalCache.photoSliderList.addAll(mediaList);
+
                         position = getPosition(position, mediaList, media);
 
                         Intent intent = new Intent();
-
-//                        Log.i(TAG, "photo pos:" + position);
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
-                        intent.putParcelableArrayListExtra(Util.KEY_MEDIA_LIST, mediaList);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                        ViewCompat.setTransitionName(mPhotoIv, media.getUuid());
+                        if (mPhotoIv.isLoaded()) {
 
-                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, mPhotoIv, media.getUuid());
+                            ViewCompat.setTransitionName(mPhotoIv, media.getUuid());
 
-                        containerActivity.startActivity(intent, options.toBundle());
+                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, mPhotoIv, media.getUuid());
+
+                            containerActivity.startActivity(intent, options.toBundle());
+                        } else {
+
+                            intent.putExtra(Util.KEY_NEED_TRANSITION, false);
+                            containerActivity.startActivity(intent);
+
+                        }
+
 
                     }
 
@@ -845,7 +854,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             mPhotoIv.setLayoutParams(photoParams);
         }
 
-        private int getPosition(int position, ArrayList<Media> mediaList, Media media) {
+        private int getPosition(int position, List<Media> mediaList, Media media) {
             for (int i = 0; i < mediaList.size(); i++) {
                 Media media1 = mediaList.get(i);
 
@@ -924,6 +933,5 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         }
     }
-
 
 }

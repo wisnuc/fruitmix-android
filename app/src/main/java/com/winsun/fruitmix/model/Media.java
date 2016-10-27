@@ -141,7 +141,7 @@ public class Media implements Parcelable {
     }
 
     public String getThumb() {
-        return thumb;
+        return thumb == null ? "" : thumb;
     }
 
     public void setThumb(String thumb) {

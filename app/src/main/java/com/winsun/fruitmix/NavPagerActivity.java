@@ -39,6 +39,7 @@ import com.winsun.fruitmix.Fragment.NewPhotoList;
 import com.winsun.fruitmix.Fragment.MediaShareList;
 import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.file.FileMainActivity;
 import com.winsun.fruitmix.file.LocalFileActivity;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.model.Comment;
@@ -568,8 +569,6 @@ public class NavPagerActivity extends AppCompatActivity
 
                 pageList.get(PAGE_PHOTO).refreshView();
 
-                mRemoteMediaLoaded = true;
-
                 retrieveLocalMediaInCamera();
 
                 FNAS.retrieveLocalMediaShare(mContext);
@@ -997,7 +996,7 @@ public class NavPagerActivity extends AppCompatActivity
             }.execute();
 
         } else if (id == R.id.file) {
-            Intent intent = new Intent(mContext, LocalFileActivity.class);
+            Intent intent = new Intent(mContext, FileMainActivity.class);
             startActivity(intent);
         }
 

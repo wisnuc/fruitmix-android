@@ -60,6 +60,8 @@ public class NetworkImageView extends ImageView {
 
     private int orientationNumber;
 
+    private boolean loaded = false;
+
     /**
      * Current ImageContainer. (either in-flight or finished)
      */
@@ -128,6 +130,14 @@ public class NetworkImageView extends ImageView {
 
     public void setOrientationNumber(int orientationNumber) {
         this.orientationNumber = orientationNumber;
+    }
+
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    public void setLoaded(boolean loaded) {
+        this.loaded = loaded;
     }
 
     /**
@@ -210,8 +220,6 @@ public class NetworkImageView extends ImageView {
 
                         if (response.getBitmap() != null && getTag().equals(mUrl)) {
 
-                            Log.i(TAG, "onResponse: orientationNumber:" + orientationNumber);
-
                             Bitmap bitmap = null;
 
                             if(orientationNumber >= 1 && orientationNumber <= 8){
@@ -222,6 +230,8 @@ public class NetworkImageView extends ImageView {
                             }
 
                             setImageBitmap(bitmap);
+
+                            setLoaded(true);
 
                             post(new Runnable() {
                                 @Override

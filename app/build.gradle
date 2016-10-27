@@ -37,4 +37,5 @@ dependencies {
     testCompile 'org.mockito:mockito-core:2.1.0-beta.119'
     testCompile 'org.robolectric:robolectric:3.1.2'
     apt 'com.jakewharton:butterknife-compiler:8.1.0'
+    compile 'org.greenrobot:eventbus:3.0.0'
 }

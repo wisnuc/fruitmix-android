@@ -3,7 +3,6 @@ package com.winsun.fruitmix.Fragment;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
@@ -533,15 +532,16 @@ public class MediaShareList implements NavPagerActivity.Page {
                     ivCover.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            ArrayList<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
+                            List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
+
+                            LocalCache.photoSliderList.clear();
+                            LocalCache.photoSliderList.addAll(imageList);
 
                             Intent intent = new Intent();
                             intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
                             intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                             intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
                             intent.putExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, false);
-
-                            intent.putParcelableArrayListExtra(Util.KEY_MEDIA_LIST, imageList);
                             intent.setClass(containerActivity, PhotoSliderActivity.class);
 
                             String transitionName = String.valueOf(imageList.get(0).getUuid());
@@ -628,16 +628,15 @@ public class MediaShareList implements NavPagerActivity.Page {
                         ivItems[i].setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Log.d("winsun", currentItem + "");
 
-                                ArrayList<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
+                                List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
+                                LocalCache.photoSliderList.clear();
+                                LocalCache.photoSliderList.addAll(imageList);
 
                                 Intent intent = new Intent();
                                 intent.putExtra(Util.INITIAL_PHOTO_POSITION, mItemPosition);
                                 intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                                 intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
-                                intent.putParcelableArrayListExtra(Util.KEY_MEDIA_LIST, imageList);
-
                                 intent.setClass(containerActivity, PhotoSliderActivity.class);
 
                                 String transitionName = String.valueOf(imageList.get(mItemPosition).getUuid());
@@ -686,7 +685,7 @@ public class MediaShareList implements NavPagerActivity.Page {
             mShareCountTextView.setText(builder);
         }
 
-        ArrayList<Media> getImgList(List<String> imageDigests) {
+        List<Media> getImgList(List<String> imageDigests) {
             ArrayList<Media> picList;
             Media picItem;
             Media picItemRaw;

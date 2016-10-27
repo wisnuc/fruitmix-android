@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
@@ -19,8 +18,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -36,8 +33,10 @@ import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +80,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
     private boolean transitionMediaNeedShowThumb = true;
 
+    private boolean needTransition = true;
+
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -113,15 +114,20 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ActivityCompat.postponeEnterTransition(this);
-
         setContentView(R.layout.activity_photo_slider);
-
-        setEnterSharedElementCallback(sharedElementCallback);
 
         mContext = this;
 
         ButterKnife.bind(this);
+
+        needTransition = getIntent().getBooleanExtra(Util.KEY_NEED_TRANSITION, true);
+
+        Log.i(TAG, "onCreate: needTransition:" + needTransition);
+
+        if (needTransition) {
+            ActivityCompat.postponeEnterTransition(this);
+            setEnterSharedElementCallback(sharedElementCallback);
+        }
 
         initImageLoader();
 
@@ -129,7 +135,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         boolean mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
 
-        mediaList = getIntent().getParcelableArrayListExtra(Util.KEY_MEDIA_LIST);
+        mediaList = new ArrayList<>(LocalCache.photoSliderList);
 
         transitionMediaNeedShowThumb = getIntent().getBooleanExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, true);
 
@@ -241,7 +247,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     }
 
     private void finishActivity() {
-        supportFinishAfterTransition();
+        if (needTransition)
+            supportFinishAfterTransition();
+        else
+            finish();
     }
 
     @Override
@@ -304,7 +313,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 if (media.isLocal()) {
 
-                    if (isCurrentViewPage(i)) {
+                    if (isCurrentViewPage(i) && needTransition) {
                         ActivityCompat.startPostponedEnterTransition(this);
                     }
 
@@ -312,7 +321,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     if (isImageThumb(url)) {
 
-                        if (isCurrentViewPage(i)) {
+                        if (isCurrentViewPage(i) && needTransition) {
                             ActivityCompat.startPostponedEnterTransition(this);
 
                             startLoadCurrentImageAfterTransition(media);
@@ -324,7 +333,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     } else {
 
-                        if (!transitionMediaNeedShowThumb) {
+                        if (!transitionMediaNeedShowThumb && needTransition) {
                             ActivityCompat.startPostponedEnterTransition(this);
                             transitionMediaNeedShowThumb = true;
                         } else {
@@ -444,10 +453,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 Log.i(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
 
-                int screenHeight = Util.calcScreenWidth(PhotoSliderActivity.this);
-                RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) defaultMainPic.getLayoutParams();
-                layoutParams.height = screenHeight;
-                defaultMainPic.setLayoutParams(layoutParams);
+                setDefaultMainPicScreenHeight(defaultMainPic, media);
 
                 mainPic.registerImageLoadListener(PhotoSliderActivity.this);
                 String originalImageUrl = media.getImageOriginalUrl(mContext);
@@ -455,8 +461,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 mImageLoader.setShouldCache(!media.isLocal());
 
-//                defaultMainPic.setOrientationNumber(media.getOrientationNumber());
-//                mainPic.setOrientationNumber(media.getOrientationNumber());
+                mainPic.setOrientationNumber(media.getOrientationNumber());
 
                 if (transitionMediaNeedShowThumb && !media.isLocal()) {
 
@@ -520,6 +525,35 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             return view;
 
 
+        }
+
+        private void setDefaultMainPicScreenHeight(TouchNetworkImageView defaultMainPic, Media media) {
+
+            int mediaWidth = Integer.parseInt(media.getWidth());
+            int mediaHeight = Integer.parseInt(media.getHeight());
+            int actualWidth = 0;
+            int actualHeight = 0;
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) defaultMainPic.getLayoutParams();
+
+            if (mediaWidthLargerThanHeight(media, mediaWidth, mediaHeight)) {
+                actualWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
+                actualHeight = mediaHeight * actualWidth / mediaWidth;
+            } else if (mediaHeightLargerThanWidth(media, mediaWidth, mediaHeight)) {
+                actualHeight = Util.dip2px(mContext, 600);
+                actualWidth = mediaWidth * actualHeight / mediaHeight;
+            }
+            layoutParams.width = actualWidth;
+            layoutParams.height = actualHeight;
+
+            defaultMainPic.setLayoutParams(layoutParams);
+        }
+
+        private boolean mediaHeightLargerThanWidth(Media media, int mediaWidth, int mediaHeight) {
+            return (mediaWidth < mediaHeight && media.getOrientationNumber() == 1) || (mediaWidth > mediaHeight && media.getOrientationNumber() == 6);
+        }
+
+        private boolean mediaWidthLargerThanHeight(Media media, int mediaWidth, int mediaHeight) {
+            return (mediaWidth > mediaHeight && media.getOrientationNumber() == 1) || (mediaWidth < mediaHeight && media.getOrientationNumber() == 6);
         }
 
         private void convertEditState() {

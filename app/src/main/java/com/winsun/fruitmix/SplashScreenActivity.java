@@ -237,6 +237,8 @@ public class SplashScreenActivity extends Activity {
                     Util.loginState = false;
 
                     FNAS.JWT = mToken;
+                    FNAS.Gateway = mGateway;
+                    FNAS.userUUID = mUuid;
 
                     LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
 

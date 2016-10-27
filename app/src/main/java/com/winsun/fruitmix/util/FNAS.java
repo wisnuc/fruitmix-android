@@ -75,13 +75,16 @@ public class FNAS {
         return result;
     }
 
+    public static String loadFileInFolder(String folderUUID) throws Exception{
+
+        return FNAS.RemoteCall(Util.FILE_PARAMETER + "/" + folderUUID);
+    }
+
     public static String loadUser() throws Exception {
 
         return FNAS.RemoteCall(Util.USER_PARAMETER);
 
     }
-
-
 
     public static String loadMedia() throws Exception {
 
@@ -122,7 +125,6 @@ public class FNAS {
         }
 
         return str;
-
     }
 
     public static void retrieveUserMap(Context context) {
@@ -184,6 +186,15 @@ public class FNAS {
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
         localBroadcastManager.sendBroadcast(intent);
 
+    }
+
+    public static void retrieveRemoteFile(Context context,String folderUUID){
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_FILE.name());
+        intent.putExtra(Util.FOLDER_UUID,folderUUID);
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
+        localBroadcastManager.sendBroadcast(intent);
     }
 
     public static void startUploadAllLocalPhoto(Context context) {

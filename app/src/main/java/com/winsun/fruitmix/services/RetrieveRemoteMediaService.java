@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.Media;
@@ -25,7 +26,9 @@ import java.util.concurrent.ConcurrentMap;
  * helper methods.
  */
 public class RetrieveRemoteMediaService extends IntentService {
-    // TODO: Rename actions, choose action names that describe tasks that this
+    
+    public static final String TAG = RetrieveRemoteMediaService.class.getSimpleName();
+    
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_RETRIEVE_REMOTE_MEDIA = "com.winsun.fruitmix.services.action.retrieve_remote_media";
 

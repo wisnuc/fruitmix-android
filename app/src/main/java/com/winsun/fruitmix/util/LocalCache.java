@@ -18,6 +18,7 @@ import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.file.model.AbstractRemoteFile;
 import com.winsun.fruitmix.model.Comment;
 import com.winsun.fruitmix.model.Media;
 import com.winsun.fruitmix.model.MediaShare;
@@ -58,8 +59,11 @@ public class LocalCache {
     public static ConcurrentMap<String, Media> RemoteMediaMapKeyIsUUID = null;
     public static ConcurrentMap<String, Media> LocalMediaMapKeyIsThumb = null;
     public static ConcurrentMap<String, Media> LocalMediaMapKeyIsUUID = null;
+    public static ConcurrentMap<String, AbstractRemoteFile> RemoteFileMapKeyIsUUID = null;
 
     public static String DeviceID = null;
+
+    public static List<Media> photoSliderList = null;
 
     public static boolean DeleteFile(File file) {
         File[] files;
@@ -111,6 +115,9 @@ public class LocalCache {
         RemoteMediaMapKeyIsUUID = new ConcurrentHashMap<>();
         LocalMediaMapKeyIsThumb = new ConcurrentHashMap<>();
         BuildLocalImagesMapsKeyIsUUID();
+        RemoteFileMapKeyIsUUID = new ConcurrentHashMap<>();
+
+        photoSliderList = new ArrayList<>();
 
         return true;
     }
@@ -149,6 +156,15 @@ public class LocalCache {
             mediaConcurrentMap.put(media.getThumb(), media);
         }
         return mediaConcurrentMap;
+    }
+
+    public static ConcurrentMap<String, AbstractRemoteFile> BuildFileMapKeyIsUUID(List<AbstractRemoteFile> abstractRemoteFiles) {
+
+        ConcurrentMap<String, AbstractRemoteFile> abstractFileConcurrentMap = new ConcurrentHashMap<>(abstractRemoteFiles.size());
+        for (AbstractRemoteFile abstractFile : abstractRemoteFiles) {
+            abstractFileConcurrentMap.put(abstractFile.getUuid(), abstractFile);
+        }
+        return abstractFileConcurrentMap;
     }
 
     public static void BuildLocalImagesMapsKeyIsUUID() {

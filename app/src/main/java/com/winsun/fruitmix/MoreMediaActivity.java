@@ -43,7 +43,7 @@ public class MoreMediaActivity extends AppCompatActivity {
 
     private int mSpanCount = 3;
     private Context mContext;
-    private ArrayList<Media> mPhotos;
+    private List<Media> mPhotos;
     private ImageLoader mImageLoader;
 
     @Override
@@ -150,10 +150,12 @@ public class MoreMediaActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
 
+                    LocalCache.photoSliderList.clear();
+                    LocalCache.photoSliderList.addAll(mPhotos);
+
                     Intent intent = new Intent();
                     intent.putExtra(Util.INITIAL_PHOTO_POSITION, getAdapterPosition());
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
-                    intent.putParcelableArrayListExtra(Util.KEY_MEDIA_LIST, mPhotos);
                     intent.setClass(mContext, PhotoSliderActivity.class);
                     startActivity(intent);
                 }

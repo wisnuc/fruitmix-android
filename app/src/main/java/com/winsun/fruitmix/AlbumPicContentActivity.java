@@ -65,7 +65,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     @BindView(R.id.toolbar)
     Toolbar mToolBar;
 
-    private ArrayList<Media> mediaList;
+    private List<Media> mediaList;
+
+    private ArrayList<String> mediaUUIDList;
 
     private MenuItem mPrivatePublicMenu;
 
@@ -151,7 +153,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mediaList = new ArrayList<>();
-        fillPicList(mediaShare.getMediaDigestInMediaShareContents());
+        mediaUUIDList = new ArrayList<>(mediaShare.getMediaDigestInMediaShareContents());
+        fillPicList(mediaUUIDList);
         ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
@@ -259,10 +262,13 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     }
 
     public void showPhotoSlider(int position, View sharedElement, String sharedElementName) {
+
+        LocalCache.photoSliderList.clear();
+        LocalCache.photoSliderList.addAll(mediaList);
+
         Intent intent = new Intent();
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, mShowCommentBtn);
-        intent.putParcelableArrayListExtra(Util.KEY_MEDIA_LIST, mediaList);
         intent.setClass(this, PhotoSliderActivity.class);
 
         ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, sharedElement, sharedElementName);

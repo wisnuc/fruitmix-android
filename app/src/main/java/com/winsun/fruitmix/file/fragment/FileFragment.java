@@ -14,9 +14,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.file.interfaces.OnFragmentInteractionListener;
 import com.winsun.fruitmix.file.model.AbstractRemoteFile;
+import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationTargetType;
+import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,7 +51,11 @@ public class FileFragment extends Fragment {
     @BindView(R.id.file_recyclerview)
     RecyclerView fileRecyclerView;
 
+    private FileRecyclerViewAdapter fileRecyclerViewAdapter;
+
     private List<AbstractRemoteFile> abstractRemoteFiles;
+
+    private boolean remoteFileLoaded = false;
 
     public FileFragment() {
         // Required empty public constructor
@@ -61,6 +78,9 @@ public class FileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        abstractRemoteFiles = new ArrayList<>();
+
     }
 
     @Override
@@ -71,13 +91,64 @@ public class FileFragment extends Fragment {
 
         ButterKnife.bind(this, view);
 
-        fileRecyclerView.setAdapter(new FileRecyclerViewAdapter());
+        fileRecyclerViewAdapter = new FileRecyclerViewAdapter();
+        fileRecyclerView.setAdapter(fileRecyclerViewAdapter);
         fileRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        //TODO:add get file infor function
+        //TODO:add get file information function;
 
         return view;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        EventBus.getDefault().register(this);
+
+        if(!remoteFileLoaded){
+            User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
+
+            FNAS.retrieveRemoteFile(getActivity(), user.getHome());
+        }
+
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleOperationResult(OperationEvent operationEvent){
+
+        String action = operationEvent.getAction();
+        if(action.equals(Util.REMOTE_FILE_RETRIEVED)){
+
+            OperationResult result = operationEvent.getOperationResult();
+            switch (result){
+                case SUCCEED:
+
+                    remoteFileLoaded = true;
+
+                    fillAbstractFileList();
+                    fileRecyclerViewAdapter.notifyDataSetChanged();
+
+                    break;
+                case FAIL:
+                    break;
+            }
+
+        }
+
+    }
+
+    private void fillAbstractFileList(){
+
+        abstractRemoteFiles.addAll(LocalCache.RemoteFileMapKeyIsUUID.values());
+
+    }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -101,21 +172,6 @@ public class FileFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
     }
 
     class FileRecyclerViewAdapter extends RecyclerView.Adapter<FileViewHolder> {
@@ -162,9 +218,9 @@ public class FileFragment extends Fragment {
                 fileIcon.setImageResource(R.drawable.folder_icon);
             } else {
                 fileIcon.setImageResource(R.drawable.file_icon);
+                fileTime.setText(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss上传").format(new Date(Long.parseLong(abstractRemoteFile.getTime()))));
             }
             fileName.setText(abstractRemoteFile.getName());
-            fileTime.setText(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss上传").format(new Date(Long.parseLong(abstractRemoteFile.getTime()))));
         }
 
     }

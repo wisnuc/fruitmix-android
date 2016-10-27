@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.file;
 
+import android.net.Uri;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,11 +15,17 @@ import com.winsun.fruitmix.component.UnscrollableViewPager;
 import com.winsun.fruitmix.file.fragment.FileDownloadFragment;
 import com.winsun.fruitmix.file.fragment.FileFragment;
 import com.winsun.fruitmix.file.fragment.FileShareFragment;
+import com.winsun.fruitmix.file.interfaces.OnFragmentInteractionListener;
+import com.winsun.fruitmix.file.model.AbstractRemoteFile;
+
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class FileMainActivity extends AppCompatActivity {
+public class FileMainActivity extends AppCompatActivity implements OnFragmentInteractionListener{
 
     @BindView(R.id.bottom_navigation_view)
     BottomNavigationView bottomNavigationView;
@@ -28,7 +35,6 @@ public class FileMainActivity extends AppCompatActivity {
     public static final int PAGE_FILE_SHARE = 0;
     public static final int PAGE_FILE = 1;
     public static final int PAGE_FILE_DOWNLOAD = 2;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,4 +102,8 @@ public class FileMainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
 }

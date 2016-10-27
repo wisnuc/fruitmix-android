@@ -180,12 +180,17 @@
             android:exported="false">
         </service>
 
-        <activity android:name=".file.LocalFileActivity"
+        <activity
+            android:name=".file.LocalFileActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".file.FileMainActivity"
             android:screenOrientation="portrait"/>
 
-        <activity android:name=".file.FileMainActivity"
-            android:screenOrientation="portrait"/>
-
+        <service
+            android:name=".services.RetrieveRemoteFileService"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

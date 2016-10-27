@@ -297,6 +297,10 @@ public class ButlerService extends Service {
 
 //                RetrieveNewLocalMediaInCameraService.startActionRetrieveNewLocalMediaInCamera(this);
                 break;
+            case REMOTE_FILE:
+                String folderUUID = intent.getStringExtra(Util.FOLDER_UUID);
+                RetrieveRemoteFileService.startActionRetrieveRemoteFile(this,folderUUID);
+                break;
         }
     }
 }

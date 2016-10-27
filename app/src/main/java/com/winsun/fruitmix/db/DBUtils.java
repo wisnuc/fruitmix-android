@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.winsun.fruitmix.model.Media;
@@ -46,8 +48,8 @@ public class DBUtils {
         referenceCount = new AtomicInteger();
     }
 
-    public static DBUtils getInstance(Context context){
-        if(dbUtils == null){
+    public static DBUtils getInstance(Context context) {
+        if (dbUtils == null) {
             dbUtils = new DBUtils(context);
         }
 
@@ -266,30 +268,73 @@ public class DBUtils {
         contentValues.put(DBHelper.MEDIA_KEY_BELONGING_MEDIASHARE_UUID, media.getBelongingMediaShareUUID());
         contentValues.put(DBHelper.MEDIA_KEY_UPLOADED, media.isUploaded() ? 1 : 0);
         contentValues.put(DBHelper.MEDIA_KEY_SHARING, media.isSharing() ? 1 : 0);
-        contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER,media.getOrientationNumber());
+        contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER, media.getOrientationNumber());
 
         return contentValues;
     }
 
     public long insertRemoteMedias(ConcurrentMap<String, Media> medias) {
 
-        openWritableDB();
-
         long returnValue = 0;
 
-        ContentValues contentValues;
+        try {
+            openWritableDB();
 
-        for (Media media : medias.values()) {
+            String sql = createInsertMediaSql();
 
-            contentValues = createMediaContentValues(media);
+            SQLiteStatement sqLiteStatement = database.compileStatement(sql);
+            database.beginTransaction();
 
-            returnValue = database.insert(DBHelper.REMOTE_MEDIA_TABLE_NAME, null, contentValues);
+            for (Media media : medias.values()) {
+
+                bingData(sqLiteStatement, media);
+
+                returnValue = sqLiteStatement.executeInsert();
+
+            }
+            database.setTransactionSuccessful();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+
+            database.endTransaction();
+
+            close();
         }
-
-        close();
 
         return returnValue;
 
+    }
+
+    private void bingData(SQLiteStatement sqLiteStatement, Media media) {
+        sqLiteStatement.bindString(1, media.getUuid());
+        sqLiteStatement.bindString(2, media.getTime());
+        sqLiteStatement.bindString(3, media.getWidth());
+        sqLiteStatement.bindString(4, media.getHeight());
+        sqLiteStatement.bindString(5, media.getThumb());
+        sqLiteStatement.bindLong(6, media.isLocal() ? 1 : 0);
+        sqLiteStatement.bindString(7, media.getTitle());
+        sqLiteStatement.bindString(8, media.getBelongingMediaShareUUID());
+        sqLiteStatement.bindLong(9, media.isUploaded() ? 1 : 0);
+        sqLiteStatement.bindLong(10, media.isSharing() ? 1 : 0);
+        sqLiteStatement.bindLong(11, media.getOrientationNumber());
+    }
+
+    @NonNull
+    private String createInsertMediaSql() {
+        return "insert into " + DBHelper.REMOTE_MEDIA_TABLE_NAME + "(" +
+                DBHelper.MEDIA_KEY_UUID + "," +
+                DBHelper.MEDIA_KEY_TIME + "," +
+                DBHelper.MEDIA_KEY_WIDTH + "," +
+                DBHelper.MEDIA_KEY_HEIGHT + "," +
+                DBHelper.MEDIA_KEY_THUMB + "," +
+                DBHelper.MEDIA_KEY_LOCAL + "," +
+                DBHelper.MEDIA_KEY_TITLE + "," +
+                DBHelper.MEDIA_KEY_BELONGING_MEDIASHARE_UUID + "," +
+                DBHelper.MEDIA_KEY_UPLOADED + "," +
+                DBHelper.MEDIA_KEY_SHARING + "," +
+                DBHelper.MEDIA_KEY_ORIENTATION_NUMBER + ")" +
+                "values(?,?,?,?,?,?,?,?,?,?,?)";
     }
 
     public long insertLocalMedia(Media media) {

@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.file.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,6 +44,10 @@ public abstract class AbstractRemoteFile {
 
     public void removeOwner(String owner){
         owners.remove(owner);
+    }
+
+    private List<String> getOwners(){
+        return Collections.unmodifiableList(owners);
     }
 
     public String getTime() {
