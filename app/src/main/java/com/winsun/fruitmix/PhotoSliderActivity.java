@@ -323,7 +323,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     if (isImageThumb(url)) {
 
-                        //TODO:some photo can not loaded(call onImageLoadFinish),replace icon and app_launcher_page
+                        //TODO:some photo can not loaded(call onImageLoadFinish) maybe bacause of set view width and height when width equals height occurs bug,replace icon and app_launcher_page
 
                         if (isCurrentViewPage(i) && needTransition) {
                             ActivityCompat.startPostponedEnterTransition(this);
