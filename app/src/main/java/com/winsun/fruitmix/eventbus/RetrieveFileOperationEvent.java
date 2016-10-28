@@ -1,23 +1,24 @@
 package com.winsun.fruitmix.eventbus;
 
 import com.winsun.fruitmix.util.OperationResult;
-import com.winsun.fruitmix.util.OperationTargetType;
 
 /**
  * Created by Administrator on 2016/10/27.
  */
 
-public class OperationEvent {
+public class RetrieveFileOperationEvent {
 
     private String action;
     private OperationResult operationResult;
+    private String folderUUID;
 
-    public OperationEvent(String action, OperationResult operationResult) {
+    public RetrieveFileOperationEvent(String action, OperationResult operationResult,String folderUUID) {
         this.action = action;
         this.operationResult = operationResult;
+        this.folderUUID = folderUUID;
     }
 
-    public OperationEvent() {
+    public RetrieveFileOperationEvent() {
     }
 
     public OperationResult getOperationResult() {
@@ -26,5 +27,9 @@ public class OperationEvent {
 
     public String getAction() {
         return action;
+    }
+
+    public String getFolderUUID() {
+        return folderUUID;
     }
 }

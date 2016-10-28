@@ -4,19 +4,18 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 
-import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
 import com.winsun.fruitmix.file.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.model.RemoteFolder;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
-import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -73,18 +72,21 @@ public class RetrieveRemoteFileService extends IntentService {
             RemoteFileFolderParser parser = new RemoteFileFolderParser();
             List<AbstractRemoteFile> abstractRemoteFiles = parser.parse(json);
 
-            ConcurrentMap<String,AbstractRemoteFile> abstractRemoteFileConcurrentMap = LocalCache.BuildFileMapKeyIsUUID(abstractRemoteFiles);
-
             LocalCache.RemoteFileMapKeyIsUUID.clear();
-            LocalCache.RemoteFileMapKeyIsUUID.putAll(abstractRemoteFileConcurrentMap);
 
-            EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_RETRIEVED, OperationResult.SUCCEED));
+            AbstractRemoteFile remoteFolder = new RemoteFolder();
+            remoteFolder.setUuid(folderUUID);
+            remoteFolder.initChildAbstractRemoteFileList(abstractRemoteFiles);
+
+            LocalCache.RemoteFileMapKeyIsUUID.put(folderUUID,remoteFolder);
+
+            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, OperationResult.SUCCEED,folderUUID));
 
 
         } catch (Exception e) {
             e.printStackTrace();
 
-            EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_RETRIEVED, OperationResult.FAIL));
+            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, OperationResult.FAIL,folderUUID));
         }
 
     }

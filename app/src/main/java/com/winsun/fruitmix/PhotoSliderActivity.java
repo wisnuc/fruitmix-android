@@ -127,6 +127,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         if (needTransition) {
             ActivityCompat.postponeEnterTransition(this);
             setEnterSharedElementCallback(sharedElementCallback);
+        } else {
+            showDialog();
         }
 
         initImageLoader();
@@ -321,12 +323,14 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     if (isImageThumb(url)) {
 
+                        //TODO:some photo can not loaded(call onImageLoadFinish),replace icon and app_launcher_page
+
                         if (isCurrentViewPage(i) && needTransition) {
                             ActivityCompat.startPostponedEnterTransition(this);
 
                             startLoadCurrentImageAfterTransition(media);
                         } else {
-                            final String imageUUID = media.getUuid();
+                            String imageUUID = media.getUuid();
 
                             startLoadingOriginalPhoto(imageUUID);
                         }
@@ -458,6 +462,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 mainPic.registerImageLoadListener(PhotoSliderActivity.this);
                 String originalImageUrl = media.getImageOriginalUrl(mContext);
                 mainPic.setTag(originalImageUrl);
+                mainPic.setDefaultImageResId(R.drawable.placeholder_photo);
 
                 mImageLoader.setShouldCache(!media.isLocal());
 
@@ -472,6 +477,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     String thumbImageUrl = media.getImageThumbUrl(mContext);
                     defaultMainPic.setTag(thumbImageUrl);
+                    defaultMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
                     defaultMainPic.setImageUrl(thumbImageUrl, mImageLoader);
 
                 } else {

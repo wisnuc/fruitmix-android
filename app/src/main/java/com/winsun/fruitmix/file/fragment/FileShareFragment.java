@@ -60,6 +60,10 @@ public class FileShareFragment extends Fragment {
         }
     }
 
+    public void onBackPressed(){
+
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);

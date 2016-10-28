@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.file.model;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +23,12 @@ public abstract class AbstractRemoteFile {
     }
 
     public abstract boolean isFolder();
+
+    public abstract void openAbstractRemoteFile(Context context);
+
+    public abstract List<AbstractRemoteFile> listChildAbstractRemoteFileList();
+
+    public abstract void initChildAbstractRemoteFileList(List<AbstractRemoteFile> abstractRemoteFiles);
 
     public String getName() {
         return name;

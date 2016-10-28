@@ -120,6 +120,8 @@ public class NavPagerActivity extends AppCompatActivity
 
     private boolean onCreate = false;
 
+    private NavigationView navigationView;
+
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -188,16 +190,16 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     private void initNavigationView() {
-        NavigationView mNavigationView = (NavigationView) findViewById(R.id.nav_view);
-        mNavigationView.setNavigationItemSelectedListener(this);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
         User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
 
         String userName = user.getUserName();
-        TextView mUserNameTextView = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.user_name_textview);
+        TextView mUserNameTextView = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name_textview);
         mUserNameTextView.setText(userName);
 
-        TextView mUserAvatar = (TextView) mNavigationView.getHeaderView(0).findViewById(R.id.avatar);
+        TextView mUserAvatar = (TextView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
         mUserAvatar.setText(user.getDefaultAvatar());
         mUserAvatar.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
 

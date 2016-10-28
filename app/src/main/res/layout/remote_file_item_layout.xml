@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/remote_file_item_layout"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
+              android:clickable="true"
               android:orientation="vertical"
               android:paddingLeft="16dp"
               android:paddingRight="16dp">
@@ -29,18 +31,18 @@
                 android:id="@+id/file_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="文件名"
                 android:layout_marginBottom="8dp"
-                android:textSize="18dp"
-                android:textColor="@color/black"/>
+                android:text="文件名"
+                android:textColor="@color/black"
+                android:textSize="18dp"/>
 
             <TextView
                 android:id="@+id/file_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="2016-7-14"
-                android:textSize="18dp"
-                android:textColor="@color/black"/>
+                android:textColor="@color/black"
+                android:textSize="18dp"/>
 
 
         </LinearLayout>

@@ -255,6 +255,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             media.setHeight(picItemRaw.getHeight());
             media.setTime(picItemRaw.getTime());
             media.setSelected(false);
+            media.setSharing(picItemRaw.isSharing());
+            media.setOrientationNumber(picItemRaw.getOrientationNumber());
 
             mediaList.add(media);
 
@@ -415,7 +417,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         if (requestCode == Util.KEY_EDIT_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            MediaShare mediaShare = data.getParcelableExtra(Util.KEY_MEDIASHARE);
+            mediaShare = data.getParcelableExtra(Util.KEY_MEDIASHARE);
 
             fillPicList(mediaShare.getMediaDigestInMediaShareContents());
             ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();

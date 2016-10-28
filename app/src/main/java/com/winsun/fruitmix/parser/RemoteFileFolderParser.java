@@ -15,9 +15,8 @@ import java.util.List;
  * Created by Administrator on 2016/10/25.
  */
 
-public class RemoteFileFolderParser implements RemoteDataParser<AbstractRemoteFile> {
+public class RemoteFileFolderParser implements RemoteDataParser<AbstractRemoteFile>{
 
-    @Override
     public List<AbstractRemoteFile> parse(String json) {
 
         List<AbstractRemoteFile> abstractRemoteFiles = new ArrayList<>();
@@ -55,13 +54,11 @@ public class RemoteFileFolderParser implements RemoteDataParser<AbstractRemoteFi
                 }
 
                 abstractRemoteFiles.add(abstractRemoteFile);
-
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
 
         return abstractRemoteFiles;
     }

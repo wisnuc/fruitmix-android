@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.file;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -17,6 +18,9 @@ import com.winsun.fruitmix.file.fragment.FileFragment;
 import com.winsun.fruitmix.file.fragment.FileShareFragment;
 import com.winsun.fruitmix.file.interfaces.OnFragmentInteractionListener;
 import com.winsun.fruitmix.file.model.AbstractRemoteFile;
+import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -25,16 +29,22 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class FileMainActivity extends AppCompatActivity implements OnFragmentInteractionListener{
+public class FileMainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
 
     @BindView(R.id.bottom_navigation_view)
     BottomNavigationView bottomNavigationView;
     @BindView(R.id.file_main_viewpager)
     UnscrollableViewPager fileMainViewPager;
 
+    private FilePageAdapter filePageAdapter;
+
     public static final int PAGE_FILE_SHARE = 0;
     public static final int PAGE_FILE = 1;
     public static final int PAGE_FILE_DOWNLOAD = 2;
+
+    private FileFragment fileFragment;
+    private FileShareFragment fileShareFragment;
+    private FileDownloadFragment fileDownloadFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +53,50 @@ public class FileMainActivity extends AppCompatActivity implements OnFragmentInt
 
         ButterKnife.bind(this);
 
-        fileMainViewPager.setAdapter(new FilePageAdapter(getSupportFragmentManager()));
+        filePageAdapter = new FilePageAdapter(getSupportFragmentManager());
+
+        fileMainViewPager.setAdapter(filePageAdapter);
         fileMainViewPager.setCurrentItem(PAGE_FILE);
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                switch (item.getItemId()) {
+                    case R.id.share:
+                        fileMainViewPager.setCurrentItem(PAGE_FILE_SHARE);
+                        break;
+                    case R.id.file:
+                        fileMainViewPager.setCurrentItem(PAGE_FILE);
+                        break;
+                    case R.id.download:
+                        fileMainViewPager.setCurrentItem(PAGE_FILE_DOWNLOAD);
+                        break;
+                }
+
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if(notRootFolder()){
+            fileFragment.onBackPressed();
+        }else if(fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE){
+            fileShareFragment.onBackPressed();
+        }else {
+            super.onBackPressed();
+        }
+    }
+
+    private boolean notRootFolder() {
+
+        User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
+        String homeFolderUUID = user.getHome();
+
+        return fileMainViewPager.getCurrentItem() == PAGE_FILE && !(fileFragment.getCurrentFolderUUID().equals(homeFolderUUID));
     }
 
     @Override
@@ -77,23 +129,20 @@ public class FileMainActivity extends AppCompatActivity implements OnFragmentInt
         @Override
         public Fragment getItem(int position) {
 
-            Fragment fragment;
-
             switch (position) {
                 case PAGE_FILE:
-                    fragment = FileFragment.newInstance();
-                    break;
+                    fileFragment = FileFragment.newInstance();
+                    return fileFragment;
                 case PAGE_FILE_SHARE:
-                    fragment = FileShareFragment.newInstance();
-                    break;
+                    fileShareFragment = FileShareFragment.newInstance();
+                    return fileShareFragment;
                 case PAGE_FILE_DOWNLOAD:
-                    fragment = FileDownloadFragment.newInstance();
-                    break;
+                    fileDownloadFragment = FileDownloadFragment.newInstance();
+                    return fileDownloadFragment;
                 default:
-                    fragment = null;
-                    break;
+                    return null;
             }
-            return fragment;
+
         }
 
         @Override

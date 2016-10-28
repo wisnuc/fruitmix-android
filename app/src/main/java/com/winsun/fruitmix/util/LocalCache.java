@@ -158,15 +158,6 @@ public class LocalCache {
         return mediaConcurrentMap;
     }
 
-    public static ConcurrentMap<String, AbstractRemoteFile> BuildFileMapKeyIsUUID(List<AbstractRemoteFile> abstractRemoteFiles) {
-
-        ConcurrentMap<String, AbstractRemoteFile> abstractFileConcurrentMap = new ConcurrentHashMap<>(abstractRemoteFiles.size());
-        for (AbstractRemoteFile abstractFile : abstractRemoteFiles) {
-            abstractFileConcurrentMap.put(abstractFile.getUuid(), abstractFile);
-        }
-        return abstractFileConcurrentMap;
-    }
-
     public static void BuildLocalImagesMapsKeyIsUUID() {
         Media itemRaw;
 

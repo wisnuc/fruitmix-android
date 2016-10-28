@@ -133,7 +133,7 @@ public class Media implements Parcelable {
     }
 
     public String getTitle() {
-        return title;
+        return title == null ? "" : title;
     }
 
     public void setTitle(String title) {
@@ -157,7 +157,7 @@ public class Media implements Parcelable {
     }
 
     public String getBelongingMediaShareUUID() {
-        return belongingMediaShareUUID;
+        return belongingMediaShareUUID == null ? "" : belongingMediaShareUUID;
     }
 
     public void setBelongingMediaShareUUID(String belongingMediaShareUUID) {

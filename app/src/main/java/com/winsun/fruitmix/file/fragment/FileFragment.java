@@ -3,7 +3,6 @@ package com.winsun.fruitmix.file.fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.BoolRes;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,17 +10,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
 import com.winsun.fruitmix.file.interfaces.OnFragmentInteractionListener;
 import com.winsun.fruitmix.file.model.AbstractRemoteFile;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
-import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -39,7 +38,7 @@ import butterknife.ButterKnife;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link FileFragment.OnFragmentInteractionListener} interface
+ * {@link OnFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link FileFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -56,6 +55,10 @@ public class FileFragment extends Fragment {
     private List<AbstractRemoteFile> abstractRemoteFiles;
 
     private boolean remoteFileLoaded = false;
+
+    private String currentFolderUUID;
+
+    private List<String> retrievedFolderUUIDList;
 
     public FileFragment() {
         // Required empty public constructor
@@ -81,6 +84,7 @@ public class FileFragment extends Fragment {
 
         abstractRemoteFiles = new ArrayList<>();
 
+        retrievedFolderUUIDList = new ArrayList<>();
     }
 
     @Override
@@ -95,43 +99,46 @@ public class FileFragment extends Fragment {
         fileRecyclerView.setAdapter(fileRecyclerViewAdapter);
         fileRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        //TODO:add get file information function;
-
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
         EventBus.getDefault().register(this);
 
-        if(!remoteFileLoaded){
+        if (!remoteFileLoaded) {
             User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
 
-            FNAS.retrieveRemoteFile(getActivity(), user.getHome());
+            currentFolderUUID = user.getHome();
+
+            retrievedFolderUUIDList.add(currentFolderUUID);
+
+            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
         }
 
     }
 
     @Override
-    public void onStop() {
+    public void onPause() {
         EventBus.getDefault().unregister(this);
-        super.onStop();
+        super.onPause();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleOperationResult(OperationEvent operationEvent){
+    public void handleOperationResult(RetrieveFileOperationEvent retrieveFileOperationEvent) {
 
-        String action = operationEvent.getAction();
-        if(action.equals(Util.REMOTE_FILE_RETRIEVED)){
+        String action = retrieveFileOperationEvent.getAction();
+        if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
 
-            OperationResult result = operationEvent.getOperationResult();
-            switch (result){
+            OperationResult result = retrieveFileOperationEvent.getOperationResult();
+            switch (result) {
                 case SUCCEED:
 
                     remoteFileLoaded = true;
 
-                    fillAbstractFileList();
+                    abstractRemoteFiles = LocalCache.RemoteFileMapKeyIsUUID.get(retrieveFileOperationEvent.getFolderUUID()).listChildAbstractRemoteFileList();
                     fileRecyclerViewAdapter.notifyDataSetChanged();
 
                     break;
@@ -143,9 +150,17 @@ public class FileFragment extends Fragment {
 
     }
 
-    private void fillAbstractFileList(){
+    public String getCurrentFolderUUID() {
+        return currentFolderUUID;
+    }
 
-        abstractRemoteFiles.addAll(LocalCache.RemoteFileMapKeyIsUUID.values());
+    public void onBackPressed() {
+
+        retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
+
+        currentFolderUUID = retrievedFolderUUIDList.get(retrievedFolderUUIDList.size() - 1);
+
+        FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
 
     }
 
@@ -177,7 +192,7 @@ public class FileFragment extends Fragment {
     class FileRecyclerViewAdapter extends RecyclerView.Adapter<FileViewHolder> {
         @Override
         public int getItemCount() {
-            return abstractRemoteFiles.size();
+            return abstractRemoteFiles == null ? 0 : abstractRemoteFiles.size();
         }
 
         @Override
@@ -203,6 +218,8 @@ public class FileFragment extends Fragment {
         TextView fileName;
         @BindView(R.id.file_time)
         TextView fileTime;
+        @BindView(R.id.remote_file_item_layout)
+        LinearLayout remoteFileItemLayout;
 
 
         FileViewHolder(View view) {
@@ -212,10 +229,23 @@ public class FileFragment extends Fragment {
         }
 
         void refreshView(int position) {
-            AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
+            final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
             if (abstractRemoteFile.isFolder()) {
                 fileIcon.setImageResource(R.drawable.folder_icon);
+
+                remoteFileItemLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        currentFolderUUID = abstractRemoteFile.getUuid();
+
+                        retrievedFolderUUIDList.add(currentFolderUUID);
+
+                        abstractRemoteFile.openAbstractRemoteFile(getActivity());
+                    }
+                });
+
             } else {
                 fileIcon.setImageResource(R.drawable.file_icon);
                 fileTime.setText(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss上传").format(new Date(Long.parseLong(abstractRemoteFile.getTime()))));
