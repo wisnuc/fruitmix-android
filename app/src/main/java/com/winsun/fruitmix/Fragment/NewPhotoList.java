@@ -323,7 +323,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
             localMedia.setThumb(media.getThumb());
             localMedia.setSelected(false);
             localMedia.setSharing(true);
-            localMedia.setOrientationNumber(0);
+            localMedia.setOrientationNumber(1);
             mediaList.add(localMedia);
         }
 

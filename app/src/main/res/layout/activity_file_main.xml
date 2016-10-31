@@ -1,41 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<android.support.v4.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_file_main"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.winsun.fruitmix.file.FileMainActivity">
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+    <include
+        layout="@layout/file_main_layout"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:elevation="@dimen/appbar_elevation"
-        app:navigationIcon="@drawable/menu"
-        app:popupTheme="@style/AppTheme.PopupOverlay"
-        app:title="@string/file"
-        app:titleTextAppearance="@style/CollapsedToolbarTitle"/>
+        android:layout_height="match_parent"/>
 
-
-    <android.support.design.widget.BottomNavigationView
-        android:id="@+id/bottom_navigation_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        app:itemBackground="@color/colorPrimary"
-        app:itemIconTint="@color/white"
-        app:itemTextColor="@color/white"
-        app:menu="@menu/file_bottom_menu"/>
-
-    <com.winsun.fruitmix.component.UnscrollableViewPager
-        android:id="@+id/file_main_viewpager"
-        android:layout_width="match_parent"
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_above="@id/bottom_navigation_view"
-        android:layout_below="@id/toolbar"/>
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/left_drawer_head"
+        app:menu="@menu/left_drawer_menu"/>
 
-</RelativeLayout>
+</android.support.v4.widget.DrawerLayout>

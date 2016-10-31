@@ -14,7 +14,7 @@ import com.winsun.fruitmix.file.interfaces.OnFragmentInteractionListener;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link FileShareFragment.OnFragmentInteractionListener} interface
+ * {@link OnFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link FileShareFragment#newInstance} factory method to
  * create an instance of this fragment.

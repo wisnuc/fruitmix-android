@@ -29,9 +29,9 @@
         android:id="@+id/default_main_pic"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="60dp"
         android:layout_centerVertical="true"
         android:layout_marginBottom="60dp"
+        android:layout_marginTop="60dp"
         android:maxHeight="600dp"
         android:src="@drawable/placeholder_photo"
         android:visibility="visible"/>

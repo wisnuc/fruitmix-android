@@ -117,6 +117,7 @@ public class NavPagerActivity extends AppCompatActivity
     private boolean mRemoteMediaLoaded = false;
 
     private boolean mRemoteMediaShareLoaded = false;
+    private boolean mLocalMediaShareLoaded = false;
 
     private boolean onCreate = false;
 
@@ -211,7 +212,7 @@ public class NavPagerActivity extends AppCompatActivity
         viewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                    onDidAppear(position);
+                onDidAppear(position);
             }
         });
     }
@@ -573,7 +574,6 @@ public class NavPagerActivity extends AppCompatActivity
 
                 retrieveLocalMediaInCamera();
 
-                FNAS.retrieveLocalMediaShare(mContext);
                 FNAS.retrieveRemoteMediaShare(mContext);
 
             } else if (intent.getAction().equals(Util.LOCAL_MEDIA_RETRIEVED)) {
@@ -596,8 +596,13 @@ public class NavPagerActivity extends AppCompatActivity
                 pageList.get(PAGE_ALBUM).refreshView();
                 pageList.get(PAGE_SHARE).refreshView();
 
+                if (!mLocalMediaShareLoaded)
+                    FNAS.retrieveLocalMediaShare(mContext);
+
             } else if (intent.getAction().equals(Util.LOCAL_MEDIA_SHARE_RETRIEVED)) {
                 Log.i(TAG, "local share loaded");
+
+                mLocalMediaShareLoaded = true;
 
                 doCreateMediaShareInLocalMediaShareMapFunction();
             } else if (intent.getAction().equals(Util.LOCAL_MEDIA_COMMENT_RETRIEVED)) {
@@ -1000,6 +1005,7 @@ public class NavPagerActivity extends AppCompatActivity
         } else if (id == R.id.file) {
             Intent intent = new Intent(mContext, FileMainActivity.class);
             startActivity(intent);
+            finish();
         }
 
         mDrawerLayout.closeDrawer(GravityCompat.START);

@@ -323,8 +323,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     if (isImageThumb(url)) {
 
-                        //TODO:some photo can not loaded(call onImageLoadFinish) maybe bacause of set view width and height when width equals height occurs bug,replace icon and app_launcher_page
-
                         if (isCurrentViewPage(i) && needTransition) {
                             ActivityCompat.startPostponedEnterTransition(this);
 
@@ -342,6 +340,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                             transitionMediaNeedShowThumb = true;
                         } else {
                             dismissCurrentImageThumb(media);
+
+                            view.setVisibility(View.VISIBLE);
                         }
 
                         if (!media.isLoaded()) {
@@ -419,8 +419,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         final TouchNetworkImageView mainPic = (TouchNetworkImageView) mViewPager.findViewWithTag(remoteUrl);
 
-        mainPic.setVisibility(View.VISIBLE);
-
         ViewCompat.setTransitionName(mainPic, imageUUID);
 
         mImageLoader.setShouldCache(true);
@@ -457,7 +455,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 Log.i(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
 
-                setDefaultMainPicScreenHeight(defaultMainPic, media);
+                setDefaultMainPicAndMainPicScreenHeight(defaultMainPic, mainPic, media);
 
                 mainPic.registerImageLoadListener(PhotoSliderActivity.this);
                 String originalImageUrl = media.getImageOriginalUrl(mContext);
@@ -533,7 +531,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         }
 
-        private void setDefaultMainPicScreenHeight(TouchNetworkImageView defaultMainPic, Media media) {
+        private void setDefaultMainPicAndMainPicScreenHeight(TouchNetworkImageView defaultMainPic, TouchNetworkImageView mainPic, Media media) {
 
             int mediaWidth = Integer.parseInt(media.getWidth());
             int mediaHeight = Integer.parseInt(media.getHeight());
@@ -547,11 +545,20 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             } else if (mediaHeightLargerThanWidth(media, mediaWidth, mediaHeight)) {
                 actualHeight = Util.dip2px(mContext, 600);
                 actualWidth = mediaWidth * actualHeight / mediaHeight;
+            } else if (mediaWidthEqualsHeight(mediaWidth, mediaHeight)) {
+
+                actualWidth = actualHeight = Util.calcScreenWidth(PhotoSliderActivity.this);
             }
+
             layoutParams.width = actualWidth;
             layoutParams.height = actualHeight;
 
             defaultMainPic.setLayoutParams(layoutParams);
+            mainPic.setLayoutParams(layoutParams);
+        }
+
+        private boolean mediaWidthEqualsHeight(int mediaWidth, int mediaHeight) {
+            return mediaWidth == mediaHeight;
         }
 
         private boolean mediaHeightLargerThanWidth(Media media, int mediaWidth, int mediaHeight) {

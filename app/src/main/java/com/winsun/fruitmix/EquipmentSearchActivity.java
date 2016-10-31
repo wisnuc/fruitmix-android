@@ -61,6 +61,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private List<Equipment> mEquipments;
 
+    private NsdManager.DiscoveryListener mListener;
+
     private NsdManager mManager;
 
     private List<List<Map<String, String>>> mUserExpandableLists;
@@ -128,7 +130,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         localBroadcastManager.registerReceiver(customReceiver, filter);
 
-//        discoverService(mContext);
+        discoverService(mContext);
     }
 
     @Override
@@ -138,11 +140,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         localBroadcastManager.unregisterReceiver(customReceiver);
 
-/*        try {
+        try {
             stopDiscoverServices(mContext, mListener);
         } catch (Exception ex) {
             ex.printStackTrace();
-        }*/
+        }
 
     }
 
@@ -372,6 +374,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         };
         mManager.discoverServices("_http._tcp", NsdManager.PROTOCOL_DNS_SD, nsDicListener);
 
+        mListener = nsDicListener;
     }
 
     private void resolveService(NsdServiceInfo serviceInfo) {
@@ -387,7 +390,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 Log.i(TAG, "onServiceResolved Service info:" + serviceInfo);
 
                 for (Equipment equipment : mEquipments) {
-                    if (equipment == null || serviceInfo.getServiceName().equals(equipment.getServiceName())) {
+                    if (equipment == null || serviceInfo.getServiceName().equals(equipment.getServiceName()) || (serviceInfo.getHost().getHostAddress().equals(equipment.getHost()))) {
                         return;
                     }
                 }

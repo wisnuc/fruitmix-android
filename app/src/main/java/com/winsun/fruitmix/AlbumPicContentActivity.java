@@ -141,6 +141,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                onBackOperation();
                 finish();
             }
         });
@@ -191,10 +192,15 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (isOperated)
-            setResult(RESULT_OK);
+
+        onBackOperation();
 
         super.onBackPressed();
+    }
+
+    private void onBackOperation(){
+        if (isOperated)
+            setResult(RESULT_OK);
     }
 
     @Override

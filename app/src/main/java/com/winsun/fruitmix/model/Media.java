@@ -33,7 +33,7 @@ public class Media implements Parcelable {
     private int orientationNumber;
 
     public Media() {
-
+        orientationNumber = 1;
     }
 
     protected Media(Parcel in) {

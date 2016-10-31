@@ -3,12 +3,14 @@ package com.winsun.fruitmix.file.fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.RawRes;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -60,6 +62,10 @@ public class FileFragment extends Fragment {
 
     private List<String> retrievedFolderUUIDList;
 
+    private boolean selectMode = false;
+
+    private List<String> selectedFileUUIDs;
+
     public FileFragment() {
         // Required empty public constructor
     }
@@ -85,6 +91,8 @@ public class FileFragment extends Fragment {
         abstractRemoteFiles = new ArrayList<>();
 
         retrievedFolderUUIDList = new ArrayList<>();
+
+        selectedFileUUIDs = new ArrayList<>();
     }
 
     @Override
@@ -164,6 +172,13 @@ public class FileFragment extends Fragment {
 
     }
 
+    public void refreshSelectMode(boolean selectMode) {
+
+        this.selectMode = selectMode;
+        fileRecyclerViewAdapter.notifyDataSetChanged();
+
+    }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -212,6 +227,8 @@ public class FileFragment extends Fragment {
 
     class FileViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.file_icon_bg)
+        ImageView fileIconBg;
         @BindView(R.id.file_icon)
         ImageView fileIcon;
         @BindView(R.id.file_name)
@@ -251,6 +268,48 @@ public class FileFragment extends Fragment {
                 fileTime.setText(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss上传").format(new Date(Long.parseLong(abstractRemoteFile.getTime()))));
             }
             fileName.setText(abstractRemoteFile.getName());
+
+            if (selectMode) {
+
+                fileIconBg.setVisibility(View.VISIBLE);
+
+                toggleFileIconBgResource(abstractRemoteFile.getUuid());
+
+                if (!abstractRemoteFile.isFolder()) {
+                    fileIconBg.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                            toggleFileInSelectedFile(abstractRemoteFile.getUuid());
+                            toggleFileIconBgResource(abstractRemoteFile.getUuid());
+                        }
+                    });
+                }
+
+            } else {
+
+                fileIconBg.setVisibility(View.INVISIBLE);
+
+            }
+
+        }
+
+        private void toggleFileIconBgResource(String fileUUID) {
+            if (selectedFileUUIDs.contains(fileUUID)) {
+                fileIconBg.setBackgroundResource(R.drawable.check_circle_selected);
+                fileIcon.setVisibility(View.INVISIBLE);
+            } else {
+                fileIconBg.setBackgroundResource(R.drawable.round_circle);
+                fileIcon.setVisibility(View.VISIBLE);
+            }
+        }
+
+        private void toggleFileInSelectedFile(String fileUUID) {
+            if (selectedFileUUIDs.contains(fileUUID)) {
+                selectedFileUUIDs.remove(fileUUID);
+            } else {
+                selectedFileUUIDs.add(fileUUID);
+            }
         }
 
     }
