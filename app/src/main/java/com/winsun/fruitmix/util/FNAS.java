@@ -3,37 +3,24 @@ package com.winsun.fruitmix.util;
 import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Comment;
-import com.winsun.fruitmix.model.Media;
-import com.winsun.fruitmix.model.MediaShare;
-import com.winsun.fruitmix.model.User;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.winsun.fruitmix.mediaModule.model.Media;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 /**
  * Created by Administrator on 2016/4/22.

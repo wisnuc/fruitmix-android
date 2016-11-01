@@ -1,9 +1,6 @@
 package com.winsun.fruitmix.parser;
 
-import android.util.Log;
-
-import com.winsun.fruitmix.model.Media;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.mediaModule.model.Media;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,8 +8,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by Administrator on 2016/8/31.
@@ -51,7 +46,7 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
                 }
 
                 String sharing = itemRaw.getString("sharing");
-                media.setSharing(sharing.equals("1"));
+                media.setSharing(!sharing.equals("2") && !sharing.equals("6"));
 
                 int orientationNumber = itemRaw.optInt("exifOrientation");
 

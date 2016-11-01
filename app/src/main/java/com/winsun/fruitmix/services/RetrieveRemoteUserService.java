@@ -6,6 +6,7 @@ import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteUserParser;
@@ -13,6 +14,8 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
@@ -91,10 +94,8 @@ public class RetrieveRemoteUserService extends IntentService {
 
         LocalCache.RemoteUserMapKeyIsUUID.putAll(userConcurrentMap);
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        Intent intent = new Intent(Util.REMOTE_USER_RETRIEVED);
-        intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
-        localBroadcastManager.sendBroadcast(intent);
+        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED,OperationResult.SUCCEED);
+        EventBus.getDefault().post(operationEvent);
     }
 
 }

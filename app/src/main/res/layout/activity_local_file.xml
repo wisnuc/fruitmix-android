@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.winsun.fruitmix.file.LocalFileActivity">
+    tools:context="com.winsun.fruitmix.fileModule.LocalFileActivity">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/file_recyclerview"

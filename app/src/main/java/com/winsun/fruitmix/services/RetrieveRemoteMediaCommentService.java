@@ -7,7 +7,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Comment;
+import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteMediaCommentParser;
 import com.winsun.fruitmix.util.FNAS;
@@ -16,7 +16,6 @@ import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in

@@ -1,19 +1,13 @@
 package com.winsun.fruitmix.parser;
 
-import android.util.Log;
-
-import com.winsun.fruitmix.model.Media;
-import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by Administrator on 2016/8/31.

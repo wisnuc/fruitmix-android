@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.parser;
 
-import com.winsun.fruitmix.model.Comment;
+import com.winsun.fruitmix.mediaModule.model.Comment;
 
 import org.json.JSONArray;
 import org.json.JSONException;

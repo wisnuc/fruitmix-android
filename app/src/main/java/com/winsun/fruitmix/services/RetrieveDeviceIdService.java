@@ -6,11 +6,13 @@ import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 /**
@@ -61,13 +63,13 @@ public class RetrieveDeviceIdService extends IntentService {
      * parameters.
      */
     private void handleActionRetrieveDeviceId() {
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        Intent intent = new Intent(Util.REMOTE_DEVICEID_RETRIEVED);
+
+        OperationEvent operationEvent;
 
         LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
         if(LocalCache.DeviceID != null && !LocalCache.DeviceID.equals("")){
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+            operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED,OperationResult.SUCCEED);
 
         }else {
 
@@ -81,22 +83,17 @@ public class RetrieveDeviceIdService extends IntentService {
                 LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
                 Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
 
-                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED,OperationResult.SUCCEED);
 
             } catch (Exception e) {
                 e.printStackTrace();
 
-                intent.putExtra(Util.OPERATION_RESULT_NAME,OperationResult.FAIL.name());
+                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED,OperationResult.FAIL);
             }
         }
 
+        EventBus.getDefault().post(operationEvent);
 
-
-        localBroadcastManager.sendBroadcast(intent);
     }
 
-    public static void handleActionRetrieveDeviceIdStaticMethod(){
-        RetrieveDeviceIdService service = new RetrieveDeviceIdService();
-        service.handleActionRetrieveDeviceId();
-    }
 }

@@ -1,0 +1,276 @@
+package com.winsun.fruitmix.fileModule;
+
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+
+import com.winsun.fruitmix.EquipmentSearchActivity;
+import com.winsun.fruitmix.NavPagerActivity;
+import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.component.UnscrollableViewPager;
+import com.winsun.fruitmix.fileModule.fragment.FileDownloadFragment;
+import com.winsun.fruitmix.fileModule.fragment.FileFragment;
+import com.winsun.fruitmix.fileModule.fragment.FileShareFragment;
+import com.winsun.fruitmix.interfaces.OnFragmentInteractionListener;
+import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class FileMainActivity extends AppCompatActivity implements OnFragmentInteractionListener,NavigationView.OnNavigationItemSelectedListener {
+
+    @BindView(R.id.bottom_navigation_view)
+    BottomNavigationView bottomNavigationView;
+    @BindView(R.id.file_main_viewpager)
+    UnscrollableViewPager fileMainViewPager;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawerLayout;
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
+
+    private FilePageAdapter filePageAdapter;
+
+    public static final int PAGE_FILE_SHARE = 0;
+    public static final int PAGE_FILE = 1;
+    public static final int PAGE_FILE_DOWNLOAD = 2;
+
+    private FileFragment fileFragment;
+    private FileShareFragment fileShareFragment;
+    private FileDownloadFragment fileDownloadFragment;
+
+    private Context context;
+
+    private ProgressDialog mDialog;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_file_main);
+
+        ButterKnife.bind(this);
+
+        context = this;
+
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchDrawerOpenState();
+            }
+        });
+
+        initNavigationView();
+
+        filePageAdapter = new FilePageAdapter(getSupportFragmentManager());
+
+        fileMainViewPager.setAdapter(filePageAdapter);
+        fileMainViewPager.setCurrentItem(PAGE_FILE);
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                switch (item.getItemId()) {
+                    case R.id.share:
+                        fileMainViewPager.setCurrentItem(PAGE_FILE_SHARE);
+                        break;
+                    case R.id.file:
+                        fileMainViewPager.setCurrentItem(PAGE_FILE);
+                        break;
+                    case R.id.download:
+                        fileMainViewPager.setCurrentItem(PAGE_FILE_DOWNLOAD);
+                        break;
+                }
+
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.file:
+                Intent intent = new Intent(context, NavPagerActivity.class);
+                startActivity(intent);
+                finish();
+                break;
+            case R.id.logout:
+
+                new AsyncTask<Void, Void, Void>() {
+
+                    @Override
+                    protected void onPreExecute() {
+                        super.onPreExecute();
+
+                        mDialog = ProgressDialog.show(context, context.getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+
+                    }
+
+                    @Override
+                    protected Void doInBackground(Void... params) {
+
+                        LocalCache.clearToken(context);
+                        FNAS.restoreLocalPhotoUploadState(context);
+
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        super.onPostExecute(aVoid);
+
+                        mDialog.dismiss();
+
+                        Intent intent = new Intent(FileMainActivity.this, EquipmentSearchActivity.class);
+                        startActivity(intent);
+                        finish();
+
+                    }
+
+                }.execute();
+                break;
+        }
+
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if(notRootFolder()){
+            fileFragment.onBackPressed();
+        }else if(fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE){
+            fileShareFragment.onBackPressed();
+        }else {
+            super.onBackPressed();
+        }
+    }
+
+    private boolean notRootFolder() {
+
+        User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
+        String homeFolderUUID = user.getHome();
+
+        return fileMainViewPager.getCurrentItem() == PAGE_FILE && !(fileFragment.getCurrentFolderUUID().equals(homeFolderUUID));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.file_main_menu, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.select_file:
+
+                if(fileMainViewPager.getCurrentItem() == PAGE_FILE && item.getTitle().equals(getString(R.string.select_file))){
+                    fileFragment.refreshSelectMode(true);
+
+                    item.setTitle(getString(R.string.quit_select_file));
+                }else if(fileMainViewPager.getCurrentItem() == PAGE_FILE && item.getTitle().equals(getString(R.string.quit_select_file))){
+
+                    fileFragment.refreshSelectMode(false);
+
+                    item.setTitle(getString(R.string.select_file));
+                }
+
+
+
+                break;
+        }
+
+        return true;
+    }
+
+
+    private class FilePageAdapter extends FragmentPagerAdapter {
+
+        FilePageAdapter(FragmentManager manager) {
+            super(manager);
+        }
+
+
+        @Override
+        public Fragment getItem(int position) {
+
+            switch (position) {
+                case PAGE_FILE:
+                    fileFragment = FileFragment.newInstance();
+                    return fileFragment;
+                case PAGE_FILE_SHARE:
+                    fileShareFragment = FileShareFragment.newInstance();
+                    return fileShareFragment;
+                case PAGE_FILE_DOWNLOAD:
+                    fileDownloadFragment = FileDownloadFragment.newInstance();
+                    return fileDownloadFragment;
+                default:
+                    return null;
+            }
+
+        }
+
+        @Override
+        public int getCount() {
+            return 3;
+        }
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
+    private void switchDrawerOpenState() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            drawerLayout.openDrawer(GravityCompat.START);
+        }
+    }
+
+    private void initNavigationView() {
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
+
+        String userName = user.getUserName();
+        TextView mUserNameTextView = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name_textview);
+        mUserNameTextView.setText(userName);
+
+        TextView mUserAvatar = (TextView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
+        mUserAvatar.setText(user.getDefaultAvatar());
+        mUserAvatar.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
+
+        MenuItem menuItem = navigationView.getMenu().findItem(R.id.file);
+        menuItem.setTitle(getString(R.string.my_photo));
+    }
+}

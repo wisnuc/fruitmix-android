@@ -15,12 +15,17 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -55,8 +60,6 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     private String mGateway;
 
     private LocalBroadcastManager localBroadcastManager;
-    private IntentFilter filter;
-    private CustomReceiver customReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,10 +103,6 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         }
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        filter = new IntentFilter(Util.REMOTE_TOKEN_RETRIEVED);
-        filter.addAction(Util.REMOTE_DEVICEID_RETRIEVED);
-        filter.addAction(Util.REMOTE_USER_RETRIEVED);
-        customReceiver = new CustomReceiver();
 
     }
 
@@ -111,14 +110,84 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     protected void onResume() {
         super.onResume();
 
-        localBroadcastManager.registerReceiver(customReceiver, filter);
+        EventBus.getDefault().register(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
-        localBroadcastManager.unregisterReceiver(customReceiver);
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleOperationEvent(OperationEvent operationEvent){
+
+        String action = operationEvent.getAction();
+
+        if (action.equals(Util.REMOTE_TOKEN_RETRIEVED)) {
+
+            OperationResult result = operationEvent.getOperationResult();
+
+            switch (result) {
+                case SUCCEED:
+
+                    if (!mGateway.equals(FNAS.Gateway)) {
+                        LocalCache.CleanAll(LoginActivity.this);
+                    }
+
+                    LocalCache.Init(LoginActivity.this);
+
+                    FNAS.Gateway = mGateway;
+                    FNAS.userUUID = mUserUUid;
+
+                    Intent operationIntent = new Intent(Util.OPERATION);
+                    operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
+                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_DEVICEID.name());
+                    localBroadcastManager.sendBroadcast(operationIntent);
+
+                    break;
+                case FAIL:
+                    Util.loginState = false;
+                    Snackbar.make(mLoginBtn, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
+                    break;
+            }
+
+        } else if (action.equals(Util.REMOTE_DEVICEID_RETRIEVED)) {
+
+            OperationResult result = operationEvent.getOperationResult();
+
+            switch (result) {
+                case SUCCEED:
+
+                    Util.loginState = true;
+
+                    FNAS.retrieveUserMap(mContext);
+
+                    LocalCache.saveGateway(FNAS.Gateway, mContext);
+
+                    setGroupNameUserName(mEquipmentGroupName, mEquipmentChildName);
+                    setUuidPassword(FNAS.userUUID, mPwd);
+
+
+                    break;
+                case FAIL:
+                    Util.loginState = false;
+                    Snackbar.make(mLoginBtn, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
+
+                    break;
+            }
+
+        } else if (action.equals(Util.REMOTE_USER_RETRIEVED)) {
+
+            Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
+            jumpIntent.putExtra(Util.EQUIPMENT_CHILD_NAME, mEquipmentChildName);
+            startActivity(jumpIntent);
+            LoginActivity.this.setResult(RESULT_OK);
+            finish();
+
+        }
+
     }
 
     @Override
@@ -180,76 +249,5 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         editor.putString(Util.PASSWORD, password);
         editor.apply();
     }
-
-    private class CustomReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if (intent.getAction().equals(Util.REMOTE_TOKEN_RETRIEVED)) {
-
-                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
-
-                switch (result) {
-                    case SUCCEED:
-
-                        if (!mGateway.equals(FNAS.Gateway)) {
-                            LocalCache.CleanAll(LoginActivity.this);
-                        }
-
-                        LocalCache.Init(LoginActivity.this);
-
-                        FNAS.Gateway = mGateway;
-                        FNAS.userUUID = mUserUUid;
-
-                        Intent operationIntent = new Intent(Util.OPERATION);
-                        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_DEVICEID.name());
-                        localBroadcastManager.sendBroadcast(operationIntent);
-
-                        break;
-                    case FAIL:
-                        Util.loginState = false;
-                        Snackbar.make(mLoginBtn, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
-                        break;
-                }
-
-            } else if (intent.getAction().equals(Util.REMOTE_DEVICEID_RETRIEVED)) {
-
-                OperationResult result = OperationResult.valueOf(intent.getStringExtra(Util.OPERATION_RESULT_NAME));
-
-                switch (result) {
-                    case SUCCEED:
-
-                        Util.loginState = true;
-
-                        FNAS.retrieveUserMap(mContext);
-
-                        LocalCache.saveGateway(FNAS.Gateway, mContext);
-
-                        setGroupNameUserName(mEquipmentGroupName, mEquipmentChildName);
-                        setUuidPassword(FNAS.userUUID, mPwd);
-
-
-                        break;
-                    case FAIL:
-                        Util.loginState = false;
-                        Snackbar.make(mLoginBtn, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
-
-                        break;
-                }
-
-            } else if (intent.getAction().equals(Util.REMOTE_USER_RETRIEVED)) {
-
-                Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
-                jumpIntent.putExtra(Util.EQUIPMENT_CHILD_NAME, mEquipmentChildName);
-                startActivity(jumpIntent);
-                LoginActivity.this.setResult(RESULT_OK);
-                finish();
-
-            }
-
-        }
-    }
-
 
 }

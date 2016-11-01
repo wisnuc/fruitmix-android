@@ -48,20 +48,20 @@
             android:name=".Test2Activity"
             android:label="@string/title_activity_test2"/>
         <activity
-            android:name=".PhotoSliderActivity"
+            android:name=".mediaModule.PhotoSliderActivity"
             android:label="@string/title_activity_test2"/>
         <activity
             android:name=".Test3Activity"
             android:label="@string/title_activity_test3"/>
         <activity
-            android:name=".CreateAlbumActivity"
+            android:name=".mediaModule.CreateAlbumActivity"
             android:label="@string/title_activity_test3"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".ModifyAlbumActivity"
+            android:name=".mediaModule.ModifyAlbumActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".AlbumPicContentActivity"
+            android:name=".mediaModule.AlbumPicContentActivity"
             android:label="@string/title_activity_test3"
             android:screenOrientation="portrait"/>
         <activity
@@ -69,10 +69,10 @@
             android:label="@string/title_activity_test3"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".MediaShareCommentActivity"
+            android:name=".mediaModule.MediaShareCommentActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".NewAlbumPicChooseActivity"
+            android:name=".mediaModule.NewAlbumPicChooseActivity"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".Test4Activity"
@@ -92,7 +92,7 @@
             android:windowSoftInputMode="stateVisible|adjustPan"/>
         <activity android:name=".GalleryTestActivity"/>
         <activity
-            android:name=".EditPhotoActivity"
+            android:name=".mediaModule.EditPhotoActivity"
             android:screenOrientation="portrait"/>
 
         <service
@@ -103,7 +103,7 @@
             android:exported="false"/>
 
         <activity
-            android:name=".MoreMediaActivity"
+            android:name=".mediaModule.MoreMediaActivity"
             android:screenOrientation="portrait"/>
 
         <service
@@ -181,10 +181,10 @@
         </service>
 
         <activity
-            android:name=".file.LocalFileActivity"
+            android:name=".fileModule.LocalFileActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".file.FileMainActivity"
+            android:name=".fileModule.FileMainActivity"
             android:screenOrientation="portrait"/>
 
         <service

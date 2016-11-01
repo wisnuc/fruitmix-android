@@ -7,13 +7,15 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.MediaShare;
-import com.winsun.fruitmix.model.MediaShareContent;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
-import java.util.ArrayList;
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 /**
@@ -37,8 +39,6 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
     public ModifyMediaInLocalMediaShareService() {
         super("EditPhotoInMediaShareService");
     }
-
-    private LocalBroadcastManager localBroadcastManager;
 
     /**
      * Starts this service to perform action Foo with the given parameters. If
@@ -76,8 +76,7 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
         List<MediaShareContent> differentContentsInOriginalMediaShare = originalMediaShare.getDifferentMediaShareContentInCurrentMediaShare(modifiedMediaShare);
         List<MediaShareContent> differentContentsInModifiedMediaShare = modifiedMediaShare.getDifferentMediaShareContentInCurrentMediaShare(originalMediaShare);
 
-        localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        Intent intent = new Intent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED);
+        OperationEvent operationEvent;
 
         DBUtils dbUtils = DBUtils.getInstance(this);
         long dbResult = 0;
@@ -97,13 +96,14 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
 
             Log.i(TAG, "modify media in local mediashare in map result:" + (mapResult != null ? "true" : "false"));
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+            operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED,OperationResult.SUCCEED);
 
         }else {
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
+
+            operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED,OperationResult.FAIL);
         }
 
-        localBroadcastManager.sendBroadcast(intent);
+        EventBus.getDefault().post(operationEvent);
 
     }
 }

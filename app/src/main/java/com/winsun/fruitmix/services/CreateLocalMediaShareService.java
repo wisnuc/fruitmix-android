@@ -7,10 +7,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -63,12 +67,11 @@ public class CreateLocalMediaShareService extends IntentService {
         DBUtils dbUtils = DBUtils.getInstance(this);
         long returnValue = dbUtils.insertLocalShare(mediaShare);
 
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        Intent intent = new Intent(Util.LOCAL_SHARE_CREATED);
+        MediaShareOperationEvent mediaShareOperationEvent;
 
         if(returnValue > 0){
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
-            intent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare);
+
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_CREATED,OperationResult.SUCCEED,mediaShare);
 
             Log.i(TAG,"insert local mediashare succeed");
 
@@ -77,12 +80,13 @@ public class CreateLocalMediaShareService extends IntentService {
             Log.i(TAG,"insert local media share to map result:" + (mapResult != null?"true":"false"));
 
         }else {
-            intent.putExtra(Util.OPERATION_RESULT_NAME,OperationResult.FAIL.name());
+
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_CREATED,OperationResult.FAIL,mediaShare);
 
             Log.i(TAG,"insert local mediashare fail");
         }
 
-        broadcastManager.sendBroadcast(intent);
+        EventBus.getDefault().post(mediaShareOperationEvent);
 
     }
 

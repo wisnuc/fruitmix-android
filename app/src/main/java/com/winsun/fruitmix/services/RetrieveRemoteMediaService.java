@@ -4,16 +4,18 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Media;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
@@ -95,10 +97,9 @@ public class RetrieveRemoteMediaService extends IntentService {
 
         LocalCache.RemoteMediaMapKeyIsUUID.putAll(mediaConcurrentMap);
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        Intent intent = new Intent(Util.REMOTE_MEDIA_RETRIEVED);
-        intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
-        localBroadcastManager.sendBroadcast(intent);
+        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_RETRIEVED,OperationResult.SUCCEED);
+        EventBus.getDefault().post(operationEvent);
+
 
     }
 

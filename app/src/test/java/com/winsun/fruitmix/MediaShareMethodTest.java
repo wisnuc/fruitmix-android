@@ -1,7 +1,7 @@
 package com.winsun.fruitmix;
 
-import com.winsun.fruitmix.model.MediaShare;
-import com.winsun.fruitmix.model.MediaShareContent;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 
 import org.junit.Assert;
 import org.junit.Test;

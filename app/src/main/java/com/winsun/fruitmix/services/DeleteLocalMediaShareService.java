@@ -7,10 +7,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -62,11 +65,12 @@ public class DeleteLocalMediaShareService extends IntentService {
      */
     private void handleActionDeleteLocalShare(MediaShare mediaShare) {
 
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        Intent intent = new Intent(Util.LOCAL_SHARE_DELETED);
+        OperationEvent operationEvent;
 
         if (!mediaShare.isLocal()) {
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.NO_NETWORK.name());
+
+            operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED,OperationResult.NO_NETWORK);
+
         } else {
 
             DBUtils dbUtils = DBUtils.getInstance(this);
@@ -75,7 +79,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
             if (value > 0) {
 
-                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+                operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED,OperationResult.SUCCEED);
 
                 Log.i(TAG, "delete local mediashare succeed");
 
@@ -84,13 +88,14 @@ public class DeleteLocalMediaShareService extends IntentService {
                 Log.i(TAG, "delete local media share in map result:" + (mapResult != null ? "true" : "false"));
 
             } else {
-                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
+
+                operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED,OperationResult.FAIL);
 
                 Log.i(TAG, "delete local mediashare fail");
             }
         }
 
-        broadcastManager.sendBroadcast(intent);
+        EventBus.getDefault().post(operationEvent);
 
     }
 

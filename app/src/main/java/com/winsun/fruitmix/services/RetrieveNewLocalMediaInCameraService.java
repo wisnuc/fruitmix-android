@@ -7,10 +7,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Media;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 import java.util.Map;
@@ -71,8 +74,6 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
 
         localPhotoList = LocalCache.PhotoList("Camera");
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-
         for (i = 0; i < localPhotoList.size(); i++) {
             itemRaw = localPhotoList.get(i);
 
@@ -113,17 +114,14 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
             }
 
         }
-        Intent intent = new Intent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED);
+
+        OperationEvent operationEvent;
         if(retrieveMediaCount > 0){
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+            operationEvent = new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED,OperationResult.SUCCEED);
         }else {
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
+            operationEvent = new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED,OperationResult.FAIL);
         }
-        localBroadcastManager.sendBroadcast(intent);
+        EventBus.getDefault().post(operationEvent);
     }
 
-    public static void handleActionRetrieveLocalMediaStaticMethod(){
-        RetrieveNewLocalMediaInCameraService service = new RetrieveNewLocalMediaInCameraService();
-        service.handleActionRetrieveLocalMedia();
-    }
 }

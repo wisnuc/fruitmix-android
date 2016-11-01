@@ -7,14 +7,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.UploadMediaTask;
-import com.winsun.fruitmix.model.Comment;
-import com.winsun.fruitmix.model.Media;
-import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.mediaModule.model.Comment;
+import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
@@ -227,20 +226,12 @@ public class ButlerService extends Service {
 
         String imageUUID;
 
-        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-
         switch (targetType) {
             case LOCAL_MEDIA:
                 RetrieveLocalMediaService.startActionRetrieveLocalMedia(this);
                 break;
             case LOCAL_MEDIASHARE:
-//                RetrieveLocalMediaShareService.startActionRetrieveMediaShare(this);
-                instance.doOneTaskInCachedThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        RetrieveLocalMediaShareService.handleActionRetrieveLocalMediaShareStaticMethod();
-                    }
-                });
+                RetrieveLocalMediaShareService.startActionRetrieveMediaShare(this);
                 break;
             case LOCAL_MEDIA_COMMENT:
                 RetrieveLocalMediaCommentService.startActionRetrieveLocalComment(this);
@@ -252,50 +243,25 @@ public class ButlerService extends Service {
                 RetrieveRemoteMediaService.startActionRetrieveRemoteMedia(this);
                 break;
             case REMOTE_MEDIASHARE:
-//                RetrieveRemoteMediaShareService.startActionRetrieveRemoteMediaShare(this);
-                instance.doOneTaskInCachedThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        RetrieveRemoteMediaShareService.handleActionRetrieveRemoteMediaShareStaticMethod();
-                    }
-                });
+                RetrieveRemoteMediaShareService.startActionRetrieveRemoteMediaShare(this);
                 break;
             case REMOTE_MEDIA_COMMENT:
                 imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
                 RetrieveRemoteMediaCommentService.startActionRetrieveRemoteMediaComment(this, imageUUID);
                 break;
             case REMOTE_DEVICEID:
-//                RetrieveDeviceIdService.startActionRetrieveDeviceId(this);
-                instance.doOneTaskInCachedThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        RetrieveDeviceIdService.handleActionRetrieveDeviceIdStaticMethod();
-                    }
-                });
+                RetrieveDeviceIdService.startActionRetrieveDeviceId(this);
                 break;
             case REMOTE_TOKEN:
                 final String gateway = intent.getStringExtra(Util.GATEWAY);
                 final String userUUID = intent.getStringExtra(Util.USER_UUID);
                 final String userPassword = intent.getStringExtra(Util.PASSWORD);
 
-//                RetrieveTokenService.startActionRetrieveToken(this, gateway, userUUID, userPassword);
-                instance.doOneTaskInCachedThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        RetrieveTokenService.handleActionRetrieveTokenStaticMethod(gateway,userUUID,userPassword);
-                    }
-                });
+                RetrieveTokenService.startActionRetrieveToken(this, gateway, userUUID, userPassword);
 
                 break;
             case LOCAL_MEDIA_IN_CAMERA:
-                instance.doOneTaskInCachedThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        RetrieveNewLocalMediaInCameraService.handleActionRetrieveLocalMediaStaticMethod();
-                    }
-                });
-
-//                RetrieveNewLocalMediaInCameraService.startActionRetrieveNewLocalMediaInCamera(this);
+                RetrieveNewLocalMediaInCameraService.startActionRetrieveNewLocalMediaInCamera(this);
                 break;
             case REMOTE_FILE:
                 String folderUUID = intent.getStringExtra(Util.FOLDER_UUID);

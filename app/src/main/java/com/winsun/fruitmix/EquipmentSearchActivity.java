@@ -71,10 +71,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private static final int DATA_CHANGE = 0x0001;
 
-    private LocalBroadcastManager localBroadcastManager;
-    private IntentFilter filter;
-    private CustomReceiver customReceiver;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,17 +114,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        filter = new IntentFilter(Util.REMOTE_USER_RETRIEVED);
-        customReceiver = new CustomReceiver();
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        localBroadcastManager.registerReceiver(customReceiver, filter);
 
         discoverService(mContext);
     }
@@ -137,8 +127,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     protected void onPause() {
 
         super.onPause();
-
-        localBroadcastManager.unregisterReceiver(customReceiver);
 
         try {
             stopDiscoverServices(mContext, mListener);
@@ -265,7 +253,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         @BindView(R.id.equipment_ip_tv)
         TextView mEquipmentIpTV;
 
-        public GroupViewHolder(View view) {
+        GroupViewHolder(View view) {
             ButterKnife.bind(this, view);
         }
 
@@ -292,7 +280,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         @BindView(R.id.equipment_child_name)
         TextView mChildName;
 
-        public ChildViewHolder(View view) {
+        ChildViewHolder(View view) {
             ButterKnife.bind(this, view);
         }
 
@@ -501,9 +489,4 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         }
     }
 
-    private class CustomReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-        }
-    }
 }

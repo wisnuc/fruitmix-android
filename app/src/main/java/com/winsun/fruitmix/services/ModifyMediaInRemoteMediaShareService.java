@@ -9,12 +9,15 @@ import android.util.Log;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.MediaShare;
-import com.winsun.fruitmix.model.MediaShareContent;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -37,8 +40,6 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
     public ModifyMediaInRemoteMediaShareService() {
         super("EditPhotoInMediaShareService");
     }
-
-    private LocalBroadcastManager localBroadcastManager;
 
     /**
      * Starts this service to perform action Foo with the given parameters. If
@@ -81,12 +82,11 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
         diffContentsModifiedMediaShare.clearMediaShareContents();
         diffContentsModifiedMediaShare.initMediaShareContents(modifiedMediaShare.getDifferentMediaShareContentInCurrentMediaShare(originalMediaShare));
 
-        localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        Intent intent = new Intent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED);
+        OperationEvent operationEvent;
 
         if (!Util.uploadImageDigestsIfNotUpload(this, diffContentsModifiedMediaShare.getMediaDigestInMediaShareContents())) {
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
+            operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED,OperationResult.FAIL);
 
             Log.i(TAG, "edit photo in remote mediashare fail");
 
@@ -101,7 +101,8 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
                 String result = FNAS.PostRemoteCall(req, data);
 
                 if (result.length() > 0) {
-                    intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+
+                    operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED,OperationResult.SUCCEED);
 
                     Log.i(TAG, "modify media in remote mediashare which source is network succeed");
 
@@ -122,6 +123,10 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
                     MediaShare mapResult = LocalCache.RemoteMediaShareMapKeyIsUUID.put(modifiedMediaShare.getUuid(), modifiedMediaShare);
 
                     Log.i(TAG, "modify media in remote mediashare in map result:" + (mapResult != null ? "true" : "false"));
+                }else {
+
+                    operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED,OperationResult.FAIL);
+
                 }
 
 
@@ -129,13 +134,14 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
 
                 e.printStackTrace();
 
-                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
+                operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED,OperationResult.FAIL);
 
                 Log.i(TAG, "edit photo in remote mediashare fail");
             }
 
         }
-        localBroadcastManager.sendBroadcast(intent);
+
+        EventBus.getDefault().post(operationEvent);
 
     }
 

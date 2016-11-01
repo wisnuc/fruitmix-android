@@ -5,8 +5,8 @@ import android.content.Intent;
 import android.content.Context;
 
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
-import com.winsun.fruitmix.file.model.AbstractRemoteFile;
-import com.winsun.fruitmix.file.model.RemoteFolder;
+import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
+import com.winsun.fruitmix.fileModule.model.RemoteFolder;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;

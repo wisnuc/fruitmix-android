@@ -8,11 +8,14 @@ import android.util.Log;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.Comment;
+import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
+import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,17 +75,15 @@ public class CreateRemoteCommentService extends IntentService {
      * parameters.
      */
     private void handleActionCreateRemoteCommentTask(Comment comment, String mediaUUID) {
-        // TODO: Handle action create remote comment
 
-        mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());
-
-        Intent intent = new Intent(Util.REMOTE_COMMENT_CREATED);
+        MediaShareCommentOperationEvent mediaShareCommentOperationEvent;
 
         boolean returnValue = Util.uploadImageDigestsIfNotUpload(this, Collections.singletonList(mediaUUID));
 
         if (!returnValue) {
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
-            mManager.sendBroadcast(intent);
+
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResult.FAIL, comment, mediaUUID);
+            EventBus.getDefault().post(mediaShareCommentOperationEvent);
 
             return;
         }
@@ -93,41 +94,40 @@ public class CreateRemoteCommentService extends IntentService {
         try {
             String result = FNAS.PostRemoteCall(request, data);
 
-            if(result.length() > 0){
+            if (result.length() > 0) {
 
-                Log.i(TAG,"insert remote comment which source is network succeed");
+                Log.i(TAG, "insert remote comment which source is network succeed");
 
                 DBUtils dbUtils = DBUtils.getInstance(this);
-                long dbResult = dbUtils.insertRemoteComment(comment,mediaUUID);
+                long dbResult = dbUtils.insertRemoteComment(comment, mediaUUID);
 
-                Log.i(TAG, "insert remote media comment which source is db result:"+dbResult);
+                Log.i(TAG, "insert remote media comment which source is db result:" + dbResult);
 
                 List<Comment> comments = new ArrayList<>();
 
-                LocalCache.RemoteMediaCommentMapKeyIsImageUUID.putIfAbsent(mediaUUID,comments);
+                LocalCache.RemoteMediaCommentMapKeyIsImageUUID.putIfAbsent(mediaUUID, comments);
 
                 comments = LocalCache.RemoteMediaCommentMapKeyIsImageUUID.get(mediaUUID);
 
                 boolean mapResult = comments.add(comment);
 
-                Log.i(TAG,"insert remote media comment to map result:" + mapResult);
+                Log.i(TAG, "insert remote media comment to map result:" + mapResult);
 
-                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
-                intent.putExtra(Util.OPERATION_IMAGE_UUID,mediaUUID);
-                intent.putExtra(Util.OPERATION_COMMENT,comment);
+                mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResult.SUCCEED, comment, mediaUUID);
 
-
+            } else {
+                mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResult.FAIL, comment, mediaUUID);
             }
 
         } catch (Exception ex) {
             ex.printStackTrace();
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResult.FAIL, comment, mediaUUID);
 
-            Log.i(TAG,"insert remote comment fail");
+            Log.i(TAG, "insert remote comment fail");
         }
 
-        mManager.sendBroadcast(intent);
+        EventBus.getDefault().post(mediaShareCommentOperationEvent);
 
     }
 

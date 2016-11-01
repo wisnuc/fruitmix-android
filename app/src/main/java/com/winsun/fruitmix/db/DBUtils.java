@@ -8,10 +8,10 @@ import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.winsun.fruitmix.model.Media;
-import com.winsun.fruitmix.model.MediaShare;
-import com.winsun.fruitmix.model.Comment;
-import com.winsun.fruitmix.model.MediaShareContent;
+import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.mediaModule.model.Comment;
+import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.parser.LocalDataParser;
 import com.winsun.fruitmix.parser.LocalMediaCommentParser;

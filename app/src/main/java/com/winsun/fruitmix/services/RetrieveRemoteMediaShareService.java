@@ -7,13 +7,16 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteMediaShareParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
@@ -66,8 +69,6 @@ public class RetrieveRemoteMediaShareService extends IntentService {
         ConcurrentMap<String, MediaShare> mediaShareConcurrentMap;
         DBUtils dbUtils = DBUtils.getInstance(this);
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-
         try {
 
             String json = FNAS.loadRemoteShare();
@@ -95,15 +96,9 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
         Log.i(TAG, "retrieve remote media share from network");
 
-        Intent intent = new Intent(Util.REMOTE_MEDIA_SHARE_RETRIEVED);
-        intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
-        localBroadcastManager.sendBroadcast(intent);
+        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_RETRIEVED,OperationResult.SUCCEED);
+        EventBus.getDefault().post(operationEvent);
 
-    }
-
-    public static void handleActionRetrieveRemoteMediaShareStaticMethod(){
-        RetrieveRemoteMediaShareService service = new RetrieveRemoteMediaShareService();
-        service.handleActionRetrieveRemoteMediaShare();
     }
 
 }

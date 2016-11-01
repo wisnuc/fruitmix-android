@@ -8,11 +8,14 @@ import android.util.Log;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -63,16 +66,16 @@ public class ModifyRemoteMediaShareService extends IntentService {
      * parameters.
      */
     private void handleActionModifyRemoteShare(MediaShare mediaShare, String requestData) {
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
 
-        Intent intent = new Intent(Util.REMOTE_SHARE_MODIFIED);
+        MediaShareOperationEvent mediaShareOperationEvent;
 
         if (mediaShare.isLocal()) {
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.LOCAL_MEDIASHARE_UPLOADING.name());
+
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED,OperationResult.LOCAL_MEDIASHARE_UPLOADING,mediaShare);
 
         } else if (!Util.uploadImageDigestsIfNotUpload(this, mediaShare.getMediaDigestInMediaShareContents())) {
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED,OperationResult.FAIL,mediaShare);
 
         } else {
 
@@ -80,8 +83,8 @@ public class ModifyRemoteMediaShareService extends IntentService {
                 String result = FNAS.PostRemoteCall(String.format(getString(R.string.update_mediashare_url), Util.MEDIASHARE_PARAMETER, mediaShare.getUuid()), requestData);
 
                 if (result.length() > 0) {
-                    intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
-                    intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
+
+                    mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED,OperationResult.SUCCEED,mediaShare);
 
                     Log.i(TAG, "modify remote share succeed");
 
@@ -94,20 +97,21 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
                     Log.i(TAG, "modify media in remote mediashare in map result:" + (mapResult != null ? "true" : "false"));
 
+                }else {
+                    mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED,OperationResult.FAIL,mediaShare);
                 }
 
             } catch (Exception e) {
 
                 e.printStackTrace();
 
-                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED,OperationResult.FAIL,mediaShare);
 
                 Log.i(TAG, "modify remote share fail");
             }
         }
 
-        broadcastManager.sendBroadcast(intent);
-
+        EventBus.getDefault().post(mediaShareOperationEvent);
     }
 
 }

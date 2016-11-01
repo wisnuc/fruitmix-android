@@ -3,7 +3,7 @@ package com.winsun.fruitmix.parser;
 import android.database.Cursor;
 
 import com.winsun.fruitmix.db.DBHelper;
-import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
 
 import java.util.Arrays;
 

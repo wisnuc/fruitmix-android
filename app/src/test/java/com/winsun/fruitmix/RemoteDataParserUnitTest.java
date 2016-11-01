@@ -1,9 +1,9 @@
 package com.winsun.fruitmix;
 
-import com.winsun.fruitmix.file.model.AbstractRemoteFile;
-import com.winsun.fruitmix.model.Comment;
-import com.winsun.fruitmix.model.Media;
-import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
+import com.winsun.fruitmix.mediaModule.model.Comment;
+import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;

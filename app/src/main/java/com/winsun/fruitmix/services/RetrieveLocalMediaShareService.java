@@ -6,10 +6,13 @@ import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
@@ -73,15 +76,9 @@ public class RetrieveLocalMediaShareService extends IntentService {
 
         LocalCache.LocalMediaShareMapKeyIsUUID.putAll(mediaShareConcurrentMap);
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        Intent intent = new Intent(Util.LOCAL_MEDIA_SHARE_RETRIEVED);
-        intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
-        localBroadcastManager.sendBroadcast(intent);
-    }
+        OperationEvent operationEvent = new OperationEvent(Util.LOCAL_MEDIA_SHARE_RETRIEVED,OperationResult.SUCCEED);
+        EventBus.getDefault().post(operationEvent);
 
-    public static void handleActionRetrieveLocalMediaShareStaticMethod(){
-        RetrieveLocalMediaShareService service = new RetrieveLocalMediaShareService();
-        service.handleActionRetrieveLocalMediaShare();
     }
 
 }

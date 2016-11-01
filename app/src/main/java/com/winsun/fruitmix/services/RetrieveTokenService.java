@@ -6,11 +6,13 @@ import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 /**
@@ -75,8 +77,7 @@ public class RetrieveTokenService extends IntentService {
 
         String str;
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        Intent intent = new Intent(Util.REMOTE_TOKEN_RETRIEVED);
+        OperationEvent operationEvent;
 
         try {
 
@@ -88,24 +89,18 @@ public class RetrieveTokenService extends IntentService {
 
             LocalCache.saveToken(FNAS.JWT);
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+            operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED,OperationResult.SUCCEED);
 
         } catch (Exception e) {
             e.printStackTrace();
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME,OperationResult.FAIL.name());
+            operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED,OperationResult.FAIL);
         }
 
-        localBroadcastManager.sendBroadcast(intent);
+        EventBus.getDefault().post(operationEvent);
 
         Log.i(TAG, "handleActionRetrieveToken: send broadcast finish");
 
     }
 
-    public static void handleActionRetrieveTokenStaticMethod(String gateway, String userUUID, String userPassword){
-
-        RetrieveTokenService retrieveTokenService = new RetrieveTokenService();
-
-        retrieveTokenService.handleActionRetrieveToken(gateway,userUUID,userPassword);
-    }
 }

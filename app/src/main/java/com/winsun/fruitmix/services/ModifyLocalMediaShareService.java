@@ -7,9 +7,12 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.MediaShare;
+import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -58,11 +61,12 @@ public class ModifyLocalMediaShareService extends IntentService {
      */
     private void handleActionModifyLocalShare(MediaShare mediaShare) {
 
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        Intent intent = new Intent(Util.LOCAL_SHARE_MODIFIED);
+        MediaShareOperationEvent mediaShareOperationEvent;
 
         if (!mediaShare.isLocal()) {
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.NO_NETWORK.name());
+
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED,OperationResult.NO_NETWORK,mediaShare);
+
         } else {
 
             DBUtils dbUtils = DBUtils.getInstance(this);
@@ -71,20 +75,20 @@ public class ModifyLocalMediaShareService extends IntentService {
 
             if (returnValue > 0) {
 
-                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
-                intent.putExtra(Util.OPERATION_MEDIASHARE,mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED,OperationResult.SUCCEED,mediaShare);
 
                 Log.i(TAG,"modify local share succeed");
 
             } else {
-                intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
+
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED,OperationResult.FAIL,mediaShare);
 
                 Log.i(TAG,"modify local share fail");
             }
 
         }
 
-        broadcastManager.sendBroadcast(intent);
+        EventBus.getDefault().post(mediaShareOperationEvent);
 
     }
 
