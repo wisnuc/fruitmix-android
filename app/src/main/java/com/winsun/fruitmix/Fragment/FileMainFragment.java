@@ -1,34 +1,32 @@
-package com.winsun.fruitmix.fileModule;
+package com.winsun.fruitmix.fragment;
 
-import android.app.ProgressDialog;
+
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.winsun.fruitmix.EquipmentSearchActivity;
-import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.UnscrollableViewPager;
 import com.winsun.fruitmix.fileModule.fragment.FileDownloadFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileShareFragment;
-import com.winsun.fruitmix.interfaces.OnFragmentInteractionListener;
+import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
+import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -36,7 +34,12 @@ import com.winsun.fruitmix.util.LocalCache;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class FileMainActivity extends AppCompatActivity implements OnFragmentInteractionListener,NavigationView.OnNavigationItemSelectedListener {
+/**
+ * A simple {@link Fragment} subclass.
+ * Use the {@link FileMainFragment#newInstance} factory method to
+ * create an instance of this fragment.
+ */
+public class FileMainFragment extends Fragment {
 
     @BindView(R.id.bottom_navigation_view)
     BottomNavigationView bottomNavigationView;
@@ -44,12 +47,6 @@ public class FileMainActivity extends AppCompatActivity implements OnFragmentInt
     UnscrollableViewPager fileMainViewPager;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
-    @BindView(R.id.drawer_layout)
-    DrawerLayout drawerLayout;
-    @BindView(R.id.nav_view)
-    NavigationView navigationView;
-
-    private FilePageAdapter filePageAdapter;
 
     public static final int PAGE_FILE_SHARE = 0;
     public static final int PAGE_FILE = 1;
@@ -61,28 +58,53 @@ public class FileMainActivity extends AppCompatActivity implements OnFragmentInt
 
     private Context context;
 
-    private ProgressDialog mDialog;
+    private OnMainFragmentInteractionListener mListener;
+
+
+    public FileMainFragment() {
+        // Required empty public constructor
+    }
+
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     * @return A new instance of fragment FileMainFragment.
+     */
+    // TODO: Rename and change types and number of parameters
+    public static FileMainFragment newInstance() {
+        FileMainFragment fragment = new FileMainFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_file_main);
 
-        ButterKnife.bind(this);
+        context = getActivity();
 
-        context = this;
+    }
 
-        setSupportActionBar(toolbar);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.activity_file_main,container,false);
+
+        ButterKnife.bind(this,view);
+
+        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+
+        setHasOptionsMenu(true);
+
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switchDrawerOpenState();
+                mListener.switchDrawerOpenState();
             }
         });
 
-        initNavigationView();
-
-        filePageAdapter = new FilePageAdapter(getSupportFragmentManager());
+        FilePageAdapter filePageAdapter = new FilePageAdapter(getActivity().getSupportFragmentManager());
 
         fileMainViewPager.setAdapter(filePageAdapter);
         fileMainViewPager.setCurrentItem(PAGE_FILE);
@@ -106,67 +128,40 @@ public class FileMainActivity extends AppCompatActivity implements OnFragmentInt
                 return true;
             }
         });
+
+
+        return view;
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.file:
-                Intent intent = new Intent(context, NavPagerActivity.class);
-                startActivity(intent);
-                finish();
-                break;
-            case R.id.logout:
-
-                new AsyncTask<Void, Void, Void>() {
-
-                    @Override
-                    protected void onPreExecute() {
-                        super.onPreExecute();
-
-                        mDialog = ProgressDialog.show(context, context.getString(R.string.operating_title), getString(R.string.loading_message), true, false);
-
-                    }
-
-                    @Override
-                    protected Void doInBackground(Void... params) {
-
-                        LocalCache.clearToken(context);
-                        FNAS.restoreLocalPhotoUploadState(context);
-
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void aVoid) {
-                        super.onPostExecute(aVoid);
-
-                        mDialog.dismiss();
-
-                        Intent intent = new Intent(FileMainActivity.this, EquipmentSearchActivity.class);
-                        startActivity(intent);
-                        finish();
-
-                    }
-
-                }.execute();
-                break;
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnMainFragmentInteractionListener) {
+            mListener = (OnMainFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
         }
-
-        drawerLayout.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     @Override
-    public void onBackPressed() {
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    public void handleBackPressed(){
 
         if(notRootFolder()){
             fileFragment.onBackPressed();
         }else if(fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE){
             fileShareFragment.onBackPressed();
-        }else {
-            super.onBackPressed();
         }
+
+    }
+
+    public boolean handleBackPressedOrNot(){
+        return notRootFolder();
     }
 
     private boolean notRootFolder() {
@@ -178,11 +173,9 @@ public class FileMainActivity extends AppCompatActivity implements OnFragmentInt
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        getMenuInflater().inflate(R.menu.file_main_menu, menu);
-
-        return true;
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu,inflater);
+        inflater.inflate(R.menu.file_main_menu,menu);
     }
 
     @Override
@@ -203,7 +196,6 @@ public class FileMainActivity extends AppCompatActivity implements OnFragmentInt
                 }
 
 
-
                 break;
         }
 
@@ -216,7 +208,6 @@ public class FileMainActivity extends AppCompatActivity implements OnFragmentInt
         FilePageAdapter(FragmentManager manager) {
             super(manager);
         }
-
 
         @Override
         public Fragment getItem(int position) {
@@ -241,36 +232,5 @@ public class FileMainActivity extends AppCompatActivity implements OnFragmentInt
         public int getCount() {
             return 3;
         }
-    }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
-
-    private void switchDrawerOpenState() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            drawerLayout.openDrawer(GravityCompat.START);
-        }
-    }
-
-    private void initNavigationView() {
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
-
-        String userName = user.getUserName();
-        TextView mUserNameTextView = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name_textview);
-        mUserNameTextView.setText(userName);
-
-        TextView mUserAvatar = (TextView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
-        mUserAvatar.setText(user.getDefaultAvatar());
-        mUserAvatar.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
-
-        MenuItem menuItem = navigationView.getMenu().findItem(R.id.file);
-        menuItem.setTitle(getString(R.string.my_photo));
     }
 }

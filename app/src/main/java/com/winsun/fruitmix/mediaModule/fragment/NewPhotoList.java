@@ -32,6 +32,8 @@ import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
+import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
+import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.FNAS;
@@ -54,9 +56,11 @@ import io.github.sin3hz.fastjumper.callback.SpannableCallback;
 /**
  * Created by Administrator on 2016/7/28.
  */
-public class NewPhotoList implements NavPagerActivity.Page {
+public class NewPhotoList implements Page {
 
     public static final String TAG = NewPhotoList.class.getSimpleName();
+
+    private OnMediaFragmentInteractionListener listener;
 
     private Activity containerActivity;
     private View view;
@@ -110,8 +114,10 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
     private List<String> alreadySelectedImageUUIDArrayList;
 
-    public NewPhotoList(Activity activity) {
+    public NewPhotoList(Activity activity,OnMediaFragmentInteractionListener listener) {
         containerActivity = activity;
+
+        this.listener = listener;
 
         view = View.inflate(containerActivity, R.layout.new_photo_layout, null);
 
@@ -183,7 +189,7 @@ public class NewPhotoList implements NavPagerActivity.Page {
 
         mLoadingLayout.setVisibility(View.VISIBLE);
 
-        if (containerActivity instanceof NavPagerActivity && !((NavPagerActivity) containerActivity).ismRemoteMediaLoaded()) {
+        if (!listener.isRemoteMediaLoaded()) {
             return;
         }
 

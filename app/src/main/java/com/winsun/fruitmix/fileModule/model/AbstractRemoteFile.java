@@ -30,6 +30,10 @@ public abstract class AbstractRemoteFile {
 
     public abstract void initChildAbstractRemoteFileList(List<AbstractRemoteFile> abstractRemoteFiles);
 
+    public abstract int getImageResource();
+
+    public abstract String getTimeDateText();
+
     public String getName() {
         return name;
     }

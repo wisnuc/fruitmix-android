@@ -2,6 +2,7 @@ package com.winsun.fruitmix.fileModule.model;
 
 import android.content.Context;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.util.FNAS;
 
 import java.util.ArrayList;
@@ -40,6 +41,16 @@ public class RemoteFolder extends AbstractRemoteFile {
     @Override
     public void initChildAbstractRemoteFileList(List<AbstractRemoteFile> abstractRemoteFiles) {
         this.abstractRemoteFiles.addAll(abstractRemoteFiles);
+    }
+
+    @Override
+    public int getImageResource() {
+        return R.drawable.folder_icon;
+    }
+
+    @Override
+    public String getTimeDateText() {
+        return "";
     }
 
 }

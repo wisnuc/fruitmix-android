@@ -9,19 +9,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.interfaces.OnFragmentInteractionListener;
+import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link OnFragmentInteractionListener} interface
+ * {@link OnFileFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link FileShareFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class FileShareFragment extends Fragment {
 
-    private OnFragmentInteractionListener mListener;
+    private OnFileFragmentInteractionListener mListener;
 
     public FileShareFragment() {
         // Required empty public constructor
@@ -53,32 +53,9 @@ public class FileShareFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_file_share, container, false);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     public void onBackPressed(){
 
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
 
 }

@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.mediaModule.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
@@ -31,9 +32,10 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.mediaModule.AlbumPicContentActivity;
 import com.winsun.fruitmix.mediaModule.MediaShareCommentActivity;
 import com.winsun.fruitmix.mediaModule.MoreMediaActivity;
-import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
+import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -56,11 +58,13 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/4/19.
  */
-public class MediaShareList implements NavPagerActivity.Page {
+public class MediaShareList implements Page {
 
     public static final String TAG = MediaShareList.class.getSimpleName();
 
-    private NavPagerActivity containerActivity;
+    private OnMediaFragmentInteractionListener listener;
+
+    private Activity containerActivity;
     private View view;
 
     @BindView(R.id.loading_layout)
@@ -79,8 +83,10 @@ public class MediaShareList implements NavPagerActivity.Page {
     private ImageLoader mImageLoader;
     private Bundle reenterState;
 
-    public MediaShareList(NavPagerActivity activity_) {
+    public MediaShareList(Activity activity_,OnMediaFragmentInteractionListener listener) {
         containerActivity = activity_;
+
+        this.listener = listener;
 
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
                 R.layout.share_list2, null);
@@ -153,7 +159,7 @@ public class MediaShareList implements NavPagerActivity.Page {
 
         mLoadingLayout.setVisibility(View.VISIBLE);
 
-        if (!containerActivity.ismRemoteMediaShareLoaded()) {
+        if (!listener.isRemoteMediaShareLoaded()) {
             return;
         }
 
@@ -708,6 +714,8 @@ public class MediaShareList implements NavPagerActivity.Page {
                 picItem.setHeight(picItemRaw.getHeight());
                 picItem.setTime(picItemRaw.getTime());
                 picItem.setSelected(false);
+                picItem.setSharing(picItemRaw.isSharing());
+                picItem.setOrientationNumber(picItemRaw.getOrientationNumber());
 
                 picList.add(picItem);
             }

@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.interfaces;
+package com.winsun.fruitmix.fileModule.interfaces;
 
 import android.net.Uri;
 
@@ -6,6 +6,6 @@ import android.net.Uri;
  * Created by Administrator on 2016/10/27.
  */
 
-public interface OnFragmentInteractionListener {
+public interface OnFileFragmentInteractionListener {
     void onFragmentInteraction(Uri uri);
 }

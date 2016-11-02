@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.mediaModule.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -19,9 +20,10 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.mediaModule.AlbumPicContentActivity;
-import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.mediaModule.NewAlbumPicChooseActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
+import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -42,11 +44,13 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/4/19.
  */
-public class AlbumList implements NavPagerActivity.Page {
+public class AlbumList implements Page {
 
     public static final String TAG = AlbumList.class.getSimpleName();
 
-    private NavPagerActivity containerActivity;
+    private OnMediaFragmentInteractionListener listener;
+
+    private Activity containerActivity;
     private View view;
 
     @BindView(R.id.add_album)
@@ -67,9 +71,11 @@ public class AlbumList implements NavPagerActivity.Page {
     private RelativeLayout lastMainBar;
 
 
-    public AlbumList(NavPagerActivity activity_) {
+    public AlbumList(Activity activity_, OnMediaFragmentInteractionListener listener) {
 
         containerActivity = activity_;
+
+        this.listener = listener;
 
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
                 R.layout.album_list, null);
@@ -149,7 +155,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
         mLoadingLayout.setVisibility(View.VISIBLE);
 
-        if(!containerActivity.ismRemoteMediaShareLoaded()){
+        if (!listener.isRemoteMediaShareLoaded()) {
             return;
         }
 
@@ -302,9 +308,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                     MediaShare cloneMediaShare = currentItem.cloneMyself();
 
-                    String requestData = createRequestData(cloneMediaShare);
-
-                    containerActivity.modifyMediaShare(cloneMediaShare, requestData);
+                    listener.modifyMediaShare(cloneMediaShare);
 
                 }
             });
@@ -315,7 +319,7 @@ public class AlbumList implements NavPagerActivity.Page {
 
                     restoreMainBarState();
 
-                    containerActivity.deleteMediaShare(currentItem);
+                    listener.deleteMediaShare(currentItem);
 
                 }
             });

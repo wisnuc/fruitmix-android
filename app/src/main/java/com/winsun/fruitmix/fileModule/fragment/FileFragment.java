@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
-import com.winsun.fruitmix.interfaces.OnFragmentInteractionListener;
+import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
@@ -38,14 +38,12 @@ import butterknife.ButterKnife;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link OnFragmentInteractionListener} interface
+ * {@link OnFileFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link FileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class FileFragment extends Fragment {
-
-    private OnFragmentInteractionListener mListener;
 
     @BindView(R.id.file_recyclerview)
     RecyclerView fileRecyclerView;
@@ -178,30 +176,6 @@ public class FileFragment extends Fragment {
     }
 
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
     class FileRecyclerViewAdapter extends RecyclerView.Adapter<FileViewHolder> {
         @Override
         public int getItemCount() {
@@ -246,25 +220,22 @@ public class FileFragment extends Fragment {
         void refreshView(int position) {
             final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
-            if (abstractRemoteFile.isFolder()) {
-                fileIcon.setImageResource(R.drawable.folder_icon);
+            remoteFileItemLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-                remoteFileItemLayout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
+                    if(abstractRemoteFile.isFolder()){
                         currentFolderUUID = abstractRemoteFile.getUuid();
 
                         retrievedFolderUUIDList.add(currentFolderUUID);
-
-                        abstractRemoteFile.openAbstractRemoteFile(getActivity());
                     }
-                });
 
-            } else {
-                fileIcon.setImageResource(R.drawable.file_icon);
-                fileTime.setText(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss上传").format(new Date(Long.parseLong(abstractRemoteFile.getTime()))));
-            }
+                    abstractRemoteFile.openAbstractRemoteFile(getActivity());
+                }
+            });
+
+            fileIcon.setImageResource(abstractRemoteFile.getImageResource());
+            fileTime.setText(abstractRemoteFile.getTimeDateText());
             fileName.setText(abstractRemoteFile.getName());
 
             if (selectMode) {
@@ -286,7 +257,10 @@ public class FileFragment extends Fragment {
 
             } else {
 
+                selectedFileUUIDs.clear();
+
                 fileIconBg.setVisibility(View.INVISIBLE);
+                fileIcon.setVisibility(View.VISIBLE);
 
             }
 

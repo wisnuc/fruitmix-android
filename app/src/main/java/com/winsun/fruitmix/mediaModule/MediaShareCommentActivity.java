@@ -259,6 +259,8 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         media.setWidth(imageRaw.getWidth());
         media.setHeight(imageRaw.getHeight());
         media.setSelected(false);
+        media.setSharing(imageRaw.isSharing());
+        media.setOrientationNumber(imageRaw.getOrientationNumber());
 
         for (MediaShare shareRaw : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
 

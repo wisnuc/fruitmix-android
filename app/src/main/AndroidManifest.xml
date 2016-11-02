@@ -183,9 +183,6 @@
         <activity
             android:name=".fileModule.LocalFileActivity"
             android:screenOrientation="portrait"/>
-        <activity
-            android:name=".fileModule.FileMainActivity"
-            android:screenOrientation="portrait"/>
 
         <service
             android:name=".services.RetrieveRemoteFileService"

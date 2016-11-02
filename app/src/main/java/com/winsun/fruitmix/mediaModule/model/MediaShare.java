@@ -1,9 +1,16 @@
 package com.winsun.fruitmix.mediaModule.model;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.OperationTargetType;
+import com.winsun.fruitmix.util.OperationType;
+import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +61,32 @@ public class MediaShare implements Parcelable {
         isLocal = in.readByte() != 0;
         shareDigest = in.readString();
         isSticky = in.readByte() != 0;
+    }
+
+    public String createToggleShareStateRequestData() {
+        String requestData;
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[");
+
+        if (getViewersListSize() == 0) {
+
+            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+                addViewer(userUUID);
+            }
+
+            stringBuilder.append(createStringOperateViewersInMediaShare(Util.ADD));
+
+        } else {
+
+            stringBuilder.append(createStringOperateViewersInMediaShare(Util.DELETE));
+
+            clearViewers();
+        }
+
+        stringBuilder.append("]");
+        requestData = stringBuilder.toString();
+        return requestData;
     }
 
     public String createStringOperateViewersInMediaShare(String op) {
@@ -406,6 +439,38 @@ public class MediaShare implements Parcelable {
         mediaShareContents.removeAll(originalMediaShare.getMediaShareContents());
 
         return mediaShareContents;
+    }
+
+    public void sendModifyMediaShareRequest(Context context, String requestData) {
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.MODIFY.name());
+        if (Util.getNetworkState(context)) {
+            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
+        } else {
+            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
+        }
+        intent.putExtra(Util.OPERATION_MEDIASHARE, this);
+        intent.putExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA, requestData);
+
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(context);
+        manager.sendBroadcast(intent);
+    }
+
+    public void sendDeleteMediaShareRequest(Context context) {
+        Intent intent = new Intent(Util.OPERATION);
+        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
+        if (Util.getNetworkState(context)) {
+            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
+        } else {
+            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
+        }
+        intent.putExtra(Util.OPERATION_MEDIASHARE, this);
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(context);
+        manager.sendBroadcast(intent);
+    }
+
+    public boolean checkPermissionToOperate() {
+        return checkMaintainersListContainCurrentUserUUID() || getCreatorUUID().equals(FNAS.userUUID);
     }
 
 }

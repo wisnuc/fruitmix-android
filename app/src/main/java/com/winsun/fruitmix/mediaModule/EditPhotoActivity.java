@@ -190,6 +190,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             picItem.setHeight(picItemRaw.getHeight());
             picItem.setTime(picItemRaw.getTime());
             picItem.setSelected(false);
+            picItem.setSharing(picItemRaw.isSharing());
+            picItem.setOrientationNumber(picItemRaw.getOrientationNumber());
 
             mPhotoList.add(picItem);
 

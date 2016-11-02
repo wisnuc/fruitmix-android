@@ -117,6 +117,7 @@ public class MoreMediaActivity extends AppCompatActivity {
             picItem.setTime(picItemRaw.getTime());
             picItem.setSelected(false);
             picItem.setSharing(picItemRaw.isSharing());
+            picItem.setOrientationNumber(picItemRaw.getOrientationNumber());
 
             mPhotos.add(picItem);
         }

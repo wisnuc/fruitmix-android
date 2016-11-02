@@ -47,7 +47,7 @@ public class NewAlbumPicChooseActivity extends Activity {
 
         mContext = this;
 
-        mNewPhotoList = new NewPhotoList(this);
+        mNewPhotoList = new NewPhotoList(this,null);
 
         List<String> alreadySelectedImageUUIDArrayList = getIntent().getStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST);
 
