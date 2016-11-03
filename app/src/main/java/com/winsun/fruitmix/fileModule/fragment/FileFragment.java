@@ -1,8 +1,10 @@
 package com.winsun.fruitmix.fileModule.fragment;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
@@ -61,6 +64,10 @@ public class FileFragment extends Fragment {
     private boolean selectMode = false;
 
     private List<String> selectedFileUUIDs;
+
+    private ProgressDialog dialog;
+
+    private AbstractRemoteFile currentDownloadFile;
 
     public FileFragment() {
         // Required empty public constructor
@@ -150,6 +157,19 @@ public class FileFragment extends Fragment {
                     break;
             }
 
+        } else if (action.equals(Util.REMOTE_FILE_DOWNLOAD_STATE_CHANGED)) {
+
+            dialog.dismiss();
+            OperationResult result = retrieveFileOperationEvent.getOperationResult();
+            switch (result) {
+                case SUCCEED:
+                    currentDownloadFile.openAbstractRemoteFile(getActivity());
+                    break;
+                case FAIL:
+                    Toast.makeText(getActivity(), getString(R.string.download_file_failed), Toast.LENGTH_SHORT).show();
+                    break;
+            }
+
         }
 
     }
@@ -171,6 +191,11 @@ public class FileFragment extends Fragment {
     public void refreshSelectMode(boolean selectMode) {
 
         this.selectMode = selectMode;
+
+        if (!selectMode) {
+            selectedFileUUIDs.clear();
+        }
+
         fileRecyclerViewAdapter.notifyDataSetChanged();
 
     }
@@ -220,20 +245,6 @@ public class FileFragment extends Fragment {
         void refreshView(int position) {
             final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
-            remoteFileItemLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    if(abstractRemoteFile.isFolder()){
-                        currentFolderUUID = abstractRemoteFile.getUuid();
-
-                        retrievedFolderUUIDList.add(currentFolderUUID);
-                    }
-
-                    abstractRemoteFile.openAbstractRemoteFile(getActivity());
-                }
-            });
-
             fileIcon.setImageResource(abstractRemoteFile.getImageResource());
             fileTime.setText(abstractRemoteFile.getTimeDateText());
             fileName.setText(abstractRemoteFile.getName());
@@ -244,23 +255,58 @@ public class FileFragment extends Fragment {
 
                 toggleFileIconBgResource(abstractRemoteFile.getUuid());
 
-                if (!abstractRemoteFile.isFolder()) {
-                    fileIconBg.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
+                remoteFileItemLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (abstractRemoteFile.isFolder()) {
 
+                            currentFolderUUID = abstractRemoteFile.getUuid();
+
+                            retrievedFolderUUIDList.add(currentFolderUUID);
+
+                            abstractRemoteFile.openAbstractRemoteFile(getActivity());
+
+                        } else {
                             toggleFileInSelectedFile(abstractRemoteFile.getUuid());
                             toggleFileIconBgResource(abstractRemoteFile.getUuid());
                         }
-                    });
-                }
+                    }
+                });
+
 
             } else {
 
-                selectedFileUUIDs.clear();
-
                 fileIconBg.setVisibility(View.INVISIBLE);
                 fileIcon.setVisibility(View.VISIBLE);
+
+                remoteFileItemLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        if (abstractRemoteFile.isFolder()) {
+                            currentFolderUUID = abstractRemoteFile.getUuid();
+
+                            retrievedFolderUUIDList.add(currentFolderUUID);
+                        }
+
+                        if (abstractRemoteFile.checkIsDownloaded()) {
+
+                            if (!abstractRemoteFile.openAbstractRemoteFile(getActivity())) {
+                                Toast.makeText(getActivity(), getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
+                            }
+
+                        } else {
+
+                            abstractRemoteFile.downloadFile(getActivity());
+
+                            currentDownloadFile = abstractRemoteFile;
+
+                            dialog = ProgressDialog.show(getActivity(), getString(R.string.downloading), getString(R.string.loading_message), true, false);
+                        }
+
+
+                    }
+                });
 
             }
 

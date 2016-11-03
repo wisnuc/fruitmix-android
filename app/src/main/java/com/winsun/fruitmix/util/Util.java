@@ -15,6 +15,8 @@ import android.view.inputmethod.InputMethodManager;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.model.Media;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.FileInputStream;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
@@ -41,6 +43,8 @@ public class Util {
     public static final String UPDATED_ALBUM_TITLE = "updated_album_title";
     public static final String IMAGE_UUID = "image_uuid";
     public static final String FOLDER_UUID = "folder_uuid";
+    public static final String FILE_UUID = "file_uuid";
+    public static final String FILE_NAME = "file_name";
 
     public static final String LOCAL_SHARE_CREATED = "local_share_created";
     public static final String LOCAL_SHARE_MODIFIED = "local_share_modified";
@@ -71,6 +75,7 @@ public class Util {
     public static final String REMOTE_FILE_RETRIEVED = "remote_file_retrieved";
 
     public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
+    public static final String REMOTE_FILE_DOWNLOAD_STATE_CHANGED = "remote_file_download_state_changed";
 
     public static final String OPERATION = "operation";
     public static final String OPERATION_RESULT_NAME = "operation_result";
@@ -124,7 +129,6 @@ public class Util {
     public static final String CURRENT_MEDIASHARE_TIME = "current_mediashare_time";
 
     public static final String KEY_MEDIASHARE = "key_mediashare";
-    public static final String KEY_MEDIA_UUID_LIST = "key_media_uuid_list";
 
     public static final String KEY_NEW_SELECTED_IMAGE_UUID_ARRAY = "key_new_selected_image_uuid_array";
 
@@ -317,14 +321,13 @@ public class Util {
 
         if (uploadSucceedCount > 0) {
 
-            Intent localPhotoIntent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(localPhotoIntent);
+            EventBus.getDefault().post(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
         }
 
         return uploadFileResult;
     }
 
-    public static String removeWrap(String str){
-        return str.replaceAll("\r|\n","");
+    public static String removeWrap(String str) {
+        return str.replaceAll("\r|\n", "");
     }
 }

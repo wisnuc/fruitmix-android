@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.winsun.fruitmix.executor.DownloadFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.UploadMediaTask;
 import com.winsun.fruitmix.mediaModule.model.Comment;
@@ -86,6 +87,16 @@ public class ButlerService extends Service {
                         break;
                     case GET:
                         handleGetOperation(intent);
+                        break;
+                    case DOWNLOAD_FILE:
+
+                        String fileUUID = intent.getStringExtra(Util.FILE_UUID);
+                        String fileName = intent.getStringExtra(Util.FILE_NAME);
+
+                        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+                        DownloadFileTask downloadFileTask = new DownloadFileTask(fileUUID,fileName);
+                        instance.doOneTaskInFixedThreadPool(downloadFileTask);
+
                         break;
                 }
             }

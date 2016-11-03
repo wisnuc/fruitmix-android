@@ -7,6 +7,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.Util;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.concurrent.Callable;
 
 /**
@@ -28,8 +30,7 @@ public class UploadMediaTask implements Callable<Boolean> {
         boolean result = media.uploadIfNotDone(context);
 
         if(result){
-            Intent localPhotoIntent = new Intent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(localPhotoIntent);
+            EventBus.getDefault().post(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
         }
 
         return result;

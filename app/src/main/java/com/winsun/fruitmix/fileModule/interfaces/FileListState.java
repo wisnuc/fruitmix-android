@@ -6,9 +6,6 @@ package com.winsun.fruitmix.fileModule.interfaces;
 
 public interface FileListState {
 
-
-
-
     void onListItemClick();
 
     void refreshView();

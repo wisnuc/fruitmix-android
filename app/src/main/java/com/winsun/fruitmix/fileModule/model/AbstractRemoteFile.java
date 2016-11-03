@@ -24,7 +24,11 @@ public abstract class AbstractRemoteFile {
 
     public abstract boolean isFolder();
 
-    public abstract void openAbstractRemoteFile(Context context);
+    public abstract boolean openAbstractRemoteFile(Context context);
+
+    public abstract void downloadFile(Context context);
+
+    public abstract boolean checkIsDownloaded();
 
     public abstract List<AbstractRemoteFile> listChildAbstractRemoteFileList();
 

@@ -274,6 +274,9 @@
     <string name="select_file">Select File</string>
     <string name="quit_select_file">Quit Select File</string>
     <string name="already_select_media">Sorry,the photo has been selected</string>
+    <string name="open_file_failed">Sorry,open this file failed</string>
+    <string name="download_file_failed">Sorry,download this file failed</string>
+    <string name="downloading">Downloading</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

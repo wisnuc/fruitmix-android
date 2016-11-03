@@ -27,11 +27,22 @@ public class RemoteFolder extends AbstractRemoteFile {
     }
 
     @Override
-    public void openAbstractRemoteFile(Context context) {
+    public boolean openAbstractRemoteFile(Context context) {
 
         FNAS.retrieveRemoteFile(context,getUuid());
+        return true;
+    }
+
+    @Override
+    public void downloadFile(Context context) {
 
     }
+
+    @Override
+    public boolean checkIsDownloaded() {
+        return true;
+    }
+
 
     @Override
     public List<AbstractRemoteFile> listChildAbstractRemoteFileList() {
