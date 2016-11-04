@@ -121,7 +121,7 @@ public class Util {
     static final String HTTP_POST_METHOD = "POST";
     static final String HTTP_PATCH_METHOD = "PATCH";
     static final String HTTP_DELETE_METHOD = "DELETE";
-    static final int HTTP_CONNECT_TIMEOUT = 10 * 1000;
+    public static final int HTTP_CONNECT_TIMEOUT = 10 * 1000;
 
     public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
     public static final String CURRENT_PHOTO_POSITION = "current_photo_position";
@@ -143,6 +143,9 @@ public class Util {
     public static final String KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA = "key_modify_remote_mediashare_request_data";
 
     public static boolean loginState = false;
+
+    public static final int WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 1;
+
 
     /**
      * 根据手机的分辨率从 px(像素) 的单位 转成为 dp

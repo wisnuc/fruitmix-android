@@ -112,6 +112,8 @@
     <string name="open_file_failed">对不起，无法打开此文件</string>
     <string name="download_file_failed">对不起，下载文件失败</string>
     <string name="downloading">正在下载中</string>
+    <string name="no_write_external_storage_permission">对不起，没有写权限</string>
+
 
     <!-- finish add by liang.wu-->
 

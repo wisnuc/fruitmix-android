@@ -1,15 +1,23 @@
 package com.winsun.fruitmix;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.SharedElementCallback;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -143,6 +151,29 @@ public class NavPagerActivity extends AppCompatActivity
 
     }
 
+    private void showExplanation(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ActivityCompat.requestPermissions(NavPagerActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Util.WRITE_EXTERNAL_STORAGE_REQUEST_CODE);
+                    }
+                });
+        builder.create().show();
+    }
+    
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        Log.i(TAG, "onRequestPermissionsResult: " + (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED ? "true" : "false"));
+
+        if (currentPage == PAGE_FILE)
+            fileMainFragment.requestPermissionsResult(requestCode, permissions, grantResults);
+
+    }
+
     @Override
     public void onActivityReenter(int resultCode, Intent data) {
         super.onActivityReenter(resultCode, data);
@@ -165,13 +196,13 @@ public class NavPagerActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
 
-        if(currentPage == PAGE_FILE){
-            if(fileMainFragment.handleBackPressedOrNot()){
+        if (currentPage == PAGE_FILE) {
+            if (fileMainFragment.handleBackPressedOrNot()) {
                 fileMainFragment.handleBackPressed();
-            }else {
+            } else {
                 super.onBackPressed();
             }
-        }else {
+        } else {
             super.onBackPressed();
         }
     }
@@ -255,11 +286,11 @@ public class NavPagerActivity extends AppCompatActivity
         return true;
     }
 
-    private void toggleFileOrMediaFragment(){
+    private void toggleFileOrMediaFragment() {
 
         MenuItem menuItem = navigationView.getMenu().findItem(R.id.file);
 
-        if(currentPage == PAGE_MEDIA){
+        if (currentPage == PAGE_MEDIA) {
 
             currentPage = PAGE_FILE;
 
@@ -267,7 +298,7 @@ public class NavPagerActivity extends AppCompatActivity
 
             fragmentManager.beginTransaction().hide(mediaMainFragment).show(fileMainFragment).commit();
 
-        }else {
+        } else {
 
             currentPage = PAGE_MEDIA;
 

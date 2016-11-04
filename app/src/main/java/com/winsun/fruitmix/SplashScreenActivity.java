@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.OperationTargetType;
@@ -59,6 +60,12 @@ public class SplashScreenActivity extends Activity {
         LocalCache.Init(this);
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
+
+
+        boolean result = FileUtil.createDownloadFileStoreFolder();
+
+        Log.i(TAG, "onCreate: create file result:" + result);
+
 
         CustomHandler mHandler = new CustomHandler(this);
         mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);

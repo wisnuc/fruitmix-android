@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
@@ -28,9 +29,9 @@ import java.util.concurrent.ConcurrentMap;
  * helper methods.
  */
 public class RetrieveRemoteMediaService extends IntentService {
-    
+
     public static final String TAG = RetrieveRemoteMediaService.class.getSimpleName();
-    
+
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_RETRIEVE_REMOTE_MEDIA = "com.winsun.fruitmix.services.action.retrieve_remote_media";
 
@@ -77,13 +78,24 @@ public class RetrieveRemoteMediaService extends IntentService {
 
             String json = FNAS.loadMedia();
 
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: load media finish");
+
             RemoteDataParser<Media> parser = new RemoteMediaParser();
             medias = parser.parse(json);
 
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: parse json finish");
+
             mediaConcurrentMap = LocalCache.BuildMediaMapKeyIsUUID(medias);
 
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: build media map");
+
             dbUtils.deleteAllRemoteMedia();
+
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: delete all remote media");
+
             dbUtils.insertRemoteMedias(mediaConcurrentMap);
+
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: insert all remote media");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -97,7 +109,7 @@ public class RetrieveRemoteMediaService extends IntentService {
 
         LocalCache.RemoteMediaMapKeyIsUUID.putAll(mediaConcurrentMap);
 
-        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_RETRIEVED,OperationResult.SUCCEED);
+        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_RETRIEVED, OperationResult.SUCCEED);
         EventBus.getDefault().post(operationEvent);
 
 

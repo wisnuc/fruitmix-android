@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Environment;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,7 +21,7 @@ import okhttp3.ResponseBody;
 
 public class FileUtil {
 
-    public static final String DOWNLOAD_FILE_STORE_FOLDER_NAME = "winsuc";
+    private static final String DOWNLOAD_FOLDER_NAME = "winsuc";
 
     public static boolean checkExternalStorageState() {
         String state = Environment.getExternalStorageState();
@@ -31,48 +32,59 @@ public class FileUtil {
         return Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
-    public static String getExternalDirectoryPathForDownload() {
+    private static String getExternalDirectoryPathForDownload() {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
     }
 
     public static boolean createDownloadFileStoreFolder() {
         if (!checkExternalStorageState()) return false;
-        File downloadFileStoreFolder = new File(getExternalStorageDirectoryPath() + DOWNLOAD_FILE_STORE_FOLDER_NAME);
+        File downloadFileStoreFolder = new File(getDownloadFileStoreFolderPath());
 
-        return downloadFileStoreFolder.mkdir() || downloadFileStoreFolder.isDirectory();
+        return downloadFileStoreFolder.mkdirs() || downloadFileStoreFolder.isDirectory();
     }
 
     public static String getDownloadFileStoreFolderPath() {
-        return getExternalStorageDirectoryPath() + DOWNLOAD_FILE_STORE_FOLDER_NAME;
+        return getExternalDirectoryPathForDownload() + File.separator;
     }
 
     public static boolean writeResponseBodyToFolder(ResponseBody responseBody, String fileName) {
 
         File downloadFile = new File(getDownloadFileStoreFolderPath(), fileName);
 
-        InputStream inputStream;
+        InputStream inputStream = null;
         OutputStream outputStream = null;
 
         byte[] fileBuffer = new byte[4096];
 
-        inputStream = responseBody.byteStream();
         try {
-            outputStream = new FileOutputStream(downloadFile);
 
-            while (true) {
-                int read = inputStream.read(fileBuffer);
+            if (downloadFile.createNewFile() || downloadFile.isFile()) {
 
-                if (read == -1) {
-                    break;
+                inputStream = responseBody.byteStream();
+
+                outputStream = new FileOutputStream(downloadFile);
+
+                while (true) {
+                    int read = inputStream.read(fileBuffer);
+
+                    if (read == -1) {
+                        break;
+                    }
+
+                    outputStream.write(fileBuffer, 0, read);
+
                 }
 
-                outputStream.write(fileBuffer, 0, read);
+                outputStream.flush();
+
+                return true;
+
+            } else {
+
+                return false;
 
             }
 
-            outputStream.flush();
-
-            return true;
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -98,7 +110,7 @@ public class FileUtil {
 
     }
 
-    public static void openFile(Context context,File file) throws Exception{
+    public static void openFile(Context context, File file) throws Exception {
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(Intent.ACTION_VIEW);

@@ -1,11 +1,13 @@
 package com.winsun.fruitmix.fileModule.fragment;
 
+import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.net.Uri;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
@@ -30,9 +33,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -47,6 +48,8 @@ import butterknife.ButterKnife;
  * create an instance of this fragment.
  */
 public class FileFragment extends Fragment {
+
+    public static final String TAG = FileFragment.class.getSimpleName();
 
     @BindView(R.id.file_recyclerview)
     RecyclerView fileRecyclerView;
@@ -133,23 +136,25 @@ public class FileFragment extends Fragment {
 
     @Override
     public void onPause() {
-        EventBus.getDefault().unregister(this);
+
         super.onPause();
+
+        EventBus.getDefault().unregister(this);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleOperationResult(RetrieveFileOperationEvent retrieveFileOperationEvent) {
+    public void handleOperationResult(OperationEvent operationEvent) {
 
-        String action = retrieveFileOperationEvent.getAction();
+        String action = operationEvent.getAction();
         if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
 
-            OperationResult result = retrieveFileOperationEvent.getOperationResult();
+            OperationResult result = operationEvent.getOperationResult();
             switch (result) {
                 case SUCCEED:
 
                     remoteFileLoaded = true;
 
-                    abstractRemoteFiles = LocalCache.RemoteFileMapKeyIsUUID.get(retrieveFileOperationEvent.getFolderUUID()).listChildAbstractRemoteFileList();
+                    abstractRemoteFiles = LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent)operationEvent).getFolderUUID()).listChildAbstractRemoteFileList();
                     fileRecyclerViewAdapter.notifyDataSetChanged();
 
                     break;
@@ -160,7 +165,7 @@ public class FileFragment extends Fragment {
         } else if (action.equals(Util.REMOTE_FILE_DOWNLOAD_STATE_CHANGED)) {
 
             dialog.dismiss();
-            OperationResult result = retrieveFileOperationEvent.getOperationResult();
+            OperationResult result = operationEvent.getOperationResult();
             switch (result) {
                 case SUCCEED:
                     currentDownloadFile.openAbstractRemoteFile(getActivity());
@@ -200,6 +205,47 @@ public class FileFragment extends Fragment {
 
     }
 
+
+
+    private void checkWriteExternalStoragePermission() {
+
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Util.WRITE_EXTERNAL_STORAGE_REQUEST_CODE);
+
+        } else {
+
+            currentDownloadFile.downloadFile(getActivity());
+
+            dialog = ProgressDialog.show(getActivity(), getString(R.string.downloading), getString(R.string.loading_message), true, false);
+
+        }
+
+    }
+
+
+    public void requestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+            case Util.WRITE_EXTERNAL_STORAGE_REQUEST_CODE:
+
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    currentDownloadFile.downloadFile(getActivity());
+
+                    dialog = ProgressDialog.show(getActivity(), getString(R.string.downloading), getString(R.string.loading_message), true, false);
+
+                } else {
+
+                    Toast.makeText(getActivity(), getString(R.string.no_write_external_storage_permission), Toast.LENGTH_SHORT).show();
+
+                }
+
+        }
+
+
+    }
 
     class FileRecyclerViewAdapter extends RecyclerView.Adapter<FileViewHolder> {
         @Override
@@ -297,11 +343,10 @@ public class FileFragment extends Fragment {
 
                         } else {
 
-                            abstractRemoteFile.downloadFile(getActivity());
-
                             currentDownloadFile = abstractRemoteFile;
 
-                            dialog = ProgressDialog.show(getActivity(), getString(R.string.downloading), getString(R.string.loading_message), true, false);
+                            checkWriteExternalStoragePermission();
+
                         }
 
 

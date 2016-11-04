@@ -73,7 +73,7 @@ import static android.app.Activity.RESULT_OK;
  * Use the {@link MediaMainFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MediaMainFragment extends Fragment implements OnMediaFragmentInteractionListener, View.OnClickListener, IPhotoListListener,NavPageBar.OnTabChangedListener {
+public class MediaMainFragment extends Fragment implements OnMediaFragmentInteractionListener, View.OnClickListener, IPhotoListListener, NavPageBar.OnTabChangedListener {
 
     public static final String TAG = MediaMainFragment.class.getSimpleName();
 
@@ -168,7 +168,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         ButterKnife.bind(this, view);
 
-        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -196,6 +196,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void onResume() {
         super.onResume();
 
+        if (isHidden()) return;
+
         mNavPageBar.registerOnTabChangedListener(this);
 
         EventBus.getDefault().register(this);
@@ -215,6 +217,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     @Override
     public void onPause() {
         super.onPause();
+
+        if (isHidden()) return;
 
         EventBus.getDefault().unregister(this);
     }
@@ -250,7 +254,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mListener = null;
     }
 
-    public void onActivityReenter(int resultCode, Intent data){
+    public void onActivityReenter(int resultCode, Intent data) {
         if (viewPager.getCurrentItem() == PAGE_PHOTO) {
             ((NewPhotoList) pageList.get(viewPager.getCurrentItem())).onActivityReenter(resultCode, data);
         } else if (viewPager.getCurrentItem() == PAGE_SHARE) {
@@ -278,7 +282,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         }
     }
 
-        private void initPageList() {
+    private void initPageList() {
         shareList = new MediaShareList(getActivity(), this);
         photoList = new NewPhotoList(getActivity(), this);
         albumList = new AlbumList(getActivity(), this);

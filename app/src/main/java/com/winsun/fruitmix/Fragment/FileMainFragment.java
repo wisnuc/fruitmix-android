@@ -144,6 +144,12 @@ public class FileMainFragment extends Fragment {
         }
     }
 
+    public void requestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+
+        if(fileMainViewPager.getCurrentItem() == PAGE_FILE)
+            fileFragment.requestPermissionsResult(requestCode,permissions,grantResults);
+    }
+
     @Override
     public void onDetach() {
         super.onDetach();
