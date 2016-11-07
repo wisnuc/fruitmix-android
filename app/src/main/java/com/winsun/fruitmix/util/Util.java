@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
 
 import org.greenrobot.eventbus.EventBus;
@@ -324,7 +325,7 @@ public class Util {
 
         if (uploadSucceedCount > 0) {
 
-            EventBus.getDefault().post(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED);
+            EventBus.getDefault().post(new OperationEvent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED,OperationResult.SUCCEED));
         }
 
         return uploadFileResult;

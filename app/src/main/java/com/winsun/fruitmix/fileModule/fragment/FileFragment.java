@@ -117,12 +117,17 @@ public class FileFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
-        EventBus.getDefault().register(this);
-
-        if (!remoteFileLoaded) {
+        if (!remoteFileLoaded && !isHidden()) {
             User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
 
             currentFolderUUID = user.getHome();
@@ -135,11 +140,10 @@ public class FileFragment extends Fragment {
     }
 
     @Override
-    public void onPause() {
-
-        super.onPause();
-
+    public void onStop() {
         EventBus.getDefault().unregister(this);
+
+        super.onStop();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -168,6 +172,8 @@ public class FileFragment extends Fragment {
             OperationResult result = operationEvent.getOperationResult();
             switch (result) {
                 case SUCCEED:
+                    Toast.makeText(getActivity(), getString(R.string.download_file_succeed), Toast.LENGTH_SHORT).show();
+                    
                     currentDownloadFile.openAbstractRemoteFile(getActivity());
                     break;
                 case FAIL:

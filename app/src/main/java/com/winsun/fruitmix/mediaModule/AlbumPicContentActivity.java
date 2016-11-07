@@ -172,17 +172,17 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
 
         EventBus.getDefault().register(this);
     }
 
     @Override
-    protected void onPause() {
+    protected void onStop() {
         EventBus.getDefault().unregister(this);
-        super.onPause();
 
+        super.onStop();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

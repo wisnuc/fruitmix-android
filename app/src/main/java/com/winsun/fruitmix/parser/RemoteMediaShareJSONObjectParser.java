@@ -23,13 +23,13 @@ public class RemoteMediaShareJSONObjectParser {
 
         MediaShare mediaShare = new MediaShare();
 
-        mediaShare.setShareDigest(itemRaw.getString("digest"));
+        mediaShare.setShareDigest(itemRaw.optString("digest"));
 
         itemRaw = itemRaw.getJSONObject("doc");
 
-        mediaShare.setUuid(itemRaw.getString("uuid"));
+        mediaShare.setUuid(itemRaw.optString("uuid"));
 
-        mediaShare.setCreatorUUID(itemRaw.getString("author"));
+        mediaShare.setCreatorUUID(itemRaw.optString("author"));
 
         JSONObject album = itemRaw.optJSONObject("album");
 
@@ -38,15 +38,15 @@ public class RemoteMediaShareJSONObjectParser {
         } else {
             mediaShare.setAlbum(true);
 
-            mediaShare.setTitle(album.getString("title"));
-            mediaShare.setDesc(album.getString("text"));
+            mediaShare.setTitle(album.optString("title"));
+            mediaShare.setDesc(album.optString("text"));
         }
 
-        mediaShare.setTime(itemRaw.getString("mtime"));
+        mediaShare.setTime(itemRaw.optString("mtime"));
 
         mediaShare.setArchived(false);
 
-        mediaShare.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(itemRaw.getString("mtime")))));
+        mediaShare.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(itemRaw.optString("mtime")))));
 
         jsonArr = itemRaw.getJSONArray("contents");
         if (jsonArr.length() > 0) {
@@ -57,11 +57,11 @@ public class RemoteMediaShareJSONObjectParser {
                 JSONObject jsonObject = jsonArr.getJSONObject(j);
 
                 mediaShareContent = new MediaShareContent();
-                mediaShareContent.setDigest(jsonObject.getString("digest").toLowerCase());
+                mediaShareContent.setDigest(jsonObject.optString("digest").toLowerCase());
 
                 String author = jsonObject.optString("author");
                 if (author.equals("")) {
-                    author = jsonObject.getString("creator");
+                    author = jsonObject.optString("creator");
                 }
 
                 mediaShareContent.setAuthor(author.toLowerCase());
@@ -69,7 +69,7 @@ public class RemoteMediaShareJSONObjectParser {
 
                 String time = jsonObject.optString("time");
                 if (author.equals("")) {
-                    time = jsonObject.getString("ctime");
+                    time = jsonObject.optString("ctime");
                 }
 
                 mediaShareContent.setTime(time.toLowerCase());
@@ -88,7 +88,7 @@ public class RemoteMediaShareJSONObjectParser {
 
             for (int j = 0; j < jsonArr.length(); j++) {
 
-                mediaShare.addViewer(jsonArr.getString(j));
+                mediaShare.addViewer(jsonArr.optString(j));
             }
 
         } else {
@@ -99,7 +99,7 @@ public class RemoteMediaShareJSONObjectParser {
         if (jsonArr.length() > 0) {
 
             for (int j = 0; j < jsonArr.length(); j++) {
-                mediaShare.addMaintainer(jsonArr.getString(j));
+                mediaShare.addMaintainer(jsonArr.optString(j));
             }
 
         } else {

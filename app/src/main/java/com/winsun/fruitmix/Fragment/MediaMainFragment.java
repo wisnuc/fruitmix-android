@@ -3,7 +3,6 @@ package com.winsun.fruitmix.fragment;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -124,7 +123,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private boolean mRemoteMediaShareLoaded = false;
     private boolean mLocalMediaShareLoaded = false;
 
-    private boolean onCreate = false;
+    private boolean onResume = false;
 
     private OnMainFragmentInteractionListener mListener;
 
@@ -193,6 +192,13 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
@@ -200,32 +206,26 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         mNavPageBar.registerOnTabChangedListener(this);
 
-        EventBus.getDefault().register(this);
-
         if (viewPager.getCurrentItem() == PAGE_PHOTO && mLocalMediaLoaded & mRemoteMediaLoaded) {
             retrieveLocalMediaInCamera();
         }
 
-        if (!onCreate) {
+        if (!onResume) {
             FNAS.retrieveLocalMediaMap(mContext);
 //            FNAS.retrieveLocalMediaCommentMap(mContext);
 
-            onCreate = true;
+            onResume = true;
         }
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-
-        if (isHidden()) return;
+    public void onStop() {
 
         EventBus.getDefault().unregister(this);
-    }
 
-    @Override
-    public void onStop() {
         super.onStop();
+
+        if (isHidden()) return;
 
         mNavPageBar.unregisterOnTabChangedListener(this);
     }

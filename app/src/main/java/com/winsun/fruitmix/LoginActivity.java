@@ -107,17 +107,17 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
 
         EventBus.getDefault().register(this);
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-
+    protected void onStop() {
         EventBus.getDefault().unregister(this);
+
+        super.onStop();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

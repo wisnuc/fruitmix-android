@@ -30,11 +30,11 @@ public class RemoteUserParser implements RemoteDataParser<User> {
                 itemRaw = jsonArray.getJSONObject(i);
 
                 user = new User();
-                uuid = itemRaw.getString("uuid");
+                uuid = itemRaw.optString("uuid");
                 user.setUuid(uuid);
-                user.setUserName(itemRaw.getString("username"));
+                user.setUserName(itemRaw.optString("username"));
 
-                String avatar = itemRaw.getString("avatar");
+                String avatar = itemRaw.optString("avatar");
                 if(avatar.equals("null")){
                     user.setAvatar("defaultAvatar.jpg");
                 }else {
@@ -42,7 +42,7 @@ public class RemoteUserParser implements RemoteDataParser<User> {
                 }
 
                 if (itemRaw.has("email")) {
-                    user.setEmail(itemRaw.getString("email"));
+                    user.setEmail(itemRaw.optString("email"));
                 }
                 StringBuilder stringBuilder = new StringBuilder();
                 String[] splitStrings = user.getUserName().split(" ");
@@ -56,8 +56,8 @@ public class RemoteUserParser implements RemoteDataParser<User> {
                     user.setDefaultAvatarBgColor(String.valueOf(new Random().nextInt(3)));
                 }
 
-                user.setHome(itemRaw.getString("home"));
-                user.setLibrary(itemRaw.getString("library"));
+                user.setHome(itemRaw.optString("home"));
+                user.setLibrary(itemRaw.optString("library"));
 
                 users.add(user);
 

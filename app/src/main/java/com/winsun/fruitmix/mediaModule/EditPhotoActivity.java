@@ -76,8 +76,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     private ProgressDialog mDialog;
 
     private LocalBroadcastManager localBroadcastManager;
-    private CustomReceiver customReceiver;
-    private IntentFilter filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,9 +107,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         mAdapter.notifyDataSetChanged();
 
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        customReceiver = new CustomReceiver();
-        filter = new IntentFilter(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED);
-        filter.addAction(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED);
 
     }
 
@@ -124,21 +119,18 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
 
         EventBus.getDefault().register(this);
 
-        localBroadcastManager.registerReceiver(customReceiver, filter);
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-
+    protected void onStop() {
         EventBus.getDefault().unregister(this);
 
-        localBroadcastManager.unregisterReceiver(customReceiver);
+        super.onStop();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -349,31 +341,4 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
     }
 
-    private class CustomReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if (mDialog != null && mDialog.isShowing())
-                mDialog.dismiss();
-
-            String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
-
-            OperationResult operationResult = OperationResult.valueOf(result);
-
-            switch (operationResult) {
-                case SUCCEED:
-                    Toast.makeText(mContext, getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
-                    getIntent().putExtra(Util.KEY_MEDIASHARE, modifiedMediaShare);
-                    EditPhotoActivity.this.setResult(RESULT_OK, getIntent());
-                    finish();
-                    break;
-                case FAIL:
-                    Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
-                    EditPhotoActivity.this.setResult(RESULT_CANCELED, getIntent());
-                    finish();
-                    break;
-            }
-
-        }
-    }
 }

@@ -85,7 +85,7 @@ public class Media implements Parcelable {
     };
 
     public String getUuid() {
-        return uuid;
+        return uuid == null ? "" : uuid;
     }
 
     public void setUuid(String uuid) {
@@ -93,7 +93,7 @@ public class Media implements Parcelable {
     }
 
     public String getTime() {
-        return time;
+        return time == null ? "" : time;
     }
 
     public void setTime(String time) {
@@ -101,7 +101,7 @@ public class Media implements Parcelable {
     }
 
     public String getWidth() {
-        return width;
+        return width == null ? "" : width;
     }
 
     public void setWidth(String width) {
@@ -109,7 +109,7 @@ public class Media implements Parcelable {
     }
 
     public String getHeight() {
-        return height;
+        return height == null ? "" : height;
     }
 
     public void setHeight(String height) {

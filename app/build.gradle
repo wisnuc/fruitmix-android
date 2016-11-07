@@ -2,8 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '23.0.1'
+    compileSdkVersion 25
+    buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "com.winsun.fruitmix"
@@ -27,11 +27,11 @@ dependencies {
     compile 'com.veinhorn.scrollgalleryview:library:1.0.5'
     compile 'com.jakewharton:butterknife:8.1.0'
     compile 'uk.co.chrisjenx:calligraphy:2.2.0'
-    compile 'com.android.support:support-v4:24.0.0'
-    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile 'com.android.support:support-v4:25.0.0'
+    compile 'com.android.support:appcompat-v7:25.0.0'
     compile 'com.android.support:design:25.0.0'
-    compile 'com.android.support:cardview-v7:24.0.0'
-    compile 'com.android.support:recyclerview-v7:24.0.0'
+    compile 'com.android.support:cardview-v7:25.0.0'
+    compile 'com.android.support:recyclerview-v7:25.0.0'
     compile 'io.github.sin3hz.fastjumper:fastjumper:0.1.0'
     compile 'org.greenrobot:eventbus:3.0.0'
     testCompile 'junit:junit:4.12'
@@ -40,4 +40,11 @@ dependencies {
     apt 'com.jakewharton:butterknife-compiler:8.1.0'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
+    apt 'org.greenrobot:eventbus-annotation-processor:3.0.1'
+}
+
+apt {
+    arguments {
+        eventBusIndex "com.wisnun.fruitmix.MyEventBusIndex"
+    }
 }

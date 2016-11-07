@@ -6,12 +6,13 @@ import android.net.Uri;
 import android.os.Environment;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
 
 import okhttp3.ResponseBody;
 
@@ -205,5 +206,36 @@ public class FileUtil {
             {".zip", "application/x-zip-compressed"},
             {"", "*/*"}
     };
+
+    public static String formatFileSize(long fileSize) {
+
+        String formatFileSize = "";
+
+        DecimalFormat decimalFormat = new DecimalFormat("####.00");
+
+        if (fileSize < 0) {
+
+            formatFileSize = "0 B";
+
+        } else if (fileSize < 1024L) {
+
+            formatFileSize = fileSize + " B";
+
+        } else if (fileSize < 1024L * 1024L) {
+
+            formatFileSize = decimalFormat.format(fileSize / 1024) + " KB";
+
+        } else if (fileSize < 1024L * 1024L * 1024L) {
+
+            formatFileSize = decimalFormat.format(fileSize / 1024 / 1024) + " MB";
+
+        } else if (fileSize < 1024L * 1024L * 1024L * 1024L) {
+
+            formatFileSize = decimalFormat.format(fileSize / 1024 / 1024 / 1024 / 1024) + " GB";
+
+        }
+
+        return formatFileSize;
+    }
 
 }

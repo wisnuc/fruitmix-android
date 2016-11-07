@@ -30,23 +30,23 @@ public class RemoteFileFolderParser implements RemoteDataParser<AbstractRemoteFi
 
                 AbstractRemoteFile abstractRemoteFile;
 
-                String type = jsonObject.getString("type");
+                String type = jsonObject.optString("type");
                 if(type.equals("file")){
                     abstractRemoteFile = new RemoteFile();
 
-                    String time = jsonObject.getString("mtime");
+                    String time = jsonObject.optString("mtime");
                     abstractRemoteFile.setTime(time);
 
-                    String size = jsonObject.getString("size");
+                    String size = jsonObject.optString("size");
                     abstractRemoteFile.setSize(size);
 
                 }else {
                     abstractRemoteFile = new RemoteFolder();
                 }
 
-                abstractRemoteFile.setUuid(jsonObject.getString("uuid"));
+                abstractRemoteFile.setUuid(jsonObject.optString("uuid"));
 
-                abstractRemoteFile.setName(jsonObject.getString("name"));
+                abstractRemoteFile.setName(jsonObject.optString("name"));
 
                 JSONArray ownerArray = jsonObject.getJSONArray("owner");
                 for (int j = 0;j < ownerArray.length();j++){

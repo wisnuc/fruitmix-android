@@ -2,10 +2,10 @@ package com.winsun.fruitmix;
 
 import android.app.Application;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.winsun.fruitmix.services.ButlerService;
-import com.winsun.fruitmix.util.Util;
+import com.wisnun.fruitmix.MyEventBusIndex;
+
+import org.greenrobot.eventbus.EventBus;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
@@ -21,5 +21,7 @@ public class CustomApplication extends Application {
         CalligraphyConfig.initDefault(new CalligraphyConfig.Builder().setDefaultFontPath("fonts/fangzheng.ttf").setFontAttrId(R.attr.fontPath).build());
 
         ButlerService.startButlerService(getApplicationContext());
+
+        EventBus.builder().addIndex(new MyEventBusIndex()).installDefaultEventBus();
     }
 }
