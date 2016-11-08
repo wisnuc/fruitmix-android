@@ -206,12 +206,8 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                 Log.i(TAG, "onClick: mediaUUID:" + media.getUuid());
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
-                Intent operationIntent = new Intent(Util.OPERATION);
-                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
-                operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, media.getUuid());
-                operationIntent.putExtra(Util.OPERATION_COMMENT, createComment(media.getBelongingMediaShareUUID(), mComment));
-                mManager.sendBroadcast(operationIntent);
+
+                FNAS.createLocalMediaComment(mContext,media.getUuid(), createComment(media.getBelongingMediaShareUUID(), mComment));
             }
         });
 
@@ -561,12 +557,8 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
                         Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
                         String imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
-                        Intent operationIntent = new Intent(Util.OPERATION);
-                        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
-                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
-                        operationIntent.putExtra(Util.OPERATION_COMMENT, comment);
-                        operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
-                        mManager.sendBroadcast(operationIntent);
+
+                        FNAS.deleteLocalMediaComment(mContext,imageUUID,comment);
 
                         break;
                     case FAIL:
@@ -591,12 +583,10 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                         Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
 
                         if (Util.getNetworkState(mContext)) {
-                            Intent operationIntent = new Intent(Util.OPERATION);
-                            operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
-                            operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, intent.getStringExtra(Util.OPERATION_IMAGE_UUID));
-                            operationIntent.putExtra(Util.OPERATION_COMMENT, comment);
-                            mManager.sendBroadcast(operationIntent);
+
+                            String imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
+
+                            FNAS.createRemoteMediaComment(mContext,imageUUID,comment);
                         }
 
                         tfContent.setText("");

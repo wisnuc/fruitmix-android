@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
 
+import butterknife.ButterKnife;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -20,8 +22,6 @@ import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListen
  * create an instance of this fragment.
  */
 public class FileShareFragment extends Fragment {
-
-    private OnFileFragmentInteractionListener mListener;
 
     public FileShareFragment() {
         // Required empty public constructor
@@ -50,7 +50,11 @@ public class FileShareFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_file_share, container, false);
+        View view =  inflater.inflate(R.layout.fragment_file_share, container, false);
+
+        ButterKnife.bind(this,view);
+
+        return view;
     }
 
     public void onBackPressed(){

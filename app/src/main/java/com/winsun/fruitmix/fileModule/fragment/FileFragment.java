@@ -53,6 +53,10 @@ public class FileFragment extends Fragment {
 
     @BindView(R.id.file_recyclerview)
     RecyclerView fileRecyclerView;
+    @BindView(R.id.loading_layout)
+    LinearLayout loadingLayout;
+    @BindView(R.id.no_content_layout)
+    LinearLayout noContentLayout;
 
     private FileRecyclerViewAdapter fileRecyclerViewAdapter;
 
@@ -68,12 +72,16 @@ public class FileFragment extends Fragment {
 
     private List<String> selectedFileUUIDs;
 
-    private ProgressDialog dialog;
-
     private AbstractRemoteFile currentDownloadFile;
+
+    private OnFileFragmentInteractionListener onFileFragmentInteractionListener;
 
     public FileFragment() {
         // Required empty public constructor
+    }
+
+    public void setOnFileFragmentInteractionListener(OnFileFragmentInteractionListener onFileFragmentInteractionListener) {
+        this.onFileFragmentInteractionListener = onFileFragmentInteractionListener;
     }
 
     /**
@@ -83,8 +91,10 @@ public class FileFragment extends Fragment {
      * @return A new instance of fragment FileFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static FileFragment newInstance() {
+    public static FileFragment newInstance(OnFileFragmentInteractionListener onFileFragmentInteractionListener) {
         FileFragment fragment = new FileFragment();
+        fragment.setOnFileFragmentInteractionListener(onFileFragmentInteractionListener);
+
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -152,32 +162,22 @@ public class FileFragment extends Fragment {
         String action = operationEvent.getAction();
         if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
 
+            loadingLayout.setVisibility(View.GONE);
+
             OperationResult result = operationEvent.getOperationResult();
             switch (result) {
                 case SUCCEED:
 
                     remoteFileLoaded = true;
 
-                    abstractRemoteFiles = LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent)operationEvent).getFolderUUID()).listChildAbstractRemoteFileList();
+                    fileRecyclerView.setVisibility(View.VISIBLE);
+
+                    abstractRemoteFiles = LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent) operationEvent).getFolderUUID()).listChildAbstractRemoteFileList();
                     fileRecyclerViewAdapter.notifyDataSetChanged();
 
                     break;
                 case FAIL:
-                    break;
-            }
-
-        } else if (action.equals(Util.REMOTE_FILE_DOWNLOAD_STATE_CHANGED)) {
-
-            dialog.dismiss();
-            OperationResult result = operationEvent.getOperationResult();
-            switch (result) {
-                case SUCCEED:
-                    Toast.makeText(getActivity(), getString(R.string.download_file_succeed), Toast.LENGTH_SHORT).show();
-                    
-                    currentDownloadFile.openAbstractRemoteFile(getActivity());
-                    break;
-                case FAIL:
-                    Toast.makeText(getActivity(), getString(R.string.download_file_failed), Toast.LENGTH_SHORT).show();
+                    noContentLayout.setVisibility(View.VISIBLE);
                     break;
             }
 
@@ -212,7 +212,6 @@ public class FileFragment extends Fragment {
     }
 
 
-
     private void checkWriteExternalStoragePermission() {
 
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -223,8 +222,7 @@ public class FileFragment extends Fragment {
 
             currentDownloadFile.downloadFile(getActivity());
 
-            dialog = ProgressDialog.show(getActivity(), getString(R.string.downloading), getString(R.string.loading_message), true, false);
-
+            onFileFragmentInteractionListener.changeFilePageToFileDownloadFragment();
         }
 
     }
@@ -240,7 +238,7 @@ public class FileFragment extends Fragment {
 
                     currentDownloadFile.downloadFile(getActivity());
 
-                    dialog = ProgressDialog.show(getActivity(), getString(R.string.downloading), getString(R.string.loading_message), true, false);
+                    onFileFragmentInteractionListener.changeFilePageToFileDownloadFragment();
 
                 } else {
 

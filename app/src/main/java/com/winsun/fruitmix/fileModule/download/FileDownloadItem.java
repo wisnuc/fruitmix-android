@@ -18,31 +18,36 @@ public class FileDownloadItem {
         this.fileUUID = fileUUID;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    void setFileDownloadState(FileDownloadState fileDownloadState) {
+    public void setFileDownloadState(FileDownloadState fileDownloadState) {
         this.fileDownloadState = fileDownloadState;
 
         fileDownloadState.setFileUUID(fileUUID);
         fileDownloadState.setFileName(fileName);
         fileDownloadState.setFileSize(fileSize);
-        fileDownloadState.setFileDownloadItem(this);
+
+        fileDownloadState.startWork();
 
         fileDownloadState.notifyDownloadStateChanged();
     }
 
-    public void setFileUUID(String fileUUID) {
-        this.fileUUID = fileUUID;
-    }
-
-    public void setFileSize(long fileSize) {
+    void setFileSize(long fileSize) {
         this.fileSize = fileSize;
     }
 
-    public void setFileCurrentDownloadSize(long fileCurrentDownloadSize) {
+    void setFileCurrentDownloadSize(long fileCurrentDownloadSize) {
         this.fileCurrentDownloadSize = fileCurrentDownloadSize;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public long getFileSize() {
+        return fileSize;
+    }
+
+    public long getFileCurrentDownloadSize() {
+        return fileCurrentDownloadSize;
     }
 
     public DownloadState getDownloadState() {

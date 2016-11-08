@@ -1,15 +1,19 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              tools:context="com.winsun.fruitmix.fileModule.fragment.FileFragment">
-
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:orientation="vertical"
+             tools:context="com.winsun.fruitmix.fileModule.fragment.FileFragment">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/file_recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <include layout="@layout/loading_layout"/>
+
+    <include layout="@layout/no_content_layout"/>
 
 
-</LinearLayout>
+</FrameLayout>

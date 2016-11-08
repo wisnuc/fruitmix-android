@@ -15,11 +15,15 @@ public abstract class AbstractRemoteFile {
     private String uuid;
     private String name;
     private List<String> owners;
+    private List<String> writeList;
+    private List<String> readList;
     private String time;
     private String size;
 
-    public AbstractRemoteFile(){
+    public AbstractRemoteFile() {
         owners = new ArrayList<>();
+        writeList = new ArrayList<>();
+        readList = new ArrayList<>();
     }
 
     public abstract boolean isFolder();
@@ -54,16 +58,32 @@ public abstract class AbstractRemoteFile {
         this.uuid = uuid;
     }
 
-    public void addOwner(String owner){
+    public void addOwner(String owner) {
         owners.add(owner);
     }
 
-    public void removeOwner(String owner){
+    public void removeOwner(String owner) {
         owners.remove(owner);
     }
 
-    private List<String> getOwners(){
+    public List<String> getOwners() {
         return Collections.unmodifiableList(owners);
+    }
+
+    public void addReadList(String reader) {
+        readList.add(reader);
+    }
+
+    public List<String> getReadList() {
+        return Collections.unmodifiableList(readList);
+    }
+
+    public void addWriteList(String writer) {
+        writeList.add(writer);
+    }
+
+    public List<String> getWriteList() {
+        return Collections.unmodifiableList(writeList);
     }
 
     public String getTime() {

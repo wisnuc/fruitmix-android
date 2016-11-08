@@ -127,11 +127,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
-                Intent intent = new Intent(Util.OPERATION);
-                intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
-                intent.putExtra(Util.OPERATION_MEDIASHARE, generateMediaShare(sPublic, sSetMaintainer, title, desc, mSelectedImageUUIDArray));
-                localBroadcastManager.sendBroadcast(intent);
+                FNAS.createLocalMediaShare(mContext,generateMediaShare(sPublic, sSetMaintainer, title, desc, mSelectedImageUUIDArray));
 
             }
         });
@@ -178,11 +174,8 @@ public class CreateAlbumActivity extends AppCompatActivity {
                 case SUCCEED:
                     if (Util.getNetworkState(mContext)) {
                         MediaShare mediaShare = operationEvent.getMediaShare();
-                        Intent operationIntent = new Intent(Util.OPERATION);
-                        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-                        operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-                        localBroadcastManager.sendBroadcast(operationIntent);
+
+                        FNAS.createRemoteMediaShare(mContext,mediaShare);
                     }
 
                     CreateAlbumActivity.this.setResult(RESULT_OK);

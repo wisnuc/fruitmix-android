@@ -7,6 +7,7 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
+import com.winsun.fruitmix.parser.RemoteFileShareParser;
 import com.winsun.fruitmix.parser.RemoteMediaCommentParser;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
 import com.winsun.fruitmix.parser.RemoteMediaShareParser;
@@ -256,7 +257,7 @@ public class RemoteDataParserUnitTest {
 
 
     @Test
-    public void parseRemoteFileFolderTest(){
+    public void parseRemoteFileFolderTest() {
         String json = "[\n" +
                 "  {\n" +
                 "    \"uuid\": \"5d463eac-f73f-4987-a3e9-bb68fee726e0\",\n" +
@@ -298,15 +299,90 @@ public class RemoteDataParserUnitTest {
                 "  }\n" +
                 "]";
 
-        RemoteDataParser<AbstractRemoteFile> remoteDataParser  = new RemoteFileFolderParser();
+        RemoteDataParser<AbstractRemoteFile> remoteDataParser = new RemoteFileFolderParser();
         List<AbstractRemoteFile> abstractRemoteFiles = remoteDataParser.parse(json);
 
         AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(0);
-        assertEquals(abstractRemoteFile.getTime(),"1477386652380");
-        assertEquals(abstractRemoteFile.getUuid(),"5d463eac-f73f-4987-a3e9-bb68fee726e0");
-        assertEquals(abstractRemoteFile.getName(),"7685_spec.png");
-        assertEquals(abstractRemoteFile.getSize(),"95516");
+        assertEquals(abstractRemoteFile.getTime(), "1477386652380");
+        assertEquals(abstractRemoteFile.getUuid(), "5d463eac-f73f-4987-a3e9-bb68fee726e0");
+        assertEquals(abstractRemoteFile.getName(), "7685_spec.png");
+        assertEquals(abstractRemoteFile.getSize(), "95516");
 
+    }
+
+    @Test
+    public void parseRemoteFileShareTest() {
+        String json = "[\n" +
+                "  {\n" +
+                "    \"uuid\": \"ed1d9638-8130-4077-9ed8-05be641a9ab4\",\n" +
+                "    \"type\": \"folder\",\n" +
+                "    \"owner\": [\n" +
+                "      \"e5f23cb9-1852-475d-937d-162d2554e22c\"\n" +
+                "    ],\n" +
+                "    \"writelist\": [],\n" +
+                "    \"readlist\": [\n" +
+                "      \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\"\n" +
+                "    ],\n" +
+                "    \"mtime\": 1476343620053,\n" +
+                "    \"root\": \"ed1d9638-8130-4077-9ed8-05be641a9ab4\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"uuid\": \"4d807647-0feb-4692-aea4-4eaf26232916\",\n" +
+                "    \"type\": \"folder\",\n" +
+                "    \"owner\": [\n" +
+                "      \"831b5cc9-6a14-4a4f-b1b6-666c5b282783\"\n" +
+                "    ],\n" +
+                "    \"writelist\": [\n" +
+                "      \"e5f23cb9-1852-475d-937d-162d2554e22c\"\n" +
+                "    ],\n" +
+                "    \"readlist\": [\n" +
+                "      \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\"\n" +
+                "    ],\n" +
+                "    \"mtime\": 1476343620053,\n" +
+                "    \"root\": \"4d807647-0feb-4692-aea4-4eaf26232916\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"uuid\": \"bc097836-b056-46ef-862c-e0423e440b4c\",\n" +
+                "    \"type\": \"folder\",\n" +
+                "    \"owner\": [\n" +
+                "      \"278a60cf-2ba3-4eab-8641-e9a837c12950\"\n" +
+                "    ],\n" +
+                "    \"writelist\": [\n" +
+                "      \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
+                "      \"e5f23cb9-1852-475d-937d-162d2554e22c\"\n" +
+                "    ],\n" +
+                "    \"readlist\": [],\n" +
+                "    \"mtime\": 1476343620053,\n" +
+                "    \"root\": \"bc097836-b056-46ef-862c-e0423e440b4c\"\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"uuid\": \"ec374b5a-490c-47ea-9a33-cb9ae1103b3b\",\n" +
+                "    \"type\": \"folder\",\n" +
+                "    \"owner\": [\n" +
+                "      \"bc53b2f7-045b-4e86-91b9-9b5731489a13\"\n" +
+                "    ],\n" +
+                "    \"writelist\": [\n" +
+                "      \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
+                "      \"e5f23cb9-1852-475d-937d-162d2554e22c\"\n" +
+                "    ],\n" +
+                "    \"readlist\": [\n" +
+                "      \"1f4faecf-1bb5-4ff1-ab41-bd44a0cd0809\",\n" +
+                "      \"3908afee-0818-4a3e-b327-76c2578ecb80\"\n" +
+                "    ],\n" +
+                "    \"mtime\": 1476343620053,\n" +
+                "    \"root\": \"ec374b5a-490c-47ea-9a33-cb9ae1103b3b\"\n" +
+                "  }\n" +
+                "]";
+
+        RemoteDataParser<AbstractRemoteFile> parser = new RemoteFileShareParser();
+        List<AbstractRemoteFile> abstractRemoteFiles = parser.parse(json);
+
+        AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(0);
+        assertEquals(abstractRemoteFile.getUuid(), "ed1d9638-8130-4077-9ed8-05be641a9ab4");
+        assertEquals(abstractRemoteFile.getName(), "");
+        assertEquals(abstractRemoteFile.getTime(), "1476343620053");
+        assertEquals(abstractRemoteFile.getWriteList().size(), 0);
+        assertEquals(abstractRemoteFile.getReadList().get(0), "5da92303-33a1-4f79-8d8f-a7b6becde6c3");
     }
 
 }

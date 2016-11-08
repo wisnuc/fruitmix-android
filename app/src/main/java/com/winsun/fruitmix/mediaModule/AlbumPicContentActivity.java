@@ -486,16 +486,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
 
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
-        if (Util.getNetworkState(mContext)) {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-        } else {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
+        if(Util.getNetworkState(mContext)){
+            FNAS.deleteRemoteMediaShare(mContext,mediaShare);
+        }else {
+            FNAS.deleteLocalMediaShare(mContext,mediaShare);
         }
-
-        intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-        localBroadcastManager.sendBroadcast(intent);
 
     }
 
@@ -528,17 +523,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
 
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.MODIFY.name());
-        if (Util.getNetworkState(mContext)) {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-        } else {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
+        if(Util.getNetworkState(mContext)){
+            FNAS.modifyRemoteMediaShare(mContext,cloneMediaShare,requestData);
+        }else {
+            FNAS.modifyLocalMediaShare(mContext,cloneMediaShare,requestData);
         }
-
-        intent.putExtra(Util.OPERATION_MEDIASHARE, cloneMediaShare);
-        intent.putExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA,requestData);
-        localBroadcastManager.sendBroadcast(intent);
 
     }
 

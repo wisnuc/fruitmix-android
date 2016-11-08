@@ -442,31 +442,19 @@ public class MediaShare implements Parcelable {
     }
 
     public void sendModifyMediaShareRequest(Context context, String requestData) {
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.MODIFY.name());
-        if (Util.getNetworkState(context)) {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-        } else {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
+        if(Util.getNetworkState(context)){
+            FNAS.modifyRemoteMediaShare(context,this,requestData);
+        }else {
+            FNAS.modifyLocalMediaShare(context,this,requestData);
         }
-        intent.putExtra(Util.OPERATION_MEDIASHARE, this);
-        intent.putExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA, requestData);
-
-        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(context);
-        manager.sendBroadcast(intent);
     }
 
     public void sendDeleteMediaShareRequest(Context context) {
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
-        if (Util.getNetworkState(context)) {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-        } else {
-            intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
+        if(Util.getNetworkState(context)){
+            FNAS.deleteRemoteMediaShare(context,this);
+        }else {
+            FNAS.deleteLocalMediaShare(context,this);
         }
-        intent.putExtra(Util.OPERATION_MEDIASHARE, this);
-        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(context);
-        manager.sendBroadcast(intent);
     }
 
     public boolean checkPermissionToOperate() {

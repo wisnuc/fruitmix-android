@@ -5,6 +5,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 
+import com.winsun.fruitmix.fileModule.download.FileDownloadFinishedState;
+import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
+import com.winsun.fruitmix.fileModule.download.FileDownloadState;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -45,12 +49,12 @@ public class FileUtil {
     }
 
     public static String getDownloadFileStoreFolderPath() {
-        return getExternalDirectoryPathForDownload() + File.separator;
+        return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator;
     }
 
-    public static boolean writeResponseBodyToFolder(ResponseBody responseBody, String fileName) {
+    public static boolean writeResponseBodyToFolder(ResponseBody responseBody, FileDownloadState fileDownloadState) {
 
-        File downloadFile = new File(getDownloadFileStoreFolderPath(), fileName);
+        File downloadFile = new File(getDownloadFileStoreFolderPath(), fileDownloadState.getFileName());
 
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -58,6 +62,14 @@ public class FileUtil {
         byte[] fileBuffer = new byte[4096];
 
         try {
+
+            long contentLength = responseBody.contentLength();
+
+            if (contentLength != 0) {
+                fileDownloadState.setFileSize(contentLength);
+            }
+
+            long fileDownloadedSize = 0;
 
             if (downloadFile.createNewFile() || downloadFile.isFile()) {
 
@@ -74,9 +86,17 @@ public class FileUtil {
 
                     outputStream.write(fileBuffer, 0, read);
 
+                    fileDownloadedSize += read;
+
+                    fileDownloadState.setFileCurrentDownloadSize(fileDownloadedSize);
+                    fileDownloadState.notifyDownloadStateChanged();
                 }
 
                 outputStream.flush();
+
+                FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
+
+                fileDownloadItem.setFileDownloadState(new FileDownloadFinishedState(fileDownloadItem));
 
                 return true;
 

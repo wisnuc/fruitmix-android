@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="true"
+                android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
     <ListView
         android:id="@+id/mainList"
@@ -14,26 +14,9 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context="com.winsun.fruitmix.Test2Activity" />
+        tools:context="com.winsun.fruitmix.Test2Activity"/>
 
-    <LinearLayout
-        android:id="@+id/no_content_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/no_content"
-            android:textColor="@color/light_black"
-            android:textSize="20dp" />
-
-    </LinearLayout>
+    <include layout="@layout/no_content_layout"/>
 
     <ImageView
         android:id="@+id/add_album"
@@ -44,31 +27,9 @@
         android:layout_marginBottom="60dp"
         android:layout_marginRight="30dp"
         android:src="@drawable/add_album"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
-    <LinearLayout
-        android:id="@+id/loading_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="visible">
-
-        <ProgressBar
-            style="@android:style/Widget.Holo.ProgressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/loading_title"
-            android:textColor="@color/light_black"
-            android:textSize="20dp" />
-
-    </LinearLayout>
+    <include layout="@layout/loading_layout"/>
 
     <!--
         <android.support.v4.widget.NestedScrollView

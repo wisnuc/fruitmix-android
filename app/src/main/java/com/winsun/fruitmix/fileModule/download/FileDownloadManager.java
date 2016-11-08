@@ -1,13 +1,7 @@
 package com.winsun.fruitmix.fileModule.download;
 
-import com.winsun.fruitmix.eventbus.DownloadEvent;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
 import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.List;
 
 /**
@@ -25,11 +19,9 @@ public enum FileDownloadManager {
     FileDownloadManager() {
         fileDownloadItems = new ArrayList<>();
 
-        EventBus.getDefault().register(this);
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING)
-    private void handleDownloadItemFinished(DownloadEvent downloadEvent) {
+    public void handleDownloadItemFinished() {
 
         startPendingDownloadItem();
     }
@@ -39,18 +31,18 @@ public enum FileDownloadManager {
 
         FileDownloadState fileDownloadState;
 
-        fileDownloadItems.add(fileDownloadItem);
-
         if (checkDownloadingItemIsMax()) {
 
-            fileDownloadState = new FileDownloadPendingState();
+            fileDownloadState = new FileDownloadPendingState(fileDownloadItem);
 
         } else {
 
-            fileDownloadState = new FileDownloadingState();
+            fileDownloadState = new FileDownloadingState(fileDownloadItem);
         }
 
         fileDownloadItem.setFileDownloadState(fileDownloadState);
+
+        fileDownloadItems.add(fileDownloadItem);
 
     }
 
@@ -75,7 +67,7 @@ public enum FileDownloadManager {
 
         for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
             if (fileDownloadItem.getDownloadState().equals(DownloadState.PENDING)) {
-                fileDownloadItem.setFileDownloadState(new FileDownloadingState());
+                fileDownloadItem.setFileDownloadState(new FileDownloadingState(fileDownloadItem));
             }
         }
     }

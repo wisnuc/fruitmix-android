@@ -393,13 +393,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
 
             for (Comment comment : entry.getValue()) {
-                Intent operationResult = new Intent(Util.OPERATION);
-                operationResult.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                operationResult.removeExtra(Util.OPERATION_TARGET_TYPE_NAME);
-                operationResult.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
-                operationResult.putExtra(Util.OPERATION_COMMENT, comment);
-                operationResult.putExtra(Util.OPERATION_IMAGE_UUID, entry.getKey());
-                mManager.sendBroadcast(operationResult);
+                FNAS.createRemoteMediaComment(mContext,entry.getKey(),comment);
             }
 
         }
@@ -409,11 +403,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
 
-            Intent operationIntent = new Intent(Util.OPERATION);
-            operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-            operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-            mManager.sendBroadcast(operationIntent);
+            FNAS.createRemoteMediaShare(mContext,mediaShare);
 
         }
     }
@@ -434,10 +424,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private void handleLocalPhotoUploadStateChanged() {
         Log.i(TAG, "local photo upload state changed");
 
-        Intent operationIntent = new Intent(Util.OPERATION);
-        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA.name());
-        mManager.sendBroadcast(operationIntent);
+        FNAS.retrieveRemoteMediaMap(mContext);
     }
 
     private void handleLocalCommentDeleted(OperationEvent operationEvent) {
@@ -459,12 +446,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             Comment comment = ((MediaShareCommentOperationEvent) operationEvent).getComment();
             String imageUUID = ((MediaShareCommentOperationEvent) operationEvent).getImageUUID();
-            Intent operationIntent = new Intent(Util.OPERATION);
-            operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
-            operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
-            operationIntent.putExtra(Util.OPERATION_COMMENT, comment);
-            operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
-            mManager.sendBroadcast(operationIntent);
+            FNAS.deleteLocalMediaComment(mContext,imageUUID,comment);
         }
     }
 
@@ -505,11 +487,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             case SUCCEED:
 
                 MediaShare mediaShare = ((MediaShareOperationEvent) operationEvent).getMediaShare();
-                Intent operationIntent = new Intent(Util.OPERATION);
-                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
-                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
-                operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-                mManager.sendBroadcast(operationIntent);
+                FNAS.deleteLocalMediaShare(mContext,mediaShare);
 
                 break;
             case FAIL:
@@ -531,11 +509,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 if (Util.getNetworkState(mContext)) {
                     MediaShare mediaShare = ((MediaShareOperationEvent) operationEvent).getMediaShare();
-                    Intent operationIntent = new Intent(Util.OPERATION);
-                    operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-                    operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-                    mManager.sendBroadcast(operationIntent);
+
+                    FNAS.createRemoteMediaShare(mContext,mediaShare);
                 }
 
                 onActivityResult(Util.KEY_CREATE_SHARE_REQUEST_CODE, RESULT_OK, null);
@@ -551,20 +526,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     private void retrieveLocalMediaInCamera() {
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_IN_CAMERA.name());
-
-        mManager.sendBroadcast(intent);
+        FNAS.retrieveLocalMediaInCamera(mContext);
     }
 
     public void retrieveRemoteMediaComment(String mediaUUID) {
 
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
-        intent.putExtra(Util.OPERATION_IMAGE_UUID, mediaUUID);
-        mManager.sendBroadcast(intent);
+        FNAS.retrieveRemoteMediaCommentMap(mContext,mediaUUID);
     }
 
     public void setSelectCountText(String text) {
@@ -733,12 +700,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private void doCreateShareFunction(List<String> selectUUIDs) {
 
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
-
-        intent.putExtra(Util.OPERATION_MEDIASHARE, createMediaShare(selectUUIDs));
-        mManager.sendBroadcast(intent);
+        FNAS.createLocalMediaShare(mContext,createMediaShare(selectUUIDs));
     }
 
     private MediaShare createMediaShare(List<String> selectUUIDs) {

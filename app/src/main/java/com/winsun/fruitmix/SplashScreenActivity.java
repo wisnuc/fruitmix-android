@@ -145,10 +145,7 @@ public class SplashScreenActivity extends Activity {
         switch (result) {
             case SUCCEED:
 
-                Intent operationIntent = new Intent(Util.OPERATION);
-                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-                operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_DEVICEID.name());
-                localBroadcastManager.sendBroadcast(operationIntent);
+                FNAS.retrieveRemoteDeviceID(mContext);
 
                 break;
             case FAIL:
@@ -194,13 +191,7 @@ public class SplashScreenActivity extends Activity {
      */
     private void login() {
 
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_TOKEN.name());
-        intent.putExtra(Util.GATEWAY, mGateway);
-        intent.putExtra(Util.USER_UUID, mUuid);
-        intent.putExtra(Util.PASSWORD, mPassword);
-        localBroadcastManager.sendBroadcast(intent);
+        FNAS.retrieveRemoteToken(mContext,mGateway,mUuid,mPassword);
 
     }
 

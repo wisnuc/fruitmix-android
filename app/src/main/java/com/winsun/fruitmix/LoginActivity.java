@@ -141,10 +141,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                     FNAS.Gateway = mGateway;
                     FNAS.userUUID = mUserUUid;
 
-                    Intent operationIntent = new Intent(Util.OPERATION);
-                    operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_DEVICEID.name());
-                    localBroadcastManager.sendBroadcast(operationIntent);
+                    FNAS.retrieveRemoteDeviceID(mContext);
 
                     break;
                 case FAIL:
@@ -190,6 +187,8 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
     }
 
+
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -220,15 +219,11 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
      */
     private void login() {
 
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_TOKEN.name());
-        intent.putExtra(Util.GATEWAY, mGateway);
-        intent.putExtra(Util.USER_UUID, mUserUUid);
-        intent.putExtra(Util.PASSWORD, mPwd);
-        localBroadcastManager.sendBroadcast(intent);
+        FNAS.retrieveRemoteToken(mContext,mGateway,mUserUUid,mPwd);
 
     }
+
+
 
     private void setGroupNameUserName(String groupName, String userName) {
         SharedPreferences sp;

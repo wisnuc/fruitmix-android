@@ -1,11 +1,10 @@
 package com.winsun.fruitmix.fileModule.fragment;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,20 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
+import com.winsun.fruitmix.fileModule.download.DownloadState;
+import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
+import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
+import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,15 +40,18 @@ import butterknife.ButterKnife;
  */
 public class FileDownloadFragment extends Fragment {
 
-    private OnFileFragmentInteractionListener mListener;
+    public static final String TAG = FileDownloadFragment.class.getSimpleName();
 
     @BindView(R.id.downloading_recyclerview)
     RecyclerView fileDownloadingRecyclerView;
     @BindView(R.id.downloaded_recyclerview)
-    RecyclerView fileDownladedRecyclerView;
+    RecyclerView fileDownloadedRecyclerView;
 
     private DownloadingFileAdapter downloadingFileAdapter;
     private DownloadedFileAdapter downloadedFileAdapter;
+
+    private List<FileDownloadItem> downloadingItems;
+    private List<FileDownloadItem> downloadedItems;
 
     public FileDownloadFragment() {
         // Required empty public constructor
@@ -63,6 +78,8 @@ public class FileDownloadFragment extends Fragment {
         downloadingFileAdapter = new DownloadingFileAdapter();
         downloadedFileAdapter = new DownloadedFileAdapter();
 
+        downloadingItems = new ArrayList<>();
+        downloadedItems = new ArrayList<>();
     }
 
     @Override
@@ -76,10 +93,53 @@ public class FileDownloadFragment extends Fragment {
         fileDownloadingRecyclerView.setAdapter(downloadingFileAdapter);
         fileDownloadingRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        fileDownladedRecyclerView.setAdapter(downloadedFileAdapter);
-        fileDownladedRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        fileDownloadedRecyclerView.setAdapter(downloadedFileAdapter);
+        fileDownloadedRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+
+        super.onStop();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
+
+        FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
+
+        filterFileDownloadItems(fileDownloadManager.getFileDownloadItems());
+
+        downloadingFileAdapter.notifyDataSetChanged();
+        downloadedFileAdapter.notifyDataSetChanged();
+
+    }
+
+    private void filterFileDownloadItems(List<FileDownloadItem> fileDownloadItems) {
+
+        downloadingItems.clear();
+        downloadedItems.clear();
+
+        for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
+
+            if (fileDownloadItem.getDownloadState().equals(DownloadState.FINISHED)) {
+                downloadedItems.add(fileDownloadItem);
+            } else {
+                downloadingItems.add(fileDownloadItem);
+            }
+
+        }
+
     }
 
 
@@ -95,12 +155,12 @@ public class FileDownloadFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(DownloadingFileAdapterViewHolder holder, int position) {
-
+            holder.refreshView(position);
         }
 
         @Override
         public int getItemCount() {
-            return 0;
+            return downloadingItems.size();
         }
     }
 
@@ -115,7 +175,25 @@ public class FileDownloadFragment extends Fragment {
         DownloadingFileAdapterViewHolder(View itemView) {
             super(itemView);
 
-            ButterKnife.bind(this,itemView);
+            ButterKnife.bind(this, itemView);
+
+            downloadingProgressBar.setMax(100);
+        }
+
+        void refreshView(int position) {
+
+            FileDownloadItem fileDownloadItem = downloadingItems.get(position);
+
+            fileName.setText(fileDownloadItem.getFileName());
+
+            Log.i(TAG, "refreshView: currentDownloadSize:" + fileDownloadItem.getFileCurrentDownloadSize() + " fileSize:" + fileDownloadItem.getFileSize());
+
+            float currentProgress = fileDownloadItem.getFileCurrentDownloadSize() * 100 / fileDownloadItem.getFileSize();
+
+            Log.i(TAG, "refreshView: currentProgress:" + currentProgress);
+
+            downloadingProgressBar.setProgress((int) currentProgress);
+
         }
 
     }
@@ -132,12 +210,12 @@ public class FileDownloadFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(DownloadedFileAdapterViewHolder holder, int position) {
-
+            holder.refreshView(position);
         }
 
         @Override
         public int getItemCount() {
-            return 0;
+            return downloadedItems.size();
         }
     }
 
@@ -151,7 +229,15 @@ public class FileDownloadFragment extends Fragment {
         DownloadedFileAdapterViewHolder(View itemView) {
             super(itemView);
 
-            ButterKnife.bind(this,itemView);
+            ButterKnife.bind(this, itemView);
+        }
+
+        void refreshView(int position) {
+
+            FileDownloadItem fileDownloadItem = downloadedItems.get(position);
+
+            fileName.setText(fileDownloadItem.getFileName());
+            fileSize.setText(FileUtil.formatFileSize(fileDownloadItem.getFileSize()));
         }
     }
 

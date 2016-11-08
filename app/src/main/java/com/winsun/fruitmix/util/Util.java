@@ -115,6 +115,9 @@ public class Util {
     public static final String DEVICE_ID_PARAMETER = "/libraries";
     public static final String FILE_PARAMETER = "/files";
 
+    public static final String FILE_SHARED_WITH_ME_PARAMETER = "/sharedWithMe";
+    public static final String FILE_SHARED_WITH_OTHERS_PARAMETER = "/sharedWithOthers";
+
     public static final String FRUITMIX_SHAREDPREFERENCE_NAME = "fruitMix";
 
     public static final String DEVICE_ID_MAP_NAME = "deviceID";

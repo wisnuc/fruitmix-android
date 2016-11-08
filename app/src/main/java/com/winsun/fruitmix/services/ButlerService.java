@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.winsun.fruitmix.eventbus.DownloadFileEvent;
 import com.winsun.fruitmix.executor.DownloadFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.UploadMediaTask;
@@ -18,6 +19,10 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 public class ButlerService extends Service {
 
@@ -42,6 +47,7 @@ public class ButlerService extends Service {
         IntentFilter intentFilter = new IntentFilter(Util.OPERATION);
         broadcastManager.registerReceiver(broadCastReceiver, intentFilter);
 
+        EventBus.getDefault().register(this);
     }
 
 
@@ -61,6 +67,17 @@ public class ButlerService extends Service {
         super.onDestroy();
 
         broadcastManager.unregisterReceiver(broadCastReceiver);
+
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.POSTING)
+    public void handleEvent(DownloadFileEvent downloadFileEvent){
+
+        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+        DownloadFileTask downloadFileTask = new DownloadFileTask(downloadFileEvent.getFileDownloadState());
+        instance.doOneTaskInFixedThreadPool(downloadFileTask);
+
     }
 
     private class CustomBroadCastReceiver extends BroadcastReceiver {
@@ -87,16 +104,6 @@ public class ButlerService extends Service {
                         break;
                     case GET:
                         handleGetOperation(intent);
-                        break;
-                    case DOWNLOAD_FILE:
-
-                        String fileUUID = intent.getStringExtra(Util.FILE_UUID);
-                        String fileName = intent.getStringExtra(Util.FILE_NAME);
-
-                        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-                        DownloadFileTask downloadFileTask = new DownloadFileTask(fileUUID,fileName);
-                        instance.doOneTaskInFixedThreadPool(downloadFileTask);
-
                         break;
                 }
             }

@@ -1,14 +1,11 @@
 package com.winsun.fruitmix.fileModule.model;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
+import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
-import com.winsun.fruitmix.util.Util;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -44,13 +41,9 @@ public class RemoteFile extends AbstractRemoteFile {
     @Override
     public void downloadFile(Context context) {
 
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DOWNLOAD_FILE.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_FILE.name());
-        intent.putExtra(Util.FILE_UUID, getUuid());
-        intent.putExtra(Util.FILE_NAME, getName());
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(intent);
+        FileDownloadItem fileDownloadItem = new FileDownloadItem(getName(),Long.parseLong(getSize()),getUuid());
+
+        FileDownloadManager.INSTANCE.addFileDownloadItem(fileDownloadItem);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.fileModule.download;
 
-import com.winsun.fruitmix.eventbus.DownloadEvent;
+import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -12,9 +12,11 @@ public abstract class FileDownloadState {
 
     private String fileName;
     private String fileUUID;
-    private long fileSize;
-    private long fileCurrentDownloadSize;
     private FileDownloadItem fileDownloadItem;
+
+    public FileDownloadState(FileDownloadItem fileDownloadItem) {
+        this.fileDownloadItem = fileDownloadItem;
+    }
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
@@ -25,15 +27,11 @@ public abstract class FileDownloadState {
     }
 
     public void setFileSize(long fileSize) {
-        this.fileSize = fileSize;
+        fileDownloadItem.setFileSize(fileSize);
     }
 
     public void setFileCurrentDownloadSize(long fileCurrentDownloadSize) {
-        this.fileCurrentDownloadSize = fileCurrentDownloadSize;
-    }
-
-    public void setFileDownloadItem(FileDownloadItem fileDownloadItem) {
-        this.fileDownloadItem = fileDownloadItem;
+        fileDownloadItem.setFileCurrentDownloadSize(fileCurrentDownloadSize);
     }
 
     public String getFileName() {
@@ -44,24 +42,17 @@ public abstract class FileDownloadState {
         return fileUUID;
     }
 
-    public long getFileSize() {
-        return fileSize;
-    }
-
-    public long getFileCurrentDownloadSize() {
-        return fileCurrentDownloadSize;
-    }
-
     public FileDownloadItem getFileDownloadItem() {
         return fileDownloadItem;
     }
 
     public abstract DownloadState getDownloadState();
 
+    public abstract void startWork();
+
     public void notifyDownloadStateChanged() {
 
-        EventBus.getDefault().post(new DownloadEvent());
-
+        EventBus.getDefault().post(new DownloadStateChangedEvent());
     }
 
 }

@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.OperationTargetType;
@@ -110,19 +111,11 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
-                Intent intent = new Intent(Util.OPERATION);
-                intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.MODIFY.name());
-                if (Util.getNetworkState(mContext)) {
-                    intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-                } else {
-                    intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
+                if(Util.getNetworkState(mContext)){
+                    FNAS.modifyRemoteMediaShare(mContext,mAlbumMap,requestData);
+                }else {
+                    FNAS.modifyLocalMediaShare(mContext,mAlbumMap,requestData);
                 }
-                intent.putExtra(Util.OPERATION_MEDIASHARE, mAlbumMap);
-                intent.putExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA,requestData);
-
-                LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(mContext);
-                localBroadcastManager.sendBroadcast(intent);
-
             }
         });
 

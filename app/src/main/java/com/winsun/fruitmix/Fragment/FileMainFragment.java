@@ -39,7 +39,7 @@ import butterknife.ButterKnife;
  * Use the {@link FileMainFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FileMainFragment extends Fragment {
+public class FileMainFragment extends Fragment implements OnFileFragmentInteractionListener{
 
     @BindView(R.id.bottom_navigation_view)
     BottomNavigationView bottomNavigationView;
@@ -208,6 +208,21 @@ public class FileMainFragment extends Fragment {
         return true;
     }
 
+    @Override
+    public void changeFilePageToFileFragment() {
+        fileMainViewPager.setCurrentItem(PAGE_FILE);
+    }
+
+    @Override
+    public void changeFilePageToFileShareFragment() {
+        fileMainViewPager.setCurrentItem(PAGE_FILE_SHARE);
+    }
+
+    @Override
+    public void changeFilePageToFileDownloadFragment() {
+        fileMainViewPager.setCurrentItem(PAGE_FILE_DOWNLOAD);
+    }
+
 
     private class FilePageAdapter extends FragmentPagerAdapter {
 
@@ -220,7 +235,7 @@ public class FileMainFragment extends Fragment {
 
             switch (position) {
                 case PAGE_FILE:
-                    fileFragment = FileFragment.newInstance();
+                    fileFragment = FileFragment.newInstance(FileMainFragment.this);
                     return fileFragment;
                 case PAGE_FILE_SHARE:
                     fileShareFragment = FileShareFragment.newInstance();

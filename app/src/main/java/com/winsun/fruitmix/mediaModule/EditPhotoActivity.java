@@ -232,29 +232,16 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
-                Intent operationIntent = new Intent(Util.OPERATION);
-
                 if (modifiedMediaShare.getMediaContentsListSize() != 0) {
                     modifiedMediaShare.setCoverImageDigest(modifiedMediaShare.getFirstMediaDigestInMediaContentsList());
                 } else {
                     modifiedMediaShare.setCoverImageDigest("");
                 }
 
-                operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.EDIT_PHOTO_IN_MEDIASHARE.name());
-                operationIntent.putExtra(Util.OPERATION_ORIGINAL_MEDIASHARE_WHEN_EDIT_PHOTO, mediaShare);
-                operationIntent.putExtra(Util.OPERATION_MODIFIED_MEDIASHARE_WHEN_EDIT_PHOTO, modifiedMediaShare);
-
-                if (Util.getNetworkState(mContext)) {
-
-                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-
-                    localBroadcastManager.sendBroadcast(operationIntent);
-
-                } else {
-
-                    operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
-
-                    localBroadcastManager.sendBroadcast(operationIntent);
+                if(Util.getNetworkState(mContext)){
+                    FNAS.editPhotoInRemoteMediaShare(mContext,mediaShare,modifiedMediaShare);
+                }else {
+                    FNAS.editPhotoInLocalMediaShare(mContext,mediaShare,modifiedMediaShare);
                 }
 
                 break;
