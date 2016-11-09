@@ -5,16 +5,13 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.widget.DrawerLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,14 +19,17 @@ import android.widget.TextView;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.UnscrollableViewPager;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.fragment.FileDownloadFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileShareFragment;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
-import com.winsun.fruitmix.model.User;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,7 +39,7 @@ import butterknife.ButterKnife;
  * Use the {@link FileMainFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FileMainFragment extends Fragment implements OnFileFragmentInteractionListener{
+public class FileMainFragment extends Fragment implements OnFileFragmentInteractionListener {
 
     @BindView(R.id.bottom_navigation_view)
     BottomNavigationView bottomNavigationView;
@@ -47,6 +47,8 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
     UnscrollableViewPager fileMainViewPager;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    @BindView(R.id.right)
+    TextView rightTextView;
 
     public static final int PAGE_FILE_SHARE = 0;
     public static final int PAGE_FILE = 1;
@@ -68,6 +70,7 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
+     *
      * @return A new instance of fragment FileMainFragment.
      */
     // TODO: Rename and change types and number of parameters
@@ -89,11 +92,11 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_file_main,container,false);
+        View view = inflater.inflate(R.layout.activity_file_main, container, false);
 
-        ButterKnife.bind(this,view);
+        ButterKnife.bind(this, view);
 
-        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         setHasOptionsMenu(true);
 
@@ -104,10 +107,39 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
             }
         });
 
+        rightTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (fileFragment.isSelectMode()) {
+                    rightTextView.setText(getString(R.string.select_file));
+                    fileFragment.refreshSelectMode(false);
+                } else {
+                    rightTextView.setText(getString(R.string.quit_select_file));
+                    fileFragment.refreshSelectMode(true);
+                }
+
+            }
+        });
+
         FilePageAdapter filePageAdapter = new FilePageAdapter(getActivity().getSupportFragmentManager());
 
         fileMainViewPager.setAdapter(filePageAdapter);
         fileMainViewPager.setCurrentItem(PAGE_FILE);
+
+        fileMainViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+
+                if (position == PAGE_FILE) {
+                    rightTextView.setVisibility(View.VISIBLE);
+                } else {
+                    rightTextView.setVisibility(View.GONE);
+                }
+
+            }
+        });
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -134,6 +166,38 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+
+        super.onStop();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleOperationEvent(OperationEvent operationEvent) {
+
+        String action = operationEvent.getAction();
+        if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
+
+            if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
+                fileFragment.handleOperationResult(operationEvent);
+            } else if (fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE) {
+                fileShareFragment.handleOperationEvent(operationEvent);
+            }
+        } else if (action.equals(Util.REMOTE_FILE_SHARE_RETRIEVED)) {
+            fileShareFragment.handleOperationEvent(operationEvent);
+        }
+
+    }
+
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof OnMainFragmentInteractionListener) {
@@ -144,10 +208,10 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
         }
     }
 
-    public void requestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+    public void requestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-        if(fileMainViewPager.getCurrentItem() == PAGE_FILE)
-            fileFragment.requestPermissionsResult(requestCode,permissions,grantResults);
+        if (fileMainViewPager.getCurrentItem() == PAGE_FILE)
+            fileFragment.requestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -156,56 +220,26 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
         mListener = null;
     }
 
-    public void handleBackPressed(){
+    public void handleBackPressed() {
 
-        if(notRootFolder()){
+        if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
             fileFragment.onBackPressed();
-        }else if(fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE){
+        } else if (fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE) {
             fileShareFragment.onBackPressed();
         }
 
     }
 
-    public boolean handleBackPressedOrNot(){
-        return notRootFolder();
-    }
+    public boolean handleBackPressedOrNot() {
 
-    private boolean notRootFolder() {
-
-        User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
-        String homeFolderUUID = user.getHome();
-
-        return fileMainViewPager.getCurrentItem() == PAGE_FILE && !(fileFragment.getCurrentFolderUUID().equals(homeFolderUUID));
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu,inflater);
-        inflater.inflate(R.menu.file_main_menu,menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.select_file:
-
-                if(fileMainViewPager.getCurrentItem() == PAGE_FILE && item.getTitle().equals(getString(R.string.select_file))){
-                    fileFragment.refreshSelectMode(true);
-
-                    item.setTitle(getString(R.string.quit_select_file));
-                }else if(fileMainViewPager.getCurrentItem() == PAGE_FILE && item.getTitle().equals(getString(R.string.quit_select_file))){
-
-                    fileFragment.refreshSelectMode(false);
-
-                    item.setTitle(getString(R.string.select_file));
-                }
-
-
-                break;
+        if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
+            return fileFragment.notRootFolder();
         }
+        if (fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE) {
+            return fileShareFragment.notRootFolder();
+        }
+        return false;
 
-        return true;
     }
 
     @Override

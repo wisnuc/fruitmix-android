@@ -53,6 +53,7 @@ public class LocalCache {
     public static ConcurrentMap<String, Media> LocalMediaMapKeyIsThumb = null;
     public static ConcurrentMap<String, Media> LocalMediaMapKeyIsUUID = null;
     public static ConcurrentMap<String, AbstractRemoteFile> RemoteFileMapKeyIsUUID = null;
+    public static List<AbstractRemoteFile> RemoteFileShareList = null;
 
     public static String DeviceID = null;
 
@@ -109,6 +110,7 @@ public class LocalCache {
         LocalMediaMapKeyIsThumb = new ConcurrentHashMap<>();
         BuildLocalImagesMapsKeyIsUUID();
         RemoteFileMapKeyIsUUID = new ConcurrentHashMap<>();
+        RemoteFileShareList = new ArrayList<>();
 
         photoSliderList = new ArrayList<>();
 

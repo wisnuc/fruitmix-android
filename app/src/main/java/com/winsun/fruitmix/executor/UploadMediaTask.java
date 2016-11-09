@@ -32,6 +32,7 @@ public class UploadMediaTask implements Callable<Boolean> {
         boolean result = media.uploadIfNotDone(context);
 
         if(result){
+
             EventBus.getDefault().post(new OperationEvent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED, OperationResult.SUCCEED));
         }
 

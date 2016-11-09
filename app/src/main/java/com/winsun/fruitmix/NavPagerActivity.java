@@ -240,7 +240,11 @@ public class NavPagerActivity extends AppCompatActivity
 //            startActivity(intent);
 
         } else */
-        if (id == R.id.logout) {
+
+        if (id == R.id.user_manage) {
+            Intent intent = new Intent(this, UserManageActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.logout) {
 
             new AsyncTask<Void, Void, Void>() {
 

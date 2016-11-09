@@ -9,9 +9,19 @@ import android.util.Log;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
+import com.winsun.fruitmix.eventbus.EditPhotoInMediaShareRequestEvent;
+import com.winsun.fruitmix.eventbus.MediaCommentRequestEvent;
+import com.winsun.fruitmix.eventbus.MediaRequestEvent;
+import com.winsun.fruitmix.eventbus.MediaShareRequestEvent;
+import com.winsun.fruitmix.eventbus.ModifyMediaShareRequestEvent;
+import com.winsun.fruitmix.eventbus.RequestEvent;
+import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -70,11 +80,11 @@ public class FNAS {
     }
 
     public static String loadFileSharedWithMe() throws Exception {
-        return FNAS.RemoteCall(Util.FILE_PARAMETER + Util.FILE_SHARED_WITH_ME_PARAMETER);
+        return FNAS.RemoteCall(Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_ME_PARAMETER);
     }
 
     public static String loadFileShareWithOthers() throws Exception {
-        return FNAS.RemoteCall(Util.FILE_PARAMETER + Util.FILE_SHARED_WITH_OTHERS_PARAMETER);
+        return FNAS.RemoteCall(Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_OTHERS_PARAMETER);
     }
 
     public static String loadUser() throws Exception {
@@ -125,235 +135,134 @@ public class FNAS {
     }
 
     public static void retrieveRemoteDeviceID(Context context) {
-        Intent operationIntent = new Intent(Util.OPERATION);
-        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_DEVICEID.name());
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(operationIntent);
+
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_DEVICEID));
     }
 
     public static void retrieveRemoteToken(Context context, String gateway, String userUUID, String pwd) {
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_TOKEN.name());
-        intent.putExtra(Util.GATEWAY, gateway);
-        intent.putExtra(Util.USER_UUID, userUUID);
-        intent.putExtra(Util.PASSWORD, pwd);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(intent);
+
+        EventBus.getDefault().post(new TokenRequestEvent(OperationType.GET, OperationTargetType.REMOTE_TOKEN, gateway, userUUID, pwd));
     }
 
     public static void retrieveUserMap(Context context) {
 
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_USER.name());
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(intent);
-
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_USER));
     }
 
     public static void retrieveLocalMediaMap(Context context) {
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA.name());
-        localBroadcastManager.sendBroadcast(intent);
-
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIA));
     }
 
     public static void retrieveRemoteMediaMap(Context context) {
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA.name());
-        localBroadcastManager.sendBroadcast(intent);
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIA));
     }
 
 
     public static void retrieveLocalMediaShare(Context context) {
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
-        localBroadcastManager.sendBroadcast(intent);
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIASHARE));
     }
 
     public static void retrieveRemoteMediaShare(Context context) {
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
 
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-        localBroadcastManager.sendBroadcast(intent);
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIASHARE));
     }
 
     public static void retrieveLocalMediaInCamera(Context context) {
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_IN_CAMERA.name());
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(intent);
+
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIA_IN_CAMERA));
     }
 
     public static void retrieveLocalMediaCommentMap(Context context) {
 
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(intent);
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIA_COMMENT));
 
     }
 
     public static void retrieveRemoteMediaCommentMap(Context context, String imageUUID) {
 
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
-        intent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(intent);
-
+        EventBus.getDefault().post(new MediaCommentRequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIA_COMMENT, imageUUID, null));
     }
 
     public static void retrieveRemoteFile(Context context, String folderUUID) {
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.GET.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_FILE.name());
-        intent.putExtra(Util.FOLDER_UUID, folderUUID);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(intent);
+
+        EventBus.getDefault().post(new AbstractFileRequestEvent(OperationType.GET, OperationTargetType.REMOTE_FILE, folderUUID));
+    }
+
+    public static void retrieveRemoteFileShare() {
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_FILE_SHARE));
+    }
+
+    public static void createRemoteMedia(Context context, Media media) {
+
+        EventBus.getDefault().post(new MediaRequestEvent(OperationType.CREATE, OperationTargetType.REMOTE_MEDIA, media));
     }
 
     public static void createRemoteMediaShare(Context context, MediaShare mediaShare) {
-        Intent operationIntent = new Intent(Util.OPERATION);
-        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-        operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(operationIntent);
+
+        EventBus.getDefault().post(new MediaShareRequestEvent(OperationType.CREATE, OperationTargetType.REMOTE_MEDIASHARE, mediaShare));
     }
 
     public static void createLocalMediaShare(Context context, MediaShare mediaShare) {
-        Intent operationIntent = new Intent(Util.OPERATION);
-        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
-        operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(operationIntent);
+
+        EventBus.getDefault().post(new MediaShareRequestEvent(OperationType.CREATE, OperationTargetType.LOCAL_MEDIASHARE, mediaShare));
     }
 
     public static void createRemoteMediaComment(Context context, String imageUUID, Comment comment) {
-        Intent operationResult = new Intent(Util.OPERATION);
-        operationResult.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-        operationResult.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA_COMMENT.name());
-        operationResult.putExtra(Util.OPERATION_COMMENT, comment);
-        operationResult.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(operationResult);
+
+        EventBus.getDefault().post(new MediaCommentRequestEvent(OperationType.CREATE, OperationTargetType.REMOTE_MEDIA_COMMENT, imageUUID, comment));
     }
 
     public static void createLocalMediaComment(Context context, String imageUUID, Comment comment) {
-        Intent operationResult = new Intent(Util.OPERATION);
-        operationResult.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-        operationResult.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
-        operationResult.putExtra(Util.OPERATION_COMMENT, comment);
-        operationResult.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(operationResult);
+
+        EventBus.getDefault().post(new MediaCommentRequestEvent(OperationType.CREATE, OperationTargetType.LOCAL_MEDIA_COMMENT, imageUUID, comment));
     }
 
     public static void modifyRemoteMediaShare(Context context, MediaShare mediaShare, String requestData) {
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.MODIFY.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-        intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-        intent.putExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA, requestData);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(intent);
+
+        EventBus.getDefault().post(new ModifyMediaShareRequestEvent(OperationType.MODIFY, OperationTargetType.REMOTE_MEDIASHARE, mediaShare, requestData));
     }
 
     public static void modifyLocalMediaShare(Context context, MediaShare mediaShare, String requestData) {
-        Intent intent = new Intent(Util.OPERATION);
-        intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.MODIFY.name());
-        intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
-        intent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-        intent.putExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA, requestData);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(intent);
+
+        EventBus.getDefault().post(new ModifyMediaShareRequestEvent(OperationType.MODIFY, OperationTargetType.LOCAL_MEDIASHARE, mediaShare, requestData));
     }
 
     public static void deleteLocalMediaShare(Context context, MediaShare mediaShare) {
-        Intent operationIntent = new Intent(Util.OPERATION);
-        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
-        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIASHARE.name());
-        operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(operationIntent);
+
+        EventBus.getDefault().post(new MediaShareRequestEvent(OperationType.DELETE, OperationTargetType.LOCAL_MEDIASHARE, mediaShare));
     }
 
     public static void deleteRemoteMediaShare(Context context, MediaShare mediaShare) {
-        Intent operationIntent = new Intent(Util.OPERATION);
-        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
-        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-        operationIntent.putExtra(Util.OPERATION_MEDIASHARE, mediaShare);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(operationIntent);
+
+        EventBus.getDefault().post(new MediaShareRequestEvent(OperationType.DELETE, OperationTargetType.REMOTE_MEDIASHARE, mediaShare));
     }
 
     public static void deleteLocalMediaComment(Context context, String imageUUID, Comment comment) {
-        Intent operationIntent = new Intent(Util.OPERATION);
-        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.DELETE.name());
-        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.LOCAL_MEDIA_COMMENT.name());
-        operationIntent.putExtra(Util.OPERATION_COMMENT, comment);
-        operationIntent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(operationIntent);
+
+        EventBus.getDefault().post(new MediaCommentRequestEvent(OperationType.DELETE, OperationTargetType.LOCAL_MEDIA_COMMENT, imageUUID, comment));
     }
 
     public static void editPhotoInRemoteMediaShare(Context context, MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
-        Intent operationIntent = new Intent(Util.OPERATION);
-        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.EDIT_PHOTO_IN_MEDIASHARE.name());
-        operationIntent.putExtra(Util.OPERATION_ORIGINAL_MEDIASHARE_WHEN_EDIT_PHOTO, originalMediaShare);
-        operationIntent.putExtra(Util.OPERATION_MODIFIED_MEDIASHARE_WHEN_EDIT_PHOTO, modifiedMediaShare);
-        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(operationIntent);
+
+        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.REMOTE_MEDIASHARE, originalMediaShare, modifiedMediaShare));
     }
 
     public static void editPhotoInLocalMediaShare(Context context, MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
-        Intent operationIntent = new Intent(Util.OPERATION);
-        operationIntent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.EDIT_PHOTO_IN_MEDIASHARE.name());
-        operationIntent.putExtra(Util.OPERATION_ORIGINAL_MEDIASHARE_WHEN_EDIT_PHOTO, originalMediaShare);
-        operationIntent.putExtra(Util.OPERATION_MODIFIED_MEDIASHARE_WHEN_EDIT_PHOTO, modifiedMediaShare);
-        operationIntent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIASHARE.name());
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-        localBroadcastManager.sendBroadcast(operationIntent);
+
+        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.REMOTE_MEDIASHARE, originalMediaShare, modifiedMediaShare));
+
     }
 
     public static void startUploadAllLocalPhoto(Context context) {
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(context);
-
         for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
-
             if (!media.isUploaded()) {
-                Intent intent = new Intent(Util.OPERATION);
-                intent.putExtra(Util.OPERATION_TYPE_NAME, OperationType.CREATE.name());
-                intent.putExtra(Util.OPERATION_TARGET_TYPE_NAME, OperationTargetType.REMOTE_MEDIA.name());
-                intent.putExtra(Util.OPERATION_MEDIA, media);
-                localBroadcastManager.sendBroadcast(intent);
+                createRemoteMedia(context, media);
             }
-
         }
-
     }
 
 

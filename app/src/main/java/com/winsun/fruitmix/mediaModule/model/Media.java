@@ -211,6 +211,7 @@ public class Media implements Parcelable {
             Log.i(TAG, "upload file:" + thumb + "result:" + uploaded);
 
             if (uploaded) {
+
                 dbUtils.updateLocalMedia(this);
             }
 

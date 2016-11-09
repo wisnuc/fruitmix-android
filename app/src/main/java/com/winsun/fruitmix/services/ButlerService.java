@@ -1,15 +1,20 @@
 package com.winsun.fruitmix.services;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.IBinder;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.DownloadFileEvent;
+import com.winsun.fruitmix.eventbus.EditPhotoInMediaShareRequestEvent;
+import com.winsun.fruitmix.eventbus.MediaCommentRequestEvent;
+import com.winsun.fruitmix.eventbus.MediaRequestEvent;
+import com.winsun.fruitmix.eventbus.MediaShareRequestEvent;
+import com.winsun.fruitmix.eventbus.ModifyMediaShareRequestEvent;
+import com.winsun.fruitmix.eventbus.RequestEvent;
+import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.executor.DownloadFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.UploadMediaTask;
@@ -28,24 +33,14 @@ public class ButlerService extends Service {
 
     private static final String TAG = ButlerService.class.getSimpleName();
 
-    private LocalBroadcastManager broadcastManager;
-    private CustomBroadCastReceiver broadCastReceiver;
-
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
         context.startService(intent);
     }
 
-
     @Override
     public void onCreate() {
         super.onCreate();
-
-        broadcastManager = LocalBroadcastManager.getInstance(this);
-
-        broadCastReceiver = new CustomBroadCastReceiver();
-        IntentFilter intentFilter = new IntentFilter(Util.OPERATION);
-        broadcastManager.registerReceiver(broadCastReceiver, intentFilter);
 
         EventBus.getDefault().register(this);
     }
@@ -64,15 +59,13 @@ public class ButlerService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-
-        broadcastManager.unregisterReceiver(broadCastReceiver);
-
         EventBus.getDefault().unregister(this);
+
+        super.onDestroy();
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING)
-    public void handleEvent(DownloadFileEvent downloadFileEvent){
+    public void handleEvent(DownloadFileEvent downloadFileEvent) {
 
         ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
         DownloadFileTask downloadFileTask = new DownloadFileTask(downloadFileEvent.getFileDownloadState());
@@ -80,41 +73,34 @@ public class ButlerService extends Service {
 
     }
 
-    private class CustomBroadCastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
+    @Subscribe(threadMode = ThreadMode.POSTING)
+    public void handleRequestEvent(RequestEvent requestEvent) {
 
-            if (intent.getAction().equals(Util.OPERATION)) {
-                String type = intent.getStringExtra(Util.OPERATION_TYPE_NAME);
-
-                OperationType operationType = OperationType.valueOf(type);
-
-                switch (operationType) {
-                    case CREATE:
-                        handleCreateOperation(intent);
-                        break;
-                    case MODIFY:
-                        handleModifyOperation(intent);
-                        break;
-                    case EDIT_PHOTO_IN_MEDIASHARE:
-                        handleEditPhotoInMediaShareOperation(intent);
-                        break;
-                    case DELETE:
-                        handleDeleteOperation(intent);
-                        break;
-                    case GET:
-                        handleGetOperation(intent);
-                        break;
-                }
-            }
-
+        OperationType operationType = requestEvent.getOperationType();
+        switch (operationType) {
+            case CREATE:
+                handleCreateOperation(requestEvent);
+                break;
+            case MODIFY:
+                handleModifyOperation(requestEvent);
+                break;
+            case EDIT_PHOTO_IN_MEDIASHARE:
+                handleEditPhotoInMediaShareOperation(requestEvent);
+                break;
+            case DELETE:
+                handleDeleteOperation(requestEvent);
+                break;
+            case GET:
+                handleGetOperation(requestEvent);
+                break;
         }
+
     }
 
-    private void handleCreateOperation(Intent intent) {
-        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE_NAME);
 
-        OperationTargetType targetType = OperationTargetType.valueOf(type);
+    private void handleCreateOperation(RequestEvent requestEvent) {
+
+        OperationTargetType targetType = requestEvent.getOperationTargetType();
 
         Log.i(TAG, "handle create operation target type:" + targetType);
 
@@ -126,34 +112,38 @@ public class ButlerService extends Service {
 
         switch (targetType) {
             case LOCAL_MEDIASHARE:
-                mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
+                mediaShare = ((MediaShareRequestEvent) requestEvent).getMediaShare();
                 CreateLocalMediaShareService.startActionCreateLocalShare(this, mediaShare);
                 break;
             case LOCAL_MEDIA_COMMENT:
-                imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
-                comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
+                MediaCommentRequestEvent localMediaShareCommentOperationEvent = (MediaCommentRequestEvent) requestEvent;
+                imageUUID = localMediaShareCommentOperationEvent.getImageUUID();
+                comment = localMediaShareCommentOperationEvent.getComment();
+
                 CreateLocalCommentService.startActionCreateLocalComment(this, imageUUID, comment);
                 break;
 
             case REMOTE_MEDIA:
 
-                media = intent.getParcelableExtra(Util.OPERATION_MEDIA);
+                media = ((MediaRequestEvent) requestEvent).getMedia();
 
                 instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-                UploadMediaTask task = new UploadMediaTask(this,media);
+                UploadMediaTask task = new UploadMediaTask(this, media);
                 instance.doOneTaskInFixedThreadPool(task);
 
                 break;
             case REMOTE_MEDIASHARE:
 
-                mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
+                mediaShare = ((MediaShareRequestEvent) requestEvent).getMediaShare();
 
                 CreateRemoteMediaShareService.startActionCreateRemoteMediaShareTask(this, mediaShare);
 
                 break;
             case REMOTE_MEDIA_COMMENT:
-                imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
-                comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
+                MediaCommentRequestEvent remoteMediaShareCommentOperationEvent = (MediaCommentRequestEvent) requestEvent;
+                imageUUID = remoteMediaShareCommentOperationEvent.getImageUUID();
+                comment = remoteMediaShareCommentOperationEvent.getComment();
+
                 CreateRemoteCommentService.startActionCreateRemoteCommentTask(this, comment, imageUUID);
                 break;
         }
@@ -161,10 +151,9 @@ public class ButlerService extends Service {
     }
 
 
-    private void handleModifyOperation(Intent intent) {
-        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE_NAME);
+    private void handleModifyOperation(RequestEvent requestEvent) {
 
-        OperationTargetType targetType = OperationTargetType.valueOf(type);
+        OperationTargetType targetType = requestEvent.getOperationTargetType();
 
         Log.i(TAG, "handle modify operation target type:" + targetType);
 
@@ -172,26 +161,29 @@ public class ButlerService extends Service {
 
         switch (targetType) {
             case LOCAL_MEDIASHARE:
-                mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
+                mediaShare = ((MediaShareRequestEvent) requestEvent).getMediaShare();
                 ModifyLocalMediaShareService.startActionModifyLocalMediaShare(this, mediaShare);
                 break;
             case REMOTE_MEDIASHARE:
-                mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
-                String requestData = intent.getStringExtra(Util.KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA);
-                ModifyRemoteMediaShareService.startActionModifyRemoteMediaShare(this, mediaShare,requestData);
+
+                ModifyMediaShareRequestEvent modifyMediaShareRequestEvent = (ModifyMediaShareRequestEvent) requestEvent;
+
+                mediaShare = modifyMediaShareRequestEvent.getMediaShare();
+                String requestData = modifyMediaShareRequestEvent.getRequestData();
+                ModifyRemoteMediaShareService.startActionModifyRemoteMediaShare(this, mediaShare, requestData);
                 break;
 
         }
     }
 
-    private void handleEditPhotoInMediaShareOperation(Intent intent) {
+    private void handleEditPhotoInMediaShareOperation(RequestEvent requestEvent) {
 
-        MediaShare originalMediaShare = intent.getParcelableExtra(Util.OPERATION_ORIGINAL_MEDIASHARE_WHEN_EDIT_PHOTO);
-        MediaShare modifiedMediaShare = intent.getParcelableExtra(Util.OPERATION_MODIFIED_MEDIASHARE_WHEN_EDIT_PHOTO);
+        EditPhotoInMediaShareRequestEvent editPhotoInMediaShareRequestEvent = (EditPhotoInMediaShareRequestEvent) requestEvent;
 
-        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE_NAME);
+        MediaShare originalMediaShare = editPhotoInMediaShareRequestEvent.getOriginalMediaShare();
+        MediaShare modifiedMediaShare = editPhotoInMediaShareRequestEvent.getModifiedMediaShare();
 
-        OperationTargetType targetType = OperationTargetType.valueOf(type);
+        OperationTargetType targetType = requestEvent.getOperationTargetType();
 
         Log.i(TAG, "handle modify operation target type:" + targetType);
 
@@ -205,10 +197,9 @@ public class ButlerService extends Service {
         }
     }
 
-    private void handleDeleteOperation(Intent intent) {
-        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE_NAME);
+    private void handleDeleteOperation(RequestEvent requestEvent) {
 
-        OperationTargetType targetType = OperationTargetType.valueOf(type);
+        OperationTargetType targetType = requestEvent.getOperationTargetType();
 
         Log.i(TAG, "handle delete operation target type:" + targetType);
 
@@ -218,26 +209,26 @@ public class ButlerService extends Service {
 
         switch (targetType) {
             case LOCAL_MEDIASHARE:
-                mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
-                DeleteLocalMediaShareService.startActionDeleteLocalShare(this,mediaShare);
+                mediaShare = ((MediaShareRequestEvent) requestEvent).getMediaShare();
+                DeleteLocalMediaShareService.startActionDeleteLocalShare(this, mediaShare);
                 break;
             case REMOTE_MEDIASHARE:
-                mediaShare = intent.getParcelableExtra(Util.OPERATION_MEDIASHARE);
+                mediaShare = ((MediaShareRequestEvent) requestEvent).getMediaShare();
                 DeleteRemoteMediaShareService.startActionDeleteRemoteShare(this, mediaShare);
                 break;
             case LOCAL_MEDIA_COMMENT:
-                comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
-                imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
+                MediaCommentRequestEvent remoteMediaShareCommentOperationEvent = (MediaCommentRequestEvent) requestEvent;
+                imageUUID = remoteMediaShareCommentOperationEvent.getImageUUID();
+                comment = remoteMediaShareCommentOperationEvent.getComment();
                 DeleteLocalCommentService.startActionDeleteLocalComment(this, comment, imageUUID);
                 break;
         }
     }
 
 
-    private void handleGetOperation(Intent intent) {
-        String type = intent.getStringExtra(Util.OPERATION_TARGET_TYPE_NAME);
+    private void handleGetOperation(RequestEvent requestEvent) {
 
-        OperationTargetType targetType = OperationTargetType.valueOf(type);
+        OperationTargetType targetType = requestEvent.getOperationTargetType();
 
         if (targetType != OperationTargetType.REMOTE_MEDIA_COMMENT)
             Log.i(TAG, "handle get operation target type:" + targetType);
@@ -264,16 +255,21 @@ public class ButlerService extends Service {
                 RetrieveRemoteMediaShareService.startActionRetrieveRemoteMediaShare(this);
                 break;
             case REMOTE_MEDIA_COMMENT:
-                imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
+                MediaCommentRequestEvent remoteMediaShareCommentOperationEvent = (MediaCommentRequestEvent) requestEvent;
+                imageUUID = remoteMediaShareCommentOperationEvent.getImageUUID();
+
                 RetrieveRemoteMediaCommentService.startActionRetrieveRemoteMediaComment(this, imageUUID);
                 break;
             case REMOTE_DEVICEID:
                 RetrieveDeviceIdService.startActionRetrieveDeviceId(this);
                 break;
             case REMOTE_TOKEN:
-                final String gateway = intent.getStringExtra(Util.GATEWAY);
-                final String userUUID = intent.getStringExtra(Util.USER_UUID);
-                final String userPassword = intent.getStringExtra(Util.PASSWORD);
+
+                TokenRequestEvent tokenRequestEvent = (TokenRequestEvent) requestEvent;
+
+                final String gateway = tokenRequestEvent.getGateway();
+                final String userUUID = tokenRequestEvent.getUserUUID();
+                final String userPassword = tokenRequestEvent.getUserPassword();
 
                 RetrieveTokenService.startActionRetrieveToken(this, gateway, userUUID, userPassword);
 
@@ -282,8 +278,11 @@ public class ButlerService extends Service {
                 RetrieveNewLocalMediaInCameraService.startActionRetrieveNewLocalMediaInCamera(this);
                 break;
             case REMOTE_FILE:
-                String folderUUID = intent.getStringExtra(Util.FOLDER_UUID);
-                RetrieveRemoteFileService.startActionRetrieveRemoteFile(this,folderUUID);
+                String folderUUID = ((AbstractFileRequestEvent) requestEvent).getFolderUUID();
+                RetrieveRemoteFileService.startActionRetrieveRemoteFile(this, folderUUID);
+                break;
+            case REMOTE_FILE_SHARE:
+                RetrieveRemoteFileShareService.startActionRetrieveRemoteFileShare(this);
                 break;
         }
     }

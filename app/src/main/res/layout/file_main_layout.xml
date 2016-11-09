@@ -17,7 +17,20 @@
         app:navigationIcon="@drawable/menu"
         app:popupTheme="@style/AppTheme.PopupOverlay"
         app:title="@string/file"
-        app:titleTextAppearance="@style/CollapsedToolbarTitle"/>
+        app:titleTextAppearance="@style/CollapsedToolbarTitle">
+
+        <TextView
+            android:id="@+id/right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginRight="15dp"
+            android:text="@string/choose_text"
+            android:textColor="@color/white"
+            android:textSize="18dp"
+            android:visibility="visible"/>
+
+    </android.support.v7.widget.Toolbar>
 
 
     <android.support.design.widget.BottomNavigationView

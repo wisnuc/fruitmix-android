@@ -21,12 +21,6 @@ public enum FileDownloadManager {
 
     }
 
-    public void handleDownloadItemFinished() {
-
-        startPendingDownloadItem();
-    }
-
-
     public void addFileDownloadItem(FileDownloadItem fileDownloadItem) {
 
         FileDownloadState fileDownloadState;
@@ -63,7 +57,7 @@ public enum FileDownloadManager {
 
     }
 
-    private void startPendingDownloadItem() {
+    void startPendingDownloadItem() {
 
         for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
             if (fileDownloadItem.getDownloadState().equals(DownloadState.PENDING)) {

@@ -114,7 +114,7 @@ public class NewPhotoList implements Page {
 
     private List<String> alreadySelectedImageUUIDArrayList;
 
-    public NewPhotoList(Activity activity,OnMediaFragmentInteractionListener listener) {
+    public NewPhotoList(Activity activity, OnMediaFragmentInteractionListener listener) {
         containerActivity = activity;
 
         this.listener = listener;
@@ -189,7 +189,7 @@ public class NewPhotoList implements Page {
 
         mLoadingLayout.setVisibility(View.VISIBLE);
 
-        if (!listener.isRemoteMediaLoaded()) {
+        if (listener != null && !listener.isRemoteMediaLoaded()) {
             return;
         }
 
@@ -803,7 +803,7 @@ public class NewPhotoList implements Page {
 
                         int position = 0;
 
-                        List<Media> mediaList =mMapKeyIsDateValueIsPhotoList.get(media.getTitle());
+                        List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(media.getTitle());
                         LocalCache.photoSliderList.clear();
                         LocalCache.photoSliderList.addAll(mediaList);
 

@@ -341,7 +341,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             retrieveLocalMediaInCamera();
 
-            FNAS.retrieveRemoteMediaShare(mContext);
+            if(!mRemoteMediaShareLoaded){
+                FNAS.retrieveRemoteMediaShare(mContext);
+            }
 
         } else if (action.equals(Util.LOCAL_MEDIA_RETRIEVED)) {
 
@@ -424,7 +426,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private void handleLocalPhotoUploadStateChanged() {
         Log.i(TAG, "local photo upload state changed");
 
-        FNAS.retrieveRemoteMediaMap(mContext);
+        pageList.get(PAGE_PHOTO).refreshView();
     }
 
     private void handleLocalCommentDeleted(OperationEvent operationEvent) {

@@ -74,9 +74,9 @@ public class Util {
     public static final String REMOTE_TOKEN_RETRIEVED = "remote_token_retrieved";
     public static final String REMOTE_DEVICEID_RETRIEVED = "remote_deviceid_retrieved";
     public static final String REMOTE_FILE_RETRIEVED = "remote_file_retrieved";
+    public static final String REMOTE_FILE_SHARE_RETRIEVED = "remote_file_share_retrieved";
 
     public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
-    public static final String REMOTE_FILE_DOWNLOAD_STATE_CHANGED = "remote_file_download_state_changed";
 
     public static final String OPERATION = "operation";
     public static final String OPERATION_RESULT_NAME = "operation_result";
@@ -114,6 +114,7 @@ public class Util {
     public static final String LOGIN_PARAMETER = "/login";
     public static final String DEVICE_ID_PARAMETER = "/libraries";
     public static final String FILE_PARAMETER = "/files";
+    public static final String FILE_SHARE_PARAMETER = "/share";
 
     public static final String FILE_SHARED_WITH_ME_PARAMETER = "/sharedWithMe";
     public static final String FILE_SHARED_WITH_OTHERS_PARAMETER = "/sharedWithOthers";

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 
+import com.winsun.fruitmix.fileModule.download.FileDownloadErrorState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadFinishedState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadState;
@@ -56,6 +57,8 @@ public class FileUtil {
 
         File downloadFile = new File(getDownloadFileStoreFolderPath(), fileDownloadState.getFileName());
 
+        FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
+
         InputStream inputStream = null;
         OutputStream outputStream = null;
 
@@ -94,24 +97,29 @@ public class FileUtil {
 
                 outputStream.flush();
 
-                FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
-
                 fileDownloadItem.setFileDownloadState(new FileDownloadFinishedState(fileDownloadItem));
 
                 return true;
 
             } else {
 
+                fileDownloadItem.setFileDownloadState(new FileDownloadErrorState(fileDownloadItem));
+
                 return false;
 
             }
 
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+
+            fileDownloadItem.setFileDownloadState(new FileDownloadErrorState(fileDownloadItem));
+
             return false;
         } catch (IOException e) {
             e.printStackTrace();
+
+            fileDownloadItem.setFileDownloadState(new FileDownloadErrorState(fileDownloadItem));
+
             return false;
         } finally {
 

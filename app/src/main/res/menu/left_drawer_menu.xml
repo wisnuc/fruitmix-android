@@ -28,6 +28,11 @@
                     android:title="@string/help" />-->
 
         <item
+            android:id="@+id/user_manage"
+            android:icon="@drawable/user_manage"
+            android:title="@string/user_manage" />
+
+        <item
             android:id="@+id/file"
             android:icon="@drawable/cloud"
             android:title="@string/my_file"/>

@@ -5,8 +5,10 @@ import android.content.Context;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.util.FNAS;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,7 +19,7 @@ public class RemoteFolder extends AbstractRemoteFile {
 
     private List<AbstractRemoteFile> abstractRemoteFiles;
 
-    public RemoteFolder(){
+    public RemoteFolder() {
         abstractRemoteFiles = new ArrayList<>();
     }
 
@@ -29,7 +31,7 @@ public class RemoteFolder extends AbstractRemoteFile {
     @Override
     public boolean openAbstractRemoteFile(Context context) {
 
-        FNAS.retrieveRemoteFile(context,getUuid());
+        FNAS.retrieveRemoteFile(context, getUuid());
         return true;
     }
 
@@ -61,7 +63,11 @@ public class RemoteFolder extends AbstractRemoteFile {
 
     @Override
     public String getTimeDateText() {
-        return "";
+        if (getTime().equals(""))
+            return "";
+        else {
+            return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(getTime())));
+        }
     }
 
 }

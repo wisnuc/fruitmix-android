@@ -23,5 +23,4 @@ public class FileDownloadingState extends FileDownloadState {
         EventBus.getDefault().post(new DownloadFileEvent(this));
     }
 
-
 }

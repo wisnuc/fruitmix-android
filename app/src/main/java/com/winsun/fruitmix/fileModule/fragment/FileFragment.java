@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -109,6 +110,8 @@ public class FileFragment extends Fragment {
         retrievedFolderUUIDList = new ArrayList<>();
 
         selectedFileUUIDs = new ArrayList<>();
+
+        Log.i(TAG, "onCreate: ");
     }
 
     @Override
@@ -123,14 +126,9 @@ public class FileFragment extends Fragment {
         fileRecyclerView.setAdapter(fileRecyclerViewAdapter);
         fileRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        Log.i(TAG, "onCreateView: ");
+
         return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -142,21 +140,24 @@ public class FileFragment extends Fragment {
 
             currentFolderUUID = user.getHome();
 
-            retrievedFolderUUIDList.add(currentFolderUUID);
+            if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
+                retrievedFolderUUIDList.add(currentFolderUUID);
+            }
 
             FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
         }
 
+        Log.i(TAG, "onResume: ");
+
     }
 
     @Override
-    public void onStop() {
-        EventBus.getDefault().unregister(this);
+    public void onDestroyView() {
+        super.onDestroyView();
 
-        super.onStop();
+        remoteFileLoaded = false;
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationResult(OperationEvent operationEvent) {
 
         String action = operationEvent.getAction();
@@ -170,10 +171,19 @@ public class FileFragment extends Fragment {
 
                     remoteFileLoaded = true;
 
-                    fileRecyclerView.setVisibility(View.VISIBLE);
+                    List<AbstractRemoteFile> abstractRemoteFileList = LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent) operationEvent).getFolderUUID()).listChildAbstractRemoteFileList();
 
-                    abstractRemoteFiles = LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent) operationEvent).getFolderUUID()).listChildAbstractRemoteFileList();
-                    fileRecyclerViewAdapter.notifyDataSetChanged();
+                    if (abstractRemoteFileList.size() == 0) {
+                        noContentLayout.setVisibility(View.VISIBLE);
+                        fileRecyclerView.setVisibility(View.GONE);
+                    } else {
+                        fileRecyclerView.setVisibility(View.VISIBLE);
+                        noContentLayout.setVisibility(View.GONE);
+
+                        abstractRemoteFiles.clear();
+                        abstractRemoteFiles.addAll(abstractRemoteFileList);
+                        fileRecyclerViewAdapter.notifyDataSetChanged();
+                    }
 
                     break;
                 case FAIL:
@@ -185,8 +195,15 @@ public class FileFragment extends Fragment {
 
     }
 
-    public String getCurrentFolderUUID() {
-        return currentFolderUUID;
+    public boolean notRootFolder() {
+        User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
+        String homeFolderUUID = user.getHome();
+
+        return !currentFolderUUID.equals(homeFolderUUID);
+    }
+
+    public boolean isSelectMode() {
+        return selectMode;
     }
 
     public void onBackPressed() {

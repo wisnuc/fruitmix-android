@@ -18,7 +18,6 @@ import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
 import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -80,6 +79,8 @@ public class FileDownloadFragment extends Fragment {
 
         downloadingItems = new ArrayList<>();
         downloadedItems = new ArrayList<>();
+
+        Log.i(TAG, "onCreate: ");
     }
 
     @Override
@@ -96,6 +97,8 @@ public class FileDownloadFragment extends Fragment {
         fileDownloadedRecyclerView.setAdapter(downloadedFileAdapter);
         fileDownloadedRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        Log.i(TAG, "onCreateView: ");
+
         return view;
     }
 
@@ -104,6 +107,14 @@ public class FileDownloadFragment extends Fragment {
         super.onStart();
 
         EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        downloadedFileAdapter.notifyDataSetChanged();
+        downloadingFileAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -132,7 +143,9 @@ public class FileDownloadFragment extends Fragment {
 
         for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
 
-            if (fileDownloadItem.getDownloadState().equals(DownloadState.FINISHED)) {
+            DownloadState downloadState = fileDownloadItem.getDownloadState();
+
+            if (downloadState.equals(DownloadState.FINISHED) || downloadState.equals(DownloadState.ERROR)) {
                 downloadedItems.add(fileDownloadItem);
             } else {
                 downloadingItems.add(fileDownloadItem);
@@ -236,8 +249,16 @@ public class FileDownloadFragment extends Fragment {
 
             FileDownloadItem fileDownloadItem = downloadedItems.get(position);
 
+            DownloadState downloadState = fileDownloadItem.getDownloadState();
+
             fileName.setText(fileDownloadItem.getFileName());
-            fileSize.setText(FileUtil.formatFileSize(fileDownloadItem.getFileSize()));
+
+            if (downloadState.equals(DownloadState.FINISHED)) {
+                fileSize.setText(FileUtil.formatFileSize(fileDownloadItem.getFileSize()));
+            } else {
+                fileSize.setText(getString(R.string.download_failed));
+            }
+
         }
     }
 
