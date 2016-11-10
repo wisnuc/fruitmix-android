@@ -298,7 +298,10 @@ public class AlbumList implements Page {
             lbDesc.setText(currentItem.getDesc());
             lbDate.setText(currentItem.getDate().substring(0, 10));
 
-            lbOwner.setText(LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreatorUUID()).getUserName());
+            String createUUID = currentItem.getCreatorUUID();
+            if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(createUUID)) {
+                lbOwner.setText(LocalCache.RemoteUserMapKeyIsUUID.get(createUUID).getUserName());
+            }
 
             lbShare.setOnClickListener(new View.OnClickListener() {
                 @Override

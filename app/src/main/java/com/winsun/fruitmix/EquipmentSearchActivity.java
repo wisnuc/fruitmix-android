@@ -54,6 +54,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     ExpandableListView mEquipmentExpandableListView;
     @BindView(R.id.loading_layout)
     LinearLayout mLoadingLayout;
+    @BindView(R.id.add_ip)
+    ImageView addIpImageView;
 
     private Context mContext;
 
@@ -83,7 +85,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         mUserExpandableLists = new ArrayList<>();
         mEquipments = new ArrayList<>();
 
-        Equipment equipment = new Equipment("Winsuc Appliction 141 By Wu", "192.168.5.141", 6666);
+        Equipment equipment = new Equipment("Winsuc Appliction 146 By Wu", "192.168.5.146", 6666);
         getUserList(equipment);
 
         mHandler = new CustomHandler(this, getMainLooper());
@@ -111,6 +113,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         });
 
         mBack.setOnClickListener(this);
+        addIpImageView.setOnClickListener(this);
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
@@ -142,6 +145,12 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         if (requestCode == Util.KEY_LOGIN_REQUEST_CODE && resultCode == RESULT_OK) {
             finish();
+        } else if (requestCode == Util.KEY_MANUAL_INPUT_IP_REQUEST_CODE && resultCode == RESULT_OK) {
+
+            String ip = data.getStringExtra(Util.KEY_MANUAL_INPUT_IP);
+
+            Equipment equipment = new Equipment("Winsuc Appliction " + ip, ip, 6666);
+            getUserList(equipment);
         }
     }
 
@@ -150,6 +159,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         switch (v.getId()) {
             case R.id.back:
                 finish();
+                break;
+            case R.id.add_ip:
+                Intent intent = new Intent(mContext, CreateNewEquipmentActivity.class);
+                startActivityForResult(intent, Util.KEY_MANUAL_INPUT_IP_REQUEST_CODE);
                 break;
             default:
         }
@@ -419,7 +432,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                 try {
                     Log.i(TAG, "login url:" + Util.HTTP + equipment.getHost() + ":" + FNAS.PORT + Util.LOGIN_PARAMETER);
-                    conn = (HttpURLConnection) (new URL(Util.HTTP + equipment.getHost() + ":"  + FNAS.PORT + Util.LOGIN_PARAMETER)).openConnection();
+                    conn = (HttpURLConnection) (new URL(Util.HTTP + equipment.getHost() + ":" + FNAS.PORT + Util.LOGIN_PARAMETER)).openConnection();
                     Log.i(TAG, "response code" + conn.getResponseCode() + "");
                     str = FNAS.ReadFull(conn.getInputStream());
                     json = new JSONArray(str);

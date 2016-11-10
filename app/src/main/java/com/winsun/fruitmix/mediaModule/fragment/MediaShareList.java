@@ -83,7 +83,7 @@ public class MediaShareList implements Page {
     private ImageLoader mImageLoader;
     private Bundle reenterState;
 
-    public MediaShareList(Activity activity_,OnMediaFragmentInteractionListener listener) {
+    public MediaShareList(Activity activity_, OnMediaFragmentInteractionListener listener) {
         containerActivity = activity_;
 
         this.listener = listener;
@@ -403,21 +403,26 @@ public class MediaShareList implements Page {
 
             currentItem = mediaShare;
 
-            nickName = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreatorUUID()).getUserName();
-
-            lbNick.setText(nickName);
             lbTime.setText(Util.formatTime(containerActivity, Long.parseLong(currentItem.getTime())));
 
-            User user = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreatorUUID());
+            String createUUID = currentItem.getCreatorUUID();
+            if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(createUUID)) {
 
-            String avatar;
-            avatar = user.getAvatar();
-            if (avatar.equals("defaultAvatar.jpg")) {
-                avatar = user.getDefaultAvatar();
+                User user = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreatorUUID());
+
+                nickName = user.getUserName();
+                lbNick.setText(nickName);
+
+                String avatar;
+                avatar = user.getAvatar();
+                if (avatar.equals("defaultAvatar.jpg")) {
+                    avatar = user.getDefaultAvatar();
+                }
+                mAvatar.setText(avatar);
+
+                mAvatar.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
             }
-            mAvatar.setText(avatar);
 
-            mAvatar.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
 
             if (currentItem.isAlbum()) {
 
@@ -714,6 +719,7 @@ public class MediaShareList implements Page {
                 picItem.setHeight(picItemRaw.getHeight());
                 picItem.setTime(picItemRaw.getTime());
                 picItem.setSelected(false);
+                picItem.setUploaded(picItemRaw.isUploaded());
                 picItem.setSharing(picItemRaw.isSharing());
                 picItem.setOrientationNumber(picItemRaw.getOrientationNumber());
 

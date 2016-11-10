@@ -92,7 +92,7 @@ public class RetrieveDeviceIdService extends IntentService {
             }
         }
 
-        EventBus.getDefault().post(operationEvent);
+        EventBus.getDefault().postSticky(operationEvent);
 
     }
 

@@ -77,6 +77,14 @@ public class RetrieveRemoteUserService extends IntentService {
             RemoteDataParser<User> parser = new RemoteUserParser();
             users = parser.parse(json);
 
+            List<User> otherUsers = parser.parse(FNAS.loadOtherUsers());
+
+            for (User user:otherUsers){
+                if(!user.getUuid().equals(FNAS.userUUID)){
+                    users.add(user);
+                }
+            }
+
             userConcurrentMap = LocalCache.BuildRemoteUserMapKeyIsUUID(users);
 
             dbUtils.deleteAllRemoteUser();
@@ -94,8 +102,8 @@ public class RetrieveRemoteUserService extends IntentService {
 
         LocalCache.RemoteUserMapKeyIsUUID.putAll(userConcurrentMap);
 
-        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED,OperationResult.SUCCEED);
-        EventBus.getDefault().post(operationEvent);
+        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, OperationResult.SUCCEED);
+        EventBus.getDefault().postSticky(operationEvent);
     }
 
 }

@@ -3,6 +3,7 @@ package com.winsun.fruitmix.fileModule.model;
 import android.content.Context;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.fileModule.download.DownloadState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.util.FileUtil;
@@ -26,29 +27,37 @@ public class RemoteFile extends AbstractRemoteFile {
     @Override
     public boolean openAbstractRemoteFile(Context context) {
 
-        File file = new File(FileUtil.getDownloadFileStoreFolderPath(), getName());
-
-        try {
-            FileUtil.openFile(context, file);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        return FileUtil.openAbstractRemoteFile(context, getName());
 
     }
 
     @Override
     public void downloadFile(Context context) {
 
-        FileDownloadItem fileDownloadItem = new FileDownloadItem(getName(),Long.parseLong(getSize()),getUuid());
+        FileDownloadItem fileDownloadItem = new FileDownloadItem(getName(), Long.parseLong(getSize()), getUuid());
 
         FileDownloadManager.INSTANCE.addFileDownloadItem(fileDownloadItem);
     }
 
     @Override
     public boolean checkIsDownloaded() {
-        return new File(FileUtil.getDownloadFileStoreFolderPath(),getName()).exists();
+        return new File(FileUtil.getDownloadFileStoreFolderPath(), getName()).exists();
+    }
+
+    @Override
+    public boolean checkIsAlreadyDownloading() {
+
+        FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
+
+        List<FileDownloadItem> fileDownloadItems = fileDownloadManager.getFileDownloadItems();
+
+        for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
+            if (fileDownloadItem.getFileUUID().equals(getUuid()) && fileDownloadItem.getDownloadState() == DownloadState.DOWNLOADING) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

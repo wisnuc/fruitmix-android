@@ -126,8 +126,8 @@
             android:layout_height="70dp"
             android:layout_gravity="bottom|end"
             android:layout_margin="10dp"
-            android:src="@drawable/add_album"
-            android:visibility="gone"
+            android:src="@drawable/ic_add_white_24dp"
+            android:visibility="visible"
             app:borderWidth="0dp"/>
 
     </LinearLayout>

@@ -39,8 +39,6 @@ public class DownloadFileTask implements Callable<Boolean> {
     public Boolean call() throws Exception {
 
         //TODO:add file state(downloading,pending,finishing.etc) and scheduler,use state mode and do function:1.log child node 2.log parent node 3.find node and return
-        //TODO:replace eventbus poststicky function of post function for the issue:event is posted before register listener
-        //TODO:add click listener in file download fragment item,show local photo when it upload succeed
 
         FileDownloadUploadInterface fileDownloadUploadInterface = RetrofitInstance.INSTANCE.getRetrofitInstance().create(FileDownloadUploadInterface.class);
 

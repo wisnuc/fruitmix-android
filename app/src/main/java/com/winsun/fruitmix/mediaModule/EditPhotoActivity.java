@@ -75,8 +75,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
     private ProgressDialog mDialog;
 
-    private LocalBroadcastManager localBroadcastManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,8 +103,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         mPhotoList = new ArrayList<>();
         fillPhotoList(mediaShare.getMediaDigestInMediaShareContents().toArray(new String[mediaShare.getMediaContentsListSize()]));
         mAdapter.notifyDataSetChanged();
-
-        localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
     }
 
@@ -182,6 +178,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             picItem.setHeight(picItemRaw.getHeight());
             picItem.setTime(picItemRaw.getTime());
             picItem.setSelected(false);
+            picItem.setUploaded(picItemRaw.isUploaded());
             picItem.setSharing(picItemRaw.isSharing());
             picItem.setOrientationNumber(picItemRaw.getOrientationNumber());
 

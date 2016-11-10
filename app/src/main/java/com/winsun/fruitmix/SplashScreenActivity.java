@@ -47,8 +47,6 @@ public class SplashScreenActivity extends Activity {
 
     public static final int DELAY_TIME_MILLISECOND = 3 * 1000;
 
-    private LocalBroadcastManager localBroadcastManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,9 +56,6 @@ public class SplashScreenActivity extends Activity {
         mContext = this;
 
         LocalCache.Init(this);
-
-        localBroadcastManager = LocalBroadcastManager.getInstance(this);
-
 
         boolean result = FileUtil.createDownloadFileStoreFolder();
 
@@ -85,23 +80,27 @@ public class SplashScreenActivity extends Activity {
         super.onStop();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
-        String action = operationEvent.getAction();
+        OperationEvent stickyEvent = EventBus.getDefault().removeStickyEvent(OperationEvent.class);
 
-        if (action.equals(Util.REMOTE_TOKEN_RETRIEVED)) {
+        if(stickyEvent != null){
+            String action = stickyEvent.getAction();
 
-            handleRemoteTokenRetrieved(operationEvent);
+            if (action.equals(Util.REMOTE_TOKEN_RETRIEVED)) {
 
-        } else if (action.equals(Util.REMOTE_DEVICEID_RETRIEVED)) {
+                handleRemoteTokenRetrieved(stickyEvent);
 
-            handleRemoteDeviceIDRetrieved(operationEvent);
+            } else if (action.equals(Util.REMOTE_DEVICEID_RETRIEVED)) {
 
-        } else if (action.equals(Util.REMOTE_USER_RETRIEVED)) {
+                handleRemoteDeviceIDRetrieved(stickyEvent);
 
-            startNavPagerActivity();
+            } else if (action.equals(Util.REMOTE_USER_RETRIEVED)) {
 
+                startNavPagerActivity();
+
+            }
         }
 
     }
@@ -129,8 +128,6 @@ public class SplashScreenActivity extends Activity {
                 break;
         }
 
-        FNAS.Gateway = mGateway;
-        FNAS.userUUID = mUuid;
         FNAS.retrieveUserMap(mContext);
     }
 
@@ -153,8 +150,6 @@ public class SplashScreenActivity extends Activity {
                 Util.loginState = false;
 
                 FNAS.JWT = mToken;
-                FNAS.Gateway = mGateway;
-                FNAS.userUUID = mUuid;
 
                 LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
 

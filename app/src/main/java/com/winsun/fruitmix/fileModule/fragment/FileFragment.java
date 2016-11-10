@@ -26,6 +26,7 @@ import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListen
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
@@ -356,7 +357,17 @@ public class FileFragment extends Fragment {
                             retrievedFolderUUIDList.add(currentFolderUUID);
                         }
 
-                        if (abstractRemoteFile.checkIsDownloaded()) {
+                        if (FileUtil.checkExternalDirectoryForDownloadAvailableSizeEnough()) {
+
+                            Toast.makeText(getActivity(), getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+
+                        } else if (abstractRemoteFile.checkIsAlreadyDownloading()) {
+
+                            onFileFragmentInteractionListener.changeFilePageToFileDownloadFragment();
+
+                            Toast.makeText(getActivity(), getString(R.string.already_downloading_file), Toast.LENGTH_SHORT).show();
+
+                        } else if (abstractRemoteFile.checkIsDownloaded()) {
 
                             if (!abstractRemoteFile.openAbstractRemoteFile(getActivity())) {
                                 Toast.makeText(getActivity(), getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();

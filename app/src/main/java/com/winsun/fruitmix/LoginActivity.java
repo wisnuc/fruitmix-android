@@ -120,73 +120,94 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         super.onStop();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(OperationEvent operationEvent){
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void handleOperationEvent(OperationEvent operationEvent) {
 
-        String action = operationEvent.getAction();
+        OperationEvent stickyEvent = EventBus.getDefault().removeStickyEvent(OperationEvent.class);
 
-        if (action.equals(Util.REMOTE_TOKEN_RETRIEVED)) {
+        if (stickyEvent != null) {
+            String action = stickyEvent.getAction();
 
-            OperationResult result = operationEvent.getOperationResult();
+            switch (action) {
+                case Util.REMOTE_TOKEN_RETRIEVED: {
 
-            switch (result) {
-                case SUCCEED:
-
-                    if (!mGateway.equals(FNAS.Gateway)) {
-                        LocalCache.CleanAll(LoginActivity.this);
-                    }
-
-                    LocalCache.Init(LoginActivity.this);
-
-                    FNAS.Gateway = mGateway;
-                    FNAS.userUUID = mUserUUid;
-
-                    FNAS.retrieveRemoteDeviceID(mContext);
+                    handleRetrieveToken(operationEvent);
 
                     break;
-                case FAIL:
-                    Util.loginState = false;
-                    Snackbar.make(mLoginBtn, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
-                    break;
-            }
+                }
+                case Util.REMOTE_DEVICEID_RETRIEVED: {
 
-        } else if (action.equals(Util.REMOTE_DEVICEID_RETRIEVED)) {
-
-            OperationResult result = operationEvent.getOperationResult();
-
-            switch (result) {
-                case SUCCEED:
-
-                    Util.loginState = true;
-
-                    FNAS.retrieveUserMap(mContext);
-
-                    LocalCache.saveGateway(FNAS.Gateway, mContext);
-
-                    setGroupNameUserName(mEquipmentGroupName, mEquipmentChildName);
-                    setUuidPassword(FNAS.userUUID, mPwd);
-
+                    handleRetrieveDeviceID(operationEvent);
 
                     break;
-                case FAIL:
-                    Util.loginState = false;
-                    Snackbar.make(mLoginBtn, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
+                }
+                case Util.REMOTE_USER_RETRIEVED:
+
+                    handleRetrieveUser();
 
                     break;
             }
-
-        } else if (action.equals(Util.REMOTE_USER_RETRIEVED)) {
-
-            Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
-            jumpIntent.putExtra(Util.EQUIPMENT_CHILD_NAME, mEquipmentChildName);
-            startActivity(jumpIntent);
-            LoginActivity.this.setResult(RESULT_OK);
-            finish();
-
         }
 
     }
 
+    private void handleRetrieveUser() {
+        Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
+        jumpIntent.putExtra(Util.EQUIPMENT_CHILD_NAME, mEquipmentChildName);
+        startActivity(jumpIntent);
+        LoginActivity.this.setResult(RESULT_OK);
+        finish();
+    }
+
+    private void handleRetrieveDeviceID(OperationEvent operationEvent) {
+        OperationResult result = operationEvent.getOperationResult();
+
+        switch (result) {
+            case SUCCEED:
+
+                Util.loginState = true;
+
+                FNAS.retrieveUserMap(mContext);
+
+                LocalCache.saveGateway(FNAS.Gateway, mContext);
+
+                setGroupNameUserName(mEquipmentGroupName, mEquipmentChildName);
+                setUuidPassword(FNAS.userUUID, mPwd);
+
+
+                break;
+            case FAIL:
+                Util.loginState = false;
+                Snackbar.make(mLoginBtn, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
+
+                break;
+        }
+    }
+
+    private void handleRetrieveToken(OperationEvent operationEvent) {
+        OperationResult result = operationEvent.getOperationResult();
+
+        switch (result) {
+            case SUCCEED:
+
+                if (!mGateway.equals(FNAS.Gateway)) {
+                    LocalCache.CleanAll(LoginActivity.this);
+                }
+
+                LocalCache.Init(LoginActivity.this);
+
+                FNAS.Gateway = mGateway;
+                FNAS.userUUID = mUserUUid;
+
+                FNAS.retrieveRemoteDeviceID(mContext);
+
+                break;
+            case FAIL:
+                Util.loginState = false;
+                Snackbar.make(mLoginBtn, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
+                break;
+        }
+    }
 
 
     @Override
@@ -219,10 +240,9 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
      */
     private void login() {
 
-        FNAS.retrieveRemoteToken(mContext,mGateway,mUserUUid,mPwd);
+        FNAS.retrieveRemoteToken(mContext, mGateway, mUserUUid, mPwd);
 
     }
-
 
 
     private void setGroupNameUserName(String groupName, String userName) {

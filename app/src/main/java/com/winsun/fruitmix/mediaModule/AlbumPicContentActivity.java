@@ -89,8 +89,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private Bundle reenterState;
 
-    private LocalBroadcastManager localBroadcastManager;
-
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -158,8 +156,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         fillPicList(mediaUUIDList);
         ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
 
-        localBroadcastManager = LocalBroadcastManager.getInstance(this);
-
     }
 
     private void initImageLoader() {
@@ -186,7 +182,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(OperationEvent operationEvent){
+    public void handleOperationEvent(OperationEvent operationEvent) {
 
         if (mDialog != null && mDialog.isShowing())
             mDialog.dismiss();
@@ -244,7 +240,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    private void onBackOperation(){
+    private void onBackOperation() {
         if (isOperated)
             setResult(RESULT_OK);
     }
@@ -293,7 +289,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             if (picItemRaw == null) {
                 picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
 
-                if(picItemRaw == null){
+                if (picItemRaw == null) {
                     continue;
                 }
                 media.setLocal(true);
@@ -307,6 +303,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             media.setHeight(picItemRaw.getHeight());
             media.setTime(picItemRaw.getTime());
             media.setSelected(false);
+            media.setUploaded(picItemRaw.isUploaded());
             media.setSharing(picItemRaw.isSharing());
             media.setOrientationNumber(picItemRaw.getOrientationNumber());
 
@@ -486,10 +483,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
 
-        if(Util.getNetworkState(mContext)){
-            FNAS.deleteRemoteMediaShare(mContext,mediaShare);
-        }else {
-            FNAS.deleteLocalMediaShare(mContext,mediaShare);
+        if (Util.getNetworkState(mContext)) {
+            FNAS.deleteRemoteMediaShare(mContext, mediaShare);
+        } else {
+            FNAS.deleteLocalMediaShare(mContext, mediaShare);
         }
 
     }
@@ -505,7 +502,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         if (cloneMediaShare.getViewersListSize() == 0) {
 
 
-            for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
                 cloneMediaShare.addViewer(userUUID);
             }
 
@@ -523,10 +520,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
 
-        if(Util.getNetworkState(mContext)){
-            FNAS.modifyRemoteMediaShare(mContext,cloneMediaShare,requestData);
-        }else {
-            FNAS.modifyLocalMediaShare(mContext,cloneMediaShare,requestData);
+        if (Util.getNetworkState(mContext)) {
+            FNAS.modifyRemoteMediaShare(mContext, cloneMediaShare, requestData);
+        } else {
+            FNAS.modifyLocalMediaShare(mContext, cloneMediaShare, requestData);
         }
 
     }

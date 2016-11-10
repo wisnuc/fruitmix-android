@@ -34,6 +34,15 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
                 media = new Media();
 
                 media.setUuid(itemRaw.optString("digest"));
+
+                String sharing = itemRaw.optString("sharing");
+                media.setSharing(!sharing.equals("2") && !sharing.equals("6"));
+
+                String width = itemRaw.optString("width");
+                if (width.equals("")) {
+                    itemRaw = itemRaw.getJSONObject("meta");
+                }
+
                 media.setWidth(itemRaw.optString("width"));
                 media.setHeight(itemRaw.optString("height"));
 
@@ -44,9 +53,6 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
                 } else {
                     media.setTime(dateTime.substring(0, 4) + "-" + dateTime.substring(5, 7) + "-" + dateTime.substring(8, 10));
                 }
-
-                String sharing = itemRaw.optString("sharing");
-                media.setSharing(!sharing.equals("2") && !sharing.equals("6"));
 
                 int orientationNumber = itemRaw.optInt("exifOrientation");
 

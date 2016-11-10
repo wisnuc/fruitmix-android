@@ -92,6 +92,9 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        //TODO:modify layout to change ui effect same as ios app,modify no content ui effect 
+
         View view = inflater.inflate(R.layout.activity_file_main, container, false);
 
         ButterKnife.bind(this, view);

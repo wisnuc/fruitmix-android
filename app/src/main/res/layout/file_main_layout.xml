@@ -2,7 +2,6 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_file_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -13,7 +12,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
         android:theme="@style/AppTheme.AppBarOverlay"
-        app:elevation="@dimen/appbar_elevation"
+        android:elevation="@dimen/appbar_elevation"
         app:navigationIcon="@drawable/menu"
         app:popupTheme="@style/AppTheme.PopupOverlay"
         app:title="@string/file"

@@ -1,6 +1,8 @@
 package com.winsun.fruitmix.fileModule.fragment;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -8,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -23,6 +26,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +56,12 @@ public class FileDownloadFragment extends Fragment {
     private List<FileDownloadItem> downloadingItems;
     private List<FileDownloadItem> downloadedItems;
 
+    private CustomHandler customHandler;
+
+    public static final int DOWNLOAD_STATE_CHANGED = 0x0010;
+
+    public static final int DELAY_TIME_MILLISECOND = 3 * 1000;
+
     public FileDownloadFragment() {
         // Required empty public constructor
     }
@@ -79,6 +89,8 @@ public class FileDownloadFragment extends Fragment {
 
         downloadingItems = new ArrayList<>();
         downloadedItems = new ArrayList<>();
+
+        customHandler = new CustomHandler(this);
 
         Log.i(TAG, "onCreate: ");
     }
@@ -127,13 +139,37 @@ public class FileDownloadFragment extends Fragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
 
+        Log.i(TAG, "handleEvent: downloadState:" + downloadStateChangedEvent.getDownloadState());
+
+        if (downloadStateChangedEvent.getDownloadState() == DownloadState.FINISHED) {
+            customHandler.sendEmptyMessageDelayed(DOWNLOAD_STATE_CHANGED, DELAY_TIME_MILLISECOND);
+        } else {
+            refreshView();
+        }
+
+    }
+
+    private static class CustomHandler extends Handler {
+
+        WeakReference<FileDownloadFragment> weakReference = null;
+
+        CustomHandler(FileDownloadFragment fileDownloadFragment) {
+            weakReference = new WeakReference<>(fileDownloadFragment);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            weakReference.get().refreshView();
+        }
+    }
+
+    private void refreshView() {
         FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
 
         filterFileDownloadItems(fileDownloadManager.getFileDownloadItems());
 
         downloadingFileAdapter.notifyDataSetChanged();
         downloadedFileAdapter.notifyDataSetChanged();
-
     }
 
     private void filterFileDownloadItems(List<FileDownloadItem> fileDownloadItems) {
@@ -238,6 +274,8 @@ public class FileDownloadFragment extends Fragment {
         TextView fileName;
         @BindView(R.id.file_size)
         TextView fileSize;
+        @BindView(R.id.remote_file_item_layout)
+        LinearLayout downloadedItemLayout;
 
         DownloadedFileAdapterViewHolder(View itemView) {
             super(itemView);
@@ -247,7 +285,7 @@ public class FileDownloadFragment extends Fragment {
 
         void refreshView(int position) {
 
-            FileDownloadItem fileDownloadItem = downloadedItems.get(position);
+            final FileDownloadItem fileDownloadItem = downloadedItems.get(position);
 
             DownloadState downloadState = fileDownloadItem.getDownloadState();
 
@@ -255,9 +293,18 @@ public class FileDownloadFragment extends Fragment {
 
             if (downloadState.equals(DownloadState.FINISHED)) {
                 fileSize.setText(FileUtil.formatFileSize(fileDownloadItem.getFileSize()));
+
+                downloadedItemLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FileUtil.openAbstractRemoteFile(getActivity(), fileDownloadItem.getFileName());
+                    }
+                });
+
             } else {
                 fileSize.setText(getString(R.string.download_failed));
             }
+
 
         }
     }

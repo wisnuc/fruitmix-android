@@ -304,11 +304,11 @@ public class NewPhotoList implements Page {
         mMapKeyIsPhotoPositionValueIsPhotoDate.clear();
         mMapKeyIsPhotoPositionValueIsPhoto.clear();
 
+        List<String> localUploadMediaUUID = new ArrayList<>();
+
         for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
 
-            if (media.isUploaded()) {
-                continue;
-            }
+            localUploadMediaUUID.add(media.getUuid());
 
             date = media.getTime().substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
@@ -328,12 +328,16 @@ public class NewPhotoList implements Page {
             localMedia.setTitle(date);
             localMedia.setThumb(media.getThumb());
             localMedia.setSelected(false);
+            localMedia.setUploaded(media.isUploaded());
             localMedia.setSharing(true);
             localMedia.setOrientationNumber(1);
             mediaList.add(localMedia);
         }
 
         for (Media media : LocalCache.RemoteMediaMapKeyIsUUID.values()) {
+
+            if (localUploadMediaUUID.contains(media.getUuid()))
+                continue;
 
             date = media.getTime().substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
@@ -353,6 +357,7 @@ public class NewPhotoList implements Page {
             remoteMedia.setThumb(media.getThumb());
             remoteMedia.setTitle(date);
             remoteMedia.setSelected(false);
+            remoteMedia.setUploaded(media.isUploaded());
             remoteMedia.setSharing(media.isSharing());
             remoteMedia.setOrientationNumber(media.getOrientationNumber());
             mediaList.add(remoteMedia);

@@ -97,9 +97,9 @@ public class RetrieveTokenService extends IntentService {
             operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED,OperationResult.FAIL);
         }
 
-        EventBus.getDefault().post(operationEvent);
+        EventBus.getDefault().postSticky(operationEvent);
 
-        Log.i(TAG, "handleActionRetrieveToken: send broadcast finish");
+        Log.i(TAG, "handleActionRetrieveToken: post sticky finish");
 
     }
 

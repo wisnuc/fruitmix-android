@@ -47,8 +47,8 @@
     <string name="public_text">分享</string>
     <string name="search_equipment">搜索设备</string>
     <string name="winsun_group_name">Winsun</string>
-    <string name="name_abbreviations">AD</string>
-    <string name="admin_default_name">admin</string>
+    <string name="name_abbreviations">D</string>
+    <string name="admin_default_name">Default</string>
     <string name="comment_text">评论</string>
     <string name="send_comment_hint">说点什么吧…</string>
     <string name="no_user_text">无用户</string>
@@ -112,11 +112,16 @@
     <string name="open_file_failed">对不起，无法打开此文件</string>
     <string name="download_file_failed_toast">对不起，下载文件失败</string>
     <string name="download_file_succeed">文件下载成功</string>
+    <string name="already_downloading_file">该文件正在下载中</string>
     <string name="downloading">正在下载</string>
     <string name="downloaded">已下载</string>
     <string name="download_failed">下载失败</string>
     <string name="no_write_external_storage_permission">对不起，没有写权限</string>
-
+    <string name="manual_add_new_equipment">手动输入ip</string>
+    <string name="ip_title_text">IP</string>
+    <string name="edit_ip_text">请输入ip</string>
+    <string name="finishAppToast">请再次点击返回键以退出应用</string>
+    <string name="no_enough_space">存储空间不足，请确认</string>
 
     <!-- finish add by liang.wu-->
 

@@ -25,6 +25,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.winsun.fruitmix.fragment.FileMainFragment;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
@@ -68,6 +69,9 @@ public class NavPagerActivity extends AppCompatActivity
     public static final int PAGE_MEDIA = 0;
 
     private int currentPage = 0;
+
+    private static final int TIME_INTERNAL = 2 * 1000;
+    private long backPressedTimeMillis = 0;
 
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
@@ -200,12 +204,33 @@ public class NavPagerActivity extends AppCompatActivity
             if (fileMainFragment.handleBackPressedOrNot()) {
                 fileMainFragment.handleBackPressed();
             } else {
-                super.onBackPressed();
+                finishApp();
             }
+        } else if (currentPage == PAGE_MEDIA) {
+
+            if (mediaMainFragment.handleBackPressedOrNot()) {
+                mediaMainFragment.handleBackPressed();
+            } else {
+                finishApp();
+            }
+
         } else {
-            super.onBackPressed();
+            finishApp();
         }
     }
+
+    private void finishApp() {
+
+        if (System.currentTimeMillis() - backPressedTimeMillis < TIME_INTERNAL) {
+            super.onBackPressed();
+        } else {
+
+            Toast.makeText(mContext, getString(R.string.finishAppToast), Toast.LENGTH_SHORT).show();
+        }
+
+        backPressedTimeMillis = System.currentTimeMillis();
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {

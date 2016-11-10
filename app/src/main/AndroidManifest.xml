@@ -192,6 +192,9 @@
             android:name=".services.RetrieveRemoteFileShareService"
             android:exported="false">
         </service>
+
+        <activity android:name=".CreateNewEquipmentActivity">
+        </activity>
     </application>
 
 </manifest>

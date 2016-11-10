@@ -154,7 +154,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         mManager = LocalBroadcastManager.getInstance(mContext);
 
-
         initPageList();
 
     }
@@ -303,6 +302,28 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         });
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN,sticky = true)
+    public void handleStickyOperationEvent(OperationEvent operationEvent){
+        OperationEvent stickyEvent = EventBus.getDefault().removeStickyEvent(OperationEvent.class);
+
+        if(stickyEvent != null){
+            String action = operationEvent.getAction();
+
+            if (action.equals(Util.REMOTE_MEDIA_RETRIEVED)) {
+                Log.i(TAG, "remote media loaded");
+
+                mRemoteMediaLoaded = true;
+
+                pageList.get(PAGE_PHOTO).refreshView();
+
+                if(!mRemoteMediaShareLoaded){
+                    FNAS.retrieveRemoteMediaShare(mContext);
+                }
+
+            }
+        }
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
@@ -331,19 +352,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         } else if (action.equals(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED)) {
 
             handleLocalPhotoUploadStateChanged();
-
-        } else if (action.equals(Util.REMOTE_MEDIA_RETRIEVED)) {
-            Log.i(TAG, "remote media loaded");
-
-            mRemoteMediaLoaded = true;
-
-            pageList.get(PAGE_PHOTO).refreshView();
-
-            retrieveLocalMediaInCamera();
-
-            if(!mRemoteMediaShareLoaded){
-                FNAS.retrieveRemoteMediaShare(mContext);
-            }
 
         } else if (action.equals(Util.LOCAL_MEDIA_RETRIEVED)) {
 
@@ -630,6 +638,16 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         if (tabNum == NavPageBar.TAB_ALBUM) {
             showTips();
         }
+    }
+
+    public boolean handleBackPressedOrNot(){
+        return sInChooseMode;
+    }
+
+    public void handleBackPressed(){
+
+        hideChooseHeader();
+
     }
 
     @Override

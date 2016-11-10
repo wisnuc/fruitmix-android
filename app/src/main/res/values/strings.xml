@@ -211,8 +211,8 @@
     <string name="private_text">Private</string>
     <string name="search_equipment">Search Equipment</string>
     <string name="winsun_group_name">Winsun</string>
-    <string name="name_abbreviations">AD</string>
-    <string name="admin_default_name">admin</string>
+    <string name="name_abbreviations">D</string>
+    <string name="admin_default_name">Default</string>
     <string name="comment_text">Comment</string>
     <string name="send_comment_hint">Say something here…</string>
     <string name="no_user_text">No User</string>
@@ -277,10 +277,16 @@
     <string name="open_file_failed">Sorry,open this file failed</string>
     <string name="download_file_failed_toast">Sorry,download this file failed</string>
     <string name="download_file_succeed">Download this file succeed!</string>
+    <string name="already_downloading_file">this file is already downloading</string>
     <string name="downloading">Downloading</string>
     <string name="downloaded">Downloaded</string>
     <string name="download_failed">Download failed</string>
     <string name="no_write_external_storage_permission">No write external storage permission</string>
+    <string name="manual_add_new_equipment">Manual add new equipment</string>
+    <string name="ip_title_text">IP</string>
+    <string name="edit_ip_text">Please enter ip</string>
+    <string name="finishAppToast">Please click BACK again to exit</string>
+    <string name="no_enough_space">No enough space</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

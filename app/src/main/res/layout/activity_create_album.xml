@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="com.winsun.fruitmix.MainActivity">
+                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                 xmlns:tools="http://schemas.android.com/tools"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="match_parent"
+                                                 android:fitsSystemWindows="true"
+                                                 tools:context="com.winsun.fruitmix.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        android:stateListAnimator="@animator/appbar_elevation">
+        android:stateListAnimator="@animator/appbar_elevation"
+        android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -31,7 +31,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/arrow_back" />
+                    android:src="@drawable/arrow_back"/>
 
                 <TextView
                     android:id="@+id/layout_title"
@@ -42,7 +42,7 @@
                     android:layout_toRightOf="@+id/back"
                     android:text="@string/modify_album_text"
                     android:textColor="@color/white"
-                    android:textSize="18dp" />
+                    android:textSize="18dp"/>
 
                 <TextView
                     android:id="@+id/ok"
@@ -53,7 +53,7 @@
                     android:layout_marginRight="10dp"
                     android:text="@string/ok"
                     android:textColor="@color/white"
-                    android:textSize="16dp" />
+                    android:textSize="16dp"/>
 
             </RelativeLayout>
 
@@ -74,7 +74,7 @@
             android:layout_marginLeft="20dp"
             android:text="@string/title_text"
             android:textColor="@color/album_title_text"
-            android:textSize="24dp" />
+            android:textSize="24dp"/>
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/title_textlayout"
@@ -87,11 +87,11 @@
                 android:id="@+id/title_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/title_text"
                 android:gravity="bottom"
+                android:hint="@string/title_text"
                 android:inputType="textAutoComplete"
                 android:textColor="@color/content_text"
-                android:textColorHighlight="#f57c00" />
+                android:textColorHighlight="#f57c00"/>
 
         </android.support.design.widget.TextInputLayout>
 
@@ -102,7 +102,7 @@
             android:layout_marginTop="20dp"
             android:text="@string/description_text"
             android:textColor="@color/album_desc_text"
-            android:textSize="24dp" />
+            android:textSize="24dp"/>
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -120,7 +120,7 @@
                 android:inputType="textMultiLine"
                 android:minLines="2"
                 android:textColor="@color/content_text"
-                android:textSize="16dp" />
+                android:textSize="16dp"/>
 
         </android.support.design.widget.TextInputLayout>
 
@@ -134,14 +134,14 @@
             <CheckBox
                 android:id="@+id/sPublic"
                 android:layout_width="32dp"
-                android:layout_height="32dp" />
+                android:layout_height="32dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/public_text"
                 android:textColor="@color/content_text"
-                android:textSize="16dp" />
+                android:textSize="16dp"/>
 
         </LinearLayout>
 
@@ -155,14 +155,14 @@
             <CheckBox
                 android:id="@+id/set_maintainer"
                 android:layout_width="32dp"
-                android:layout_height="32dp" />
+                android:layout_height="32dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/set_maintainer"
                 android:textColor="@color/content_text"
-                android:textSize="16dp" />
+                android:textSize="16dp"/>
 
         </LinearLayout>
 

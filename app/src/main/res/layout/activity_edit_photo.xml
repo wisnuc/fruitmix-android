@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:stateListAnimator="@animator/appbar_elevation">
 
-
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -59,7 +58,7 @@
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="60dp"
         android:layout_marginRight="30dp"
-        android:src="@drawable/add_album"/>
+        android:src="@drawable/ic_add_white_24dp"/>
 
 
 </android.support.design.widget.CoordinatorLayout>

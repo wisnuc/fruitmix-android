@@ -35,15 +35,14 @@ public class RemoteUserParser implements RemoteDataParser<User> {
                 user.setUserName(itemRaw.optString("username"));
 
                 String avatar = itemRaw.optString("avatar");
-                if(avatar.equals("null")){
+                if (avatar.equals("null")) {
                     user.setAvatar("defaultAvatar.jpg");
-                }else {
+                } else {
                     user.setAvatar(avatar);
                 }
 
-                if (itemRaw.has("email")) {
-                    user.setEmail(itemRaw.optString("email"));
-                }
+                user.setEmail(itemRaw.optString("email"));
+
                 StringBuilder stringBuilder = new StringBuilder();
                 String[] splitStrings = user.getUserName().split(" ");
                 for (String splitString : splitStrings) {

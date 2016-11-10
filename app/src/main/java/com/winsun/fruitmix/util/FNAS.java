@@ -93,6 +93,12 @@ public class FNAS {
 
     }
 
+    public static String loadOtherUsers() throws Exception{
+
+        return FNAS.RemoteCall(Util.LOGIN_PARAMETER);
+
+    }
+
     public static String loadMedia() throws Exception {
 
         return FNAS.RemoteCall(Util.MEDIA_PARAMETER); // get all pictures;

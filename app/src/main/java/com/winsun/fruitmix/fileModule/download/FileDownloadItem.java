@@ -53,4 +53,8 @@ public class FileDownloadItem {
     public DownloadState getDownloadState() {
         return fileDownloadState.getDownloadState();
     }
+
+    public String getFileUUID() {
+        return fileUUID;
+    }
 }

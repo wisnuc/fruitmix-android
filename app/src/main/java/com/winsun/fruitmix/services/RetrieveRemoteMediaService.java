@@ -110,7 +110,7 @@ public class RetrieveRemoteMediaService extends IntentService {
         LocalCache.RemoteMediaMapKeyIsUUID.putAll(mediaConcurrentMap);
 
         OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_RETRIEVED, OperationResult.SUCCEED);
-        EventBus.getDefault().post(operationEvent);
+        EventBus.getDefault().postSticky(operationEvent);
 
 
     }

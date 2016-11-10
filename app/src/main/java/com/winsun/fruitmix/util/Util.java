@@ -105,6 +105,8 @@ public class Util {
     public static final int KEY_CREATE_ALBUM_REQUEST_CODE = 104;
     public static final int KEY_ALBUM_CONTENT_REQUEST_CODE = 105;
     public static final int KEY_CREATE_SHARE_REQUEST_CODE = 106;
+    public static final int KEY_MANUAL_INPUT_IP_REQUEST_CODE = 107;
+
 
     public static final String HTTP = "http://";
     public static final String MEDIASHARE_PARAMETER = "/mediashare";
@@ -146,6 +148,8 @@ public class Util {
     public static final String KEY_SHOW_SOFT_INPUT_WHEN_ENTER = "key_show_soft_input_when_enter";
 
     public static final String KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA = "key_modify_remote_mediashare_request_data";
+
+    public static final String KEY_MANUAL_INPUT_IP = "key_manual_input_ip";
 
     public static boolean loginState = false;
 

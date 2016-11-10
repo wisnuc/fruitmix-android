@@ -3,7 +3,10 @@ package com.winsun.fruitmix.util;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.os.StatFs;
+import android.support.v4.content.ContextCompat;
 
 import com.winsun.fruitmix.fileModule.download.FileDownloadErrorState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadFinishedState;
@@ -32,6 +35,25 @@ public class FileUtil {
     public static boolean checkExternalStorageState() {
         String state = Environment.getExternalStorageState();
         return state.equals(Environment.MEDIA_MOUNTED) || state.equals(Environment.MEDIA_MOUNTED_READ_ONLY);
+    }
+
+    public static boolean checkExternalDirectoryForDownloadAvailableSizeEnough() {
+
+        StatFs statFs = new StatFs(getExternalDirectoryPathForDownload());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+
+            long availableBlocks = statFs.getAvailableBlocksLong();
+            long blockSize = statFs.getBlockSizeLong();
+
+            return availableBlocks * blockSize > 100 * 1024 * 1024;
+
+        } else {
+            int availableBlocks = statFs.getAvailableBlocks();
+            int blockSize = statFs.getBlockSize();
+
+            return availableBlocks * blockSize > 100 * 1024 * 1024;
+        }
     }
 
     public static String getExternalStorageDirectoryPath() {
@@ -135,6 +157,20 @@ public class FileUtil {
                 ex.printStackTrace();
             }
 
+        }
+
+    }
+
+    public static boolean openAbstractRemoteFile(Context context, String fileName) {
+
+        File file = new File(FileUtil.getDownloadFileStoreFolderPath(), fileName);
+
+        try {
+            FileUtil.openFile(context, file);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
 
     }

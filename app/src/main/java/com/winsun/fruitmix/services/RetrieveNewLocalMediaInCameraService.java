@@ -93,6 +93,8 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
             media.setTime(itemRaw.get("lastModified"));
             media.setUploaded(false);
             media.setSelected(false);
+            media.setOrientationNumber(1);
+            media.setSharing(true);
             media.setUuid(uuid);
 
             DBUtils dbUtils = DBUtils.getInstance(this);
@@ -116,10 +118,10 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
         }
 
         OperationEvent operationEvent;
-        if(retrieveMediaCount > 0){
-            operationEvent = new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED,OperationResult.SUCCEED);
-        }else {
-            operationEvent = new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED,OperationResult.FAIL);
+        if (retrieveMediaCount > 0) {
+            operationEvent = new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, OperationResult.SUCCEED);
+        } else {
+            operationEvent = new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, OperationResult.FAIL);
         }
         EventBus.getDefault().post(operationEvent);
     }

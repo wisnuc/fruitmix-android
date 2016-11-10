@@ -34,6 +34,10 @@ public abstract class AbstractRemoteFile {
 
     public abstract boolean checkIsDownloaded();
 
+    public boolean checkIsAlreadyDownloading(){
+        return true;
+    }
+
     public abstract List<AbstractRemoteFile> listChildAbstractRemoteFileList();
 
     public abstract void initChildAbstractRemoteFileList(List<AbstractRemoteFile> abstractRemoteFiles);
