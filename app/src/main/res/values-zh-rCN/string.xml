@@ -123,6 +123,11 @@
     <string name="finishAppToast">请再次点击返回键以退出应用</string>
     <string name="no_enough_space">存储空间不足，请确认</string>
 
+    <string name="cancel">取消</string>
+    <string name="clear_select_item">清除选择</string>
+    <string name="download_select_item">下载所选项</string>
+    <string name="download_the_item">下载该文件</string>
+
     <!-- finish add by liang.wu-->
 
 

@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import com.winsun.fruitmix.fileModule.download.DownloadState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
+import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
 import com.winsun.fruitmix.util.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -28,6 +30,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -62,8 +65,18 @@ public class FileDownloadFragment extends Fragment {
 
     public static final int DELAY_TIME_MILLISECOND = 3 * 1000;
 
+    private boolean selectMode = false;
+
+    private List<String> selectDownloadedItemUUID;
+
+    private OnFileFragmentInteractionListener onFileFragmentInteractionListener;
+
     public FileDownloadFragment() {
         // Required empty public constructor
+    }
+
+    public void setOnFileFragmentInteractionListener(OnFileFragmentInteractionListener onFileFragmentInteractionListener) {
+        this.onFileFragmentInteractionListener = onFileFragmentInteractionListener;
     }
 
     /**
@@ -73,8 +86,10 @@ public class FileDownloadFragment extends Fragment {
      * @return A new instance of fragment FileDownloadFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static FileDownloadFragment newInstance() {
+    public static FileDownloadFragment newInstance(OnFileFragmentInteractionListener onFileFragmentInteractionListener) {
         FileDownloadFragment fragment = new FileDownloadFragment();
+        fragment.setOnFileFragmentInteractionListener(onFileFragmentInteractionListener);
+
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -91,6 +106,8 @@ public class FileDownloadFragment extends Fragment {
         downloadedItems = new ArrayList<>();
 
         customHandler = new CustomHandler(this);
+
+        selectDownloadedItemUUID = new ArrayList<>();
 
         Log.i(TAG, "onCreate: ");
     }
@@ -191,6 +208,78 @@ public class FileDownloadFragment extends Fragment {
 
     }
 
+    public List<BottomMenuItem> getMainMenuItem() {
+
+        List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
+
+        BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel)) {
+            @Override
+            public void handleOnClickEvent() {
+                onFileFragmentInteractionListener.dismissBottomSheetDialog();
+            }
+        };
+
+        bottomMenuItems.add(cancelMenuItem);
+
+        if (selectMode) {
+
+            BottomMenuItem clearSelectItem = new BottomMenuItem(getString(R.string.clear_select_item)) {
+                @Override
+                public void handleOnClickEvent() {
+                    selectMode = false;
+                    refreshSelectMode(selectMode);
+                }
+            };
+
+            bottomMenuItems.add(clearSelectItem);
+
+            BottomMenuItem deleteSelectItem = new BottomMenuItem(getString(R.string.delete_text)) {
+                @Override
+                public void handleOnClickEvent() {
+
+                    for (String fileUUID : selectDownloadedItemUUID) {
+
+                        Iterator<FileDownloadItem> itemIterator = downloadedItems.iterator();
+                        while (itemIterator.hasNext()) {
+                            FileDownloadItem fileDownloadItem = itemIterator.next();
+                            if (fileDownloadItem.getFileUUID().equals(fileUUID))
+                                itemIterator.remove();
+                        }
+
+                    }
+
+                    downloadedFileAdapter.notifyDataSetChanged();
+
+                }
+            };
+
+            bottomMenuItems.add(deleteSelectItem);
+
+        } else {
+
+            BottomMenuItem selectItem = new BottomMenuItem(getString(R.string.choose_text)) {
+                @Override
+                public void handleOnClickEvent() {
+                    selectMode = true;
+                    refreshSelectMode(selectMode);
+                }
+            };
+
+            bottomMenuItems.add(selectItem);
+
+        }
+
+        return bottomMenuItems;
+    }
+
+    private void refreshSelectMode(boolean selectMode) {
+        this.selectMode = selectMode;
+
+        if (!selectMode) {
+
+        }
+    }
+
 
     class DownloadingFileAdapter extends RecyclerView.Adapter<DownloadingFileAdapterViewHolder> {
 
@@ -270,6 +359,10 @@ public class FileDownloadFragment extends Fragment {
 
     class DownloadedFileAdapterViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.file_icon_bg)
+        ImageView fileIconBg;
+        @BindView(R.id.file_icon)
+        ImageView fileIcon;
         @BindView(R.id.file_name)
         TextView fileName;
         @BindView(R.id.file_size)
@@ -287,25 +380,63 @@ public class FileDownloadFragment extends Fragment {
 
             final FileDownloadItem fileDownloadItem = downloadedItems.get(position);
 
-            DownloadState downloadState = fileDownloadItem.getDownloadState();
+            final DownloadState downloadState = fileDownloadItem.getDownloadState();
 
             fileName.setText(fileDownloadItem.getFileName());
 
             if (downloadState.equals(DownloadState.FINISHED)) {
                 fileSize.setText(FileUtil.formatFileSize(fileDownloadItem.getFileSize()));
-
-                downloadedItemLayout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FileUtil.openAbstractRemoteFile(getActivity(), fileDownloadItem.getFileName());
-                    }
-                });
-
             } else {
                 fileSize.setText(getString(R.string.download_failed));
             }
 
+            if (selectMode) {
+                fileIconBg.setVisibility(View.VISIBLE);
+                fileIcon.setVisibility(View.VISIBLE);
 
+                downloadedItemLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        toggleFileIconBgResource(fileDownloadItem.getFileUUID());
+                        toggleFileInSelectedFile(fileDownloadItem.getFileUUID());
+                    }
+                });
+
+            } else {
+                fileIconBg.setVisibility(View.INVISIBLE);
+                fileIcon.setVisibility(View.VISIBLE);
+
+                downloadedItemLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        if (downloadState.equals(DownloadState.FINISHED)) {
+                            FileUtil.openAbstractRemoteFile(getActivity(), fileDownloadItem.getFileName());
+                        }
+
+                    }
+                });
+
+            }
+
+        }
+
+        private void toggleFileIconBgResource(String fileUUID) {
+            if (selectDownloadedItemUUID.contains(fileUUID)) {
+                fileIconBg.setBackgroundResource(R.drawable.check_circle_selected);
+                fileIcon.setVisibility(View.INVISIBLE);
+            } else {
+                fileIconBg.setBackgroundResource(R.drawable.round_circle);
+                fileIcon.setVisibility(View.VISIBLE);
+            }
+        }
+
+        private void toggleFileInSelectedFile(String fileUUID) {
+            if (selectDownloadedItemUUID.contains(fileUUID)) {
+                selectDownloadedItemUUID.remove(fileUUID);
+            } else {
+                selectDownloadedItemUUID.add(fileUUID);
+            }
         }
     }
 

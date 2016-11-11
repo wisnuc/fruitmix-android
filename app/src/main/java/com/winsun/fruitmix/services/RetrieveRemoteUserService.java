@@ -79,11 +79,7 @@ public class RetrieveRemoteUserService extends IntentService {
 
             List<User> otherUsers = parser.parse(FNAS.loadOtherUsers());
 
-            for (User user:otherUsers){
-                if(!user.getUuid().equals(FNAS.userUUID)){
-                    users.add(user);
-                }
-            }
+            addDifferentUsers(users, otherUsers);
 
             userConcurrentMap = LocalCache.BuildRemoteUserMapKeyIsUUID(users);
 
@@ -104,6 +100,21 @@ public class RetrieveRemoteUserService extends IntentService {
 
         OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, OperationResult.SUCCEED);
         EventBus.getDefault().postSticky(operationEvent);
+    }
+
+    private void addDifferentUsers(List<User> users, List<User> otherUsers) {
+        for (User otherUser : otherUsers) {
+            int i;
+            for (i = 0; i < users.size(); i++) {
+                if (otherUser.getUuid().equals(users.get(i).getUuid())) {
+                    break;
+                }
+            }
+            if (i >= users.size()) {
+                users.add(otherUser);
+            }
+
+        }
     }
 
 }

@@ -1,52 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_file_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        android:elevation="@dimen/appbar_elevation"
-        app:navigationIcon="@drawable/menu"
-        app:popupTheme="@style/AppTheme.PopupOverlay"
-        app:title="@string/file"
-        app:titleTextAppearance="@style/CollapsedToolbarTitle">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/right"
-            android:layout_width="wrap_content"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            android:elevation="@dimen/appbar_elevation"
+            android:theme="@style/AppTheme.AppBarOverlay"
+            app:navigationIcon="@drawable/menu"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:title="@string/file"
+            app:titleTextAppearance="@style/CollapsedToolbarTitle">
+
+            <ImageView
+                android:id="@+id/file_main_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginRight="15dp"
+                android:src="@drawable/ic_menu"
+                android:visibility="visible"/>
+
+        </android.support.v7.widget.Toolbar>
+
+        <android.support.design.widget.BottomNavigationView
+            android:id="@+id/bottom_navigation_view"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|end"
-            android:layout_marginRight="15dp"
-            android:text="@string/choose_text"
-            android:textColor="@color/white"
-            android:textSize="18dp"
-            android:visibility="visible"/>
+            android:layout_alignParentBottom="true"
+            app:itemBackground="@color/colorPrimary"
+            app:itemIconTint="@color/white"
+            app:itemTextColor="@color/white"
+            app:menu="@menu/file_bottom_menu"/>
 
-    </android.support.v7.widget.Toolbar>
+        <com.winsun.fruitmix.component.UnscrollableViewPager
+            android:id="@+id/file_main_viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/bottom_navigation_view"
+            android:layout_below="@id/toolbar"/>
 
+    </RelativeLayout>
 
-    <android.support.design.widget.BottomNavigationView
-        android:id="@+id/bottom_navigation_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        app:itemBackground="@color/colorPrimary"
-        app:itemIconTint="@color/white"
-        app:itemTextColor="@color/white"
-        app:menu="@menu/file_bottom_menu"/>
-
-    <com.winsun.fruitmix.component.UnscrollableViewPager
-        android:id="@+id/file_main_viewpager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/bottom_navigation_view"
-        android:layout_below="@id/toolbar"/>
-
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

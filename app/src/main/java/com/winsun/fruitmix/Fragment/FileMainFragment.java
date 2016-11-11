@@ -5,16 +5,21 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.R;
@@ -24,12 +29,16 @@ import com.winsun.fruitmix.fileModule.fragment.FileDownloadFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileShareFragment;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
+import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,8 +56,8 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
     UnscrollableViewPager fileMainViewPager;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
-    @BindView(R.id.right)
-    TextView rightTextView;
+    @BindView(R.id.file_main_menu)
+    ImageView fileMainMenu;
 
     public static final int PAGE_FILE_SHARE = 0;
     public static final int PAGE_FILE = 1;
@@ -62,6 +71,11 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
 
     private OnMainFragmentInteractionListener mListener;
 
+    private BottomSheetDialog bottomSheetDialog;
+
+    private View bottomSheetView;
+
+    private BottomSheetRecyclerViewAdapter bottomSheetRecyclerViewAdapter;
 
     public FileMainFragment() {
         // Required empty public constructor
@@ -87,63 +101,142 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
 
         context = getActivity();
 
+        initBottomSheetDialog();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        //TODO:modify layout to change ui effect same as ios app,modify no content ui effect 
+        //TODO:modify layout to change ui effect same as ios app,modify no content ui effect
 
         View view = inflater.inflate(R.layout.activity_file_main, container, false);
 
         ButterKnife.bind(this, view);
 
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        initToolbar();
 
-        setHasOptionsMenu(true);
+        initViewPager();
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.switchDrawerOpenState();
-            }
-        });
+        initNavigationView();
 
-        rightTextView.setOnClickListener(new View.OnClickListener() {
+        fileMainMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if (fileFragment.isSelectMode()) {
-                    rightTextView.setText(getString(R.string.select_file));
-                    fileFragment.refreshSelectMode(false);
-                } else {
-                    rightTextView.setText(getString(R.string.quit_select_file));
-                    fileFragment.refreshSelectMode(true);
+                if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
+                    showBottomSheetDialog(fileFragment.getMainMenuItem());
+                } else if (fileMainViewPager.getCurrentItem() == PAGE_FILE_DOWNLOAD) {
+                    showBottomSheetDialog(fileDownloadFragment.getMainMenuItem());
                 }
 
             }
         });
 
-        FilePageAdapter filePageAdapter = new FilePageAdapter(getActivity().getSupportFragmentManager());
 
-        fileMainViewPager.setAdapter(filePageAdapter);
-        fileMainViewPager.setCurrentItem(PAGE_FILE);
+        return view;
+    }
 
-        fileMainViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
+    @Override
+    public void dismissBottomSheetDialog() {
+        if (bottomSheetDialog != null && bottomSheetDialog.isShowing())
+            bottomSheetDialog.dismiss();
+    }
 
-                if (position == PAGE_FILE) {
-                    rightTextView.setVisibility(View.VISIBLE);
-                } else {
-                    rightTextView.setVisibility(View.GONE);
+    @Override
+    public void showBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
+
+        bottomSheetRecyclerViewAdapter.setBottomMenuItems(bottomMenuItems);
+        bottomSheetRecyclerViewAdapter.notifyDataSetChanged();
+
+        View parent = (View) bottomSheetView.getParent();
+        BottomSheetBehavior behavior = BottomSheetBehavior.from(parent);
+        behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+/*        bottomSheetView.measure(0, 0);
+        behavior.setPeekHeight(bottomSheetView.getMeasuredHeight());
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) parent.getLayoutParams();
+        params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+        parent.setLayoutParams(params);*/
+        bottomSheetDialog.show();
+
+    }
+
+    private void initBottomSheetDialog() {
+
+        bottomSheetView = View.inflate(getActivity(), R.layout.bottom_sheet_dialog_layout, null);
+
+        RecyclerView bottomSheetRecyclerView = (RecyclerView) bottomSheetView.findViewById(R.id.bottom_sheet_recyclerview);
+
+        bottomSheetRecyclerViewAdapter = new BottomSheetRecyclerViewAdapter();
+
+        bottomSheetRecyclerView.setAdapter(bottomSheetRecyclerViewAdapter);
+
+        bottomSheetRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        bottomSheetDialog = new BottomSheetDialog(getActivity());
+
+        bottomSheetDialog.setContentView(bottomSheetView);
+    }
+
+    private class BottomSheetRecyclerViewAdapter extends RecyclerView.Adapter<BottomSheetRecyclerViewViewHolder> {
+
+        private List<BottomMenuItem> bottomMenuItems;
+
+        BottomSheetRecyclerViewAdapter() {
+            bottomMenuItems = new ArrayList<>();
+        }
+
+        @Override
+        public BottomSheetRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            View view = LayoutInflater.from(getActivity()).inflate(R.layout.bottom_sheet_dialog_item, parent, false);
+
+            return new BottomSheetRecyclerViewViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(BottomSheetRecyclerViewViewHolder holder, int position) {
+            holder.refreshView(bottomMenuItems.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return bottomMenuItems.size();
+        }
+
+        void setBottomMenuItems(List<BottomMenuItem> bottomMenuItems) {
+            this.bottomMenuItems.clear();
+            this.bottomMenuItems.addAll(bottomMenuItems);
+        }
+    }
+
+
+    class BottomSheetRecyclerViewViewHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.item_text)
+        TextView itemTextView;
+
+        BottomSheetRecyclerViewViewHolder(View itemView) {
+            super(itemView);
+
+            ButterKnife.bind(this, itemView);
+        }
+
+        public void refreshView(final BottomMenuItem bottomMenuItem) {
+            itemTextView.setText(bottomMenuItem.getText());
+
+            itemTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    bottomMenuItem.handleOnClickEvent();
                 }
+            });
+        }
+    }
 
-            }
-        });
 
+    private void initNavigationView() {
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -163,9 +256,38 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
                 return true;
             }
         });
+    }
 
+    private void initViewPager() {
+        FilePageAdapter filePageAdapter = new FilePageAdapter(getActivity().getSupportFragmentManager());
 
-        return view;
+        fileMainViewPager.setAdapter(filePageAdapter);
+        fileMainViewPager.setCurrentItem(PAGE_FILE);
+
+        fileMainViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+
+                if (position != PAGE_FILE_SHARE) {
+                    fileMainMenu.setVisibility(View.VISIBLE);
+                } else {
+                    fileMainMenu.setVisibility(View.GONE);
+                }
+
+            }
+        });
+    }
+
+    private void initToolbar() {
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.switchDrawerOpenState();
+            }
+        });
     }
 
     @Override
@@ -260,7 +382,6 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
         fileMainViewPager.setCurrentItem(PAGE_FILE_DOWNLOAD);
     }
 
-
     private class FilePageAdapter extends FragmentPagerAdapter {
 
         FilePageAdapter(FragmentManager manager) {
@@ -278,7 +399,7 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
                     fileShareFragment = FileShareFragment.newInstance();
                     return fileShareFragment;
                 case PAGE_FILE_DOWNLOAD:
-                    fileDownloadFragment = FileDownloadFragment.newInstance();
+                    fileDownloadFragment = FileDownloadFragment.newInstance(FileMainFragment.this);
                     return fileDownloadFragment;
                 default:
                     return null;

@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.NavPageBar;
+import com.winsun.fruitmix.eventbus.MediaOperationEvent;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
@@ -302,21 +303,25 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         });
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN,sticky = true)
-    public void handleStickyOperationEvent(OperationEvent operationEvent){
-        OperationEvent stickyEvent = EventBus.getDefault().removeStickyEvent(OperationEvent.class);
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void handleStickyOperationEvent(MediaOperationEvent operationEvent) {
+        MediaOperationEvent stickyEvent = EventBus.getDefault().getStickyEvent(MediaOperationEvent.class);
 
-        if(stickyEvent != null){
+        Log.i(TAG, "handleStickyOperationEvent: action:" + stickyEvent.getAction());
+
+        if (stickyEvent != null) {
             String action = operationEvent.getAction();
 
             if (action.equals(Util.REMOTE_MEDIA_RETRIEVED)) {
                 Log.i(TAG, "remote media loaded");
 
+                EventBus.getDefault().removeStickyEvent(stickyEvent);
+
                 mRemoteMediaLoaded = true;
 
                 pageList.get(PAGE_PHOTO).refreshView();
 
-                if(!mRemoteMediaShareLoaded){
+                if (!mRemoteMediaShareLoaded) {
                     FNAS.retrieveRemoteMediaShare(mContext);
                 }
 
@@ -328,6 +333,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void handleOperationEvent(OperationEvent operationEvent) {
 
         String action = operationEvent.getAction();
+
+        Log.i(TAG, "handleOperationEvent: action:" + action);
 
         if (action.equals(Util.LOCAL_SHARE_CREATED)) {
 
@@ -403,7 +410,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
 
             for (Comment comment : entry.getValue()) {
-                FNAS.createRemoteMediaComment(mContext,entry.getKey(),comment);
+                FNAS.createRemoteMediaComment(mContext, entry.getKey(), comment);
             }
 
         }
@@ -413,7 +420,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
 
-            FNAS.createRemoteMediaShare(mContext,mediaShare);
+            FNAS.createRemoteMediaShare(mContext, mediaShare);
 
         }
     }
@@ -456,7 +463,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             Comment comment = ((MediaShareCommentOperationEvent) operationEvent).getComment();
             String imageUUID = ((MediaShareCommentOperationEvent) operationEvent).getImageUUID();
-            FNAS.deleteLocalMediaComment(mContext,imageUUID,comment);
+            FNAS.deleteLocalMediaComment(mContext, imageUUID, comment);
         }
     }
 
@@ -497,7 +504,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             case SUCCEED:
 
                 MediaShare mediaShare = ((MediaShareOperationEvent) operationEvent).getMediaShare();
-                FNAS.deleteLocalMediaShare(mContext,mediaShare);
+                FNAS.deleteLocalMediaShare(mContext, mediaShare);
 
                 break;
             case FAIL:
@@ -520,7 +527,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 if (Util.getNetworkState(mContext)) {
                     MediaShare mediaShare = ((MediaShareOperationEvent) operationEvent).getMediaShare();
 
-                    FNAS.createRemoteMediaShare(mContext,mediaShare);
+                    FNAS.createRemoteMediaShare(mContext, mediaShare);
                 }
 
                 onActivityResult(Util.KEY_CREATE_SHARE_REQUEST_CODE, RESULT_OK, null);
@@ -541,7 +548,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     public void retrieveRemoteMediaComment(String mediaUUID) {
 
-        FNAS.retrieveRemoteMediaCommentMap(mContext,mediaUUID);
+        FNAS.retrieveRemoteMediaCommentMap(mContext, mediaUUID);
     }
 
     public void setSelectCountText(String text) {
@@ -640,11 +647,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         }
     }
 
-    public boolean handleBackPressedOrNot(){
+    public boolean handleBackPressedOrNot() {
         return sInChooseMode;
     }
 
-    public void handleBackPressed(){
+    public void handleBackPressed() {
 
         hideChooseHeader();
 
@@ -720,7 +727,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private void doCreateShareFunction(List<String> selectUUIDs) {
 
-        FNAS.createLocalMediaShare(mContext,createMediaShare(selectUUIDs));
+        FNAS.createLocalMediaShare(mContext, createMediaShare(selectUUIDs));
     }
 
     private MediaShare createMediaShare(List<String> selectUUIDs) {

@@ -22,8 +22,10 @@ import android.widget.Toast;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
+import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
+import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
@@ -72,9 +74,7 @@ public class FileFragment extends Fragment {
 
     private boolean selectMode = false;
 
-    private List<String> selectedFileUUIDs;
-
-    private AbstractRemoteFile currentDownloadFile;
+    private List<AbstractRemoteFile> selectedFiles;
 
     private OnFileFragmentInteractionListener onFileFragmentInteractionListener;
 
@@ -110,7 +110,7 @@ public class FileFragment extends Fragment {
 
         retrievedFolderUUIDList = new ArrayList<>();
 
-        selectedFileUUIDs = new ArrayList<>();
+        selectedFiles = new ArrayList<>();
 
         Log.i(TAG, "onCreate: ");
     }
@@ -203,10 +203,6 @@ public class FileFragment extends Fragment {
         return !currentFolderUUID.equals(homeFolderUUID);
     }
 
-    public boolean isSelectMode() {
-        return selectMode;
-    }
-
     public void onBackPressed() {
 
         retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
@@ -217,18 +213,75 @@ public class FileFragment extends Fragment {
 
     }
 
-    public void refreshSelectMode(boolean selectMode) {
+    private void refreshSelectMode(boolean selectMode) {
 
         this.selectMode = selectMode;
 
         if (!selectMode) {
-            selectedFileUUIDs.clear();
+            selectedFiles.clear();
         }
 
         fileRecyclerViewAdapter.notifyDataSetChanged();
 
     }
 
+    public List<BottomMenuItem> getMainMenuItem() {
+
+        List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
+
+        BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel)) {
+            @Override
+            public void handleOnClickEvent() {
+                onFileFragmentInteractionListener.dismissBottomSheetDialog();
+            }
+        };
+
+        bottomMenuItems.add(cancelMenuItem);
+
+        if (selectMode) {
+
+            BottomMenuItem clearSelectItem = new BottomMenuItem(getString(R.string.clear_select_item)) {
+                @Override
+                public void handleOnClickEvent() {
+                    selectMode = false;
+                    refreshSelectMode(selectMode);
+                }
+            };
+
+            bottomMenuItems.add(clearSelectItem);
+
+            BottomMenuItem downloadSelectItem = new BottomMenuItem(getString(R.string.download_select_item)) {
+                @Override
+                public void handleOnClickEvent() {
+
+                    if (!FileUtil.checkExternalDirectoryForDownloadAvailableSizeEnough()) {
+
+                        Toast.makeText(getActivity(), getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+
+                    }
+
+                    checkWriteExternalStoragePermission();
+                }
+            };
+
+            bottomMenuItems.add(downloadSelectItem);
+
+        } else {
+
+            BottomMenuItem selectItem = new BottomMenuItem(getString(R.string.select_file)) {
+                @Override
+                public void handleOnClickEvent() {
+                    selectMode = true;
+                    refreshSelectMode(selectMode);
+                }
+            };
+
+            bottomMenuItems.add(selectItem);
+        }
+
+        return bottomMenuItems;
+
+    }
 
     private void checkWriteExternalStoragePermission() {
 
@@ -237,12 +290,21 @@ public class FileFragment extends Fragment {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Util.WRITE_EXTERNAL_STORAGE_REQUEST_CODE);
 
         } else {
-
-            currentDownloadFile.downloadFile(getActivity());
-
-            onFileFragmentInteractionListener.changeFilePageToFileDownloadFragment();
+            downloadSelectedFiles();
         }
 
+    }
+
+    private void downloadSelectedFiles() {
+        for (AbstractRemoteFile abstractRemoteFile : selectedFiles) {
+
+            if (!abstractRemoteFile.checkIsAlreadyDownloading() && !abstractRemoteFile.checkIsDownloaded()) {
+                abstractRemoteFile.downloadFile(getActivity());
+            }
+
+        }
+
+        onFileFragmentInteractionListener.changeFilePageToFileDownloadFragment();
     }
 
 
@@ -254,9 +316,7 @@ public class FileFragment extends Fragment {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    currentDownloadFile.downloadFile(getActivity());
-
-                    onFileFragmentInteractionListener.changeFilePageToFileDownloadFragment();
+                    downloadSelectedFiles();
 
                 } else {
 
@@ -302,6 +362,8 @@ public class FileFragment extends Fragment {
         TextView fileTime;
         @BindView(R.id.remote_file_item_layout)
         LinearLayout remoteFileItemLayout;
+        @BindView(R.id.item_menu)
+        ImageView itemMenu;
 
 
         FileViewHolder(View view) {
@@ -319,9 +381,10 @@ public class FileFragment extends Fragment {
 
             if (selectMode) {
 
+                itemMenu.setVisibility(View.GONE);
                 fileIconBg.setVisibility(View.VISIBLE);
 
-                toggleFileIconBgResource(abstractRemoteFile.getUuid());
+                toggleFileIconBgResource(abstractRemoteFile);
 
                 remoteFileItemLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -335,14 +398,56 @@ public class FileFragment extends Fragment {
                             abstractRemoteFile.openAbstractRemoteFile(getActivity());
 
                         } else {
-                            toggleFileInSelectedFile(abstractRemoteFile.getUuid());
-                            toggleFileIconBgResource(abstractRemoteFile.getUuid());
+                            toggleFileInSelectedFile(abstractRemoteFile);
+                            toggleFileIconBgResource(abstractRemoteFile);
                         }
                     }
                 });
 
 
             } else {
+
+                if (abstractRemoteFile.isFolder()) {
+                    itemMenu.setVisibility(View.GONE);
+                } else {
+                    itemMenu.setVisibility(View.VISIBLE);
+
+                    itemMenu.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
+
+                            BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel)) {
+                                @Override
+                                public void handleOnClickEvent() {
+                                    onFileFragmentInteractionListener.dismissBottomSheetDialog();
+                                }
+                            };
+
+                            bottomMenuItems.add(cancelMenuItem);
+
+                            BottomMenuItem downloadTheItem = new BottomMenuItem(getString(R.string.download_the_item)) {
+                                @Override
+                                public void handleOnClickEvent() {
+
+                                    if (!FileUtil.checkExternalDirectoryForDownloadAvailableSizeEnough()) {
+
+                                        Toast.makeText(getActivity(), getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+
+                                    }
+
+                                    checkWriteExternalStoragePermission();
+                                }
+                            };
+
+                            bottomMenuItems.add(downloadTheItem);
+
+                            onFileFragmentInteractionListener.showBottomSheetDialog(bottomMenuItems);
+                        }
+                    });
+
+                }
 
                 fileIconBg.setVisibility(View.INVISIBLE);
                 fileIcon.setVisibility(View.VISIBLE);
@@ -355,33 +460,48 @@ public class FileFragment extends Fragment {
                             currentFolderUUID = abstractRemoteFile.getUuid();
 
                             retrievedFolderUUIDList.add(currentFolderUUID);
-                        }
 
-                        if (FileUtil.checkExternalDirectoryForDownloadAvailableSizeEnough()) {
-
-                            Toast.makeText(getActivity(), getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
-
-                        } else if (abstractRemoteFile.checkIsAlreadyDownloading()) {
-
-                            onFileFragmentInteractionListener.changeFilePageToFileDownloadFragment();
-
-                            Toast.makeText(getActivity(), getString(R.string.already_downloading_file), Toast.LENGTH_SHORT).show();
-
-                        } else if (abstractRemoteFile.checkIsDownloaded()) {
-
-                            if (!abstractRemoteFile.openAbstractRemoteFile(getActivity())) {
-                                Toast.makeText(getActivity(), getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
-                            }
-
+                            abstractRemoteFile.openAbstractRemoteFile(getActivity());
                         } else {
 
-                            currentDownloadFile = abstractRemoteFile;
 
-                            checkWriteExternalStoragePermission();
+                            if (!FileUtil.checkExternalDirectoryForDownloadAvailableSizeEnough()) {
+
+                                Toast.makeText(getActivity(), getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+
+                            } else if (abstractRemoteFile.checkIsAlreadyDownloading()) {
+
+                                onFileFragmentInteractionListener.changeFilePageToFileDownloadFragment();
+
+                                Toast.makeText(getActivity(), getString(R.string.already_downloading_file), Toast.LENGTH_SHORT).show();
+
+                            } else if (abstractRemoteFile.checkIsDownloaded()) {
+
+                                if (!abstractRemoteFile.openAbstractRemoteFile(getActivity())) {
+                                    Toast.makeText(getActivity(), getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
+                                }
+
+                            } else {
+
+                                selectedFiles.add(abstractRemoteFile);
+
+                                checkWriteExternalStoragePermission();
+
+                            }
 
                         }
 
+                    }
+                });
 
+                remoteFileItemLayout.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        if (!selectMode) {
+                            selectMode = true;
+                            refreshSelectMode(selectMode);
+                        }
+                        return true;
                     }
                 });
 
@@ -389,8 +509,8 @@ public class FileFragment extends Fragment {
 
         }
 
-        private void toggleFileIconBgResource(String fileUUID) {
-            if (selectedFileUUIDs.contains(fileUUID)) {
+        private void toggleFileIconBgResource(AbstractRemoteFile abstractRemoteFile) {
+            if (selectedFiles.contains(abstractRemoteFile)) {
                 fileIconBg.setBackgroundResource(R.drawable.check_circle_selected);
                 fileIcon.setVisibility(View.INVISIBLE);
             } else {
@@ -399,11 +519,11 @@ public class FileFragment extends Fragment {
             }
         }
 
-        private void toggleFileInSelectedFile(String fileUUID) {
-            if (selectedFileUUIDs.contains(fileUUID)) {
-                selectedFileUUIDs.remove(fileUUID);
+        private void toggleFileInSelectedFile(AbstractRemoteFile abstractRemoteFile) {
+            if (selectedFiles.contains(abstractRemoteFile)) {
+                selectedFiles.remove(abstractRemoteFile);
             } else {
-                selectedFileUUIDs.add(fileUUID);
+                selectedFiles.add(abstractRemoteFile);
             }
         }
 

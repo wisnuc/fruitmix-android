@@ -7,6 +7,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.eventbus.MediaOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.parser.RemoteDataParser;
@@ -109,9 +110,8 @@ public class RetrieveRemoteMediaService extends IntentService {
 
         LocalCache.RemoteMediaMapKeyIsUUID.putAll(mediaConcurrentMap);
 
-        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_RETRIEVED, OperationResult.SUCCEED);
+        MediaOperationEvent operationEvent = new MediaOperationEvent(Util.REMOTE_MEDIA_RETRIEVED, OperationResult.SUCCEED);
         EventBus.getDefault().postSticky(operationEvent);
-
 
     }
 

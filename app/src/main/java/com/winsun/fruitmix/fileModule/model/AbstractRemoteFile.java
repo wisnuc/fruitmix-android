@@ -2,6 +2,8 @@ package com.winsun.fruitmix.fileModule.model;
 
 import android.content.Context;
 
+import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -104,5 +106,23 @@ public abstract class AbstractRemoteFile {
 
     public void setSize(String size) {
         this.size = size;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if(this == o)
+            return true;
+
+        if(o instanceof AbstractRemoteFile){
+            return ((AbstractRemoteFile) o).getUuid().equals(this.getUuid());
+        }
+
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return getUuid().hashCode();
     }
 }
