@@ -1,7 +1,11 @@
 package com.winsun.fruitmix.fileModule.download;
 
+import com.winsun.fruitmix.util.FileUtil;
+
+import java.io.File;
 import java.util.ArrayList;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -21,13 +25,28 @@ public enum FileDownloadManager {
 
     }
 
+    public void addDownloadedFile(FileDownloadItem fileDownloadItem) {
+
+        if (checkIsAlreadyDownloadingStateOrDownloadedState(fileDownloadItem.getFileUUID())) return;
+
+        fileDownloadItems.add(fileDownloadItem);
+        fileDownloadItem.setFileDownloadState(new FileDownloadFinishedState(fileDownloadItem));
+
+    }
+
     public void addFileDownloadItem(FileDownloadItem fileDownloadItem) {
+
+        if (checkIsAlreadyDownloadingStateOrDownloadedState(fileDownloadItem.getFileUUID())) return;
 
         FileDownloadState fileDownloadState;
 
         if (checkDownloadingItemIsMax()) {
 
             fileDownloadState = new FileDownloadPendingState(fileDownloadItem);
+
+        } else if (checkIsDownloaded(fileDownloadItem.getFileName())) {
+
+            fileDownloadState = new FileDownloadFinishedState(fileDownloadItem);
 
         } else {
 
@@ -37,6 +56,21 @@ public enum FileDownloadManager {
         fileDownloadItem.setFileDownloadState(fileDownloadState);
 
         fileDownloadItems.add(fileDownloadItem);
+
+    }
+
+    public void deleteFileDownloadItem(List<String> fileUUIDs) {
+
+        for (String fileUUID : fileUUIDs) {
+
+            Iterator<FileDownloadItem> itemIterator = fileDownloadItems.iterator();
+            while (itemIterator.hasNext()) {
+                FileDownloadItem fileDownloadItem = itemIterator.next();
+                if (fileDownloadItem.getFileUUID().equals(fileUUID))
+                    itemIterator.remove();
+            }
+
+        }
 
     }
 
@@ -56,6 +90,24 @@ public enum FileDownloadManager {
         return false;
 
     }
+
+    private boolean checkIsAlreadyDownloadingStateOrDownloadedState(String fileUUID) {
+
+        List<FileDownloadItem> fileDownloadItems = getFileDownloadItems();
+
+        for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
+            if (fileDownloadItem.getFileUUID().equals(fileUUID) && (fileDownloadItem.getDownloadState() == DownloadState.DOWNLOADING || fileDownloadItem.getDownloadState() == DownloadState.FINISHED)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean checkIsDownloaded(String fileName) {
+        return new File(FileUtil.getDownloadFileStoreFolderPath(), fileName).exists();
+    }
+
 
     void startPendingDownloadItem() {
 

@@ -42,7 +42,8 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="16dp"
-            android:src="@drawable/ic_menu"/>
+            android:src="@drawable/ic_menu"
+            android:visibility="gone"/>
 
         <LinearLayout
             android:layout_width="wrap_content"

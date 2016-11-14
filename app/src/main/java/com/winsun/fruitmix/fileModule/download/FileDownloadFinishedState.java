@@ -2,6 +2,8 @@ package com.winsun.fruitmix.fileModule.download;
 
 import android.util.Log;
 
+import com.winsun.fruitmix.db.DBUtils;
+
 /**
  * Created by Administrator on 2016/11/7.
  */

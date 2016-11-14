@@ -9,8 +9,6 @@ import android.graphics.Matrix;
 public class OrientationUtils {
     public static Matrix rotateBitmap(Matrix matrix, int degrees, float px, float py) {
 
-        //TODO: rotate and convert bitmap when load media;
-
         matrix.setRotate(degrees, px, py);
 
         return matrix;

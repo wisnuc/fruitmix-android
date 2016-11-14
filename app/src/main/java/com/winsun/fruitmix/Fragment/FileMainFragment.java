@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.R;
@@ -101,7 +102,7 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
 
         context = getActivity();
 
-        initBottomSheetDialog();
+        bottomSheetDialog = new BottomSheetDialog(getActivity());
     }
 
     @Override
@@ -146,23 +147,27 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
     @Override
     public void showBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
 
-        bottomSheetRecyclerViewAdapter.setBottomMenuItems(bottomMenuItems);
-        bottomSheetRecyclerViewAdapter.notifyDataSetChanged();
+        createBottomSheetView(bottomMenuItems);
+
+        bottomSheetDialog.setContentView(bottomSheetView);
 
         View parent = (View) bottomSheetView.getParent();
         BottomSheetBehavior behavior = BottomSheetBehavior.from(parent);
         behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-/*        bottomSheetView.measure(0, 0);
+/*
+        bottomSheetView.measure(0, 0);
         behavior.setPeekHeight(bottomSheetView.getMeasuredHeight());
         CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) parent.getLayoutParams();
         params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-        parent.setLayoutParams(params);*/
+        parent.setLayoutParams(params);
+*/
+
         bottomSheetDialog.show();
 
     }
 
-    private void initBottomSheetDialog() {
+    private void createBottomSheetView(List<BottomMenuItem> bottomMenuItems) {
 
         bottomSheetView = View.inflate(getActivity(), R.layout.bottom_sheet_dialog_layout, null);
 
@@ -174,9 +179,9 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
 
         bottomSheetRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        bottomSheetDialog = new BottomSheetDialog(getActivity());
+        bottomSheetRecyclerViewAdapter.setBottomMenuItems(bottomMenuItems);
+        bottomSheetRecyclerViewAdapter.notifyDataSetChanged();
 
-        bottomSheetDialog.setContentView(bottomSheetView);
     }
 
     private class BottomSheetRecyclerViewAdapter extends RecyclerView.Adapter<BottomSheetRecyclerViewViewHolder> {
@@ -216,6 +221,8 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
 
         @BindView(R.id.item_text)
         TextView itemTextView;
+        @BindView(R.id.item_layout)
+        RelativeLayout itemLayout;
 
         BottomSheetRecyclerViewViewHolder(View itemView) {
             super(itemView);
@@ -226,10 +233,12 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
         public void refreshView(final BottomMenuItem bottomMenuItem) {
             itemTextView.setText(bottomMenuItem.getText());
 
-            itemTextView.setOnClickListener(new View.OnClickListener() {
+            itemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     bottomMenuItem.handleOnClickEvent();
+
+                    dismissBottomSheetDialog();
                 }
             });
         }
@@ -358,10 +367,10 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
     public boolean handleBackPressedOrNot() {
 
         if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
-            return fileFragment.notRootFolder();
+            return fileFragment.handleBackPressedOrNot();
         }
         if (fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE) {
-            return fileShareFragment.notRootFolder();
+            return fileShareFragment.handleBackPressedOrNot();
         }
         return false;
 

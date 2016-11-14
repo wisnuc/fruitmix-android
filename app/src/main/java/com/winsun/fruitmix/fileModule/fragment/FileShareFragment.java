@@ -207,7 +207,11 @@ public class FileShareFragment extends Fragment {
 
     }
 
-    public boolean notRootFolder() {
+    public boolean handleBackPressedOrNot(){
+        return notRootFolder();
+    }
+
+    private boolean notRootFolder() {
 
         return !currentFolderUUID.equals(FNAS.userUUID);
     }

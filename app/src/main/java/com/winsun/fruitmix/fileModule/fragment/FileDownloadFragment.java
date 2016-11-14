@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
@@ -22,6 +24,7 @@ import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
+import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -63,13 +66,15 @@ public class FileDownloadFragment extends Fragment {
 
     public static final int DOWNLOAD_STATE_CHANGED = 0x0010;
 
-    public static final int DELAY_TIME_MILLISECOND = 3 * 1000;
+    public static final int DELAY_TIME_MILLISECOND = 1000;
 
     private boolean selectMode = false;
 
     private List<String> selectDownloadedItemUUID;
 
     private OnFileFragmentInteractionListener onFileFragmentInteractionListener;
+
+    private FileDownloadManager fileDownloadManager;
 
     public FileDownloadFragment() {
         // Required empty public constructor
@@ -109,6 +114,8 @@ public class FileDownloadFragment extends Fragment {
 
         selectDownloadedItemUUID = new ArrayList<>();
 
+        fileDownloadManager = FileDownloadManager.INSTANCE;
+
         Log.i(TAG, "onCreate: ");
     }
 
@@ -136,14 +143,8 @@ public class FileDownloadFragment extends Fragment {
         super.onStart();
 
         EventBus.getDefault().register(this);
-    }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        downloadedFileAdapter.notifyDataSetChanged();
-        downloadingFileAdapter.notifyDataSetChanged();
+        FNAS.retrieveDownloadedFile();
     }
 
     @Override
@@ -158,8 +159,14 @@ public class FileDownloadFragment extends Fragment {
 
         Log.i(TAG, "handleEvent: downloadState:" + downloadStateChangedEvent.getDownloadState());
 
-        if (downloadStateChangedEvent.getDownloadState() == DownloadState.FINISHED) {
+        DownloadState downloadState = downloadStateChangedEvent.getDownloadState();
+
+        if (downloadState == DownloadState.FINISHED) {
             customHandler.sendEmptyMessageDelayed(DOWNLOAD_STATE_CHANGED, DELAY_TIME_MILLISECOND);
+        } else if (downloadState == DownloadState.NO_ENOUGH_SPACE) {
+
+            Toast.makeText(getActivity(), getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+
         } else {
             refreshView();
         }
@@ -181,8 +188,6 @@ public class FileDownloadFragment extends Fragment {
     }
 
     private void refreshView() {
-        FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
-
         filterFileDownloadItems(fileDownloadManager.getFileDownloadItems());
 
         downloadingFileAdapter.notifyDataSetChanged();
@@ -212,15 +217,6 @@ public class FileDownloadFragment extends Fragment {
 
         List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
 
-        BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel)) {
-            @Override
-            public void handleOnClickEvent() {
-                onFileFragmentInteractionListener.dismissBottomSheetDialog();
-            }
-        };
-
-        bottomMenuItems.add(cancelMenuItem);
-
         if (selectMode) {
 
             BottomMenuItem clearSelectItem = new BottomMenuItem(getString(R.string.clear_select_item)) {
@@ -237,19 +233,12 @@ public class FileDownloadFragment extends Fragment {
                 @Override
                 public void handleOnClickEvent() {
 
-                    for (String fileUUID : selectDownloadedItemUUID) {
+                    fileDownloadManager.deleteFileDownloadItem(selectDownloadedItemUUID);
 
-                        Iterator<FileDownloadItem> itemIterator = downloadedItems.iterator();
-                        while (itemIterator.hasNext()) {
-                            FileDownloadItem fileDownloadItem = itemIterator.next();
-                            if (fileDownloadItem.getFileUUID().equals(fileUUID))
-                                itemIterator.remove();
-                        }
+                    refreshView();
 
-                    }
-
-                    downloadedFileAdapter.notifyDataSetChanged();
-
+                    selectMode = false;
+                    refreshSelectMode(selectMode);
                 }
             };
 
@@ -269,6 +258,15 @@ public class FileDownloadFragment extends Fragment {
 
         }
 
+        BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel)) {
+            @Override
+            public void handleOnClickEvent() {
+                onFileFragmentInteractionListener.dismissBottomSheetDialog();
+            }
+        };
+
+        bottomMenuItems.add(cancelMenuItem);
+
         return bottomMenuItems;
     }
 
@@ -276,10 +274,12 @@ public class FileDownloadFragment extends Fragment {
         this.selectMode = selectMode;
 
         if (!selectMode) {
-
+            selectDownloadedItemUUID.clear();
         }
-    }
 
+        downloadingFileAdapter.notifyDataSetChanged();
+        downloadedFileAdapter.notifyDataSetChanged();
+    }
 
     class DownloadingFileAdapter extends RecyclerView.Adapter<DownloadingFileAdapterViewHolder> {
 
@@ -397,8 +397,8 @@ public class FileDownloadFragment extends Fragment {
                 downloadedItemLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        toggleFileIconBgResource(fileDownloadItem.getFileUUID());
                         toggleFileInSelectedFile(fileDownloadItem.getFileUUID());
+                        toggleFileIconBgResource(fileDownloadItem.getFileUUID());
                     }
                 });
 

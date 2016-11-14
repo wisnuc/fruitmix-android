@@ -2,8 +2,6 @@ package com.winsun.fruitmix.util;
 
 import android.accounts.NetworkErrorException;
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Base64;
 import android.util.Log;
 
@@ -142,7 +140,7 @@ public class FNAS {
 
     public static void retrieveRemoteDeviceID(Context context) {
 
-        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_DEVICEID));
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_DEVICE_ID));
     }
 
     public static void retrieveRemoteToken(Context context, String gateway, String userUUID, String pwd) {
@@ -168,12 +166,12 @@ public class FNAS {
 
     public static void retrieveLocalMediaShare(Context context) {
 
-        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIASHARE));
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIA_SHARE));
     }
 
     public static void retrieveRemoteMediaShare(Context context) {
 
-        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIASHARE));
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIA_SHARE));
     }
 
     public static void retrieveLocalMediaInCamera(Context context) {
@@ -201,6 +199,10 @@ public class FNAS {
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_FILE_SHARE));
     }
 
+    public static void retrieveDownloadedFile(){
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET,OperationTargetType.DOWNLOADED_FILE));
+    }
+
     public static void createRemoteMedia(Context context, Media media) {
 
         EventBus.getDefault().post(new MediaRequestEvent(OperationType.CREATE, OperationTargetType.REMOTE_MEDIA, media));
@@ -208,12 +210,12 @@ public class FNAS {
 
     public static void createRemoteMediaShare(Context context, MediaShare mediaShare) {
 
-        EventBus.getDefault().post(new MediaShareRequestEvent(OperationType.CREATE, OperationTargetType.REMOTE_MEDIASHARE, mediaShare));
+        EventBus.getDefault().post(new MediaShareRequestEvent(OperationType.CREATE, OperationTargetType.REMOTE_MEDIA_SHARE, mediaShare));
     }
 
     public static void createLocalMediaShare(Context context, MediaShare mediaShare) {
 
-        EventBus.getDefault().post(new MediaShareRequestEvent(OperationType.CREATE, OperationTargetType.LOCAL_MEDIASHARE, mediaShare));
+        EventBus.getDefault().post(new MediaShareRequestEvent(OperationType.CREATE, OperationTargetType.LOCAL_MEDIA_SHARE, mediaShare));
     }
 
     public static void createRemoteMediaComment(Context context, String imageUUID, Comment comment) {
@@ -228,22 +230,22 @@ public class FNAS {
 
     public static void modifyRemoteMediaShare(Context context, MediaShare mediaShare, String requestData) {
 
-        EventBus.getDefault().post(new ModifyMediaShareRequestEvent(OperationType.MODIFY, OperationTargetType.REMOTE_MEDIASHARE, mediaShare, requestData));
+        EventBus.getDefault().post(new ModifyMediaShareRequestEvent(OperationType.MODIFY, OperationTargetType.REMOTE_MEDIA_SHARE, mediaShare, requestData));
     }
 
     public static void modifyLocalMediaShare(Context context, MediaShare mediaShare, String requestData) {
 
-        EventBus.getDefault().post(new ModifyMediaShareRequestEvent(OperationType.MODIFY, OperationTargetType.LOCAL_MEDIASHARE, mediaShare, requestData));
+        EventBus.getDefault().post(new ModifyMediaShareRequestEvent(OperationType.MODIFY, OperationTargetType.LOCAL_MEDIA_SHARE, mediaShare, requestData));
     }
 
     public static void deleteLocalMediaShare(Context context, MediaShare mediaShare) {
 
-        EventBus.getDefault().post(new MediaShareRequestEvent(OperationType.DELETE, OperationTargetType.LOCAL_MEDIASHARE, mediaShare));
+        EventBus.getDefault().post(new MediaShareRequestEvent(OperationType.DELETE, OperationTargetType.LOCAL_MEDIA_SHARE, mediaShare));
     }
 
     public static void deleteRemoteMediaShare(Context context, MediaShare mediaShare) {
 
-        EventBus.getDefault().post(new MediaShareRequestEvent(OperationType.DELETE, OperationTargetType.REMOTE_MEDIASHARE, mediaShare));
+        EventBus.getDefault().post(new MediaShareRequestEvent(OperationType.DELETE, OperationTargetType.REMOTE_MEDIA_SHARE, mediaShare));
     }
 
     public static void deleteLocalMediaComment(Context context, String imageUUID, Comment comment) {
@@ -253,12 +255,12 @@ public class FNAS {
 
     public static void editPhotoInRemoteMediaShare(Context context, MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
 
-        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.REMOTE_MEDIASHARE, originalMediaShare, modifiedMediaShare));
+        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.REMOTE_MEDIA_SHARE, originalMediaShare, modifiedMediaShare));
     }
 
     public static void editPhotoInLocalMediaShare(Context context, MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
 
-        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.REMOTE_MEDIASHARE, originalMediaShare, modifiedMediaShare));
+        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.REMOTE_MEDIA_SHARE, originalMediaShare, modifiedMediaShare));
 
     }
 

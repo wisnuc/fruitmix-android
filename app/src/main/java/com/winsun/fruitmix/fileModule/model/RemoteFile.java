@@ -40,27 +40,6 @@ public class RemoteFile extends AbstractRemoteFile {
     }
 
     @Override
-    public boolean checkIsDownloaded() {
-        return new File(FileUtil.getDownloadFileStoreFolderPath(), getName()).exists();
-    }
-
-    @Override
-    public boolean checkIsAlreadyDownloading() {
-
-        FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
-
-        List<FileDownloadItem> fileDownloadItems = fileDownloadManager.getFileDownloadItems();
-
-        for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
-            if (fileDownloadItem.getFileUUID().equals(getUuid()) && fileDownloadItem.getDownloadState() == DownloadState.DOWNLOADING) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
     public List<AbstractRemoteFile> listChildAbstractRemoteFileList() {
         throw new UnsupportedOperationException("File can not call list operation");
     }

@@ -8,5 +8,5 @@ import android.os.Parcelable;
  */
 public enum OperationType {
 
-    GET,CREATE,MODIFY,DELETE,EDIT_PHOTO_IN_MEDIASHARE,DOWNLOAD_FILE
+    GET,CREATE,MODIFY,DELETE,EDIT_PHOTO_IN_MEDIASHARE
 }

@@ -6,5 +6,5 @@ package com.winsun.fruitmix.fileModule.download;
 
 public enum DownloadState {
 
-    PENDING,DOWNLOADING,FINISHED,ERROR
+    PENDING,DOWNLOADING,FINISHED,ERROR,NO_ENOUGH_SPACE
 }

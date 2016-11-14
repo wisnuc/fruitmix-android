@@ -195,6 +195,11 @@
 
         <activity android:name=".CreateNewEquipmentActivity">
         </activity>
+
+        <service
+            android:name=".services.RetrieveDownloadedFileService"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

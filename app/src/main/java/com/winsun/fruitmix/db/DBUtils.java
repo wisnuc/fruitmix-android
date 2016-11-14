@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.Comment;
@@ -256,6 +257,28 @@ public class DBUtils {
         return returnValue;
     }
 
+    private ContentValues createDownloadedFileContentValues(FileDownloadItem fileDownloadItem) {
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.FILE_KEY_NAME, fileDownloadItem.getFileName());
+        contentValues.put(DBHelper.FILE_KEY_SIZE, fileDownloadItem.getFileSize());
+        contentValues.put(DBHelper.FILE_KEY_UUID, fileDownloadItem.getFileUUID());
+        contentValues.put(DBHelper.FILE_KEY_TIME, fileDownloadItem.getFileTime());
+
+        return contentValues;
+    }
+
+    public long insertDownloadedFile(FileDownloadItem fileDownloadItem) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        returnValue = database.insert(DBHelper.DOWNLOADED_FILE_TABLE_NAME, null, createDownloadedFileContentValues(fileDownloadItem));
+
+        return returnValue;
+    }
+
     private ContentValues createMediaContentValues(Media media) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.MEDIA_KEY_UUID, media.getUuid());
@@ -479,6 +502,17 @@ public class DBUtils {
 
         database.delete(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, DBHelper.SHARE_CONTENT_KEY_SHARE_UUID + " = ?", new String[]{uuid});
         long returnValue = database.delete(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
+
+        close();
+
+        return returnValue;
+    }
+
+    public long deleteDownloadedFileByUUID(String fileUUID) {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.DOWNLOADED_FILE_TABLE_NAME, DBHelper.FILE_KEY_UUID + " = ?", new String[]{fileUUID});
 
         close();
 
@@ -737,6 +771,34 @@ public class DBUtils {
 
         return users;
     }
+
+    public List<FileDownloadItem> getAllDownloadedFile() {
+
+        openReadableDB();
+
+        List<FileDownloadItem> fileDownloadItems = new ArrayList<>();
+
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.DOWNLOADED_FILE_TABLE_NAME, null);
+        while (cursor.moveToNext()) {
+
+            String fileName = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_NAME));
+            String fileUUID = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_UUID));
+            long fileSize = cursor.getLong(cursor.getColumnIndex(DBHelper.FILE_KEY_SIZE));
+            long fileTime = cursor.getLong(cursor.getColumnIndex(DBHelper.FILE_KEY_TIME));
+
+            FileDownloadItem fileDownloadItem = new FileDownloadItem(fileName, fileSize, fileUUID);
+            fileDownloadItem.setFileTime(fileTime);
+
+            fileDownloadItems.add(fileDownloadItem);
+        }
+
+        cursor.close();
+
+        close();
+
+        return fileDownloadItems;
+    }
+
 
     public List<Media> getAllRemoteMedia() {
         openReadableDB();

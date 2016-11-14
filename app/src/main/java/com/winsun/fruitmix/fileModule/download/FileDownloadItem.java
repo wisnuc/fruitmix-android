@@ -9,6 +9,7 @@ public class FileDownloadItem {
     private String fileName;
     private String fileUUID;
     private long fileSize;
+    private long fileTime;
     private long fileCurrentDownloadSize;
     private FileDownloadState fileDownloadState;
 
@@ -56,5 +57,13 @@ public class FileDownloadItem {
 
     public String getFileUUID() {
         return fileUUID;
+    }
+
+    public void setFileTime(long fileTime) {
+        this.fileTime = fileTime;
+    }
+
+    public long getFileTime() {
+        return fileTime;
     }
 }

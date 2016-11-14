@@ -196,7 +196,11 @@ public class FileFragment extends Fragment {
 
     }
 
-    public boolean notRootFolder() {
+    public boolean handleBackPressedOrNot() {
+        return selectMode || notRootFolder();
+    }
+
+    private boolean notRootFolder() {
         User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
         String homeFolderUUID = user.getHome();
 
@@ -205,11 +209,19 @@ public class FileFragment extends Fragment {
 
     public void onBackPressed() {
 
-        retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
+        if (selectMode) {
 
-        currentFolderUUID = retrievedFolderUUIDList.get(retrievedFolderUUIDList.size() - 1);
+            selectMode = false;
+            refreshSelectMode(selectMode);
+        } else {
 
-        FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
+            retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
+
+            currentFolderUUID = retrievedFolderUUIDList.get(retrievedFolderUUIDList.size() - 1);
+
+            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
+
+        }
 
     }
 
@@ -229,15 +241,6 @@ public class FileFragment extends Fragment {
 
         List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
 
-        BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel)) {
-            @Override
-            public void handleOnClickEvent() {
-                onFileFragmentInteractionListener.dismissBottomSheetDialog();
-            }
-        };
-
-        bottomMenuItems.add(cancelMenuItem);
-
         if (selectMode) {
 
             BottomMenuItem clearSelectItem = new BottomMenuItem(getString(R.string.clear_select_item)) {
@@ -254,13 +257,11 @@ public class FileFragment extends Fragment {
                 @Override
                 public void handleOnClickEvent() {
 
-                    if (!FileUtil.checkExternalDirectoryForDownloadAvailableSizeEnough()) {
-
-                        Toast.makeText(getActivity(), getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
-
-                    }
-
                     checkWriteExternalStoragePermission();
+
+                    selectMode = false;
+                    refreshSelectMode(selectMode);
+
                 }
             };
 
@@ -278,6 +279,15 @@ public class FileFragment extends Fragment {
 
             bottomMenuItems.add(selectItem);
         }
+
+        BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel)) {
+            @Override
+            public void handleOnClickEvent() {
+                onFileFragmentInteractionListener.dismissBottomSheetDialog();
+            }
+        };
+
+        bottomMenuItems.add(cancelMenuItem);
 
         return bottomMenuItems;
 
@@ -298,10 +308,7 @@ public class FileFragment extends Fragment {
     private void downloadSelectedFiles() {
         for (AbstractRemoteFile abstractRemoteFile : selectedFiles) {
 
-            if (!abstractRemoteFile.checkIsAlreadyDownloading() && !abstractRemoteFile.checkIsDownloaded()) {
-                abstractRemoteFile.downloadFile(getActivity());
-            }
-
+            abstractRemoteFile.downloadFile(getActivity());
         }
 
         onFileFragmentInteractionListener.changeFilePageToFileDownloadFragment();
@@ -418,6 +425,18 @@ public class FileFragment extends Fragment {
 
                             List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
 
+                            BottomMenuItem downloadTheItem = new BottomMenuItem(getString(R.string.download_the_item)) {
+                                @Override
+                                public void handleOnClickEvent() {
+
+                                    selectedFiles.add(abstractRemoteFile);
+
+                                    checkWriteExternalStoragePermission();
+                                }
+                            };
+
+                            bottomMenuItems.add(downloadTheItem);
+
                             BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel)) {
                                 @Override
                                 public void handleOnClickEvent() {
@@ -426,22 +445,6 @@ public class FileFragment extends Fragment {
                             };
 
                             bottomMenuItems.add(cancelMenuItem);
-
-                            BottomMenuItem downloadTheItem = new BottomMenuItem(getString(R.string.download_the_item)) {
-                                @Override
-                                public void handleOnClickEvent() {
-
-                                    if (!FileUtil.checkExternalDirectoryForDownloadAvailableSizeEnough()) {
-
-                                        Toast.makeText(getActivity(), getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
-
-                                    }
-
-                                    checkWriteExternalStoragePermission();
-                                }
-                            };
-
-                            bottomMenuItems.add(downloadTheItem);
 
                             onFileFragmentInteractionListener.showBottomSheetDialog(bottomMenuItems);
                         }
@@ -464,30 +467,9 @@ public class FileFragment extends Fragment {
                             abstractRemoteFile.openAbstractRemoteFile(getActivity());
                         } else {
 
+                            selectedFiles.add(abstractRemoteFile);
 
-                            if (!FileUtil.checkExternalDirectoryForDownloadAvailableSizeEnough()) {
-
-                                Toast.makeText(getActivity(), getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
-
-                            } else if (abstractRemoteFile.checkIsAlreadyDownloading()) {
-
-                                onFileFragmentInteractionListener.changeFilePageToFileDownloadFragment();
-
-                                Toast.makeText(getActivity(), getString(R.string.already_downloading_file), Toast.LENGTH_SHORT).show();
-
-                            } else if (abstractRemoteFile.checkIsDownloaded()) {
-
-                                if (!abstractRemoteFile.openAbstractRemoteFile(getActivity())) {
-                                    Toast.makeText(getActivity(), getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
-                                }
-
-                            } else {
-
-                                selectedFiles.add(abstractRemoteFile);
-
-                                checkWriteExternalStoragePermission();
-
-                            }
+                            checkWriteExternalStoragePermission();
 
                         }
 

@@ -1,8 +1,11 @@
 package com.winsun.fruitmix.executor;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadState;
 import com.winsun.fruitmix.fileModule.interfaces.FileDownloadUploadInterface;
 import com.winsun.fruitmix.retrofit.RetrofitInstance;
@@ -31,8 +34,11 @@ public class DownloadFileTask implements Callable<Boolean> {
 
     private FileDownloadState fileDownloadState;
 
-    public DownloadFileTask(FileDownloadState fileDownloadState) {
+    private Context context;
+
+    public DownloadFileTask(FileDownloadState fileDownloadState, Context context) {
         this.fileDownloadState = fileDownloadState;
+        this.context = context;
     }
 
     @Override
@@ -49,6 +55,15 @@ public class DownloadFileTask implements Callable<Boolean> {
         boolean result = FileUtil.writeResponseBodyToFolder(call.execute().body(), fileDownloadState);
 
         Log.i(TAG, "call: download result:" + result);
+
+        if (result) {
+            DBUtils dbUtils = DBUtils.getInstance(context);
+
+            FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
+
+            fileDownloadItem.setFileTime(System.currentTimeMillis());
+            dbUtils.insertDownloadedFile(fileDownloadItem);
+        }
 
         return result;
     }

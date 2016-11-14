@@ -41,12 +41,6 @@ public class RemoteFolder extends AbstractRemoteFile {
     }
 
     @Override
-    public boolean checkIsDownloaded() {
-        return true;
-    }
-
-
-    @Override
     public List<AbstractRemoteFile> listChildAbstractRemoteFileList() {
         return Collections.unmodifiableList(abstractRemoteFiles);
     }
