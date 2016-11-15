@@ -34,6 +34,7 @@ public class Media implements Parcelable {
 
     public Media() {
         orientationNumber = 1;
+        belongingMediaShareUUID = "";
     }
 
     protected Media(Parcel in) {
@@ -247,5 +248,25 @@ public class Media implements Parcelable {
             imageUrl = String.format(context.getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid());
         }
         return imageUrl;
+    }
+
+    public Media cloneSelf() {
+
+        Media media = new Media();
+        media.setUuid(getUuid());
+        media.setThumb(getThumb());
+        media.setTime(getTime());
+        media.setWidth(getWidth());
+        media.setHeight(getHeight());
+        media.setSelected(isSelected());
+        media.setLocal(isLocal());
+        media.setTitle(getTitle());
+        media.setLoaded(isLoaded());
+        media.setBelongingMediaShareUUID(getBelongingMediaShareUUID());
+        media.setUploaded(isUploaded());
+        media.setSharing(isSharing());
+        media.setOrientationNumber(getOrientationNumber());
+
+        return media;
     }
 }

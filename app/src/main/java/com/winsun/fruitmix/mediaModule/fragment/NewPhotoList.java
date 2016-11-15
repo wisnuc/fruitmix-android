@@ -319,18 +319,11 @@ public class NewPhotoList implements Page {
                 mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
             }
 
-            Media localMedia = new Media();
-            localMedia.setUuid(media.getUuid());
-            localMedia.setWidth(media.getWidth());
-            localMedia.setHeight(media.getHeight());
+            Media localMedia = media.cloneSelf();
             localMedia.setLocal(true);
-            localMedia.setTime(media.getTime());
             localMedia.setTitle(date);
-            localMedia.setThumb(media.getThumb());
             localMedia.setSelected(false);
-            localMedia.setUploaded(media.isUploaded());
-            localMedia.setSharing(true);
-            localMedia.setOrientationNumber(1);
+
             mediaList.add(localMedia);
         }
 
@@ -348,19 +341,13 @@ public class NewPhotoList implements Page {
                 mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
             }
 
-            Media remoteMedia = new Media();
-            remoteMedia.setUuid(media.getUuid());
-            remoteMedia.setWidth(media.getWidth());
-            remoteMedia.setHeight(media.getHeight());
+            Media remoteMedia = media.cloneSelf();
             remoteMedia.setLocal(false);
-            remoteMedia.setTime(media.getTime());
-            remoteMedia.setThumb(media.getThumb());
             remoteMedia.setTitle(date);
             remoteMedia.setSelected(false);
-            remoteMedia.setUploaded(media.isUploaded());
-            remoteMedia.setSharing(media.isSharing());
-            remoteMedia.setOrientationNumber(media.getOrientationNumber());
+
             mediaList.add(remoteMedia);
+
         }
 
         Collections.sort(mPhotoDateGroups, new Comparator<String>() {

@@ -292,6 +292,7 @@
     <string name="clear_select_item">Clear select item</string>
     <string name="download_select_item">Download select item</string>
     <string name="download_the_item">Download the item</string>
+    <string name="media_not_exist">This media is not exist</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

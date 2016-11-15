@@ -93,9 +93,12 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
             media.setTime(itemRaw.get("lastModified"));
             media.setUploaded(false);
             media.setSelected(false);
+            media.setLoaded(false);
             media.setOrientationNumber(1);
+            media.setLocal(true);
             media.setSharing(true);
             media.setUuid(uuid);
+            media.setOrientationNumber(1);
 
             DBUtils dbUtils = DBUtils.getInstance(this);
 

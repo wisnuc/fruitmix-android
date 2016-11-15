@@ -44,10 +44,6 @@ public enum FileDownloadManager {
 
             fileDownloadState = new FileDownloadPendingState(fileDownloadItem);
 
-        } else if (checkIsDownloaded(fileDownloadItem.getFileName())) {
-
-            fileDownloadState = new FileDownloadFinishedState(fileDownloadItem);
-
         } else {
 
             fileDownloadState = new FileDownloadingState(fileDownloadItem);
@@ -104,8 +100,16 @@ public enum FileDownloadManager {
         return false;
     }
 
-    private boolean checkIsDownloaded(String fileName) {
-        return new File(FileUtil.getDownloadFileStoreFolderPath(), fileName).exists();
+    public boolean checkIsDownloaded(String fileUUID){
+
+        for (FileDownloadItem fileDownloadItem:fileDownloadItems){
+
+            if(fileDownloadItem.getFileUUID().equals(fileUUID) && fileDownloadItem.getDownloadState() == DownloadState.FINISHED){
+                return true;
+            }
+        }
+
+        return false;
     }
 
 

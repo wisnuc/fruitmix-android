@@ -187,6 +187,17 @@ public class TouchNetworkImageView extends TouchImageView {
                         if (mErrorImageId != 0) {
                             setImageResource(mErrorImageId);
                         }
+
+                        post(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                Log.i(TAG, "onErrorResponse Url:" + mUrl);
+                                if (mImageLoadListener != null) {
+                                    mImageLoadListener.onImageLoadFinish(mUrl, TouchNetworkImageView.this);
+                                }
+                            }
+                        });
                     }
 
                     @Override
@@ -209,7 +220,7 @@ public class TouchNetworkImageView extends TouchImageView {
 
                             Log.i(TAG, "onResponse: orientationNumber:" + orientationNumber);
 
-                            Bitmap bitmap = null;
+                            Bitmap bitmap;
 
                             if(orientationNumber >= 1 && orientationNumber <= 8){
                                 OrientationOperation orientationOperation = OrientationOperationFactory.createOrientationOperation(orientationNumber);

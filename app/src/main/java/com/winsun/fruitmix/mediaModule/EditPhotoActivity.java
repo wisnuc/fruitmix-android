@@ -130,7 +130,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(OperationEvent operationEvent){
+    public void handleOperationEvent(OperationEvent operationEvent) {
 
         if (mDialog != null && mDialog.isShowing())
             mDialog.dismiss();
@@ -163,26 +163,27 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         Media picItem;
         Media picItemRaw;
         for (String aStArr : selectedImageUUIDs) {
-            picItem = new Media();
             picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
-            if (picItemRaw != null) {
-                picItem.setLocal(false);
-            } else {
+            if (picItemRaw == null) {
+
                 picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
+
+                if (picItemRaw == null)
+                    continue;
+
+                picItem = picItemRaw.cloneSelf();
                 picItem.setLocal(true);
-                picItem.setThumb(picItemRaw.getThumb());
+
+            }else {
+
+                picItem = picItemRaw.cloneSelf();
+                picItem.setLocal(false);
+
             }
 
-            picItem.setUuid(picItemRaw.getUuid());
-            picItem.setWidth(picItemRaw.getWidth());
-            picItem.setHeight(picItemRaw.getHeight());
-            picItem.setTime(picItemRaw.getTime());
             picItem.setSelected(false);
-            picItem.setUploaded(picItemRaw.isUploaded());
-            picItem.setSharing(picItemRaw.isSharing());
-            picItem.setOrientationNumber(picItemRaw.getOrientationNumber());
 
-            mPhotoList.add(picItem);
+            mPhotoList.add(picItemRaw.cloneSelf());
 
             Log.i(TAG, "fillPhotoList: image uuid" + aStArr);
 
@@ -222,7 +223,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                 int diffOriginalMediaShareContentSize = mediaShare.getDifferentMediaShareContentInCurrentMediaShare(modifiedMediaShare).size();
                 int diffModifiedMediaShareContentSize = modifiedMediaShare.getDifferentMediaShareContentInCurrentMediaShare(mediaShare).size();
-                if(diffOriginalMediaShareContentSize == 0 && diffModifiedMediaShareContentSize == 0){
+                if (diffOriginalMediaShareContentSize == 0 && diffModifiedMediaShareContentSize == 0) {
 
                     finish();
                 }
@@ -235,10 +236,10 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                     modifiedMediaShare.setCoverImageDigest("");
                 }
 
-                if(Util.getNetworkState(mContext)){
-                    FNAS.editPhotoInRemoteMediaShare(mContext,mediaShare,modifiedMediaShare);
-                }else {
-                    FNAS.editPhotoInLocalMediaShare(mContext,mediaShare,modifiedMediaShare);
+                if (Util.getNetworkState(mContext)) {
+                    FNAS.editPhotoInRemoteMediaShare(mContext, mediaShare, modifiedMediaShare);
+                } else {
+                    FNAS.editPhotoInLocalMediaShare(mContext, mediaShare, modifiedMediaShare);
                 }
 
                 break;

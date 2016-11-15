@@ -277,11 +277,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         Media picItemRaw;
 
+        Media picItem;
         mediaList.clear();
-        Media media;
 
         for (String aStArr : imageDigests) {
-            media = new Media();
+
             picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
 
             Log.i(TAG, "media has it or not:" + (picItemRaw != null ? "true" : "false"));
@@ -292,22 +292,20 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 if (picItemRaw == null) {
                     continue;
                 }
-                media.setLocal(true);
-                media.setThumb(picItemRaw.getThumb());
-            } else {
-                media.setLocal(false);
+
+                picItem = picItemRaw.cloneSelf();
+                picItem.setLocal(true);
+
+            }else {
+
+                picItem = picItemRaw.cloneSelf();
+
+                picItem.setLocal(false);
             }
 
-            media.setUuid(picItemRaw.getUuid());
-            media.setWidth(picItemRaw.getWidth());
-            media.setHeight(picItemRaw.getHeight());
-            media.setTime(picItemRaw.getTime());
-            media.setSelected(false);
-            media.setUploaded(picItemRaw.isUploaded());
-            media.setSharing(picItemRaw.isSharing());
-            media.setOrientationNumber(picItemRaw.getOrientationNumber());
+            picItem.setSelected(false);
 
-            mediaList.add(media);
+            mediaList.add(picItemRaw.cloneSelf());
 
         }
     }

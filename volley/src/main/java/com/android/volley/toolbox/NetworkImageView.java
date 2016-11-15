@@ -200,6 +200,18 @@ public class NetworkImageView extends ImageView {
                         if (mErrorImageId != 0) {
                             setImageResource(mErrorImageId);
                         }
+
+                        setLoaded(true);
+
+                        post(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                if (mImageLoadListener != null) {
+                                    mImageLoadListener.onImageLoadFinish(mUrl, NetworkImageView.this);
+                                }
+                            }
+                        });
                     }
 
                     @Override
@@ -220,7 +232,7 @@ public class NetworkImageView extends ImageView {
 
                         if (response.getBitmap() != null && getTag().equals(mUrl)) {
 
-                            Bitmap bitmap = null;
+                            Bitmap bitmap;
 
                             if(orientationNumber >= 1 && orientationNumber <= 8){
                                 OrientationOperation orientationOperation = OrientationOperationFactory.createOrientationOperation(orientationNumber);

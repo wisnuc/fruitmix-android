@@ -66,7 +66,7 @@ public class FileDownloadFragment extends Fragment {
 
     public static final int DOWNLOAD_STATE_CHANGED = 0x0010;
 
-    public static final int DELAY_TIME_MILLISECOND = 1000;
+    public static final int DELAY_TIME_MILLISECOND = 0;
 
     private boolean selectMode = false;
 

@@ -100,25 +100,26 @@ public class MoreMediaActivity extends AppCompatActivity {
         Media picItem;
         Media picItemRaw;
         for (String str : imageDigests) {
-            picItem = new Media();
+
             picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(str);
-            if (picItemRaw != null) {
-                picItem.setLocal(false);
-            } else {
+            if (picItemRaw == null) {
+
                 picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(str);
 
+                if (picItemRaw == null)
+                    continue;
+
+                picItem = picItemRaw.cloneSelf();
                 picItem.setLocal(true);
-                picItem.setThumb(picItemRaw.getThumb());
+
+            }else {
+
+                picItem = picItemRaw.cloneSelf();
+                picItem.setLocal(false);
+
             }
 
-            picItem.setUuid(picItemRaw.getUuid());
-            picItem.setWidth(picItemRaw.getWidth());
-            picItem.setHeight(picItemRaw.getHeight());
-            picItem.setTime(picItemRaw.getTime());
             picItem.setSelected(false);
-            picItem.setUploaded(picItemRaw.isUploaded());
-            picItem.setSharing(picItemRaw.isSharing());
-            picItem.setOrientationNumber(picItemRaw.getOrientationNumber());
 
             mPhotos.add(picItem);
         }

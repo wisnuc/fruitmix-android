@@ -563,11 +563,11 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         }
 
         private boolean mediaHeightLargerThanWidth(Media media, int mediaWidth, int mediaHeight) {
-            return (mediaWidth < mediaHeight && media.getOrientationNumber() == 1) || (mediaWidth > mediaHeight && media.getOrientationNumber() == 6);
+            return (mediaWidth < mediaHeight && media.getOrientationNumber() <= 4) || (mediaWidth > mediaHeight && media.getOrientationNumber() > 4);
         }
 
         private boolean mediaWidthLargerThanHeight(Media media, int mediaWidth, int mediaHeight) {
-            return (mediaWidth > mediaHeight && media.getOrientationNumber() == 1) || (mediaWidth < mediaHeight && media.getOrientationNumber() == 6);
+            return (mediaWidth > mediaHeight && media.getOrientationNumber() <= 4) || (mediaWidth < mediaHeight && media.getOrientationNumber() > 4);
         }
 
         private void convertEditState() {

@@ -467,9 +467,14 @@ public class FileFragment extends Fragment {
                             abstractRemoteFile.openAbstractRemoteFile(getActivity());
                         } else {
 
-                            selectedFiles.add(abstractRemoteFile);
+                            FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
+                            if (fileDownloadManager.checkIsDownloaded(abstractRemoteFile.getUuid())) {
+                                abstractRemoteFile.openAbstractRemoteFile(getActivity());
+                            } else {
+                                selectedFiles.add(abstractRemoteFile);
 
-                            checkWriteExternalStoragePermission();
+                                checkWriteExternalStoragePermission();
+                            }
 
                         }
 

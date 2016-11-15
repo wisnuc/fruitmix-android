@@ -426,47 +426,9 @@ public class MediaShareList implements Page {
 
             if (currentItem.isAlbum()) {
 
-                rlAlbum.setVisibility(View.VISIBLE);
+                refreshViewVisibilityWhenIsAlbum();
 
-                llPic1.setVisibility(View.GONE);
-                llPic2.setVisibility(View.GONE);
-                llPic3.setVisibility(View.GONE);
-
-                mShareCommentLayout.setVisibility(View.GONE);
-                mShareCountLayout.setVisibility(View.GONE);
-
-                lbAlbumShare.setVisibility(View.VISIBLE);
-                lbAlbumTitle.setVisibility(View.VISIBLE);
-                lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.share_album_title), currentItem.getTitle(), String.valueOf(currentItem.getMediaShareContents().size())));
-
-                coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
-                if (coverImg == null) {
-                    coverImg = LocalCache.LocalMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
-                }
-                if (coverImg != null) {
-
-                    String imageUrl = coverImg.getImageOriginalUrl(containerActivity);
-                    mImageLoader.setShouldCache(!coverImg.isLocal());
-                    ivCover.setTag(imageUrl);
-                    ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                    ivCover.setImageUrl(imageUrl, mImageLoader);
-
-                } else {
-                    ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                    ivCover.setImageUrl(null, mImageLoader);
-                }
-
-                ivCover.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent();
-                        intent.setClass(containerActivity, AlbumPicContentActivity.class);
-                        intent.putExtra(Util.KEY_MEDIASHARE, currentItem);
-                        intent.putExtra(Util.NEED_SHOW_MENU, false);
-                        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
-                        containerActivity.startActivity(intent);
-                    }
-                });
+                refreshViewAttributeWhenIsAlbum();
 
             } else {
 
@@ -476,195 +438,278 @@ public class MediaShareList implements Page {
                 imageDigests = currentItem.getMediaDigestInMediaShareContents();
 
                 if (imageDigests.size() == 1) {
-                    rlAlbum.setVisibility(View.VISIBLE);
-                    llPic1.setVisibility(View.GONE);
-                    llPic2.setVisibility(View.GONE);
-                    llPic3.setVisibility(View.GONE);
+                    refreshViewVisibilityWhenOneImage();
 
-                    mShareCommentLayout.setVisibility(View.VISIBLE);
-                    mShareCountLayout.setVisibility(View.GONE);
-
-                    Log.i(TAG, "images[0]:" + imageDigests.get(0));
-                    itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(0));
-                    if (itemImg == null) {
-                        itemImg = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigests.get(0));
-                    }
-
-                    if (itemImg != null) {
-
-                        String imageUrl = itemImg.getImageOriginalUrl(containerActivity);
-                        mImageLoader.setShouldCache(!itemImg.isLocal());
-                        ivCover.setTag(imageUrl);
-                        ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                        ivCover.setImageUrl(imageUrl, mImageLoader);
-
-                        String uuid = itemImg.getUuid();
-                        if (commentMap.containsKey(uuid)) {
-                            List<Comment> commentList = commentMap.get(uuid);
-                            if (commentList.size() != 0) {
-                                mShareCommentTextView.setText(String.format(containerActivity.getString(R.string.share_comment_text), nickName, commentList.get(0).getText()));
-                            } else {
-                                mShareCommentTextView.setText("");
-                            }
-                            mShareCommentCountTextView.setText(String.valueOf(commentList.size()));
-
-                        } else {
-                            mShareCommentTextView.setText("");
-                            mShareCommentCountTextView.setText("0");
-                        }
-
-                        if (!mShareCommentTextView.getText().equals("")) {
-                            mShareCommentTextView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-
-                                    Toast.makeText(containerActivity, containerActivity.getString(R.string.coming_soon), Toast.LENGTH_SHORT).show();
-
-//                                    gotoMediaShareCommentActivity(false);
-                                }
-                            });
-                        }
-
-                        mCommentLayout.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                                Toast.makeText(containerActivity, containerActivity.getString(R.string.coming_soon), Toast.LENGTH_SHORT).show();
-
-//                                gotoMediaShareCommentActivity(true);
-                            }
-                        });
-
-                    } else {
-                        ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                        ivCover.setImageUrl(null, mImageLoader);
-                    }
-
-                    ivCover.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
-
-                            LocalCache.photoSliderList.clear();
-                            LocalCache.photoSliderList.addAll(imageList);
-
-                            Intent intent = new Intent();
-                            intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
-                            intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
-                            intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
-                            intent.putExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, false);
-                            intent.setClass(containerActivity, PhotoSliderActivity.class);
-
-                            String transitionName = String.valueOf(imageList.get(0).getUuid());
-
-                            ViewCompat.setTransitionName(ivCover, transitionName);
-
-                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
-
-                            containerActivity.startActivity(intent, options.toBundle());
-                        }
-                    });
+                    refreshViewAttributeWhenOneImage(commentMap);
 
                 } else {
 
-                    if (imageDigests.size() <= 3) {
-
-                        rlAlbum.setVisibility(View.GONE);
-                        llPic1.setVisibility(View.VISIBLE);
-                        llPic2.setVisibility(View.GONE);
-                        llPic3.setVisibility(View.GONE);
-
-                    } else if (imageDigests.size() <= 6) {
-
-                        rlAlbum.setVisibility(View.GONE);
-                        llPic1.setVisibility(View.VISIBLE);
-                        llPic2.setVisibility(View.VISIBLE);
-                        llPic3.setVisibility(View.GONE);
-
-                    } else {
-                        rlAlbum.setVisibility(View.GONE);
-                        llPic1.setVisibility(View.VISIBLE);
-                        llPic2.setVisibility(View.VISIBLE);
-                        llPic3.setVisibility(View.VISIBLE);
-
-                        if (imageDigests.size() > 9) {
-                            mCheckMorePhoto.setVisibility(View.VISIBLE);
-                            mCheckMorePhoto.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
-                            mCheckMorePhoto.getPaint().setAntiAlias(true);
-
-                            mCheckMorePhoto.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent intent = new Intent(containerActivity, MoreMediaActivity.class);
-                                    intent.putExtra(Util.KEY_MEDIASHARE, currentItem);
-                                    containerActivity.startActivity(intent);
-                                }
-                            });
-                        } else {
-                            mCheckMorePhoto.setVisibility(View.GONE);
-                        }
-
-                    }
-
-                    mShareCommentLayout.setVisibility(View.GONE);
-                    mShareCountLayout.setVisibility(View.VISIBLE);
+                    refreshViewVisibilityWhenNotOneImage();
 
                     setShareCountText();
 
-                    for (i = 0; i < 9; i++) {
-                        if (i >= imageDigests.size()) {
-                            ivItems[i].setVisibility(View.INVISIBLE);
-                            continue;
-                        }
-                        ivItems[i].setVisibility(View.VISIBLE);
-                        itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(i));
-                        if (itemImg == null)
-                            itemImg = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigests.get(i));
-
-                        if (itemImg != null) {
-
-                            String imageUrl = itemImg.getImageThumbUrl(containerActivity);
-                            mImageLoader.setShouldCache(!itemImg.isLocal());
-                            ivItems[i].setTag(imageUrl);
-                            ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
-                            ivItems[i].setImageUrl(imageUrl, mImageLoader);
-
-                        } else {
-                            ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
-                            ivItems[i].setImageUrl(null, mImageLoader);
-                        }
-
-                        final int mItemPosition = i;
-
-                        ivItems[i].setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                                List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
-                                LocalCache.photoSliderList.clear();
-                                LocalCache.photoSliderList.addAll(imageList);
-
-                                Intent intent = new Intent();
-                                intent.putExtra(Util.INITIAL_PHOTO_POSITION, mItemPosition);
-                                intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
-                                intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
-                                intent.setClass(containerActivity, PhotoSliderActivity.class);
-
-                                String transitionName = String.valueOf(imageList.get(mItemPosition).getUuid());
-                                View transitionView = ivItems[mItemPosition];
-
-                                ViewCompat.setTransitionName(ivItems[mItemPosition], transitionName);
-
-                                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, transitionView, transitionName);
-
-                                containerActivity.startActivity(intent, options.toBundle());
-
-                            }
-                        });
-                    }
+                    refreshViewAttributeWhenNotOneImage();
                 }
 
             }
+        }
+
+        private void refreshViewAttributeWhenNotOneImage() {
+            for (i = 0; i < 9; i++) {
+                ivItems[i].setVisibility(View.INVISIBLE);
+            }
+
+            int imageDigestSize = imageDigests.size();
+
+            int length = imageDigestSize > 9 ? 9 : imageDigestSize;
+
+            for (i = 0; i < length; i++) {
+
+                ivItems[i].setVisibility(View.VISIBLE);
+                itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(i));
+                if (itemImg == null)
+                    itemImg = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigests.get(i));
+
+                if (itemImg != null) {
+
+                    String imageUrl = itemImg.getImageThumbUrl(containerActivity);
+                    mImageLoader.setShouldCache(!itemImg.isLocal());
+                    ivItems[i].setTag(imageUrl);
+                    ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
+                    ivItems[i].setImageUrl(imageUrl, mImageLoader);
+
+                } else {
+                    ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
+                    ivItems[i].setImageUrl(null, mImageLoader);
+                }
+
+                final int mItemPosition = i;
+
+                ivItems[i].setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
+
+                        if (imageList.size() <= mItemPosition) {
+                            Toast.makeText(containerActivity, containerActivity.getString(R.string.media_not_exist), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        LocalCache.photoSliderList.clear();
+                        LocalCache.photoSliderList.addAll(imageList);
+
+                        Intent intent = new Intent();
+                        intent.putExtra(Util.INITIAL_PHOTO_POSITION, mItemPosition);
+                        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
+                        intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
+                        intent.setClass(containerActivity, PhotoSliderActivity.class);
+
+                        String transitionName = String.valueOf(imageList.get(mItemPosition).getUuid());
+                        View transitionView = ivItems[mItemPosition];
+
+                        ViewCompat.setTransitionName(ivItems[mItemPosition], transitionName);
+
+                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, transitionView, transitionName);
+
+                        containerActivity.startActivity(intent, options.toBundle());
+
+                    }
+                });
+            }
+        }
+
+        private void refreshViewVisibilityWhenNotOneImage() {
+            if (imageDigests.size() <= 3) {
+
+                rlAlbum.setVisibility(View.GONE);
+                llPic1.setVisibility(View.VISIBLE);
+                llPic2.setVisibility(View.GONE);
+                llPic3.setVisibility(View.GONE);
+
+                mCheckMorePhoto.setVisibility(View.GONE);
+
+            } else if (imageDigests.size() <= 6) {
+
+                rlAlbum.setVisibility(View.GONE);
+                llPic1.setVisibility(View.VISIBLE);
+                llPic2.setVisibility(View.VISIBLE);
+                llPic3.setVisibility(View.GONE);
+
+                mCheckMorePhoto.setVisibility(View.GONE);
+
+            } else {
+                rlAlbum.setVisibility(View.GONE);
+                llPic1.setVisibility(View.VISIBLE);
+                llPic2.setVisibility(View.VISIBLE);
+                llPic3.setVisibility(View.VISIBLE);
+
+                if (imageDigests.size() > 9) {
+                    mCheckMorePhoto.setVisibility(View.VISIBLE);
+                    mCheckMorePhoto.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
+                    mCheckMorePhoto.getPaint().setAntiAlias(true);
+
+                    mCheckMorePhoto.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(containerActivity, MoreMediaActivity.class);
+                            intent.putExtra(Util.KEY_MEDIASHARE, currentItem);
+                            containerActivity.startActivity(intent);
+                        }
+                    });
+                } else {
+                    mCheckMorePhoto.setVisibility(View.GONE);
+                }
+
+            }
+
+            mShareCommentLayout.setVisibility(View.GONE);
+            mShareCountLayout.setVisibility(View.VISIBLE);
+        }
+
+        private void refreshViewAttributeWhenOneImage(Map<String, List<Comment>> commentMap) {
+            Log.i(TAG, "images[0]:" + imageDigests.get(0));
+            itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(0));
+            if (itemImg == null) {
+                itemImg = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigests.get(0));
+            }
+
+            if (itemImg != null) {
+
+                String imageUrl = itemImg.getImageOriginalUrl(containerActivity);
+                mImageLoader.setShouldCache(!itemImg.isLocal());
+                ivCover.setTag(imageUrl);
+                ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivCover.setImageUrl(imageUrl, mImageLoader);
+
+                String uuid = itemImg.getUuid();
+                if (commentMap.containsKey(uuid)) {
+                    List<Comment> commentList = commentMap.get(uuid);
+                    if (commentList.size() != 0) {
+                        mShareCommentTextView.setText(String.format(containerActivity.getString(R.string.share_comment_text), nickName, commentList.get(0).getText()));
+                    } else {
+                        mShareCommentTextView.setText("");
+                    }
+                    mShareCommentCountTextView.setText(String.valueOf(commentList.size()));
+
+                } else {
+                    mShareCommentTextView.setText("");
+                    mShareCommentCountTextView.setText("0");
+                }
+
+                if (!mShareCommentTextView.getText().equals("")) {
+                    mShareCommentTextView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                            Toast.makeText(containerActivity, containerActivity.getString(R.string.coming_soon), Toast.LENGTH_SHORT).show();
+
+//                                    gotoMediaShareCommentActivity(false);
+                        }
+                    });
+                }
+
+                mCommentLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        Toast.makeText(containerActivity, containerActivity.getString(R.string.coming_soon), Toast.LENGTH_SHORT).show();
+
+//                                gotoMediaShareCommentActivity(true);
+                    }
+                });
+
+            } else {
+                ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivCover.setImageUrl(null, mImageLoader);
+            }
+
+            ivCover.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
+
+                    if (imageList.size() <= 0) {
+                        Toast.makeText(containerActivity, containerActivity.getString(R.string.media_not_exist), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    LocalCache.photoSliderList.clear();
+                    LocalCache.photoSliderList.addAll(imageList);
+
+                    Intent intent = new Intent();
+                    intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
+                    intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
+                    intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
+                    intent.putExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, false);
+                    intent.setClass(containerActivity, PhotoSliderActivity.class);
+
+                    String transitionName = String.valueOf(imageList.get(0).getUuid());
+
+                    ViewCompat.setTransitionName(ivCover, transitionName);
+
+                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
+
+                    containerActivity.startActivity(intent, options.toBundle());
+                }
+            });
+        }
+
+        private void refreshViewVisibilityWhenOneImage() {
+            rlAlbum.setVisibility(View.VISIBLE);
+            llPic1.setVisibility(View.GONE);
+            llPic2.setVisibility(View.GONE);
+            llPic3.setVisibility(View.GONE);
+
+            mShareCommentLayout.setVisibility(View.VISIBLE);
+            mShareCountLayout.setVisibility(View.GONE);
+        }
+
+        private void refreshViewAttributeWhenIsAlbum() {
+            lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.share_album_title), currentItem.getTitle(), String.valueOf(currentItem.getMediaShareContents().size())));
+
+            coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
+            if (coverImg == null) {
+                coverImg = LocalCache.LocalMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
+            }
+            if (coverImg != null) {
+
+                String imageUrl = coverImg.getImageOriginalUrl(containerActivity);
+                mImageLoader.setShouldCache(!coverImg.isLocal());
+                ivCover.setTag(imageUrl);
+                ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivCover.setImageUrl(imageUrl, mImageLoader);
+
+            } else {
+                ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivCover.setImageUrl(null, mImageLoader);
+            }
+
+            ivCover.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    intent.setClass(containerActivity, AlbumPicContentActivity.class);
+                    intent.putExtra(Util.KEY_MEDIASHARE, currentItem);
+                    intent.putExtra(Util.NEED_SHOW_MENU, false);
+                    intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
+                    containerActivity.startActivity(intent);
+                }
+            });
+        }
+
+        private void refreshViewVisibilityWhenIsAlbum() {
+            rlAlbum.setVisibility(View.VISIBLE);
+
+            llPic1.setVisibility(View.GONE);
+            llPic2.setVisibility(View.GONE);
+            llPic3.setVisibility(View.GONE);
+
+            mShareCommentLayout.setVisibility(View.GONE);
+            mShareCountLayout.setVisibility(View.GONE);
+
+            lbAlbumShare.setVisibility(View.VISIBLE);
+            lbAlbumTitle.setVisibility(View.VISIBLE);
         }
 
         private void gotoMediaShareCommentActivity(boolean showSoftInputWhenEnter) {
@@ -704,26 +749,28 @@ public class MediaShareList implements Page {
             picList = new ArrayList<>();
 
             for (String aStArr : imageDigests) {
-                picItem = new Media();
+
                 picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
-                if (picItemRaw != null) {
-                    picItem.setLocal(false);
-                } else {
+                if (picItemRaw == null) {
+
                     picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
+
+                    if (picItemRaw == null)
+                        continue;
+
+                    picItem = picItemRaw.cloneSelf();
                     picItem.setLocal(true);
-                    picItem.setThumb(picItemRaw.getThumb());
+
+                } else {
+
+                    picItem = picItemRaw.cloneSelf();
+                    picItem.setLocal(false);
+
                 }
 
-                picItem.setUuid(picItemRaw.getUuid());
-                picItem.setWidth(picItemRaw.getWidth());
-                picItem.setHeight(picItemRaw.getHeight());
-                picItem.setTime(picItemRaw.getTime());
                 picItem.setSelected(false);
-                picItem.setUploaded(picItemRaw.isUploaded());
-                picItem.setSharing(picItemRaw.isSharing());
-                picItem.setOrientationNumber(picItemRaw.getOrientationNumber());
 
-                picList.add(picItem);
+                picList.add(picItemRaw.cloneSelf());
             }
 
             return picList;

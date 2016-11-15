@@ -44,8 +44,6 @@ import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
 import java.text.SimpleDateFormat;
@@ -182,7 +180,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         showSoftInputWhenEnter = getIntent().getBooleanExtra(Util.KEY_SHOW_SOFT_INPUT_WHEN_ENTER, false);
 
-        createMediaByImageUUID();
+        retrieveMediaByImageUUID();
 
         loadMedia();
 
@@ -236,27 +234,24 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         ivMain.setImageUrl(url, mImageLoader);
     }
 
-    private void createMediaByImageUUID() {
+    private void retrieveMediaByImageUUID() {
         Media imageRaw;
-        media = new Media();
+
         String imageUUID = getIntent().getStringExtra(Util.IMAGE_UUID);
         imageRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(imageUUID);
         if (imageRaw == null) {
             imageRaw = LocalCache.LocalMediaMapKeyIsUUID.get(imageUUID);
 
+            media = imageRaw.cloneSelf();
             media.setLocal(true);
-            media.setThumb(imageRaw.getThumb());
-        } else {
 
+        }else {
+
+            media = imageRaw.cloneSelf();
             media.setLocal(false);
         }
 
-        media.setUuid(imageRaw.getUuid());
-        media.setWidth(imageRaw.getWidth());
-        media.setHeight(imageRaw.getHeight());
         media.setSelected(false);
-        media.setSharing(imageRaw.isSharing());
-        media.setOrientationNumber(imageRaw.getOrientationNumber());
 
         for (MediaShare shareRaw : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
 

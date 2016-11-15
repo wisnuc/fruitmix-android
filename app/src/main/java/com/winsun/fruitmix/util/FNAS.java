@@ -318,6 +318,7 @@ public class FNAS {
         conn.setRequestProperty("Charsert", "UTF-8");
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
+        conn.setReadTimeout(Util.HTTP_CONNECT_TIMEOUT);
         outStream = new BufferedOutputStream(conn.getOutputStream());
         if (data == null) str = "";
         else str = data;
@@ -445,6 +446,7 @@ public class FNAS {
             conn.setRequestProperty("Charsert", "UTF-8");
             conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
             conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
+            conn.setReadTimeout(Util.HTTP_CONNECT_TIMEOUT);
 
             outStream = new BufferedOutputStream(conn.getOutputStream());
 
