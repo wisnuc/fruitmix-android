@@ -103,6 +103,8 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
         context = getActivity();
 
         bottomSheetDialog = new BottomSheetDialog(getActivity());
+
+        bottomSheetRecyclerViewAdapter = new BottomSheetRecyclerViewAdapter();
     }
 
     @Override
@@ -172,8 +174,6 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
         bottomSheetView = View.inflate(getActivity(), R.layout.bottom_sheet_dialog_layout, null);
 
         RecyclerView bottomSheetRecyclerView = (RecyclerView) bottomSheetView.findViewById(R.id.bottom_sheet_recyclerview);
-
-        bottomSheetRecyclerViewAdapter = new BottomSheetRecyclerViewAdapter();
 
         bottomSheetRecyclerView.setAdapter(bottomSheetRecyclerViewAdapter);
 

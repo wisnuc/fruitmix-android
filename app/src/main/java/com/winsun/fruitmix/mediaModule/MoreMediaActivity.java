@@ -106,11 +106,15 @@ public class MoreMediaActivity extends AppCompatActivity {
 
                 picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(str);
 
-                if (picItemRaw == null)
-                    continue;
+                if (picItemRaw == null) {
+                    picItem = new Media();
+                    picItem.setUuid(str);
+                    picItem.setLocal(false);
+                } else {
 
-                picItem = picItemRaw.cloneSelf();
-                picItem.setLocal(true);
+                    picItem = picItemRaw.cloneSelf();
+                    picItem.setLocal(true);
+                }
 
             }else {
 

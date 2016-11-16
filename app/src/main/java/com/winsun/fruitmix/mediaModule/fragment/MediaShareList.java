@@ -377,7 +377,6 @@ public class MediaShareList implements Page {
 
         NetworkImageView ivItems[];
 
-        int w, h, i;
         List<String> imageDigests;
 
         String nickName;
@@ -455,7 +454,7 @@ public class MediaShareList implements Page {
         }
 
         private void refreshViewAttributeWhenNotOneImage() {
-            for (i = 0; i < 9; i++) {
+            for (int i = 0; i < 9; i++) {
                 ivItems[i].setVisibility(View.INVISIBLE);
             }
 
@@ -463,7 +462,7 @@ public class MediaShareList implements Page {
 
             int length = imageDigestSize > 9 ? 9 : imageDigestSize;
 
-            for (i = 0; i < length; i++) {
+            for (int i = 0; i < length; i++) {
 
                 ivItems[i].setVisibility(View.VISIBLE);
                 itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(i));
@@ -490,11 +489,6 @@ public class MediaShareList implements Page {
                     public void onClick(View v) {
 
                         List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
-
-                        if (imageList.size() <= mItemPosition) {
-                            Toast.makeText(containerActivity, containerActivity.getString(R.string.media_not_exist), Toast.LENGTH_SHORT).show();
-                            return;
-                        }
 
                         LocalCache.photoSliderList.clear();
                         LocalCache.photoSliderList.addAll(imageList);
@@ -629,11 +623,6 @@ public class MediaShareList implements Page {
                 public void onClick(View v) {
                     List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
 
-                    if (imageList.size() <= 0) {
-                        Toast.makeText(containerActivity, containerActivity.getString(R.string.media_not_exist), Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
                     LocalCache.photoSliderList.clear();
                     LocalCache.photoSliderList.addAll(imageList);
 
@@ -755,11 +744,15 @@ public class MediaShareList implements Page {
 
                     picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
 
-                    if (picItemRaw == null)
-                        continue;
+                    if (picItemRaw == null) {
+                        picItem = new Media();
+                        picItem.setUuid(aStArr);
+                        picItem.setLocal(false);
+                    } else {
 
-                    picItem = picItemRaw.cloneSelf();
-                    picItem.setLocal(true);
+                        picItem = picItemRaw.cloneSelf();
+                        picItem.setLocal(true);
+                    }
 
                 } else {
 
@@ -770,7 +763,7 @@ public class MediaShareList implements Page {
 
                 picItem.setSelected(false);
 
-                picList.add(picItemRaw.cloneSelf());
+                picList.add(picItem);
             }
 
             return picList;

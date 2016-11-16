@@ -290,13 +290,16 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
 
                 if (picItemRaw == null) {
-                    continue;
+                    picItem = new Media();
+                    picItem.setUuid(aStArr);
+                    picItem.setLocal(false);
+                } else {
+
+                    picItem = picItemRaw.cloneSelf();
+                    picItem.setLocal(true);
                 }
 
-                picItem = picItemRaw.cloneSelf();
-                picItem.setLocal(true);
-
-            }else {
+            } else {
 
                 picItem = picItemRaw.cloneSelf();
 
@@ -305,7 +308,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             picItem.setSelected(false);
 
-            mediaList.add(picItemRaw.cloneSelf());
+            mediaList.add(picItem);
 
         }
     }

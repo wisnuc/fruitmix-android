@@ -205,7 +205,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
-                FNAS.createLocalMediaComment(mContext,media.getUuid(), createComment(media.getBelongingMediaShareUUID(), mComment));
+                FNAS.createLocalMediaComment(mContext, media.getUuid(), createComment(media.getBelongingMediaShareUUID(), mComment));
             }
         });
 
@@ -242,10 +242,17 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         if (imageRaw == null) {
             imageRaw = LocalCache.LocalMediaMapKeyIsUUID.get(imageUUID);
 
-            media = imageRaw.cloneSelf();
-            media.setLocal(true);
+            if (imageRaw == null) {
+                media = new Media();
+                media.setUuid(imageUUID);
+                media.setLocal(false);
 
-        }else {
+            } else {
+                media = imageRaw.cloneSelf();
+                media.setLocal(true);
+            }
+
+        } else {
 
             media = imageRaw.cloneSelf();
             media.setLocal(false);
@@ -553,7 +560,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                         Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
                         String imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
 
-                        FNAS.deleteLocalMediaComment(mContext,imageUUID,comment);
+                        FNAS.deleteLocalMediaComment(mContext, imageUUID, comment);
 
                         break;
                     case FAIL:
@@ -581,7 +588,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
                             String imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
 
-                            FNAS.createRemoteMediaComment(mContext,imageUUID,comment);
+                            FNAS.createRemoteMediaComment(mContext, imageUUID, comment);
                         }
 
                         tfContent.setText("");

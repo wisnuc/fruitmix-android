@@ -35,6 +35,9 @@ public class Media implements Parcelable {
     public Media() {
         orientationNumber = 1;
         belongingMediaShareUUID = "";
+        width = "200";
+        height = "200";
+        thumb = "";
     }
 
     protected Media(Parcel in) {

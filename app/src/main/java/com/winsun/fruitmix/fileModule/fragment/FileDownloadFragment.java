@@ -357,7 +357,7 @@ public class FileDownloadFragment extends Fragment {
         }
     }
 
-    class DownloadedFileAdapterViewHolder extends RecyclerView.ViewHolder {
+    class DownloadedFileAdapterViewHolder extends RecyclerView.ViewHolder{
 
         @BindView(R.id.file_icon_bg)
         ImageView fileIconBg;
@@ -390,9 +390,10 @@ public class FileDownloadFragment extends Fragment {
                 fileSize.setText(getString(R.string.download_failed));
             }
 
+            fileIcon.setVisibility(View.VISIBLE); 
+
             if (selectMode) {
                 fileIconBg.setVisibility(View.VISIBLE);
-                fileIcon.setVisibility(View.VISIBLE);
 
                 downloadedItemLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -402,9 +403,9 @@ public class FileDownloadFragment extends Fragment {
                     }
                 });
 
+
             } else {
                 fileIconBg.setVisibility(View.INVISIBLE);
-                fileIcon.setVisibility(View.VISIBLE);
 
                 downloadedItemLayout.setOnClickListener(new View.OnClickListener() {
                     @Override

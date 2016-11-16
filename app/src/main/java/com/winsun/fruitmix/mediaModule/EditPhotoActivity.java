@@ -168,13 +168,18 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
                 picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
 
-                if (picItemRaw == null)
-                    continue;
+                if (picItemRaw == null) {
+                    picItem = new Media();
+                    picItem.setUuid(aStArr);
+                    picItem.setLocal(false);
+                } else {
 
-                picItem = picItemRaw.cloneSelf();
-                picItem.setLocal(true);
+                    picItem = picItemRaw.cloneSelf();
+                    picItem.setLocal(true);
+                }
 
-            }else {
+
+            } else {
 
                 picItem = picItemRaw.cloneSelf();
                 picItem.setLocal(false);
@@ -183,7 +188,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
             picItem.setSelected(false);
 
-            mPhotoList.add(picItemRaw.cloneSelf());
+            mPhotoList.add(picItem);
 
             Log.i(TAG, "fillPhotoList: image uuid" + aStArr);
 
