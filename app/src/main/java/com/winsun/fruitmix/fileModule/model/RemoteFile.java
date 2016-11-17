@@ -50,11 +50,6 @@ public class RemoteFile extends AbstractRemoteFile {
     }
 
     @Override
-    public int getImageResource() {
-        return R.drawable.file_icon;
-    }
-
-    @Override
     public String getTimeDateText() {
         return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss上传").format(new Date(Long.parseLong(getTime())));
     }

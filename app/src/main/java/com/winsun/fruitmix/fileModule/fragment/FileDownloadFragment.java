@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +32,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -357,7 +355,7 @@ public class FileDownloadFragment extends Fragment {
         }
     }
 
-    class DownloadedFileAdapterViewHolder extends RecyclerView.ViewHolder{
+    class DownloadedFileAdapterViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.file_icon_bg)
         ImageView fileIconBg;
@@ -390,7 +388,7 @@ public class FileDownloadFragment extends Fragment {
                 fileSize.setText(getString(R.string.download_failed));
             }
 
-            fileIcon.setVisibility(View.VISIBLE); 
+            fileIcon.setVisibility(View.VISIBLE);
 
             if (selectMode) {
                 fileIconBg.setVisibility(View.VISIBLE);

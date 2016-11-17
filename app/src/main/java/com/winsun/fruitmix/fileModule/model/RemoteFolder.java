@@ -51,11 +51,6 @@ public class RemoteFolder extends AbstractRemoteFile {
     }
 
     @Override
-    public int getImageResource() {
-        return R.drawable.folder_icon;
-    }
-
-    @Override
     public String getTimeDateText() {
         if (getTime().equals(""))
             return "";

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/remote_file_item_layout"
+              android:id="@+id/remote_folder_item_layout"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:clickable="true"
@@ -13,44 +13,33 @@
         android:layout_height="100dp">
 
         <FrameLayout
-            android:id="@+id/file_icon_layout"
+            android:id="@+id/folder_icon_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="16dp">
 
             <ImageView
-                android:id="@+id/file_icon_bg"
+                android:id="@+id/folder_icon_bg"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:background="@drawable/round_circle"
                 android:visibility="invisible"/>
 
             <ImageView
-                android:id="@+id/file_icon"
+                android:id="@+id/folder_icon"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_gravity="center"
-                android:src="@drawable/file_icon"/>
+                android:src="@drawable/folder_icon"/>
 
         </FrameLayout>
-
-        <ImageView
-            android:id="@+id/item_menu"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="16dp"
-            android:src="@drawable/ic_menu"
-            android:visibility="visible"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toLeftOf="@id/item_menu"
-            android:layout_toRightOf="@id/file_icon_layout"
+            android:layout_toRightOf="@id/folder_icon_layout"
             android:orientation="vertical">
 
             <TextView
@@ -59,14 +48,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:text="文件名"
-                android:textColor="@color/black"
-                android:textSize="18dp"/>
-
-            <TextView
-                android:id="@+id/file_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="2016-7-14"
                 android:textColor="@color/black"
                 android:textSize="18dp"/>
 

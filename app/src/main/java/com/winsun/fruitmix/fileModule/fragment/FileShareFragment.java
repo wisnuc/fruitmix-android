@@ -21,10 +21,7 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResult;
 import com.winsun.fruitmix.util.Util;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -207,7 +204,7 @@ public class FileShareFragment extends Fragment {
 
     }
 
-    public boolean handleBackPressedOrNot(){
+    public boolean handleBackPressedOrNot() {
         return notRootFolder();
     }
 
@@ -216,18 +213,36 @@ public class FileShareFragment extends Fragment {
         return !currentFolderUUID.equals(FNAS.userUUID);
     }
 
-    class FileShareRecyclerAdapter extends RecyclerView.Adapter<FileShareRecyclerAdapterViewHolder> {
+    class FileShareRecyclerAdapter extends RecyclerView.Adapter<BaseRecyclerViewHolder> {
+
+        private static final int VIEW_FILE = 0;
+        private static final int VIEW_FOLDER = 1;
 
         @Override
-        public FileShareRecyclerAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public BaseRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-            View view = LayoutInflater.from(getActivity()).inflate(R.layout.remote_file_item_layout, parent, false);
+            View view;
+            BaseRecyclerViewHolder viewHolder;
 
-            return new FileShareRecyclerAdapterViewHolder(view);
+            switch (viewType) {
+                case VIEW_FILE:
+                    view = LayoutInflater.from(getActivity()).inflate(R.layout.remote_file_item_layout, parent, false);
+                    viewHolder = new FileShareRecyclerAdapterViewHolder(view);
+                    break;
+                case VIEW_FOLDER:
+                    view = LayoutInflater.from(getActivity()).inflate(R.layout.remote_folder_item_layout, parent, false);
+                    viewHolder = new FolderShareRecyclerAdapterViewHolder(view);
+                    break;
+                default:
+                    view = LayoutInflater.from(getActivity()).inflate(R.layout.remote_file_item_layout, parent, false);
+                    viewHolder = new FileShareRecyclerAdapterViewHolder(view);
+            }
+
+            return viewHolder;
         }
 
         @Override
-        public void onBindViewHolder(FileShareRecyclerAdapterViewHolder holder, int position) {
+        public void onBindViewHolder(BaseRecyclerViewHolder holder, int position) {
             holder.refreshView(position);
         }
 
@@ -235,9 +250,52 @@ public class FileShareFragment extends Fragment {
         public int getItemCount() {
             return abstractRemoteFiles.size();
         }
+
+        @Override
+        public int getItemViewType(int position) {
+            return abstractRemoteFiles.get(position).isFolder() ? VIEW_FOLDER : VIEW_FILE;
+        }
     }
 
-    class FileShareRecyclerAdapterViewHolder extends RecyclerView.ViewHolder {
+    class FolderShareRecyclerAdapterViewHolder extends BaseRecyclerViewHolder {
+
+        @BindView(R.id.file_name)
+        TextView fileName;
+        @BindView(R.id.remote_folder_item_layout)
+        LinearLayout remoteFolderItemLayout;
+        @BindView(R.id.item_menu)
+        ImageView itemMenu;
+
+        FolderShareRecyclerAdapterViewHolder(View itemView) {
+            super(itemView);
+
+            ButterKnife.bind(this, itemView);
+        }
+
+        @Override
+        public void refreshView(int position) {
+
+            final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
+
+            itemMenu.setVisibility(View.INVISIBLE);
+
+            fileName.setText(abstractRemoteFile.getName());
+
+            remoteFolderItemLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    currentFolderUUID = abstractRemoteFile.getUuid();
+
+                    retrievedFolderUUIDList.add(currentFolderUUID);
+
+                    abstractRemoteFile.openAbstractRemoteFile(getActivity());
+                }
+            });
+        }
+    }
+
+
+    class FileShareRecyclerAdapterViewHolder extends BaseRecyclerViewHolder {
 
         @BindView(R.id.file_icon)
         ImageView fileIcon;
@@ -247,6 +305,9 @@ public class FileShareFragment extends Fragment {
         TextView fileTime;
         @BindView(R.id.remote_file_item_layout)
         LinearLayout remoteFileItemLayout;
+        @BindView(R.id.item_menu)
+        ImageView itemMenu;
+
 
         FileShareRecyclerAdapterViewHolder(View itemView) {
             super(itemView);
@@ -254,25 +315,16 @@ public class FileShareFragment extends Fragment {
             ButterKnife.bind(this, itemView);
         }
 
-        void refreshView(int position) {
+        @Override
+        public void refreshView(int position) {
 
-            final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
+            AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
-            fileIcon.setImageResource(abstractRemoteFile.getImageResource());
+            itemMenu.setVisibility(View.INVISIBLE);
+
             fileName.setText(abstractRemoteFile.getName());
             fileTime.setText(abstractRemoteFile.getTimeDateText());
 
-            remoteFileItemLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    currentFolderUUID = abstractRemoteFile.getUuid();
-
-                    retrievedFolderUUIDList.add(currentFolderUUID);
-
-                    abstractRemoteFile.openAbstractRemoteFile(getActivity());
-                }
-            });
         }
 
     }

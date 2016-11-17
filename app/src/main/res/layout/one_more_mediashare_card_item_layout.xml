@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:id="@+id/one_more_mediashare_card_item_layout"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              tools:showIn="@layout/share_list_cell">
+
+    <LinearLayout
+        android:id="@+id/pic_row1"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:orientation="horizontal">
+
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/mainPic0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_img"/>
+
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/mainPic1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_img"/>
+
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/mainPic2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_img"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pic_row2"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:orientation="horizontal">
+
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/mainPic3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_img"/>
+
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/mainPic4"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_img"/>
+
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/mainPic5"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_img"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pic_row3"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:orientation="horizontal">
+
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/mainPic6"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_img"/>
+
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/mainPic7"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_img"/>
+
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/mainPic8"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_img"/>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/share_count_layout"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:clickable="true">
+
+        <TextView
+            android:id="@+id/share_count_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="18dp"
+            android:gravity="center"
+            android:text="@string/share_comment_count"
+            android:textSize="14dp"/>
+
+        <TextView
+            android:id="@+id/check_more_photos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="18dp"
+            android:text="@string/check_more_photos"
+            android:textColor="@color/light_black"
+            android:textSize="14dp"
+            android:visibility="gone"/>
+
+
+    </RelativeLayout>
+
+</LinearLayout>
