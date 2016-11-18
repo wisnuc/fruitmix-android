@@ -32,7 +32,7 @@ public abstract class AbstractRemoteFile {
 
     public abstract boolean openAbstractRemoteFile(Context context);
 
-    public abstract void downloadFile(Context context);
+    public abstract void downloadFile();
 
     public abstract List<AbstractRemoteFile> listChildAbstractRemoteFileList();
 

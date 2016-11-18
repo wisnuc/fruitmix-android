@@ -32,7 +32,7 @@ public class RemoteFile extends AbstractRemoteFile {
     }
 
     @Override
-    public void downloadFile(Context context) {
+    public void downloadFile() {
 
         FileDownloadItem fileDownloadItem = new FileDownloadItem(getName(), Long.parseLong(getSize()), getUuid());
 

@@ -36,7 +36,7 @@ public class RemoteFolder extends AbstractRemoteFile {
     }
 
     @Override
-    public void downloadFile(Context context) {
+    public void downloadFile() {
 
     }
 

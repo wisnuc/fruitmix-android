@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.fileModule.interfaces;
 
+import android.app.Dialog;
+
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
 
 import java.util.List;
@@ -15,7 +17,4 @@ public interface OnFileFragmentInteractionListener {
 
     void changeFilePageToFileDownloadFragment();
 
-    void showBottomSheetDialog(List<BottomMenuItem> bottomMenuItems);
-
-    void dismissBottomSheetDialog();
 }

@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.fileModule.fragment;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,12 +18,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.command.AbstractCommand;
+import com.winsun.fruitmix.command.DeleteDownloadedFileCommand;
+import com.winsun.fruitmix.command.NullCommand;
+import com.winsun.fruitmix.command.MacroCommand;
+import com.winsun.fruitmix.command.RefreshViewCommand;
+import com.winsun.fruitmix.command.ShowSelectModeViewCommand;
+import com.winsun.fruitmix.command.ShowUnSelectModeViewCommand;
+import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.fileModule.download.DownloadState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
+import com.winsun.fruitmix.interfaces.OnViewRefreshListener;
+import com.winsun.fruitmix.interfaces.OnViewSelectListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 
@@ -45,7 +56,7 @@ import butterknife.ButterKnife;
  * Use the {@link FileDownloadFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FileDownloadFragment extends Fragment {
+public class FileDownloadFragment extends Fragment implements OnViewSelectListener, OnViewRefreshListener {
 
     public static final String TAG = FileDownloadFragment.class.getSimpleName();
 
@@ -73,6 +84,15 @@ public class FileDownloadFragment extends Fragment {
     private OnFileFragmentInteractionListener onFileFragmentInteractionListener;
 
     private FileDownloadManager fileDownloadManager;
+
+    private Dialog dialog;
+
+    private AbstractCommand showUnSelectModeViewCommand;
+
+    private AbstractCommand showSelectModeViewCommand;
+
+    private AbstractCommand nullCommand;
+
 
     public FileDownloadFragment() {
         // Required empty public constructor
@@ -114,6 +134,12 @@ public class FileDownloadFragment extends Fragment {
 
         fileDownloadManager = FileDownloadManager.INSTANCE;
 
+        showUnSelectModeViewCommand = new ShowUnSelectModeViewCommand(this);
+
+        showSelectModeViewCommand = new ShowSelectModeViewCommand(this);
+
+        nullCommand = new NullCommand();
+
         Log.i(TAG, "onCreate: ");
     }
 
@@ -141,6 +167,8 @@ public class FileDownloadFragment extends Fragment {
         super.onStart();
 
         EventBus.getDefault().register(this);
+
+        //TODO: delete downloaded item does not means delete local file ,so retrieveDownloaded file will load local downloaded file and show,just like have not do delete operation
 
         FNAS.retrieveDownloadedFile();
     }
@@ -185,11 +213,16 @@ public class FileDownloadFragment extends Fragment {
         }
     }
 
-    private void refreshView() {
-        filterFileDownloadItems(fileDownloadManager.getFileDownloadItems());
+    @Override
+    public void refreshView() {
+        refreshData();
 
         downloadingFileAdapter.notifyDataSetChanged();
         downloadedFileAdapter.notifyDataSetChanged();
+    }
+
+    private void refreshData() {
+        filterFileDownloadItems(fileDownloadManager.getFileDownloadItems());
     }
 
     private void filterFileDownloadItems(List<FileDownloadItem> fileDownloadItems) {
@@ -211,57 +244,47 @@ public class FileDownloadFragment extends Fragment {
 
     }
 
+    public void onBackPressed() {
+
+        if (selectMode) {
+            selectMode = false;
+            refreshSelectMode(selectMode);
+        }
+
+    }
+
+    public boolean handleBackPressedOrNot() {
+        return selectMode;
+    }
+
     public List<BottomMenuItem> getMainMenuItem() {
 
         List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
 
         if (selectMode) {
 
-            BottomMenuItem clearSelectItem = new BottomMenuItem(getString(R.string.clear_select_item)) {
-                @Override
-                public void handleOnClickEvent() {
-                    selectMode = false;
-                    refreshSelectMode(selectMode);
-                }
-            };
+            BottomMenuItem clearSelectItem = new BottomMenuItem(getString(R.string.clear_select_item), showUnSelectModeViewCommand);
 
             bottomMenuItems.add(clearSelectItem);
 
-            BottomMenuItem deleteSelectItem = new BottomMenuItem(getString(R.string.delete_text)) {
-                @Override
-                public void handleOnClickEvent() {
+            AbstractCommand macroCommand = new MacroCommand();
+            macroCommand.addCommand(new DeleteDownloadedFileCommand(selectDownloadedItemUUID));
+            macroCommand.addCommand(new RefreshViewCommand(this));
+            macroCommand.addCommand(showUnSelectModeViewCommand);
 
-                    fileDownloadManager.deleteFileDownloadItem(selectDownloadedItemUUID);
-
-                    refreshView();
-
-                    selectMode = false;
-                    refreshSelectMode(selectMode);
-                }
-            };
+            BottomMenuItem deleteSelectItem = new BottomMenuItem(getString(R.string.delete_text), macroCommand);
 
             bottomMenuItems.add(deleteSelectItem);
 
         } else {
 
-            BottomMenuItem selectItem = new BottomMenuItem(getString(R.string.choose_text)) {
-                @Override
-                public void handleOnClickEvent() {
-                    selectMode = true;
-                    refreshSelectMode(selectMode);
-                }
-            };
+            BottomMenuItem selectItem = new BottomMenuItem(getString(R.string.choose_text), showSelectModeViewCommand);
 
             bottomMenuItems.add(selectItem);
 
         }
 
-        BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel)) {
-            @Override
-            public void handleOnClickEvent() {
-                onFileFragmentInteractionListener.dismissBottomSheetDialog();
-            }
-        };
+        BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel), nullCommand);
 
         bottomMenuItems.add(cancelMenuItem);
 
@@ -277,6 +300,29 @@ public class FileDownloadFragment extends Fragment {
 
         downloadingFileAdapter.notifyDataSetChanged();
         downloadedFileAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void selectMode() {
+        selectMode = true;
+        refreshSelectMode(selectMode);
+    }
+
+    @Override
+    public void unSelectMode() {
+        selectMode = false;
+        refreshSelectMode(selectMode);
+    }
+
+    public Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
+
+        dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(getActivity());
+
+        for (BottomMenuItem bottomMenuItem : bottomMenuItems) {
+            bottomMenuItem.setDialog(dialog);
+        }
+
+        return dialog;
     }
 
     class DownloadingFileAdapter extends RecyclerView.Adapter<DownloadingFileAdapterViewHolder> {
@@ -388,7 +434,7 @@ public class FileDownloadFragment extends Fragment {
                 fileSize.setText(getString(R.string.download_failed));
             }
 
-            fileIcon.setVisibility(View.VISIBLE);
+            toggleFileIconBgResource(fileDownloadItem.getFileUUID());
 
             if (selectMode) {
                 fileIconBg.setVisibility(View.VISIBLE);
