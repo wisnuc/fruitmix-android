@@ -26,7 +26,7 @@ public enum ExecutorServiceInstance {
         executorService.execute(runnable);
     }
 
-    public <V> Future<V> doOneTaskInCachedTheadUsingCallable(Callable<V> callable){
+    public <V> Future<V> doOneTaskInCachedThreadUsingCallable(Callable<V> callable){
         return executorService.submit(callable);
     }
 

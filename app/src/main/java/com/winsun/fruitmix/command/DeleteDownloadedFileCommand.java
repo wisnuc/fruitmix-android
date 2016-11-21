@@ -1,6 +1,10 @@
 package com.winsun.fruitmix.command;
 
-import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
+import com.winsun.fruitmix.util.OperationTargetType;
+import com.winsun.fruitmix.util.OperationType;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
@@ -19,7 +23,7 @@ public class DeleteDownloadedFileCommand extends AbstractCommand {
     @Override
     public void execute() {
 
-        FileDownloadManager.INSTANCE.deleteFileDownloadItem(fileUUIDs);
+        EventBus.getDefault().post(new DeleteDownloadedRequestEvent(OperationType.DELETE, OperationTargetType.DOWNLOADED_FILE, fileUUIDs));
     }
 
     @Override

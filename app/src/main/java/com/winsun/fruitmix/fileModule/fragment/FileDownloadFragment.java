@@ -22,20 +22,20 @@ import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.command.DeleteDownloadedFileCommand;
 import com.winsun.fruitmix.command.NullCommand;
 import com.winsun.fruitmix.command.MacroCommand;
-import com.winsun.fruitmix.command.RefreshViewCommand;
 import com.winsun.fruitmix.command.ShowSelectModeViewCommand;
 import com.winsun.fruitmix.command.ShowUnSelectModeViewCommand;
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.download.DownloadState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
-import com.winsun.fruitmix.interfaces.OnViewRefreshListener;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -56,7 +56,7 @@ import butterknife.ButterKnife;
  * Use the {@link FileDownloadFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FileDownloadFragment extends Fragment implements OnViewSelectListener, OnViewRefreshListener {
+public class FileDownloadFragment extends Fragment implements OnViewSelectListener {
 
     public static final String TAG = FileDownloadFragment.class.getSimpleName();
 
@@ -199,6 +199,19 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
 
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleOperationEvent(OperationEvent operationEvent) {
+
+        String action = operationEvent.getAction();
+
+        Log.i(TAG, "handleOperationEvent: action:" + action);
+
+        if (action.equals(Util.DOWNLOADED_FILE_DELETED) || action.equals(Util.DOWNLOADED_FILE_RETRIEVED)) {
+            refreshView();
+        }
+
+    }
+
     private static class CustomHandler extends Handler {
 
         WeakReference<FileDownloadFragment> weakReference = null;
@@ -213,8 +226,7 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
         }
     }
 
-    @Override
-    public void refreshView() {
+    private void refreshView() {
         refreshData();
 
         downloadingFileAdapter.notifyDataSetChanged();
@@ -269,7 +281,6 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
 
             AbstractCommand macroCommand = new MacroCommand();
             macroCommand.addCommand(new DeleteDownloadedFileCommand(selectDownloadedItemUUID));
-            macroCommand.addCommand(new RefreshViewCommand(this));
             macroCommand.addCommand(showUnSelectModeViewCommand);
 
             BottomMenuItem deleteSelectItem = new BottomMenuItem(getString(R.string.delete_text), macroCommand);

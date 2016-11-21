@@ -55,6 +55,8 @@ public class Util {
     public static final String REMOTE_SHARE_MODIFIED = "remote_share_modified";
     public static final String REMOTE_SHARE_DELETED = "remote_share_deleted";
 
+    public static final String DOWNLOADED_FILE_DELETED = "downloaded_file_deleted";
+
     public static final String LOCAL_COMMENT_CREATED = "local_comment_created";
     public static final String REMOTE_COMMENT_CREATED = "remote_comment_created";
     public static final String LOCAL_COMMENT_DELETED = "local_comment_deleted";
@@ -75,6 +77,8 @@ public class Util {
     public static final String REMOTE_DEVICEID_RETRIEVED = "remote_deviceid_retrieved";
     public static final String REMOTE_FILE_RETRIEVED = "remote_file_retrieved";
     public static final String REMOTE_FILE_SHARE_RETRIEVED = "remote_file_share_retrieved";
+
+    public static final String DOWNLOADED_FILE_RETRIEVED = "downloaded_file_retrieved";
 
     public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
 

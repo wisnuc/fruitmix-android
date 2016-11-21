@@ -5,10 +5,15 @@ import android.content.Intent;
 import android.content.Context;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.download.FileDownloadFinishedState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.sql.Array;
@@ -88,6 +93,7 @@ public class RetrieveDownloadedFileService extends IntentService {
             fileDownloadManager.addDownloadedFile(fileDownloadItem);
         }
 
+        EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_RETRIEVED, OperationResult.SUCCEED));
     }
 
 

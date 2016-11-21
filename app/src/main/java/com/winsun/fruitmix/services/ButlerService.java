@@ -7,6 +7,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
+import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
 import com.winsun.fruitmix.eventbus.DownloadFileEvent;
 import com.winsun.fruitmix.eventbus.EditPhotoInMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaCommentRequestEvent;
@@ -15,6 +16,7 @@ import com.winsun.fruitmix.eventbus.MediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.ModifyMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
+import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.DownloadFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.UploadMediaTask;
@@ -27,6 +29,8 @@ import com.winsun.fruitmix.util.OperationType;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.List;
 
 public class ButlerService extends Service {
 
@@ -67,7 +71,7 @@ public class ButlerService extends Service {
     public void handleEvent(DownloadFileEvent downloadFileEvent) {
 
         ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-        DownloadFileTask downloadFileTask = new DownloadFileTask(downloadFileEvent.getFileDownloadState(),this);
+        DownloadFileTask downloadFileTask = new DownloadFileTask(downloadFileEvent.getFileDownloadState(), this);
         instance.doOneTaskInFixedThreadPool(downloadFileTask);
 
     }
@@ -220,6 +224,16 @@ public class ButlerService extends Service {
                 imageUUID = remoteMediaShareCommentOperationEvent.getImageUUID();
                 comment = remoteMediaShareCommentOperationEvent.getComment();
                 DeleteLocalCommentService.startActionDeleteLocalComment(this, comment, imageUUID);
+                break;
+            case DOWNLOADED_FILE:
+
+                List<String> fileUUIDs = ((DeleteDownloadedRequestEvent) requestEvent).getFileUUIDs();
+                ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+
+                DeleteDownloadedFileTask deleteDownloadedFileTask = new DeleteDownloadedFileTask(this, fileUUIDs);
+
+                instance.doOneTaskInCachedThreadUsingCallable(deleteDownloadedFileTask);
+
                 break;
         }
     }

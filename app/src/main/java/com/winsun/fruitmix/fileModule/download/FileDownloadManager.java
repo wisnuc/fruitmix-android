@@ -22,7 +22,6 @@ public enum FileDownloadManager {
 
     FileDownloadManager() {
         fileDownloadItems = new ArrayList<>();
-
     }
 
     public void addDownloadedFile(FileDownloadItem fileDownloadItem) {
