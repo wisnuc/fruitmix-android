@@ -453,6 +453,8 @@ public class NewPhotoList implements Page {
 
                 Media media = mMapKeyIsPhotoPositionValueIsPhoto.get(findPhotoPositionInRecyclerView(currentPhotoDate, currentPhotoPosition));
 
+                if (media == null) return;
+
                 View newSharedElement = mRecyclerView.findViewWithTag(findPhotoTag(media));
                 String sharedElementName = media.getUuid();
 

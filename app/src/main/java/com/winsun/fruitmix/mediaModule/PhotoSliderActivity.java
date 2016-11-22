@@ -128,9 +128,9 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         if (needTransition) {
             ActivityCompat.postponeEnterTransition(this);
             setEnterSharedElementCallback(sharedElementCallback);
-        } else {
-            showDialog();
         }
+
+        showDialog();
 
         initImageLoader();
 
@@ -320,6 +320,13 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                         ActivityCompat.startPostponedEnterTransition(this);
                     }
 
+                    if (!media.isLoaded()) {
+                        media.setLoaded(true);
+                    }
+
+                    if (isCurrentViewPage(i) && mDialog != null && mDialog.isShowing())
+                        mDialog.dismiss();
+
                 } else {
 
                     if (isImageThumb(url)) {
@@ -506,7 +513,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
                             lastX = event.getRawX();
                             lastY = event.getRawY();
-                            if (!mainPic.isZoomed() && lastY > y && lastX - x <= 0) {
+
+                            //Log.i(TAG, "handleTouchEvent: action move lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
+
+                            if (!mainPic.isZoomed() && lastY > y) {
                                 mainPic.setTranslationY(lastY - y);
                             }
                         } else if (event.getAction() == MotionEvent.ACTION_UP) {
