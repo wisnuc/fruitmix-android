@@ -10,7 +10,7 @@ import com.winsun.fruitmix.fileModule.model.RemoteFolder;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -80,13 +80,13 @@ public class RetrieveRemoteFileService extends IntentService {
 
             LocalCache.RemoteFileMapKeyIsUUID.put(folderUUID,remoteFolder);
 
-            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, OperationResult.SUCCEED,folderUUID));
+            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, OperationResultType.SUCCEED,folderUUID));
 
 
         } catch (Exception e) {
             e.printStackTrace();
 
-            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, OperationResult.FAIL,folderUUID));
+            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, OperationResultType.FAIL,folderUUID));
         }
 
     }

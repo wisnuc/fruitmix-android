@@ -12,7 +12,7 @@ import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -82,7 +82,7 @@ public class CreateRemoteCommentService extends IntentService {
 
         if (!returnValue) {
 
-            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResult.FAIL, comment, mediaUUID);
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResultType.FAIL, comment, mediaUUID);
             EventBus.getDefault().post(mediaShareCommentOperationEvent);
 
             return;
@@ -113,16 +113,16 @@ public class CreateRemoteCommentService extends IntentService {
 
                 Log.i(TAG, "insert remote media comment to map result:" + mapResult);
 
-                mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResult.SUCCEED, comment, mediaUUID);
+                mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResultType.SUCCEED, comment, mediaUUID);
 
             } else {
-                mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResult.FAIL, comment, mediaUUID);
+                mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResultType.FAIL, comment, mediaUUID);
             }
 
         } catch (Exception ex) {
             ex.printStackTrace();
 
-            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResult.FAIL, comment, mediaUUID);
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResultType.FAIL, comment, mediaUUID);
 
             Log.i(TAG, "insert remote comment fail");
         }

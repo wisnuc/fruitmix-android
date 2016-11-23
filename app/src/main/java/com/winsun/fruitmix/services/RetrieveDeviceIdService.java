@@ -3,13 +3,12 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -69,7 +68,7 @@ public class RetrieveDeviceIdService extends IntentService {
         LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
         if(LocalCache.DeviceID != null && !LocalCache.DeviceID.equals("")){
 
-            operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED,OperationResult.SUCCEED);
+            operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, OperationResultType.SUCCEED);
 
         }else {
 
@@ -83,12 +82,12 @@ public class RetrieveDeviceIdService extends IntentService {
                 LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
                 Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
 
-                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED,OperationResult.SUCCEED);
+                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, OperationResultType.SUCCEED);
 
             } catch (Exception e) {
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED,OperationResult.FAIL);
+                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, OperationResultType.FAIL);
             }
         }
 

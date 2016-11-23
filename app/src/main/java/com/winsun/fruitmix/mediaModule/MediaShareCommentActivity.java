@@ -43,7 +43,7 @@ import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import java.text.SimpleDateFormat;
@@ -544,7 +544,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                 if (mDialog != null && mDialog.isShowing())
                     mDialog.dismiss();
 
-                if (intent.getStringExtra(Util.OPERATION_RESULT_NAME).equals(OperationResult.SUCCEED.name())) {
+                if (intent.getStringExtra(Util.OPERATION_RESULT_NAME).equals(OperationResultType.SUCCEED.name())) {
                     reloadList();
                 }
 
@@ -552,9 +552,9 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
                 String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
 
-                OperationResult operationResult = OperationResult.valueOf(result);
+                OperationResultType operationResultType = OperationResultType.valueOf(result);
 
-                switch (operationResult) {
+                switch (operationResultType) {
                     case SUCCEED:
 
                         Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
@@ -577,9 +577,9 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
                 String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
 
-                OperationResult operationResult = OperationResult.valueOf(result);
+                OperationResultType operationResultType = OperationResultType.valueOf(result);
 
-                switch (operationResult) {
+                switch (operationResultType) {
                     case SUCCEED:
 
                         Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);

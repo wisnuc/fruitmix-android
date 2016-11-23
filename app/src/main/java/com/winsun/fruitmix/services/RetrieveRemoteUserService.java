@@ -3,7 +3,6 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
@@ -12,7 +11,7 @@ import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteUserParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -98,7 +97,7 @@ public class RetrieveRemoteUserService extends IntentService {
 
         LocalCache.RemoteUserMapKeyIsUUID.putAll(userConcurrentMap);
 
-        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, OperationResult.SUCCEED);
+        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, OperationResultType.SUCCEED);
         EventBus.getDefault().postSticky(operationEvent);
     }
 

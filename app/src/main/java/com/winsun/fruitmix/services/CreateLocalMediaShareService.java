@@ -3,15 +3,13 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -71,7 +69,7 @@ public class CreateLocalMediaShareService extends IntentService {
 
         if(returnValue > 0){
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_CREATED,OperationResult.SUCCEED,mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_CREATED, OperationResultType.SUCCEED,mediaShare);
 
             Log.i(TAG,"insert local mediashare succeed");
 
@@ -81,7 +79,7 @@ public class CreateLocalMediaShareService extends IntentService {
 
         }else {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_CREATED,OperationResult.FAIL,mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_CREATED, OperationResultType.FAIL,mediaShare);
 
             Log.i(TAG,"insert local mediashare fail");
         }

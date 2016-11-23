@@ -3,7 +3,6 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
@@ -11,7 +10,7 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -67,7 +66,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
 
         if (mediaShare.isLocal()) {
 
-            operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED,OperationResult.LOCAL_MEDIASHARE_UPLOADING);
+            operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, OperationResultType.LOCAL_MEDIA_SHARE_UPLOADING);
 
         } else {
 
@@ -76,7 +75,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
             try {
                 FNAS.DeleteRemoteCall(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid(), "");
 
-                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED,OperationResult.SUCCEED);
+                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, OperationResultType.SUCCEED);
 
                 Log.i(TAG, "delete remote mediashare which source is network succeed");
 
@@ -94,7 +93,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
 
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED,OperationResult.FAIL);
+                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, OperationResultType.FAIL);
 
                 Log.i(TAG, "delete remote mediashare fail");
             }

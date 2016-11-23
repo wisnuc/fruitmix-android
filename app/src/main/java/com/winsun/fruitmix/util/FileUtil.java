@@ -60,6 +60,10 @@ public class FileUtil {
         return Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
+    public static String getDownloadFolderName(Context context){
+        return context.getExternalFilesDir(null).getAbsolutePath();
+    }
+
     private static String getExternalDirectoryPathForDownload() {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
     }
@@ -175,7 +179,7 @@ public class FileUtil {
 
     }
 
-    public static void openFile(Context context, File file) throws Exception {
+    private static void openFile(Context context, File file) throws Exception {
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(Intent.ACTION_VIEW);

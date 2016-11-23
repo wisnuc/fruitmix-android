@@ -2,12 +2,10 @@ package com.winsun.fruitmix.mediaModule;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.CheckBox;
@@ -20,9 +18,7 @@ import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -220,13 +216,13 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         if (mDialog != null && mDialog.isShowing())
             mDialog.dismiss();
 
-        OperationResult operationResult = operationEvent.getOperationResult();
+        OperationResultType operationResultType = operationEvent.getOperationResultType();
 
         String action = operationEvent.getAction();
 
         if (action.equals(Util.LOCAL_SHARE_MODIFIED) || action.equals(Util.REMOTE_SHARE_MODIFIED)) {
 
-            switch (operationResult) {
+            switch (operationResultType) {
                 case SUCCEED:
                     MediaShare mediaShare = operationEvent.getMediaShare();
                     getIntent().putExtra(Util.UPDATED_ALBUM_TITLE, mediaShare.getTitle());

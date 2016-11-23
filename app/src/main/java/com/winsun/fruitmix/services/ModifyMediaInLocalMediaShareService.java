@@ -3,7 +3,6 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
@@ -11,7 +10,7 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -96,11 +95,11 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
 
             Log.i(TAG, "modify media in local mediashare in map result:" + (mapResult != null ? "true" : "false"));
 
-            operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED,OperationResult.SUCCEED);
+            operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED, OperationResultType.SUCCEED);
 
         }else {
 
-            operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED,OperationResult.FAIL);
+            operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED, OperationResultType.FAIL);
         }
 
         EventBus.getDefault().post(operationEvent);

@@ -2,11 +2,9 @@ package com.winsun.fruitmix.util;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -337,7 +335,7 @@ public class Util {
 
         if (uploadSucceedCount > 0) {
 
-            EventBus.getDefault().post(new OperationEvent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED,OperationResult.SUCCEED));
+            EventBus.getDefault().post(new OperationEvent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED, OperationResultType.SUCCEED));
         }
 
         return uploadFileResult;

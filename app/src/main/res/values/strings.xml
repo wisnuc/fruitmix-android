@@ -1,11 +1,8 @@
 <resources>
     <string name="app_name">照片宝</string>
-    <string name="action_settings">Settings</string>
+
     <string name="title_activity_nav_pager">NavPagerActivity</string>
     <string name="title_activity_left_drawer">LeftDrawerActivity</string>
-
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="title_activity_test">TestActivity</string>
 
     <string name="interstitial_ad_sample">Interstitial Ad Sample</string>
@@ -183,31 +180,22 @@
     <string name="logout">Logout</string>
     <string name="login">Login</string>
     <string name="login_fail">Login failed</string>
-    <string name="share_uploading">Sorry,it is uploading,please wait!</string>
-    <string name="replace_action">Replace with your own action</string>
-    <string name="patch_now">Patch now</string>
-    <string name="success">Success</string>
-    <string name="fail">Fail</string>
 
     <string name="email_text">Email</string>
     <string name="password_text">Password</string>
     <string name="confirm_password_text">Confirm Password</string>
     <string name="login_by_password_text">Login By Password</string>
-    <string name="title_activity_user_manage">UserManage</string>
     <string name="password_error">Input Password Error</string>
-    <string name="no_edit_photo_permission">You have not the permission to operate</string>
+    <string name="no_operate_mediashare_permission">You have not the permission to operate</string>
     <string name="set_maintainer">Set Maintainer</string>
     <string name="set_private">Set Private</string>
     <string name="set_public">Set Public</string>
     <string name="choose_text">Choose</string>
-    <string name="album_content_text">Album Content</string>
     <string name="modify_album_text">Modify Album</string>
     <string name="create_album_text">Create Album</string>
     <string name="title_text">Title</string>
     <string name="title_hint">Untitled %1$s</string>
     <string name="description_text">Description</string>
-    <string name="ok">OK</string>
-    <string name="public_text">Share</string>
     <string name="private_text">Private</string>
     <string name="search_equipment">Search Equipment</string>
     <string name="winsun_group_name">Winsun</string>
@@ -221,7 +209,6 @@
     <string name="album_item_title">New York</string>
     <string name="album_item_desc">2016–02–09 ~ 2017–05–05</string>
     <string name="album_item_date">2016–02–01</string>
-    <string name="hello_world">Hello World!</string>
     <string name="today_text">Today</string>
     <string name="test_text">Test</string>
     <string name="share_item_date">21:08 yesterday</string>
@@ -239,14 +226,13 @@
     <string name="no_comment_content">Please write comment!</string>
     <string name="check_more_photos">Check more photos</string>
     <string name="load_finish">Load Finish</string>
-
     <string name="setting_album">Setting Ablum</string>
     <string name="edit_photo">Edit Photo</string>
     <string name="modify_cover">Modify Cover</string>
     <string name="delete_album">Delete Album</string>
     <string name="operation_success">Operation Success!</string>
     <string name="operation_fail">Operation fail,Please check network!</string>
-    <string name="no_network">No Network or Log in failed,Please check it</string>
+
     <string name="share_comment_count">Share %1$s Pictures</string>
     <string name="share_comment_text">%1$s : %2$s</string>
     <string name="photo_count">%1$sPhotos</string>
@@ -288,14 +274,24 @@
     <string name="finishAppToast">Please click BACK again to exit</string>
     <string name="no_enough_space">No enough space</string>
 
+    <string name="ok">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="clear_select_item">Clear select item</string>
     <string name="download_select_item">Download select item</string>
     <string name="download_the_item">Download the item</string>
     <string name="media_not_exist">This media is not exist</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="confirm_delete">Please confirm whether to delete</string>
+
+    <!-- operation result -->
+    <string name="success">Success</string>
+    <string name="local_media_share_uploading">Sorry,it is uploading,please wait!</string>
+    <string name="no_network">No Network or Log in failed,Please check it</string>
+    <string name="io_exception">IO Exception</string>
+    <string name="json_exception">JSON Exception</string>
+    <string name="socket_timeout_exception">Socket Timeout Exception</string>
+    <string name="malformed_url_exception">Malformed Url Exception</string>
+    <string name="network_exception">%1$d Error</string>
 
     <!-- finish add by liang.wu-->
 

@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.R;
@@ -14,7 +13,7 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -86,7 +85,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
 
         if (!Util.uploadImageDigestsIfNotUpload(this, diffContentsModifiedMediaShare.getMediaDigestInMediaShareContents())) {
 
-            operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED,OperationResult.FAIL);
+            operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, OperationResultType.FAIL);
 
             Log.i(TAG, "edit photo in remote mediashare fail");
 
@@ -102,7 +101,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
 
                 if (result.length() > 0) {
 
-                    operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED,OperationResult.SUCCEED);
+                    operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, OperationResultType.SUCCEED);
 
                     Log.i(TAG, "modify media in remote mediashare which source is network succeed");
 
@@ -125,7 +124,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
                     Log.i(TAG, "modify media in remote mediashare in map result:" + (mapResult != null ? "true" : "false"));
                 }else {
 
-                    operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED,OperationResult.FAIL);
+                    operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, OperationResultType.FAIL);
 
                 }
 
@@ -134,7 +133,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
 
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED,OperationResult.FAIL);
+                operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, OperationResultType.FAIL);
 
                 Log.i(TAG, "edit photo in remote mediashare fail");
             }

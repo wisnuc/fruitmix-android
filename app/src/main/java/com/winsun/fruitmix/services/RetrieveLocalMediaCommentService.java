@@ -8,7 +8,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;
@@ -69,7 +69,7 @@ public class RetrieveLocalMediaCommentService extends IntentService {
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
         Intent intent = new Intent(Util.LOCAL_MEDIA_COMMENT_RETRIEVED);
-        intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+        intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResultType.SUCCEED.name());
         localBroadcastManager.sendBroadcast(intent);
 
     }

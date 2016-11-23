@@ -2,13 +2,10 @@ package com.winsun.fruitmix.mediaModule;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,9 +29,7 @@ import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -135,9 +130,9 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         if (mDialog != null && mDialog.isShowing())
             mDialog.dismiss();
 
-        OperationResult operationResult = operationEvent.getOperationResult();
+        OperationResultType operationResultType = operationEvent.getOperationResultType();
 
-        switch (operationResult) {
+        switch (operationResultType) {
             case SUCCEED:
                 Toast.makeText(mContext, getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
                 getIntent().putExtra(Util.KEY_MEDIASHARE, modifiedMediaShare);

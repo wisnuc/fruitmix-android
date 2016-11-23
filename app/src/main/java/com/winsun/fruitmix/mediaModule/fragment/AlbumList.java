@@ -1,11 +1,12 @@
 package com.winsun.fruitmix.mediaModule.fragment;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -19,6 +20,9 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
+import com.daimajia.swipe.SimpleSwipeListener;
+import com.daimajia.swipe.SwipeLayout;
+import com.daimajia.swipe.adapters.BaseSwipeAdapter;
 import com.winsun.fruitmix.mediaModule.AlbumPicContentActivity;
 import com.winsun.fruitmix.mediaModule.NewAlbumPicChooseActivity;
 import com.winsun.fruitmix.R;
@@ -54,7 +58,7 @@ public class AlbumList implements Page {
     private View view;
 
     @BindView(R.id.add_album)
-    ImageView ivAdd;
+    FloatingActionButton ivAdd;
     @BindView(R.id.loading_layout)
     LinearLayout mLoadingLayout;
     @BindView(R.id.no_content_layout)
@@ -70,6 +74,8 @@ public class AlbumList implements Page {
     private ImageLoader mImageLoader;
     private RelativeLayout lastMainBar;
 
+    private SwipeLayout lastSwipeLayout;
+
 
     public AlbumList(Activity activity_, OnMediaFragmentInteractionListener listener) {
 
@@ -77,14 +83,14 @@ public class AlbumList implements Page {
 
         this.listener = listener;
 
-        view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
+        view = LayoutInflater.from(containerActivity).inflate(
                 R.layout.album_list, null);
 
         ButterKnife.bind(this, view);
 
         initImageLoader();
 
-        mainListView.setAdapter(new AlbumListViewAdapter(this));
+        mainListView.setAdapter(new AlbumListAdapter(this));
 
         ivAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,7 +114,7 @@ public class AlbumList implements Page {
     }
 
 
-    public void reloadList() {
+    private void reloadList() {
         List<MediaShare> mediaShareList;
         mediaShareList = new ArrayList<>();
 
@@ -185,51 +191,100 @@ public class AlbumList implements Page {
         return view;
     }
 
-    private class AlbumListViewAdapter extends BaseAdapter {
+    private class AlbumListAdapter extends BaseSwipeAdapter {
 
-        AlbumList container;
+        AlbumList albumList;
 
-        AlbumListViewAdapter(AlbumList container_) {
-            container = container_;
+        AlbumListAdapter(AlbumList albumList) {
+            this.albumList = albumList;
         }
 
+        /**
+         * return the {@link SwipeLayout} resource id, int the view item.
+         *
+         * @param position
+         * @return
+         */
         @Override
-        public int getCount() {
-            if (container.mediaShareList == null) return 0;
-            return container.mediaShareList.size();
+        public int getSwipeLayoutResourceId(int position) {
+            return R.id.swipe_layout;
         }
 
+        /**
+         * generate a new view item.
+         * Never bind SwipeListener or fill values here, every item has a chance to fill value or bind
+         * listeners in fillValues.
+         * to fill it in {@code fillValues} method.
+         *
+         * @param position
+         * @param parent
+         * @return
+         */
         @Override
-        public View getView(final int position, final View convertView, ViewGroup parent) {
-            View view;
-            AlbumListViewHolder viewHolder;
+        public View generateView(int position, ViewGroup parent) {
+            View view = LayoutInflater.from(containerActivity).inflate(R.layout.album_list_item, null);
 
-            if (convertView == null) {
-                view = LayoutInflater.from(container.containerActivity).inflate(R.layout.album_list_cell, parent, false);
-                viewHolder = new AlbumListViewHolder(view);
-                view.setTag(viewHolder);
-            } else {
-                view = convertView;
-                viewHolder = (AlbumListViewHolder) view.getTag();
-            }
-
-            MediaShare currentItem = (MediaShare) getItem(position);
-            viewHolder.refreshView(currentItem);
+            AlbumListViewHolder viewHolder = new AlbumListViewHolder(view);
+            view.setTag(viewHolder);
 
             return view;
         }
 
+        /**
+         * fill values or bind listeners to the view.
+         *
+         * @param position
+         * @param convertView
+         */
         @Override
-        public long getItemId(int position) {
+        public void fillValues(int position, View convertView) {
 
-            return position;
+            View view;
+            AlbumListViewHolder viewHolder;
+
+            view = convertView;
+            viewHolder = (AlbumListViewHolder) view.getTag();
+
+            MediaShare currentItem = (MediaShare) getItem(position);
+            viewHolder.refreshView(currentItem);
+
         }
 
+        /**
+         * How many items are in the data set represented by this Adapter.
+         *
+         * @return Count of items.
+         */
+        @Override
+        public int getCount() {
+            if (albumList.mediaShareList == null) return 0;
+            return albumList.mediaShareList.size();
+        }
+
+        /**
+         * Get the data item associated with the specified position in the data set.
+         *
+         * @param position Position of the item whose data we want within the adapter's
+         *                 data set.
+         * @return The data at the specified position.
+         */
         @Override
         public Object getItem(int position) {
-            return container.mediaShareList.get(position);
+            return albumList.mediaShareList.get(position);
+        }
+
+        /**
+         * Get the row id associated with the specified position in the list.
+         *
+         * @param position The position of the item within the adapter's data set whose row id we want.
+         * @return The id of the item at the specified position.
+         */
+        @Override
+        public long getItemId(int position) {
+            return position;
         }
     }
+
 
     class AlbumListViewHolder {
 
@@ -253,6 +308,8 @@ public class AlbumList implements Page {
         TextView lbDelete;
         @BindView(R.id.share)
         TextView lbShare;
+        @BindView(R.id.swipe_layout)
+        SwipeLayout swipeLayout;
 
         Media coverImg;
         MediaShare currentItem;
@@ -265,7 +322,7 @@ public class AlbumList implements Page {
         void refreshView(MediaShare mediaShare) {
 
             currentItem = mediaShare;
-            restoreMainBarState();
+            restoreSwipeLayoutState();
 
             coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
             if (coverImg == null) {
@@ -287,7 +344,7 @@ public class AlbumList implements Page {
 
             if (currentItem.getViewersListSize() == 0) {
                 ivLock.setVisibility(View.GONE);
-                lbShare.setText(containerActivity.getString(R.string.public_text));
+                lbShare.setText(containerActivity.getString(R.string.share_text));
             } else {
                 ivLock.setVisibility(View.VISIBLE);
                 lbShare.setText(containerActivity.getString(R.string.private_text));
@@ -307,7 +364,7 @@ public class AlbumList implements Page {
                 @Override
                 public void onClick(final View v) {
 
-                    restoreMainBarState();
+                    restoreSwipeLayoutState();
 
                     MediaShare cloneMediaShare = currentItem.cloneMyself();
 
@@ -320,100 +377,54 @@ public class AlbumList implements Page {
                 @Override
                 public void onClick(final View v) {
 
-                    restoreMainBarState();
+                    new AlertDialog.Builder(containerActivity).setMessage(containerActivity.getString(R.string.confirm_delete))
+                            .setPositiveButton(containerActivity.getString(R.string.ok), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
 
-                    listener.deleteMediaShare(currentItem);
+                                    restoreSwipeLayoutState();
+
+                                    listener.deleteMediaShare(currentItem);
+
+                                }
+                            }).setNegativeButton(containerActivity.getString(R.string.cancel), null).create().show();
+
 
                 }
             });
 
-            mainBar.setOnTouchListener(new View.OnTouchListener() {
-
-                float x, y, lastX, lastY, vY, vX;
-
+            mainBar.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    int margin;
-                    margin = Util.dip2px(containerActivity, 100);
-                    switch (event.getAction() & MotionEvent.ACTION_MASK) {
-                        case MotionEvent.ACTION_DOWN:
-
-                            if (lastMainBar != null) lastMainBar.setTranslationX(0.0f);
-                            lastMainBar = mainBar;
-                            x = event.getRawX() - mainBar.getTranslationX();
-                            y = event.getRawY();
-                            lastX = x;
-                            lastY = y;
-
-                            mDownTime = System.currentTimeMillis();
-
-                            Log.d(TAG, "down");
-                            break;
-                        case MotionEvent.ACTION_UP:
-                            Log.d(TAG, "up X:" + (lastX - x) + " Y:" + (lastY - y));
-
-                            if (System.currentTimeMillis() - mDownTime < mDiffTimeMilliSecond && (lastX - x) * (lastX - x) + (lastY - y) * (lastY - y) < 100.0) {
-                                Intent intent = new Intent();
-                                intent.setClass(containerActivity, AlbumPicContentActivity.class);
-                                intent.putExtra(Util.KEY_MEDIASHARE, currentItem);
-                                containerActivity.startActivityForResult(intent, Util.KEY_ALBUM_CONTENT_REQUEST_CODE);
-
-                            }
-                        case MotionEvent.ACTION_CANCEL:
-                            Log.d(TAG, "cancel " + (lastX - x) + " " + (lastY - y));
-                            if (lastX - x > -margin + 0.5 && lastX - x < margin - 0.5) {
-                                if (vX > 30.0) mainBar.setTranslationX(margin);
-                                else if (vX < -30.0) mainBar.setTranslationX(-margin);
-                                else restoreMainBarState();
-                            }
-                            break;
-                        case MotionEvent.ACTION_MOVE:
-                            vX = event.getRawX() - lastX;
-                            vY = event.getRawX() - lastY;
-                            lastX = event.getRawX();
-                            lastY = event.getRawY();
-                            if (lastX - x > margin) lastX = x + margin;
-                            else if (lastX - x < -margin) lastX = x - margin;
-                            mainBar.setTranslationX(lastX - x);
-                            break;
-                    }
-                    return true;
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    intent.setClass(containerActivity, AlbumPicContentActivity.class);
+                    intent.putExtra(Util.KEY_MEDIASHARE, currentItem);
+                    containerActivity.startActivityForResult(intent, Util.KEY_ALBUM_CONTENT_REQUEST_CODE);
                 }
-
             });
-        }
 
-        private void restoreMainBarState() {
-            //restore mainbar state
-            mainBar.setTranslationX(0.0f);
-        }
+            swipeLayout.setShowMode(SwipeLayout.ShowMode.LayDown);
 
-        @NonNull
-        private String createRequestData(MediaShare cloneMediaShare) {
-            String requestData;
+            swipeLayout.addSwipeListener(new SimpleSwipeListener() {
+                @Override
+                public void onStartOpen(SwipeLayout layout) {
+                    super.onStartOpen(layout);
 
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("[");
-
-            if (cloneMediaShare.getViewersListSize() == 0) {
-
-                for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-                    cloneMediaShare.addViewer(userUUID);
+                    if (lastSwipeLayout != null) {
+                        lastSwipeLayout.close();
+                    }
+                    lastSwipeLayout = swipeLayout;
                 }
+            });
 
-                stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare(Util.ADD));
-
-            } else {
-
-                stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare(Util.DELETE));
-
-                cloneMediaShare.clearViewers();
-            }
-
-            stringBuilder.append("]");
-            requestData = stringBuilder.toString();
-            return requestData;
         }
+
+        private void restoreSwipeLayoutState() {
+            //restore mainbar state
+//            mainBar.setTranslationX(0.0f);
+            swipeLayout.close();
+        }
+
     }
 
 }

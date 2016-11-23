@@ -46,9 +46,7 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -426,9 +424,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     private void handleNewLocalMediaInCameraRetrieved(OperationEvent operationEvent) {
-        OperationResult result = operationEvent.getOperationResult();
+        OperationResultType result = operationEvent.getOperationResultType();
 
-        if (result == OperationResult.SUCCEED) {
+        if (result == OperationResultType.SUCCEED) {
 
             Log.i(TAG, "new local media in camera loaded");
 
@@ -447,18 +445,18 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private void handleLocalCommentDeleted(OperationEvent operationEvent) {
         Log.i(TAG, "local comment changed");
 
-        OperationResult result = operationEvent.getOperationResult();
+        OperationResultType result = operationEvent.getOperationResultType();
 
-        if (result == OperationResult.SUCCEED) {
+        if (result == OperationResultType.SUCCEED) {
             pageList.get(PAGE_SHARE).refreshView();
         }
     }
 
     private void handleRemoteCommentCreated(OperationEvent operationEvent) {
 
-        OperationResult result = operationEvent.getOperationResult();
+        OperationResultType result = operationEvent.getOperationResultType();
 
-        if (result == OperationResult.SUCCEED) {
+        if (result == OperationResultType.SUCCEED) {
             Log.i(TAG, "remote comment created");
 
             Comment comment = ((MediaShareCommentOperationEvent) operationEvent).getComment();
@@ -470,9 +468,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private void handleLocalShareModifiedDeletedOrRemoteShareModifiedDeleted(OperationEvent operationEvent) {
         dismissDialog();
 
-        OperationResult operationResult = operationEvent.getOperationResult();
+        OperationResultType operationResultType = operationEvent.getOperationResultType();
 
-        switch (operationResult) {
+        switch (operationResultType) {
             case SUCCEED:
                 Toast.makeText(mContext, getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
 
@@ -480,11 +478,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 pageList.get(PAGE_SHARE).refreshView();
 
                 break;
-            case LOCAL_MEDIASHARE_UPLOADING:
-                Toast.makeText(mContext, getString(R.string.share_uploading), Toast.LENGTH_SHORT).show();
+            case LOCAL_MEDIA_SHARE_UPLOADING:
+                Toast.makeText(mContext, getString(R.string.local_media_share_uploading), Toast.LENGTH_SHORT).show();
 
                 break;
-            case NO_NETWORK:
+            case NO_NETWORK_EXCEPTION:
                 Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
 
                 break;
@@ -498,9 +496,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private void handleRemoteShareCreated(OperationEvent operationEvent) {
         Log.i(TAG, "remote share created");
 
-        OperationResult operationResult = operationEvent.getOperationResult();
+        OperationResultType operationResultType = operationEvent.getOperationResultType();
 
-        switch (operationResult) {
+        switch (operationResultType) {
             case SUCCEED:
 
                 MediaShare mediaShare = ((MediaShareOperationEvent) operationEvent).getMediaShare();
@@ -519,9 +517,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private void handleLocalShareCreated(OperationEvent operationEvent) {
 
-        OperationResult operationResult = operationEvent.getOperationResult();
+        OperationResultType operationResultType = operationEvent.getOperationResultType();
 
-        switch (operationResult) {
+        switch (operationResultType) {
             case SUCCEED:
 
                 if (Util.getNetworkState(mContext)) {
@@ -845,7 +843,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             mediaShare.sendModifyMediaShareRequest(mContext, requestData);
         } else {
-            Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, getString(R.string.no_operate_mediashare_permission), Toast.LENGTH_SHORT).show();
 
         }
 
@@ -858,7 +856,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             mediaShare.sendDeleteMediaShareRequest(mContext);
         } else {
-            Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, getString(R.string.no_operate_mediashare_permission), Toast.LENGTH_SHORT).show();
         }
 
     }

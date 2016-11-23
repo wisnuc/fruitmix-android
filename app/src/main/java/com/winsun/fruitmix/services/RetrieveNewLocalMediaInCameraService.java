@@ -3,14 +3,13 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -122,9 +121,9 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
 
         OperationEvent operationEvent;
         if (retrieveMediaCount > 0) {
-            operationEvent = new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, OperationResult.SUCCEED);
+            operationEvent = new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, OperationResultType.SUCCEED);
         } else {
-            operationEvent = new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, OperationResult.FAIL);
+            operationEvent = new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, OperationResultType.FAIL);
         }
         EventBus.getDefault().post(operationEvent);
     }

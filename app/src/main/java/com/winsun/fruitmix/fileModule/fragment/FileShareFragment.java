@@ -19,7 +19,7 @@ import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListen
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
@@ -136,8 +136,8 @@ public class FileShareFragment extends Fragment {
 
             loadingLayout.setVisibility(View.GONE);
 
-            OperationResult operationResult = operationEvent.getOperationResult();
-            switch (operationResult) {
+            OperationResultType operationResultType = operationEvent.getOperationResultType();
+            switch (operationResultType) {
                 case SUCCEED:
 
                     remoteFileShareLoaded = true;
@@ -162,7 +162,7 @@ public class FileShareFragment extends Fragment {
 
         } else if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
 
-            OperationResult result = operationEvent.getOperationResult();
+            OperationResultType result = operationEvent.getOperationResultType();
             switch (result) {
                 case SUCCEED:
 

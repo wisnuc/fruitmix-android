@@ -3,13 +3,12 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -23,9 +22,9 @@ import org.json.JSONObject;
  * helper methods.
  */
 public class RetrieveTokenService extends IntentService {
-    
+
     public static final String TAG = RetrieveTokenService.class.getSimpleName();
-    
+
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_RETRIEVE_TOKEN = "com.winsun.fruitmix.services.action.retrieve.token";
 
@@ -89,12 +88,12 @@ public class RetrieveTokenService extends IntentService {
 
             LocalCache.saveToken(FNAS.JWT);
 
-            operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED,OperationResult.SUCCEED);
+            operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, OperationResultType.SUCCEED);
 
         } catch (Exception e) {
             e.printStackTrace();
 
-            operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED,OperationResult.FAIL);
+            operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, OperationResultType.FAIL);
         }
 
         EventBus.getDefault().postSticky(operationEvent);

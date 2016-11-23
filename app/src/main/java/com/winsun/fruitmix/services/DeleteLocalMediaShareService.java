@@ -3,14 +3,13 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -69,7 +68,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
         if (!mediaShare.isLocal()) {
 
-            operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED,OperationResult.NO_NETWORK);
+            operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED, OperationResultType.NO_NETWORK_EXCEPTION);
 
         } else {
 
@@ -79,7 +78,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
             if (value > 0) {
 
-                operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED,OperationResult.SUCCEED);
+                operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED, OperationResultType.SUCCEED);
 
                 Log.i(TAG, "delete local mediashare succeed");
 
@@ -89,7 +88,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
             } else {
 
-                operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED,OperationResult.FAIL);
+                operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED, OperationResultType.FAIL);
 
                 Log.i(TAG, "delete local mediashare fail");
             }

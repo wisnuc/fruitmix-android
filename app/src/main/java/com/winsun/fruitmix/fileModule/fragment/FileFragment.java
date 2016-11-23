@@ -38,7 +38,7 @@ import com.winsun.fruitmix.interfaces.OnViewSelectListener;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
@@ -187,7 +187,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
             loadingLayout.setVisibility(View.GONE);
 
-            OperationResult result = operationEvent.getOperationResult();
+            OperationResultType result = operationEvent.getOperationResultType();
             switch (result) {
                 case SUCCEED:
 

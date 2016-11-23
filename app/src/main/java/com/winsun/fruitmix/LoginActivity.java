@@ -1,10 +1,8 @@
 package com.winsun.fruitmix;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -18,9 +16,7 @@ import android.widget.TextView;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -29,7 +25,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class LoginActivity extends Activity implements View.OnClickListener, EditText.OnFocusChangeListener {
 
@@ -160,7 +155,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     }
 
     private void handleRetrieveDeviceID(OperationEvent operationEvent) {
-        OperationResult result = operationEvent.getOperationResult();
+        OperationResultType result = operationEvent.getOperationResultType();
 
         switch (result) {
             case SUCCEED:
@@ -185,7 +180,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     }
 
     private void handleRetrieveToken(OperationEvent operationEvent) {
-        OperationResult result = operationEvent.getOperationResult();
+        OperationResultType result = operationEvent.getOperationResultType();
 
         switch (result) {
             case SUCCEED:

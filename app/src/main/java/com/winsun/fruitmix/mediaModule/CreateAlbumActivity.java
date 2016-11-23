@@ -2,7 +2,6 @@ package com.winsun.fruitmix.mediaModule;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -22,9 +21,7 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -168,9 +165,9 @@ public class CreateAlbumActivity extends AppCompatActivity {
             if (mDialog != null && mDialog.isShowing())
                 mDialog.dismiss();
 
-            OperationResult operationResult = operationEvent.getOperationResult();
+            OperationResultType operationResultType = operationEvent.getOperationResultType();
 
-            switch (operationResult) {
+            switch (operationResultType) {
                 case SUCCEED:
                     if (Util.getNetworkState(mContext)) {
                         MediaShare mediaShare = operationEvent.getMediaShare();

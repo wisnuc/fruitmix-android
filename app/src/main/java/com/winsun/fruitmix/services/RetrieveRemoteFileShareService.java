@@ -10,12 +10,10 @@ import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteFileShareParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
-
-import java.util.List;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -76,12 +74,12 @@ public class RetrieveRemoteFileShareService extends IntentService {
 
             LocalCache.RemoteFileShareList.addAll(parser.parse(remoteFileShareWithOthersJSON));
 
-            EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, OperationResult.SUCCEED));
+            EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, OperationResultType.SUCCEED));
 
         } catch (Exception e) {
             e.printStackTrace();
 
-            EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, OperationResult.FAIL));
+            EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, OperationResultType.FAIL));
         }
 
 

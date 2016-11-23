@@ -12,7 +12,7 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.parser.RemoteMediaShareJSONObjectParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -81,7 +81,7 @@ public class CreateRemoteMediaShareService extends IntentService {
 
         if (!returnValue) {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, OperationResult.FAIL, mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, OperationResultType.FAIL, mediaShare);
 
             EventBus.getDefault().post(mediaShareOperationEvent);
 
@@ -171,7 +171,7 @@ public class CreateRemoteMediaShareService extends IntentService {
 
                 Log.i(TAG, "insert remote mediashare which source is network succeed");
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, OperationResult.SUCCEED, mediaShare.cloneMyself());
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, OperationResultType.SUCCEED, mediaShare.cloneMyself());
 
                 RemoteMediaShareJSONObjectParser parser = new RemoteMediaShareJSONObjectParser();
 
@@ -187,7 +187,7 @@ public class CreateRemoteMediaShareService extends IntentService {
                 Log.i(TAG, "insert remote mediashare to map result:" + (mapResult != null ? "true" : "false"));
 
             } else {
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, OperationResult.FAIL, mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, OperationResultType.FAIL, mediaShare);
 
                 Log.i(TAG, "insert remote mediashare fail");
             }
@@ -195,7 +195,7 @@ public class CreateRemoteMediaShareService extends IntentService {
         } catch (Exception ex) {
             ex.printStackTrace();
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, OperationResult.FAIL, mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, OperationResultType.FAIL, mediaShare);
 
             Log.i(TAG, "insert remote mediashare fail");
 

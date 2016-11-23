@@ -1,12 +1,10 @@
 package com.winsun.fruitmix.executor;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -33,7 +31,7 @@ public class UploadMediaTask implements Callable<Boolean> {
 
         if(result){
 
-            EventBus.getDefault().post(new OperationEvent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED, OperationResult.SUCCEED));
+            EventBus.getDefault().post(new OperationEvent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED, OperationResultType.SUCCEED));
         }
 
         return result;

@@ -9,7 +9,7 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.Iterator;
@@ -100,7 +100,7 @@ public class DeleteLocalCommentService extends IntentService {
 
             Log.i(TAG, "delete local comment in map result:" + result);
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.SUCCEED.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResultType.SUCCEED.name());
             intent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
             intent.putExtra(Util.OPERATION_COMMENT, comment);
 
@@ -108,7 +108,7 @@ public class DeleteLocalCommentService extends IntentService {
 
             Log.i(TAG, "delete local comment fail");
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResult.FAIL.name());
+            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResultType.FAIL.name());
 
         }
 

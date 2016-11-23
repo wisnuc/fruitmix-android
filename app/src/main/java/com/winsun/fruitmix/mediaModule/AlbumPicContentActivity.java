@@ -3,13 +3,14 @@ package com.winsun.fruitmix.mediaModule;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -35,9 +36,7 @@ import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -191,15 +190,15 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         if (action.equals(Util.LOCAL_SHARE_DELETED) || action.equals(Util.REMOTE_SHARE_DELETED)) {
 
-            OperationResult operationResult = operationEvent.getOperationResult();
+            OperationResultType operationResultType = operationEvent.getOperationResultType();
 
-            switch (operationResult) {
+            switch (operationResultType) {
                 case SUCCEED:
                     ((Activity) mContext).setResult(RESULT_OK);
                     break;
                 case FAIL:
-                case LOCAL_MEDIASHARE_UPLOADING:
-                case NO_NETWORK:
+                case LOCAL_MEDIA_SHARE_UPLOADING:
+                case NO_NETWORK_EXCEPTION:
                     Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
                     break;
             }
@@ -208,9 +207,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         } else if (action.equals(Util.LOCAL_SHARE_MODIFIED) || action.equals(Util.REMOTE_SHARE_MODIFIED)) {
 
-            OperationResult operationResult = operationEvent.getOperationResult();
+            OperationResultType operationResultType = operationEvent.getOperationResultType();
 
-            switch (operationResult) {
+            switch (operationResultType) {
                 case SUCCEED:
                     Toast.makeText(mContext, getString(R.string.setting_succeed), Toast.LENGTH_SHORT).show();
 
@@ -417,7 +416,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         if (Util.getNetworkState(mContext)) {
             if (mediaShare.isLocal()) {
-                Toast.makeText(mContext, getString(R.string.share_uploading), Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, getString(R.string.local_media_share_uploading), Toast.LENGTH_SHORT).show();
                 return true;
             }
         } else {
@@ -428,7 +427,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
 
         if (!checkPermissionToOperate()) {
-            Toast.makeText(mContext, getString(R.string.no_edit_photo_permission), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, getString(R.string.no_operate_mediashare_permission), Toast.LENGTH_SHORT).show();
 
             return true;
         }
@@ -482,13 +481,21 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private void deleteCurrentAlbum() {
 
-        mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
+        new AlertDialog.Builder(mContext).setMessage(getString(R.string.confirm_delete))
+                .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
-        if (Util.getNetworkState(mContext)) {
-            FNAS.deleteRemoteMediaShare(mContext, mediaShare);
-        } else {
-            FNAS.deleteLocalMediaShare(mContext, mediaShare);
-        }
+                        mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
+
+                        if (Util.getNetworkState(mContext)) {
+                            FNAS.deleteRemoteMediaShare(mContext, mediaShare);
+                        } else {
+                            FNAS.deleteLocalMediaShare(mContext, mediaShare);
+                        }
+
+                    }
+                }).setNegativeButton(getString(R.string.cancel), null).create().show();
 
     }
 

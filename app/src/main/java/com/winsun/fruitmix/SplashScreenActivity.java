@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -14,9 +13,7 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -113,7 +110,7 @@ public class SplashScreenActivity extends Activity {
     }
 
     private void handleRemoteDeviceIDRetrieved(OperationEvent operationEvent) {
-        OperationResult result = operationEvent.getOperationResult();
+        OperationResultType result = operationEvent.getOperationResultType();
         switch (result) {
             case SUCCEED:
                 Log.i(TAG, "login success");
@@ -132,7 +129,7 @@ public class SplashScreenActivity extends Activity {
     }
 
     private void handleRemoteTokenRetrieved(OperationEvent operationEvent) {
-        OperationResult result = operationEvent.getOperationResult();
+        OperationResultType result = operationEvent.getOperationResultType();
 
         FNAS.userUUID = mUuid;
         FNAS.Gateway = mGateway;

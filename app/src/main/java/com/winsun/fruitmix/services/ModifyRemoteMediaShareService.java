@@ -3,7 +3,6 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.R;
@@ -12,7 +11,7 @@ import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResult;
+import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -71,11 +70,11 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
         if (mediaShare.isLocal()) {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED,OperationResult.LOCAL_MEDIASHARE_UPLOADING,mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, OperationResultType.LOCAL_MEDIA_SHARE_UPLOADING,mediaShare);
 
         } else if (!Util.uploadImageDigestsIfNotUpload(this, mediaShare.getMediaDigestInMediaShareContents())) {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED,OperationResult.FAIL,mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, OperationResultType.FAIL,mediaShare);
 
         } else {
 
@@ -84,7 +83,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
                 if (result.length() > 0) {
 
-                    mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED,OperationResult.SUCCEED,mediaShare);
+                    mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, OperationResultType.SUCCEED,mediaShare);
 
                     Log.i(TAG, "modify remote share succeed");
 
@@ -98,14 +97,14 @@ public class ModifyRemoteMediaShareService extends IntentService {
                     Log.i(TAG, "modify media in remote mediashare in map result:" + (mapResult != null ? "true" : "false"));
 
                 }else {
-                    mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED,OperationResult.FAIL,mediaShare);
+                    mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, OperationResultType.FAIL,mediaShare);
                 }
 
             } catch (Exception e) {
 
                 e.printStackTrace();
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED,OperationResult.FAIL,mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, OperationResultType.FAIL,mediaShare);
 
                 Log.i(TAG, "modify remote share fail");
             }
