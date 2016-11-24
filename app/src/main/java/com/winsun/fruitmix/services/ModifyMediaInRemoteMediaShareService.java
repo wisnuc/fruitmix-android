@@ -9,14 +9,27 @@ import android.util.Log;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
+import com.winsun.fruitmix.operationResult.OperationIOException;
+import com.winsun.fruitmix.operationResult.OperationJSONException;
+import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.operationResult.OperationUploadPhotoFailed;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -85,7 +98,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
 
         if (!Util.uploadImageDigestsIfNotUpload(this, diffContentsModifiedMediaShare.getMediaDigestInMediaShareContents())) {
 
-            operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, OperationResultType.FAIL);
+            operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, new OperationUploadPhotoFailed());
 
             Log.i(TAG, "edit photo in remote mediashare fail");
 
@@ -97,11 +110,11 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
             String req = String.format(getString(R.string.update_mediashare_url), Util.MEDIASHARE_PARAMETER, modifiedMediaShare.getUuid());
 
             try {
-                String result = FNAS.PostRemoteCall(req, data);
+                HttpResponse httpResponse = FNAS.PostRemoteCall(req, data);
 
-                if (result.length() > 0) {
+                if (httpResponse.getResponseCode() == 200) {
 
-                    operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, OperationResultType.SUCCEED);
+                    operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, new OperationSuccess());
 
                     Log.i(TAG, "modify media in remote mediashare which source is network succeed");
 
@@ -124,16 +137,30 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
                     Log.i(TAG, "modify media in remote mediashare in map result:" + (mapResult != null ? "true" : "false"));
                 }else {
 
-                    operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, OperationResultType.FAIL);
+                    operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, new OperationNetworkException(httpResponse.getResponseCode()));
 
                 }
 
 
-            } catch (Exception e) {
+            } catch (MalformedURLException e) {
 
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, OperationResultType.FAIL);
+                operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, new OperationMalformedUrlException());
+
+                Log.i(TAG, "edit photo in remote mediashare fail");
+            }catch (SocketTimeoutException e) {
+
+                e.printStackTrace();
+
+                operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, new OperationSocketTimeoutException());
+
+                Log.i(TAG, "edit photo in remote mediashare fail");
+            }catch (IOException e) {
+
+                e.printStackTrace();
+
+                operationEvent = new OperationEvent(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED, new OperationIOException());
 
                 Log.i(TAG, "edit photo in remote mediashare fail");
             }

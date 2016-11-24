@@ -17,46 +17,41 @@ import java.util.List;
 
 public class RemoteFileFolderParser implements RemoteDataParser<AbstractRemoteFile> {
 
-    public List<AbstractRemoteFile> parse(String json) {
+    public List<AbstractRemoteFile> parse(String json) throws JSONException {
 
         List<AbstractRemoteFile> abstractRemoteFiles = new ArrayList<>();
 
-        try {
-            JSONArray jsonArray = new JSONArray(json);
+        JSONArray jsonArray = new JSONArray(json);
 
-            for (int i = 0; i < jsonArray.length(); i++) {
+        for (int i = 0; i < jsonArray.length(); i++) {
 
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-                AbstractRemoteFile abstractRemoteFile;
+            AbstractRemoteFile abstractRemoteFile;
 
-                String type = jsonObject.optString("type");
-                if (type.equals("file")) {
-                    abstractRemoteFile = new RemoteFile();
-                } else {
-                    abstractRemoteFile = new RemoteFolder();
-                }
-
-                String size = jsonObject.optString("size");
-                abstractRemoteFile.setSize(size);
-
-                String time = jsonObject.optString("mtime");
-                abstractRemoteFile.setTime(time);
-
-                abstractRemoteFile.setUuid(jsonObject.optString("uuid"));
-
-                abstractRemoteFile.setName(jsonObject.optString("name"));
-
-                JSONArray ownerArray = jsonObject.getJSONArray("owner");
-                for (int j = 0; j < ownerArray.length(); j++) {
-                    abstractRemoteFile.addOwner(ownerArray.getString(j));
-                }
-
-                abstractRemoteFiles.add(abstractRemoteFile);
+            String type = jsonObject.optString("type");
+            if (type.equals("file")) {
+                abstractRemoteFile = new RemoteFile();
+            } else {
+                abstractRemoteFile = new RemoteFolder();
             }
 
-        } catch (JSONException e) {
-            e.printStackTrace();
+            String size = jsonObject.optString("size");
+            abstractRemoteFile.setSize(size);
+
+            String time = jsonObject.optString("mtime");
+            abstractRemoteFile.setTime(time);
+
+            abstractRemoteFile.setUuid(jsonObject.optString("uuid"));
+
+            abstractRemoteFile.setName(jsonObject.optString("name"));
+
+            JSONArray ownerArray = jsonObject.getJSONArray("owner");
+            for (int j = 0; j < ownerArray.length(); j++) {
+                abstractRemoteFile.addOwner(ownerArray.getString(j));
+            }
+
+            abstractRemoteFiles.add(abstractRemoteFile);
         }
 
         return abstractRemoteFiles;

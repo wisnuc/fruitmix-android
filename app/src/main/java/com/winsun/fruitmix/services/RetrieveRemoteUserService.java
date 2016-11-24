@@ -3,10 +3,13 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteUserParser;
 import com.winsun.fruitmix.util.FNAS;
@@ -27,7 +30,9 @@ import java.util.concurrent.ConcurrentMap;
  * helper methods.
  */
 public class RetrieveRemoteUserService extends IntentService {
-    // TODO: Rename actions, choose action names that describe tasks that this
+
+    public static final String TAG = RetrieveRemoteUserService.class.getSimpleName();
+
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_RETRIEVE_REMOET_USER = "com.winsun.fruitmix.services.action.retrieve_remote_user";
 
@@ -71,12 +76,12 @@ public class RetrieveRemoteUserService extends IntentService {
 
         try {
 
-            String json = FNAS.loadUser();
+            HttpResponse httpResponse = FNAS.loadUser();
 
             RemoteDataParser<User> parser = new RemoteUserParser();
-            users = parser.parse(json);
+            users = parser.parse(httpResponse.getResponseData());
 
-            List<User> otherUsers = parser.parse(FNAS.loadOtherUsers());
+            List<User> otherUsers = parser.parse(FNAS.loadOtherUsers().getResponseData());
 
             addDifferentUsers(users, otherUsers);
 
@@ -85,19 +90,23 @@ public class RetrieveRemoteUserService extends IntentService {
             dbUtils.deleteAllRemoteUser();
             dbUtils.insertRemoteUsers(userConcurrentMap);
 
+            Log.i(TAG, "handleActionRetrieveRemoteUser: retrieve user from network");
+
         } catch (Exception e) {
             e.printStackTrace();
 
             users = dbUtils.getAllRemoteUser();
 
             userConcurrentMap = LocalCache.BuildRemoteUserMapKeyIsUUID(users);
+
+            Log.i(TAG, "handleActionRetrieveRemoteUser: retrieve user from db");
         }
 
         LocalCache.RemoteUserMapKeyIsUUID.clear();
 
         LocalCache.RemoteUserMapKeyIsUUID.putAll(userConcurrentMap);
 
-        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, OperationResultType.SUCCEED);
+        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationSuccess());
         EventBus.getDefault().postSticky(operationEvent);
     }
 
@@ -112,7 +121,6 @@ public class RetrieveRemoteUserService extends IntentService {
             if (i >= users.size()) {
                 users.add(otherUser);
             }
-
         }
     }
 

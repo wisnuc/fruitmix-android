@@ -6,6 +6,13 @@ import android.content.Context;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
+import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.operationResult.OperationIOException;
+import com.winsun.fruitmix.operationResult.OperationJSONException;
+import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteFileShareParser;
 import com.winsun.fruitmix.util.FNAS;
@@ -14,6 +21,11 @@ import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -64,24 +76,48 @@ public class RetrieveRemoteFileShareService extends IntentService {
 
             LocalCache.RemoteFileShareList.clear();
 
-            String remoteFileShareWithMeJSON = FNAS.loadFileSharedWithMe();
+            HttpResponse remoteFileShareWithMeJSON = FNAS.loadFileSharedWithMe();
 
-            RemoteDataParser<AbstractRemoteFile> parser = new RemoteFileShareParser();
+            if (remoteFileShareWithMeJSON.getResponseCode() == 200) {
+                RemoteDataParser<AbstractRemoteFile> parser = new RemoteFileShareParser();
 
-            LocalCache.RemoteFileShareList.addAll(parser.parse(remoteFileShareWithMeJSON));
+                LocalCache.RemoteFileShareList.addAll(parser.parse(remoteFileShareWithMeJSON.getResponseData()));
 
-            String remoteFileShareWithOthersJSON = FNAS.loadFileShareWithOthers();
+                HttpResponse remoteFileShareWithOthersJSON = FNAS.loadFileShareWithOthers();
 
-            LocalCache.RemoteFileShareList.addAll(parser.parse(remoteFileShareWithOthersJSON));
+                if (remoteFileShareWithOthersJSON.getResponseCode() == 200) {
 
-            EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, OperationResultType.SUCCEED));
+                    LocalCache.RemoteFileShareList.addAll(parser.parse(remoteFileShareWithOthersJSON.getResponseData()));
 
-        } catch (Exception e) {
+                    EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, new OperationSuccess()));
+
+                } else {
+
+                    EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, new OperationNetworkException(remoteFileShareWithOthersJSON.getResponseCode())));
+                }
+
+            } else {
+
+                EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, new OperationNetworkException(remoteFileShareWithMeJSON.getResponseCode())));
+            }
+
+        } catch (MalformedURLException e) {
             e.printStackTrace();
 
-            EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, OperationResultType.FAIL));
-        }
+            EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, new OperationMalformedUrlException()));
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
 
+            EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, new OperationSocketTimeoutException()));
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, new OperationIOException()));
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, new OperationJSONException()));
+        }
 
     }
 

@@ -16,7 +16,7 @@ import java.util.Random;
 public class RemoteUserParser implements RemoteDataParser<User> {
 
     @Override
-    public List<User> parse(String json) {
+    public List<User> parse(String json) throws JSONException {
 
         List<User> users = new ArrayList<>();
         String uuid;
@@ -24,47 +24,42 @@ public class RemoteUserParser implements RemoteDataParser<User> {
         JSONObject itemRaw;
         User user;
 
-        try {
-            jsonArray = new JSONArray(json);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                itemRaw = jsonArray.getJSONObject(i);
+        jsonArray = new JSONArray(json);
+        for (int i = 0; i < jsonArray.length(); i++) {
+            itemRaw = jsonArray.getJSONObject(i);
 
-                user = new User();
-                uuid = itemRaw.optString("uuid");
-                user.setUuid(uuid);
-                user.setUserName(itemRaw.optString("username"));
+            user = new User();
+            uuid = itemRaw.optString("uuid");
+            user.setUuid(uuid);
+            user.setUserName(itemRaw.optString("username"));
 
-                String avatar = itemRaw.optString("avatar");
-                if (avatar.equals("null")) {
-                    user.setAvatar("defaultAvatar.jpg");
-                } else {
-                    user.setAvatar(avatar);
-                }
-
-                user.setEmail(itemRaw.optString("email"));
-
-                StringBuilder stringBuilder = new StringBuilder();
-                String[] splitStrings = user.getUserName().split(" ");
-                for (String splitString : splitStrings) {
-                    stringBuilder.append(splitString.substring(0, 1).toUpperCase());
-                }
-                if (user.getDefaultAvatar() == null) {
-                    user.setDefaultAvatar(stringBuilder.toString());
-                }
-                if (user.getDefaultAvatarBgColor() == null) {
-                    user.setDefaultAvatarBgColor(String.valueOf(new Random().nextInt(3)));
-                }
-
-                user.setHome(itemRaw.optString("home"));
-                user.setLibrary(itemRaw.optString("library"));
-
-                users.add(user);
-
+            String avatar = itemRaw.optString("avatar");
+            if (avatar.equals("null")) {
+                user.setAvatar("defaultAvatar.jpg");
+            } else {
+                user.setAvatar(avatar);
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
+            user.setEmail(itemRaw.optString("email"));
+
+            StringBuilder stringBuilder = new StringBuilder();
+            String[] splitStrings = user.getUserName().split(" ");
+            for (String splitString : splitStrings) {
+                stringBuilder.append(splitString.substring(0, 1).toUpperCase());
+            }
+            if (user.getDefaultAvatar() == null) {
+                user.setDefaultAvatar(stringBuilder.toString());
+            }
+            if (user.getDefaultAvatarBgColor() == null) {
+                user.setDefaultAvatarBgColor(String.valueOf(new Random().nextInt(3)));
+            }
+
+            user.setHome(itemRaw.optString("home"));
+            user.setLibrary(itemRaw.optString("library"));
+
+            users.add(user);
+
+        }
 
         return users;
     }

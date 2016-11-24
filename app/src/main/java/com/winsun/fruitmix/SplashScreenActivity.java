@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
@@ -54,9 +55,11 @@ public class SplashScreenActivity extends Activity {
 
         LocalCache.Init(this);
 
-        boolean result = FileUtil.createDownloadFileStoreFolder();
+        boolean result = FileUtil.createDownloadFileStoreFolder(mContext);
 
-        Log.i(TAG, "onCreate: create file result:" + result);
+        if (!result) {
+            Log.i(TAG, "onCreate: " + getString(R.string.create_download_file_store_folder_failed));
+        }
 
 
         CustomHandler mHandler = new CustomHandler(this);
@@ -77,12 +80,12 @@ public class SplashScreenActivity extends Activity {
         super.onStop();
     }
 
-    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
         OperationEvent stickyEvent = EventBus.getDefault().removeStickyEvent(OperationEvent.class);
 
-        if(stickyEvent != null){
+        if (stickyEvent != null) {
             String action = stickyEvent.getAction();
 
             if (action.equals(Util.REMOTE_TOKEN_RETRIEVED)) {
@@ -110,18 +113,19 @@ public class SplashScreenActivity extends Activity {
     }
 
     private void handleRemoteDeviceIDRetrieved(OperationEvent operationEvent) {
-        OperationResultType result = operationEvent.getOperationResultType();
-        switch (result) {
+
+        OperationResult result = operationEvent.getOperationResult();
+
+        OperationResultType resultType = result.getOperationResultType();
+        switch (resultType) {
             case SUCCEED:
                 Log.i(TAG, "login success");
                 Util.loginState = true;
-
                 break;
-            case FAIL:
+            default:
                 Util.loginState = false;
                 LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
-                Toast.makeText(SplashScreenActivity.this, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(SplashScreenActivity.this, result.getResultMessage(this), Toast.LENGTH_SHORT).show();
                 break;
         }
 
@@ -129,20 +133,22 @@ public class SplashScreenActivity extends Activity {
     }
 
     private void handleRemoteTokenRetrieved(OperationEvent operationEvent) {
-        OperationResultType result = operationEvent.getOperationResultType();
 
+        OperationResult result = operationEvent.getOperationResult();
+
+        OperationResultType resultType = result.getOperationResultType();
         FNAS.userUUID = mUuid;
         FNAS.Gateway = mGateway;
 
-        Log.i(TAG, "onReceive: remote token retrieve:" + result.name());
+        Log.i(TAG, "onReceive: remote token retrieve:" + resultType.name());
 
-        switch (result) {
+        switch (resultType) {
             case SUCCEED:
 
                 FNAS.retrieveRemoteDeviceID(mContext);
 
                 break;
-            case FAIL:
+            default:
 
                 Util.loginState = false;
 
@@ -150,7 +156,7 @@ public class SplashScreenActivity extends Activity {
 
                 LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
 
-                Toast.makeText(SplashScreenActivity.this, getString(R.string.login_fail), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SplashScreenActivity.this, result.getResultMessage(this), Toast.LENGTH_SHORT).show();
 
                 FNAS.retrieveUserMap(mContext);
 
@@ -183,7 +189,7 @@ public class SplashScreenActivity extends Activity {
      */
     private void login() {
 
-        FNAS.retrieveRemoteToken(mContext,mGateway,mUuid,mPassword);
+        FNAS.retrieveRemoteToken(mContext, mGateway, mUuid, mPassword);
 
     }
 

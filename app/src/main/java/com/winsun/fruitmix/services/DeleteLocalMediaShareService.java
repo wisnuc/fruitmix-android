@@ -8,6 +8,9 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.operationResult.OperationNoNetworkException;
+import com.winsun.fruitmix.operationResult.OperationSQLException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
@@ -43,7 +46,7 @@ public class DeleteLocalMediaShareService extends IntentService {
     public static void startActionDeleteLocalShare(Context context, MediaShare mediaShare) {
         Intent intent = new Intent(context, DeleteLocalMediaShareService.class);
         intent.setAction(ACTION_DELETE_LOCAL_SHARE);
-        intent.putExtra(EXTRA_MEDIASHARE,mediaShare);
+        intent.putExtra(EXTRA_MEDIASHARE, mediaShare);
         context.startService(intent);
     }
 
@@ -68,7 +71,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
         if (!mediaShare.isLocal()) {
 
-            operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED, OperationResultType.NO_NETWORK_EXCEPTION);
+            operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED, new OperationNoNetworkException());
 
         } else {
 
@@ -78,7 +81,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
             if (value > 0) {
 
-                operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED, OperationResultType.SUCCEED);
+                operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED, new OperationSuccess());
 
                 Log.i(TAG, "delete local mediashare succeed");
 
@@ -88,7 +91,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
             } else {
 
-                operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED, OperationResultType.FAIL);
+                operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED, new OperationSQLException());
 
                 Log.i(TAG, "delete local mediashare fail");
             }

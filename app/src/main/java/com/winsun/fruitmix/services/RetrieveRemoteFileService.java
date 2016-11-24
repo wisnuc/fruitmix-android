@@ -7,6 +7,13 @@ import android.content.Context;
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.fileModule.model.RemoteFolder;
+import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.operationResult.OperationIOException;
+import com.winsun.fruitmix.operationResult.OperationJSONException;
+import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -14,7 +21,11 @@ import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 /**
@@ -67,26 +78,43 @@ public class RetrieveRemoteFileService extends IntentService {
     private void handleActionRetrieveRemoteFile(String folderUUID) {
 
         try {
-            String json = FNAS.loadFileInFolder(folderUUID);
+            HttpResponse httpResponse = FNAS.loadFileInFolder(folderUUID);
 
-            RemoteFileFolderParser parser = new RemoteFileFolderParser();
-            List<AbstractRemoteFile> abstractRemoteFiles = parser.parse(json);
+            if(httpResponse.getResponseCode() == 200){
 
-            LocalCache.RemoteFileMapKeyIsUUID.clear();
+                RemoteFileFolderParser parser = new RemoteFileFolderParser();
+                List<AbstractRemoteFile> abstractRemoteFiles = parser.parse(httpResponse.getResponseData());
 
-            AbstractRemoteFile remoteFolder = new RemoteFolder();
-            remoteFolder.setUuid(folderUUID);
-            remoteFolder.initChildAbstractRemoteFileList(abstractRemoteFiles);
+                LocalCache.RemoteFileMapKeyIsUUID.clear();
 
-            LocalCache.RemoteFileMapKeyIsUUID.put(folderUUID,remoteFolder);
+                AbstractRemoteFile remoteFolder = new RemoteFolder();
+                remoteFolder.setUuid(folderUUID);
+                remoteFolder.initChildAbstractRemoteFileList(abstractRemoteFiles);
 
-            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, OperationResultType.SUCCEED,folderUUID));
+                LocalCache.RemoteFileMapKeyIsUUID.put(folderUUID,remoteFolder);
 
+                EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationSuccess(),folderUUID));
 
-        } catch (Exception e) {
+            }else {
+                EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()),folderUUID));
+            }
+
+        } catch (MalformedURLException e) {
             e.printStackTrace();
 
-            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, OperationResultType.FAIL,folderUUID));
+            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationMalformedUrlException(),folderUUID));
+        }catch (SocketTimeoutException e) {
+            e.printStackTrace();
+
+            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationSocketTimeoutException(),folderUUID));
+        }catch (IOException e) {
+            e.printStackTrace();
+
+            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationIOException(),folderUUID));
+        }catch (JSONException e) {
+            e.printStackTrace();
+
+            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationJSONException(),folderUUID));
         }
 
     }

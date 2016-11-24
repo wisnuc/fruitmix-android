@@ -15,29 +15,24 @@ import java.util.List;
 public class RemoteMediaShareParser implements RemoteDataParser<MediaShare> {
 
     @Override
-    public List<MediaShare> parse(String json) {
+    public List<MediaShare> parse(String json) throws JSONException {
 
         List<MediaShare> mediaShares = new ArrayList<>();
 
         JSONArray jsonArray;
         JSONObject itemRaw;
 
-        try {
-            jsonArray = new JSONArray(json);
+        jsonArray = new JSONArray(json);
 
-            RemoteMediaShareJSONObjectParser parser = new RemoteMediaShareJSONObjectParser();
+        RemoteMediaShareJSONObjectParser parser = new RemoteMediaShareJSONObjectParser();
 
-            for (int i = 0; i < jsonArray.length(); i++) {
+        for (int i = 0; i < jsonArray.length(); i++) {
 
-                itemRaw = jsonArray.getJSONObject(i);
+            itemRaw = jsonArray.getJSONObject(i);
 
-                MediaShare mediaShare = parser.getRemoteMediaShare(itemRaw);
+            MediaShare mediaShare = parser.getRemoteMediaShare(itemRaw);
 
-                mediaShares.add(mediaShare);
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
+            mediaShares.add(mediaShare);
         }
 
         return mediaShares;

@@ -187,7 +187,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
             loadingLayout.setVisibility(View.GONE);
 
-            OperationResultType result = operationEvent.getOperationResultType();
+            OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
             switch (result) {
                 case SUCCEED:
 
@@ -208,7 +208,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
                     }
 
                     break;
-                case FAIL:
+                default:
                     noContentLayout.setVisibility(View.VISIBLE);
                     break;
             }
@@ -546,7 +546,12 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
                         FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
                         if (fileDownloadManager.checkIsDownloaded(abstractRemoteFile.getUuid())) {
-                            abstractRemoteFile.openAbstractRemoteFile(getActivity());
+
+                            if (!abstractRemoteFile.openAbstractRemoteFile(getActivity())) {
+                                Toast.makeText(getActivity(), getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
+                            }
+
+
                         } else {
                             selectedFiles.add(abstractRemoteFile);
 

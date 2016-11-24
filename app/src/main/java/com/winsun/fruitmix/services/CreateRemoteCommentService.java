@@ -9,7 +9,14 @@ import android.util.Log;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
+import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.Comment;
+import com.winsun.fruitmix.operationResult.OperationIOException;
+import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.operationResult.OperationUploadPhotoFailed;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
@@ -17,6 +24,9 @@ import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -82,7 +92,7 @@ public class CreateRemoteCommentService extends IntentService {
 
         if (!returnValue) {
 
-            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResultType.FAIL, comment, mediaUUID);
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, new OperationUploadPhotoFailed(), comment, mediaUUID);
             EventBus.getDefault().post(mediaShareCommentOperationEvent);
 
             return;
@@ -92,9 +102,10 @@ public class CreateRemoteCommentService extends IntentService {
         String data = "{\"shareid\":\"" + comment.getShareId() + "\", \"text\":\"" + comment.getText() + "\"}";
 
         try {
-            String result = FNAS.PostRemoteCall(request, data);
 
-            if (result.length() > 0) {
+            HttpResponse httpResponse = FNAS.PostRemoteCall(request, data);
+
+            if (httpResponse.getResponseCode() == 200) {
 
                 Log.i(TAG, "insert remote comment which source is network succeed");
 
@@ -113,16 +124,28 @@ public class CreateRemoteCommentService extends IntentService {
 
                 Log.i(TAG, "insert remote media comment to map result:" + mapResult);
 
-                mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResultType.SUCCEED, comment, mediaUUID);
+                mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, new OperationSuccess(), comment, mediaUUID);
 
             } else {
-                mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResultType.FAIL, comment, mediaUUID);
+                mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, new OperationNetworkException(httpResponse.getResponseCode()), comment, mediaUUID);
             }
 
-        } catch (Exception ex) {
+        } catch (MalformedURLException ex) {
             ex.printStackTrace();
 
-            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, OperationResultType.FAIL, comment, mediaUUID);
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, new OperationMalformedUrlException(), comment, mediaUUID);
+
+            Log.i(TAG, "insert remote comment fail");
+        }catch (SocketTimeoutException ex) {
+            ex.printStackTrace();
+
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, new OperationSocketTimeoutException(), comment, mediaUUID);
+
+            Log.i(TAG, "insert remote comment fail");
+        }catch (IOException ex) {
+            ex.printStackTrace();
+
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, new OperationIOException(), comment, mediaUUID);
 
             Log.i(TAG, "insert remote comment fail");
         }

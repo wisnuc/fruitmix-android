@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.eventbus;
 
+import com.winsun.fruitmix.operationResult.OperationResult;
 import com.winsun.fruitmix.util.OperationResultType;
 
 /**
@@ -10,8 +11,8 @@ public class RetrieveFileOperationEvent extends OperationEvent{
 
     private String folderUUID;
 
-    public RetrieveFileOperationEvent(String action, OperationResultType operationResultType, String folderUUID) {
-        super(action, operationResultType);
+    public RetrieveFileOperationEvent(String action, OperationResult operationResult, String folderUUID) {
+        super(action, operationResult);
         this.folderUUID = folderUUID;
     }
 

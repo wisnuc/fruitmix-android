@@ -7,7 +7,9 @@ import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteMediaShareParser;
 import com.winsun.fruitmix.util.FNAS;
@@ -70,16 +72,18 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
         try {
 
-            String json = FNAS.loadRemoteShare();
+            HttpResponse httpResponse = FNAS.loadRemoteShare();
 
-            Log.i(TAG, "loadRemoteShare:"+json.equals(""));
+            Log.i(TAG, "loadRemoteShare:" + httpResponse.getResponseData().equals(""));
 
             RemoteDataParser<MediaShare> parser = new RemoteMediaShareParser();
-            mediaShares = parser.parse(json);
+            mediaShares = parser.parse(httpResponse.getResponseData());
             mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
 
             dbUtils.deleteAllRemoteShare();
             dbUtils.insertRemoteMediaShares(mediaShareConcurrentMap);
+
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: retrieve remote media share from network");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -87,15 +91,15 @@ public class RetrieveRemoteMediaShareService extends IntentService {
             mediaShares = dbUtils.getAllRemoteShare();
             mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
 
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: retrieve remote media share from db");
         }
 
         LocalCache.RemoteMediaShareMapKeyIsUUID.clear();
 
         LocalCache.RemoteMediaShareMapKeyIsUUID.putAll(mediaShareConcurrentMap);
 
-        Log.i(TAG, "retrieve remote media share from network");
 
-        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_RETRIEVED, OperationResultType.SUCCEED);
+        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_RETRIEVED, new OperationSuccess());
         EventBus.getDefault().post(operationEvent);
 
     }

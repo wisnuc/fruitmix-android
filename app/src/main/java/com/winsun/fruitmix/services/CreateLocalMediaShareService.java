@@ -8,6 +8,8 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.operationResult.OperationSQLException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
@@ -69,7 +71,7 @@ public class CreateLocalMediaShareService extends IntentService {
 
         if(returnValue > 0){
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_CREATED, OperationResultType.SUCCEED,mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_CREATED, new OperationSuccess(),mediaShare);
 
             Log.i(TAG,"insert local mediashare succeed");
 
@@ -79,7 +81,7 @@ public class CreateLocalMediaShareService extends IntentService {
 
         }else {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_CREATED, OperationResultType.FAIL,mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_CREATED, new OperationSQLException(),mediaShare);
 
             Log.i(TAG,"insert local mediashare fail");
         }

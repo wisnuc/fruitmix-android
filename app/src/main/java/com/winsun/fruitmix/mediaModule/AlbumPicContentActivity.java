@@ -34,6 +34,7 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
@@ -190,7 +191,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         if (action.equals(Util.LOCAL_SHARE_DELETED) || action.equals(Util.REMOTE_SHARE_DELETED)) {
 
-            OperationResultType operationResultType = operationEvent.getOperationResultType();
+            OperationResult operationResult = operationEvent.getOperationResult();
+
+            OperationResultType operationResultType = operationResult.getOperationResultType();
 
             switch (operationResultType) {
                 case SUCCEED:
@@ -199,7 +202,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 case FAIL:
                 case LOCAL_MEDIA_SHARE_UPLOADING:
                 case NO_NETWORK_EXCEPTION:
-                    Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
                     break;
             }
 
@@ -207,11 +210,13 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         } else if (action.equals(Util.LOCAL_SHARE_MODIFIED) || action.equals(Util.REMOTE_SHARE_MODIFIED)) {
 
-            OperationResultType operationResultType = operationEvent.getOperationResultType();
+            OperationResult operationResult = operationEvent.getOperationResult();
+
+            OperationResultType operationResultType = operationResult.getOperationResultType();
 
             switch (operationResultType) {
                 case SUCCEED:
-                    Toast.makeText(mContext, getString(R.string.setting_succeed), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
 
                     if (mediaShare.getViewersListSize() == 0) {
                         mPrivatePublicMenu.setTitle(getString(R.string.set_public));
@@ -222,8 +227,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     isOperated = true;
 
                     break;
-                case FAIL:
-                    Toast.makeText(mContext, getString(R.string.setting_fail), Toast.LENGTH_SHORT).show();
+                default:
+                    Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
                     break;
             }
 

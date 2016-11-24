@@ -8,6 +8,9 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.operationResult.OperationNoNetworkException;
+import com.winsun.fruitmix.operationResult.OperationSQLException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
@@ -64,7 +67,7 @@ public class ModifyLocalMediaShareService extends IntentService {
 
         if (!mediaShare.isLocal()) {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, OperationResultType.NO_NETWORK_EXCEPTION,mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, new OperationNoNetworkException(),mediaShare);
 
         } else {
 
@@ -74,13 +77,13 @@ public class ModifyLocalMediaShareService extends IntentService {
 
             if (returnValue > 0) {
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, OperationResultType.SUCCEED,mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, new OperationSuccess(),mediaShare);
 
                 Log.i(TAG,"modify local share succeed");
 
             } else {
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, OperationResultType.FAIL,mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, new OperationSQLException(),mediaShare);
 
                 Log.i(TAG,"modify local share fail");
             }

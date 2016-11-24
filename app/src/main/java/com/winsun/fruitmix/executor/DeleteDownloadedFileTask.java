@@ -5,6 +5,7 @@ import android.content.Context;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
@@ -45,7 +46,7 @@ public class DeleteDownloadedFileTask implements Callable<Boolean> {
 
         FileDownloadManager.INSTANCE.deleteFileDownloadItem(fileUUIDs);
 
-        EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_DELETED, OperationResultType.SUCCEED));
+        EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_DELETED, new OperationSuccess()));
 
         return true;
     }

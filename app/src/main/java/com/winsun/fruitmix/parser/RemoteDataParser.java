@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.parser;
 
+import org.json.JSONException;
+
 import java.util.List;
 
 /**
@@ -7,5 +9,5 @@ import java.util.List;
  */
 public interface RemoteDataParser<T> {
 
-    List<T> parse(String json);
+    List<T> parse(String json) throws JSONException;
 }

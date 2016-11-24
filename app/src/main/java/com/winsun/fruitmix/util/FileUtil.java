@@ -7,7 +7,9 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.fileModule.download.FileDownloadErrorState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadFinishedState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
@@ -30,11 +32,13 @@ import okhttp3.ResponseBody;
 
 public class FileUtil {
 
+    public static final String TAG = FileUtil.class.getSimpleName();
+
     private static final String DOWNLOAD_FOLDER_NAME = "winsuc";
 
     public static boolean checkExternalStorageState() {
         String state = Environment.getExternalStorageState();
-        return state.equals(Environment.MEDIA_MOUNTED) || state.equals(Environment.MEDIA_MOUNTED_READ_ONLY);
+        return state.equals(Environment.MEDIA_MOUNTED);
     }
 
     public static boolean checkExternalDirectoryForDownloadAvailableSizeEnough() {
@@ -60,16 +64,24 @@ public class FileUtil {
         return Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
-    public static String getDownloadFolderName(Context context){
-        return context.getExternalFilesDir(null).getAbsolutePath();
+    public static String getDownloadFolderName(Context context) {
+        File file = context.getExternalFilesDir(null);
+        if (file != null) {
+            return file.getAbsolutePath();
+        } else {
+            return "";
+        }
     }
 
     private static String getExternalDirectoryPathForDownload() {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
     }
 
-    public static boolean createDownloadFileStoreFolder() {
-        if (!checkExternalStorageState()) return false;
+    public static boolean createDownloadFileStoreFolder(Context context) {
+        if (!checkExternalStorageState()) {
+            Log.i(TAG, "createDownloadFileStoreFolder: " + context.getString(R.string.external_storage_not_mounted));
+            return false;
+        }
         File downloadFileStoreFolder = new File(getDownloadFileStoreFolderPath());
 
         return downloadFileStoreFolder.mkdirs() || downloadFileStoreFolder.isDirectory();

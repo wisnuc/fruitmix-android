@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.eventbus;
 
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.operationResult.OperationResult;
 import com.winsun.fruitmix.util.OperationResultType;
 
 /**
@@ -11,8 +12,8 @@ public class MediaShareOperationEvent extends OperationEvent {
 
     private MediaShare mediaShare;
 
-    public MediaShareOperationEvent(String action, OperationResultType operationResultType, MediaShare mediaShare) {
-        super(action, operationResultType);
+    public MediaShareOperationEvent(String action, OperationResult operationResult, MediaShare mediaShare) {
+        super(action, operationResult);
         this.mediaShare = mediaShare;
     }
 

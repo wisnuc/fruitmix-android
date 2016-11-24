@@ -172,66 +172,102 @@
 
     <string name="finish_text">Finish</string>
 
+    <string name="choose_text">Choose</string>
+
+    <string name="delete_text">Delete</string>
+
+    <string name="loading_title">Loading</string>
+    <string name="loading_message">Please Wait!</string>
+
+    <string name="no_content">Sorry,No content!</string>
+
+    <string name="operating_title">Operating</string>
+
+    <string name="load_finish">Load Finish</string>
+
+    <string name="operation_success">Operation Success!</string>
+    <string name="operation_fail">Operation fail,Please check network!</string>
+
+    <string name="coming_soon">Coming Soon</string>
+
+    <string name="finishAppToast">Please click BACK again to exit</string>
+
+    <string name="ok">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="clear_select_item">Clear select item</string>
+
+    <string name="confirm_delete">Please confirm whether to delete</string>
+
+    <!-- slide menu -->
+
     <string name="person_data">Person Data</string>
     <string name="cloud">My Cloud</string>
     <string name="user_manage">User Manage</string>
     <string name="setting">Setting</string>
     <string name="help">Help</string>
     <string name="logout">Logout</string>
+
+    <string name="my_file">My File</string>
+    <string name="my_photo">My Photo</string>
+    <!-- login -->
+
     <string name="login">Login</string>
     <string name="login_fail">Login failed</string>
+
+
+    <!-- personal data -->
 
     <string name="email_text">Email</string>
     <string name="password_text">Password</string>
     <string name="confirm_password_text">Confirm Password</string>
     <string name="login_by_password_text">Login By Password</string>
-    <string name="password_error">Input Password Error</string>
-    <string name="no_operate_mediashare_permission">You have not the permission to operate</string>
+
+    <!-- album -->
+
+    <string name="album_text">Album</string>
+
     <string name="set_maintainer">Set Maintainer</string>
-    <string name="set_private">Set Private</string>
-    <string name="set_public">Set Public</string>
-    <string name="choose_text">Choose</string>
+
     <string name="modify_album_text">Modify Album</string>
     <string name="create_album_text">Create Album</string>
+
     <string name="title_text">Title</string>
     <string name="title_hint">Untitled %1$s</string>
     <string name="description_text">Description</string>
+
     <string name="private_text">Private</string>
-    <string name="search_equipment">Search Equipment</string>
-    <string name="winsun_group_name">Winsun</string>
-    <string name="name_abbreviations">D</string>
-    <string name="admin_default_name">Default</string>
-    <string name="comment_text">Comment</string>
-    <string name="send_comment_hint">Say something here…</string>
-    <string name="no_user_text">No User</string>
-    <string name="share_text">Share</string>
-    <string name="delete_text">Delete</string>
+
     <string name="album_item_title">New York</string>
     <string name="album_item_desc">2016–02–09 ~ 2017–05–05</string>
     <string name="album_item_date">2016–02–01</string>
-    <string name="today_text">Today</string>
-    <string name="test_text">Test</string>
-    <string name="share_item_date">21:08 yesterday</string>
-    <string name="user_email">example@qq.com</string>
-    <string name="album_text">Album</string>
-    <string name="photo_text">Photo</string>
-    <string name="unknown_time_text">Unknown Time</string>
-    <string name="loading_title">Loading</string>
-    <string name="loading_message">Please Wait!</string>
-    <string name="choose_photo">Choose Photo</string>
-    <string name="select_count">Select %1$d item</string>
-    <string name="no_content">Sorry,No content!</string>
-    <string name="select_nothing">Select nothing,please select</string>
-    <string name="operating_title">Operating</string>
-    <string name="no_comment_content">Please write comment!</string>
-    <string name="check_more_photos">Check more photos</string>
-    <string name="load_finish">Load Finish</string>
-    <string name="setting_album">Setting Ablum</string>
+
+    <!-- album content menu -->
+
+    <string name="set_private">Set Private</string>
+    <string name="set_public">Set Public</string>
+
+    <string name="setting_album">Setting Album</string>
     <string name="edit_photo">Edit Photo</string>
     <string name="modify_cover">Modify Cover</string>
     <string name="delete_album">Delete Album</string>
-    <string name="operation_success">Operation Success!</string>
-    <string name="operation_fail">Operation fail,Please check network!</string>
+
+    <!-- equipment -->
+
+    <string name="search_equipment">Search Equipment</string>
+
+    <!-- share -->
+
+    <string name="winsun_group_name">Winsun</string>
+    <string name="name_abbreviations">D</string>
+    <string name="admin_default_name">Default</string>
+
+    <string name="share_text">Share</string>
+
+    <string name="today_text">Today</string>
+    <string name="test_text">Test</string>
+    <string name="share_item_date">21:08 yesterday</string>
+
+    <string name="check_more_photos">Check more photos</string>
 
     <string name="share_comment_count">Share %1$s Pictures</string>
     <string name="share_comment_text">%1$s : %2$s</string>
@@ -239,10 +275,39 @@
 
     <string name="share_album_title">%1$s·%2$sPhoto</string>
 
+
+    <!-- share comment -->
+
+    <string name="comment_text">Comment</string>
+    <string name="send_comment_hint">Say something here…</string>
+
+    <string name="no_comment_content">Please write comment!</string>
+
+    <!-- user manage -->
+
+    <string name="no_user_text">No User</string>
+
+    <string name="user_email">example@qq.com</string>
+
+    <!-- photo -->
+
+    <string name="photo_text">Photo</string>
+    <string name="unknown_time_text">Unknown Time</string>
+
+    <string name="choose_photo">Choose Photo</string>
+    <string name="select_count">Select %1$d item</string>
+
+    <string name="select_nothing">Select nothing,please select</string>
+
+
+    <!-- time format -->
+
     <string name="seconds_ago">%1$s seconds ago</string>
     <string name="minutes_ago">%1$s minutes ago</string>
     <string name="hours_ago">%1$s hours ago</string>
     <string name="yesterday">yesterday</string>
+
+    <!-- url -->
 
     <string name="new_thumb_photo_url">%1$s/download</string>
     <string name="thumb_photo_url">%1$s/thumbnail?width=%2$s&amp;height=%3$s&amp;autoOrient=true&amp;modifier=caret</string>
@@ -250,48 +315,49 @@
     <string name="photo_comment_url">%1$s?type=comments</string>
     <string name="update_mediashare_url">%1$s/%2$s/update</string>
 
-    <string name="photo_not_sharing">Sorry,the photo can not be shared</string>
-    <string name="modify_nothing_about_mediashare">Sorry,nothing change,please check it</string>
-    <string name="coming_soon">Coming Soon</string>
-    <string name="my_file">My File</string>
-    <string name="my_photo">My Photo</string>
+    <!-- file -->
+
     <string name="file">File</string>
     <string name="download">Download</string>
     <string name="select_file">Select File</string>
     <string name="quit_select_file">Quit Select File</string>
-    <string name="already_select_media">Sorry,the photo has been selected</string>
-    <string name="open_file_failed">Sorry,open this file failed</string>
-    <string name="download_file_failed_toast">Sorry,download this file failed</string>
-    <string name="download_file_succeed">Download this file succeed!</string>
-    <string name="already_downloading_file">this file is already downloading</string>
+
+
     <string name="downloading">Downloading</string>
     <string name="downloaded">Downloaded</string>
     <string name="download_failed">Download failed</string>
-    <string name="no_write_external_storage_permission">No write external storage permission</string>
+
+    <string name="download_select_item">Download select item</string>
+    <string name="download_the_item">Download the item</string>
+
+    <!-- input ip -->
+
     <string name="manual_add_new_equipment">Manual add new equipment</string>
     <string name="ip_title_text">IP</string>
     <string name="edit_ip_text">Please enter ip</string>
-    <string name="finishAppToast">Please click BACK again to exit</string>
-    <string name="no_enough_space">No enough space</string>
 
-    <string name="ok">Confirm</string>
-    <string name="cancel">Cancel</string>
-    <string name="clear_select_item">Clear select item</string>
-    <string name="download_select_item">Download select item</string>
-    <string name="download_the_item">Download the item</string>
-    <string name="media_not_exist">This media is not exist</string>
-
-    <string name="confirm_delete">Please confirm whether to delete</string>
 
     <!-- operation result -->
     <string name="success">Success</string>
     <string name="local_media_share_uploading">Sorry,it is uploading,please wait!</string>
-    <string name="no_network">No Network or Log in failed,Please check it</string>
+    <string name="no_network">No Network,Please check it</string>
     <string name="io_exception">IO Exception</string>
     <string name="json_exception">JSON Exception</string>
     <string name="socket_timeout_exception">Socket Timeout Exception</string>
     <string name="malformed_url_exception">Malformed Url Exception</string>
     <string name="network_exception">%1$d Error</string>
+    <string name="file_not_found_exception">File Not Found Exception</string>
+
+    <string name="upload_photo_failed">Upload photo failed</string>
+
+    <string name="no_operate_mediashare_permission">You have not the permission to operate</string>
+    <string name="password_error">Input Password Error</string>
+    <string name="already_select_media">Sorry,the photo has been selected</string>
+    <string name="photo_not_sharing">Sorry,the photo can not be shared</string>
+    <string name="open_file_failed">Sorry,open this file failed</string>
+
+    <string name="no_write_external_storage_permission">No write external storage permission</string>
+    <string name="no_enough_space">No enough space</string>
 
     <!-- finish add by liang.wu-->
 

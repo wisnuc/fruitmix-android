@@ -4,6 +4,7 @@ import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
@@ -15,18 +16,20 @@ import com.winsun.fruitmix.parser.RemoteUserParser;
 
 import static org.junit.Assert.*;
 
+import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Administrator on 2016/9/2.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
+@Config(constants = BuildConfig.class, sdk = 23,application = MockApplication.class)
 public class RemoteDataParserUnitTest {
 
     @Test
@@ -72,7 +75,12 @@ public class RemoteDataParserUnitTest {
 
         RemoteDataParser<Media> remoteDataParser = new RemoteMediaParser();
 
-        List<Media> medias = remoteDataParser.parse(json);
+        List<Media> medias = new ArrayList<>();
+        try {
+            medias = remoteDataParser.parse(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         assertFalse(medias.size() == 0);
 
@@ -166,7 +174,12 @@ public class RemoteDataParserUnitTest {
 
         RemoteDataParser<MediaShare> shareParser = new RemoteMediaShareParser();
 
-        List<MediaShare> shares = shareParser.parse(json);
+        List<MediaShare> shares = new ArrayList<>();
+        try {
+            shares = shareParser.parse(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         assertFalse(shares.size() == 0);
 
@@ -212,7 +225,12 @@ public class RemoteDataParserUnitTest {
 
         RemoteDataParser<User> parser = new RemoteUserParser();
 
-        List<User> users = parser.parse(json);
+        List<User> users = new ArrayList<>();
+        try {
+            users = parser.parse(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         assertFalse(users.size() == 0);
 
@@ -250,7 +268,12 @@ public class RemoteDataParserUnitTest {
 
         RemoteDataParser<Comment> remoteDataParser = new RemoteMediaCommentParser();
 
-        List<Comment> comments = remoteDataParser.parse(json);
+        List<Comment> comments = new ArrayList<>();
+        try {
+            comments = remoteDataParser.parse(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         assertFalse(comments.size() == 0);
     }
@@ -300,7 +323,12 @@ public class RemoteDataParserUnitTest {
                 "]";
 
         RemoteDataParser<AbstractRemoteFile> remoteDataParser = new RemoteFileFolderParser();
-        List<AbstractRemoteFile> abstractRemoteFiles = remoteDataParser.parse(json);
+        List<AbstractRemoteFile> abstractRemoteFiles = new ArrayList<>();
+        try {
+            abstractRemoteFiles = remoteDataParser.parse(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(0);
         assertEquals(abstractRemoteFile.getTime(), "1477386652380");
@@ -375,7 +403,12 @@ public class RemoteDataParserUnitTest {
                 "]";
 
         RemoteDataParser<AbstractRemoteFile> parser = new RemoteFileShareParser();
-        List<AbstractRemoteFile> abstractRemoteFiles = parser.parse(json);
+        List<AbstractRemoteFile> abstractRemoteFiles = new ArrayList<>();
+        try {
+            abstractRemoteFiles = parser.parse(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(0);
         assertEquals(abstractRemoteFile.getUuid(), "ed1d9638-8130-4077-9ed8-05be641a9ab4");

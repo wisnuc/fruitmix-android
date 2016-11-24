@@ -19,6 +19,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
+import com.winsun.fruitmix.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
@@ -165,7 +166,10 @@ public class CreateAlbumActivity extends AppCompatActivity {
             if (mDialog != null && mDialog.isShowing())
                 mDialog.dismiss();
 
-            OperationResultType operationResultType = operationEvent.getOperationResultType();
+
+            OperationResult operationResult = operationEvent.getOperationResult();
+
+            OperationResultType operationResultType = operationResult.getOperationResultType();
 
             switch (operationResultType) {
                 case SUCCEED:
@@ -177,8 +181,8 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                     CreateAlbumActivity.this.setResult(RESULT_OK);
                     break;
-                case FAIL:
-                    Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+                default:
+                    Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
                     CreateAlbumActivity.this.setResult(RESULT_CANCELED);
                     break;
             }

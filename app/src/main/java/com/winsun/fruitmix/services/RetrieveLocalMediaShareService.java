@@ -7,6 +7,7 @@ import android.content.Context;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
@@ -75,7 +76,7 @@ public class RetrieveLocalMediaShareService extends IntentService {
 
         LocalCache.LocalMediaShareMapKeyIsUUID.putAll(mediaShareConcurrentMap);
 
-        OperationEvent operationEvent = new OperationEvent(Util.LOCAL_MEDIA_SHARE_RETRIEVED, OperationResultType.SUCCEED);
+        OperationEvent operationEvent = new OperationEvent(Util.LOCAL_MEDIA_SHARE_RETRIEVED, new OperationSuccess());
         EventBus.getDefault().post(operationEvent);
 
     }

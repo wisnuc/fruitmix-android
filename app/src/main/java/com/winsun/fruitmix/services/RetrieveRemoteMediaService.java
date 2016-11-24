@@ -7,7 +7,9 @@ import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaOperationEvent;
+import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
 import com.winsun.fruitmix.util.FNAS;
@@ -75,12 +77,12 @@ public class RetrieveRemoteMediaService extends IntentService {
 
         try {
 
-            String json = FNAS.loadMedia();
+            HttpResponse httpResponse = FNAS.loadMedia();
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: load media finish");
 
             RemoteDataParser<Media> parser = new RemoteMediaParser();
-            medias = parser.parse(json);
+            medias = parser.parse(httpResponse.getResponseData());
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: parse json finish");
 
@@ -102,13 +104,15 @@ public class RetrieveRemoteMediaService extends IntentService {
             medias = dbUtils.getAllRemoteMedia();
 
             mediaConcurrentMap = LocalCache.BuildMediaMapKeyIsUUID(medias);
+
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: retrieve media from db");
         }
 
         LocalCache.RemoteMediaMapKeyIsUUID.clear();
 
         LocalCache.RemoteMediaMapKeyIsUUID.putAll(mediaConcurrentMap);
 
-        MediaOperationEvent operationEvent = new MediaOperationEvent(Util.REMOTE_MEDIA_RETRIEVED, OperationResultType.SUCCEED);
+        MediaOperationEvent operationEvent = new MediaOperationEvent(Util.REMOTE_MEDIA_RETRIEVED, new OperationSuccess());
         EventBus.getDefault().postSticky(operationEvent);
 
     }

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    //TODO:modify strings.xml as this
-
     <!--begin add by liang.wu-->
     <string name="app_name">照片宝</string>
 
@@ -55,8 +53,6 @@
     <string name="login">登录</string>
     <string name="login_fail">对不起，登录失败！</string>
 
-    <string name="password_error">输入密码错误</string>
-
     <!-- personal data -->
 
     <string name="email_text">电子邮件</string>
@@ -79,7 +75,6 @@
     <string name="description_text">描述</string>
 
     <string name="private_text">私密</string>
-
 
     <string name="album_item_title">New York</string>
     <string name="album_item_desc">2016–02–09 ~ 2017–05–05</string>
@@ -112,15 +107,12 @@
 
     <string name="check_more_photos">查看更多照片</string>
 
-    <string name="modify_nothing_about_mediashare">未做任何修改，请进行操作</string>
-
     <string name="share_comment_count">分享了%1$s张照片</string>
     <string name="share_comment_text">%1$s : %2$s</string>
     <string name="photo_count">%1$s张</string>
 
     <string name="share_album_title">%1$s·%2$s张</string>
 
-    <string name="already_select_media">对不起，该照片已在相册中</string>
 
     <!-- share comment -->
 
@@ -145,10 +137,6 @@
 
     <string name="select_nothing">未选择内容，请进行选择</string>
 
-    <string name="photo_not_sharing">对不起，该照片不能被分享</string>
-
-    <string name="media_not_exist">对不起，该照片不存在</string>
-
 
     <!-- time format -->
     <string name="seconds_ago">%1$s秒前</string>
@@ -163,16 +151,9 @@
     <string name="select_file">选择文件</string>
     <string name="quit_select_file">结束选择</string>
 
-    <string name="open_file_failed">对不起，无法打开此文件</string>
-    <string name="download_file_failed_toast">对不起，下载文件失败</string>
-    <string name="download_file_succeed">文件下载成功</string>
-    <string name="already_downloading_file">该文件正在下载中</string>
     <string name="downloading">正在下载</string>
     <string name="downloaded">已下载</string>
     <string name="download_failed">下载失败</string>
-    <string name="no_write_external_storage_permission">对不起，没有写权限</string>
-
-    <string name="no_enough_space">存储空间不足，请确认</string>
 
     <string name="download_select_item">下载所选项</string>
     <string name="download_the_item">下载该文件</string>
@@ -186,14 +167,28 @@
     <!-- operation result -->
     <string name="success">操作成功</string>
     <string name="local_media_share_uploading">对不起，相册正在上传，请稍后操作！</string>
-    <string name="no_network">没有网络或登录失败，请检查</string>
+    <string name="no_network">没有网络，请检查</string>
     <string name="io_exception">网络IO异常</string>
     <string name="json_exception">解析网络数据出错</string>
     <string name="socket_timeout_exception">服务器超时</string>
     <string name="malformed_url_exception">错误的url</string>
     <string name="network_exception">网络%1$d错误</string>
+    <string name="sql_exception">SQL错误</string>
+    <string name="file_not_found_exception">文件未找到</string>
+
+    <string name="upload_photo_failed">上传照片失败</string>
 
     <string name="no_operate_mediashare_permission">你没有权限操作此相册</string>
+    <string name="password_error">输入密码错误</string>
+    <string name="already_select_media">对不起，该照片已在相册中</string>
+    <string name="photo_not_sharing">对不起，该照片不能被分享</string>
+    <string name="open_file_failed">对不起，无法打开此文件</string>
+    <string name="no_write_external_storage_permission">对不起，没有写权限</string>
+    <string name="no_enough_space">存储空间不足，请确认</string>
+
+    <string name="create_download_file_store_folder_failed">Create download file store folder failed</string> 
+    <string name="external_storage_not_mounted">External storage not mounted</string>
+
 
     <!-- finish add by liang.wu-->
 

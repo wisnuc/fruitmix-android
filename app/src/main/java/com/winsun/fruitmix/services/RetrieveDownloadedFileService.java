@@ -8,6 +8,7 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
@@ -90,7 +91,7 @@ public class RetrieveDownloadedFileService extends IntentService {
             fileDownloadManager.addDownloadedFile(fileDownloadItem);
         }
 
-        EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_RETRIEVED, OperationResultType.SUCCEED));
+        EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_RETRIEVED, new OperationSuccess()));
     }
 
 

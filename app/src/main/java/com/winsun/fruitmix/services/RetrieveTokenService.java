@@ -6,13 +6,26 @@ import android.content.Context;
 import android.util.Log;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.operationResult.OperationIOException;
+import com.winsun.fruitmix.operationResult.OperationJSONException;
+import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.NoRouteToHostException;
+import java.net.SocketTimeoutException;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -74,26 +87,46 @@ public class RetrieveTokenService extends IntentService {
      */
     private void handleActionRetrieveToken(String gateway, String userUUID, String userPassword) {
 
-        String str;
+        HttpResponse httpResponse;
 
         OperationEvent operationEvent;
 
         try {
 
-            str = FNAS.loadToken(this, gateway, userUUID, userPassword);
+            httpResponse = FNAS.loadToken(this, gateway, userUUID, userPassword);
 
-            if (str.length() > 0) {
-                FNAS.JWT = new JSONObject(str).getString("token");
+            int responseCode = httpResponse.getResponseCode();
+
+            if (responseCode == 200) {
+
+                FNAS.JWT = new JSONObject(httpResponse.getResponseData()).getString("token");
+
+                LocalCache.saveToken(FNAS.JWT);
+
+                operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationSuccess());
+
+            } else {
+
+                operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationNetworkException(responseCode));
+
             }
 
-            LocalCache.saveToken(FNAS.JWT);
-
-            operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, OperationResultType.SUCCEED);
-
-        } catch (Exception e) {
+        } catch (MalformedURLException e) {
             e.printStackTrace();
 
-            operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, OperationResultType.FAIL);
+            operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationMalformedUrlException());
+        } catch (SocketTimeoutException ex) {
+            ex.printStackTrace();
+
+            operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationSocketTimeoutException());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+
+            operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationIOException());
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+
+            operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationJSONException());
         }
 
         EventBus.getDefault().postSticky(operationEvent);

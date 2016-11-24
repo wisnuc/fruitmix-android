@@ -8,7 +8,15 @@ import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
+import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.operationResult.OperationIOException;
+import com.winsun.fruitmix.operationResult.OperationJSONException;
+import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.operationResult.OperationUploadPhotoFailed;
 import com.winsun.fruitmix.parser.RemoteMediaShareJSONObjectParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -16,7 +24,12 @@ import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -32,8 +45,6 @@ public class CreateRemoteMediaShareService extends IntentService {
     private static final String ACTION_CREATE_REMOTE_MEDIASHARE_TASK = "com.winsun.fruitmix.action.create.remote.mediashare";
 
     private static final String EXTRA_MEDIASHARE = "extra_mediashare";
-
-    private LocalBroadcastManager mManager;
 
     public CreateRemoteMediaShareService() {
         super("CreateRemoteMediaShareService");
@@ -71,9 +82,6 @@ public class CreateRemoteMediaShareService extends IntentService {
      * parameters.
      */
     private void handleActionCreateRemoteMediaShareTask(MediaShare mediaShare) {
-        // TODO: Handle action create remote mediashare
-
-        mManager = LocalBroadcastManager.getInstance(this.getApplicationContext());
 
         MediaShareOperationEvent mediaShareOperationEvent;
 
@@ -81,7 +89,7 @@ public class CreateRemoteMediaShareService extends IntentService {
 
         if (!returnValue) {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, OperationResultType.FAIL, mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationUploadPhotoFailed(), mediaShare);
 
             EventBus.getDefault().post(mediaShareOperationEvent);
 
@@ -162,20 +170,20 @@ public class CreateRemoteMediaShareService extends IntentService {
         data = builder.toString();
         Log.i(TAG, "handleActionCreateRemoteMediaShareTask: request json:" + data);
 
-        String result;
+        HttpResponse httpResponse;
 
         try {
-            result = FNAS.PostRemoteCall(Util.MEDIASHARE_PARAMETER, data);
+            httpResponse = FNAS.PostRemoteCall(Util.MEDIASHARE_PARAMETER, data);
 
-            if (result.length() > 0) {
+            if (httpResponse.getResponseCode() == 200) {
 
                 Log.i(TAG, "insert remote mediashare which source is network succeed");
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, OperationResultType.SUCCEED, mediaShare.cloneMyself());
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationSuccess(), mediaShare.cloneMyself());
 
                 RemoteMediaShareJSONObjectParser parser = new RemoteMediaShareJSONObjectParser();
 
-                MediaShare newMediaShare = parser.getRemoteMediaShare(new JSONObject(result));
+                MediaShare newMediaShare = parser.getRemoteMediaShare(new JSONObject(httpResponse.getResponseData()));
 
                 DBUtils dbUtils = DBUtils.getInstance(this);
                 long dbResult = dbUtils.insertRemoteMediaShare(newMediaShare);
@@ -187,19 +195,36 @@ public class CreateRemoteMediaShareService extends IntentService {
                 Log.i(TAG, "insert remote mediashare to map result:" + (mapResult != null ? "true" : "false"));
 
             } else {
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, OperationResultType.FAIL, mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationNetworkException(httpResponse.getResponseCode()), mediaShare);
 
                 Log.i(TAG, "insert remote mediashare fail");
             }
 
-        } catch (Exception ex) {
+        } catch (MalformedURLException ex) {
             ex.printStackTrace();
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, OperationResultType.FAIL, mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationMalformedUrlException(), mediaShare);
 
             Log.i(TAG, "insert remote mediashare fail");
 
+        } catch (SocketTimeoutException ex) {
+            ex.printStackTrace();
 
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationSocketTimeoutException(), mediaShare);
+
+            Log.i(TAG, "insert remote mediashare fail");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationIOException(), mediaShare);
+
+            Log.i(TAG, "insert remote mediashare fail");
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationJSONException(), mediaShare);
+
+            Log.i(TAG, "insert remote mediashare fail");
         }
 
         EventBus.getDefault().post(mediaShareOperationEvent);

@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
@@ -31,7 +32,7 @@ public class UploadMediaTask implements Callable<Boolean> {
 
         if(result){
 
-            EventBus.getDefault().post(new OperationEvent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED, OperationResultType.SUCCEED));
+            EventBus.getDefault().post(new OperationEvent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED, new OperationSuccess()));
         }
 
         return result;

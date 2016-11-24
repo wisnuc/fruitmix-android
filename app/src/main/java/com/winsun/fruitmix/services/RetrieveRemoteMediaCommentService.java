@@ -7,6 +7,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteMediaCommentParser;
@@ -77,10 +78,10 @@ public class RetrieveRemoteMediaCommentService extends IntentService {
 
         try {
 
-            String json = FNAS.loadRemoteMediaComment(this, mediaUUID);
+            HttpResponse httpResponse = FNAS.loadRemoteMediaComment(this, mediaUUID);
 
             RemoteDataParser<Comment> parser = new RemoteMediaCommentParser();
-            comments = parser.parse(json);
+            comments = parser.parse(httpResponse.getResponseData());
 
             dbUtils.deleteRemoteCommentByUUid(mediaUUID);
 
@@ -90,7 +91,7 @@ public class RetrieveRemoteMediaCommentService extends IntentService {
 
             LocalCache.RemoteMediaCommentMapKeyIsImageUUID.remove(mediaUUID);
 
-            LocalCache.RemoteMediaCommentMapKeyIsImageUUID.putIfAbsent(mediaUUID,comments);
+            LocalCache.RemoteMediaCommentMapKeyIsImageUUID.putIfAbsent(mediaUUID, comments);
 
             Log.i(TAG, "retrieve remote media comment from network");
 
@@ -105,7 +106,7 @@ public class RetrieveRemoteMediaCommentService extends IntentService {
 
             LocalCache.RemoteMediaCommentMapKeyIsImageUUID.remove(mediaUUID);
 
-            LocalCache.RemoteMediaCommentMapKeyIsImageUUID.putIfAbsent(mediaUUID,comments);
+            LocalCache.RemoteMediaCommentMapKeyIsImageUUID.putIfAbsent(mediaUUID, comments);
 
             Log.i(TAG, "retrieve remote media comment from db");
 

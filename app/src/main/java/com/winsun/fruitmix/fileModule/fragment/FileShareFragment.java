@@ -136,7 +136,7 @@ public class FileShareFragment extends Fragment {
 
             loadingLayout.setVisibility(View.GONE);
 
-            OperationResultType operationResultType = operationEvent.getOperationResultType();
+            OperationResultType operationResultType = operationEvent.getOperationResult().getOperationResultType();
             switch (operationResultType) {
                 case SUCCEED:
 
@@ -155,14 +155,14 @@ public class FileShareFragment extends Fragment {
                     }
 
                     break;
-                case FAIL:
+                default:
                     noContentLayout.setVisibility(View.VISIBLE);
                     break;
             }
 
         } else if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
 
-            OperationResultType result = operationEvent.getOperationResultType();
+            OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
             switch (result) {
                 case SUCCEED:
 
@@ -181,7 +181,7 @@ public class FileShareFragment extends Fragment {
                     }
 
                     break;
-                case FAIL:
+                default:
                     noContentLayout.setVisibility(View.VISIBLE);
                     break;
             }

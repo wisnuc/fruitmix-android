@@ -6,13 +6,25 @@ import android.content.Context;
 import android.util.Log;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.operationResult.OperationIOException;
+import com.winsun.fruitmix.operationResult.OperationJSONException;
+import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -66,29 +78,47 @@ public class RetrieveDeviceIdService extends IntentService {
         OperationEvent operationEvent;
 
         LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
-        if(LocalCache.DeviceID != null && !LocalCache.DeviceID.equals("")){
+        if (LocalCache.DeviceID != null && !LocalCache.DeviceID.equals("")) {
 
-            operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, OperationResultType.SUCCEED);
+            operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationSuccess());
 
-        }else {
+        } else {
 
             try {
-                String str = FNAS.loadDeviceId();
+                HttpResponse httpResponse = FNAS.loadDeviceId();
 
-                if (str.length() > 0) {
-                    LocalCache.DeviceID = new JSONObject(str).getString("uuid");
+                if (httpResponse.getResponseCode() == 200) {
+
+                    LocalCache.DeviceID = new JSONObject(httpResponse.getResponseData()).getString("uuid");
+
+                    LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
+                    Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
+
+                    operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationSuccess());
+
+                } else {
+
+                    operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()));
                 }
 
-                LocalCache.SetGlobalData(Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
-                Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME));
-
-                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, OperationResultType.SUCCEED);
-
-            } catch (Exception e) {
+            } catch (MalformedURLException e) {
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, OperationResultType.FAIL);
+                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationMalformedUrlException());
+            } catch (SocketTimeoutException e) {
+                e.printStackTrace();
+
+                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationSocketTimeoutException());
+            } catch (IOException e) {
+                e.printStackTrace();
+
+                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationIOException());
+            } catch (JSONException e) {
+                e.printStackTrace();
+
+                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationJSONException());
             }
+
         }
 
         EventBus.getDefault().postSticky(operationEvent);

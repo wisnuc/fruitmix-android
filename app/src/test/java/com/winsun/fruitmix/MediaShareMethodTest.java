@@ -2,6 +2,7 @@ package com.winsun.fruitmix;
 
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
+import com.winsun.fruitmix.mock.MockApplication;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,7 +17,7 @@ import java.util.List;
  */
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
+@Config(constants = BuildConfig.class, sdk = 23,application = MockApplication.class)
 public class MediaShareMethodTest {
 
     @Test

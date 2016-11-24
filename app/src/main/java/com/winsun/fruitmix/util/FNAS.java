@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.util;
 
-import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
@@ -15,6 +14,7 @@ import com.winsun.fruitmix.eventbus.MediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.ModifyMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
+import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 /**
@@ -45,7 +47,7 @@ public class FNAS {
 
     public static String PORT = "3721";
 
-    public static String ReadFull(InputStream ins) {
+    public static String ReadFull(InputStream ins) throws IOException {
         String result = "";
         int length;
         byte[] buffer = new byte[1024];
@@ -69,73 +71,79 @@ public class FNAS {
 
         }
 
-        return result;
+        if (result.equals("")) {
+            throw new IOException();
+        } else {
+            return result;
+        }
     }
 
-    public static String loadFileInFolder(String folderUUID) throws Exception {
+    public static HttpResponse loadFileInFolder(String folderUUID) throws MalformedURLException, IOException, SocketTimeoutException {
 
         return FNAS.RemoteCall(Util.FILE_PARAMETER + "/" + folderUUID);
     }
 
-    public static String loadFileSharedWithMe() throws Exception {
+    public static HttpResponse loadFileSharedWithMe() throws MalformedURLException, IOException, SocketTimeoutException  {
+
         return FNAS.RemoteCall(Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_ME_PARAMETER);
     }
 
-    public static String loadFileShareWithOthers() throws Exception {
+    public static HttpResponse loadFileShareWithOthers() throws MalformedURLException, IOException, SocketTimeoutException  {
+
         return FNAS.RemoteCall(Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_OTHERS_PARAMETER);
     }
 
-    public static String loadUser() throws Exception {
+    public static HttpResponse loadUser() throws MalformedURLException, IOException, SocketTimeoutException {
 
         return FNAS.RemoteCall(Util.USER_PARAMETER);
 
     }
 
-    public static String loadOtherUsers() throws Exception{
+    public static HttpResponse loadOtherUsers() throws MalformedURLException, IOException, SocketTimeoutException  {
 
         return FNAS.RemoteCall(Util.LOGIN_PARAMETER);
 
     }
 
-    public static String loadMedia() throws Exception {
+    public static HttpResponse loadMedia() throws MalformedURLException, IOException, SocketTimeoutException {
 
         return FNAS.RemoteCall(Util.MEDIA_PARAMETER); // get all pictures;
 
     }
 
-    public static String loadRemoteShare() throws Exception {
+    public static HttpResponse loadRemoteShare() throws MalformedURLException, IOException, SocketTimeoutException  {
         return FNAS.RemoteCall(Util.MEDIASHARE_PARAMETER);
     }
 
-    public static String loadRemoteMediaComment(Context context, String mediaUUID) throws Exception {
+    public static HttpResponse loadRemoteMediaComment(Context context, String mediaUUID) throws MalformedURLException, IOException, SocketTimeoutException  {
         return FNAS.RemoteCall(String.format(context.getString(R.string.photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID));
     }
 
-    public static String loadToken(Context context, String gateway, String userUUID, String userPassword) throws Exception {
+    public static HttpResponse loadToken(Context context, String gateway, String userUUID, String userPassword) throws MalformedURLException, SocketTimeoutException, IOException {
 
         HttpURLConnection conn;
         String str = "";
         conn = (HttpURLConnection) (new URL(gateway + ":" + FNAS.PORT + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
         conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((userUUID + ":" + userPassword).getBytes(), Base64.DEFAULT));
         conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
-        if (conn.getResponseCode() != 200) {
-            throw new NetworkErrorException();
-        } else {
+        if (conn.getResponseCode() == 200) {
             str = FNAS.ReadFull(conn.getInputStream());
         }
 
+        HttpResponse httpResponse = new HttpResponse(conn.getResponseCode(), str);
+
         Log.i(TAG, "loadToken: " + str);
 
-        return str;
+        return httpResponse;
     }
 
-    public static String loadDeviceId() throws Exception {
-        String str = "";
+    public static HttpResponse loadDeviceId() throws MalformedURLException, IOException, SocketTimeoutException  {
+        HttpResponse httpResponse = new HttpResponse();
         if (LocalCache.DeviceID == null || LocalCache.DeviceID.equals("")) {
-            str = FNAS.PostRemoteCall(Util.DEVICE_ID_PARAMETER, "");
+            httpResponse = FNAS.PostRemoteCall(Util.DEVICE_ID_PARAMETER, "");
         }
 
-        return str;
+        return httpResponse;
     }
 
     public static void retrieveRemoteDeviceID(Context context) {
@@ -199,8 +207,8 @@ public class FNAS {
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_FILE_SHARE));
     }
 
-    public static void retrieveDownloadedFile(){
-        EventBus.getDefault().post(new RequestEvent(OperationType.GET,OperationTargetType.DOWNLOADED_FILE));
+    public static void retrieveDownloadedFile() {
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.DOWNLOADED_FILE));
     }
 
     public static void createRemoteMedia(Context context, Media media) {
@@ -274,7 +282,7 @@ public class FNAS {
     }
 
 
-    public static String RemoteCall(String req) throws Exception {
+    private static HttpResponse RemoteCall(String req) throws MalformedURLException, IOException, SocketTimeoutException {
         HttpURLConnection conn;
         String str = "";
 
@@ -283,26 +291,30 @@ public class FNAS {
         conn.setUseCaches(false);
         conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
         Log.d(TAG, "NAS GET: " + (Gateway + ":" + FNAS.PORT + req));
-        str = FNAS.ReadFull(conn.getInputStream());
 
-        return str;
+        if (conn.getResponseCode() == 200) {
+            str = FNAS.ReadFull(conn.getInputStream());
+        }
+
+        return new HttpResponse(conn.getResponseCode(), str);
+
     }
 
     // create object and store it to the server
-    public static String PostRemoteCall(String req, String data) throws Exception {
+    public static HttpResponse PostRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException  {
         return RemoteCallMethod(Util.HTTP_POST_METHOD, req, data);
     }
 
     // modify data and save it
-    public static String PatchRemoteCall(String req, String data) throws Exception {
+    public static HttpResponse PatchRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
         return RemoteCallMethod(Util.HTTP_PATCH_METHOD, req, data);
     }
 
-    public static String DeleteRemoteCall(String req, String data) throws Exception {
+    public static HttpResponse DeleteRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
         return RemoteCallMethod(Util.HTTP_DELETE_METHOD, req, data);
     }
 
-    private static String RemoteCallMethod(String httpMethod, String req, String data) throws Exception {
+    private static HttpResponse RemoteCallMethod(String httpMethod, String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
         HttpURLConnection conn;
         OutputStream outStream;
         String str;
@@ -326,12 +338,18 @@ public class FNAS {
         outStream.flush();
 
         Log.d("winsun", "NAS " + httpMethod + " : " + (Gateway + ":" + FNAS.PORT + req) + " " + conn.getResponseCode() + " " + str);
-        str = FNAS.ReadFull(conn.getInputStream());
+
+        if (conn.getResponseCode() == 200) {
+            str = FNAS.ReadFull(conn.getInputStream());
+        }
+
         Log.d("winsun", "NAS " + httpMethod + " END: " + (Gateway + ":" + FNAS.PORT + req) + " " + str);
 
         outStream.close();
         conn.disconnect();
-        return str;
+
+        return new HttpResponse(conn.getResponseCode(), str);
+
     }
 
     // get media files and cache it locally
@@ -413,7 +431,7 @@ public class FNAS {
     }
 
 
-    public static boolean UploadFile(String fname) {
+    public static boolean UploadFile(String fileName) {
         Media localHashMap;
 
         String hash, url, boundary;
@@ -426,10 +444,10 @@ public class FNAS {
         try {
             while (JWT == null) Thread.sleep(500);
             // calc SHA256
-            localHashMap = LocalCache.LocalMediaMapKeyIsThumb.get(fname);
+            localHashMap = LocalCache.LocalMediaMapKeyIsThumb.get(fileName);
             hash = localHashMap.getUuid();
 
-            Log.i(TAG, "thumb:" + fname + "hash:" + hash);
+            Log.i(TAG, "thumb:" + fileName + "hash:" + hash);
 
             // head
             url = Gateway + ":" + FNAS.PORT + Util.DEVICE_ID_PARAMETER + "/" + LocalCache.DeviceID;
@@ -452,12 +470,12 @@ public class FNAS {
 
             sb = new StringBuilder();
             sb.append("--").append(boundary).append("\r\n");
-            sb.append("Content-Disposition: form-data; name=\"file\"; filename=\"").append(fname).append("\"\r\n");
+            sb.append("Content-Disposition: form-data; name=\"file\"; filename=\"").append(fileName).append("\"\r\n");
             sb.append("Content-Type: image/jpeg;\r\n");
             sb.append("\r\n");
             outStream.write(sb.toString().getBytes());
 
-            is = new FileInputStream(fname);
+            is = new FileInputStream(fileName);
             buffer = new byte[15000];
             len = 0;
             while ((len = is.read(buffer)) != -1) {

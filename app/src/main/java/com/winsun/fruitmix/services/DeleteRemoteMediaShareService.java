@@ -8,12 +8,21 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.operationResult.OperationIOException;
+import com.winsun.fruitmix.operationResult.OperationLocalMediaShareUploading;
+import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -66,7 +75,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
 
         if (mediaShare.isLocal()) {
 
-            operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, OperationResultType.LOCAL_MEDIA_SHARE_UPLOADING);
+            operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, new OperationLocalMediaShareUploading());
 
         } else {
 
@@ -75,7 +84,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
             try {
                 FNAS.DeleteRemoteCall(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid(), "");
 
-                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, OperationResultType.SUCCEED);
+                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, new OperationSuccess());
 
                 Log.i(TAG, "delete remote mediashare which source is network succeed");
 
@@ -89,11 +98,22 @@ public class DeleteRemoteMediaShareService extends IntentService {
                 Log.i(TAG, "delete remote mediashare in map result:" + (mapResult != null ? "true" : "false"));
 
 
-            } catch (Exception e) {
-
+            } catch (MalformedURLException e) {
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, OperationResultType.FAIL);
+                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, new OperationMalformedUrlException());
+
+                Log.i(TAG, "delete remote mediashare fail");
+            } catch (SocketTimeoutException e) {
+                e.printStackTrace();
+
+                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, new OperationSocketTimeoutException());
+
+                Log.i(TAG, "delete remote mediashare fail");
+            } catch (IOException e) {
+                e.printStackTrace();
+
+                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, new OperationIOException());
 
                 Log.i(TAG, "delete remote mediashare fail");
             }

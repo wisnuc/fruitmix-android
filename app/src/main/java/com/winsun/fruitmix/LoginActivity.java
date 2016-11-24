@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
@@ -53,8 +54,6 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     private String mUserUUid;
     private String mPwd;
     private String mGateway;
-
-    private LocalBroadcastManager localBroadcastManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,8 +95,6 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                 mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
                 break;
         }
-
-        localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
     }
 
@@ -155,9 +152,12 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     }
 
     private void handleRetrieveDeviceID(OperationEvent operationEvent) {
-        OperationResultType result = operationEvent.getOperationResultType();
 
-        switch (result) {
+        OperationResult operationResult = operationEvent.getOperationResult();
+
+        OperationResultType resultType = operationResult.getOperationResultType();
+
+        switch (resultType) {
             case SUCCEED:
 
                 Util.loginState = true;
@@ -171,18 +171,20 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
 
                 break;
-            case FAIL:
+            default:
                 Util.loginState = false;
-                Snackbar.make(mLoginBtn, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(mLoginBtn, operationResult.getResultMessage(this), Snackbar.LENGTH_SHORT).show();
 
                 break;
         }
     }
 
     private void handleRetrieveToken(OperationEvent operationEvent) {
-        OperationResultType result = operationEvent.getOperationResultType();
+        OperationResult result = operationEvent.getOperationResult();
 
-        switch (result) {
+        OperationResultType resultType = result.getOperationResultType();
+
+        switch (resultType) {
             case SUCCEED:
 
                 if (!mGateway.equals(FNAS.Gateway)) {
@@ -197,9 +199,9 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                 FNAS.retrieveRemoteDeviceID(mContext);
 
                 break;
-            case FAIL:
+            default:
                 Util.loginState = false;
-                Snackbar.make(mLoginBtn, getString(R.string.password_error), Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(mLoginBtn, result.getResultMessage(this), Snackbar.LENGTH_SHORT).show();
                 break;
         }
     }

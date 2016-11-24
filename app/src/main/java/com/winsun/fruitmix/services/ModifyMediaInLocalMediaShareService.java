@@ -9,6 +9,8 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
+import com.winsun.fruitmix.operationResult.OperationSQLException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
@@ -95,11 +97,11 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
 
             Log.i(TAG, "modify media in local mediashare in map result:" + (mapResult != null ? "true" : "false"));
 
-            operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED, OperationResultType.SUCCEED);
+            operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED, new OperationSuccess());
 
         }else {
 
-            operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED, OperationResultType.FAIL);
+            operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED, new OperationSQLException());
         }
 
         EventBus.getDefault().post(operationEvent);

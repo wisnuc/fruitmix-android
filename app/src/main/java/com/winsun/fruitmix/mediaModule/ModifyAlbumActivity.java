@@ -216,7 +216,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         if (mDialog != null && mDialog.isShowing())
             mDialog.dismiss();
 
-        OperationResultType operationResultType = operationEvent.getOperationResultType();
+        OperationResultType operationResultType = operationEvent.getOperationResult().getOperationResultType();
 
         String action = operationEvent.getAction();
 
@@ -229,7 +229,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                     ModifyAlbumActivity.this.setResult(RESULT_OK, getIntent());
                     finish();
                     break;
-                case FAIL:
+                default:
                     ModifyAlbumActivity.this.setResult(RESULT_CANCELED);
                     finish();
                     break;

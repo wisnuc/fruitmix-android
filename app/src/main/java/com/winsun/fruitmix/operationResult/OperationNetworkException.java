@@ -13,6 +13,10 @@ public class OperationNetworkException extends OperationResult {
 
     private int responseCode = 0;
 
+    public OperationNetworkException(int responseCode) {
+        this.responseCode = responseCode;
+    }
+
     public void setResponseCode(int responseCode) {
         this.responseCode = responseCode;
     }

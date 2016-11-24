@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.eventbus;
 
-import com.winsun.fruitmix.util.OperationResultType;
+import com.winsun.fruitmix.operationResult.OperationResult;
 
 /**
  * Created by Administrator on 2016/11/1.
@@ -9,15 +9,15 @@ import com.winsun.fruitmix.util.OperationResultType;
 public class OperationEvent {
 
     private String action;
-    private OperationResultType operationResultType;
+    private OperationResult operationResult;
 
-    public OperationEvent(String action, OperationResultType operationResultType) {
+    public OperationEvent(String action, OperationResult operationResult) {
         this.action = action;
-        this.operationResultType = operationResultType;
+        this.operationResult = operationResult;
     }
 
-    public OperationResultType getOperationResultType() {
-        return operationResultType;
+    public OperationResult getOperationResult() {
+        return operationResult;
     }
 
     public String getAction() {

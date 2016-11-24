@@ -27,6 +27,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
@@ -130,17 +131,19 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         if (mDialog != null && mDialog.isShowing())
             mDialog.dismiss();
 
-        OperationResultType operationResultType = operationEvent.getOperationResultType();
+        OperationResult operationResult = operationEvent.getOperationResult();
+
+        OperationResultType operationResultType = operationResult.getOperationResultType();
 
         switch (operationResultType) {
             case SUCCEED:
-                Toast.makeText(mContext, getString(R.string.operation_success), Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
                 getIntent().putExtra(Util.KEY_MEDIASHARE, modifiedMediaShare);
                 EditPhotoActivity.this.setResult(RESULT_OK, getIntent());
                 finish();
                 break;
             case FAIL:
-                Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
                 EditPhotoActivity.this.setResult(RESULT_CANCELED, getIntent());
                 finish();
                 break;
