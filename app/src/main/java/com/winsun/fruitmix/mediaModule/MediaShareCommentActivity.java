@@ -369,11 +369,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                     LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
 
                     int lastItemPosition = linearLayoutManager.findLastCompletelyVisibleItemPosition();
-                    if (lastItemPosition + 1 == mAdapter.getItemCount()) {
-                        isRecyclerViewScrollToEnd = true;
-                    } else {
-                        isRecyclerViewScrollToEnd = false;
-                    }
+                    isRecyclerViewScrollToEnd = lastItemPosition + 1 == mAdapter.getItemCount();
 
                 }
             }
@@ -568,7 +564,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                         if (mDialog != null && mDialog.isShowing())
                             mDialog.dismiss();
 
-                        Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, "fail", Toast.LENGTH_SHORT).show();
                         break;
                 }
 
@@ -598,7 +594,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                         if (mDialog != null && mDialog.isShowing())
                             mDialog.dismiss();
 
-                        Toast.makeText(mContext, getString(R.string.operation_fail), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, "fail", Toast.LENGTH_SHORT).show();
                         tfContent.setText("");
                         break;
                 }

@@ -42,7 +42,6 @@ public class LocalCache {
     private static final String TAG = LocalCache.class.getSimpleName();
 
     public static String CacheRootPath;
-    static Application CurrentApp;
 
     public static ConcurrentMap<String, List<Comment>> RemoteMediaCommentMapKeyIsImageUUID = null;
     public static ConcurrentMap<String, List<Comment>> LocalMediaCommentMapKeyIsImageUUID = null;
@@ -75,7 +74,7 @@ public class LocalCache {
 
     public static void CleanAll(final Context context) {
 
-        LocalCache.DropGlobalData(Util.DEVICE_ID_MAP_NAME);
+        LocalCache.DropGlobalData(context, Util.DEVICE_ID_MAP_NAME);
 
         DeviceID = null;
 
@@ -97,9 +96,7 @@ public class LocalCache {
 
     }
 
-    public static boolean Init(Activity activity) {
-
-        CurrentApp = activity.getApplication();
+    public static boolean Init() {
 
         RemoteMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
         LocalMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
@@ -414,58 +411,7 @@ public class LocalCache {
 
     }
 
-    //get bucket photo list
-    public static List<Map<String, String>> PhotoBucketList() {
-        ContentResolver cr;
-        String[] fields = {MediaStore.Images.Media._ID, MediaStore.Images.Media.BUCKET_ID, MediaStore.Images.Media.MIME_TYPE, MediaStore.Images.Media.PICASA_ID, MediaStore.Images.Media.DATA, MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.TITLE, MediaStore.Images.Media.SIZE, MediaStore.Images.Media.BUCKET_DISPLAY_NAME};
-        Cursor cursor;
-        Map<String, Map<String, String>> bucketMap;
-        List<Map<String, String>> bucketList;
-        Map<String, String> bucket;
-        File f;
-        SimpleDateFormat df;
-        Calendar date;
-
-        cr = CurrentApp.getContentResolver();
-        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, null, null, null);
-
-        bucketList = new ArrayList<Map<String, String>>();
-        if (!cursor.moveToFirst()) return bucketList;
-
-        bucketMap = new HashMap<String, Map<String, String>>();
-
-        do {
-            bucket = bucketMap.get(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)));
-            if (bucket == null) {
-                bucket = new HashMap<String, String>();
-                bucket.put("name", cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)));
-                bucket.put("thumb", "");
-                bucket.put("lastModified", "0");
-                bucketMap.put(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)), bucket);
-            }
-            f = new File(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)));
-            if (f.lastModified() > Long.parseLong(bucket.get("lastModified"))) {
-                bucket.put("lastModified", f.lastModified() + "");
-                bucket.put("thumb", cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)));
-            }
-        }
-        while (cursor.moveToNext());
-
-        cursor.close();
-
-        df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        date = Calendar.getInstance();
-        for (Map.Entry<String, Map<String, String>> entry : bucketMap.entrySet()) {
-            date.setTimeInMillis(Long.parseLong(entry.getValue().get("lastModified")));
-            entry.getValue().put("lastModified", df.format(date.getTime()));
-            bucketList.add(entry.getValue());
-        }
-
-        return bucketList;
-    }
-
-
-    public static List<Map<String, String>> PhotoList(String bucketName) {
+    public static List<Map<String, String>> PhotoList(Context context, String bucketName) {
         ContentResolver cr;
         String[] fields = {MediaStore.Images.Media._ID, MediaStore.Images.Media.BUCKET_ID, MediaStore.Images.Media.HEIGHT, MediaStore.Images.Media.WIDTH, MediaStore.Images.Media.PICASA_ID, MediaStore.Images.Media.DATA, MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.TITLE, MediaStore.Images.Media.SIZE, MediaStore.Images.Media.BUCKET_DISPLAY_NAME};
         Cursor cursor;
@@ -476,14 +422,14 @@ public class LocalCache {
         Calendar date;
 
 
-        cr = CurrentApp.getContentResolver();
+        cr = context.getContentResolver();
 //        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "='" + bucketName + "'", null, null);
 
         cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, null, null, null);
 
 
         imageList = new ArrayList<Map<String, String>>();
-        if (!cursor.moveToFirst()) return imageList;
+        if (cursor == null || !cursor.moveToFirst()) return imageList;
 
         df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         date = Calendar.getInstance();
@@ -507,27 +453,27 @@ public class LocalCache {
         return imageList;
     }
 
-    public static String GetGlobalData(String name) {
+    public static String GetGlobalData(Context context, String name) {
         SharedPreferences sp;
-        sp = CurrentApp.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         return sp.getString(name, null);
     }
 
-    public static void SetGlobalData(String name, String data) {
+    public static void SetGlobalData(Context context, String name, String data) {
         SharedPreferences sp;
         SharedPreferences.Editor mEditor;
 
-        sp = CurrentApp.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         mEditor = sp.edit();
         mEditor.putString(name, data);
         mEditor.apply();
     }
 
-    public static void DropGlobalData(String name) {
+    static void DropGlobalData(Context context, String name) {
         SharedPreferences sp;
         SharedPreferences.Editor mEditor;
 
-        sp = CurrentApp.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         mEditor = sp.edit();
         mEditor.putString(name, null);
         mEditor.apply();
@@ -559,10 +505,10 @@ public class LocalCache {
         return sp.getString(Util.GATEWAY, null);
     }
 
-    public static void saveToken(String jwt) {
+    public static void saveToken(Context context, String jwt) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
-        sp = CurrentApp.getApplicationContext().getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        sp = context.getApplicationContext().getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
         editor.putString(Util.JWT, jwt);
         editor.apply();

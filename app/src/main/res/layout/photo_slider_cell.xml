@@ -19,6 +19,7 @@
         android:id="@+id/mainPic"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_centerInParent="true"
         android:maxHeight="600dp"
         android:src="@drawable/placeholder_photo"
         android:visibility="invisible"/>
@@ -27,7 +28,7 @@
         android:id="@+id/default_main_pic"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerVertical="true"
+        android:layout_centerInParent="true"
         android:maxHeight="600dp"
         android:src="@drawable/placeholder_photo"
         android:visibility="visible"/>

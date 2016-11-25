@@ -53,7 +53,7 @@ public class SplashScreenActivity extends Activity {
 
         mContext = this;
 
-        LocalCache.Init(this);
+        LocalCache.Init();
 
         boolean result = FileUtil.createDownloadFileStoreFolder(mContext);
 
@@ -124,7 +124,7 @@ public class SplashScreenActivity extends Activity {
                 break;
             default:
                 Util.loginState = false;
-                LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
+                LocalCache.DeviceID = LocalCache.GetGlobalData(this,Util.DEVICE_ID_MAP_NAME);
                 Toast.makeText(SplashScreenActivity.this, result.getResultMessage(this), Toast.LENGTH_SHORT).show();
                 break;
         }
@@ -154,7 +154,7 @@ public class SplashScreenActivity extends Activity {
 
                 FNAS.JWT = mToken;
 
-                LocalCache.DeviceID = LocalCache.GetGlobalData(Util.DEVICE_ID_MAP_NAME);
+                LocalCache.DeviceID = LocalCache.GetGlobalData(this,Util.DEVICE_ID_MAP_NAME);
 
                 Toast.makeText(SplashScreenActivity.this, result.getResultMessage(this), Toast.LENGTH_SHORT).show();
 

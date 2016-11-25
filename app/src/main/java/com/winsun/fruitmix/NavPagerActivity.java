@@ -153,6 +153,9 @@ public class NavPagerActivity extends AppCompatActivity
 
         instance.shutdownFixedThreadPool();
 
+        instance = null;
+        mContext = null;
+
     }
 
     private void showExplanation(String title, String message) {

@@ -550,19 +550,23 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             int actualHeight = 0;
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) defaultMainPic.getLayoutParams();
 
-            if (mediaWidthLargerThanHeight(media, mediaWidth, mediaHeight)) {
-                actualWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
-                actualHeight = mediaHeight * actualWidth / mediaWidth;
-            } else if (mediaHeightLargerThanWidth(media, mediaWidth, mediaHeight)) {
-                actualHeight = Util.dip2px(mContext, 600);
-                actualWidth = mediaWidth * actualHeight / mediaHeight;
-            } else if (mediaWidthEqualsHeight(mediaWidth, mediaHeight)) {
+//            if (mediaWidthLargerThanHeight(media, mediaWidth, mediaHeight)) {
+//                actualWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
+//                actualHeight = mediaHeight * actualWidth / mediaWidth;
+//            } else if (mediaHeightLargerThanWidth(media, mediaWidth, mediaHeight)) {
+//                actualHeight = Util.dip2px(mContext, 600);
+//                actualWidth = mediaWidth * actualHeight / mediaHeight;
+//            } else if (mediaWidthEqualsHeight(mediaWidth, mediaHeight)) {
+//
+//                actualWidth = actualHeight = Util.calcScreenWidth(PhotoSliderActivity.this);
+//            }
+//
+//            layoutParams.width = actualWidth;
+//            layoutParams.height = actualHeight;
 
-                actualWidth = actualHeight = Util.calcScreenWidth(PhotoSliderActivity.this);
-            }
+            layoutParams.width = Util.dip2px(mContext,200);
+            layoutParams.height = Util.dip2px(mContext,200);
 
-            layoutParams.width = actualWidth;
-            layoutParams.height = actualHeight;
 
             defaultMainPic.setLayoutParams(layoutParams);
             mainPic.setLayoutParams(layoutParams);

@@ -24,6 +24,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.leakcanary.RefWatcher;
+import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.command.ShowDialogCommand;
@@ -200,6 +202,14 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
         EventBus.getDefault().unregister(this);
 
         super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        RefWatcher refWatcher = CustomApplication.getRefWatcher(getActivity());
+        refWatcher.watch(this);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

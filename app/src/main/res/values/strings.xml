@@ -167,9 +167,6 @@
 
     <!--begin add by liang.wu-->
 
-    <string name="setting_succeed">Setting Succeed</string>
-    <string name="setting_fail">Setting Fail</string>
-
     <string name="finish_text">Finish</string>
 
     <string name="choose_text">Choose</string>
@@ -182,11 +179,6 @@
     <string name="no_content">Sorry,No content!</string>
 
     <string name="operating_title">Operating</string>
-
-    <string name="load_finish">Load Finish</string>
-
-    <string name="operation_success">Operation Success!</string>
-    <string name="operation_fail">Operation fail,Please check network!</string>
 
     <string name="coming_soon">Coming Soon</string>
 
@@ -212,7 +204,6 @@
     <!-- login -->
 
     <string name="login">Login</string>
-    <string name="login_fail">Login failed</string>
 
 
     <!-- personal data -->
@@ -346,6 +337,7 @@
     <string name="socket_timeout_exception">Socket Timeout Exception</string>
     <string name="malformed_url_exception">Malformed Url Exception</string>
     <string name="network_exception">%1$d Error</string>
+    <string name="sql_exception">SQL Error</string>
     <string name="file_not_found_exception">File Not Found Exception</string>
 
     <string name="upload_photo_failed">Upload photo failed</string>
@@ -358,6 +350,9 @@
 
     <string name="no_write_external_storage_permission">No write external storage permission</string>
     <string name="no_enough_space">No enough space</string>
+
+    <string name="create_download_file_store_folder_failed">Create download file store folder failed</string>
+    <string name="external_storage_not_mounted">External storage not mounted</string>
 
     <!-- finish add by liang.wu-->
 

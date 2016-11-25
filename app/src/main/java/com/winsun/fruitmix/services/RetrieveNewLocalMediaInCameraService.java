@@ -73,7 +73,7 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
 
         int retrieveMediaCount = 0;
 
-        localPhotoList = LocalCache.PhotoList("Camera");
+        localPhotoList = LocalCache.PhotoList(this,"Camera");
 
         for (i = 0; i < localPhotoList.size(); i++) {
             itemRaw = localPhotoList.get(i);

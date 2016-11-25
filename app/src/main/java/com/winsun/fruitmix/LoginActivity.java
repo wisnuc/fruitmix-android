@@ -191,7 +191,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                     LocalCache.CleanAll(LoginActivity.this);
                 }
 
-                LocalCache.Init(LoginActivity.this);
+                LocalCache.Init();
 
                 FNAS.Gateway = mGateway;
                 FNAS.userUUID = mUserUUid;

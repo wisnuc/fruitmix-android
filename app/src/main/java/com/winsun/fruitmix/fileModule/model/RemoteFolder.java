@@ -20,6 +20,7 @@ public class RemoteFolder extends AbstractRemoteFile {
     private List<AbstractRemoteFile> abstractRemoteFiles;
 
     public RemoteFolder() {
+        super();
         abstractRemoteFiles = new ArrayList<>();
     }
 

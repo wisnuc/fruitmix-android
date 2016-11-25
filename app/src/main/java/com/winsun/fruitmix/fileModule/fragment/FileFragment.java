@@ -19,6 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.leakcanary.RefWatcher;
+import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.command.ChangeToDownloadPageCommand;
@@ -178,6 +180,14 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         super.onDestroyView();
 
         remoteFileLoaded = false;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        RefWatcher refWatcher = CustomApplication.getRefWatcher(getActivity());
+        refWatcher.watch(this);
     }
 
     public void handleOperationResult(OperationEvent operationEvent) {

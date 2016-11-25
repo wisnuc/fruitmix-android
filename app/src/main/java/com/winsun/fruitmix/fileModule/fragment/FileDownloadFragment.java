@@ -17,6 +17,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.leakcanary.RefWatcher;
+import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.command.DeleteDownloadedFileCommand;
@@ -84,8 +86,6 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
     private OnFileFragmentInteractionListener onFileFragmentInteractionListener;
 
     private FileDownloadManager fileDownloadManager;
-
-    private Dialog dialog;
 
     private AbstractCommand showUnSelectModeViewCommand;
 
@@ -178,6 +178,14 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
         EventBus.getDefault().unregister(this);
 
         super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        RefWatcher refWatcher = CustomApplication.getRefWatcher(getActivity());
+        refWatcher.watch(this);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -327,7 +335,7 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
 
     public Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
 
-        dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(getActivity());
+        Dialog dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(getActivity());
 
         for (BottomMenuItem bottomMenuItem : bottomMenuItems) {
             bottomMenuItem.setDialog(dialog);

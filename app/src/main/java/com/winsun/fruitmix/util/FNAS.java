@@ -83,12 +83,12 @@ public class FNAS {
         return FNAS.RemoteCall(Util.FILE_PARAMETER + "/" + folderUUID);
     }
 
-    public static HttpResponse loadFileSharedWithMe() throws MalformedURLException, IOException, SocketTimeoutException  {
+    public static HttpResponse loadFileSharedWithMe() throws MalformedURLException, IOException, SocketTimeoutException {
 
         return FNAS.RemoteCall(Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_ME_PARAMETER);
     }
 
-    public static HttpResponse loadFileShareWithOthers() throws MalformedURLException, IOException, SocketTimeoutException  {
+    public static HttpResponse loadFileShareWithOthers() throws MalformedURLException, IOException, SocketTimeoutException {
 
         return FNAS.RemoteCall(Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_OTHERS_PARAMETER);
     }
@@ -99,7 +99,7 @@ public class FNAS {
 
     }
 
-    public static HttpResponse loadOtherUsers() throws MalformedURLException, IOException, SocketTimeoutException  {
+    public static HttpResponse loadOtherUsers() throws MalformedURLException, IOException, SocketTimeoutException {
 
         return FNAS.RemoteCall(Util.LOGIN_PARAMETER);
 
@@ -111,11 +111,11 @@ public class FNAS {
 
     }
 
-    public static HttpResponse loadRemoteShare() throws MalformedURLException, IOException, SocketTimeoutException  {
+    public static HttpResponse loadRemoteShare() throws MalformedURLException, IOException, SocketTimeoutException {
         return FNAS.RemoteCall(Util.MEDIASHARE_PARAMETER);
     }
 
-    public static HttpResponse loadRemoteMediaComment(Context context, String mediaUUID) throws MalformedURLException, IOException, SocketTimeoutException  {
+    public static HttpResponse loadRemoteMediaComment(Context context, String mediaUUID) throws MalformedURLException, IOException, SocketTimeoutException {
         return FNAS.RemoteCall(String.format(context.getString(R.string.photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID));
     }
 
@@ -137,7 +137,7 @@ public class FNAS {
         return httpResponse;
     }
 
-    public static HttpResponse loadDeviceId() throws MalformedURLException, IOException, SocketTimeoutException  {
+    public static HttpResponse loadDeviceId() throws MalformedURLException, IOException, SocketTimeoutException {
         HttpResponse httpResponse = new HttpResponse();
         if (LocalCache.DeviceID == null || LocalCache.DeviceID.equals("")) {
             httpResponse = FNAS.PostRemoteCall(Util.DEVICE_ID_PARAMETER, "");
@@ -301,7 +301,7 @@ public class FNAS {
     }
 
     // create object and store it to the server
-    public static HttpResponse PostRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException  {
+    public static HttpResponse PostRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
         return RemoteCallMethod(Util.HTTP_POST_METHOD, req, data);
     }
 
@@ -510,10 +510,6 @@ public class FNAS {
                 Log.i(TAG, "UploadFile: result" + result);
 
                 return true;
-            }
-            if (resCode == 404) {
-                LocalCache.DropGlobalData(Util.DEVICE_ID_MAP_NAME);
-                System.exit(0);
             }
 
             conn.disconnect();

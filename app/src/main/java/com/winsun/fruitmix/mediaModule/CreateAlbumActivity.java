@@ -69,8 +69,6 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
     private ProgressDialog mDialog;
 
-    private LocalBroadcastManager localBroadcastManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,8 +135,6 @@ public class CreateAlbumActivity extends AppCompatActivity {
             }
         });
 
-        localBroadcastManager = LocalBroadcastManager.getInstance(this);
-
     }
 
     @Override
@@ -203,7 +199,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
         MediaShare mediaShare = new MediaShare();
         mediaShare.setUuid(Util.createLocalUUid());
 
-        Log.i(TAG, "create album digest:" + digests.toString());
+        Log.i(TAG, "create album digest:" + digests);
 
         List<MediaShareContent> mediaShareContents = new ArrayList<>();
         for (String digest:digests){

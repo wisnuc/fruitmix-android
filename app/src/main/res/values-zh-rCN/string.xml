@@ -4,9 +4,6 @@
     <!--begin add by liang.wu-->
     <string name="app_name">照片宝</string>
 
-    <string name="setting_succeed">设置成功</string>
-    <string name="setting_fail">设置失败</string>
-
     <string name="finish_text">完成</string>
 
     <string name="choose_text">选择</string>
@@ -21,12 +18,7 @@
 
     <string name="no_content">暂无可显示内容!</string>
 
-    <string name="load_finish">加载完成</string>
-
     <string name="coming_soon">该功能敬请期待</string>
-
-    <string name="operation_success">操作成功！</string>
-    <string name="operation_fail">操作失败，请检查网络！</string>
 
     <string name="finishAppToast">请再次点击返回键以退出应用</string>
 
@@ -35,7 +27,6 @@
     <string name="clear_select_item">清除选择</string>
 
     <string name="confirm_delete">是否删除</string>
-
 
     <!-- slide menu -->
     <string name="person_data">个人信息</string>
@@ -51,7 +42,6 @@
     <!-- login -->
 
     <string name="login">登录</string>
-    <string name="login_fail">对不起，登录失败！</string>
 
     <!-- personal data -->
 
@@ -188,7 +178,6 @@
 
     <string name="create_download_file_store_folder_failed">Create download file store folder failed</string> 
     <string name="external_storage_not_mounted">External storage not mounted</string>
-
 
     <!-- finish add by liang.wu-->
 

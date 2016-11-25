@@ -27,6 +27,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.leakcanary.RefWatcher;
+import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.eventbus.MediaOperationEvent;
@@ -101,8 +103,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private MediaShareList shareList;
     private NavPageBar mNavPageBar;
 
-    private LocalBroadcastManager mManager;
-
     private Animator mAnimator;
 
     private boolean sMenuUnfolding = false;
@@ -151,8 +151,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         super.onCreate(savedInstanceState);
 
         mContext = getActivity();
-
-        mManager = LocalBroadcastManager.getInstance(mContext);
 
         initPageList();
 
@@ -234,6 +232,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         super.onDestroy();
 
         photoList.removePhotoListListener(this);
+
+        RefWatcher refWatcher = CustomApplication.getRefWatcher(getActivity());
+        refWatcher.watch(this);
     }
 
     @Override

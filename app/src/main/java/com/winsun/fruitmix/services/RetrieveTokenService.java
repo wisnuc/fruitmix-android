@@ -101,7 +101,7 @@ public class RetrieveTokenService extends IntentService {
 
                 FNAS.JWT = new JSONObject(httpResponse.getResponseData()).getString("token");
 
-                LocalCache.saveToken(FNAS.JWT);
+                LocalCache.saveToken(this,FNAS.JWT);
 
                 operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationSuccess());
 

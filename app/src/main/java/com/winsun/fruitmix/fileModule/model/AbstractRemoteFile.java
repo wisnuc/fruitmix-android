@@ -22,7 +22,7 @@ public abstract class AbstractRemoteFile {
     private String time;
     private String size;
 
-    public AbstractRemoteFile() {
+    AbstractRemoteFile() {
         owners = new ArrayList<>();
         writeList = new ArrayList<>();
         readList = new ArrayList<>();
