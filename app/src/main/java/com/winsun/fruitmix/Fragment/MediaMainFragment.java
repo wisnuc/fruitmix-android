@@ -233,6 +233,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         photoList.removePhotoListListener(this);
 
+        mContext = null;
+
         RefWatcher refWatcher = CustomApplication.getRefWatcher(getActivity());
         refWatcher.watch(this);
     }

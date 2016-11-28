@@ -35,6 +35,8 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.IImageLoadListener;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.EditTextPreIme;
+import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -45,6 +47,10 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -88,10 +94,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
     private Context mContext;
 
-    private CustomBroadCastReceiver mReceiver;
-    private LocalBroadcastManager mManager;
     private CommentRecyclerViewAdapter mAdapter;
-    private IntentFilter filter;
 
     private ProgressDialog mDialog;
 
@@ -120,8 +123,6 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         ButterKnife.bind(this);
 
         initImageLoader();
-
-        initFilterForReceiver();
 
         LinearLayoutManager manager = new LinearLayoutManager(mContext);
         lvComment.setLayoutManager(manager);
@@ -271,29 +272,18 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         }
     }
 
-    private void initFilterForReceiver() {
-        mReceiver = new CustomBroadCastReceiver();
-        mManager = LocalBroadcastManager.getInstance(this);
-        filter = new IntentFilter(Util.REMOTE_COMMENT_CREATED);
-        filter.addAction(Util.LOCAL_COMMENT_CREATED);
-        filter.addAction(Util.LOCAL_MEDIA_COMMENT_RETRIEVED);
-        filter.addAction(Util.REMOTE_MEDIA_COMMENT_RETRIEVED);
-        filter.addAction(Util.LOCAL_COMMENT_DELETED);
-    }
-
-
     @Override
     protected void onResume() {
         super.onResume();
 
-        mManager.registerReceiver(mReceiver, filter);
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        EventBus.getDefault().unregister(this);
 
-        mManager.unregisterReceiver(mReceiver);
+        super.onStop();
     }
 
     @Override
@@ -301,14 +291,96 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         super.onDestroy();
 
         ivMain.unregisterImageLoadListener();
+
+        mContext = null;
     }
 
     @Override
     public void onBackPressed() {
-
         super.onBackPressed();
 
         finishActivity();
+
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleOperationEvent(OperationEvent operationEvent) {
+
+        String action = operationEvent.getAction();
+
+        switch (action) {
+            case Util.LOCAL_COMMENT_DELETED:
+
+                Log.i(TAG, "local comment changed");
+
+                if (mDialog != null && mDialog.isShowing())
+                    mDialog.dismiss();
+
+                if (operationEvent.getOperationResult().getOperationResultType().equals(OperationResultType.SUCCEED)) {
+                    reloadList();
+                }
+
+                break;
+            case Util.REMOTE_COMMENT_CREATED: {
+
+                OperationResultType operationResultType = operationEvent.getOperationResult().getOperationResultType();
+
+                switch (operationResultType) {
+                    case SUCCEED:
+
+                        Comment comment = ((MediaShareCommentOperationEvent) operationEvent).getComment();
+                        String imageUUID = ((MediaShareCommentOperationEvent) operationEvent).getImageUUID();
+
+                        FNAS.deleteLocalMediaComment(mContext, imageUUID, comment);
+
+                        break;
+                    case FAIL:
+
+                        if (mDialog != null && mDialog.isShowing())
+                            mDialog.dismiss();
+
+                        Toast.makeText(mContext, "fail", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+
+                break;
+            }
+            case Util.LOCAL_COMMENT_CREATED: {
+
+                OperationResultType operationResultType = operationEvent.getOperationResult().getOperationResultType();
+
+                switch (operationResultType) {
+                    case SUCCEED:
+
+                        Comment comment = ((MediaShareCommentOperationEvent) operationEvent).getComment();
+
+                        if (Util.getNetworkState(mContext)) {
+
+                            String imageUUID = ((MediaShareCommentOperationEvent) operationEvent).getImageUUID();
+
+                            FNAS.createRemoteMediaComment(mContext, imageUUID, comment);
+                        }
+
+                        tfContent.setText("");
+                        break;
+                    case FAIL:
+
+                        if (mDialog != null && mDialog.isShowing())
+                            mDialog.dismiss();
+
+                        Toast.makeText(mContext, "fail", Toast.LENGTH_SHORT).show();
+                        tfContent.setText("");
+                        break;
+                }
+
+                break;
+            }
+            case Util.LOCAL_MEDIA_COMMENT_RETRIEVED:
+            case Util.REMOTE_MEDIA_COMMENT_RETRIEVED:
+                reloadList();
+                break;
+        }
+
 
     }
 
@@ -527,81 +599,6 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                     Util.showSoftInput(MediaShareCommentActivity.this, tfContent);
                 }
             });
-        }
-    }
-
-    private class CustomBroadCastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Util.LOCAL_COMMENT_DELETED)) {
-
-                Log.i(TAG, "local comment changed");
-
-                if (mDialog != null && mDialog.isShowing())
-                    mDialog.dismiss();
-
-                if (intent.getStringExtra(Util.OPERATION_RESULT_NAME).equals(OperationResultType.SUCCEED.name())) {
-                    reloadList();
-                }
-
-            } else if (intent.getAction().equals(Util.REMOTE_COMMENT_CREATED)) {
-
-                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
-
-                OperationResultType operationResultType = OperationResultType.valueOf(result);
-
-                switch (operationResultType) {
-                    case SUCCEED:
-
-                        Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
-                        String imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
-
-                        FNAS.deleteLocalMediaComment(mContext, imageUUID, comment);
-
-                        break;
-                    case FAIL:
-
-                        if (mDialog != null && mDialog.isShowing())
-                            mDialog.dismiss();
-
-                        Toast.makeText(mContext, "fail", Toast.LENGTH_SHORT).show();
-                        break;
-                }
-
-            } else if (intent.getAction().equals(Util.LOCAL_COMMENT_CREATED)) {
-
-
-                String result = intent.getStringExtra(Util.OPERATION_RESULT_NAME);
-
-                OperationResultType operationResultType = OperationResultType.valueOf(result);
-
-                switch (operationResultType) {
-                    case SUCCEED:
-
-                        Comment comment = intent.getParcelableExtra(Util.OPERATION_COMMENT);
-
-                        if (Util.getNetworkState(mContext)) {
-
-                            String imageUUID = intent.getStringExtra(Util.OPERATION_IMAGE_UUID);
-
-                            FNAS.createRemoteMediaComment(mContext, imageUUID, comment);
-                        }
-
-                        tfContent.setText("");
-                        break;
-                    case FAIL:
-
-                        if (mDialog != null && mDialog.isShowing())
-                            mDialog.dismiss();
-
-                        Toast.makeText(mContext, "fail", Toast.LENGTH_SHORT).show();
-                        tfContent.setText("");
-                        break;
-                }
-
-            } else if (intent.getAction().equals(Util.LOCAL_MEDIA_COMMENT_RETRIEVED) || intent.getAction().equals(Util.REMOTE_MEDIA_COMMENT_RETRIEVED)) {
-                reloadList();
-            }
         }
     }
 

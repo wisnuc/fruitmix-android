@@ -1,16 +1,13 @@
 package com.winsun.fruitmix;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -112,6 +109,19 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             }
         });
 
+        mEquipmentExpandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+            @Override
+            public void onGroupExpand(int groupPosition) {
+
+                int count = mEquipmentExpandableListView.getExpandableListAdapter().getGroupCount();
+                for (int i = 0; i < count; i++) {
+                    if (i != groupPosition) {
+                        mEquipmentExpandableListView.collapseGroup(i);
+                    }
+                }
+            }
+        });
+
         mBack.setOnClickListener(this);
         addIpImageView.setOnClickListener(this);
         setSupportActionBar(mToolBar);
@@ -139,6 +149,12 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mContext = null;
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -232,7 +248,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             }
 
             groupViewHolder.refreshView(groupPosition, isExpanded);
-
 
             return convertView;
         }
@@ -331,7 +346,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     private void discoverService(final Context context) {
 
         if (mManager == null)
-            mManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+            mManager = (NsdManager) context.getApplicationContext().getSystemService(Context.NSD_SERVICE);
 
         NsdManager.DiscoveryListener nsDicListener = new NsdManager.DiscoveryListener() {
             @Override
@@ -410,7 +425,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     private void stopDiscoverServices(Context context, NsdManager.DiscoveryListener listener) {
 
         if (mManager == null)
-            mManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+            mManager = (NsdManager) context.getApplicationContext().getSystemService(Context.NSD_SERVICE);
 
         if (listener != null) {
             mManager.stopServiceDiscovery(listener);

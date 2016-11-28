@@ -63,6 +63,13 @@ public class LocalFileActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mContext = null;
+    }
+
+    @Override
     public void onBackPressed() {
 
         if(currentPath.equals(FileUtil.getExternalStorageDirectoryPath())){

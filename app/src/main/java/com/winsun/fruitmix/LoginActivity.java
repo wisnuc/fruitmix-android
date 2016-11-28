@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -110,6 +109,13 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         EventBus.getDefault().unregister(this);
 
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mContext = null;
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)

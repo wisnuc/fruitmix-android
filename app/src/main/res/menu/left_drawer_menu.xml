@@ -29,17 +29,17 @@
 
         <item
             android:id="@+id/user_manage"
-            android:icon="@drawable/user_manage"
+            android:icon="@drawable/ic_person_add"
             android:title="@string/user_manage" />
 
         <item
             android:id="@+id/file"
-            android:icon="@drawable/cloud"
+            android:icon="@drawable/ic_folder"
             android:title="@string/my_file"/>
 
         <item
             android:id="@+id/logout"
-            android:icon="@drawable/logout"
+            android:icon="@drawable/ic_logout"
             android:title="@string/logout"/>
 
     </group>

@@ -7,14 +7,18 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.Comment;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteMediaCommentParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
@@ -74,8 +78,6 @@ public class RetrieveRemoteMediaCommentService extends IntentService {
 
         DBUtils dbUtils = DBUtils.getInstance(this);
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-
         try {
 
             HttpResponse httpResponse = FNAS.loadRemoteMediaComment(this, mediaUUID);
@@ -95,10 +97,6 @@ public class RetrieveRemoteMediaCommentService extends IntentService {
 
             Log.i(TAG, "retrieve remote media comment from network");
 
-            Intent intent = new Intent(Util.REMOTE_MEDIA_COMMENT_RETRIEVED);
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResultType.SUCCEED.name());
-            localBroadcastManager.sendBroadcast(intent);
-
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -110,11 +108,10 @@ public class RetrieveRemoteMediaCommentService extends IntentService {
 
             Log.i(TAG, "retrieve remote media comment from db");
 
-            Intent intent = new Intent(Util.REMOTE_MEDIA_COMMENT_RETRIEVED);
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResultType.SUCCEED.name());
-            localBroadcastManager.sendBroadcast(intent);
         }
 
+        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_COMMENT_RETRIEVED, new OperationSuccess());
+        EventBus.getDefault().post(operationEvent);
 
     }
 

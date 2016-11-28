@@ -78,6 +78,13 @@ public class UserManageActivity extends Activity implements View.OnClickListener
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mContext = null;
+    }
+
+    @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
@@ -167,11 +174,11 @@ public class UserManageActivity extends Activity implements View.OnClickListener
             mUserDefaultPortrait.setText(stringBuilder.toString());
         }
 
-        public void setDelUserVisibility(int visibility) {
+        void setDelUserVisibility(int visibility) {
             mDelUser.setVisibility(visibility);
         }
 
-        public int getDelUserVisibility() {
+        int getDelUserVisibility() {
             return mDelUser.getVisibility();
         }
 

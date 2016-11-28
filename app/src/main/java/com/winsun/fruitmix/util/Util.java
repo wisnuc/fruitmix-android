@@ -204,7 +204,7 @@ public class Util {
     }
 
     public static boolean getNetworkState(Context context) {
-        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager manager = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         if (manager != null) {
             NetworkInfo info = manager.getActiveNetworkInfo();
@@ -278,14 +278,14 @@ public class Util {
     }
 
     public static void hideSoftInput(Activity activity) {
-        InputMethodManager methodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager methodManager = (InputMethodManager) activity.getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (activity.getCurrentFocus() != null) {
             methodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
         }
     }
 
     public static void showSoftInput(Activity activity, View view) {
-        InputMethodManager methodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager methodManager = (InputMethodManager) activity.getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         methodManager.showSoftInput(view, 0);
     }
 

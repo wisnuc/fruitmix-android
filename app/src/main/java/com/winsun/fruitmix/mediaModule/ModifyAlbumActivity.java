@@ -210,6 +210,13 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         super.onStop();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mContext = null;
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(MediaShareOperationEvent operationEvent){
 

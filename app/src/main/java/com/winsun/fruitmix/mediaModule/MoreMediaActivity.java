@@ -80,6 +80,13 @@ public class MoreMediaActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mContext = null;
+    }
+
     private void initImageLoader() {
         mImageLoader = new ImageLoader(RequestQueueInstance.getInstance(this).getRequestQueue(), ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();

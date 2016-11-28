@@ -168,8 +168,6 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
 
         EventBus.getDefault().register(this);
 
-        //TODO: delete downloaded item does not means delete local file ,so retrieveDownloaded file will load local downloaded file and show,just like have not do delete operation
-
         FNAS.retrieveDownloadedFile();
     }
 

@@ -7,10 +7,15 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Comment;
+import com.winsun.fruitmix.operationResult.OperationSQLException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +72,7 @@ public class CreateLocalCommentService extends IntentService {
         DBUtils dbUtils = DBUtils.getInstance(this);
         long returnValue = dbUtils.insertLocalComment(comment, imageUUID);
 
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
-        Intent intent = new Intent(Util.LOCAL_COMMENT_CREATED);
+        MediaShareCommentOperationEvent mediaShareCommentOperationEvent;
 
         if (returnValue > 0) {
 
@@ -77,7 +81,7 @@ public class CreateLocalCommentService extends IntentService {
             comment.setId(returnValue);
 
             List<Comment> comments = new ArrayList<>();
-            LocalCache.LocalMediaCommentMapKeyIsImageUUID.putIfAbsent(imageUUID,comments);
+            LocalCache.LocalMediaCommentMapKeyIsImageUUID.putIfAbsent(imageUUID, comments);
 
             comments = LocalCache.LocalMediaCommentMapKeyIsImageUUID.get(imageUUID);
 
@@ -85,17 +89,15 @@ public class CreateLocalCommentService extends IntentService {
 
             Log.i(TAG, "insert local media comment to map result:" + mapResult);
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResultType.SUCCEED.name());
-            intent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
-            intent.putExtra(Util.OPERATION_COMMENT, comment);
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.LOCAL_COMMENT_CREATED, new OperationSuccess(), comment, imageUUID);
 
         } else {
 
             Log.i(TAG, "insert local comment fail");
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResultType.FAIL.name());
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.LOCAL_COMMENT_CREATED, new OperationSQLException(), comment, imageUUID);
         }
-        broadcastManager.sendBroadcast(intent);
+        EventBus.getDefault().post(mediaShareCommentOperationEvent);
     }
 
 }

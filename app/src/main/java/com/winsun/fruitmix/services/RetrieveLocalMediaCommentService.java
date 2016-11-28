@@ -6,10 +6,15 @@ import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Comment;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 import java.util.Map;
@@ -67,11 +72,8 @@ public class RetrieveLocalMediaCommentService extends IntentService {
 
         }
 
-        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        Intent intent = new Intent(Util.LOCAL_MEDIA_COMMENT_RETRIEVED);
-        intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResultType.SUCCEED.name());
-        localBroadcastManager.sendBroadcast(intent);
-
+        OperationEvent operationEvent = new OperationEvent(Util.LOCAL_MEDIA_COMMENT_RETRIEVED, new OperationSuccess());
+        EventBus.getDefault().post(operationEvent);
     }
 
 }

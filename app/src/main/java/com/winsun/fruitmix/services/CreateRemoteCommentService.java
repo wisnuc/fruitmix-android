@@ -47,8 +47,6 @@ public class CreateRemoteCommentService extends IntentService {
     private static final String EXTRA_COMMMENT = "com.winsun.fruitmix.services.extra.share";
     private static final String EXTRA_MEDIA_UUID = "com.winsun.fruitmix,services.extra,media.uuid";
 
-    private LocalBroadcastManager mManager;
-
     public CreateRemoteCommentService() {
         super("CreateRemoteCommentService");
     }

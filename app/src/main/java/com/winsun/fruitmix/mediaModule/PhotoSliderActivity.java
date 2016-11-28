@@ -160,8 +160,15 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         setPosition(initialPhotoPosition);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mContext = null;
+    }
+
     private void initViewPager() {
-        MyAdapter myAdapter = new MyAdapter(this);
+        MyAdapter myAdapter = new MyAdapter();
         mViewPager.setAdapter(myAdapter);
         mViewPager.setCurrentItem(initialPhotoPosition, false);
         mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
@@ -435,11 +442,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     }
 
     private class MyAdapter extends PagerAdapter {
-        private PhotoSliderActivity activity;
-
-        public MyAdapter(PhotoSliderActivity activity) {
-            this.activity = activity;
-        }
 
         @Override
         public CharSequence getPageTitle(int position) {
@@ -451,7 +453,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             View view;
 
-            view = LayoutInflater.from(activity).inflate(R.layout.photo_slider_cell, null);
+            view = LayoutInflater.from(mContext).inflate(R.layout.photo_slider_cell, null);
 
             TouchNetworkImageView defaultMainPic = (TouchNetworkImageView) view.findViewById(R.id.default_main_pic);
 
@@ -550,23 +552,19 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             int actualHeight = 0;
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) defaultMainPic.getLayoutParams();
 
-//            if (mediaWidthLargerThanHeight(media, mediaWidth, mediaHeight)) {
-//                actualWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
-//                actualHeight = mediaHeight * actualWidth / mediaWidth;
-//            } else if (mediaHeightLargerThanWidth(media, mediaWidth, mediaHeight)) {
-//                actualHeight = Util.dip2px(mContext, 600);
-//                actualWidth = mediaWidth * actualHeight / mediaHeight;
-//            } else if (mediaWidthEqualsHeight(mediaWidth, mediaHeight)) {
-//
-//                actualWidth = actualHeight = Util.calcScreenWidth(PhotoSliderActivity.this);
-//            }
-//
-//            layoutParams.width = actualWidth;
-//            layoutParams.height = actualHeight;
+            if (mediaWidthLargerThanHeight(media, mediaWidth, mediaHeight)) {
+                actualWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
+                actualHeight = mediaHeight * actualWidth / mediaWidth;
+            } else if (mediaHeightLargerThanWidth(media, mediaWidth, mediaHeight)) {
+                actualHeight = Util.dip2px(mContext, 600);
+                actualWidth = mediaWidth * actualHeight / mediaHeight;
+            } else if (mediaWidthEqualsHeight(mediaWidth, mediaHeight)) {
 
-            layoutParams.width = Util.dip2px(mContext,200);
-            layoutParams.height = Util.dip2px(mContext,200);
+                actualWidth = actualHeight = Util.calcScreenWidth(PhotoSliderActivity.this);
+            }
 
+            layoutParams.width = actualWidth;
+            layoutParams.height = actualHeight;
 
             defaultMainPic.setLayoutParams(layoutParams);
             mainPic.setLayoutParams(layoutParams);

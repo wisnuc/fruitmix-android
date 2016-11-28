@@ -7,10 +7,15 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Comment;
+import com.winsun.fruitmix.operationResult.OperationSQLException;
+import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.Iterator;
 import java.util.List;
@@ -75,10 +80,9 @@ public class DeleteLocalCommentService extends IntentService {
 
         DBUtils dbUtils = DBUtils.getInstance(this);
 
-        long returnValue = dbUtils.deleteLocalComment(comment.getId());
+        MediaShareCommentOperationEvent mediaShareCommentOperationEvent;
 
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
-        Intent intent = new Intent(Util.LOCAL_COMMENT_DELETED);
+        long returnValue = dbUtils.deleteLocalComment(comment.getId());
 
         if (returnValue > 0) {
 
@@ -89,7 +93,7 @@ public class DeleteLocalCommentService extends IntentService {
                 Iterator<Comment> iterator = comments.iterator();
                 while (iterator.hasNext()) {
                     Comment comment1 = iterator.next();
-                    if (comment1.getId() == comment.getId()){
+                    if (comment1.getId() == comment.getId()) {
                         iterator.remove();
                         result = true;
                     }
@@ -100,19 +104,16 @@ public class DeleteLocalCommentService extends IntentService {
 
             Log.i(TAG, "delete local comment in map result:" + result);
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResultType.SUCCEED.name());
-            intent.putExtra(Util.OPERATION_IMAGE_UUID, imageUUID);
-            intent.putExtra(Util.OPERATION_COMMENT, comment);
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.LOCAL_COMMENT_DELETED, new OperationSuccess(), comment, imageUUID);
 
         } else {
 
             Log.i(TAG, "delete local comment fail");
 
-            intent.putExtra(Util.OPERATION_RESULT_NAME, OperationResultType.FAIL.name());
-
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.LOCAL_COMMENT_DELETED, new OperationSQLException(), comment, imageUUID);
         }
 
-        broadcastManager.sendBroadcast(intent);
+        EventBus.getDefault().post(mediaShareCommentOperationEvent);
     }
 
 }

@@ -327,6 +327,7 @@ public class NavPagerActivity extends AppCompatActivity
             currentPage = PAGE_FILE;
 
             menuItem.setTitle(getString(R.string.my_photo));
+            menuItem.setIcon(ContextCompat.getDrawable(this,R.drawable.ic_photo));
 
             fragmentManager.beginTransaction().hide(mediaMainFragment).show(fileMainFragment).commit();
 
@@ -335,6 +336,7 @@ public class NavPagerActivity extends AppCompatActivity
             currentPage = PAGE_MEDIA;
 
             menuItem.setTitle(getString(R.string.my_file));
+            menuItem.setIcon(ContextCompat.getDrawable(this,R.drawable.ic_folder));
 
             fragmentManager.beginTransaction().hide(fileMainFragment).show(mediaMainFragment).commit();
         }
