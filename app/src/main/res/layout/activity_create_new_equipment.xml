@@ -24,17 +24,17 @@
 
             <ImageView
                 android:id="@+id/back"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_centerVertical="true"
-                android:src="@drawable/arrow_back"/>
+                android:src="@drawable/ic_back"/>
 
             <TextView
                 android:id="@+id/layout_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="32dp"
                 android:layout_toRightOf="@+id/back"
                 android:text="@string/manual_add_new_equipment"
                 android:textColor="@color/white"

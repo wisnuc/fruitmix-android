@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/remote_file_item_layout"
               android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
+              android:layout_height="72dp"
               android:clickable="true"
               android:orientation="vertical"
               android:paddingLeft="16dp"
@@ -10,7 +10,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp">
+        android:layout_height="wrap_content">
 
         <FrameLayout
             android:id="@+id/file_icon_layout"
@@ -41,7 +41,6 @@
             android:layout_height="40dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="16dp"
             android:src="@drawable/ic_menu"
             android:visibility="visible"/>
 
@@ -60,7 +59,7 @@
                 android:layout_marginBottom="8dp"
                 android:text="文件名"
                 android:textColor="@color/black"
-                android:textSize="18dp"/>
+                android:textSize="16dp"/>
 
             <TextView
                 android:id="@+id/file_time"
@@ -68,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:text="2016-7-14"
                 android:textColor="@color/black"
-                android:textSize="18dp"/>
+                android:textSize="16dp"/>
 
 
         </LinearLayout>

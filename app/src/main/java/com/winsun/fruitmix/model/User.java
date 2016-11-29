@@ -15,6 +15,7 @@ public class User {
     private String defaultAvatarBgColor;
     private String home;
     private String library;
+    private boolean admin;
 
     public String getUserName() {
         return userName;
@@ -94,5 +95,13 @@ public class User {
 
     public void setLibrary(String library) {
         this.library = library;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 }

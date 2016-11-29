@@ -47,6 +47,8 @@ public class RemoteUserParser implements RemoteDataParser<User> {
                 user.setEmail(email);
             }
 
+            user.setAdmin(itemRaw.optBoolean("isAdmin"));
+
             StringBuilder stringBuilder = new StringBuilder();
             String[] splitStrings = user.getUserName().split(" ");
             for (String splitString : splitStrings) {

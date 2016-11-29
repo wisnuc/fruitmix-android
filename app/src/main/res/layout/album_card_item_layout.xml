@@ -5,7 +5,7 @@
     android:id="@+id/album_card_item_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:showIn="@layout/share_list_cell">
+    android:layout_marginBottom="16dp">
 
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/cover_img"

@@ -52,15 +52,15 @@
         <FrameLayout
             android:id="@+id/mainPic_layout"
             android:layout_width="150dp"
-            android:layout_height="120dp"
+            android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginRight="8dp">
 
             <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/mainPic"
-                android:layout_width="150dp"
-                android:layout_height="120dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:src="@drawable/placeholder_photo"/>
 
@@ -172,19 +172,6 @@
                 android:textSize="16dp"/>
 
         </RelativeLayout>
-
-
-        <ImageView
-            android:id="@+id/create"
-            android:layout_width="135dp"
-            android:layout_height="40dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_marginBottom="0dp"
-            android:layout_marginLeft="140dp"
-            android:adjustViewBounds="true"
-            android:src="@drawable/button_new_album"
-            android:visibility="gone"/>
 
     </RelativeLayout>
 

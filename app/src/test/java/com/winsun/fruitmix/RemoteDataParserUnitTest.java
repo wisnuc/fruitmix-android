@@ -239,6 +239,7 @@ public class RemoteDataParserUnitTest {
         assertEquals(user.getUserName(), "Alice");
         assertEquals(user.getHome(), "b9aa7c34-8b86-4306-9042-396cf8fa1a9c");
         assertEquals(user.getLibrary(), "f97f9e1f-848b-4ed4-bd47-1ddfa82b2777");
+        assertEquals(user.isAdmin(),true);
 
     }
 

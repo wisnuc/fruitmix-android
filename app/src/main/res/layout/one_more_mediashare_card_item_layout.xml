@@ -4,8 +4,7 @@
               android:id="@+id/one_more_mediashare_card_item_layout"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:orientation="vertical"
-              tools:showIn="@layout/share_list_cell">
+              android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/pic_row1"
@@ -115,7 +114,7 @@
     <RelativeLayout
         android:id="@+id/share_count_layout"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="48dp"
         android:clickable="true">
 
         <TextView

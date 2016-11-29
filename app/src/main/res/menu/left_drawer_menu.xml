@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/group1"
+        android:checkableBehavior="single">
 
         <!--        <item
                     android:id="@+id/person_info"
-                    android:icon="@drawable/person_info"
+                    android:icon="@drawable/ic_person"
                     android:title="@string/person_data" />
 
                 <item
@@ -28,14 +30,25 @@
                     android:title="@string/help" />-->
 
         <item
-            android:id="@+id/user_manage"
-            android:icon="@drawable/ic_person_add"
-            android:title="@string/user_manage" />
-
-        <item
             android:id="@+id/file"
             android:icon="@drawable/ic_folder"
             android:title="@string/my_file"/>
+
+    </group>
+
+    <group
+        android:id="@+id/group2"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/user_manage"
+            android:icon="@drawable/ic_person_add"
+            android:title="@string/user_manage"/>
+
+        <item
+            android:id="@+id/setting"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/setting"/>
 
         <item
             android:id="@+id/logout"
@@ -43,5 +56,7 @@
             android:title="@string/logout"/>
 
     </group>
+
+
 
 </menu>

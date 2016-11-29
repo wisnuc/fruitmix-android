@@ -4,8 +4,7 @@
               android:id="@+id/one_mediashare_card_item_layout"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:orientation="vertical"
-              tools:showIn="@layout/share_list_cell">
+              android:orientation="vertical">
 
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/cover_img"
@@ -20,9 +19,7 @@
     <LinearLayout
         android:id="@+id/share_comment_layout"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginRight="24dp"
+        android:layout_height="48dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 

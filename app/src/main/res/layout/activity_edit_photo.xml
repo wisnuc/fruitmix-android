@@ -23,11 +23,11 @@
 
             <ImageView
                 android:id="@+id/back"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
-                android:src="@drawable/arrow_back"/>
+                android:layout_marginLeft="16dp"
+                android:src="@drawable/ic_back"/>
 
             <TextView
                 android:id="@+id/finish"

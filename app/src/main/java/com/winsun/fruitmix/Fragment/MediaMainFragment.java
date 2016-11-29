@@ -583,7 +583,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     public void showChooseHeader() {
         fab.setVisibility(View.VISIBLE);
-        toolbar.setNavigationIcon(R.drawable.arrow_back);
+        toolbar.setNavigationIcon(R.drawable.ic_back);
         lbRight.setVisibility(View.GONE);
         CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
         lp.bottomMargin = 0;

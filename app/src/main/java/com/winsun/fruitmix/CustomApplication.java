@@ -28,8 +28,6 @@ public class CustomApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder().setDefaultFontPath("fonts/fangzheng.ttf").setFontAttrId(R.attr.fontPath).build());
-
         ButlerService.startButlerService(getApplicationContext());
 
         EventBus.builder().addIndex(new MyEventBusIndex()).installDefaultEventBus();
