@@ -17,17 +17,24 @@
             android:elevation="@dimen/appbar_elevation"
             android:theme="@style/AppTheme.AppBarOverlay"
             app:navigationIcon="@drawable/menu"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="@string/file"
-            app:titleTextAppearance="@style/CollapsedToolbarTitle">
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/file"
+                android:textColor="@color/white"
+                android:textSize="18dp"/>
 
             <ImageView
                 android:id="@+id/file_main_menu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_gravity="center_vertical|end"
                 android:layout_marginRight="15dp"
-                android:src="@drawable/ic_menu"
+                android:src="@drawable/ic_more_vert"
                 android:visibility="visible"/>
 
         </android.support.v7.widget.Toolbar>
@@ -39,8 +46,8 @@
             android:layout_alignParentBottom="true"
             android:elevation="8dp"
             app:itemBackground="@color/colorPrimary"
-            app:itemIconTint="@color/white"
-            app:itemTextColor="@color/white"
+            app:itemIconTint="@drawable/bottom_navigation_item_bg"
+            app:itemTextColor="@drawable/bottom_navigation_item_bg"
             app:menu="@menu/file_bottom_menu"/>
 
         <com.winsun.fruitmix.component.UnscrollableViewPager

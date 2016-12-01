@@ -646,6 +646,17 @@ public class NewPhotoList implements Page {
         public void refreshView(int groupPosition) {
 
             final String date = mMapKeyIsPhotoPositionValueIsPhotoDate.get(groupPosition);
+
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mPhotoTitleLayout.getLayoutParams();
+            int margin = Util.dip2px(containerActivity, 8);
+
+            if (groupPosition == 0) {
+                layoutParams.setMargins(0, 0, 0, 0);
+            } else {
+                layoutParams.setMargins(0, margin, 0, 0);
+            }
+            mPhotoTitleLayout.setLayoutParams(layoutParams);
+
             if (date.equals("1916-01-01")) {
                 mPhotoTitle.setText(containerActivity.getString(R.string.unknown_time_text));
             } else {
@@ -739,7 +750,7 @@ public class NewPhotoList implements Page {
 
             int normalMargin = Util.dip2px(containerActivity, 2.5f);
 
-            params.setMargins(normalMargin, normalMargin, normalMargin, normalMargin);
+            params.setMargins(0, normalMargin, normalMargin, 0);
             view.setLayoutParams(params);
 
             if (mSelectMode) {

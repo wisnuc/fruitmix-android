@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
              android:id="@+id/share_list_framelayout"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:background="@color/white">
 
-    <ListView
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/mainList"
-        package="com.winsun.fruitmix"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:dividerHeight="10dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
+        android:paddingBottom="8dp"
+        android:scrollbars="vertical"
         android:scrollbarSize="3dp"
         android:scrollbarStyle="insideInset"
         android:scrollbarThumbVertical="@color/gray"
-        android:visibility="visible"
-        tools:context="com.winsun.fruitmix.Test2Activity"/>
+        android:visibility="visible"/>
 
     <include layout="@layout/loading_layout"/>
 

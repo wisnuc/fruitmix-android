@@ -7,8 +7,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@color/gray"
+        android:layout_height="48dp"
+        android:background="#f3f3f3"
         android:orientation="horizontal">
 
         <TextView
@@ -30,8 +30,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@color/gray"
+        android:layout_height="48dp"
+        android:background="#f3f3f3"
         android:orientation="horizontal">
 
         <TextView

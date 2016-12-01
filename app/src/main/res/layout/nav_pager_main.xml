@@ -15,11 +15,19 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/menu"
             android:theme="@style/AppTheme.AppBarOverlay"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:titleTextAppearance="@style/CollapsedToolbarTitle"
-            app:title="@string/photo_text">
+            app:navigationIcon="@drawable/menu"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/photo_text"
+                android:textColor="@color/white"
+                android:textSize="18dp"/>
+
 
             <TextView
                 android:id="@+id/right"
@@ -29,7 +37,7 @@
                 android:layout_marginRight="15dp"
                 android:text="@string/choose_text"
                 android:textColor="@color/white"
-                android:textSize="18dp"
+                android:textSize="16dp"
                 android:visibility="visible"/>
 
         </android.support.v7.widget.Toolbar>
@@ -76,56 +84,67 @@
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="56dp"
         android:layout_marginTop="?attr/actionBarSize"
         />
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tabLayout"
+    <!--<android.support.design.widget.TabLayout-->
+    <!--android:id="@+id/tabLayout"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="48dp"-->
+    <!--android:layout_gravity="bottom|end"-->
+    <!--android:background="#3F51B5"-->
+    <!--android:elevation="2dp"-->
+    <!--app:elevation="2dp"-->
+    <!--app:tabIndicatorColor="#0026c6da"-->
+    <!--app:tabIndicatorHeight="4dp"/>-->
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/bottom_navigation_view"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="56dp"
         android:layout_gravity="bottom|end"
-        android:background="#3F51B5"
-        android:elevation="2dp"
-        app:elevation="2dp"
-        app:tabIndicatorColor="#0026c6da"
-        app:tabIndicatorHeight="4dp"/>
+        android:elevation="8dp"
+        app:itemBackground="@color/colorPrimary"
+        app:itemIconTint="@drawable/bottom_navigation_item_bg"
+        app:itemTextColor="@drawable/bottom_navigation_item_bg"
+        app:menu="@menu/media_bottom_menu"/>
+
 
     <LinearLayout
         android:id="@+id/btmenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="56dp"
         android:orientation="vertical">
 
         <ImageView
             android:id="@+id/bt_share"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_gravity="end"
-            android:layout_marginBottom="20dp"
-            android:layout_marginRight="20dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginRight="24dp"
             android:src="@drawable/share_bt"
             android:visibility="gone"/>
 
         <ImageView
             android:id="@+id/bt_album"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_gravity="end"
-            android:layout_marginBottom="20dp"
-            android:layout_marginRight="20dp"
+            android:layout_marginRight="24dp"
             android:src="@drawable/photo_album2"
             android:visibility="gone"/>
 
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:layout_gravity="bottom|end"
-            android:layout_margin="10dp"
+            android:layout_margin="16dp"
             android:src="@drawable/ic_add_white_24dp"
             android:visibility="visible"
             app:borderWidth="0dp"/>

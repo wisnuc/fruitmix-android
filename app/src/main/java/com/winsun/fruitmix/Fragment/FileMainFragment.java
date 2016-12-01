@@ -1,50 +1,38 @@
 package com.winsun.fruitmix.fragment;
 
 
-import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.BottomSheetBehavior;
-import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.leakcanary.RefWatcher;
 import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.command.AbstractCommand;
-import com.winsun.fruitmix.command.ShowDialogCommand;
 import com.winsun.fruitmix.component.UnscrollableViewPager;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.fragment.FileDownloadFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileShareFragment;
-import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
-import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
+import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -54,8 +42,10 @@ import butterknife.ButterKnife;
  * Use the {@link FileMainFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FileMainFragment extends Fragment implements OnFileFragmentInteractionListener {
+public class FileMainFragment extends Fragment implements OnFileInteractionListener {
 
+    @BindView(R.id.title)
+    TextView titleTextView;
     @BindView(R.id.bottom_navigation_view)
     BottomNavigationView bottomNavigationView;
     @BindView(R.id.file_main_viewpager)
@@ -108,9 +98,9 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
 
         initToolbar();
 
-        initViewPager();
-
         initNavigationView();
+
+        initViewPager();
 
         fileMainMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,30 +139,55 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
                 return true;
             }
         });
+
+        resetBottomNavigationItemCheckState();
+
+    }
+
+    private void resetBottomNavigationItemCheckState() {
+        for (int i = 0; i < bottomNavigationView.getMenu().size(); i++) {
+            bottomNavigationView.getMenu().getItem(i).setChecked(false);
+        }
     }
 
     private void initViewPager() {
-        FilePageAdapter filePageAdapter = new FilePageAdapter(getActivity().getSupportFragmentManager());
+        final FilePageAdapter filePageAdapter = new FilePageAdapter(getActivity().getSupportFragmentManager());
 
         fileMainViewPager.setAdapter(filePageAdapter);
-        fileMainViewPager.setCurrentItem(PAGE_FILE);
 
         fileMainViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
 
-                if (position != PAGE_FILE_SHARE) {
-                    fileMainMenu.setVisibility(View.VISIBLE);
-                } else {
-                    fileMainMenu.setVisibility(View.GONE);
-                }
+                resetBottomNavigationItemCheckState();
+                bottomNavigationView.getMenu().getItem(position).setChecked(true);
 
+                switch (position) {
+                    case PAGE_FILE:
+                        fileMainMenu.setVisibility(View.VISIBLE);
+                        if (fileFragment != null)
+                            fileFragment.handleTitle();
+                        break;
+                    case PAGE_FILE_DOWNLOAD:
+                        fileMainMenu.setVisibility(View.VISIBLE);
+                        if (fileDownloadFragment != null)
+                            fileDownloadFragment.handleTitle();
+                        break;
+                    case PAGE_FILE_SHARE:
+                        fileMainMenu.setVisibility(View.GONE);
+                        if (fileShareFragment != null)
+                            fileShareFragment.handleTitle();
+                        break;
+                }
             }
         });
+
+        fileMainViewPager.setCurrentItem(PAGE_FILE);
     }
 
     private void initToolbar() {
+        toolbar.setTitle("");
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -287,6 +302,31 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
         fileMainViewPager.setCurrentItem(PAGE_FILE_DOWNLOAD);
     }
 
+    @Override
+    public void setToolbarTitle(String title) {
+        titleTextView.setText(title);
+    }
+
+    @Override
+    public void setNavigationIcon(int id) {
+        toolbar.setNavigationIcon(id);
+    }
+
+    @Override
+    public void setDefaultNavigationOnClickListener() {
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.switchDrawerOpenState();
+            }
+        });
+    }
+
+    @Override
+    public void setNavigationOnClickListener(View.OnClickListener onClickListener) {
+        toolbar.setNavigationOnClickListener(onClickListener);
+    }
+
     private class FilePageAdapter extends FragmentPagerAdapter {
 
         FilePageAdapter(FragmentManager manager) {
@@ -301,7 +341,7 @@ public class FileMainFragment extends Fragment implements OnFileFragmentInteract
                     fileFragment = FileFragment.newInstance(FileMainFragment.this);
                     return fileFragment;
                 case PAGE_FILE_SHARE:
-                    fileShareFragment = FileShareFragment.newInstance();
+                    fileShareFragment = FileShareFragment.newInstance(FileMainFragment.this);
                     return fileShareFragment;
                 case PAGE_FILE_DOWNLOAD:
                     fileDownloadFragment = FileDownloadFragment.newInstance(FileMainFragment.this);

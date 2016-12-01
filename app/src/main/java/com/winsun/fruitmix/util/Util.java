@@ -131,7 +131,7 @@ public class Util {
     static final String HTTP_POST_METHOD = "POST";
     static final String HTTP_PATCH_METHOD = "PATCH";
     static final String HTTP_DELETE_METHOD = "DELETE";
-    public static final int HTTP_CONNECT_TIMEOUT = 10 * 1000;
+    public static final int HTTP_CONNECT_TIMEOUT = 15 * 1000;
 
     public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
     public static final String CURRENT_PHOTO_POSITION = "current_photo_position";

@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.command;
 
-import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
+import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 
 /**
  * Created by Administrator on 2016/11/18.
@@ -8,15 +8,15 @@ import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListen
 
 public class ChangeToDownloadPageCommand extends AbstractCommand {
 
-    private OnFileFragmentInteractionListener onFileFragmentInteractionListener;
+    private OnFileInteractionListener onFileInteractionListener;
 
-    public ChangeToDownloadPageCommand(OnFileFragmentInteractionListener onFileFragmentInteractionListener) {
-        this.onFileFragmentInteractionListener = onFileFragmentInteractionListener;
+    public ChangeToDownloadPageCommand(OnFileInteractionListener onFileInteractionListener) {
+        this.onFileInteractionListener = onFileInteractionListener;
     }
 
     @Override
     public void execute() {
-        onFileFragmentInteractionListener.changeFilePageToFileDownloadFragment();
+        onFileInteractionListener.changeFilePageToFileDownloadFragment();
     }
 
     @Override

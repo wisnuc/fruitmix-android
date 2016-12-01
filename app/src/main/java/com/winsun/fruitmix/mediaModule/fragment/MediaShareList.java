@@ -8,6 +8,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.ListViewCompat;
+import android.support.v7.widget.RecyclerView;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -43,6 +48,7 @@ import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,6 +56,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -73,11 +80,11 @@ public class MediaShareList implements Page {
     @BindView(R.id.share_list_framelayout)
     FrameLayout mShareListFrameLayout;
     @BindView(R.id.mainList)
-    ListView mainListView;
+    RecyclerView mainRecyclerView;
 
     private List<MediaShare> mediaShareList;
     private Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
-    private ShareListViewAdapter mAdapter;
+    private ShareRecyclerViewAdapter mAdapter;
 
     private ImageLoader mImageLoader;
     private Bundle reenterState;
@@ -94,8 +101,9 @@ public class MediaShareList implements Page {
 
         initImageLoader();
 
-        mAdapter = new ShareListViewAdapter(this);
-        mainListView.setAdapter(mAdapter);
+        mAdapter = new ShareRecyclerViewAdapter();
+        mainRecyclerView.setAdapter(mAdapter);
+        mainRecyclerView.setLayoutManager(new LinearLayoutManager(containerActivity));
 
         mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
 
@@ -141,13 +149,13 @@ public class MediaShareList implements Page {
 
     private void fillMediaShareList(List<MediaShare> mediaShareList) {
         for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
-            if (!mediaShare.isArchived() && mediaShare.getViewersListSize() != 0 && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID())) {
+            if (!mediaShare.isArchived() && (mediaShare.getViewersListSize() != 0 || LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()))) {
                 mediaShareList.add(mediaShare);
             }
         }
 
         for (MediaShare mediaShare : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
-            if (!mediaShare.isArchived() && mediaShare.getViewersListSize() != 0 && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID())) {
+            if (!mediaShare.isArchived() && (mediaShare.getViewersListSize() != 0 || LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()))) {
                 mediaShareList.add(mediaShare);
             }
         }
@@ -169,11 +177,11 @@ public class MediaShareList implements Page {
         mLoadingLayout.setVisibility(View.GONE);
         if (mediaShareList.size() == 0) {
             mNoContentLayout.setVisibility(View.VISIBLE);
-            mainListView.setVisibility(View.GONE);
+            mainRecyclerView.setVisibility(View.GONE);
         } else {
             mNoContentLayout.setVisibility(View.GONE);
-            mainListView.setVisibility(View.VISIBLE);
-            ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
+            mainRecyclerView.setVisibility(View.VISIBLE);
+            mAdapter.notifyDataSetChanged();
 
         }
 
@@ -205,7 +213,7 @@ public class MediaShareList implements Page {
 
                 String currentMediaUUID = currentMediaUUIDs.get(currentPhotoPosition);
 
-                View currentSharedElementView = mainListView.findViewWithTag(findMediaTagByMediaUUID(currentMediaUUID));
+                View currentSharedElementView = mainRecyclerView.findViewWithTag(findMediaTagByMediaUUID(currentMediaUUID));
 
                 names.add(currentMediaUUID);
                 sharedElements.put(currentMediaUUID, currentSharedElementView);
@@ -223,12 +231,12 @@ public class MediaShareList implements Page {
         int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
 
         ActivityCompat.postponeEnterTransition(containerActivity);
-        mainListView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+        mainRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
-                mainListView.getViewTreeObserver().removeOnPreDrawListener(this);
+                mainRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                 // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
-                mainListView.requestLayout();
+                mainRecyclerView.requestLayout();
                 ActivityCompat.startPostponedEnterTransition(containerActivity);
 
                 return true;
@@ -238,12 +246,12 @@ public class MediaShareList implements Page {
 /*        if (initialPhotoPosition != currentPhotoPosition) {
 
             ActivityCompat.postponeEnterTransition(containerActivity);
-            mainListView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            mainRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
-                    mainListView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    mainRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                     // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
-                    mainListView.requestLayout();
+                    mainRecyclerView.requestLayout();
                     ActivityCompat.startPostponedEnterTransition(containerActivity);
 
                     return true;
@@ -283,78 +291,62 @@ public class MediaShareList implements Page {
         return view;
     }
 
+    private class ShareRecyclerViewAdapter extends RecyclerView.Adapter<CardItemViewHolder> {
 
-    private class ShareListViewAdapter extends BaseAdapter {
-
-        MediaShareList container;
         Map<String, List<Comment>> commentMap;
 
         private static final int VIEW_ALBUM_CARD_ITEM = 0;
         private static final int VIEW_ONE_MORE_MEDIA_SHARE_CARD_ITEM = 1;
         private static final int VIEW_ONE_MEDIA_SHARE_CARD_ITEM = 2;
 
-        ShareListViewAdapter(MediaShareList container_) {
-            container = container_;
+        ShareRecyclerViewAdapter() {
             commentMap = new HashMap<>();
+
+            setHasStableIds(true);
         }
 
         @Override
-        public int getCount() {
-            if (container.mediaShareList == null) return 0;
-            return container.mediaShareList.size();
-        }
+        public CardItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(containerActivity).inflate(R.layout.share_list_cell, parent, false);
 
-        @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            View view;
-            CardItemViewHolder viewHolder;
+            switch (viewType) {
+                case VIEW_ALBUM_CARD_ITEM:
+                    return new AlbumCardItemViewHolder(view);
 
-            if (convertView == null) {
+                case VIEW_ONE_MEDIA_SHARE_CARD_ITEM:
+                    return new OneMediaShareCardItemViewHolder(view, commentMap);
 
-                view = LayoutInflater.from(container.containerActivity).inflate(R.layout.share_list_cell, parent, false);
+                case VIEW_ONE_MORE_MEDIA_SHARE_CARD_ITEM:
+                    return new OneMoreMediaShareCardItemViewHolder(view);
 
-                int type = getItemViewType(position);
-                switch (type) {
-                    case VIEW_ALBUM_CARD_ITEM:
-                        viewHolder = new AlbumCardItemViewHolder(view);
-                        break;
-                    case VIEW_ONE_MEDIA_SHARE_CARD_ITEM:
-                        viewHolder = new OneMediaShareCardItemViewHolder(view, commentMap);
-                        break;
-                    case VIEW_ONE_MORE_MEDIA_SHARE_CARD_ITEM:
-                        viewHolder = new OneMoreMediaShareCardItemViewHolder(view);
-                        break;
-                    default:
-                        viewHolder = new AlbumCardItemViewHolder(view);
-                }
-
-                view.setTag(viewHolder);
-            } else {
-                view = convertView;
-                viewHolder = (CardItemViewHolder) view.getTag();
             }
+            return null;
+        }
 
-            MediaShare currentItem = (MediaShare) getItem(position);
-            viewHolder.refreshView(currentItem);
+        @Override
+        public void onBindViewHolder(CardItemViewHolder holder, int position) {
 
-            return view;
+            MediaShare mediaShare = mediaShareList.get(position);
+
+            holder.refreshView(mediaShare, position);
+
+        }
+
+        @Override
+        public int getItemCount() {
+
+            if (mediaShareList == null) return 0;
+            return mediaShareList.size();
         }
 
         @Override
         public long getItemId(int position) {
-
             return position;
         }
 
         @Override
-        public Object getItem(int position) {
-            return container.mediaShareList.get(position);
-        }
-
-        @Override
         public int getItemViewType(int position) {
-
-            MediaShare mediaShare = (MediaShare) getItem(position);
+            MediaShare mediaShare = mediaShareList.get(position);
             if (mediaShare.isAlbum()) {
                 return VIEW_ALBUM_CARD_ITEM;
             } else if (mediaShare.getMediaContentsListSize() == 1) {
@@ -364,13 +356,9 @@ public class MediaShareList implements Page {
             }
         }
 
-        @Override
-        public int getViewTypeCount() {
-            return 3;
-        }
     }
 
-    class CardItemViewHolder {
+    class CardItemViewHolder extends RecyclerView.ViewHolder {
 
         MediaShare currentItem;
 
@@ -378,21 +366,35 @@ public class MediaShareList implements Page {
         TextView lbNick;
         TextView lbTime;
         FrameLayout cardItemContentFrameLayout;
+        CardView cardView;
 
         String nickName;
 
         CardItemViewHolder(View view) {
 
+            super(view);
+
             mAvatar = (TextView) view.findViewById(R.id.avatar);
             lbNick = (TextView) view.findViewById(R.id.nick);
             lbTime = (TextView) view.findViewById(R.id.time);
             cardItemContentFrameLayout = (FrameLayout) view.findViewById(R.id.card_item_content_frame_layout);
-
+            cardView = (CardView) view.findViewById(R.id.card_view);
         }
 
-        public void refreshView(MediaShare mediaShare) {
+        public void refreshView(MediaShare mediaShare, int position) {
 
             currentItem = mediaShare;
+
+            RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) cardView.getLayoutParams();
+            int margin = Util.dip2px(containerActivity, 8);
+
+            if (position == 0) {
+                layoutParams.setMargins(0, margin, 0, margin);
+            } else {
+                layoutParams.setMargins(0, 0, 0, margin);
+            }
+            cardView.setLayoutParams(layoutParams);
+
 
             lbTime.setText(Util.formatTime(containerActivity, Long.parseLong(currentItem.getTime())));
 
@@ -436,8 +438,8 @@ public class MediaShareList implements Page {
         }
 
         @Override
-        public void refreshView(MediaShare mediaShare) {
-            super.refreshView(mediaShare);
+        public void refreshView(MediaShare mediaShare, int position) {
+            super.refreshView(mediaShare, position);
 
             refreshViewAttributeWhenIsAlbum();
         }
@@ -505,8 +507,8 @@ public class MediaShareList implements Page {
         }
 
         @Override
-        public void refreshView(MediaShare mediaShare) {
-            super.refreshView(mediaShare);
+        public void refreshView(MediaShare mediaShare, int position) {
+            super.refreshView(mediaShare, position);
 
             imageDigests = mediaShare.getMediaDigestInMediaShareContents();
 
@@ -653,8 +655,8 @@ public class MediaShareList implements Page {
         }
 
         @Override
-        public void refreshView(MediaShare mediaShare) {
-            super.refreshView(mediaShare);
+        public void refreshView(MediaShare mediaShare, int position) {
+            super.refreshView(mediaShare, position);
 
             imageDigests = mediaShare.getMediaDigestInMediaShareContents();
 
@@ -827,7 +829,19 @@ public class MediaShareList implements Page {
 
     public void refreshRemoteComment() {
 
-        for (Map.Entry<String, List<Comment>> entry : LocalCache.RemoteMediaCommentMapKeyIsImageUUID.entrySet()) {
+        refreshComment(LocalCache.RemoteMediaCommentMapKeyIsImageUUID);
+
+    }
+
+    public void refreshLocalComment() {
+
+        refreshComment(LocalCache.LocalMediaCommentMapKeyIsImageUUID);
+
+    }
+
+    private void refreshComment(ConcurrentMap<String, List<Comment>> map) {
+
+        for (Map.Entry<String, List<Comment>> entry : map.entrySet()) {
             List<Comment> comments = new ArrayList<>();
 
             String imageUUID = entry.getKey();
@@ -842,21 +856,6 @@ public class MediaShareList implements Page {
             mAdapter.notifyDataSetChanged();
         }
 
-    }
-
-    public void refreshLocalComment() {
-        for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
-            List<Comment> comments = new ArrayList<>();
-
-            String imageUUID = entry.getKey();
-
-            comments.addAll(entry.getValue());
-
-            mMapKeyIsImageUUIDValueIsComments.put(imageUUID, comments);
-        }
-
-        mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);
-        mAdapter.notifyDataSetChanged();
     }
 }
 

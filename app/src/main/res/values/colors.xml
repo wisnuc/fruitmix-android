@@ -19,6 +19,9 @@
     <color name="content_text">#333333</color>
     <color name="album_time">#666666</color>
     <color name="check_circle_solid_color">#e0e0e0</color>
+
+    <color name="bottom_item_select_color">#8aFFFFFF</color>
+
     <!-- finish add by liang.wu-->
 
 </resources>

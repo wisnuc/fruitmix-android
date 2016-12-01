@@ -5,5 +5,5 @@
     android:interpolator="@android:anim/bounce_interpolator"
     android:propertyName="translationY"
     android:valueFrom="0"
-    android:valueTo="450" />
+    android:valueTo="224" />
 

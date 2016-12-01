@@ -32,7 +32,7 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.download.DownloadState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
-import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
+import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
 import com.winsun.fruitmix.util.FNAS;
@@ -53,7 +53,7 @@ import butterknife.ButterKnife;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link OnFileFragmentInteractionListener} interface
+ * {@link OnFileInteractionListener} interface
  * to handle interaction events.
  * Use the {@link FileDownloadFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -83,7 +83,7 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
 
     private List<String> selectDownloadedItemUUID;
 
-    private OnFileFragmentInteractionListener onFileFragmentInteractionListener;
+    private OnFileInteractionListener onFileInteractionListener;
 
     private FileDownloadManager fileDownloadManager;
 
@@ -98,8 +98,8 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
         // Required empty public constructor
     }
 
-    public void setOnFileFragmentInteractionListener(OnFileFragmentInteractionListener onFileFragmentInteractionListener) {
-        this.onFileFragmentInteractionListener = onFileFragmentInteractionListener;
+    public void setOnFileInteractionListener(OnFileInteractionListener onFileInteractionListener) {
+        this.onFileInteractionListener = onFileInteractionListener;
     }
 
     /**
@@ -109,9 +109,9 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
      * @return A new instance of fragment FileDownloadFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static FileDownloadFragment newInstance(OnFileFragmentInteractionListener onFileFragmentInteractionListener) {
+    public static FileDownloadFragment newInstance(OnFileInteractionListener onFileInteractionListener) {
         FileDownloadFragment fragment = new FileDownloadFragment();
-        fragment.setOnFileFragmentInteractionListener(onFileFragmentInteractionListener);
+        fragment.setOnFileInteractionListener(onFileInteractionListener);
 
         Bundle args = new Bundle();
         fragment.setArguments(args);
@@ -169,6 +169,12 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
         EventBus.getDefault().register(this);
 
         FNAS.retrieveDownloadedFile();
+    }
+
+    public void handleTitle() {
+        onFileInteractionListener.setToolbarTitle(getString(R.string.file));
+        onFileInteractionListener.setNavigationIcon(R.drawable.menu);
+        onFileInteractionListener.setDefaultNavigationOnClickListener();
     }
 
     @Override

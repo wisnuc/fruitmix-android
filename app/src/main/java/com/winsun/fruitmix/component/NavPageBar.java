@@ -37,20 +37,20 @@ public class NavPageBar {
 
         itemMap=new HashMap<String, String>();
         itemMap.put("name", "share");
-        itemMap.put("img", ""+R.drawable.share);
-        itemMap.put("active_img", "" + R.drawable.share_select);
+        itemMap.put("img", ""+R.drawable.ic_share);
+        itemMap.put("active_img", "" + R.drawable.ic_share);
         itemList.add(itemMap);
 
         itemMap=new HashMap<String, String>();
         itemMap.put("name", "photo");
-        itemMap.put("img", ""+R.drawable.photo);
-        itemMap.put("active_img", ""+R.drawable.photo_select);
+        itemMap.put("img", ""+R.drawable.ic_photo);
+        itemMap.put("active_img", ""+R.drawable.ic_photo);
         itemList.add(itemMap);
 
         itemMap=new HashMap<String, String>();
         itemMap.put("name", "album");
-        itemMap.put("img", "" + R.drawable.photo_album);
-        itemMap.put("active_img", "" + R.drawable.photo_album_select);
+        itemMap.put("img", "" + R.drawable.ic_photo_album);
+        itemMap.put("active_img", "" + R.drawable.ic_photo_album);
         itemList.add(itemMap);
 
 

@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +34,7 @@ import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
-import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
+import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
@@ -53,7 +54,7 @@ import butterknife.ButterKnife;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link OnFileFragmentInteractionListener} interface
+ * {@link OnFileInteractionListener} interface
  * to handle interaction events.
  * Use the {@link FileFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -76,14 +77,16 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
     private boolean remoteFileLoaded = false;
 
     private String currentFolderUUID;
+    private String currentFolderName;
 
     private List<String> retrievedFolderUUIDList;
+    private List<String> retrievedFolderNameList;
 
     private boolean selectMode = false;
 
     private List<AbstractRemoteFile> selectedFiles;
 
-    private OnFileFragmentInteractionListener onFileFragmentInteractionListener;
+    private OnFileInteractionListener onFileInteractionListener;
 
     private Dialog dialog;
 
@@ -99,8 +102,8 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         // Required empty public constructor
     }
 
-    public void setOnFileFragmentInteractionListener(OnFileFragmentInteractionListener onFileFragmentInteractionListener) {
-        this.onFileFragmentInteractionListener = onFileFragmentInteractionListener;
+    public void setOnFileInteractionListener(OnFileInteractionListener onFileInteractionListener) {
+        this.onFileInteractionListener = onFileInteractionListener;
     }
 
     /**
@@ -110,9 +113,9 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
      * @return A new instance of fragment FileFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static FileFragment newInstance(OnFileFragmentInteractionListener onFileFragmentInteractionListener) {
+    public static FileFragment newInstance(OnFileInteractionListener onFileInteractionListener) {
         FileFragment fragment = new FileFragment();
-        fragment.setOnFileFragmentInteractionListener(onFileFragmentInteractionListener);
+        fragment.setOnFileInteractionListener(onFileInteractionListener);
 
         Bundle args = new Bundle();
         fragment.setArguments(args);
@@ -126,6 +129,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         abstractRemoteFiles = new ArrayList<>();
 
         retrievedFolderUUIDList = new ArrayList<>();
+        retrievedFolderNameList = new ArrayList<>();
 
         selectedFiles = new ArrayList<>();
 
@@ -159,13 +163,14 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
     public void onResume() {
         super.onResume();
 
-        if (!remoteFileLoaded && !isHidden()) {
-            User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
+        User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
 
+        if (!remoteFileLoaded && !isHidden()) {
             currentFolderUUID = user.getHome();
 
             if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
                 retrievedFolderUUIDList.add(currentFolderUUID);
+                retrievedFolderNameList.add(getString(R.string.file));
             }
 
             FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
@@ -188,6 +193,27 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
         RefWatcher refWatcher = CustomApplication.getRefWatcher(getActivity());
         refWatcher.watch(this);
+    }
+
+    public void handleTitle() {
+
+        if (handleBackPressedOrNot()) {
+
+            onFileInteractionListener.setToolbarTitle(currentFolderName);
+            onFileInteractionListener.setNavigationIcon(R.drawable.ic_back);
+            onFileInteractionListener.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+
+        } else {
+            onFileInteractionListener.setToolbarTitle(getString(R.string.file));
+            onFileInteractionListener.setNavigationIcon(R.drawable.menu);
+            onFileInteractionListener.setDefaultNavigationOnClickListener();
+        }
+
     }
 
     public void handleOperationResult(OperationEvent operationEvent) {
@@ -246,12 +272,17 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
             currentFolderUUID = retrievedFolderUUIDList.get(retrievedFolderUUIDList.size() - 1);
 
+            retrievedFolderNameList.remove(retrievedFolderNameList.size() - 1);
+            currentFolderName = retrievedFolderNameList.get(retrievedFolderUUIDList.size() - 1);
+
             FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
 
         } else {
             selectMode = false;
             refreshSelectMode(selectMode);
         }
+
+        handleTitle();
 
     }
 
@@ -306,7 +337,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
             macroCommand.addCommand(showUnSelectModeViewCommand);
 
-            macroCommand.addCommand(new ChangeToDownloadPageCommand(onFileFragmentInteractionListener));
+            macroCommand.addCommand(new ChangeToDownloadPageCommand(onFileInteractionListener));
 
             BottomMenuItem downloadSelectItem = new BottomMenuItem(getString(R.string.download_select_item), macroCommand);
 
@@ -354,7 +385,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
             abstractRemoteFile.downloadFile();
         }
 
-        onFileFragmentInteractionListener.changeFilePageToFileDownloadFragment();
+        onFileInteractionListener.changeFilePageToFileDownloadFragment();
     }
 
 
@@ -435,6 +466,8 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         ImageView folderIconBg;
         @BindView(R.id.remote_folder_item_layout)
         LinearLayout folderItemLayout;
+        @BindView(R.id.content_layout)
+        RelativeLayout contentLayout;
 
         FolderViewHolder(View itemView) {
             super(itemView);
@@ -444,6 +477,14 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
         @Override
         public void refreshView(int position) {
+
+            if (position == 0) {
+
+                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
+                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), 0, 0);
+                contentLayout.setLayoutParams(layoutParams);
+
+            }
 
             final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
@@ -462,7 +503,13 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
                     retrievedFolderUUIDList.add(currentFolderUUID);
 
+                    currentFolderName = abstractRemoteFile.getName();
+
+                    retrievedFolderNameList.add(currentFolderName);
+
                     abstractRemoteFile.openAbstractRemoteFile(getActivity());
+
+                    handleTitle();
                 }
             });
 
@@ -484,7 +531,8 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         LinearLayout remoteFileItemLayout;
         @BindView(R.id.item_menu)
         ImageView itemMenu;
-
+        @BindView(R.id.content_layout)
+        RelativeLayout contentLayout;
 
         FileViewHolder(View view) {
             super(view);
@@ -494,6 +542,15 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
         @Override
         public void refreshView(int position) {
+
+            if (position == 0) {
+
+                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
+                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), 0, 0);
+                contentLayout.setLayoutParams(layoutParams);
+
+            }
+
             final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
             fileTime.setText(abstractRemoteFile.getTimeDateText());
@@ -536,7 +593,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
                         AbstractCommand downloadFileCommand = new DownloadFileCommand(abstractRemoteFile);
 
                         macroCommand.addCommand(downloadFileCommand);
-                        macroCommand.addCommand(new ChangeToDownloadPageCommand(onFileFragmentInteractionListener));
+                        macroCommand.addCommand(new ChangeToDownloadPageCommand(onFileInteractionListener));
 
                         BottomMenuItem downloadTheItem = new BottomMenuItem(getString(R.string.download_the_item), macroCommand);
 

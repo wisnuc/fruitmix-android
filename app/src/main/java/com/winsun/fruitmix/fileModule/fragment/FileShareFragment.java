@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.leakcanary.RefWatcher;
@@ -17,7 +18,7 @@ import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
-import com.winsun.fruitmix.fileModule.interfaces.OnFileFragmentInteractionListener;
+import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -34,7 +35,7 @@ import butterknife.ButterKnife;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link OnFileFragmentInteractionListener} interface
+ * {@link OnFileInteractionListener} interface
  * to handle interaction events.
  * Use the {@link FileShareFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -56,11 +57,19 @@ public class FileShareFragment extends Fragment {
     private boolean remoteFileShareLoaded = false;
 
     private String currentFolderUUID;
+    private String currentFolderName;
 
     private List<String> retrievedFolderUUIDList;
+    private List<String> retrievedFolderNameList;
+
+    private OnFileInteractionListener onFileInteractionListener;
 
     public FileShareFragment() {
         // Required empty public constructor
+    }
+
+    public void setOnFileInteractionListener(OnFileInteractionListener onFileInteractionListener) {
+        this.onFileInteractionListener = onFileInteractionListener;
     }
 
     /**
@@ -70,8 +79,9 @@ public class FileShareFragment extends Fragment {
      * @return A new instance of fragment FileShareFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static FileShareFragment newInstance() {
+    public static FileShareFragment newInstance(OnFileInteractionListener onFileInteractionListener) {
         FileShareFragment fragment = new FileShareFragment();
+        fragment.setOnFileInteractionListener(onFileInteractionListener);
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -85,6 +95,7 @@ public class FileShareFragment extends Fragment {
         fileShareRecyclerAdapter = new FileShareRecyclerAdapter();
 
         retrievedFolderUUIDList = new ArrayList<>();
+        retrievedFolderNameList = new ArrayList<>();
 
         Log.i(TAG, "onCreate: ");
     }
@@ -115,6 +126,7 @@ public class FileShareFragment extends Fragment {
 
             if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
                 retrievedFolderUUIDList.add(currentFolderUUID);
+                retrievedFolderNameList.add(getString(R.string.file));
             }
 
             FNAS.retrieveRemoteFileShare();
@@ -122,6 +134,25 @@ public class FileShareFragment extends Fragment {
 
         Log.i(TAG, "onResume: ");
 
+    }
+
+    public void handleTitle() {
+        if (handleBackPressedOrNot()) {
+
+            onFileInteractionListener.setToolbarTitle(currentFolderName);
+            onFileInteractionListener.setNavigationIcon(R.drawable.ic_back);
+            onFileInteractionListener.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+
+        } else {
+            onFileInteractionListener.setToolbarTitle(getString(R.string.file));
+            onFileInteractionListener.setNavigationIcon(R.drawable.menu);
+            onFileInteractionListener.setDefaultNavigationOnClickListener();
+        }
     }
 
     @Override
@@ -206,11 +237,16 @@ public class FileShareFragment extends Fragment {
 
         currentFolderUUID = retrievedFolderUUIDList.get(retrievedFolderUUIDList.size() - 1);
 
+        retrievedFolderNameList.remove(retrievedFolderNameList.size() - 1);
+        currentFolderName = retrievedFolderNameList.get(retrievedFolderNameList.size() - 1);
+
         if (currentFolderUUID.equals(FNAS.userUUID)) {
             FNAS.retrieveRemoteFileShare();
         } else {
             FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
         }
+
+        handleTitle();
 
     }
 
@@ -275,6 +311,8 @@ public class FileShareFragment extends Fragment {
         LinearLayout remoteFolderItemLayout;
         @BindView(R.id.item_menu)
         ImageView itemMenu;
+        @BindView(R.id.content_layout)
+        RelativeLayout contentLayout;
 
         FolderShareRecyclerAdapterViewHolder(View itemView) {
             super(itemView);
@@ -284,6 +322,13 @@ public class FileShareFragment extends Fragment {
 
         @Override
         public void refreshView(int position) {
+
+            if (position == 0) {
+
+                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
+                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), 0, 0);
+                contentLayout.setLayoutParams(layoutParams);
+            }
 
             final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
@@ -298,7 +343,12 @@ public class FileShareFragment extends Fragment {
 
                     retrievedFolderUUIDList.add(currentFolderUUID);
 
+                    currentFolderName = abstractRemoteFile.getName();
+                    retrievedFolderNameList.add(currentFolderName);
+
                     abstractRemoteFile.openAbstractRemoteFile(getActivity());
+
+                    handleTitle();
                 }
             });
         }
@@ -317,7 +367,8 @@ public class FileShareFragment extends Fragment {
         LinearLayout remoteFileItemLayout;
         @BindView(R.id.item_menu)
         ImageView itemMenu;
-
+        @BindView(R.id.content_layout)
+        RelativeLayout contentLayout;
 
         FileShareRecyclerAdapterViewHolder(View itemView) {
             super(itemView);
@@ -327,6 +378,14 @@ public class FileShareFragment extends Fragment {
 
         @Override
         public void refreshView(int position) {
+
+            if (position == 0) {
+
+                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
+                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), 0, 0);
+                contentLayout.setLayoutParams(layoutParams);
+
+            }
 
             AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
