@@ -5,11 +5,13 @@
               android:orientation="vertical">
 
     <View
+        android:id="@+id/spacing_layout"
         android:layout_width="match_parent"
         android:layout_height="16dp"
         android:background="@color/white"/>
 
     <View
+        android:id="@+id/spacing_second_layout"
         android:layout_width="match_parent"
         android:layout_height="8dp"
         android:background="#F8F8F8"/>

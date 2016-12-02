@@ -499,12 +499,10 @@ public class NewPhotoList implements Page {
 
     private int findPhotoPositionInRecyclerView(String photoDate, int photoPositionInDateList) {
         int photoDatePosition = 0;
-        if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsValue(photoDate)) {
 
-            for (Map.Entry<Integer, String> entry : mMapKeyIsPhotoPositionValueIsPhotoDate.entrySet()) {
-                if (entry.getValue().equals(photoDate)) {
-                    photoDatePosition = entry.getKey();
-                }
+        for (Map.Entry<Integer, String> entry : mMapKeyIsPhotoPositionValueIsPhotoDate.entrySet()) {
+            if (photoDate.contains(entry.getValue())) {
+                photoDatePosition = entry.getKey();
             }
         }
 
@@ -638,6 +636,12 @@ public class NewPhotoList implements Page {
         @BindView(R.id.photo_title_layout)
         LinearLayout mPhotoTitleLayout;
 
+        @BindView(R.id.spacing_layout)
+        View mSpacingLayout;
+
+        @BindView(R.id.spacing_second_layout)
+        View mSpacingSecondLayout;
+
         PhotoGroupHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
@@ -647,15 +651,13 @@ public class NewPhotoList implements Page {
 
             final String date = mMapKeyIsPhotoPositionValueIsPhotoDate.get(groupPosition);
 
-            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mPhotoTitleLayout.getLayoutParams();
-            int margin = Util.dip2px(containerActivity, 8);
-
             if (groupPosition == 0) {
-                layoutParams.setMargins(0, 0, 0, 0);
+                mSpacingLayout.setVisibility(View.GONE);
+                mSpacingSecondLayout.setVisibility(View.GONE);
             } else {
-                layoutParams.setMargins(0, margin, 0, 0);
+                mSpacingLayout.setVisibility(View.VISIBLE);
+                mSpacingSecondLayout.setVisibility(View.VISIBLE);
             }
-            mPhotoTitleLayout.setLayoutParams(layoutParams);
 
             if (date.equals("1916-01-01")) {
                 mPhotoTitle.setText(containerActivity.getString(R.string.unknown_time_text));
@@ -744,14 +746,10 @@ public class NewPhotoList implements Page {
                 mPhotoIv.setImageUrl(null, mImageLoader);
             }
 
-            GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) view.getLayoutParams();
+            final List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(media.getTitle());
+            final int mediaInListPosition = getPosition(mediaList, media);
 
-            params.height = mItemWidth;
-
-            int normalMargin = Util.dip2px(containerActivity, 2.5f);
-
-            params.setMargins(0, normalMargin, normalMargin, 0);
-            view.setLayoutParams(params);
+            setPhotoItemMargin(mediaInListPosition);
 
             if (mSelectMode) {
                 boolean selected = media.isSelected();
@@ -806,16 +804,11 @@ public class NewPhotoList implements Page {
 
                     } else {
 
-                        int position = 0;
-
-                        List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(media.getTitle());
                         LocalCache.photoSliderList.clear();
                         LocalCache.photoSliderList.addAll(mediaList);
 
-                        position = getPosition(position, mediaList, media);
-
                         Intent intent = new Intent();
-                        intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
+                        intent.putExtra(Util.INITIAL_PHOTO_POSITION, mediaInListPosition);
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
@@ -859,13 +852,32 @@ public class NewPhotoList implements Page {
 
         }
 
+        private void setPhotoItemMargin(int mediaInListPosition) {
+            GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) view.getLayoutParams();
+
+            params.height = mItemWidth;
+
+            int normalMargin = Util.dip2px(containerActivity, 2.5f);
+
+            if ((mediaInListPosition + 1) % mSpanCount == 0) {
+                params.setMargins(normalMargin, normalMargin, normalMargin, 0);
+            } else {
+                params.setMargins(normalMargin, normalMargin, 0, 0);
+            }
+
+            view.setLayoutParams(params);
+        }
+
         private void setPhotoIvLayoutParams(int margin) {
             RelativeLayout.LayoutParams photoParams = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
             photoParams.setMargins(margin, margin, margin, margin);
             mPhotoIv.setLayoutParams(photoParams);
         }
 
-        private int getPosition(int position, List<Media> mediaList, Media media) {
+        private int getPosition(List<Media> mediaList, Media media) {
+
+            int position = 0;
+
             for (int i = 0; i < mediaList.size(); i++) {
                 Media media1 = mediaList.get(i);
 

@@ -37,6 +37,8 @@ public class ModifyAlbumActivity extends AppCompatActivity {
     TextInputLayout mTitleLayout;
     @BindView(R.id.title_edit)
     TextInputEditText tfTitle;
+    @BindView(R.id.desc_textlayout)
+    TextInputLayout mDescLayout;
     @BindView(R.id.desc)
     TextInputEditText tfDesc;
     @BindView(R.id.sPublic)
@@ -67,9 +69,8 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         String mMediaShareUuid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
         mAlbumMap = LocalCache.RemoteMediaShareMapKeyIsUUID.get(mMediaShareUuid);
 
-        tfTitle.setText(mAlbumMap.getTitle());
-
-        tfDesc.setText(mAlbumMap.getDesc());
+        mTitleLayout.getEditText().setText(mAlbumMap.getTitle());
+        mDescLayout.getEditText().setText(mAlbumMap.getDesc());
 
         ckPublic.setChecked(mAlbumMap.getViewersListSize() != 0);
 
@@ -99,18 +100,18 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
                 sPublic = ckPublic.isChecked();
                 sSetMaintainer = ckSetMaintainer.isChecked();
-                title = tfTitle.getText().toString();
-                desc = tfDesc.getText().toString();
+                title = mTitleLayout.getEditText().getText().toString();
+                desc = mDescLayout.getEditText().getText().toString();
 
                 String requestData = createRequestData(sPublic, sSetMaintainer, title, desc);
                 if (requestData == null) finish();
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
-                if(Util.getNetworkState(mContext)){
-                    FNAS.modifyRemoteMediaShare(mContext,mAlbumMap,requestData);
-                }else {
-                    FNAS.modifyLocalMediaShare(mContext,mAlbumMap,requestData);
+                if (Util.getNetworkState(mContext)) {
+                    FNAS.modifyRemoteMediaShare(mContext, mAlbumMap, requestData);
+                } else {
+                    FNAS.modifyLocalMediaShare(mContext, mAlbumMap, requestData);
                 }
             }
         });
@@ -184,7 +185,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
             stringBuilder.append(",");
         }
 
-        requestData = stringBuilder.substring(0,stringBuilder.length() - 1);
+        requestData = stringBuilder.substring(0, stringBuilder.length() - 1);
 
         requestData += "]";
 
@@ -218,7 +219,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(MediaShareOperationEvent operationEvent){
+    public void handleOperationEvent(MediaShareOperationEvent operationEvent) {
 
         if (mDialog != null && mDialog.isShowing())
             mDialog.dismiss();

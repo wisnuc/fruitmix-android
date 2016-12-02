@@ -84,7 +84,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
         mLayoutTitle.setText(getString(R.string.create_album_text));
 
         String mTitle = String.format(getString(R.string.title_hint), new SimpleDateFormat("yyyy-MM-dd", Locale.SIMPLIFIED_CHINESE).format(new Date(System.currentTimeMillis())));
-        mTitleLayout.setHint(mTitle);
+        mTitleLayout.getEditText().setText(mTitle);
 
         ckPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
