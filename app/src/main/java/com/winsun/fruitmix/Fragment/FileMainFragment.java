@@ -18,7 +18,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.leakcanary.RefWatcher;
 import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.UnscrollableViewPager;
@@ -215,9 +214,6 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        RefWatcher refWatcher = CustomApplication.getRefWatcher(getActivity());
-        refWatcher.watch(this);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

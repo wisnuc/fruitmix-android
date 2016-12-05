@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.squareup.leakcanary.RefWatcher;
 import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
@@ -68,8 +67,6 @@ public class ButlerService extends Service {
 
         super.onDestroy();
 
-        RefWatcher refWatcher = CustomApplication.getRefWatcher(this);
-        refWatcher.watch(this);
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING)

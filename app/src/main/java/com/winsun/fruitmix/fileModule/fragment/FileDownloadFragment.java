@@ -17,7 +17,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.leakcanary.RefWatcher;
 import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
@@ -188,8 +187,6 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
     public void onDestroy() {
         super.onDestroy();
 
-        RefWatcher refWatcher = CustomApplication.getRefWatcher(getActivity());
-        refWatcher.watch(this);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

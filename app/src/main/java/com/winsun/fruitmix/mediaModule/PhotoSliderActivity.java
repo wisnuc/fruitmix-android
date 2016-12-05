@@ -69,6 +69,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     private int initialPhotoPosition;
     private int currentPhotoPosition;
 
+    private Map<String, Media> mediaMap;
+
     private boolean sInEdit;
 
     private ImageLoader mImageLoader;
@@ -139,6 +141,12 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         boolean mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
 
         mediaList = new ArrayList<>(LocalCache.photoSliderList);
+
+        mediaMap = new HashMap<>(mediaList.size() * 2);
+        for (Media media : mediaList) {
+            mediaMap.put(getImageUrl(true, media), media);
+            mediaMap.put(getImageUrl(false, media), media);
+        }
 
         transitionMediaNeedShowThumb = getIntent().getBooleanExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, true);
 
@@ -270,7 +278,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         Intent intent = new Intent();
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
         intent.putExtra(Util.CURRENT_PHOTO_POSITION, currentPhotoPosition);
-        intent.putExtra(Util.CURRENT_PHOTO_DATE, lbDate.getText().toString());
+        intent.putExtra(Util.CURRENT_MEDIA_UUID, mediaList.get(currentPhotoPosition).getUuid());
         intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, getIntent().getStringExtra(Util.CURRENT_MEDIASHARE_TIME));
         setResult(RESULT_OK, intent);
 
@@ -314,64 +322,115 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         if (url == null)
             return;
 
-        for (int i = 0; i < mediaList.size(); i++) {
-            final Media media = mediaList.get(i);
+        Media media = mediaMap.get(url);
 
-            final String imageUrl = getImageUrl(isImageThumb(url), media);
+        if (media.isLocal()) {
 
-            if (url.equals(imageUrl)) {
+            if (isCurrentViewPage(currentPhotoPosition) && needTransition) {
+                ActivityCompat.startPostponedEnterTransition(this);
+            }
 
-                if (media.isLocal()) {
+            if (!media.isLoaded()) {
+                media.setLoaded(true);
+            }
 
-                    if (isCurrentViewPage(i) && needTransition) {
-                        ActivityCompat.startPostponedEnterTransition(this);
-                    }
+            if (isCurrentViewPage(currentPhotoPosition) && mDialog != null && mDialog.isShowing())
+                mDialog.dismiss();
 
-                    if (!media.isLoaded()) {
-                        media.setLoaded(true);
-                    }
+        } else {
 
-                    if (isCurrentViewPage(i) && mDialog != null && mDialog.isShowing())
-                        mDialog.dismiss();
+            if (isImageThumb(url)) {
 
+                if (isCurrentViewPage(currentPhotoPosition) && needTransition) {
+                    ActivityCompat.startPostponedEnterTransition(this);
+
+                    startLoadCurrentImageAfterTransition(media);
                 } else {
+                    String imageUUID = media.getUuid();
 
-                    if (isImageThumb(url)) {
-
-                        if (isCurrentViewPage(i) && needTransition) {
-                            ActivityCompat.startPostponedEnterTransition(this);
-
-                            startLoadCurrentImageAfterTransition(media);
-                        } else {
-                            String imageUUID = media.getUuid();
-
-                            startLoadingOriginalPhoto(imageUUID);
-                        }
-
-                    } else {
-
-                        if (!transitionMediaNeedShowThumb && needTransition) {
-                            ActivityCompat.startPostponedEnterTransition(this);
-                            transitionMediaNeedShowThumb = true;
-                        } else {
-                            dismissCurrentImageThumb(media);
-
-                            view.setVisibility(View.VISIBLE);
-                        }
-
-                        if (!media.isLoaded()) {
-                            media.setLoaded(true);
-                        }
-
-                        if (isCurrentViewPage(i) && mDialog != null && mDialog.isShowing())
-                            mDialog.dismiss();
-                    }
-
+                    startLoadingOriginalPhoto(imageUUID);
                 }
 
+            } else {
+
+                if (!transitionMediaNeedShowThumb && needTransition) {
+                    ActivityCompat.startPostponedEnterTransition(this);
+                    transitionMediaNeedShowThumb = true;
+                } else {
+                    dismissCurrentImageThumb(media);
+
+                    view.setVisibility(View.VISIBLE);
+                }
+
+                if (!media.isLoaded()) {
+                    media.setLoaded(true);
+                }
+
+                if (isCurrentViewPage(currentPhotoPosition) && mDialog != null && mDialog.isShowing())
+                    mDialog.dismiss();
             }
 
         }
+
+
+//        for (int i = 0; i < mediaList.size(); i++) {
+//            final Media media = mediaList.get(i);
+//
+//            final String imageUrl = getImageUrl(isImageThumb(url), media);
+//
+//            if (url.equals(imageUrl)) {
+//
+//                if (media.isLocal()) {
+//
+//                    if (isCurrentViewPage(i) && needTransition) {
+//                        ActivityCompat.startPostponedEnterTransition(this);
+//                    }
+//
+//                    if (!media.isLoaded()) {
+//                        media.setLoaded(true);
+//                    }
+//
+//                    if (isCurrentViewPage(i) && mDialog != null && mDialog.isShowing())
+//                        mDialog.dismiss();
+//
+//                } else {
+//
+//                    if (isImageThumb(url)) {
+//
+//                        if (isCurrentViewPage(i) && needTransition) {
+//                            ActivityCompat.startPostponedEnterTransition(this);
+//
+//                            startLoadCurrentImageAfterTransition(media);
+//                        } else {
+//                            String imageUUID = media.getUuid();
+//
+//                            startLoadingOriginalPhoto(imageUUID);
+//                        }
+//
+//                    } else {
+//
+//                        if (!transitionMediaNeedShowThumb && needTransition) {
+//                            ActivityCompat.startPostponedEnterTransition(this);
+//                            transitionMediaNeedShowThumb = true;
+//                        } else {
+//                            dismissCurrentImageThumb(media);
+//
+//                            view.setVisibility(View.VISIBLE);
+//                        }
+//
+//                        if (!media.isLoaded()) {
+//                            media.setLoaded(true);
+//                        }
+//
+//                        if (isCurrentViewPage(i) && mDialog != null && mDialog.isShowing())
+//                            mDialog.dismiss();
+//                    }
+//
+//                }
+//
+//            }
+//
+//        }
 
     }
 

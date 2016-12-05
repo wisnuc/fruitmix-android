@@ -135,7 +135,7 @@ public class Util {
 
     public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
     public static final String CURRENT_PHOTO_POSITION = "current_photo_position";
-    public static final String CURRENT_PHOTO_DATE = "current_photo_date";
+    public static final String CURRENT_MEDIA_UUID = "current_media_uuid";
     public static final String CURRENT_MEDIASHARE_TIME = "current_mediashare_time";
 
     public static final String KEY_MEDIASHARE = "key_mediashare";

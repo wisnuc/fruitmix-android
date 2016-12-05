@@ -13,7 +13,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.squareup.leakcanary.RefWatcher;
 import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
@@ -165,9 +164,6 @@ public class FileShareFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        RefWatcher refWatcher = CustomApplication.getRefWatcher(getActivity());
-        refWatcher.watch(this);
     }
 
     public void handleOperationEvent(OperationEvent operationEvent) {

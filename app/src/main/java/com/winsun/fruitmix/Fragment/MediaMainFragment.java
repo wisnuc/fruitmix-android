@@ -27,9 +27,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.squareup.leakcanary.RefWatcher;
-import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.eventbus.MediaOperationEvent;
@@ -236,9 +233,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         photoList.removePhotoListListener(this);
 
         mContext = null;
-
-        RefWatcher refWatcher = CustomApplication.getRefWatcher(getActivity());
-        refWatcher.watch(this);
     }
 
     @Override

@@ -233,6 +233,7 @@ public class DBUtils {
         contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR_BG_COLOR, user.getDefaultAvatarBgColor());
         contentValues.put(DBHelper.USER_KEY_HOME, user.getHome());
         contentValues.put(DBHelper.USER_KEY_LIBRARY, user.getLibrary());
+        contentValues.put(DBHelper.USER_KEY_IS_ADMIN, user.isAdmin() ? 1 : 0);
 
         return contentValues;
     }

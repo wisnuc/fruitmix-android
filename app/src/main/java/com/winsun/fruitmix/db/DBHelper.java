@@ -52,6 +52,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String USER_KEY_DEFAULT_AVATAR_BG_COLOR = "user_default_avatar_bg_color";
     public static final String USER_KEY_HOME = "home";
     public static final String USER_KEY_LIBRARY = "library";
+    public static final String USER_KEY_IS_ADMIN = "is_admin";
 
     public static final String MEDIA_KEY_ID = "id";
     public static final String MEDIA_KEY_UUID = "media_uuid";
@@ -92,7 +93,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     static final String DOWNLOADED_FILE_TABLE_NAME = "downloaded_file";
 
-    private static final int DB_VERSION = 14;
+    private static final int DB_VERSION = 15;
 
     private static final String CREATE_TABLE = "create table ";
 
@@ -134,7 +135,7 @@ public class DBHelper extends SQLiteOpenHelper {
             + USER_KEY_ID + " integer primary key autoincrement," + USER_KEY_UUID + " text not null,"
             + USER_KEY_USERNAME + " text not null," + USER_KEY_AVATAR + " text not null,"
             + USER_KEY_EMAIL + " text," + USER_KEY_DEFAULT_AVATAR + " text not null," + USER_KEY_DEFAULT_AVATAR_BG_COLOR + " text not null,"
-            + USER_KEY_HOME + " text not null," + USER_KEY_LIBRARY + " text not null)";
+            + USER_KEY_HOME + " text not null," + USER_KEY_LIBRARY + " text not null," + USER_KEY_IS_ADMIN + " integer not null)";
 
     private static final String DATABASE_MEDIA_SHARE_CONTENT_CREATE = " (" + SHARE_CONTENT_KEY_ID + " integer primary key autoincrement,"
             + SHARE_CONTENT_KEY_SHARE_UUID + " text not null," + SHARE_CONTENT_KEY_CREATOR_UUID + " text not null,"

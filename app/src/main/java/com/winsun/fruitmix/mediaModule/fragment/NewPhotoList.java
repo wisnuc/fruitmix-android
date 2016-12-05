@@ -3,6 +3,7 @@ package com.winsun.fruitmix.mediaModule.fragment;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -28,7 +29,6 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
-import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
@@ -444,14 +444,19 @@ public class NewPhotoList implements Page {
 
             int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
             int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
-            String currentPhotoDate = reenterState.getString(Util.CURRENT_PHOTO_DATE);
+            String currentMediaUUID = reenterState.getString(Util.CURRENT_MEDIA_UUID);
 
             if (initialPhotoPosition != currentPhotoPosition) {
 
                 names.clear();
                 sharedElements.clear();
 
-                Media media = mMapKeyIsPhotoPositionValueIsPhoto.get(findPhotoPositionInRecyclerView(currentPhotoDate, currentPhotoPosition));
+                Media media = null;
+
+                for (Media media1 : mMapKeyIsPhotoPositionValueIsPhoto.values()) {
+                    if (media1.getUuid().equals(currentMediaUUID))
+                        media = media1;
+                }
 
                 if (media == null) return;
 
@@ -471,13 +476,18 @@ public class NewPhotoList implements Page {
         reenterState = new Bundle(data.getExtras());
         int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
         int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
-        String currentPhotoDate = reenterState.getString(Util.CURRENT_PHOTO_DATE);
-
+        String currentMediaUUID = reenterState.getString(Util.CURRENT_MEDIA_UUID);
 
         if (initialPhotoPosition != currentPhotoPosition) {
 
-            mRecyclerView.smoothScrollToPosition(findPhotoPositionInRecyclerView(currentPhotoDate, currentPhotoPosition));
+            int scrollToPosition = 0;
 
+            for (Map.Entry<Integer, Media> entry : mMapKeyIsPhotoPositionValueIsPhoto.entrySet()) {
+                if (entry.getValue().getUuid().equals(currentMediaUUID))
+                    scrollToPosition = entry.getKey();
+            }
+
+            mRecyclerView.smoothScrollToPosition(scrollToPosition);
 
 //            ActivityCompat.startPostponedEnterTransition(containerActivity);
 
@@ -731,13 +741,13 @@ public class NewPhotoList implements Page {
 
         public void refreshView(int position) {
 
-            final Media media = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
+            final Media currentMedia = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
 
             mImageLoader.setTag(position);
 
             if (!mIsFling) {
-                String imageUrl = media.getImageThumbUrl(containerActivity);
-                mImageLoader.setShouldCache(!media.isLocal());
+                String imageUrl = currentMedia.getImageThumbUrl(containerActivity);
+                mImageLoader.setShouldCache(!currentMedia.isLocal());
                 mPhotoIv.setTag(imageUrl);
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(imageUrl, mImageLoader);
@@ -746,13 +756,13 @@ public class NewPhotoList implements Page {
                 mPhotoIv.setImageUrl(null, mImageLoader);
             }
 
-            final List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(media.getTitle());
-            final int mediaInListPosition = getPosition(mediaList, media);
+            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getTitle());
+            int mediaInListPosition = getPosition(mediaList, currentMedia);
 
             setPhotoItemMargin(mediaInListPosition);
 
             if (mSelectMode) {
-                boolean selected = media.isSelected();
+                boolean selected = currentMedia.isSelected();
                 if (selected) {
                     int selectMargin = Util.dip2px(containerActivity, 20);
                     setPhotoIvLayoutParams(selectMargin);
@@ -763,7 +773,7 @@ public class NewPhotoList implements Page {
                 }
             } else {
 
-                media.setSelected(false);
+                currentMedia.setSelected(false);
 
                 setPhotoIvLayoutParams(0);
                 mPhotoSelectedIv.setVisibility(View.GONE);
@@ -774,15 +784,15 @@ public class NewPhotoList implements Page {
                 public void onClick(View v) {
                     if (mSelectMode) {
 
-                        if (!media.isSharing()) {
+                        if (!currentMedia.isSharing()) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.photo_not_sharing), Toast.LENGTH_SHORT).show();
                             return;
-                        } else if (alreadySelectedImageUUIDArrayList != null && alreadySelectedImageUUIDArrayList.contains(media.getUuid())) {
+                        } else if (alreadySelectedImageUUIDArrayList != null && alreadySelectedImageUUIDArrayList.contains(currentMedia.getUuid())) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
                             return;
                         }
 
-                        boolean selected = media.isSelected();
+                        boolean selected = currentMedia.isSelected();
 
                         if (selected) {
                             int selectMargin = Util.dip2px(containerActivity, 20);
@@ -793,7 +803,7 @@ public class NewPhotoList implements Page {
                             mPhotoSelectedIv.setVisibility(View.GONE);
                         }
 
-                        media.setSelected(!selected);
+                        currentMedia.setSelected(!selected);
                         mPhotoRecycleAdapter.notifyDataSetChanged();
 
                         calcSelectedPhoto();
@@ -805,18 +815,33 @@ public class NewPhotoList implements Page {
                     } else {
 
                         LocalCache.photoSliderList.clear();
-                        LocalCache.photoSliderList.addAll(mediaList);
+
+                        int initialPhotoPosition = 0;
+                        int i = 0;
+
+                        // go to PhotoSliderActivity may be a little slow,continue check it,and add android-gif-drawable
+
+                        for (Media media : mMapKeyIsPhotoPositionValueIsPhoto.values()) {
+
+                            if (media.getUuid().equals(currentMedia.getUuid())) {
+                                initialPhotoPosition = i;
+                            } else {
+                                i++;
+                            }
+
+                            LocalCache.photoSliderList.add(media);
+                        }
 
                         Intent intent = new Intent();
-                        intent.putExtra(Util.INITIAL_PHOTO_POSITION, mediaInListPosition);
+                        intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
                         if (mPhotoIv.isLoaded()) {
 
-                            ViewCompat.setTransitionName(mPhotoIv, media.getUuid());
+                            ViewCompat.setTransitionName(mPhotoIv, currentMedia.getUuid());
 
-                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, mPhotoIv, media.getUuid());
+                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, mPhotoIv, currentMedia.getUuid());
 
                             containerActivity.startActivity(intent, options.toBundle());
                         } else {
@@ -829,7 +854,7 @@ public class NewPhotoList implements Page {
 
                     }
 
-                    Log.i(TAG, "image digest:" + media.getUuid());
+                    Log.i(TAG, "image digest:" + currentMedia.getUuid());
                 }
             });
 
@@ -837,7 +862,7 @@ public class NewPhotoList implements Page {
                 @Override
                 public boolean onLongClick(View v) {
 
-                    media.setSelected(true);
+                    currentMedia.setSelected(true);
                     mPhotoRecycleAdapter.notifyDataSetChanged();
 
                     calcSelectedPhoto();
