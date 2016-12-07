@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.eventbus.MediaOperationEvent;
@@ -203,12 +204,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         if (isHidden()) return;
 
-        if (viewPager.getCurrentItem() == PAGE_PHOTO && !mLocalMediaInCameraLoaded) {
-            retrieveLocalMediaInCamera();
-
-            mLocalMediaInCameraLoaded = true;
-        }
-
         if (!onResume) {
             FNAS.retrieveLocalMediaMap(mContext);
 //            FNAS.retrieveLocalMediaCommentMap(mContext);
@@ -351,7 +346,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 mRemoteMediaLoaded = true;
 
-                pageList.get(PAGE_PHOTO).refreshView();
+                NewPhotoList newPhotoList = (NewPhotoList) pageList.get(PAGE_PHOTO);
+                newPhotoList.refreshView();
+                newPhotoList.fillLocalCachePhotoData();
 
                 if (!mRemoteMediaShareLoaded) {
                     FNAS.retrieveRemoteMediaShare(mContext);
@@ -468,7 +465,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             Log.i(TAG, "new local media in camera loaded");
 
-            pageList.get(PAGE_PHOTO).refreshView();
+            NewPhotoList newPhotoList = (NewPhotoList) pageList.get(PAGE_PHOTO);
+            newPhotoList.refreshView();
+            newPhotoList.fillLocalCachePhotoData();
         }
 
         FNAS.startUploadAllLocalPhoto(mContext);
@@ -477,7 +476,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private void handleLocalPhotoUploadStateChanged() {
         Log.i(TAG, "local photo upload state changed");
 
-        pageList.get(PAGE_PHOTO).refreshView();
+        NewPhotoList newPhotoList = (NewPhotoList) pageList.get(PAGE_PHOTO);
+        newPhotoList.refreshView();
+
     }
 
     private void handleLocalCommentDeleted(OperationEvent operationEvent) {

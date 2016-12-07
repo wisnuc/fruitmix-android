@@ -31,6 +31,7 @@ public class Media implements Parcelable {
     private boolean uploaded;
     private boolean sharing;
     private int orientationNumber;
+    private String type;
 
     public Media() {
         orientationNumber = 1;
@@ -38,6 +39,7 @@ public class Media implements Parcelable {
         width = "200";
         height = "200";
         thumb = "";
+        type = "JPEG";
     }
 
     protected Media(Parcel in) {
@@ -53,6 +55,7 @@ public class Media implements Parcelable {
         belongingMediaShareUUID = in.readString();
         uploaded = in.readByte() != 0;
         orientationNumber = in.readInt();
+        type = in.readString();
     }
 
     @Override
@@ -69,6 +72,7 @@ public class Media implements Parcelable {
         dest.writeString(belongingMediaShareUUID);
         dest.writeByte((byte) (uploaded ? 1 : 0));
         dest.writeInt(orientationNumber);
+        dest.writeString(type);
     }
 
     @Override
@@ -196,6 +200,14 @@ public class Media implements Parcelable {
         this.orientationNumber = orientationNumber;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public synchronized boolean uploadIfNotDone(Context context) {
 
         DBUtils dbUtils = DBUtils.getInstance(context);
@@ -269,6 +281,7 @@ public class Media implements Parcelable {
         media.setUploaded(isUploaded());
         media.setSharing(isSharing());
         media.setOrientationNumber(getOrientationNumber());
+        media.setType(getType());
 
         return media;
     }

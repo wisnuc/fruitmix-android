@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -201,7 +200,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
-    private MediaShare generateMediaShare(boolean isPublic, boolean otherMaintianer, String title, String desc, String[] digests) {
+    private MediaShare generateMediaShare(boolean isPublic, boolean otherMaintainer, String title, String desc, String[] digests) {
 
         MediaShare mediaShare = new MediaShare();
         mediaShare.setUuid(Util.createLocalUUid());
@@ -230,7 +229,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
             }
         } else mediaShare.clearViewers();
 
-        if (otherMaintianer) {
+        if (otherMaintainer) {
             for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
                 mediaShare.addMaintainer(userUUID);
             }

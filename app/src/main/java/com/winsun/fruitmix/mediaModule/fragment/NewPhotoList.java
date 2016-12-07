@@ -3,7 +3,6 @@ package com.winsun.fruitmix.mediaModule.fragment;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -359,6 +358,29 @@ public class NewPhotoList implements Page {
 
         calcPhotoPositionNumber();
 
+        // go to PhotoSliderActivity may be a little slow,continue check it,and add android-gif-drawable
+
+    }
+
+    public void fillLocalCachePhotoData() {
+        fillLocalCachePhotoList();
+
+        fillLocalCachePhotoMap();
+    }
+
+    private void fillLocalCachePhotoMap() {
+        LocalCache.photoSliderMap.clear();
+        for (Media media : LocalCache.photoSliderList) {
+            LocalCache.photoSliderMap.put(media.getImageThumbUrl(containerActivity), media);
+            LocalCache.photoSliderMap.put(media.getImageOriginalUrl(containerActivity), media);
+        }
+    }
+
+    private void fillLocalCachePhotoList() {
+        LocalCache.photoSliderList.clear();
+        for (Media media : mMapKeyIsPhotoPositionValueIsPhoto.values()) {
+            LocalCache.photoSliderList.add(media);
+        }
     }
 
     private void calcPhotoPositionNumber() {
@@ -505,18 +527,6 @@ public class NewPhotoList implements Page {
             });
         }
 
-    }
-
-    private int findPhotoPositionInRecyclerView(String photoDate, int photoPositionInDateList) {
-        int photoDatePosition = 0;
-
-        for (Map.Entry<Integer, String> entry : mMapKeyIsPhotoPositionValueIsPhotoDate.entrySet()) {
-            if (photoDate.contains(entry.getValue())) {
-                photoDatePosition = entry.getKey();
-            }
-        }
-
-        return photoDatePosition + 1 + photoPositionInDateList;
     }
 
     private String findPhotoTag(Media media) {
@@ -814,22 +824,15 @@ public class NewPhotoList implements Page {
 
                     } else {
 
-                        LocalCache.photoSliderList.clear();
+                        int initialPhotoPosition;
 
-                        int initialPhotoPosition = 0;
-                        int i = 0;
+                        for (initialPhotoPosition = 0; initialPhotoPosition < LocalCache.photoSliderList.size(); initialPhotoPosition++) {
 
-                        // go to PhotoSliderActivity may be a little slow,continue check it,and add android-gif-drawable
+                            Media media = LocalCache.photoSliderList.get(initialPhotoPosition);
 
-                        for (Media media : mMapKeyIsPhotoPositionValueIsPhoto.values()) {
+                            if (media.getUuid().equals(currentMedia.getUuid()))
+                                break;
 
-                            if (media.getUuid().equals(currentMedia.getUuid())) {
-                                initialPhotoPosition = i;
-                            } else {
-                                i++;
-                            }
-
-                            LocalCache.photoSliderList.add(media);
                         }
 
                         Intent intent = new Intent();

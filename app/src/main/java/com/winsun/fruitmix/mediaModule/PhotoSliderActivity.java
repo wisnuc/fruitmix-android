@@ -29,7 +29,9 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.IImageLoadListener;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.component.TouchNetworkImageView;
+import com.winsun.fruitmix.component.GifTouchNetworkImageView;
+import com.winsun.fruitmix.gif.GifLoader;
+import com.winsun.fruitmix.gif.GifLruCache;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.CustomTransitionListener;
@@ -37,7 +39,6 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     private boolean sInEdit;
 
     private ImageLoader mImageLoader;
+
+    private GifLoader mGifLoader;
 
     private Context mContext;
 
@@ -134,19 +137,15 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         showDialog();
 
-        initImageLoader();
+        initImageLoaderAndGifLoader();
 
         initialPhotoPosition = getIntent().getIntExtra(Util.INITIAL_PHOTO_POSITION, 0);
 
         boolean mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
 
-        mediaList = new ArrayList<>(LocalCache.photoSliderList);
+        mediaList = LocalCache.photoSliderList;
 
-        mediaMap = new HashMap<>(mediaList.size() * 2);
-        for (Media media : mediaList) {
-            mediaMap.put(getImageUrl(true, media), media);
-            mediaMap.put(getImageUrl(false, media), media);
-        }
+        mediaMap = LocalCache.photoSliderMap;
 
         transitionMediaNeedShowThumb = getIntent().getBooleanExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, true);
 
@@ -178,7 +177,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     private void initViewPager() {
         MyAdapter myAdapter = new MyAdapter();
         mViewPager.setAdapter(myAdapter);
-        mViewPager.setCurrentItem(initialPhotoPosition, false);
+        mViewPager.setCurrentItem(initialPhotoPosition);
         mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 
             @Override
@@ -249,13 +248,16 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         }
     }
 
-    private void initImageLoader() {
+    private void initImageLoaderAndGifLoader() {
         RequestQueue mRequestQueue = RequestQueueInstance.getInstance(this).getRequestQueue();
         mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
         Map<String, String> headers = new HashMap<>();
         headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
+
+        mGifLoader = new GifLoader(mRequestQueue, GifLruCache.instance());
+        mGifLoader.setHeaders(headers);
     }
 
     @Override
@@ -348,7 +350,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 } else {
                     String imageUUID = media.getUuid();
 
-                    startLoadingOriginalPhoto(imageUUID);
+                    startLoadingOriginalPhoto(imageUUID, media.getType());
                 }
 
             } else {
@@ -449,7 +451,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 public void onTransitionEnd(Transition transition) {
                     super.onTransitionEnd(transition);
 
-                    startLoadingOriginalPhoto(media.getUuid());
+                    startLoadingOriginalPhoto(media.getUuid(), media.getType());
 
                     showDialog();
                 }
@@ -459,7 +461,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
     private void dismissCurrentImageThumb(Media media) {
         String thumbImageUrl = media.getImageThumbUrl(mContext);
-        final TouchNetworkImageView defaultMainPic = (TouchNetworkImageView) mViewPager.findViewWithTag(thumbImageUrl);
+        final GifTouchNetworkImageView defaultMainPic = (GifTouchNetworkImageView) mViewPager.findViewWithTag(thumbImageUrl);
         defaultMainPic.setVisibility(View.INVISIBLE);
     }
 
@@ -487,17 +489,22 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         }
     }
 
-    private void startLoadingOriginalPhoto(final String imageUUID) {
+    private void startLoadingOriginalPhoto(final String imageUUID, String mediaType) {
 
         final String remoteUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + imageUUID);
 
-        final TouchNetworkImageView mainPic = (TouchNetworkImageView) mViewPager.findViewWithTag(remoteUrl);
+        final GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) mViewPager.findViewWithTag(remoteUrl);
 
         ViewCompat.setTransitionName(mainPic, imageUUID);
 
         mImageLoader.setShouldCache(true);
 
-        mainPic.setImageUrl(remoteUrl, mImageLoader);
+        if (mediaType.equalsIgnoreCase("gif")) {
+            mainPic.setGifUrl(remoteUrl, mGifLoader);
+        } else {
+            mainPic.setImageUrl(remoteUrl, mImageLoader);
+        }
+
     }
 
     private class MyAdapter extends PagerAdapter {
@@ -514,9 +521,9 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             view = LayoutInflater.from(mContext).inflate(R.layout.photo_slider_cell, null);
 
-            TouchNetworkImageView defaultMainPic = (TouchNetworkImageView) view.findViewById(R.id.default_main_pic);
+            GifTouchNetworkImageView defaultMainPic = (GifTouchNetworkImageView) view.findViewById(R.id.default_main_pic);
 
-            final TouchNetworkImageView mainPic = (TouchNetworkImageView) view.findViewById(R.id.mainPic);
+            final GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view.findViewById(R.id.mainPic);
 
             if (mediaList.size() > position && position > -1) {
 
@@ -551,7 +558,13 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                     defaultMainPic.setVisibility(View.INVISIBLE);
                     mainPic.setVisibility(View.VISIBLE);
                     ViewCompat.setTransitionName(mainPic, media.getUuid());
-                    mainPic.setImageUrl(originalImageUrl, mImageLoader);
+
+                    if (originalImageUrl.endsWith(".gif")) {
+                        mainPic.setGifUrl(originalImageUrl, mGifLoader);
+                    } else {
+                        mainPic.setImageUrl(originalImageUrl, mImageLoader);
+                    }
+
                 }
 
                 mainPic.setOnTouchListener(new View.OnTouchListener() {
@@ -603,7 +616,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         }
 
-        private void setDefaultMainPicAndMainPicScreenHeight(TouchNetworkImageView defaultMainPic, TouchNetworkImageView mainPic, Media media) {
+        private void setDefaultMainPicAndMainPicScreenHeight(GifTouchNetworkImageView defaultMainPic, GifTouchNetworkImageView mainPic, Media media) {
 
             int mediaWidth = Integer.parseInt(media.getWidth());
             int mediaHeight = Integer.parseInt(media.getHeight());
@@ -655,10 +668,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
 
-            TouchNetworkImageView defaultMainPic = (TouchNetworkImageView) ((View) object).findViewById(R.id.default_main_pic);
+            GifTouchNetworkImageView defaultMainPic = (GifTouchNetworkImageView) ((View) object).findViewById(R.id.default_main_pic);
             defaultMainPic.unregisterImageLoadListener();
 
-            TouchNetworkImageView mainPic = (TouchNetworkImageView) ((View) object).findViewById(R.id.mainPic);
+            GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) ((View) object).findViewById(R.id.mainPic);
             mainPic.unregisterImageLoadListener();
 
             container.removeView((View) object);

@@ -61,6 +61,8 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
             media.setOrientationNumber(orientationNumber);
             media.setLocal(false);
 
+            media.setType(itemRaw.optString("type"));
+
             medias.add(media);
 
         }

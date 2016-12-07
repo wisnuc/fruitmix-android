@@ -28,6 +28,7 @@ import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,7 @@ public class LocalCache {
     public static String DeviceID = null;
 
     public static List<Media> photoSliderList = null;
+    public static Map<String, Media> photoSliderMap = null;
 
     public static boolean DeleteFile(File file) {
         File[] files;
@@ -110,6 +112,7 @@ public class LocalCache {
         RemoteFileShareList = new ArrayList<>();
 
         photoSliderList = new ArrayList<>();
+        photoSliderMap = new HashMap<>();
 
         return true;
     }
@@ -427,7 +430,6 @@ public class LocalCache {
 
         cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, null, null, null);
 
-
         imageList = new ArrayList<Map<String, String>>();
         if (cursor == null || !cursor.moveToFirst()) return imageList;
 
@@ -450,8 +452,77 @@ public class LocalCache {
 
         cursor.close();
 
+        imageList.addAll(getAllLocalMedia());
+
         return imageList;
     }
+
+    private static List<Map<String, String>> getAllLocalMedia() {
+
+        if (!FileUtil.checkExternalStorageState()) {
+            return Collections.emptyList();
+        }
+
+        File file = new File(FileUtil.getExternalStorageDirectoryPath());
+
+        SimpleDateFormat df;
+
+        df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        checkFile(file, df);
+
+        return fileList;
+    }
+
+
+    private static List<Map<String, String>> fileList = new ArrayList<>();
+
+    private static void checkFile(File file, SimpleDateFormat format) {
+
+        if (file.isDirectory()) {
+
+            File[] files = file.listFiles();
+
+            if (files != null) {
+
+                for (File f : files) {
+
+                    checkFile(f, format);
+
+                }
+
+            }
+
+        } else if (file.isFile()) {
+
+            int dot = file.getName().lastIndexOf(".");
+
+            if (dot > -1 && dot < file.getName().length()) {
+
+                String extriName = file.getName().substring(dot, file.getName().length());
+
+                if (extriName.equals(".gif")) {
+
+                    Map<String, String> map = new HashMap<>();
+
+                    map.put("thumb", file.getAbsolutePath());
+                    map.put("width", "200");
+                    map.put("height", "200");
+
+                    Calendar date = Calendar.getInstance();
+                    date.setTimeInMillis(file.lastModified());
+
+                    map.put("lastModified", format.format(date.getTime()));
+
+                    fileList.add(map);
+                }
+
+            }
+
+        }
+
+    }
+
 
     public static String GetGlobalData(Context context, String name) {
         SharedPreferences sp;

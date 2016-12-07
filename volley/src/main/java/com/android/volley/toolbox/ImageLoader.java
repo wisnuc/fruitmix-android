@@ -324,7 +324,7 @@ public class ImageLoader {
         mTag = tag;
     }
 
-    public void setShouldCache(boolean shouldCache){
+    public void setShouldCache(boolean shouldCache) {
         mShouldCache = shouldCache;
     }
 

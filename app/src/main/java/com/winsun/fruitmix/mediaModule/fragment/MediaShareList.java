@@ -577,8 +577,9 @@ public class MediaShareList implements Page {
                 public void onClick(View v) {
                     List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
 
-                    LocalCache.photoSliderList.clear();
-                    LocalCache.photoSliderList.addAll(imageList);
+                    fillLocalCachePhotoList(imageList);
+
+                    fillLocalCachePhotoMap();
 
                     Intent intent = new Intent();
                     intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
@@ -611,6 +612,14 @@ public class MediaShareList implements Page {
             ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
 
             containerActivity.startActivity(intent, options.toBundle());
+        }
+    }
+
+    private void fillLocalCachePhotoMap() {
+        LocalCache.photoSliderMap.clear();
+        for (Media media : LocalCache.photoSliderList) {
+            LocalCache.photoSliderMap.put(media.getImageThumbUrl(containerActivity), media);
+            LocalCache.photoSliderMap.put(media.getImageOriginalUrl(containerActivity), media);
         }
     }
 
@@ -763,8 +772,9 @@ public class MediaShareList implements Page {
 
                         List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
 
-                        LocalCache.photoSliderList.clear();
-                        LocalCache.photoSliderList.addAll(imageList);
+                        fillLocalCachePhotoList(imageList);
+
+                        fillLocalCachePhotoMap();
 
                         Intent intent = new Intent();
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, mItemPosition);
@@ -785,6 +795,11 @@ public class MediaShareList implements Page {
                 });
             }
         }
+    }
+
+    private void fillLocalCachePhotoList(List<Media> imageList) {
+        LocalCache.photoSliderList.clear();
+        LocalCache.photoSliderList.addAll(imageList);
     }
 
     private List<Media> getImgList(List<String> imageDigests) {

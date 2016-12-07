@@ -135,6 +135,26 @@ public class MoreMediaActivity extends AppCompatActivity {
             mPhotos.add(picItem);
         }
 
+        fillLocalCachePhotoData();
+    }
+
+    private void fillLocalCachePhotoData() {
+        fillLocalCachePhotoList();
+
+        fillLocalCachePhotoMap();
+    }
+
+    private void fillLocalCachePhotoList() {
+        LocalCache.photoSliderList.clear();
+        LocalCache.photoSliderList.addAll(mPhotos);
+    }
+
+    private void fillLocalCachePhotoMap() {
+        LocalCache.photoSliderMap.clear();
+        for (Media media : LocalCache.photoSliderList) {
+            LocalCache.photoSliderMap.put(media.getImageThumbUrl(mContext), media);
+            LocalCache.photoSliderMap.put(media.getImageOriginalUrl(mContext), media);
+        }
     }
 
     class MorePhotoViewHolder extends RecyclerView.ViewHolder {

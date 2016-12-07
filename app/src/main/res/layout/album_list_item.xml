@@ -52,7 +52,7 @@
         <FrameLayout
             android:id="@+id/mainPic_layout"
             android:layout_width="150dp"
-            android:layout_height="match_parent"
+            android:layout_height="120dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginRight="8dp">

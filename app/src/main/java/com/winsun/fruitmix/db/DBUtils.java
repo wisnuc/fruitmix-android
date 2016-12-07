@@ -293,6 +293,7 @@ public class DBUtils {
         contentValues.put(DBHelper.MEDIA_KEY_UPLOADED, media.isUploaded() ? 1 : 0);
         contentValues.put(DBHelper.MEDIA_KEY_SHARING, media.isSharing() ? 1 : 0);
         contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER, media.getOrientationNumber());
+        contentValues.put(DBHelper.MEDIA_KEY_TYPE,media.getType());
 
         return contentValues;
     }
@@ -357,8 +358,9 @@ public class DBUtils {
                 DBHelper.MEDIA_KEY_BELONGING_MEDIASHARE_UUID + "," +
                 DBHelper.MEDIA_KEY_UPLOADED + "," +
                 DBHelper.MEDIA_KEY_SHARING + "," +
-                DBHelper.MEDIA_KEY_ORIENTATION_NUMBER + ")" +
-                "values(?,?,?,?,?,?,?,?,?,?,?)";
+                DBHelper.MEDIA_KEY_ORIENTATION_NUMBER + "," +
+                DBHelper.MEDIA_KEY_TYPE + ")" +
+                "values(?,?,?,?,?,?,?,?,?,?,?,?)";
     }
 
     public long insertLocalMedia(Media media) {

@@ -17,13 +17,13 @@ package com.android.volley.toolbox;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 
-import com.android.volley.Network;
 import com.android.volley.VolleyError;
 import com.android.volley.orientation.OrientationOperation;
 import com.android.volley.orientation.OrientationOperationFactory;
@@ -61,6 +61,9 @@ public class NetworkImageView extends ImageView {
     private int orientationNumber;
 
     private boolean loaded = false;
+
+    private int mMaxRetryNum = 3;
+    private int mCurrentRetryNum = 0;
 
     /**
      * Current ImageContainer. (either in-flight or finished)
@@ -196,22 +199,22 @@ public class NetworkImageView extends ImageView {
         ImageContainer newContainer = mImageLoader.get(mUrl,
                 new ImageListener() {
                     @Override
-                    public void onErrorResponse(VolleyError error) {
+                    public void onErrorResponse(final VolleyError error) {
                         if (mErrorImageId != 0) {
                             setImageResource(mErrorImageId);
                         }
 
-                        setLoaded(true);
+                        if (error.networkResponse.statusCode == 500 && mCurrentRetryNum < mMaxRetryNum) {
 
-                        post(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                if (mImageLoadListener != null) {
-                                    mImageLoadListener.onImageLoadFinish(mUrl, NetworkImageView.this);
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mImageContainer = null;
+                                    loadImageIfNecessary(false);
+                                    mCurrentRetryNum++;
                                 }
-                            }
-                        });
+                            }, 3000);
+                        }
                     }
 
                     @Override
@@ -234,10 +237,10 @@ public class NetworkImageView extends ImageView {
 
                             Bitmap bitmap;
 
-                            if(orientationNumber >= 1 && orientationNumber <= 8){
+                            if (orientationNumber >= 1 && orientationNumber <= 8) {
                                 OrientationOperation orientationOperation = OrientationOperationFactory.createOrientationOperation(orientationNumber);
                                 bitmap = orientationOperation.handleOrientationOperate(response.getBitmap());
-                            }else {
+                            } else {
                                 bitmap = response.getBitmap();
                             }
 
@@ -288,6 +291,8 @@ public class NetworkImageView extends ImageView {
             setImageBitmap(null);
             // also clear out the container so we can reload the image if necessary.
             mImageContainer = null;
+
+            mCurrentRetryNum = 0;
         }
         super.onDetachedFromWindow();
     }

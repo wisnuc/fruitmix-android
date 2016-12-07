@@ -142,8 +142,6 @@ public class BasicNetwork implements Network {
 
                 if (statusCode < 200 || statusCode > 299) {
                     throw new IOException();
-                } else if (statusCode == 202) {
-                    attemptRetryOnException("network", request, new TimeoutError());
                 }
                 return new NetworkResponse(statusCode, responseContents, responseHeaders, false,
                         SystemClock.elapsedRealtime() - requestStart);

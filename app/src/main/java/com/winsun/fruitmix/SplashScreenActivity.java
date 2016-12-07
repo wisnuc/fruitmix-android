@@ -63,7 +63,7 @@ public class SplashScreenActivity extends Activity {
 
 
         CustomHandler mHandler = new CustomHandler(this);
-        mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
+        mHandler.sendEmptyMessage(WELCOME);
     }
 
     @Override
@@ -131,7 +131,7 @@ public class SplashScreenActivity extends Activity {
                 break;
             default:
                 Util.loginState = false;
-                LocalCache.DeviceID = LocalCache.GetGlobalData(this,Util.DEVICE_ID_MAP_NAME);
+                LocalCache.DeviceID = LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME);
                 Toast.makeText(SplashScreenActivity.this, result.getResultMessage(this), Toast.LENGTH_SHORT).show();
                 break;
         }
@@ -161,7 +161,7 @@ public class SplashScreenActivity extends Activity {
 
                 FNAS.JWT = mToken;
 
-                LocalCache.DeviceID = LocalCache.GetGlobalData(this,Util.DEVICE_ID_MAP_NAME);
+                LocalCache.DeviceID = LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME);
 
                 Toast.makeText(SplashScreenActivity.this, result.getResultMessage(this), Toast.LENGTH_SHORT).show();
 

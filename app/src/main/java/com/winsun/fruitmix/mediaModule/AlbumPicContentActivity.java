@@ -322,12 +322,30 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             mediaList.add(picItem);
 
         }
+
+        fillLocalCachePhotoData();
+    }
+
+    private void fillLocalCachePhotoData() {
+        fillLocalCachePhotoList();
+
+        fillLocalCachePhotoMap();
+    }
+
+    private void fillLocalCachePhotoList() {
+        LocalCache.photoSliderList.clear();
+        LocalCache.photoSliderList.addAll(mediaList);
+    }
+
+    private void fillLocalCachePhotoMap() {
+        LocalCache.photoSliderMap.clear();
+        for (Media media : LocalCache.photoSliderList) {
+            LocalCache.photoSliderMap.put(media.getImageThumbUrl(mContext), media);
+            LocalCache.photoSliderMap.put(media.getImageOriginalUrl(mContext), media);
+        }
     }
 
     public void showPhotoSlider(int position, View sharedElement, String sharedElementName) {
-
-        LocalCache.photoSliderList.clear();
-        LocalCache.photoSliderList.addAll(mediaList);
 
         Intent intent = new Intent();
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
