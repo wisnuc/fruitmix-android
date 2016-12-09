@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_create_new_equipment"
@@ -26,7 +25,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_centerVertical="true"
-                android:src="@drawable/ic_back"/>
+                android:src="@drawable/ic_back" />
 
             <TextView
                 android:id="@+id/layout_title"
@@ -37,7 +36,7 @@
                 android:layout_toRightOf="@+id/back"
                 android:text="@string/manual_add_new_equipment"
                 android:textColor="@color/white"
-                android:textSize="18dp"/>
+                android:textSize="18dp" />
 
             <TextView
                 android:id="@+id/ok"
@@ -48,48 +47,29 @@
                 android:layout_marginRight="16dp"
                 android:text="@string/finish_text"
                 android:textColor="@color/white"
-                android:textSize="18dp"/>
+                android:textSize="18dp" />
 
         </RelativeLayout>
 
     </android.support.v7.widget.Toolbar>
 
-
-    <LinearLayout
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/ip_textlayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="90dp"
-        android:orientation="vertical">
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="90dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:text="@string/ip_title_text"
-            android:textColor="@color/album_title_text"
-            android:textSize="24dp"/>
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/ip_textlayout"
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/ip_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="10dp">
+            android:gravity="bottom"
+            android:hint="@string/edit_ip_text"
+            android:inputType="textAutoComplete"
+            android:textColor="@color/content_text"
+            android:textColorHighlight="#f57c00" />
 
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/ip_edit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="bottom"
-                android:hint="@string/edit_ip_text"
-                android:inputType="textAutoComplete"
-                android:textColor="@color/content_text"
-                android:textColorHighlight="#f57c00"/>
-
-        </android.support.design.widget.TextInputLayout>
-
-
-    </LinearLayout>
-
+    </android.support.design.widget.TextInputLayout>
 
 </RelativeLayout>

@@ -45,7 +45,6 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class PhotoSliderActivity extends AppCompatActivity implements IImageLoadListener {
 
@@ -690,11 +689,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         public boolean isViewFromObject(View arg0, Object arg1) {
             return arg0 == arg1;
         }
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
 }

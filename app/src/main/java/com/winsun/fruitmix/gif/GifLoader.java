@@ -14,13 +14,9 @@ import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-
-import pl.droidsonroids.gif.GifDrawable;
-import pl.droidsonroids.gif.GifImageView;
 
 /**
  * Helper that handles loading and caching images from remote URLs.
@@ -90,8 +86,6 @@ public class GifLoader {
     private Object mTag;
 
     private boolean mShouldCache = true;
-
-    private boolean mShouldRetryServerErrors = true;
 
     /**
      * Simple cache adapter interface. If provided to the GifLoader, it
@@ -170,21 +164,6 @@ public class GifLoader {
         public void onResponse(GifContainer gifContainer, boolean isImmediate);
     }
 
-
-    /**
-     * Checks if the item is available in the cache.
-     *
-     * @param requestUrl The url of the remote image
-     * @return True if the item exists in cache, false otherwise.
-     */
-    public boolean isCached(String requestUrl) {
-        if (mMastRunMainThread) {
-            throwIfNotOnMainThread();
-        }
-        String cacheKey = getCacheKey(requestUrl);
-        return mCache.getData(cacheKey) != null;
-    }
-
     /**
      * Issues a bitmap request with the given URL if that image is not available
      * in the cache, and returns a bitmap container that contains all of the data
@@ -205,10 +184,9 @@ public class GifLoader {
         }
         this.mMastRunMainThread = mastRunMainThread;
         mGifListener = gifListener;
-        final String cacheKey = requestUrl;
         if (useCache) {
             // Try to look up the request in the cache of remote images.
-            byte[] cachedData = mCache.getData(cacheKey);
+            byte[] cachedData = mCache.getData(requestUrl);
             if (cachedData != null) {
                 // Return the cached bitmap.
                 GifContainer container = new GifContainer(cachedData, requestUrl, null, null);
@@ -217,33 +195,29 @@ public class GifLoader {
             }
         }
         // The data did not exist in the cache, fetch it!
-        GifContainer gifContainer = new GifContainer(null, requestUrl, cacheKey, gifListener);
+        GifContainer gifContainer = new GifContainer(null, requestUrl, requestUrl, gifListener);
 
         // Update the caller to let them know that they should use the default bitmap.
 //        fileListener.onResponse(fileContainer, true);
 
         // Check to see if a request is already in-flight.
-        BatchedGifRequest request = mInFlightRequests.get(cacheKey);
+        BatchedGifRequest request = mInFlightRequests.get(requestUrl);
         if (request != null) {
             // If it is, add this request to the list of listeners.
             request.addContainer(gifContainer);
             return gifContainer;
         }
         // The request is not already in flight. Send the new request to the network and track it.
-        Request<byte[]> newRequest = makeGifRequest(requestUrl, cacheKey);
+        Request<byte[]> newRequest = makeGifRequest(requestUrl, requestUrl);
 
         if (mTag != null) {
             newRequest.setTag(mTag);
         }
 
-        //continue modify this gif loader, using gif loader or image loader in photo slider activity and test
-
         newRequest.setShouldCache(mShouldCache);
 
-        newRequest.setShouldRetryServerErrors(mShouldRetryServerErrors);
-
         mRequestQueue.add(newRequest);
-        mInFlightRequests.put(cacheKey, new BatchedGifRequest(newRequest, gifContainer));
+        mInFlightRequests.put(requestUrl, new BatchedGifRequest(newRequest, gifContainer));
 
         return gifContainer;
     }
@@ -368,7 +342,7 @@ public class GifLoader {
          * The most relevant bitmap for the container. If the image was in cache, the
          * Holder to use for the final bitmap (the one that pairs to the requested URL).
          */
-        private byte[] mdata = null;
+        private byte[] mData = null;
 
         private final GifListener mListener;
 
@@ -391,7 +365,7 @@ public class GifLoader {
          */
         public GifContainer(byte[] data, String requestUrl,
                             String cacheKey, GifListener listener) {
-            this.mdata = data;
+            this.mData = data;
             mRequestUrl = requestUrl;
             mCacheKey = cacheKey;
             mListener = listener;
@@ -427,7 +401,7 @@ public class GifLoader {
          * Returns the bitmap associated with the request URL if it has been loaded, null otherwise.
          */
         public byte[] getData() {
-            return mdata;
+            return mData;
         }
 
         /**
@@ -536,7 +510,7 @@ public class GifLoader {
                                 continue;
                             }
                             if (bir.getError() == null) {
-                                container.mdata = bir.mResponseData;
+                                container.mData = bir.mResponseData;
                                 container.mListener.onResponse(container, false);
                             } else {
                                 container.mListener.onErrorResponse(bir.getError());
@@ -557,15 +531,6 @@ public class GifLoader {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw new IllegalStateException("GifLoader must be invoked from the main thread.");
         }
-    }
-
-    /**
-     * Creates a cache key for use with the L1 cache.
-     *
-     * @param url The URL of the request.
-     */
-    private static String getCacheKey(String url) {
-        return url;
     }
 
 }

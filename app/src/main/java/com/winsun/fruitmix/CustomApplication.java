@@ -8,8 +8,6 @@ import com.wisnun.fruitmix.MyEventBusIndex;
 
 import org.greenrobot.eventbus.EventBus;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
-
 /**
  * Created by Administrator on 2016/7/26.
  */

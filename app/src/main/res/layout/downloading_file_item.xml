@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/downloading_file_item_layout"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:clickable="true"
-              android:orientation="vertical"
-              android:paddingLeft="16dp"
-              android:paddingRight="16dp">
+    android:id="@+id/downloading_file_item_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="16dp"
-            android:src="@drawable/file_icon"/>
+            android:src="@drawable/file_icon" />
 
         <LinearLayout
             android:id="@+id/content"
@@ -37,22 +37,22 @@
                 android:maxLines="1"
                 android:text="文件名"
                 android:textColor="#DE000000"
-                android:textSize="16dp"/>
+                android:textSize="16dp" />
 
             <ProgressBar
                 android:id="@+id/downloading_progressbar"
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1px"
-            android:background="#1F000000"
+            android:layout_below="@id/content"
             android:layout_toRightOf="@id/file_icon"
-            android:layout_below="@id/content"/>
+            android:background="#1F000000" />
 
     </RelativeLayout>
 

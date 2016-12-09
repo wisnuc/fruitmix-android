@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/album_card_item_layout"
     android:layout_width="match_parent"
@@ -15,7 +14,7 @@
         android:layout_marginTop="2dp"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
-        android:src="@drawable/placeholder_photo"/>
+        android:src="@drawable/placeholder_photo" />
 
     <ImageView
         android:id="@+id/album_share"
@@ -25,7 +24,7 @@
         android:layout_alignLeft="@+id/cover_img"
         android:layout_margin="12dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/album_share"/>
+        android:src="@drawable/album_share" />
 
     <TextView
         android:id="@+id/album_title"
@@ -34,8 +33,10 @@
         android:layout_alignBottom="@id/cover_img"
         android:layout_margin="10dp"
         android:layout_toRightOf="@id/album_share"
+        android:ellipsize="end"
         android:gravity="center"
+        android:maxLines="1"
         android:text=""
         android:textColor="#FFFFFF"
-        android:textSize="15dp"/>
+        android:textSize="15dp" />
 </RelativeLayout>

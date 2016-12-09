@@ -51,7 +51,6 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Created by Administrator on 2016/4/28.
@@ -432,11 +431,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
 
         return true;
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Override

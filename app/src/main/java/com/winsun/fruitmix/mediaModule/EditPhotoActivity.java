@@ -44,7 +44,6 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class EditPhotoActivity extends Activity implements View.OnClickListener {
 
@@ -156,11 +155,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 break;
         }
 
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     private void fillPhotoList(String[] selectedImageUUIDs) {

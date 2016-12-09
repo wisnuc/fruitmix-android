@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class PersonInfoActivity extends Activity implements EditText.OnFocusChangeListener, View.OnClickListener {
 
@@ -46,11 +45,6 @@ public class PersonInfoActivity extends Activity implements EditText.OnFocusChan
 
         mBack.setOnClickListener(this);
         mFinish.setOnClickListener(this);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Override

@@ -17,6 +17,8 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -27,6 +29,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
+import com.winsun.fruitmix.anim.BaseAnimationListener;
 import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
@@ -102,7 +105,7 @@ public class NewPhotoList implements Page {
 
     private int mAdapterItemTotalCount;
 
-    private boolean mHasFlung = false;
+    private boolean mUseAnim = false;
 
     private ImageLoader mImageLoader;
 
@@ -175,6 +178,8 @@ public class NewPhotoList implements Page {
 
     public void setSelectMode(boolean selectMode) {
         mSelectMode = selectMode;
+
+        mUseAnim = true;
 
         mPhotoRecycleAdapter.notifyDataSetChanged();
     }
@@ -686,7 +691,13 @@ public class NewPhotoList implements Page {
             }
 
             if (mSelectMode) {
-                mPhotoTitleSelectImg.setVisibility(View.VISIBLE);
+
+                if (mUseAnim) {
+                    showPhotoTitleSelectImgAnim();
+
+                    mUseAnim = false;
+                } else
+                    showPhotoTitleSelectImg();
 
                 List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
                 int selectNum = 0;
@@ -700,7 +711,13 @@ public class NewPhotoList implements Page {
                     mPhotoTitleSelectImg.setSelected(false);
 
             } else {
-                mPhotoTitleSelectImg.setVisibility(View.GONE);
+
+                if (mUseAnim) {
+                    dismissPhotoTitleSelectImgAnim();
+
+                    mUseAnim = false;
+                } else
+                    dismissPhotoTitleSelectImg();
             }
 
 
@@ -726,6 +743,37 @@ public class NewPhotoList implements Page {
                 }
             });
 
+        }
+
+        private void showPhotoTitleSelectImgAnim() {
+            mPhotoTitleSelectImg.setVisibility(View.VISIBLE);
+
+            Animation animation = AnimationUtils.loadAnimation(containerActivity, R.anim.show_right_item_anim);
+
+            mPhotoTitleSelectImg.startAnimation(animation);
+        }
+
+        private void dismissPhotoTitleSelectImgAnim() {
+            Animation animation = AnimationUtils.loadAnimation(containerActivity, R.anim.dismiss_right_item_anim);
+            animation.setAnimationListener(new BaseAnimationListener() {
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    super.onAnimationEnd(animation);
+
+                    mPhotoTitleSelectImg.setVisibility(View.GONE);
+                }
+            });
+
+            mPhotoTitleSelectImg.startAnimation(animation);
+        }
+
+        private void showPhotoTitleSelectImg() {
+            mPhotoTitleSelectImg.setVisibility(View.VISIBLE);
+        }
+
+        private void dismissPhotoTitleSelectImg() {
+            mPhotoTitleSelectImg.setVisibility(View.GONE);
         }
 
     }
@@ -925,7 +973,6 @@ public class NewPhotoList implements Page {
 
             if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
 
-                mHasFlung = true;
                 mIsFling = true;
 
             } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {

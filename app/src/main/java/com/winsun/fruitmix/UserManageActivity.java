@@ -22,7 +22,6 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class UserManageActivity extends Activity implements View.OnClickListener {
 
@@ -82,11 +81,6 @@ public class UserManageActivity extends Activity implements View.OnClickListener
         super.onDestroy();
 
         mContext = null;
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Override

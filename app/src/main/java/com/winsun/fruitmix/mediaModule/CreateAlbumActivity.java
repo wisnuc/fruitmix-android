@@ -36,7 +36,6 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Created by Administrator on 2016/4/28.
@@ -192,12 +191,6 @@ public class CreateAlbumActivity extends AppCompatActivity {
             finish();
         }
 
-    }
-
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     private MediaShare generateMediaShare(boolean isPublic, boolean otherMaintainer, String title, String desc, String[] digests) {

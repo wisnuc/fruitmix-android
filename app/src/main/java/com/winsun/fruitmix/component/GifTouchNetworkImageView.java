@@ -57,9 +57,6 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
      */
     private int mErrorImageId;
 
-    /**
-     * Local copy of the ImageLoader.
-     */
     private GifLoader mGifLoader;
 
     private ImageLoader mImageLoader;
@@ -156,7 +153,6 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
 
         int width = getWidth();
         int height = getHeight();
-        ScaleType scaleType = getScaleType();
 
         boolean wrapWidth = false, wrapHeight = false;
         if (getLayoutParams() != null) {
@@ -194,10 +190,6 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                 setDefaultImageOrNull();
             }
         }
-
-        // Calculate the max image width / height to use while ignoring WRAP_CONTENT dimens.
-        int maxWidth = wrapWidth ? 0 : width;
-        int maxHeight = wrapHeight ? 0 : height;
 
         // The pre-existing content of this view didn't match the current URL. Load the new image
         // from the network.
@@ -241,8 +233,6 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
 
                         if (data != null && getTag().equals(mUrl)) {
 
-                            Log.i(TAG, "onResponse: handle gif");
-
                             try {
 
                                 GifDrawable gifDrawable = new GifDrawable(data);
@@ -252,7 +242,7 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                             } catch (IOException e) {
                                 e.printStackTrace();
 
-                                setImageResource(mErrorImageId);
+                                setImageResource(mDefaultImageId);
                             }
 
                             deliverImageLoadFinish();

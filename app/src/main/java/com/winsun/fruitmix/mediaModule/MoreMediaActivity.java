@@ -32,7 +32,6 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MoreMediaActivity extends AppCompatActivity {
     public static final String TAG = MoreMediaActivity.class.getSimpleName();
@@ -93,11 +92,6 @@ public class MoreMediaActivity extends AppCompatActivity {
         headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
         Log.i(TAG, FNAS.JWT);
         mImageLoader.setHeaders(headers);
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     private void fillPhotoList(List<String> imageDigests) {

@@ -224,8 +224,6 @@ public class Media implements Parcelable {
         if (!uploaded) {
             uploaded = FNAS.UploadFile(thumb);
 
-            Log.i(TAG, "upload file:" + thumb + "result:" + uploaded);
-
             if (uploaded) {
 
                 dbUtils.updateLocalMedia(this);

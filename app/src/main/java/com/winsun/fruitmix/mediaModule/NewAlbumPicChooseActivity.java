@@ -18,7 +18,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /**
  * Created by Administrator on 2016/5/9.
@@ -99,11 +98,6 @@ public class NewAlbumPicChooseActivity extends Activity {
         super.onDestroy();
 
         mContext = null;
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Override

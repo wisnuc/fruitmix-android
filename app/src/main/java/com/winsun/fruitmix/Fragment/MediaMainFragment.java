@@ -22,6 +22,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.BounceInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -29,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.anim.BaseAnimationListener;
 import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.eventbus.MediaOperationEvent;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
@@ -257,11 +260,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if ((requestCode == Util.KEY_ALBUM_CONTENT_REQUEST_CODE || requestCode == Util.KEY_CREATE_ALBUM_REQUEST_CODE || requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE) && resultCode == RESULT_OK) {
-            hideChooseHeader();
+
             viewPager.setCurrentItem(PAGE_ALBUM);
             onDidAppear(PAGE_ALBUM);
         } else if (requestCode == Util.KEY_CREATE_SHARE_REQUEST_CODE && resultCode == RESULT_OK) {
-            hideChooseHeader();
+
             viewPager.setCurrentItem(PAGE_SHARE);
             onDidAppear(PAGE_SHARE);
         }
@@ -346,19 +349,14 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 mRemoteMediaLoaded = true;
 
-                NewPhotoList newPhotoList = (NewPhotoList) pageList.get(PAGE_PHOTO);
-                newPhotoList.refreshView();
-                newPhotoList.fillLocalCachePhotoData();
+                photoList.refreshView();
+                photoList.fillLocalCachePhotoData();
 
                 if (!mRemoteMediaShareLoaded) {
                     FNAS.retrieveRemoteMediaShare(mContext);
                 }
 
-                if (!mLocalMediaInCameraLoaded) {
-                    FNAS.retrieveLocalMediaInCamera(mContext);
-
-                    mLocalMediaInCameraLoaded = true;
-                }
+                FNAS.startUploadAllLocalPhoto(mContext);
 
             }
         }
@@ -399,11 +397,15 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             Log.i(TAG, "local media loaded");
 
-            FNAS.retrieveRemoteMediaMap(mContext);
+            if (!mLocalMediaInCameraLoaded) {
+                FNAS.retrieveLocalMediaInCamera(mContext);
+
+                mLocalMediaInCameraLoaded = true;
+            }
 
         } else if (action.equals(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED)) {
 
-            handleNewLocalMediaInCameraRetrieved(operationEvent);
+            FNAS.retrieveRemoteMediaMap(mContext);
 
         } else if (action.equals(Util.REMOTE_MEDIA_SHARE_RETRIEVED)) {
             Log.i(TAG, "remote share loaded");
@@ -465,9 +467,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             Log.i(TAG, "new local media in camera loaded");
 
-            NewPhotoList newPhotoList = (NewPhotoList) pageList.get(PAGE_PHOTO);
-            newPhotoList.refreshView();
-            newPhotoList.fillLocalCachePhotoData();
+            photoList.refreshView();
+            photoList.fillLocalCachePhotoData();
         }
 
         FNAS.startUploadAllLocalPhoto(mContext);
@@ -476,8 +477,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private void handleLocalPhotoUploadStateChanged() {
         Log.i(TAG, "local photo upload state changed");
 
-        NewPhotoList newPhotoList = (NewPhotoList) pageList.get(PAGE_PHOTO);
-        newPhotoList.refreshView();
+        photoList.refreshView();
 
     }
 
@@ -616,25 +616,26 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         editor.apply();
     }
 
-    public void showChooseHeader() {
+    private void showChooseHeader() {
         fab.setVisibility(View.VISIBLE);
         toolbar.setNavigationIcon(R.drawable.ic_back);
-        lbRight.setVisibility(View.GONE);
-        bottomNavigationView.setVisibility(View.GONE);
-        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
-        lp.bottomMargin = 0;
-        viewPager.setLayoutParams(lp);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (sInChooseMode) {
                     hideChooseHeader();
+                    showBottomNavAnim();
                 } else {
                     mListener.onBackPress();
                 }
 
             }
         });
+        lbRight.setVisibility(View.GONE);
+
+        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
+        lp.bottomMargin = 0;
+        viewPager.setLayoutParams(lp);
         sInChooseMode = true;
         photoList.setSelectMode(sInChooseMode);
         setSelectCountText(getString(R.string.choose_photo));
@@ -642,14 +643,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mListener.lockDrawer();
     }
 
-    public void hideChooseHeader() {
+    private void hideChooseHeader() {
         if (sMenuUnfolding) {
             sMenuUnfolding = false;
             collapseFab();
         }
         fab.setVisibility(View.GONE);
-        ivBtAlbum.setVisibility(View.GONE);
-        ivBtShare.setVisibility(View.GONE);
         toolbar.setNavigationIcon(R.drawable.menu);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -658,18 +657,61 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             }
         });
         lbRight.setVisibility(View.VISIBLE);
-        bottomNavigationView.setVisibility(View.VISIBLE);
-        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
-        lp.bottomMargin = Util.dip2px(getActivity(), 48.0f);
-        //if(LocalCache.ScreenWidth==540) lp.bottomMargin=76;
-        //else if(LocalCache.ScreenWidth==1080) lp.bottomMargin=140;
-        viewPager.setLayoutParams(lp);
+
         sInChooseMode = false;
         photoList.setSelectMode(sInChooseMode);
         setSelectCountText(getString(R.string.photo_text));
 
         mListener.unlockDrawer();
     }
+
+    private void showBottomNavAnim() {
+
+        bottomNavigationView.setVisibility(View.VISIBLE);
+
+        Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.show_bottom_item_anim);
+        animation.setAnimationListener(new BaseAnimationListener() {
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                super.onAnimationEnd(animation);
+
+                CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
+                lp.bottomMargin = Util.dip2px(getActivity(), 56.0f);
+                //if(LocalCache.ScreenWidth==540) lp.bottomMargin=76;
+                //else if(LocalCache.ScreenWidth==1080) lp.bottomMargin=140;
+                viewPager.setLayoutParams(lp);
+            }
+        });
+
+
+        bottomNavigationView.startAnimation(animation);
+    }
+
+    private void showBottomNav() {
+        bottomNavigationView.setVisibility(View.VISIBLE);
+    }
+
+    private void dismissBottomNavAnim() {
+
+        Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.dismiss_bottom_item_anim);
+        animation.setAnimationListener(new BaseAnimationListener() {
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                super.onAnimationEnd(animation);
+
+                bottomNavigationView.setVisibility(View.GONE);
+            }
+        });
+
+        bottomNavigationView.startAnimation(animation);
+    }
+
+
+    private void dismissBottomNav() {
+        bottomNavigationView.setVisibility(View.GONE);
+    }
+
 
     @Override
     public void onTabChanged(int tabNum) {
@@ -686,6 +728,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void handleBackPressed() {
 
         hideChooseHeader();
+        showBottomNavAnim();
 
     }
 
@@ -707,6 +750,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     @Override
     public void onPhotoItemLongClick(int selectedItemCount) {
         showChooseHeader();
+
+        dismissBottomNavAnim();
     }
 
     @Override
@@ -728,20 +773,15 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         switch (v.getId()) {
             case R.id.bt_album:
                 selectUUIDs = photoList.getSelectedImageUUIDs();
-                if (selectUUIDs.size() == 0) {
-                    Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                if (showNothingSelectToast(selectUUIDs)) return;
 
                 photoList.createAlbum(selectUUIDs);
                 hideChooseHeader();
+                showBottomNavAnim();
                 break;
             case R.id.bt_share:
                 selectUUIDs = photoList.getSelectedImageUUIDs();
-                if (selectUUIDs.size() == 0) {
-                    Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                if (showNothingSelectToast(selectUUIDs)) return;
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
@@ -752,9 +792,18 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 break;
             case R.id.right:
                 showChooseHeader();
+                dismissBottomNavAnim();
                 break;
             default:
         }
+    }
+
+    private boolean showNothingSelectToast(List<String> selectUUIDs) {
+        if (selectUUIDs.size() == 0) {
+            Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        return false;
     }
 
     private void doCreateShareFunction(List<String> selectUUIDs) {
@@ -829,9 +878,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 ivBtAlbum.setVisibility(View.GONE);
                 ivBtShare.setVisibility(View.GONE);
 
-                Log.i(TAG, "share getTop:" + ivBtShare.getTop());
-                Log.i(TAG, "share getTranslationY" + ivBtShare.getTranslationY());
-                Log.i(TAG, "share getY:" + ivBtShare.getY());
             }
         });
 
@@ -897,6 +943,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private void onDidAppear(int position) {
         hideChooseHeader();
+        showBottomNav();
 
         switch (position) {
             case PAGE_SHARE:

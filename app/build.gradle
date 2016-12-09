@@ -13,10 +13,19 @@ android {
         versionName "1.0"
     }
     buildTypes {
-        release {
+
+        debug {
             minifyEnabled false
+            zipAlignEnabled false
+            shrinkResources false
+        }
+        release {
+            minifyEnabled true
+            zipAlignEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+
     }
     repositories {
         flatDir {
@@ -30,9 +39,7 @@ dependencies {
     compile(name:'android-gif-drawable-1.2.3', ext:'aar')
     compile project(':volley')
     compile 'com.google.android.gms:play-services-ads:9.2.0'
-    compile 'com.veinhorn.scrollgalleryview:library:1.0.5'
     compile 'com.jakewharton:butterknife:8.1.0'
-    compile 'uk.co.chrisjenx:calligraphy:2.2.0'
     compile 'com.android.support:support-v4:25.0.1'
     compile 'com.android.support:appcompat-v7:25.0.1'
     compile 'com.android.support:design:25.0.1'

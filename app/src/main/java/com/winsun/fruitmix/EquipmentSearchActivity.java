@@ -8,9 +8,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.LruCache;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
@@ -19,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.winsun.fruitmix.component.AnimatedExpandableListView;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.util.FNAS;
@@ -37,7 +40,6 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class EquipmentSearchActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -48,11 +50,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     @BindView(R.id.toolbar)
     Toolbar mToolBar;
     @BindView(R.id.equipment_expandablelist)
-    ExpandableListView mEquipmentExpandableListView;
+    AnimatedExpandableListView mEquipmentExpandableListView;
     @BindView(R.id.loading_layout)
     LinearLayout mLoadingLayout;
-    @BindView(R.id.add_ip)
-    ImageView addIpImageView;
+    @BindView(R.id.fab)
+    FloatingActionButton addIpFab;
 
     private Context mContext;
 
@@ -81,9 +83,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         mUserExpandableLists = new ArrayList<>();
         mEquipments = new ArrayList<>();
-
-        Equipment equipment = new Equipment("Winsuc Appliction 146 By Wu", "192.168.5.146", 6666);
-        getUserList(equipment);
 
         mHandler = new CustomHandler(this, getMainLooper());
 
@@ -122,8 +121,22 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             }
         });
 
+        mEquipmentExpandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+
+                if (mEquipmentExpandableListView.isGroupExpanded(groupPosition)) {
+                    mEquipmentExpandableListView.collapseGroupWithAnimation(groupPosition);
+                } else {
+                    mEquipmentExpandableListView.expandGroupWithAnimation(groupPosition);
+                }
+
+                return true;
+            }
+        });
+
         mBack.setOnClickListener(this);
-        addIpImageView.setOnClickListener(this);
+        addIpFab.setOnClickListener(this);
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
@@ -176,7 +189,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             case R.id.back:
                 finish();
                 break;
-            case R.id.add_ip:
+            case R.id.fab:
                 Intent intent = new Intent(mContext, CreateNewEquipmentActivity.class);
                 startActivityForResult(intent, Util.KEY_MANUAL_INPUT_IP_REQUEST_CODE);
                 break;
@@ -185,14 +198,17 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     }
 
 
-    class EquipmentExpandableAdapter extends BaseExpandableListAdapter {
+    class EquipmentExpandableAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter {
 
         List<Equipment> equipmentList;
         List<List<Map<String, String>>> mapList;
+        LruCache<Long, View> viewLruCache;
 
         EquipmentExpandableAdapter() {
             equipmentList = new ArrayList<>();
             mapList = new ArrayList<>();
+
+            viewLruCache = new LruCache<>(5);
         }
 
         @Override
@@ -201,7 +217,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         }
 
         @Override
-        public int getChildrenCount(int groupPosition) {
+        public int getRealChildrenCount(int groupPosition) {
             return mapList.get(groupPosition).size();
         }
 
@@ -232,7 +248,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         @Override
         public boolean hasStableIds() {
-            return false;
+            return true;
         }
 
         @Override
@@ -253,13 +269,26 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         }
 
         @Override
-        public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+        public View getRealChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
             ChildViewHolder childViewHolder;
             if (convertView == null) {
-                convertView = View.inflate(mContext, R.layout.equipment_child_item, null);
-                childViewHolder = new ChildViewHolder(convertView);
-                convertView.setTag(childViewHolder);
+
+                Long key = ((long) groupPosition << 32) + childPosition;
+                View view = viewLruCache.get(key);
+                if (view != null && view.getTag() != null) {
+
+                    convertView = view;
+                    childViewHolder = (ChildViewHolder) convertView.getTag();
+
+                } else {
+                    convertView = View.inflate(mContext, R.layout.equipment_child_item, null);
+                    childViewHolder = new ChildViewHolder(convertView);
+                    convertView.setTag(childViewHolder);
+
+                    viewLruCache.put(key, convertView);
+                }
+
             } else {
                 childViewHolder = (ChildViewHolder) convertView.getTag();
             }
@@ -317,7 +346,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             if (mAdapter.mapList.get(groupPosition) == null || mAdapter.mapList.get(groupPosition).size() == 0)
                 return;
 
-            String childName = mAdapter.mapList.get(groupPosition).get(childPosition).get("username");
+            Map<String, String> map = mAdapter.mapList.get(groupPosition).get(childPosition);
+
+
+            String childName = map.get("username");
             mChildName.setText(childName);
 
             StringBuilder stringBuilder = new StringBuilder();
@@ -326,7 +358,16 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 stringBuilder.append(splitString.substring(0, 1).toUpperCase());
             }
             mUserDefaultPortrait.setText(stringBuilder.toString());
-            int color = (int) (Math.random() * 3);
+
+            int color;
+            if (map.containsKey("userDefaultAvatarBgColor")) {
+                color = Integer.parseInt(map.get("userDefaultAvatarBgColor"));
+            } else {
+                color = (int) (Math.random() * 3);
+
+                map.put("userDefaultAvatarBgColor", String.valueOf(color));
+            }
+
             switch (color) {
                 case 0:
                     mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_blue);
@@ -510,6 +551,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                     mAdapter.mapList.clear();
                     mAdapter.equipmentList.addAll(mEquipments);
                     mAdapter.mapList.addAll(mUserExpandableLists);
+                    mAdapter.viewLruCache.evictAll();
                     weakReference.get().mAdapter.notifyDataSetChanged();
                     break;
                 default:

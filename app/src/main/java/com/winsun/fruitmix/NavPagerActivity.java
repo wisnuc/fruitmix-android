@@ -309,6 +309,9 @@ public class NavPagerActivity extends AppCompatActivity
         } else if (id == R.id.file) {
 
             toggleFileOrMediaFragment();
+        } else if (id == R.id.setting) {
+
+            Toast.makeText(mContext, getString(R.string.coming_soon), Toast.LENGTH_SHORT).show();
         }
 
         mDrawerLayout.closeDrawer(GravityCompat.START);

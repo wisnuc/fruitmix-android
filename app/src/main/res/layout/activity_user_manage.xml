@@ -30,7 +30,7 @@
                 android:layout_gravity="center"
                 android:text="@string/user_manage"
                 android:textColor="@color/white"
-                android:textSize="24dp"/>
+                android:textSize="18dp"/>
 
             <TextView
                 android:id="@+id/finish"
