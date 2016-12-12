@@ -383,9 +383,11 @@ public class NewPhotoList implements Page {
 
     private void fillLocalCachePhotoList() {
         LocalCache.photoSliderList.clear();
-        for (Media media : mMapKeyIsPhotoPositionValueIsPhoto.values()) {
-            LocalCache.photoSliderList.add(media);
+
+        for (String title:mPhotoDateGroups){
+            LocalCache.photoSliderList.addAll(mMapKeyIsDateValueIsPhotoList.get(title));
         }
+
     }
 
     private void calcPhotoPositionNumber() {
@@ -402,6 +404,13 @@ public class NewPhotoList implements Page {
             List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(title);
             photoListSize = mediaList.size();
             mAdapterItemTotalCount += photoListSize;
+
+            Collections.sort(mediaList, new Comparator<Media>() {
+                @Override
+                public int compare(Media lhs, Media rhs) {
+                    return lhs.getTime().compareTo(rhs.getTime());
+                }
+            });
 
 //            Log.i(TAG, "titlePosition:" + titlePosition + " photoListSize:" + photoListSize + " photoListLineSize:" + photoListLineSize);
 
@@ -694,8 +703,6 @@ public class NewPhotoList implements Page {
 
                 if (mUseAnim) {
                     showPhotoTitleSelectImgAnim();
-
-                    mUseAnim = false;
                 } else
                     showPhotoTitleSelectImg();
 
@@ -714,8 +721,6 @@ public class NewPhotoList implements Page {
 
                 if (mUseAnim) {
                     dismissPhotoTitleSelectImgAnim();
-
-                    mUseAnim = false;
                 } else
                     dismissPhotoTitleSelectImg();
             }
@@ -737,7 +742,7 @@ public class NewPhotoList implements Page {
                         calcSelectedPhoto();
 
                         for (IPhotoListListener listListener : mPhotoListListeners) {
-                            listListener.onPhotoItemLongClick(mSelectCount);
+                            listListener.onPhotoItemClick(mSelectCount);
                         }
                     }
                 }
@@ -916,10 +921,8 @@ public class NewPhotoList implements Page {
                     currentMedia.setSelected(true);
                     mPhotoRecycleAdapter.notifyDataSetChanged();
 
-                    calcSelectedPhoto();
-
                     for (IPhotoListListener listListener : mPhotoListListeners) {
-                        listListener.onPhotoItemLongClick(mSelectCount);
+                        listListener.onPhotoItemLongClick();
                     }
 
                     return true;
@@ -980,6 +983,10 @@ public class NewPhotoList implements Page {
                 mIsFling = false;
 
                 mPhotoRecycleAdapter.notifyDataSetChanged();
+            } else if(newState == RecyclerView.SCROLL_STATE_DRAGGING){
+
+                mUseAnim = false;
+
             }
         }
 

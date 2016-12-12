@@ -1,8 +1,6 @@
 package com.winsun.fruitmix.mediaModule;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,6 +18,7 @@ import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +38,7 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +55,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     @BindView(R.id.back)
     ImageView ivBack;
     @BindView(R.id.comment)
-    ImageView ivComment;
+    LinearLayout ivComment;
     @BindView(R.id.chooseHeader)
     Toolbar rlChooseHeader;
     @BindView(R.id.panelFooter)
@@ -69,6 +69,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     private int initialPhotoPosition;
     private int currentPhotoPosition;
 
+    private List<Media> mediaAlreadyLoadedList;
+
     private Map<String, Media> mediaMap;
 
     private boolean sInEdit;
@@ -78,8 +80,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     private GifLoader mGifLoader;
 
     private Context mContext;
-
-    private ProgressDialog mDialog;
 
     private boolean willReturn = false;
 
@@ -109,6 +109,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     sharedElements.put(imageUUID, mViewPager.findViewWithTag(imageTag));
 
+                    Log.i(TAG, "onMapSharedElements: media uuid:" + imageUUID + " imageTag:" + imageTag);
                 }
             }
 
@@ -134,8 +135,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             setEnterSharedElementCallback(sharedElementCallback);
         }
 
-        showDialog();
-
         initImageLoaderAndGifLoader();
 
         initialPhotoPosition = getIntent().getIntExtra(Util.INITIAL_PHOTO_POSITION, 0);
@@ -145,6 +144,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         mediaList = LocalCache.photoSliderList;
 
         mediaMap = LocalCache.photoSliderMap;
+
+        mediaAlreadyLoadedList = new ArrayList<>();
 
         transitionMediaNeedShowThumb = getIntent().getBooleanExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, true);
 
@@ -184,13 +185,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 Log.d(TAG, "onPageSelected:" + position);
                 setPosition(position);
 
-                Media media = mediaList.get(position);
-
-                if (!media.isLoaded() && mViewPager.getCurrentItem() == position) {
-                    if (mDialog == null || !mDialog.isShowing()) {
-                        showDialog();
-                    }
-                }
             }
 
         });
@@ -266,10 +260,19 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     }
 
     private void finishActivity() {
-        if (needTransition)
+
+        resetMediaLoadedState();
+
+        if (needTransition) {
             supportFinishAfterTransition();
-        else
+        } else
             finish();
+    }
+
+    private void resetMediaLoadedState() {
+        for (Media media : mediaAlreadyLoadedList) {
+            media.setLoaded(false);
+        }
     }
 
     @Override
@@ -327,49 +330,11 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         if (media.isLocal()) {
 
-            if (isCurrentViewPage(currentPhotoPosition) && needTransition) {
-                ActivityCompat.startPostponedEnterTransition(this);
-            }
-
-            if (!media.isLoaded()) {
-                media.setLoaded(true);
-            }
-
-            if (isCurrentViewPage(currentPhotoPosition) && mDialog != null && mDialog.isShowing())
-                mDialog.dismiss();
+            handleLocalMediaLoaded(media);
 
         } else {
 
-            if (isImageThumb(url)) {
-
-                if (isCurrentViewPage(currentPhotoPosition) && needTransition) {
-                    ActivityCompat.startPostponedEnterTransition(this);
-
-                    startLoadCurrentImageAfterTransition(media);
-                } else {
-                    String imageUUID = media.getUuid();
-
-                    startLoadingOriginalPhoto(imageUUID, media.getType());
-                }
-
-            } else {
-
-                if (!transitionMediaNeedShowThumb && needTransition) {
-                    ActivityCompat.startPostponedEnterTransition(this);
-                    transitionMediaNeedShowThumb = true;
-                } else {
-                    dismissCurrentImageThumb(media);
-
-                    view.setVisibility(View.VISIBLE);
-                }
-
-                if (!media.isLoaded()) {
-                    media.setLoaded(true);
-                }
-
-                if (isCurrentViewPage(currentPhotoPosition) && mDialog != null && mDialog.isShowing())
-                    mDialog.dismiss();
-            }
+            handleRemoteMediaLoaded(url, view, media);
 
         }
 
@@ -435,6 +400,64 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
     }
 
+    private void handleRemoteMediaLoaded(String url, View view, Media media) {
+        if (isImageThumb(url)) {
+
+            handleThumbLoaded(media);
+
+        } else {
+
+            handleOriginalMediaLoaded(view, media);
+
+        }
+    }
+
+    private void handleOriginalMediaLoaded(View view, Media media) {
+        if (!transitionMediaNeedShowThumb && needTransition) {
+            ActivityCompat.startPostponedEnterTransition(this);
+            transitionMediaNeedShowThumb = true;
+        } else {
+
+            if (transitionMediaNeedShowThumb)
+                dismissCurrentImageThumb(media);
+
+            view.setVisibility(View.VISIBLE);
+
+            if (isCurrentViewPage(initialPhotoPosition) && needTransition)
+                ViewCompat.setTransitionName(view, media.getUuid());
+        }
+
+        if (!media.isLoaded()) {
+            media.setLoaded(true);
+
+            mediaAlreadyLoadedList.add(media);
+        }
+    }
+
+    private void handleThumbLoaded(Media media) {
+        if (isCurrentViewPage(initialPhotoPosition) && needTransition) {
+            ActivityCompat.startPostponedEnterTransition(this);
+
+            startLoadCurrentImageAfterTransition(media);
+        } else {
+            String imageUUID = media.getUuid();
+
+            startLoadingOriginalPhoto(imageUUID, media.getType());
+        }
+    }
+
+    private void handleLocalMediaLoaded(Media media) {
+        if (isCurrentViewPage(initialPhotoPosition) && needTransition) {
+            ActivityCompat.startPostponedEnterTransition(this);
+        }
+
+        if (!media.isLoaded()) {
+            media.setLoaded(true);
+
+            mediaAlreadyLoadedList.add(media);
+        }
+    }
+
     public boolean isCurrentViewPage(int viewPosition) {
         return mViewPager.getCurrentItem() == viewPosition;
     }
@@ -452,7 +475,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     startLoadingOriginalPhoto(media.getUuid(), media.getType());
 
-                    showDialog();
                 }
             });
         }
@@ -476,25 +498,11 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         return currentUrl;
     }
 
-    private void showDialog() {
-
-        if (mDialog == null || !mDialog.isShowing()) {
-            mDialog = ProgressDialog.show(mContext, mContext.getString(R.string.loading_title), mContext.getString(R.string.loading_message), true, true, new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    finishActivity();
-                }
-            });
-        }
-    }
-
     private void startLoadingOriginalPhoto(final String imageUUID, String mediaType) {
 
-        final String remoteUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + imageUUID);
+        String remoteUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + imageUUID);
 
-        final GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) mViewPager.findViewWithTag(remoteUrl);
-
-        ViewCompat.setTransitionName(mainPic, imageUUID);
+        GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) mViewPager.findViewWithTag(remoteUrl);
 
         mImageLoader.setShouldCache(true);
 
@@ -520,7 +528,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             view = LayoutInflater.from(mContext).inflate(R.layout.photo_slider_cell, null);
 
-            GifTouchNetworkImageView defaultMainPic = (GifTouchNetworkImageView) view.findViewById(R.id.default_main_pic);
+            final GifTouchNetworkImageView defaultMainPic = (GifTouchNetworkImageView) view.findViewById(R.id.default_main_pic);
 
             final GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view.findViewById(R.id.mainPic);
 
@@ -545,7 +553,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     defaultMainPic.setVisibility(View.VISIBLE);
                     mainPic.setVisibility(View.INVISIBLE);
-                    ViewCompat.setTransitionName(defaultMainPic, media.getUuid());
+
+                    if (position == initialPhotoPosition)
+                        ViewCompat.setTransitionName(defaultMainPic, media.getUuid());
+
                     defaultMainPic.registerImageLoadListener(PhotoSliderActivity.this);
 
                     String thumbImageUrl = media.getImageThumbUrl(mContext);
@@ -556,7 +567,9 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 } else {
                     defaultMainPic.setVisibility(View.INVISIBLE);
                     mainPic.setVisibility(View.VISIBLE);
-                    ViewCompat.setTransitionName(mainPic, media.getUuid());
+
+                    if (position == initialPhotoPosition)
+                        ViewCompat.setTransitionName(mainPic, media.getUuid());
 
                     if (originalImageUrl.endsWith(".gif")) {
                         mainPic.setGifUrl(originalImageUrl, mGifLoader);
@@ -566,43 +579,9 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 }
 
-                mainPic.setOnTouchListener(new View.OnTouchListener() {
+                mainPic.setOnTouchListener(new CustomTouchListener());
 
-                    float x, y, lastX, lastY;
-
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        //Log.d("winsun", "aa "+event.getAction());
-                        handleTouchEvent(event);
-                        return false;
-                    }
-
-                    private void handleTouchEvent(MotionEvent event) {
-                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                            x = event.getRawX();
-                            y = event.getRawY();
-                            lastX = x;
-                            lastY = y;
-                        } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                            lastX = event.getRawX();
-                            lastY = event.getRawY();
-
-                            //Log.i(TAG, "handleTouchEvent: action move lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
-
-                            if (!mainPic.isZoomed() && lastY > y) {
-                                mainPic.setTranslationY(lastY - y);
-                            }
-                        } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                            if (lastY - y > 200 && !mainPic.isZoomed()) finishActivity();
-                            else if (!mainPic.isZoomed()) {
-                                mainPic.setTranslationY(0);
-                                if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
-                                    convertEditState();
-                                }
-                            }
-                        }
-                    }
-                });
+                defaultMainPic.setOnTouchListener(new CustomTouchListener());
 
             }
 
@@ -612,7 +591,43 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             return view;
 
+        }
 
+        private class CustomTouchListener implements View.OnTouchListener {
+
+            float x, y, lastX, lastY;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                handleTouchEvent(event, (GifTouchNetworkImageView) v);
+                return false;
+            }
+
+            private void handleTouchEvent(MotionEvent event, GifTouchNetworkImageView view) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    x = event.getRawX();
+                    y = event.getRawY();
+                    lastX = x;
+                    lastY = y;
+                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    lastX = event.getRawX();
+                    lastY = event.getRawY();
+
+                    //Log.i(TAG, "handleTouchEvent: action move lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
+
+                    if (!view.isZoomed() && lastY > y) {
+                        view.setTranslationY(lastY - y);
+                    }
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (lastY - y > 200 && !view.isZoomed()) finishActivity();
+                    else if (!view.isZoomed()) {
+                        view.setTranslationY(0);
+                        if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
+                            convertEditState();
+                        }
+                    }
+                }
+            }
         }
 
         private void setDefaultMainPicAndMainPicScreenHeight(GifTouchNetworkImageView defaultMainPic, GifTouchNetworkImageView mainPic, Media media) {

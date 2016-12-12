@@ -748,7 +748,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     @Override
-    public void onPhotoItemLongClick(int selectedItemCount) {
+    public void onPhotoItemLongClick() {
         showChooseHeader();
 
         dismissBottomNavAnim();
@@ -866,7 +866,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mAnimator.start();
 
         mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.share_btn_restore);
-        mAnimator.setInterpolator(new BounceInterpolator());
         mAnimator.setTarget(ivBtShare);
         mAnimator.start();
 
@@ -897,7 +896,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mAnimator.start();
 
         mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.share_btn_translation);
-        mAnimator.setInterpolator(new BounceInterpolator());
         mAnimator.setTarget(ivBtShare);
         mAnimator.start();
 

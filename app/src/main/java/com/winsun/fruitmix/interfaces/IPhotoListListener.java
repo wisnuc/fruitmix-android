@@ -7,7 +7,7 @@ public interface IPhotoListListener {
 
     void onPhotoItemClick(int selectedItemCount);
 
-    void onPhotoItemLongClick(int selectedItemCount);
+    void onPhotoItemLongClick();
 
     void onNoPhotoItem(boolean noPhotoItem);
 }

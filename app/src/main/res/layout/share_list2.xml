@@ -15,6 +15,7 @@
         android:scrollbars="vertical"
         android:scrollbarSize="3dp"
         android:scrollbarStyle="insideInset"
+        android:background="#f0f0f0"
         android:scrollbarThumbVertical="@color/gray"
         android:visibility="visible"/>
 

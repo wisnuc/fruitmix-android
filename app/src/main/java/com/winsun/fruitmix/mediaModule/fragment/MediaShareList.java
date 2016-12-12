@@ -457,6 +457,7 @@ public class MediaShareList implements Page {
                 mImageLoader.setShouldCache(!coverImg.isLocal());
                 ivCover.setTag(imageUrl);
                 ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivCover.setOrientationNumber(coverImg.getOrientationNumber());
                 ivCover.setImageUrl(imageUrl, mImageLoader);
 
             } else {
@@ -528,6 +529,7 @@ public class MediaShareList implements Page {
                 mImageLoader.setShouldCache(!itemImg.isLocal());
                 ivCover.setTag(imageUrl);
                 ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivCover.setOrientationNumber(itemImg.getOrientationNumber());
                 ivCover.setImageUrl(imageUrl, mImageLoader);
 
                 String uuid = itemImg.getUuid();
@@ -588,13 +590,22 @@ public class MediaShareList implements Page {
                     intent.putExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, false);
                     intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                    String transitionName = String.valueOf(imageList.get(0).getUuid());
+                    if(ivCover.isLoaded()){
 
-                    ViewCompat.setTransitionName(ivCover, transitionName);
+                        String transitionName = String.valueOf(imageList.get(0).getUuid());
 
-                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
+                        ViewCompat.setTransitionName(ivCover, transitionName);
 
-                    containerActivity.startActivity(intent, options.toBundle());
+                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
+
+                        containerActivity.startActivity(intent, options.toBundle());
+                    }else {
+
+                        intent.putExtra(Util.KEY_NEED_TRANSITION, false);
+                        containerActivity.startActivity(intent);
+
+                    }
+
                 }
             });
         }
@@ -782,15 +793,23 @@ public class MediaShareList implements Page {
                         intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                        String transitionName = String.valueOf(imageList.get(mItemPosition).getUuid());
                         View transitionView = ivItems[mItemPosition];
 
-                        ViewCompat.setTransitionName(ivItems[mItemPosition], transitionName);
+                        if(((NetworkImageView)transitionView).isLoaded()) {
 
-                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, transitionView, transitionName);
+                            String transitionName = String.valueOf(imageList.get(mItemPosition).getUuid());
 
-                        containerActivity.startActivity(intent, options.toBundle());
+                            ViewCompat.setTransitionName(ivItems[mItemPosition], transitionName);
 
+                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, transitionView, transitionName);
+
+                            containerActivity.startActivity(intent, options.toBundle());
+
+                        }else {
+
+                            intent.putExtra(Util.KEY_NEED_TRANSITION, false);
+                            containerActivity.startActivity(intent);
+                        }
                     }
                 });
             }

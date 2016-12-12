@@ -72,7 +72,6 @@ public class AlbumList implements Page {
     private double mDiffTimeMilliSecond = 200;
 
     private ImageLoader mImageLoader;
-    private RelativeLayout lastMainBar;
 
     private SwipeLayout lastSwipeLayout;
 
@@ -160,6 +159,7 @@ public class AlbumList implements Page {
     public void refreshView() {
 
         mLoadingLayout.setVisibility(View.VISIBLE);
+        ivAdd.setVisibility(View.INVISIBLE);
 
         if (!listener.isRemoteMediaShareLoaded()) {
             return;
