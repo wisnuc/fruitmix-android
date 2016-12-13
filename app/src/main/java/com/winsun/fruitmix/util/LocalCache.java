@@ -91,10 +91,8 @@ public class LocalCache {
                 dbUtils.deleteAllRemoteShare();
                 dbUtils.deleteAllRemoteUser();
                 dbUtils.deleteAllRemoteMedia();
-                dbUtils.deleteAllLocalMedia();
             }
         });
-
 
     }
 

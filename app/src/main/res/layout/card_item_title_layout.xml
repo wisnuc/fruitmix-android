@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/avatar"
-        android:layout_toRightOf="@+id/avatar"
+        android:layout_toRightOf="@id/avatar"
         android:text="@string/admin_default_name"
         android:textColor="@color/light_black"
         android:textSize="15dp"/>
@@ -35,9 +35,9 @@
         android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/nick"
+        android:layout_below="@id/nick"
         android:layout_marginTop="2dp"
-        android:layout_toRightOf="@+id/avatar"
+        android:layout_toRightOf="@id/avatar"
         android:text="@string/share_item_date"
         android:textColor="@color/light_gray"
         android:textSize="10dp"/>

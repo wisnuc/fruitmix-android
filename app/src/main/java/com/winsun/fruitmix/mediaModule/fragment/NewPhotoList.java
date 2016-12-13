@@ -121,7 +121,7 @@ public class NewPhotoList implements Page {
 
         this.listener = listener;
 
-        view = View.inflate(containerActivity, R.layout.new_photo_layout, null);
+        view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(R.layout.new_photo_layout, null);
 
         ButterKnife.bind(this, view);
 
@@ -325,7 +325,7 @@ public class NewPhotoList implements Page {
 
             Media localMedia = media.cloneSelf();
             localMedia.setLocal(true);
-            localMedia.setTitle(date);
+            localMedia.setDate(date);
             localMedia.setSelected(false);
 
             mediaList.add(localMedia);
@@ -347,7 +347,7 @@ public class NewPhotoList implements Page {
 
             Media remoteMedia = media.cloneSelf();
             remoteMedia.setLocal(false);
-            remoteMedia.setTitle(date);
+            remoteMedia.setDate(date);
             remoteMedia.setSelected(false);
 
             mediaList.add(remoteMedia);
@@ -384,7 +384,7 @@ public class NewPhotoList implements Page {
     private void fillLocalCachePhotoList() {
         LocalCache.photoSliderList.clear();
 
-        for (String title:mPhotoDateGroups){
+        for (String title : mPhotoDateGroups) {
             LocalCache.photoSliderList.addAll(mMapKeyIsDateValueIsPhotoList.get(title));
         }
 
@@ -646,7 +646,7 @@ public class NewPhotoList implements Page {
             if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsKey(position))
                 title = mMapKeyIsPhotoPositionValueIsPhotoDate.get(position);
             else {
-                title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getTitle();
+                title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDate();
             }
 
             if (title.contains("1916-01-01")) {
@@ -730,6 +730,9 @@ public class NewPhotoList implements Page {
                 @Override
                 public void onClick(View v) {
                     if (mSelectMode) {
+
+                        if (mUseAnim)
+                            mUseAnim = false;
 
                         boolean selected = mPhotoTitleSelectImg.isSelected();
                         mPhotoTitleSelectImg.setSelected(!selected);
@@ -819,7 +822,7 @@ public class NewPhotoList implements Page {
                 mPhotoIv.setImageUrl(null, mImageLoader);
             }
 
-            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getTitle());
+            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());
             int mediaInListPosition = getPosition(mediaList, currentMedia);
 
             setPhotoItemMargin(mediaInListPosition);
@@ -854,6 +857,9 @@ public class NewPhotoList implements Page {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
                             return;
                         }
+
+                        if (mUseAnim)
+                            mUseAnim = false;
 
                         boolean selected = currentMedia.isSelected();
 
@@ -983,7 +989,7 @@ public class NewPhotoList implements Page {
                 mIsFling = false;
 
                 mPhotoRecycleAdapter.notifyDataSetChanged();
-            } else if(newState == RecyclerView.SCROLL_STATE_DRAGGING){
+            } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
 
                 mUseAnim = false;
 

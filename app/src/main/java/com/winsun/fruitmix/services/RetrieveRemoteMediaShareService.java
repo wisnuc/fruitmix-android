@@ -78,9 +78,19 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
             RemoteDataParser<MediaShare> parser = new RemoteMediaShareParser();
             mediaShares = parser.parse(httpResponse.getResponseData());
+
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: parse remote media share");
+            
             mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
 
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: build media share map");
+            
+            //maybe a litte slow
+
             dbUtils.deleteAllRemoteShare();
+
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: delete all remote share in db");
+            
             dbUtils.insertRemoteMediaShares(mediaShareConcurrentMap);
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: retrieve remote media share from network");
@@ -97,7 +107,6 @@ public class RetrieveRemoteMediaShareService extends IntentService {
         LocalCache.RemoteMediaShareMapKeyIsUUID.clear();
 
         LocalCache.RemoteMediaShareMapKeyIsUUID.putAll(mediaShareConcurrentMap);
-
 
         OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_RETRIEVED, new OperationSuccess());
         EventBus.getDefault().post(operationEvent);

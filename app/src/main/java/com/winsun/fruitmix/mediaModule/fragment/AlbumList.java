@@ -82,8 +82,7 @@ public class AlbumList implements Page {
 
         this.listener = listener;
 
-        view = LayoutInflater.from(containerActivity).inflate(
-                R.layout.album_list, null);
+        view = LayoutInflater.from(containerActivity).inflate(R.layout.album_list, null);
 
         ButterKnife.bind(this, view);
 

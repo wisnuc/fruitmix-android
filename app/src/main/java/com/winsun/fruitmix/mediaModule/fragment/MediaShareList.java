@@ -9,9 +9,7 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.ListViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -21,10 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -94,8 +90,7 @@ public class MediaShareList implements Page {
 
         this.listener = listener;
 
-        view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(
-                R.layout.share_list2, null);
+        view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(R.layout.share_list2, null);
 
         ButterKnife.bind(this, view);
 

@@ -39,7 +39,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String SHARE_KEY_IS_ARCHIVED = "share_key_is_archived";
     public static final String SHARE_KEY_IS_DATE = "share_key_is_date";
     public static final String SHARE_KEY_IS_COVER_IMAGE_DIGEST = "share_key_is_cover_image_digest";
-    public static final String SHARE_KEY_IS_LOCKED = "share_key_is_locked";
+    public static final String SHARE_KEY_IS_LOCAL = "share_key_is_local";
     public static final String SHARE_KEY_DIGEST = "share_digest";
     public static final String SHARE_KEY_IS_STICKY = "share_is_sticky";
 
@@ -61,8 +61,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String MEDIA_KEY_HEIGHT = "media_height";
     public static final String MEDIA_KEY_THUMB = "media_thumb";
     public static final String MEDIA_KEY_LOCAL = "media_local";
-    public static final String MEDIA_KEY_TITLE = "media_title";
-    public static final String MEDIA_KEY_BELONGING_MEDIASHARE_UUID = "media_key_belonging_mediashare_uuid";
     public static final String MEDIA_KEY_UPLOADED = "media_key_uploaded";
     public static final String MEDIA_KEY_SHARING = "media_key_sharing";
     public static final String MEDIA_KEY_ORIENTATION_NUMBER = "media_key_orientation_number";
@@ -94,7 +92,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     static final String DOWNLOADED_FILE_TABLE_NAME = "downloaded_file";
 
-    private static final int DB_VERSION = 17;
+    private static final int DB_VERSION = 18;
 
     private static final String CREATE_TABLE = "create table ";
 
@@ -115,7 +113,7 @@ public class DBHelper extends SQLiteOpenHelper {
             + SHARE_KEY_VIEWERS + " text not null,"
             + SHARE_KEY_MAINTAINERS + " text not null," + SHARE_KEY_IS_ALBUM + " integer not null,"
             + SHARE_KEY_IS_ARCHIVED + " integer not null," + SHARE_KEY_IS_COVER_IMAGE_DIGEST + " text not null,"
-            + SHARE_KEY_IS_DATE + " text not null," + SHARE_KEY_IS_LOCKED + " integer not null,"
+            + SHARE_KEY_IS_DATE + " text not null," + SHARE_KEY_IS_LOCAL + " integer not null,"
             + SHARE_KEY_DIGEST + " text," + SHARE_KEY_IS_STICKY + " integer not null)";
 
     private static final String DATABASE_LOCAL_SHARE_CREATE = CREATE_TABLE + LOCAL_SHARE_TABLE_NAME + DATABASE_SHARE_CREATE;
@@ -125,8 +123,8 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_MEDIA_CREATE = " (" + MEDIA_KEY_ID + " integer primary key autoincrement,"
             + MEDIA_KEY_UUID + " text not null," + MEDIA_KEY_TIME + " text not null," + MEDIA_KEY_WIDTH + " text not null,"
             + MEDIA_KEY_HEIGHT + " text not null," + MEDIA_KEY_THUMB + " text," + MEDIA_KEY_LOCAL + " integer not null,"
-            + MEDIA_KEY_TITLE + " text," + MEDIA_KEY_BELONGING_MEDIASHARE_UUID + " text," + MEDIA_KEY_UPLOADED + " integer not null,"
-            + MEDIA_KEY_SHARING + " integer not null," + MEDIA_KEY_ORIENTATION_NUMBER + " integer," + MEDIA_KEY_TYPE + " text)";
+            + MEDIA_KEY_UPLOADED + " integer not null," + MEDIA_KEY_SHARING + " integer not null,"
+            + MEDIA_KEY_ORIENTATION_NUMBER + " integer," + MEDIA_KEY_TYPE + " text)";
 
     private static final String DATABASE_REMOTE_MEDIA_CREATE = CREATE_TABLE + REMOTE_MEDIA_TABLE_NAME + DATABASE_MEDIA_CREATE;
 

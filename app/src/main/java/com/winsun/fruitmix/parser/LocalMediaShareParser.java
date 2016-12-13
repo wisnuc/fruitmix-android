@@ -29,7 +29,7 @@ public class LocalMediaShareParser implements LocalDataParser<MediaShare>{
         mediaShare.setArchived(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_ARCHIVED)) == 1);
         mediaShare.setDate(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_DATE)));
         mediaShare.setCoverImageDigest(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_COVER_IMAGE_DIGEST)));
-        mediaShare.setLocal(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_LOCKED)) == 1);
+        mediaShare.setLocal(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_LOCAL)) == 1);
         mediaShare.setShareDigest(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_DIGEST)));
         mediaShare.setSticky(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_STICKY)) == 1);
 

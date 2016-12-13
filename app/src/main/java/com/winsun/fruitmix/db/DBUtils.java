@@ -125,6 +125,61 @@ public class DBUtils {
         return contentValues;
     }
 
+    private void bindMediaShareContent(SQLiteStatement sqLiteStatement, MediaShareContent mediaShareContent, String mediaShareUUID) {
+        sqLiteStatement.bindString(1, mediaShareUUID);
+        sqLiteStatement.bindString(2, mediaShareContent.getDigest());
+        sqLiteStatement.bindString(3, mediaShareContent.getAuthor());
+        sqLiteStatement.bindString(4, mediaShareContent.getTime());
+    }
+
+    @NonNull
+    private String createInsertMediaShareContentSql(String mediaShareContentDBName) {
+        return "insert into " + mediaShareContentDBName + "(" +
+                DBHelper.SHARE_CONTENT_KEY_SHARE_UUID + "," +
+                DBHelper.SHARE_CONTENT_KEY_DIGEST + "," +
+                DBHelper.SHARE_CONTENT_KEY_CREATOR_UUID + "," +
+                DBHelper.SHARE_CONTENT_KEY_TIME + ")" +
+                "values(?,?,?,?)";
+    }
+
+    private long insertMediaShareContent(String mediashareContentTableName, MediaShareContent mediaShareContent, String mediashareUUID) {
+
+        long returnValue = 0;
+
+        try {
+            openWritableDB();
+
+            String sql = createInsertMediaShareContentSql(mediashareContentTableName);
+
+            SQLiteStatement sqLiteStatement = database.compileStatement(sql);
+            database.beginTransaction();
+
+            bindMediaShareContent(sqLiteStatement, mediaShareContent, mediashareUUID);
+
+            returnValue = sqLiteStatement.executeInsert();
+
+            database.setTransactionSuccessful();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+
+            database.endTransaction();
+
+            close();
+        }
+
+        return returnValue;
+    }
+
+    public long insertLocalMediaShareContent(MediaShareContent mediaShareContent, String mediashareUUID) {
+        return insertMediaShareContent(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShareContent, mediashareUUID);
+    }
+
+    public long insertRemoteMediaShareContent(MediaShareContent mediaShareContent, String mediashareUUID) {
+        return insertMediaShareContent(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShareContent, mediashareUUID);
+    }
+
+
     private ContentValues createMediaShareContentValues(MediaShare mediaShare) {
 
         ContentValues contentValues = new ContentValues();
@@ -155,59 +210,114 @@ public class DBUtils {
         contentValues.put(DBHelper.SHARE_KEY_IS_ARCHIVED, mediaShare.isArchived() ? 1 : 0);
         contentValues.put(DBHelper.SHARE_KEY_IS_DATE, mediaShare.getDate());
         contentValues.put(DBHelper.SHARE_KEY_IS_COVER_IMAGE_DIGEST, mediaShare.getCoverImageDigest());
-        contentValues.put(DBHelper.SHARE_KEY_IS_LOCKED, mediaShare.isLocal() ? 1 : 0);
+        contentValues.put(DBHelper.SHARE_KEY_IS_LOCAL, mediaShare.isLocal() ? 1 : 0);
         contentValues.put(DBHelper.SHARE_KEY_DIGEST, mediaShare.getShareDigest());
         contentValues.put(DBHelper.SHARE_KEY_IS_STICKY, mediaShare.isSticky() ? 1 : 0);
 
         return contentValues;
     }
 
-    private long insertMediaShareContent(String mediashareContentTableName, MediaShareContent mediaShareContent, String mediashareUUID) {
-        openWritableDB();
+    private void bindMediaShare(SQLiteStatement sqLiteStatement, MediaShare mediaShare) {
+        sqLiteStatement.bindString(1, mediaShare.getUuid());
+        sqLiteStatement.bindString(2, mediaShare.getCreatorUUID());
+        sqLiteStatement.bindString(3, mediaShare.getTime());
+        sqLiteStatement.bindString(4, mediaShare.getTitle());
+        sqLiteStatement.bindString(5, mediaShare.getDesc());
 
-        ContentValues contentValues = createMediaShareContentContentValues(mediaShareContent, mediashareUUID);
+        StringBuilder builder = new StringBuilder();
 
-        long returnValue = database.insert(mediashareContentTableName, null, contentValues);
+        for (String viewer : mediaShare.getViewers()) {
+            builder.append(viewer);
+            builder.append(",");
+        }
 
-        close();
+        sqLiteStatement.bindString(6, builder.toString());
 
-        return returnValue;
+        builder.setLength(0);
+        for (String maintainer : mediaShare.getMaintainers()) {
+            builder.append(maintainer);
+            builder.append(",");
+        }
+
+        sqLiteStatement.bindString(7, builder.toString());
+
+        sqLiteStatement.bindLong(8, mediaShare.isAlbum() ? 1 : 0);
+        sqLiteStatement.bindLong(9, mediaShare.isArchived() ? 1 : 0);
+        sqLiteStatement.bindString(10, mediaShare.getDate());
+        sqLiteStatement.bindString(11, mediaShare.getCoverImageDigest());
+        sqLiteStatement.bindLong(12, mediaShare.isLocal() ? 1 : 0);
+        sqLiteStatement.bindString(13, mediaShare.getShareDigest());
+        sqLiteStatement.bindLong(14, mediaShare.isSticky() ? 1 : 0);
+
     }
 
-    public long insertLocalMediaShareContent(MediaShareContent mediaShareContent, String mediashareUUID) {
-        return insertMediaShareContent(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShareContent, mediashareUUID);
-    }
-
-    public long insertRemoteMediaShareContent(MediaShareContent mediaShareContent, String mediashareUUID) {
-        return insertMediaShareContent(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShareContent, mediashareUUID);
+    @NonNull
+    private String createInsertMediaShareSql(String mediaShareDBName) {
+        return "insert into " + mediaShareDBName + "(" +
+                DBHelper.SHARE_KEY_UUID + "," +
+                DBHelper.SHARE_KEY_CREATOR_UUID + "," +
+                DBHelper.SHARE_KEY_TIME + "," +
+                DBHelper.SHARE_KEY_TITLE + "," +
+                DBHelper.SHARE_KEY_DESC + "," +
+                DBHelper.SHARE_KEY_VIEWERS + "," +
+                DBHelper.SHARE_KEY_MAINTAINERS + "," +
+                DBHelper.SHARE_KEY_IS_ALBUM + "," +
+                DBHelper.SHARE_KEY_IS_ARCHIVED + "," +
+                DBHelper.SHARE_KEY_IS_DATE + "," +
+                DBHelper.SHARE_KEY_IS_COVER_IMAGE_DIGEST + "," +
+                DBHelper.SHARE_KEY_IS_LOCAL + "," +
+                DBHelper.SHARE_KEY_DIGEST + "," +
+                DBHelper.SHARE_KEY_IS_STICKY + ")" +
+                "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
     }
 
     private long insertMediaShare(String mediashareContentTableName, String mediashareTableName, Collection<MediaShare> mediashares) {
-        openWritableDB();
 
         long returnValue = 0;
 
-        ContentValues contentValue;
+        try {
+            openWritableDB();
 
-        for (MediaShare mediashare : mediashares) {
+            String insertMediaShareContentSql = createInsertMediaShareContentSql(mediashareContentTableName);
 
-            for (MediaShareContent mediashareContent : mediashare.getMediaShareContents()) {
-                contentValue = createMediaShareContentContentValues(mediashareContent, mediashare.getUuid());
+            SQLiteStatement mediaShareContentSQLiteStatement = database.compileStatement(insertMediaShareContentSql);
 
-                database.insert(mediashareContentTableName, null, contentValue);
+            String insertMediaShareSql = createInsertMediaShareSql(mediashareTableName);
+
+            SQLiteStatement mediaShareSQLiteStatement = database.compileStatement(insertMediaShareSql);
+
+            database.beginTransaction();
+
+            for (MediaShare mediashare : mediashares) {
+
+                for (MediaShareContent mediashareContent : mediashare.getMediaShareContents()) {
+
+                    bindMediaShareContent(mediaShareContentSQLiteStatement, mediashareContent, mediashare.getUuid());
+
+                    mediaShareContentSQLiteStatement.executeInsert();
+                }
+
+                bindMediaShare(mediaShareSQLiteStatement, mediashare);
+
+                returnValue = mediaShareSQLiteStatement.executeInsert();
+
             }
 
-            ContentValues contentValues = createMediaShareContentValues(mediashare);
+            database.setTransactionSuccessful();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
 
-            returnValue = database.insert(mediashareTableName, null, contentValues);
+            database.endTransaction();
+
+            close();
         }
 
-        close();
-
         return returnValue;
+
     }
 
-    public long insertLocalShare(MediaShare mediaShare) {
+    public long insertLocalMediaShare(MediaShare mediaShare) {
 
         return insertMediaShare(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, DBHelper.LOCAL_SHARE_TABLE_NAME, Collections.singletonList(mediaShare));
     }
@@ -288,12 +398,10 @@ public class DBUtils {
         contentValues.put(DBHelper.MEDIA_KEY_HEIGHT, media.getHeight());
         contentValues.put(DBHelper.MEDIA_KEY_THUMB, media.getThumb());
         contentValues.put(DBHelper.MEDIA_KEY_LOCAL, media.isLocal() ? 1 : 0);
-        contentValues.put(DBHelper.MEDIA_KEY_TITLE, media.getTitle());
-        contentValues.put(DBHelper.MEDIA_KEY_BELONGING_MEDIASHARE_UUID, media.getBelongingMediaShareUUID());
         contentValues.put(DBHelper.MEDIA_KEY_UPLOADED, media.isUploaded() ? 1 : 0);
         contentValues.put(DBHelper.MEDIA_KEY_SHARING, media.isSharing() ? 1 : 0);
         contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER, media.getOrientationNumber());
-        contentValues.put(DBHelper.MEDIA_KEY_TYPE,media.getType());
+        contentValues.put(DBHelper.MEDIA_KEY_TYPE, media.getType());
 
         return contentValues;
     }
@@ -312,7 +420,7 @@ public class DBUtils {
 
             for (Media media : medias.values()) {
 
-                bingData(sqLiteStatement, media);
+                bindData(sqLiteStatement, media);
 
                 returnValue = sqLiteStatement.executeInsert();
 
@@ -331,18 +439,17 @@ public class DBUtils {
 
     }
 
-    private void bingData(SQLiteStatement sqLiteStatement, Media media) {
+    private void bindData(SQLiteStatement sqLiteStatement, Media media) {
         sqLiteStatement.bindString(1, media.getUuid());
         sqLiteStatement.bindString(2, media.getTime());
         sqLiteStatement.bindString(3, media.getWidth());
         sqLiteStatement.bindString(4, media.getHeight());
         sqLiteStatement.bindString(5, media.getThumb());
         sqLiteStatement.bindLong(6, media.isLocal() ? 1 : 0);
-        sqLiteStatement.bindString(7, media.getTitle());
-        sqLiteStatement.bindString(8, media.getBelongingMediaShareUUID());
-        sqLiteStatement.bindLong(9, media.isUploaded() ? 1 : 0);
-        sqLiteStatement.bindLong(10, media.isSharing() ? 1 : 0);
-        sqLiteStatement.bindLong(11, media.getOrientationNumber());
+        sqLiteStatement.bindLong(7, media.isUploaded() ? 1 : 0);
+        sqLiteStatement.bindLong(8, media.isSharing() ? 1 : 0);
+        sqLiteStatement.bindLong(9, media.getOrientationNumber());
+        sqLiteStatement.bindString(10,media.getType());
     }
 
     @NonNull
@@ -354,13 +461,11 @@ public class DBUtils {
                 DBHelper.MEDIA_KEY_HEIGHT + "," +
                 DBHelper.MEDIA_KEY_THUMB + "," +
                 DBHelper.MEDIA_KEY_LOCAL + "," +
-                DBHelper.MEDIA_KEY_TITLE + "," +
-                DBHelper.MEDIA_KEY_BELONGING_MEDIASHARE_UUID + "," +
                 DBHelper.MEDIA_KEY_UPLOADED + "," +
                 DBHelper.MEDIA_KEY_SHARING + "," +
                 DBHelper.MEDIA_KEY_ORIENTATION_NUMBER + "," +
                 DBHelper.MEDIA_KEY_TYPE + ")" +
-                "values(?,?,?,?,?,?,?,?,?,?,?,?)";
+                "values(?,?,?,?,?,?,?,?,?,?)";
     }
 
     public long insertLocalMedia(Media media) {
@@ -372,7 +477,6 @@ public class DBUtils {
         ContentValues contentValues = createMediaContentValues(media);
 
         returnValue = database.insert(DBHelper.LOCAL_MEDIA_TABLE_NAME, null, contentValues);
-
 
         close();
 

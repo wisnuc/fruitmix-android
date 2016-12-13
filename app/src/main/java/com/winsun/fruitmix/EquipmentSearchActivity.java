@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.LruCache;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
@@ -256,7 +257,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
             GroupViewHolder groupViewHolder;
             if (convertView == null) {
-                convertView = View.inflate(mContext, R.layout.equipment_group_item, null);
+                convertView = LayoutInflater.from(mContext).inflate(R.layout.equipment_group_item, parent, false);
+
                 groupViewHolder = new GroupViewHolder(convertView);
                 convertView.setTag(groupViewHolder);
             } else {
@@ -282,7 +284,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                     childViewHolder = (ChildViewHolder) convertView.getTag();
 
                 } else {
-                    convertView = View.inflate(mContext, R.layout.equipment_child_item, null);
+                    convertView = LayoutInflater.from(mContext).inflate(R.layout.equipment_child_item, parent, false);
                     childViewHolder = new ChildViewHolder(convertView);
                     convertView.setTag(childViewHolder);
 

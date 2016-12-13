@@ -139,7 +139,6 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
 
         nullCommand = new NullCommand();
 
-        Log.i(TAG, "onCreate: ");
     }
 
     @Override
@@ -155,8 +154,6 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
 
         fileDownloadedRecyclerView.setAdapter(downloadedFileAdapter);
         fileDownloadedRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        Log.i(TAG, "onCreateView: ");
 
         return view;
     }
@@ -181,12 +178,6 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
         EventBus.getDefault().unregister(this);
 
         super.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

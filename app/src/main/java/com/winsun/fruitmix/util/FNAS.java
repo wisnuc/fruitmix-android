@@ -440,6 +440,7 @@ public class FNAS {
         InputStream is;
         byte[] buffer;
         int len, resCode;
+        HttpURLConnection conn = null;
 
         try {
             while (JWT == null) Thread.sleep(500);
@@ -453,7 +454,7 @@ public class FNAS {
             url = Gateway + ":" + FNAS.PORT + Util.DEVICE_ID_PARAMETER + "/" + LocalCache.DeviceID;
             Log.d(TAG, "Photo UP: " + url);
             boundary = java.util.UUID.randomUUID().toString();
-            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+            conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setReadTimeout(60 * 1000);
             conn.setDoInput(true);// 允许输入
             conn.setDoOutput(true);// 允许输出
@@ -464,7 +465,6 @@ public class FNAS {
             conn.setRequestProperty("Charsert", "UTF-8");
             conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
             conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
-            conn.setReadTimeout(Util.HTTP_CONNECT_TIMEOUT);
 
             outStream = new BufferedOutputStream(conn.getOutputStream());
 
@@ -512,10 +512,12 @@ public class FNAS {
                 return true;
             }
 
-            conn.disconnect();
-
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+
+            if (conn != null)
+                conn.disconnect();
         }
 
         return false;

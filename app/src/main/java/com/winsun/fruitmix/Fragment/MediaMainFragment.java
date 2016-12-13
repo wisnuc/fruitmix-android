@@ -212,6 +212,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 //            FNAS.retrieveLocalMediaCommentMap(mContext);
 
             onResume = true;
+        } else {
+            pageList.get(PAGE_ALBUM).refreshView();
+            pageList.get(PAGE_SHARE).refreshView();
         }
     }
 
@@ -356,8 +359,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                     FNAS.retrieveRemoteMediaShare(mContext);
                 }
 
-                FNAS.startUploadAllLocalPhoto(mContext);
-
             }
         }
     }
@@ -422,6 +423,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             Log.i(TAG, "local share loaded");
 
             mLocalMediaShareLoaded = true;
+
+            pageList.get(PAGE_ALBUM).refreshView();
+            pageList.get(PAGE_SHARE).refreshView();
+
+            FNAS.startUploadAllLocalPhoto(mContext);
 
             doCreateMediaShareInLocalMediaShareMapFunction();
         } else if (action.equals(Util.LOCAL_MEDIA_COMMENT_RETRIEVED)) {

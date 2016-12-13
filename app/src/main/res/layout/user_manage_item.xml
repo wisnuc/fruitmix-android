@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white"
-    android:minHeight="80dp"
-    android:paddingLeft="16dp">
+    android:layout_height="72dp"
+    android:background="@color/white">
 
     <TextView
         android:id="@+id/user_default_portrait"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
+        android:layout_marginLeft="16dp"
         android:background="@drawable/user_portrait_bg_green"
         android:gravity="center"
-        android:text="@string/name_abbreviations" />
+        android:text="@string/name_abbreviations"
+        android:textColor="@color/white"
+        android:textSize="16dp" />
 
     <LinearLayout
+        android:id="@+id/user_info_layout"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
-        android:layout_alignTop="@id/user_default_portrait"
-        android:layout_marginLeft="8dp"
         android:layout_centerVertical="true"
+        android:layout_marginLeft="32dp"
         android:layout_toRightOf="@id/user_default_portrait"
         android:orientation="vertical">
 
@@ -33,7 +33,7 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:text="@string/admin_default_name"
-            android:textSize="20dp" />
+            android:textSize="16dp" />
 
         <TextView
             android:id="@+id/user_email"
@@ -43,26 +43,34 @@
             android:gravity="center_vertical"
             android:text="@string/user_email"
             android:textColor="#8E8E8E"
-            android:textSize="16dp"
+            android:textSize="14dp"
             android:visibility="visible" />
 
     </LinearLayout>
 
-    <ImageView
+    <LinearLayout
         android:id="@+id/del_user"
         android:layout_width="40dp"
         android:layout_height="50dp"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="16dp"
-        android:background="@drawable/del_user"
-        android:visibility="invisible" />
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="invisible">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/del_user" />
+
+    </LinearLayout>
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="1dp"
+        android:layout_alignLeft="@id/user_info_layout"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="8dp"
         android:background="#DEDEDE" />
 
 </RelativeLayout>

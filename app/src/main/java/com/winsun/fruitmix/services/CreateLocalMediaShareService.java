@@ -11,7 +11,6 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.operationResult.OperationSQLException;
 import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -65,7 +64,7 @@ public class CreateLocalMediaShareService extends IntentService {
     private void handleActionCreateShare(MediaShare mediaShare) {
 
         DBUtils dbUtils = DBUtils.getInstance(this);
-        long returnValue = dbUtils.insertLocalShare(mediaShare);
+        long returnValue = dbUtils.insertLocalMediaShare(mediaShare);
 
         MediaShareOperationEvent mediaShareOperationEvent;
 

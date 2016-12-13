@@ -35,6 +35,10 @@ public class RemoteMediaShareJSONObjectParser {
 
         if (album == null) {
             mediaShare.setAlbum(false);
+
+            mediaShare.setTitle("");
+            mediaShare.setDesc("");
+
         } else {
             mediaShare.setAlbum(true);
 

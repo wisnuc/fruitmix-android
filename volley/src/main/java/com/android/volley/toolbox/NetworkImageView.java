@@ -62,7 +62,7 @@ public class NetworkImageView extends ImageView {
 
     private boolean loaded = false;
 
-    private int mMaxRetryNum = 3;
+    private int mMaxRetryNum = 10;
     private int mCurrentRetryNum = 0;
 
     /**
@@ -210,8 +210,9 @@ public class NetworkImageView extends ImageView {
                                 @Override
                                 public void run() {
                                     mImageContainer = null;
-                                    loadImageIfNecessary(false);
                                     mCurrentRetryNum++;
+                                    loadImageIfNecessary(false);
+
                                 }
                             }, 3000);
                         }

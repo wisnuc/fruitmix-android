@@ -25,7 +25,7 @@ public class Media implements Parcelable {
     private String height;
     private boolean selected;
     private boolean local;
-    private String title;
+    private String date;
     private boolean loaded;
     private String belongingMediaShareUUID;
     private boolean uploaded;
@@ -40,6 +40,8 @@ public class Media implements Parcelable {
         height = "200";
         thumb = "";
         type = "JPEG";
+        date = "";
+        belongingMediaShareUUID = "";
     }
 
     protected Media(Parcel in) {
@@ -50,7 +52,7 @@ public class Media implements Parcelable {
         height = in.readString();
         selected = in.readByte() != 0;
         local = in.readByte() != 0;
-        title = in.readString();
+        date = in.readString();
         loaded = in.readByte() != 0;
         belongingMediaShareUUID = in.readString();
         uploaded = in.readByte() != 0;
@@ -67,7 +69,7 @@ public class Media implements Parcelable {
         dest.writeString(height);
         dest.writeByte((byte) (selected ? 1 : 0));
         dest.writeByte((byte) (local ? 1 : 0));
-        dest.writeString(title);
+        dest.writeString(date);
         dest.writeByte((byte) (loaded ? 1 : 0));
         dest.writeString(belongingMediaShareUUID);
         dest.writeByte((byte) (uploaded ? 1 : 0));
@@ -140,12 +142,12 @@ public class Media implements Parcelable {
         this.local = local;
     }
 
-    public String getTitle() {
-        return title == null ? "" : title;
+    public String getDate() {
+        return date == null ? "" : date;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public String getThumb() {
@@ -273,7 +275,7 @@ public class Media implements Parcelable {
         media.setHeight(getHeight());
         media.setSelected(isSelected());
         media.setLocal(isLocal());
-        media.setTitle(getTitle());
+        media.setDate(getDate());
         media.setLoaded(isLoaded());
         media.setBelongingMediaShareUUID(getBelongingMediaShareUUID());
         media.setUploaded(isUploaded());

@@ -96,7 +96,6 @@ public class FileShareFragment extends Fragment {
         retrievedFolderUUIDList = new ArrayList<>();
         retrievedFolderNameList = new ArrayList<>();
 
-        Log.i(TAG, "onCreate: ");
     }
 
     @Override
@@ -109,8 +108,6 @@ public class FileShareFragment extends Fragment {
 
         fileShareRecyclerView.setAdapter(fileShareRecyclerAdapter);
         fileShareRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        Log.i(TAG, "onCreateView: ");
 
         return view;
     }
@@ -130,8 +127,6 @@ public class FileShareFragment extends Fragment {
 
             FNAS.retrieveRemoteFileShare();
         }
-
-        Log.i(TAG, "onResume: ");
 
     }
 
@@ -305,8 +300,6 @@ public class FileShareFragment extends Fragment {
         TextView fileName;
         @BindView(R.id.remote_folder_item_layout)
         LinearLayout remoteFolderItemLayout;
-        @BindView(R.id.item_menu)
-        ImageView itemMenu;
         @BindView(R.id.content_layout)
         RelativeLayout contentLayout;
 
@@ -327,8 +320,6 @@ public class FileShareFragment extends Fragment {
             }
 
             final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
-
-            itemMenu.setVisibility(View.INVISIBLE);
 
             fileName.setText(abstractRemoteFile.getName());
 

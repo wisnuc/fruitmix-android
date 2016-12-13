@@ -138,7 +138,6 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
         nullCommand = new NullCommand();
 
-        Log.i(TAG, "onCreate: ");
     }
 
     @Override
@@ -152,8 +151,6 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         fileRecyclerViewAdapter = new FileRecyclerViewAdapter();
         fileRecyclerView.setAdapter(fileRecyclerViewAdapter);
         fileRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        Log.i(TAG, "onCreateView: ");
 
         return view;
     }
@@ -174,8 +171,6 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
             FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
         }
-
-        Log.i(TAG, "onResume: ");
 
     }
 

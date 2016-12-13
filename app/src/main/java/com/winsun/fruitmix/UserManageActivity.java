@@ -3,10 +3,12 @@ package com.winsun.fruitmix;
 import android.content.Context;
 import android.os.Bundle;
 import android.app.Activity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -113,7 +115,8 @@ public class UserManageActivity extends Activity implements View.OnClickListener
         public View getView(int position, View convertView, ViewGroup parent) {
             final ViewHolder viewHolder;
             if (convertView == null) {
-                convertView = View.inflate(mContext, R.layout.user_manage_item, null);
+                convertView = LayoutInflater.from(mContext).inflate(R.layout.user_manage_item,parent,false);
+
                 viewHolder = new ViewHolder(convertView);
                 convertView.setTag(viewHolder);
             } else {
@@ -145,7 +148,7 @@ public class UserManageActivity extends Activity implements View.OnClickListener
         @BindView(R.id.user_email)
         TextView mUserEmail;
         @BindView(R.id.del_user)
-        ImageView mDelUser;
+        LinearLayout mDelUser;
 
         ViewHolder(View view) {
             ButterKnife.bind(this, view);
