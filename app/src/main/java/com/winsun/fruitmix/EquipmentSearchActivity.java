@@ -16,7 +16,6 @@ import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -61,7 +60,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private EquipmentExpandableAdapter mAdapter;
 
-    private List<Equipment> mEquipments;
+    private List<Equipment> mUserLoadedEquipments;
+
+    private List<Equipment> mFoundedEquipments;
 
     private NsdManager.DiscoveryListener mListener;
 
@@ -83,7 +84,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         mContext = this;
 
         mUserExpandableLists = new ArrayList<>();
-        mEquipments = new ArrayList<>();
+        mUserLoadedEquipments = new ArrayList<>();
+
+        mFoundedEquipments = new ArrayList<>();
 
         mHandler = new CustomHandler(this, getMainLooper());
 
@@ -99,8 +102,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 Map<String, String> userMap = mUserExpandableLists.get(groupPosition).get(childPosition);
 
                 Intent intent = new Intent(mContext, LoginActivity.class);
-                intent.putExtra(Util.GATEWAY, "http://" + mEquipments.get(groupPosition).getHost());
-                intent.putExtra(Util.EQUIPMENT_GROUP_NAME, mEquipments.get(groupPosition).getServiceName());
+                intent.putExtra(Util.GATEWAY, "http://" + mUserLoadedEquipments.get(groupPosition).getHost());
+                intent.putExtra(Util.EQUIPMENT_GROUP_NAME, mUserLoadedEquipments.get(groupPosition).getServiceName());
                 intent.putExtra(Util.EQUIPMENT_CHILD_NAME, userMap.get("username"));
                 intent.putExtra(Util.USER_UUID, userMap.get("uuid"));
                 startActivityForResult(intent, Util.KEY_LOGIN_REQUEST_CODE);
@@ -448,7 +451,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
                 Log.i(TAG, "onServiceResolved Service info:" + serviceInfo);
 
-                for (Equipment equipment : mEquipments) {
+                for (Equipment equipment : mFoundedEquipments) {
                     if (equipment == null || serviceInfo.getServiceName().equals(equipment.getServiceName()) || (serviceInfo.getHost().getHostAddress().equals(equipment.getHost()))) {
                         return;
                     }
@@ -459,6 +462,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 Log.i(TAG, "host address:" + serviceInfo.getHost().getHostAddress());
                 equipment.setHost(serviceInfo.getHost().getHostAddress());
                 equipment.setPort(serviceInfo.getPort());
+
+                mFoundedEquipments.add(equipment);
 
                 getUserList(equipment);
             }
@@ -504,12 +509,12 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         itemList.add(item);
                     }
 
-                    for (Equipment equipment1 : mEquipments) {
+                    for (Equipment equipment1 : mUserLoadedEquipments) {
                         if (equipment1.getHost().equals(equipment.getHost()))
                             return;
                     }
 
-                    mEquipments.add(equipment);
+                    mUserLoadedEquipments.add(equipment);
                     mUserExpandableLists.add(itemList);
 
                     Log.i(TAG, "EquipmentSearch: " + mUserExpandableLists.toString());
@@ -549,12 +554,14 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         mLoadingLayout.setVisibility(View.GONE);
                     }
 
-                    mAdapter.equipmentList.clear();
-                    mAdapter.mapList.clear();
-                    mAdapter.equipmentList.addAll(mEquipments);
-                    mAdapter.mapList.addAll(mUserExpandableLists);
-                    mAdapter.viewLruCache.evictAll();
-                    weakReference.get().mAdapter.notifyDataSetChanged();
+                    EquipmentExpandableAdapter adapter = weakReference.get().mAdapter;
+
+                    adapter.equipmentList.clear();
+                    adapter.mapList.clear();
+                    adapter.equipmentList.addAll(mUserLoadedEquipments);
+                    adapter.mapList.addAll(mUserExpandableLists);
+                    adapter.viewLruCache.evictAll();
+                    adapter.notifyDataSetChanged();
                     break;
                 default:
             }

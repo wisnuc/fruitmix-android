@@ -187,7 +187,7 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
             } else {
                 // if there is a pre-existing request, cancel it if it's fetching a different URL.
                 mGifContainer.cancelRequest();
-                setDefaultImageOrNull();
+
             }
         }
 
@@ -201,16 +201,8 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                             setImageResource(mErrorImageId);
                         }
 
-                        post(new Runnable() {
-                            @Override
-                            public void run() {
+                        deliverImageLoadFinish();
 
-                                Log.i(TAG, "onErrorResponse Url:" + mUrl);
-                                if (mImageLoadListener != null) {
-                                    mImageLoadListener.onImageLoadFinish(mUrl, GifTouchNetworkImageView.this);
-                                }
-                            }
-                        });
                     }
 
                     @Override
@@ -247,8 +239,6 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
 
                             deliverImageLoadFinish();
 
-                        } else if (mDefaultImageId != 0) {
-                            setImageResource(mDefaultImageId);
                         }
                     }
                 });
@@ -296,7 +286,7 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
             } else {
                 // if there is a pre-existing request, cancel it if it's fetching a different URL.
                 mImageContainer.cancelRequest();
-                setDefaultImageOrNull();
+
             }
         }
 
@@ -314,16 +304,7 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                             setImageResource(mErrorImageId);
                         }
 
-                        post(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                Log.i(TAG, "onErrorResponse Url:" + mUrl);
-                                if (mImageLoadListener != null) {
-                                    mImageLoadListener.onImageLoadFinish(mUrl, GifTouchNetworkImageView.this);
-                                }
-                            }
-                        });
+                        deliverImageLoadFinish();
                     }
 
                     @Override
@@ -357,8 +338,6 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
 
                             deliverImageLoadFinish();
 
-                        } else if (mDefaultImageId != 0) {
-                            setImageResource(mDefaultImageId);
                         }
                     }
                 }, maxWidth, maxHeight, scaleType);
@@ -406,10 +385,18 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
             // If the view was bound to an image request, cancel it and clear
             // out the image from the view.
             mGifContainer.cancelRequest();
-            setImageBitmap(null);
+            setImageDrawable(null);
             // also clear out the container so we can reload the image if necessary.
             mGifContainer = null;
+        } else if (mImageContainer != null) {
+            // If the view was bound to an image request, cancel it and clear
+            // out the image from the view.
+            mImageContainer.cancelRequest();
+            setImageBitmap(null);
+            // also clear out the container so we can reload the image if necessary.
+            mImageContainer = null;
         }
+
         super.onDetachedFromWindow();
     }
 

@@ -205,7 +205,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 case SUCCEED:
                     ((Activity) mContext).setResult(RESULT_OK);
                     break;
-                case FAIL:
                 case LOCAL_MEDIA_SHARE_UPLOADING:
                 case NO_NETWORK_EXCEPTION:
                     Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();

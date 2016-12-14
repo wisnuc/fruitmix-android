@@ -315,7 +315,7 @@ public class FileShareFragment extends Fragment {
             if (position == 0) {
 
                 LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
-                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), 0, 0);
+                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), Util.dip2px(getActivity(), 16), 0);
                 contentLayout.setLayoutParams(layoutParams);
             }
 
@@ -369,7 +369,7 @@ public class FileShareFragment extends Fragment {
             if (position == 0) {
 
                 LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
-                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), 0, 0);
+                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), Util.dip2px(getActivity(), 16), 0);
                 contentLayout.setLayoutParams(layoutParams);
 
             }

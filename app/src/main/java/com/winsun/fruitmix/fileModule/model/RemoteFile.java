@@ -41,7 +41,7 @@ public class RemoteFile extends AbstractRemoteFile {
 
     @Override
     public List<AbstractRemoteFile> listChildAbstractRemoteFileList() {
-        throw new UnsupportedOperationException("File can not call list operation");
+        throw new UnsupportedOperationException("File can not call this operation");
     }
 
     @Override

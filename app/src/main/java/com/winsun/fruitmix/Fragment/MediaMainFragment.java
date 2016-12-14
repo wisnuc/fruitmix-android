@@ -213,8 +213,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             onResume = true;
         } else {
-            pageList.get(PAGE_ALBUM).refreshView();
-            pageList.get(PAGE_SHARE).refreshView();
+            pageList.get(viewPager.getCurrentItem()).refreshView();
         }
     }
 
@@ -569,7 +568,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 onActivityResult(Util.KEY_CREATE_SHARE_REQUEST_CODE, RESULT_OK, null);
                 break;
-            case FAIL:
+            case SQL_EXCEPTION:
 
                 dismissDialog();
 

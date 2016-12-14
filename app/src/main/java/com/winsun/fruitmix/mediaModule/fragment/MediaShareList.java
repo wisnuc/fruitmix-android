@@ -144,13 +144,13 @@ public class MediaShareList implements Page {
 
     private void fillMediaShareList(List<MediaShare> mediaShareList) {
         for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
-            if (!mediaShare.isArchived() && (mediaShare.getViewersListSize() != 0 || LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()))) {
+            if (!mediaShare.isArchived() && (mediaShare.getViewersListSize() != 0 && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()))) {
                 mediaShareList.add(mediaShare);
             }
         }
 
         for (MediaShare mediaShare : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
-            if (!mediaShare.isArchived() && (mediaShare.getViewersListSize() != 0 || LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()))) {
+            if (!mediaShare.isArchived() && (mediaShare.getViewersListSize() != 0 && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()))) {
                 mediaShareList.add(mediaShare);
             }
         }

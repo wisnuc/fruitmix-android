@@ -47,13 +47,6 @@
 
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_below="@id/content"
-            android:layout_toRightOf="@id/file_icon"
-            android:background="#1F000000" />
-
     </RelativeLayout>
 
 

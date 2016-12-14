@@ -71,11 +71,7 @@ public class FNAS {
 
         }
 
-        if (result.equals("")) {
-            throw new IOException();
-        } else {
-            return result;
-        }
+        return result;
     }
 
     public static HttpResponse loadFileInFolder(String folderUUID) throws MalformedURLException, IOException, SocketTimeoutException {

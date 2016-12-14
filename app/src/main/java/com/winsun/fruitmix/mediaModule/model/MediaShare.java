@@ -42,6 +42,8 @@ public class MediaShare implements Parcelable {
         mediaShareContents = new ArrayList<>();
         viewers = new ArrayList<>();
         maintainers = new ArrayList<>();
+
+        shareDigest = "";
     }
 
     protected MediaShare(Parcel in) {

@@ -87,8 +87,6 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
     private OnFileInteractionListener onFileInteractionListener;
 
-    private Dialog dialog;
-
     private AbstractCommand showUnSelectModeViewCommand;
 
     private AbstractCommand showSelectModeViewCommand;
@@ -303,7 +301,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
     public Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
 
-        dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(getActivity());
+        Dialog dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(getActivity());
 
         for (BottomMenuItem bottomMenuItem : bottomMenuItems) {
             bottomMenuItem.setDialog(dialog);
@@ -472,7 +470,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
             if (position == 0) {
 
                 LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
-                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), 0, 0);
+                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), Util.dip2px(getActivity(), 16), 0);
                 contentLayout.setLayoutParams(layoutParams);
 
             }
@@ -537,7 +535,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
             if (position == 0) {
 
                 LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
-                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), 0, 0);
+                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), Util.dip2px(getActivity(), 16), 0);
                 contentLayout.setLayoutParams(layoutParams);
 
             }

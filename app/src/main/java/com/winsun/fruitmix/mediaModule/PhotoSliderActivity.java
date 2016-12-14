@@ -403,7 +403,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     private void handleRemoteMediaLoaded(String url, View view, Media media) {
         if (isImageThumb(url)) {
 
-            handleThumbLoaded(media);
+            handleThumbLoaded(view, media);
 
         } else {
 
@@ -416,15 +416,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         if (!transitionMediaNeedShowThumb && needTransition) {
             ActivityCompat.startPostponedEnterTransition(this);
             transitionMediaNeedShowThumb = true;
-        } else {
-
-            if (transitionMediaNeedShowThumb)
-                dismissCurrentImageThumb(media);
-
-            view.setVisibility(View.VISIBLE);
-
-            if (isCurrentViewPage(initialPhotoPosition) && needTransition)
-                ViewCompat.setTransitionName(view, media.getUuid());
         }
 
         if (!media.isLoaded()) {
@@ -434,15 +425,14 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         }
     }
 
-    private void handleThumbLoaded(Media media) {
+    private void handleThumbLoaded(View view, Media media) {
         if (isCurrentViewPage(initialPhotoPosition) && needTransition) {
             ActivityCompat.startPostponedEnterTransition(this);
 
-            startLoadCurrentImageAfterTransition(media);
+            startLoadCurrentImageAfterTransition(view, media);
         } else {
-            String imageUUID = media.getUuid();
 
-            startLoadingOriginalPhoto(imageUUID, media.getType());
+            startLoadingOriginalPhoto(view, media);
         }
     }
 
@@ -466,14 +456,14 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         return imageUrl.contains("thumb");
     }
 
-    private void startLoadCurrentImageAfterTransition(final Media media) {
+    private void startLoadCurrentImageAfterTransition(final View view, final Media media) {
         if (Util.checkRunningOnLollipopOrHigher()) {
             getWindow().getSharedElementEnterTransition().addListener(new CustomTransitionListener() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
                     super.onTransitionEnd(transition);
 
-                    startLoadingOriginalPhoto(media.getUuid(), media.getType());
+                    startLoadingOriginalPhoto(view, media);
 
                 }
             });
@@ -482,8 +472,11 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
     private void dismissCurrentImageThumb(Media media) {
         String thumbImageUrl = media.getImageThumbUrl(mContext);
-        final GifTouchNetworkImageView defaultMainPic = (GifTouchNetworkImageView) mViewPager.findViewWithTag(thumbImageUrl);
-        defaultMainPic.setVisibility(View.INVISIBLE);
+        View view = mViewPager.findViewWithTag(thumbImageUrl);
+
+        Log.i(TAG, "dismissCurrentImageThumb: view visibility:" + view.getVisibility());
+
+        view.setVisibility(View.INVISIBLE);
     }
 
     private String getImageUrl(boolean isThumb, Media media) {
@@ -498,15 +491,19 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         return currentUrl;
     }
 
-    private void startLoadingOriginalPhoto(final String imageUUID, String mediaType) {
+    private void startLoadingOriginalPhoto(View view, Media media) {
 
-        String remoteUrl = String.format(getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + imageUUID);
+        String remoteUrl = media.getImageOriginalUrl(mContext);
 
-        GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) mViewPager.findViewWithTag(remoteUrl);
+        GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view;
 
         mImageLoader.setShouldCache(true);
 
-        if (mediaType.equalsIgnoreCase("gif")) {
+        mainPic.setOrientationNumber(media.getOrientationNumber());
+
+        mainPic.setTag(remoteUrl);
+
+        if (media.getType().equalsIgnoreCase("gif")) {
             mainPic.setGifUrl(remoteUrl, mGifLoader);
         } else {
             mainPic.setImageUrl(remoteUrl, mImageLoader);
@@ -528,9 +525,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             view = LayoutInflater.from(mContext).inflate(R.layout.photo_slider_cell, null);
 
-            final GifTouchNetworkImageView defaultMainPic = (GifTouchNetworkImageView) view.findViewById(R.id.default_main_pic);
-
-            final GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view.findViewById(R.id.mainPic);
+            GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view.findViewById(R.id.mainPic);
 
             if (mediaList.size() > position && position > -1) {
 
@@ -538,38 +533,33 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 Log.i(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
 
-                setDefaultMainPicAndMainPicScreenHeight(defaultMainPic, mainPic, media);
+                setDefaultMainPicAndMainPicScreenHeight(mainPic, media);
 
                 mainPic.registerImageLoadListener(PhotoSliderActivity.this);
-                String originalImageUrl = media.getImageOriginalUrl(mContext);
-                mainPic.setTag(originalImageUrl);
+
                 mainPic.setDefaultImageResId(R.drawable.placeholder_photo);
 
                 mImageLoader.setShouldCache(!media.isLocal());
 
-                mainPic.setOrientationNumber(media.getOrientationNumber());
-
                 if (transitionMediaNeedShowThumb && !media.isLocal()) {
-
-                    defaultMainPic.setVisibility(View.VISIBLE);
-                    mainPic.setVisibility(View.INVISIBLE);
-
-                    if (position == initialPhotoPosition)
-                        ViewCompat.setTransitionName(defaultMainPic, media.getUuid());
-
-                    defaultMainPic.registerImageLoadListener(PhotoSliderActivity.this);
-
-                    String thumbImageUrl = media.getImageThumbUrl(mContext);
-                    defaultMainPic.setTag(thumbImageUrl);
-                    defaultMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
-                    defaultMainPic.setImageUrl(thumbImageUrl, mImageLoader);
-
-                } else {
-                    defaultMainPic.setVisibility(View.INVISIBLE);
-                    mainPic.setVisibility(View.VISIBLE);
 
                     if (position == initialPhotoPosition)
                         ViewCompat.setTransitionName(mainPic, media.getUuid());
+
+                    String thumbImageUrl = media.getImageThumbUrl(mContext);
+                    mainPic.setTag(thumbImageUrl);
+
+                    mainPic.setImageUrl(thumbImageUrl, mImageLoader);
+
+                } else {
+
+                    if (position == initialPhotoPosition)
+                        ViewCompat.setTransitionName(mainPic, media.getUuid());
+
+                    mainPic.setOrientationNumber(media.getOrientationNumber());
+
+                    String originalImageUrl = media.getImageOriginalUrl(mContext);
+                    mainPic.setTag(originalImageUrl);
 
                     if (originalImageUrl.endsWith(".gif")) {
                         mainPic.setGifUrl(originalImageUrl, mGifLoader);
@@ -580,8 +570,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 }
 
                 mainPic.setOnTouchListener(new CustomTouchListener());
-
-                defaultMainPic.setOnTouchListener(new CustomTouchListener());
 
             }
 
@@ -630,13 +618,13 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             }
         }
 
-        private void setDefaultMainPicAndMainPicScreenHeight(GifTouchNetworkImageView defaultMainPic, GifTouchNetworkImageView mainPic, Media media) {
+        private void setDefaultMainPicAndMainPicScreenHeight(GifTouchNetworkImageView mainPic, Media media) {
 
             int mediaWidth = Integer.parseInt(media.getWidth());
             int mediaHeight = Integer.parseInt(media.getHeight());
             int actualWidth = 0;
             int actualHeight = 0;
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) defaultMainPic.getLayoutParams();
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mainPic.getLayoutParams();
 
             if (mediaWidthLargerThanHeight(media, mediaWidth, mediaHeight)) {
                 actualWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
@@ -652,7 +640,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             layoutParams.width = actualWidth;
             layoutParams.height = actualHeight;
 
-            defaultMainPic.setLayoutParams(layoutParams);
             mainPic.setLayoutParams(layoutParams);
         }
 
@@ -681,9 +668,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
-
-            GifTouchNetworkImageView defaultMainPic = (GifTouchNetworkImageView) ((View) object).findViewById(R.id.default_main_pic);
-            defaultMainPic.unregisterImageLoadListener();
 
             GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) ((View) object).findViewById(R.id.mainPic);
             mainPic.unregisterImageLoadListener();

@@ -335,12 +335,14 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                         FNAS.deleteLocalMediaComment(mContext, imageUUID, comment);
 
                         break;
-                    case FAIL:
+                    case MALFORMED_URL_EXCEPTION:
+                    case SOCKET_TIMEOUT_EXCEPTION:
+                    case IO_EXCEPTION:
 
                         if (mDialog != null && mDialog.isShowing())
                             mDialog.dismiss();
 
-                        Toast.makeText(mContext, "fail", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, operationEvent.getOperationResult().getResultMessage(mContext), Toast.LENGTH_SHORT).show();
                         break;
                 }
 
@@ -364,12 +366,13 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
                         tfContent.setText("");
                         break;
-                    case FAIL:
-
+                    case MALFORMED_URL_EXCEPTION:
+                    case SOCKET_TIMEOUT_EXCEPTION:
+                    case IO_EXCEPTION:
                         if (mDialog != null && mDialog.isShowing())
                             mDialog.dismiss();
 
-                        Toast.makeText(mContext, "fail", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, operationEvent.getOperationResult().getResultMessage(mContext), Toast.LENGTH_SHORT).show();
                         tfContent.setText("");
                         break;
                 }

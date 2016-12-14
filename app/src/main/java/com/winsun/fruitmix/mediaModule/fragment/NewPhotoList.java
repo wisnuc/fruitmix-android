@@ -107,6 +107,8 @@ public class NewPhotoList implements Page {
 
     private boolean mUseAnim = false;
 
+    private int mAnimCount = 0;
+
     private ImageLoader mImageLoader;
 
     private float mOldSpan = 0;
@@ -731,9 +733,6 @@ public class NewPhotoList implements Page {
                 public void onClick(View v) {
                     if (mSelectMode) {
 
-                        if (mUseAnim)
-                            mUseAnim = false;
-
                         boolean selected = mPhotoTitleSelectImg.isSelected();
                         mPhotoTitleSelectImg.setSelected(!selected);
                         List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
@@ -758,7 +757,20 @@ public class NewPhotoList implements Page {
 
             Animation animation = AnimationUtils.loadAnimation(containerActivity, R.anim.show_right_item_anim);
 
+            animation.setAnimationListener(new BaseAnimationListener() {
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    super.onAnimationEnd(animation);
+
+                    mAnimCount--;
+                    if (mAnimCount == 0)
+                        mUseAnim = false;
+                }
+            });
+
             mPhotoTitleSelectImg.startAnimation(animation);
+
+            mAnimCount++;
         }
 
         private void dismissPhotoTitleSelectImgAnim() {
@@ -770,10 +782,17 @@ public class NewPhotoList implements Page {
                     super.onAnimationEnd(animation);
 
                     mPhotoTitleSelectImg.setVisibility(View.GONE);
+
+                    mAnimCount--;
+                    if (mAnimCount == 0)
+                        mUseAnim = false;
+
                 }
             });
 
             mPhotoTitleSelectImg.startAnimation(animation);
+
+            mAnimCount++;
         }
 
         private void showPhotoTitleSelectImg() {
@@ -857,9 +876,6 @@ public class NewPhotoList implements Page {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
                             return;
                         }
-
-                        if (mUseAnim)
-                            mUseAnim = false;
 
                         boolean selected = currentMedia.isSelected();
 
@@ -989,10 +1005,6 @@ public class NewPhotoList implements Page {
                 mIsFling = false;
 
                 mPhotoRecycleAdapter.notifyDataSetChanged();
-            } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-
-                mUseAnim = false;
-
             }
         }
 

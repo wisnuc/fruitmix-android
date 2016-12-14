@@ -148,7 +148,9 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 EditPhotoActivity.this.setResult(RESULT_OK, getIntent());
                 finish();
                 break;
-            case FAIL:
+            case MALFORMED_URL_EXCEPTION:
+            case SOCKET_TIMEOUT_EXCEPTION:
+            case IO_EXCEPTION:
                 Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
                 EditPhotoActivity.this.setResult(RESULT_CANCELED, getIntent());
                 finish();

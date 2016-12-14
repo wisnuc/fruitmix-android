@@ -158,7 +158,6 @@ public class MoreMediaActivity extends AppCompatActivity {
         LinearLayout mMorelPhotoItemLayout;
 
         private Media media;
-        private int width, height;
 
         MorePhotoViewHolder(View view) {
             super(view);
