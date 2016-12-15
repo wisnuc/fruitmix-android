@@ -10,17 +10,24 @@ import com.winsun.fruitmix.util.OperationType;
 
 public class EditPhotoInMediaShareRequestEvent extends RequestEvent {
 
-    private MediaShare originalMediaShare;
+    private MediaShare diffContentsInOriginalMediaShare;
+    private MediaShare diffContentsInModifiedMediaShare;
+
     private MediaShare modifiedMediaShare;
 
-    public EditPhotoInMediaShareRequestEvent(OperationType operationType, OperationTargetType operationTargetType, MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
+    public EditPhotoInMediaShareRequestEvent(OperationType operationType, OperationTargetType operationTargetType, MediaShare diffContentsInOriginalMediaShare, MediaShare diffContentsInModifiedMediaShare,MediaShare modifiedMediaShare) {
         super(operationType, operationTargetType);
-        this.originalMediaShare = originalMediaShare;
+        this.diffContentsInOriginalMediaShare = diffContentsInOriginalMediaShare;
+        this.diffContentsInModifiedMediaShare = diffContentsInModifiedMediaShare;
         this.modifiedMediaShare = modifiedMediaShare;
     }
 
-    public MediaShare getOriginalMediaShare() {
-        return originalMediaShare;
+    public MediaShare getDiffContentsInOriginalMediaShare() {
+        return diffContentsInOriginalMediaShare;
+    }
+
+    public MediaShare getDiffContentsInModifiedMediaShare() {
+        return diffContentsInModifiedMediaShare;
     }
 
     public MediaShare getModifiedMediaShare() {

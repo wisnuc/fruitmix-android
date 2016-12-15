@@ -13,6 +13,7 @@ import com.winsun.fruitmix.eventbus.MediaRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.ModifyMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
+import com.winsun.fruitmix.eventbus.RetrieveMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.Comment;
@@ -173,9 +174,9 @@ public class FNAS {
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIA_SHARE));
     }
 
-    public static void retrieveRemoteMediaShare(Context context) {
+    public static void retrieveRemoteMediaShare(Context context,boolean loadMediaShareInDBWhenExceptionOccur) {
 
-        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIA_SHARE));
+        EventBus.getDefault().post(new RetrieveMediaShareRequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIA_SHARE,loadMediaShareInDBWhenExceptionOccur));
     }
 
     public static void retrieveLocalMediaInCamera(Context context) {
@@ -257,14 +258,14 @@ public class FNAS {
         EventBus.getDefault().post(new MediaCommentRequestEvent(OperationType.DELETE, OperationTargetType.LOCAL_MEDIA_COMMENT, imageUUID, comment));
     }
 
-    public static void editPhotoInRemoteMediaShare(Context context, MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
+    public static void editPhotoInRemoteMediaShare(Context context, MediaShare diffContentsInOriginalMediaShare, MediaShare diffContentsInModifiedMediaShare,MediaShare modifiedMediaShare) {
 
-        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.REMOTE_MEDIA_SHARE, originalMediaShare, modifiedMediaShare));
+        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.REMOTE_MEDIA_SHARE, diffContentsInOriginalMediaShare,diffContentsInModifiedMediaShare, modifiedMediaShare));
     }
 
-    public static void editPhotoInLocalMediaShare(Context context, MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
+    public static void editPhotoInLocalMediaShare(Context context, MediaShare diffContentsInOriginalMediaShare, MediaShare diffContentsInModifiedMediaShare, MediaShare modifiedMediaShare) {
 
-        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.REMOTE_MEDIA_SHARE, originalMediaShare, modifiedMediaShare));
+        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.LOCAL_MEDIA_SHARE, diffContentsInOriginalMediaShare,diffContentsInModifiedMediaShare, modifiedMediaShare));
 
     }
 
@@ -460,7 +461,7 @@ public class FNAS {
             conn.setRequestProperty("Connection", "keep-alive");
             conn.setRequestProperty("Charsert", "UTF-8");
             conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-            conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
+            conn.setConnectTimeout(60 * 1000);
 
             outStream = new BufferedOutputStream(conn.getOutputStream());
 

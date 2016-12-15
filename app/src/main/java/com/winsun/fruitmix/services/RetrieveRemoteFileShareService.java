@@ -37,7 +37,6 @@ public class RetrieveRemoteFileShareService extends IntentService {
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_RETRIEVE_REMOTE_FILE_SHARE = "com.winsun.fruitmix.services.action.retrieve_remote_file_share";
 
-
     public RetrieveRemoteFileShareService() {
         super("RetrieveRemoteFileShareService");
     }

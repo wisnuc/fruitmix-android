@@ -204,7 +204,7 @@ public class NetworkImageView extends ImageView {
                             setImageResource(mErrorImageId);
                         }
 
-                        if (error.networkResponse.statusCode == 500 && mCurrentRetryNum < mMaxRetryNum) {
+                        if (error.networkResponse != null && error.networkResponse.statusCode == 500 && mCurrentRetryNum < mMaxRetryNum) {
 
                             new Handler().postDelayed(new Runnable() {
                                 @Override

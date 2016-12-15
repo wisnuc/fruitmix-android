@@ -66,8 +66,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     ViewPager mViewPager;
 
     private List<Media> mediaList;
-    private int initialPhotoPosition;
-    private int currentPhotoPosition;
+    private int initialPhotoPosition = 0;
+    private int currentPhotoPosition = 0;
 
     private List<Media> mediaAlreadyLoadedList;
 
@@ -282,6 +282,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         Intent intent = new Intent();
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
         intent.putExtra(Util.CURRENT_PHOTO_POSITION, currentPhotoPosition);
+
         intent.putExtra(Util.CURRENT_MEDIA_UUID, mediaList.get(currentPhotoPosition).getUuid());
         intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, getIntent().getStringExtra(Util.CURRENT_MEDIASHARE_TIME));
         setResult(RESULT_OK, intent);
@@ -430,6 +431,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             ActivityCompat.startPostponedEnterTransition(this);
 
             startLoadCurrentImageAfterTransition(view, media);
+
+
         } else {
 
             startLoadingOriginalPhoto(view, media);

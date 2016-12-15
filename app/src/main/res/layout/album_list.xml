@@ -12,8 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:context="com.winsun.fruitmix.Test2Activity"/>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <include layout="@layout/no_content_layout"/>
 
@@ -36,9 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:context="com.winsun.fruitmix.Test2Activity"
             package="com.winsun.fruitmix"
-            tools:showIn="@layout/activity_test2"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
             android:paddingLeft="2dp"

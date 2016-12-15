@@ -27,7 +27,7 @@ public class RetrieveLocalMediaCommentService extends IntentService {
     private static final String ACTION_GET_LOCAL_COMMENT = "com.winsun.fruitmix.services.action.retrieve.local.comment";
 
     public RetrieveLocalMediaCommentService() {
-        super("GetLocalDataService");
+        super("RetrieveLocalMediaCommentService");
     }
 
     /**

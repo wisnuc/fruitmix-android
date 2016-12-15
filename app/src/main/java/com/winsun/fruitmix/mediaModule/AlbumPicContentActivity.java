@@ -30,6 +30,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
@@ -190,12 +191,12 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
-        if (mDialog != null && mDialog.isShowing())
-            mDialog.dismiss();
-
         String action = operationEvent.getAction();
 
         if (action.equals(Util.LOCAL_SHARE_DELETED) || action.equals(Util.REMOTE_SHARE_DELETED)) {
+
+            if (mDialog != null && mDialog.isShowing())
+                mDialog.dismiss();
 
             OperationResult operationResult = operationEvent.getOperationResult();
 
@@ -215,6 +216,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         } else if (action.equals(Util.LOCAL_SHARE_MODIFIED) || action.equals(Util.REMOTE_SHARE_MODIFIED)) {
 
+            if (mDialog != null && mDialog.isShowing())
+                mDialog.dismiss();
+
             OperationResult operationResult = operationEvent.getOperationResult();
 
             OperationResultType operationResultType = operationResult.getOperationResultType();
@@ -222,6 +226,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             switch (operationResultType) {
                 case SUCCEED:
                     Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+
+                    mediaShare = ((MediaShareOperationEvent)operationEvent).getMediaShare();
 
                     if (mediaShare.getViewersListSize() == 0) {
                         mPrivatePublicMenu.setTitle(getString(R.string.set_public));
@@ -293,8 +299,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
 
-            Log.i(TAG, "media has it or not:" + (picItemRaw != null ? "true" : "false"));
-
             if (picItemRaw == null) {
                 picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
 
@@ -333,6 +337,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     private void fillLocalCachePhotoList() {
         LocalCache.photoSliderList.clear();
         LocalCache.photoSliderList.addAll(mediaList);
+
+        Util.needRefreshPhotoSliderList = true;
     }
 
     private void fillLocalCachePhotoMap() {

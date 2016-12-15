@@ -18,7 +18,7 @@ import java.util.Date;
 public class RemoteMediaShareJSONObjectParser {
 
     public MediaShare getRemoteMediaShare(JSONObject itemRaw) throws JSONException {
-        Log.d("winsun", "" + itemRaw);
+
         JSONArray jsonArr;
 
         MediaShare mediaShare = new MediaShare();

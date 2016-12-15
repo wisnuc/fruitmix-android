@@ -355,7 +355,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 photoList.fillLocalCachePhotoData();
 
                 if (!mRemoteMediaShareLoaded) {
-                    FNAS.retrieveRemoteMediaShare(mContext);
+                    FNAS.retrieveRemoteMediaShare(mContext, true);
                 }
 
             }
@@ -418,6 +418,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             if (!mLocalMediaShareLoaded)
                 FNAS.retrieveLocalMediaShare(mContext);
 
+            startTimingRetrieveMediaShare();
+
         } else if (action.equals(Util.LOCAL_MEDIA_SHARE_RETRIEVED)) {
             Log.i(TAG, "local share loaded");
 
@@ -442,6 +444,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         }
 
+    }
+
+    private void startTimingRetrieveMediaShare() {
+        if (!Util.startTimingRetrieveMediaShare)
+            Util.startTimingRetrieveMediaShare = true;
     }
 
     private void doCreateRemoteMediaCommentInLocalMediaCommentMapFunction() {

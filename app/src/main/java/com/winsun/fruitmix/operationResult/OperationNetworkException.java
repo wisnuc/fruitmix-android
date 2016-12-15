@@ -17,13 +17,18 @@ public class OperationNetworkException extends OperationResult {
         this.responseCode = responseCode;
     }
 
-    public void setResponseCode(int responseCode) {
-        this.responseCode = responseCode;
-    }
-
     @Override
     public String getResultMessage(Context context) {
-        return String.format(context.getString(R.string.network_exception), responseCode);
+
+        String resultMessage;
+
+        if (responseCode == 401) {
+            resultMessage = context.getString(R.string.password_error);
+        } else {
+            resultMessage = String.format(context.getString(R.string.network_exception), responseCode);
+        }
+
+        return resultMessage;
     }
 
     @Override

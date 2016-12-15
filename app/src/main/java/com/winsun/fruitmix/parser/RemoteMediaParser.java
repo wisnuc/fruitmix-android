@@ -39,11 +39,19 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
 
             String width = itemRaw.optString("width");
             if (width.equals("")) {
-                itemRaw = itemRaw.getJSONObject("meta");
-            }
+                JSONObject itemRaw2 = itemRaw.optJSONObject("meta");
 
-            media.setWidth(itemRaw.optString("width"));
-            media.setHeight(itemRaw.optString("height"));
+                if(itemRaw2 == null){
+                    media.setWidth("200");
+                    media.setHeight("200");
+                }else {
+                    media.setWidth(itemRaw2.optString("width"));
+                    media.setHeight(itemRaw2.optString("height"));
+                }
+            }else {
+                media.setWidth(itemRaw.optString("width"));
+                media.setHeight(itemRaw.optString("height"));
+            }
 
             String dateTime = itemRaw.optString("exifDateTime");
 

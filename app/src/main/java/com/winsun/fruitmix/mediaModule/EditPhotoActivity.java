@@ -134,27 +134,33 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
-        if (mDialog != null && mDialog.isShowing())
-            mDialog.dismiss();
+        String action = operationEvent.getAction();
 
-        OperationResult operationResult = operationEvent.getOperationResult();
+        if(action.equals(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED) || action.equals(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED)){
 
-        OperationResultType operationResultType = operationResult.getOperationResultType();
+            if (mDialog != null && mDialog.isShowing())
+                mDialog.dismiss();
 
-        switch (operationResultType) {
-            case SUCCEED:
-                Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-                getIntent().putExtra(Util.KEY_MEDIASHARE, modifiedMediaShare);
-                EditPhotoActivity.this.setResult(RESULT_OK, getIntent());
-                finish();
-                break;
-            case MALFORMED_URL_EXCEPTION:
-            case SOCKET_TIMEOUT_EXCEPTION:
-            case IO_EXCEPTION:
-                Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-                EditPhotoActivity.this.setResult(RESULT_CANCELED, getIntent());
-                finish();
-                break;
+            OperationResult operationResult = operationEvent.getOperationResult();
+
+            OperationResultType operationResultType = operationResult.getOperationResultType();
+
+            switch (operationResultType) {
+                case SUCCEED:
+                    Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+                    getIntent().putExtra(Util.KEY_MEDIASHARE, modifiedMediaShare);
+                    EditPhotoActivity.this.setResult(RESULT_OK, getIntent());
+                    finish();
+                    break;
+                case MALFORMED_URL_EXCEPTION:
+                case SOCKET_TIMEOUT_EXCEPTION:
+                case IO_EXCEPTION:
+                    Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+                    EditPhotoActivity.this.setResult(RESULT_CANCELED, getIntent());
+                    finish();
+                    break;
+            }
+
         }
 
     }
@@ -191,7 +197,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
             mPhotoList.add(picItem);
 
-            Log.i(TAG, "fillPhotoList: image uuid" + aStArr);
 
         }
 
@@ -227,8 +232,16 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 break;
             case R.id.finish:
 
-                int diffOriginalMediaShareContentSize = mediaShare.getDifferentMediaShareContentInCurrentMediaShare(modifiedMediaShare).size();
-                int diffModifiedMediaShareContentSize = modifiedMediaShare.getDifferentMediaShareContentInCurrentMediaShare(mediaShare).size();
+                MediaShare diffContentsOriginalMediaShare = mediaShare.cloneMyself();
+                diffContentsOriginalMediaShare.clearMediaShareContents();
+                diffContentsOriginalMediaShare.initMediaShareContents(mediaShare.getDifferentMediaShareContentInCurrentMediaShare(modifiedMediaShare));
+
+                MediaShare diffContentsModifiedMediaShare = modifiedMediaShare.cloneMyself();
+                diffContentsModifiedMediaShare.clearMediaShareContents();
+                diffContentsModifiedMediaShare.initMediaShareContents(modifiedMediaShare.getDifferentMediaShareContentInCurrentMediaShare(mediaShare));
+
+                int diffOriginalMediaShareContentSize = diffContentsOriginalMediaShare.getMediaContentsListSize();
+                int diffModifiedMediaShareContentSize = diffContentsModifiedMediaShare.getMediaContentsListSize();
                 if (diffOriginalMediaShareContentSize == 0 && diffModifiedMediaShareContentSize == 0) {
 
                     finish();
@@ -243,9 +256,9 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 }
 
                 if (Util.getNetworkState(mContext)) {
-                    FNAS.editPhotoInRemoteMediaShare(mContext, mediaShare, modifiedMediaShare);
+                    FNAS.editPhotoInRemoteMediaShare(mContext, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
                 } else {
-                    FNAS.editPhotoInLocalMediaShare(mContext, mediaShare, modifiedMediaShare);
+                    FNAS.editPhotoInLocalMediaShare(mContext, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
                 }
 
                 break;
@@ -276,7 +289,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         FrameLayout mDelPhotoLayout;
 
         private Media mMap;
-        private int width, height;
 
         EditPhotoViewHolder(View view) {
             super(view);

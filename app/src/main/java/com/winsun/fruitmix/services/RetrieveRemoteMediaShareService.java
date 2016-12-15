@@ -32,8 +32,10 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
     private static final String ACTION_GET_REMOTE_MEDIASHARE = "com.winsun.fruitmix.services.action.retrieve.remote.mediashare";
 
+    private static final String LOAD_MEDIASHARE_IN_DB_WHEN_EXCEPTION_OCCUR = "com.winsun.fruitmix.services.action.load_mediashare_in_db_when_exception_occur";
+
     public RetrieveRemoteMediaShareService() {
-        super("RetrieveRemoteDataService");
+        super("RetrieveRemoteMediaShareService");
     }
 
     /**
@@ -42,9 +44,10 @@ public class RetrieveRemoteMediaShareService extends IntentService {
      *
      * @see IntentService
      */
-    public static void startActionRetrieveRemoteMediaShare(Context context) {
+    public static void startActionRetrieveRemoteMediaShare(Context context, boolean loadMediaShareInDBWhenExceptionOccur) {
         Intent intent = new Intent(context, RetrieveRemoteMediaShareService.class);
         intent.setAction(ACTION_GET_REMOTE_MEDIASHARE);
+        intent.putExtra(LOAD_MEDIASHARE_IN_DB_WHEN_EXCEPTION_OCCUR, loadMediaShareInDBWhenExceptionOccur);
         context.startService(intent);
     }
 
@@ -54,7 +57,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_GET_REMOTE_MEDIASHARE.equals(action)) {
-                handleActionRetrieveRemoteMediaShare();
+                handleActionRetrieveRemoteMediaShare(intent.getBooleanExtra(LOAD_MEDIASHARE_IN_DB_WHEN_EXCEPTION_OCCUR, true));
             }
         }
     }
@@ -63,7 +66,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionRetrieveRemoteMediaShare() {
+    private void handleActionRetrieveRemoteMediaShare(boolean loadMediaShareInDBWhenExceptionOccur) {
 
         List<MediaShare> mediaShares;
 
@@ -80,37 +83,53 @@ public class RetrieveRemoteMediaShareService extends IntentService {
             mediaShares = parser.parse(httpResponse.getResponseData());
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: parse remote media share");
-            
+
             mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: build media share map");
-            
-            //maybe a litte slow
 
             dbUtils.deleteAllRemoteShare();
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: delete all remote share in db");
-            
+
             dbUtils.insertRemoteMediaShares(mediaShareConcurrentMap);
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: retrieve remote media share from network");
 
+            fillLocalCacheRemoteMediaShareMap(mediaShareConcurrentMap);
+
+            postEvent();
+
         } catch (Exception e) {
             e.printStackTrace();
 
-            mediaShares = dbUtils.getAllRemoteShare();
-            mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
+            if (loadMediaShareInDBWhenExceptionOccur) {
 
-            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: retrieve remote media share from db");
+                mediaShares = dbUtils.getAllRemoteShare();
+                mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
+
+                Log.i(TAG, "handleActionRetrieveRemoteMediaShare: retrieve remote media share from db");
+
+                fillLocalCacheRemoteMediaShareMap(mediaShareConcurrentMap);
+
+                postEvent();
+
+            }
+
         }
 
+
+    }
+
+    private void postEvent() {
+        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_RETRIEVED, new OperationSuccess());
+        EventBus.getDefault().post(operationEvent);
+    }
+
+    private void fillLocalCacheRemoteMediaShareMap(ConcurrentMap<String, MediaShare> mediaShareConcurrentMap) {
         LocalCache.RemoteMediaShareMapKeyIsUUID.clear();
 
         LocalCache.RemoteMediaShareMapKeyIsUUID.putAll(mediaShareConcurrentMap);
-
-        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_RETRIEVED, new OperationSuccess());
-        EventBus.getDefault().post(operationEvent);
-
     }
 
 }

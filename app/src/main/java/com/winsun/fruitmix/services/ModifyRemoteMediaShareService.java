@@ -84,10 +84,6 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
             mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, new OperationLocalMediaShareUploading(), mediaShare);
 
-        } else if (!Util.uploadImageDigestsIfNotUpload(this, mediaShare.getMediaDigestInMediaShareContents())) {
-
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, new OperationUploadPhotoFailed(), mediaShare);
-
         } else {
 
             try {

@@ -28,7 +28,6 @@
         </activity>
         <activity
             android:name=".NavPagerActivity"
-            android:label="@string/title_activity_nav_pager"
             android:screenOrientation="portrait"/>
         <!-- android:theme="@style/Theme.AppCompat.Light.NoActionBar" -->
         <!-- This meta-data tag is required to use Google Play Services. -->
@@ -36,37 +35,26 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"/>
 
-        <activity
-            android:name=".TestActivity"
-            android:label="@string/title_activity_test"/>
-        <!-- Include the AdActivity configChanges and theme. -->
+
         <activity
             android:name="com.google.android.gms.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:theme="@android:style/Theme.Translucent"/>
         <activity
-            android:name=".Test2Activity"
-            android:label="@string/title_activity_test2"/>
-        <activity
             android:name=".mediaModule.PhotoSliderActivity"
-            android:label="@string/title_activity_test2"/>
-        <activity
-            android:name=".Test3Activity"
-            android:label="@string/title_activity_test3"/>
+            />
+
         <activity
             android:name=".mediaModule.CreateAlbumActivity"
-            android:label="@string/title_activity_test3"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".mediaModule.ModifyAlbumActivity"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".mediaModule.AlbumPicContentActivity"
-            android:label="@string/title_activity_test3"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".SplashScreenActivity"
-            android:label="@string/title_activity_test3"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".mediaModule.MediaShareCommentActivity"
@@ -74,9 +62,7 @@
         <activity
             android:name=".mediaModule.NewAlbumPicChooseActivity"
             android:screenOrientation="portrait"/>
-        <activity
-            android:name=".Test4Activity"
-            android:label="@string/title_activity_test4"/>
+
         <activity
             android:name=".PersonInfoActivity"
             android:screenOrientation="portrait"/>

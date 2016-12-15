@@ -34,7 +34,7 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
     private static final String ACTION_CREATE_LOCAL_MEDIA = "com.winsun.fruitmix.services.action.retriev.local.media";
 
     public RetrieveNewLocalMediaInCameraService() {
-        super("RetrieveLocalMediaService");
+        super("RetrieveNewLocalMediaInCameraService");
     }
 
     /**

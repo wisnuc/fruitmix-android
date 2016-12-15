@@ -814,6 +814,8 @@ public class MediaShareList implements Page {
     private void fillLocalCachePhotoList(List<Media> imageList) {
         LocalCache.photoSliderList.clear();
         LocalCache.photoSliderList.addAll(imageList);
+
+        Util.needRefreshPhotoSliderList = true;
     }
 
     private List<Media> getImgList(List<String> imageDigests) {

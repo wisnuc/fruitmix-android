@@ -29,6 +29,7 @@ import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -152,6 +153,8 @@ public class NavPagerActivity extends AppCompatActivity
 
         instance = null;
         mContext = null;
+
+        stopService(new Intent(this, ButlerService.class));
 
     }
 

@@ -34,11 +34,12 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
     private static final String ACTION_MODIFY_MEDIA_IN_LOCAL_MEDIASHARE = "com.winsun.fruitmix.services.action.modify_media_in_local_mediashare";
 
     // TODO: Rename parameters
-    private static final String EXTRA_ORIGINAL_MEDIASHARE = "com.winsun.fruitmix.services.extra.original_mediashare";
+    private static final String EXTRA_DIFF_CONTENTS_IN_ORIGINAL_MEDIASHARE = "com.winsun.fruitmix.services.extra.diff_contents_in_original_mediashare";
+    private static final String EXTRA_DIFF_CONTENTS_MODIFIED_MEDIASHARE = "com.winsun.fruitmix.services.extra.diff_contents_in_modified_mediashare";
     private static final String EXTRA_MODIFIED_MEDIASHARE = "com.winsun.fruitmix.services.extra.modified_mediashare";
 
     public ModifyMediaInLocalMediaShareService() {
-        super("EditPhotoInMediaShareService");
+        super("ModifyMediaInLocalMediaShareService");
     }
 
     /**
@@ -48,11 +49,12 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionEditPhotoInMediaShare(Context context, MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
+    public static void startActionModifyMediaInLocalMediaShare(Context context, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
         Intent intent = new Intent(context, ModifyMediaInLocalMediaShareService.class);
         intent.setAction(ACTION_MODIFY_MEDIA_IN_LOCAL_MEDIASHARE);
-        intent.putExtra(EXTRA_ORIGINAL_MEDIASHARE, originalMediaShare);
-        intent.putExtra(EXTRA_MODIFIED_MEDIASHARE, modifiedMediaShare);
+        intent.putExtra(EXTRA_DIFF_CONTENTS_IN_ORIGINAL_MEDIASHARE, diffContentsOriginalMediaShare);
+        intent.putExtra(EXTRA_DIFF_CONTENTS_MODIFIED_MEDIASHARE, diffContentsModifiedMediaShare);
+        intent.putExtra(EXTRA_MODIFIED_MEDIASHARE,modifiedMediaShare);
         context.startService(intent);
     }
 
@@ -61,9 +63,11 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_MODIFY_MEDIA_IN_LOCAL_MEDIASHARE.equals(action)) {
-                MediaShare originalMediaShare = intent.getParcelableExtra(EXTRA_ORIGINAL_MEDIASHARE);
+
+                MediaShare diffContentsInOriginalMediaShare = intent.getParcelableExtra(EXTRA_DIFF_CONTENTS_IN_ORIGINAL_MEDIASHARE);
+                MediaShare diffContentsInModifiedMediaShare = intent.getParcelableExtra(EXTRA_DIFF_CONTENTS_MODIFIED_MEDIASHARE);
                 MediaShare modifiedMediaShare = intent.getParcelableExtra(EXTRA_MODIFIED_MEDIASHARE);
-                handleActionModifyMedia(originalMediaShare, modifiedMediaShare);
+                handleActionModifyMedia(diffContentsInOriginalMediaShare, diffContentsInModifiedMediaShare,modifiedMediaShare);
             }
         }
     }
@@ -72,10 +76,10 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
      * Handle action edit photo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionModifyMedia(MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
+    private void handleActionModifyMedia(MediaShare diffContentsInOriginalMediaShare, MediaShare diffContentsInModifiedMediaShare,MediaShare modifiedMediaShare) {
 
-        List<MediaShareContent> differentContentsInOriginalMediaShare = originalMediaShare.getDifferentMediaShareContentInCurrentMediaShare(modifiedMediaShare);
-        List<MediaShareContent> differentContentsInModifiedMediaShare = modifiedMediaShare.getDifferentMediaShareContentInCurrentMediaShare(originalMediaShare);
+        List<MediaShareContent> differentContentsInOriginalMediaShare = diffContentsInOriginalMediaShare.getMediaShareContents();
+        List<MediaShareContent> differentContentsInModifiedMediaShare = diffContentsInModifiedMediaShare.getMediaShareContents();
 
         OperationEvent operationEvent;
 

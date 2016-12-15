@@ -3,10 +3,12 @@ package com.winsun.fruitmix.services;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
-import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
 import com.winsun.fruitmix.eventbus.DownloadFileEvent;
@@ -16,6 +18,7 @@ import com.winsun.fruitmix.eventbus.MediaRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.ModifyMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
+import com.winsun.fruitmix.eventbus.RetrieveMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.DownloadFileTask;
@@ -24,18 +27,25 @@ import com.winsun.fruitmix.executor.UploadMediaTask;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.OperationType;
+import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class ButlerService extends Service {
 
     private static final String TAG = ButlerService.class.getSimpleName();
+
+    private static final int RETRIEVE_REMOTE_MEDIA_SHARE = 0x1003;
+
+    private TimingRetrieveMediaShareTask task;
 
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
@@ -47,6 +57,10 @@ public class ButlerService extends Service {
         super.onCreate();
 
         EventBus.getDefault().register(this);
+
+        task = new TimingRetrieveMediaShareTask(this, getMainLooper());
+
+        task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_MEDIA_SHARE, 20 * 1000);
     }
 
 
@@ -65,9 +79,44 @@ public class ButlerService extends Service {
     public void onDestroy() {
         EventBus.getDefault().unregister(this);
 
+        task.removeMessages(RETRIEVE_REMOTE_MEDIA_SHARE);
+
+        Util.startTimingRetrieveMediaShare = false;
+
+        task = null;
+
         super.onDestroy();
 
     }
+
+    private class TimingRetrieveMediaShareTask extends Handler {
+
+        WeakReference<ButlerService> weakReference = null;
+
+        TimingRetrieveMediaShareTask(ButlerService butlerService, Looper looper) {
+            super(looper);
+            weakReference = new WeakReference<ButlerService>(butlerService);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            switch (msg.what) {
+                case RETRIEVE_REMOTE_MEDIA_SHARE:
+
+                    ButlerService butlerService = weakReference.get();
+
+                    if (Util.startTimingRetrieveMediaShare)
+                        FNAS.retrieveRemoteMediaShare(butlerService, false);
+
+                    task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_MEDIA_SHARE, 20 * 1000);
+
+                    break;
+            }
+        }
+    }
+
 
     @Subscribe(threadMode = ThreadMode.POSTING)
     public void handleEvent(DownloadFileEvent downloadFileEvent) {
@@ -185,7 +234,8 @@ public class ButlerService extends Service {
 
         EditPhotoInMediaShareRequestEvent editPhotoInMediaShareRequestEvent = (EditPhotoInMediaShareRequestEvent) requestEvent;
 
-        MediaShare originalMediaShare = editPhotoInMediaShareRequestEvent.getOriginalMediaShare();
+        MediaShare diffContentsInOriginalMediaShare = editPhotoInMediaShareRequestEvent.getDiffContentsInOriginalMediaShare();
+        MediaShare diffContentsInModifiedMediaShare = editPhotoInMediaShareRequestEvent.getDiffContentsInModifiedMediaShare();
         MediaShare modifiedMediaShare = editPhotoInMediaShareRequestEvent.getModifiedMediaShare();
 
         OperationTargetType targetType = requestEvent.getOperationTargetType();
@@ -194,10 +244,10 @@ public class ButlerService extends Service {
 
         switch (targetType) {
             case REMOTE_MEDIA_SHARE:
-                ModifyMediaInRemoteMediaShareService.startActionEditPhotoInMediaShare(this, originalMediaShare, modifiedMediaShare);
+                ModifyMediaInRemoteMediaShareService.startActionModifyMediaInRemoteMediaShare(this, diffContentsInOriginalMediaShare, diffContentsInModifiedMediaShare, modifiedMediaShare);
                 break;
             case LOCAL_MEDIA_SHARE:
-                ModifyMediaInLocalMediaShareService.startActionEditPhotoInMediaShare(this, originalMediaShare, modifiedMediaShare);
+                ModifyMediaInLocalMediaShareService.startActionModifyMediaInLocalMediaShare(this, diffContentsInOriginalMediaShare, diffContentsInModifiedMediaShare, modifiedMediaShare);
                 break;
         }
     }
@@ -267,7 +317,10 @@ public class ButlerService extends Service {
                 RetrieveRemoteMediaService.startActionRetrieveRemoteMedia(this);
                 break;
             case REMOTE_MEDIA_SHARE:
-                RetrieveRemoteMediaShareService.startActionRetrieveRemoteMediaShare(this);
+
+                boolean loadMediaShareInDBWhenExceptionOccur = ((RetrieveMediaShareRequestEvent) requestEvent).isLoadMediaShareInDBWhenExceptionOccur();
+
+                RetrieveRemoteMediaShareService.startActionRetrieveRemoteMediaShare(this, loadMediaShareInDBWhenExceptionOccur);
                 break;
             case REMOTE_MEDIA_COMMENT:
                 MediaCommentRequestEvent remoteMediaShareCommentOperationEvent = (MediaCommentRequestEvent) requestEvent;

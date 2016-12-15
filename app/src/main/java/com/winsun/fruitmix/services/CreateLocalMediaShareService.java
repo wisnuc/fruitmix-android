@@ -30,7 +30,7 @@ public class CreateLocalMediaShareService extends IntentService {
     private static final String EXTRA_SHARE = "com.winsun.fruitmix.services.extra.share";
 
     public CreateLocalMediaShareService() {
-        super("CreateShareService");
+        super("CreateLocalMediaShareService");
     }
 
     /**

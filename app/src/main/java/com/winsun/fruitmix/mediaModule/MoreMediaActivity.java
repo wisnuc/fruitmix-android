@@ -141,6 +141,8 @@ public class MoreMediaActivity extends AppCompatActivity {
     private void fillLocalCachePhotoList() {
         LocalCache.photoSliderList.clear();
         LocalCache.photoSliderList.addAll(mPhotos);
+
+         Util.needRefreshPhotoSliderList = true;
     }
 
     private void fillLocalCachePhotoMap() {
@@ -180,6 +182,8 @@ public class MoreMediaActivity extends AppCompatActivity {
 
                     LocalCache.photoSliderList.clear();
                     LocalCache.photoSliderList.addAll(mPhotos);
+
+                    Util.needRefreshPhotoSliderList = true;
 
                     Intent intent = new Intent();
                     intent.putExtra(Util.INITIAL_PHOTO_POSITION, getAdapterPosition());

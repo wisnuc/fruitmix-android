@@ -53,8 +53,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     AnimatedExpandableListView mEquipmentExpandableListView;
     @BindView(R.id.loading_layout)
     LinearLayout mLoadingLayout;
-    @BindView(R.id.fab)
-    FloatingActionButton addIpFab;
 
     private Context mContext;
 
@@ -140,7 +138,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         });
 
         mBack.setOnClickListener(this);
-        addIpFab.setOnClickListener(this);
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
@@ -222,7 +219,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         @Override
         public int getRealChildrenCount(int groupPosition) {
-            return mapList.get(groupPosition).size();
+
+            List<Map<String, String>> list = mapList.get(groupPosition);
+
+            return list == null ? 0 : list.size();
         }
 
         @Override

@@ -221,14 +221,14 @@ public class ModifyAlbumActivity extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(MediaShareOperationEvent operationEvent) {
 
-        if (mDialog != null && mDialog.isShowing())
-            mDialog.dismiss();
-
-        OperationResultType operationResultType = operationEvent.getOperationResult().getOperationResultType();
-
         String action = operationEvent.getAction();
 
         if (action.equals(Util.LOCAL_SHARE_MODIFIED) || action.equals(Util.REMOTE_SHARE_MODIFIED)) {
+
+            if (mDialog != null && mDialog.isShowing())
+                mDialog.dismiss();
+
+            OperationResultType operationResultType = operationEvent.getOperationResult().getOperationResultType();
 
             switch (operationResultType) {
                 case SUCCEED:

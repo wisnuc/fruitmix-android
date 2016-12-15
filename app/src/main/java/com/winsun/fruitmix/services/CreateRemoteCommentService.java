@@ -86,16 +86,6 @@ public class CreateRemoteCommentService extends IntentService {
 
         MediaShareCommentOperationEvent mediaShareCommentOperationEvent;
 
-        boolean returnValue = Util.uploadImageDigestsIfNotUpload(this, Collections.singletonList(mediaUUID));
-
-        if (!returnValue) {
-
-            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, new OperationUploadPhotoFailed(), comment, mediaUUID);
-            EventBus.getDefault().post(mediaShareCommentOperationEvent);
-
-            return;
-        }
-
         String request = String.format(getString(R.string.photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID);
         String data = "{\"shareid\":\"" + comment.getShareId() + "\", \"text\":\"" + comment.getText() + "\"}";
 

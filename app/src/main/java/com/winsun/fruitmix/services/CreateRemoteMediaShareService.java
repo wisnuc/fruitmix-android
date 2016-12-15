@@ -85,17 +85,6 @@ public class CreateRemoteMediaShareService extends IntentService {
 
         MediaShareOperationEvent mediaShareOperationEvent;
 
-        boolean returnValue = Util.uploadImageDigestsIfNotUpload(this, mediaShare.getMediaDigestInMediaShareContents());
-
-        if (!returnValue) {
-
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationUploadPhotoFailed(), mediaShare);
-
-            EventBus.getDefault().post(mediaShareOperationEvent);
-
-            return;
-        }
-
         String data;
 
         StringBuilder builder = new StringBuilder();

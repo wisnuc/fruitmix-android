@@ -17,8 +17,6 @@ public class CustomApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        ButlerService.startButlerService(getApplicationContext());
-
         EventBus.builder().addIndex(new MyEventBusIndex()).installDefaultEventBus();
 
     }

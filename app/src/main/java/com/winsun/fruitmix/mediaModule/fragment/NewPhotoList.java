@@ -410,11 +410,9 @@ public class NewPhotoList implements Page {
             Collections.sort(mediaList, new Comparator<Media>() {
                 @Override
                 public int compare(Media lhs, Media rhs) {
-                    return lhs.getTime().compareTo(rhs.getTime());
+                    return -lhs.getTime().compareTo(rhs.getTime());
                 }
             });
-
-//            Log.i(TAG, "titlePosition:" + titlePosition + " photoListSize:" + photoListSize + " photoListLineSize:" + photoListLineSize);
 
             for (int i = 0; i < photoListSize; i++) {
                 mMapKeyIsPhotoPositionValueIsPhoto.put(titlePosition + 1 + i, mediaList.get(i));
@@ -898,6 +896,14 @@ public class NewPhotoList implements Page {
                         }
 
                     } else {
+
+                        if (Util.needRefreshPhotoSliderList) {
+
+                            fillLocalCachePhotoData();
+
+                            Util.needRefreshPhotoSliderList = false;
+
+                        }
 
                         int initialPhotoPosition;
 

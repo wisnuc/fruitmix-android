@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.operationResult.OperationResult;
+import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
@@ -62,6 +63,8 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         ButterKnife.bind(this);
 
         mContext = this;
+
+        ButlerService.startButlerService(mContext);
 
         mBack.setOnClickListener(this);
         mPwdEdit.setOnFocusChangeListener(this);
@@ -193,9 +196,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         switch (resultType) {
             case SUCCEED:
 
-                if (!mGateway.equals(FNAS.Gateway)) {
-                    LocalCache.CleanAll(LoginActivity.this);
-                }
+                LocalCache.CleanAll(LoginActivity.this);
 
                 LocalCache.Init();
 
