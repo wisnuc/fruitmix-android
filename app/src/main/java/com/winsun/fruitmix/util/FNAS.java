@@ -269,15 +269,6 @@ public class FNAS {
 
     }
 
-    public static void startUploadAllLocalPhoto(Context context) {
-
-        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
-            if (!media.isUploaded()) {
-                createRemoteMedia(context, media);
-            }
-        }
-    }
-
 
     private static HttpResponse RemoteCall(String req) throws MalformedURLException, IOException, SocketTimeoutException {
         HttpURLConnection conn;
@@ -421,9 +412,9 @@ public class FNAS {
 
         for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
             media.restoreUploadState();
-
-            dbUtils.updateLocalMedia(media);
         }
+
+        dbUtils.updateLocalMediasUploadedFalse();
 
     }
 

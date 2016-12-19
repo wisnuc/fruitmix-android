@@ -28,6 +28,10 @@
 
     <string name="confirm_delete">是否删除</string>
 
+    <string name="ellipsize">…</string>
+
+    <string name="version_name">WISNUC V%1$s</string>
+
     <!-- slide menu -->
     <string name="person_data">个人信息</string>
     <string name="cloud">我的私有云</string>
@@ -61,7 +65,7 @@
     <string name="create_album_text">创建相册</string>
 
     <string name="title_text">标题</string>
-    <string name="title_hint">未命名 %1$s</string>
+    <string name="title_hint">无标题 %1$s</string>
     <string name="description_text">描述</string>
 
     <string name="private_text">私密</string>
@@ -182,7 +186,7 @@
     <string name="no_write_external_storage_permission">对不起，没有写权限</string>
     <string name="no_enough_space">存储空间不足，请确认</string>
 
-    <string name="create_download_file_store_folder_failed">Create download file store folder failed</string> 
+    <string name="create_download_file_store_folder_failed">Create download file store folder failed</string>
     <string name="external_storage_not_mounted">External storage not mounted</string>
 
     <!-- finish add by liang.wu-->

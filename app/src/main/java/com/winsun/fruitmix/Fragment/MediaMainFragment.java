@@ -46,6 +46,7 @@ import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Comment;
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.operationResult.OperationResult;
@@ -131,6 +132,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private OnMainFragmentInteractionListener mListener;
 
+    private int mNeedUploadPhotoNumber = 0;
 
     public MediaMainFragment() {
         // Required empty public constructor
@@ -213,7 +215,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             onResume = true;
         } else {
-            pageList.get(viewPager.getCurrentItem()).refreshView();
+
+            if(viewPager.getCurrentItem() != PAGE_PHOTO){
+                pageList.get(viewPager.getCurrentItem()).refreshView();
+            }
+
         }
     }
 
@@ -265,10 +271,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             viewPager.setCurrentItem(PAGE_ALBUM);
             onDidAppear(PAGE_ALBUM);
+            pageList.get(PAGE_ALBUM).onDidAppear();
         } else if (requestCode == Util.KEY_CREATE_SHARE_REQUEST_CODE && resultCode == RESULT_OK) {
 
             viewPager.setCurrentItem(PAGE_SHARE);
             onDidAppear(PAGE_SHARE);
+            pageList.get(PAGE_SHARE).onDidAppear();
         }
     }
 
@@ -428,7 +436,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             pageList.get(PAGE_ALBUM).refreshView();
             pageList.get(PAGE_SHARE).refreshView();
 
-            FNAS.startUploadAllLocalPhoto(mContext);
+            startUploadAllLocalPhoto();
 
             doCreateMediaShareInLocalMediaShareMapFunction();
         } else if (action.equals(Util.LOCAL_MEDIA_COMMENT_RETRIEVED)) {
@@ -483,13 +491,28 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             photoList.fillLocalCachePhotoData();
         }
 
-        FNAS.startUploadAllLocalPhoto(mContext);
+    }
+
+    private void startUploadAllLocalPhoto() {
+        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+            if (!media.isUploaded()) {
+
+                mNeedUploadPhotoNumber++;
+
+                FNAS.createRemoteMedia(mContext, media);
+            }
+        }
+
     }
 
     private void handleLocalPhotoUploadStateChanged() {
         Log.i(TAG, "local photo upload state changed");
 
-        photoList.refreshView();
+        mNeedUploadPhotoNumber--;
+
+        if (mNeedUploadPhotoNumber == 0) {
+            photoList.refreshView();
+        }
 
     }
 
@@ -977,7 +1000,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 break;
             default:
         }
-        pageList.get(position).onDidAppear();
+
 
     }
 

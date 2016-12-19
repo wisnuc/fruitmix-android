@@ -46,6 +46,10 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
     private static final String EXTRA_DIFF_CONTENTS_MODIFIED_MEDIASHARE = "com.winsun.fruitmix.services.extra.diff_contents_in_modified_mediashare";
     private static final String EXTRA_MODIFIED_MEDIASHARE = "com.winsun.fruitmix.services.extra.modified_mediashare";
 
+    private static MediaShare mDiffContentsOriginalMediaShare;
+    private static MediaShare mDiffContentsModifiedMediaShare;
+    private static MediaShare mModifiedMediaShare;
+
     public ModifyMediaInRemoteMediaShareService() {
         super("ModifyMediaInRemoteMediaShareService");
     }
@@ -61,9 +65,11 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
 
         Intent intent = new Intent(context, ModifyMediaInRemoteMediaShareService.class);
         intent.setAction(ACTION_MODIFY_MEDIA_IN_REMOTE_MEDIASHARE);
-        intent.putExtra(EXTRA_DIFF_CONTENTS_IN_ORIGINAL_MEDIASHARE, diffContentsOriginalMediaShare);
-        intent.putExtra(EXTRA_DIFF_CONTENTS_MODIFIED_MEDIASHARE, diffContentsModifiedMediaShare);
-        intent.putExtra(EXTRA_MODIFIED_MEDIASHARE,modifiedMediaShare);
+
+        mDiffContentsOriginalMediaShare = diffContentsOriginalMediaShare;
+        mDiffContentsModifiedMediaShare = diffContentsModifiedMediaShare;
+        mModifiedMediaShare = modifiedMediaShare;
+
         context.startService(intent);
 
         Log.i(TAG, "startActionModifyMediaInRemoteMediaShare: start service");
@@ -75,10 +81,8 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_MODIFY_MEDIA_IN_REMOTE_MEDIASHARE.equals(action)) {
-                MediaShare diffContentsInOriginalMediaShare = intent.getParcelableExtra(EXTRA_DIFF_CONTENTS_IN_ORIGINAL_MEDIASHARE);
-                MediaShare diffContentsInModifiedMediaShare = intent.getParcelableExtra(EXTRA_DIFF_CONTENTS_MODIFIED_MEDIASHARE);
-                MediaShare modifiedMediaShare = intent.getParcelableExtra(EXTRA_MODIFIED_MEDIASHARE);
-                handleActionModifyMedia(diffContentsInOriginalMediaShare, diffContentsInModifiedMediaShare,modifiedMediaShare);
+
+                handleActionModifyMedia();
             }
         }
     }
@@ -87,7 +91,11 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
      * Handle action edit photo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionModifyMedia(MediaShare diffContentsInOriginalMediaShare, MediaShare diffContentsInModifiedMediaShare,MediaShare modifiedMediaShare) {
+    private void handleActionModifyMedia() {
+
+        MediaShare diffContentsInOriginalMediaShare = mDiffContentsOriginalMediaShare;
+        MediaShare diffContentsInModifiedMediaShare = mDiffContentsModifiedMediaShare;
+        MediaShare modifiedMediaShare = mModifiedMediaShare;
 
         OperationEvent operationEvent;
 

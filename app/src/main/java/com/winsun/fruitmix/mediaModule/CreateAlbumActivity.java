@@ -73,7 +73,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         mContext = this;
 
-        mSelectedImageUUIDArray = getIntent().getStringArrayExtra(Util.KEY_NEW_SELECTED_IMAGE_UUID_ARRAY);
+        mSelectedImageUUIDArray = LocalCache.mediaUUIDInCreateAlbum.toArray(new String[LocalCache.mediaUUIDInCreateAlbum.size()]);
 
         setContentView(R.layout.activity_create_album);
 
@@ -82,7 +82,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
         mLayoutTitle.setText(getString(R.string.create_album_text));
 
         String mTitle = String.format(getString(R.string.title_hint), new SimpleDateFormat("yyyy-MM-dd", Locale.SIMPLIFIED_CHINESE).format(new Date(System.currentTimeMillis())));
-        mTitleLayout.setHint(mTitle);
+        tfTitle.setHint(mTitle);
 
         ckPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -105,14 +105,16 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                 Util.hideSoftInput(CreateAlbumActivity.this);
 
-                final boolean sPublic, sSetMaintainer;
-                final String title, desc;
+                boolean sPublic, sSetMaintainer;
+                String title, desc;
 
                 sPublic = ckPublic.isChecked();
                 sSetMaintainer = ckSetMaintainer.isChecked();
 
-                if (tfTitle.getText().toString().equals("")) {
-                    title = mTitleLayout.getHint().toString();
+                title = tfTitle.getText().toString();
+
+                if (title.equals("")) {
+                    title = tfTitle.getHint().toString();
                 } else {
                     title = tfTitle.getText().toString();
                 }
@@ -121,7 +123,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
-                FNAS.createLocalMediaShare(mContext,generateMediaShare(sPublic, sSetMaintainer, title, desc, mSelectedImageUUIDArray));
+                FNAS.createLocalMediaShare(mContext, generateMediaShare(sPublic, sSetMaintainer, title, desc, mSelectedImageUUIDArray));
 
             }
         });
@@ -158,7 +160,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(MediaShareOperationEvent operationEvent){
+    public void handleOperationEvent(MediaShareOperationEvent operationEvent) {
 
         String action = operationEvent.getAction();
 
@@ -177,7 +179,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
                     if (Util.getNetworkState(mContext)) {
                         MediaShare mediaShare = operationEvent.getMediaShare();
 
-                        FNAS.createRemoteMediaShare(mContext,mediaShare);
+                        FNAS.createRemoteMediaShare(mContext, mediaShare);
                     }
 
                     CreateAlbumActivity.this.setResult(RESULT_OK);
@@ -201,7 +203,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
         Log.i(TAG, "create album digest:" + digests);
 
         List<MediaShareContent> mediaShareContents = new ArrayList<>();
-        for (String digest:digests){
+        for (String digest : digests) {
             MediaShareContent mediaShareContent = new MediaShareContent();
             mediaShareContent.setDigest(digest);
             mediaShareContent.setAuthor(FNAS.userUUID);
@@ -217,13 +219,13 @@ public class CreateAlbumActivity extends AppCompatActivity {
         mediaShare.setDesc(desc);
 
         if (isPublic) {
-            for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
                 mediaShare.addViewer(userUUID);
             }
         } else mediaShare.clearViewers();
 
         if (otherMaintainer) {
-            for(String userUUID:LocalCache.RemoteUserMapKeyIsUUID.keySet()){
+            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
                 mediaShare.addMaintainer(userUUID);
             }
         } else {

@@ -104,7 +104,13 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                 desc = mDescLayout.getEditText().getText().toString();
 
                 String requestData = createRequestData(sPublic, sSetMaintainer, title, desc);
-                if (requestData == null) finish();
+                if (requestData == null){
+
+                    ModifyAlbumActivity.this.setResult(RESULT_CANCELED);
+                    finish();
+
+                    return;
+                }
 
                 mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
 
@@ -119,6 +125,8 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                ModifyAlbumActivity.this.setResult(RESULT_CANCELED);
                 finish();
             }
         });
@@ -189,7 +197,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
         requestData += "]";
 
-        if (requestData.length() == 2) {
+        if (requestData.length() <= 2) {
             return null;
         }
 

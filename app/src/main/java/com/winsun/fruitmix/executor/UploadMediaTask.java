@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.operationResult.OperationIOException;
 import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
@@ -20,7 +21,7 @@ public class UploadMediaTask implements Callable<Boolean> {
     private Media media;
     private Context context;
 
-    public UploadMediaTask(Context context,Media media) {
+    public UploadMediaTask(Context context, Media media) {
         this.media = media;
         this.context = context;
     }
@@ -30,9 +31,10 @@ public class UploadMediaTask implements Callable<Boolean> {
 
         boolean result = media.uploadIfNotDone(context);
 
-        if(result){
-
+        if (result) {
             EventBus.getDefault().post(new OperationEvent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED, new OperationSuccess()));
+        } else {
+            EventBus.getDefault().post(new OperationEvent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED, new OperationIOException()));
         }
 
         return result;

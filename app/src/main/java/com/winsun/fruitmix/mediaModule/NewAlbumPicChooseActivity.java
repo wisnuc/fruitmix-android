@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
+import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;
@@ -74,21 +75,23 @@ public class NewAlbumPicChooseActivity extends Activity {
 
                 Intent intent = getIntent();
 
-                String[] selectedImageUUIDList = selectImageUUIDs.toArray(new String[selectImageUUIDs.size()]);
-
                 if (intent.getBooleanExtra(Util.EDIT_PHOTO, false)) {
 
-                    getIntent().putExtra(Util.KEY_NEW_SELECTED_IMAGE_UUID_ARRAY,selectedImageUUIDList);
+                    LocalCache.mediaUUIDInCreateAlbum.addAll(selectImageUUIDs);
+
                     setResult(RESULT_OK, intent);
                     finish();
 
                 } else {
                     intent = new Intent();
                     intent.setClass(NewAlbumPicChooseActivity.this, CreateAlbumActivity.class);
-                    intent.putExtra(Util.KEY_NEW_SELECTED_IMAGE_UUID_ARRAY, selectedImageUUIDList);
+
+                    LocalCache.mediaUUIDInCreateAlbum.addAll(selectImageUUIDs);
+
                     startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
                 }
 
+                mNewPhotoList.clearSelectedPhoto();
             }
         });
     }

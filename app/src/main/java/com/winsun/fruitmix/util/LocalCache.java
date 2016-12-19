@@ -60,6 +60,12 @@ public class LocalCache {
     public static List<Media> photoSliderList = null;
     public static Map<String, Media> photoSliderMap = null;
 
+    public static List<String> mediaUUIDInCreateAlbum = null;
+
+    //optimize get media from db, modify send media info mode: use static list instead of put it into bundle
+
+    // optimize photo list view refresh view when data is too large
+
     public static boolean DeleteFile(File file) {
         File[] files;
         int i;
@@ -111,6 +117,8 @@ public class LocalCache {
 
         photoSliderList = new ArrayList<>();
         photoSliderMap = new HashMap<>();
+
+        mediaUUIDInCreateAlbum = new ArrayList<>();
 
         return true;
     }
@@ -449,8 +457,6 @@ public class LocalCache {
         while (cursor.moveToNext());
 
         cursor.close();
-
-        imageList.addAll(getAllLocalMedia());
 
         return imageList;
     }

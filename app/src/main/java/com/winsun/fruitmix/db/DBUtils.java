@@ -413,7 +413,7 @@ public class DBUtils {
         try {
             openWritableDB();
 
-            String sql = createInsertMediaSql();
+            String sql = createInsertMediaSql(DBHelper.REMOTE_MEDIA_TABLE_NAME);
 
             SQLiteStatement sqLiteStatement = database.compileStatement(sql);
             database.beginTransaction();
@@ -449,12 +449,12 @@ public class DBUtils {
         sqLiteStatement.bindLong(7, media.isUploaded() ? 1 : 0);
         sqLiteStatement.bindLong(8, media.isSharing() ? 1 : 0);
         sqLiteStatement.bindLong(9, media.getOrientationNumber());
-        sqLiteStatement.bindString(10,media.getType());
+        sqLiteStatement.bindString(10, media.getType());
     }
 
     @NonNull
-    private String createInsertMediaSql() {
-        return "insert into " + DBHelper.REMOTE_MEDIA_TABLE_NAME + "(" +
+    private String createInsertMediaSql(String dbName) {
+        return "insert into " + dbName + "(" +
                 DBHelper.MEDIA_KEY_UUID + "," +
                 DBHelper.MEDIA_KEY_TIME + "," +
                 DBHelper.MEDIA_KEY_WIDTH + "," +
@@ -468,17 +468,36 @@ public class DBUtils {
                 "values(?,?,?,?,?,?,?,?,?,?)";
     }
 
-    public long insertLocalMedia(Media media) {
+    public long insertLocalMedias(ConcurrentMap<String, Media> medias) {
 
-        openWritableDB();
 
         long returnValue = 0;
 
-        ContentValues contentValues = createMediaContentValues(media);
+        try {
+            openWritableDB();
 
-        returnValue = database.insert(DBHelper.LOCAL_MEDIA_TABLE_NAME, null, contentValues);
+            String sql = createInsertMediaSql(DBHelper.LOCAL_MEDIA_TABLE_NAME);
 
-        close();
+            SQLiteStatement sqLiteStatement = database.compileStatement(sql);
+            database.beginTransaction();
+
+            for (Media media : medias.values()) {
+
+                bindData(sqLiteStatement, media);
+
+                returnValue = sqLiteStatement.executeInsert();
+
+                sqLiteStatement.execute();
+            }
+            database.setTransactionSuccessful();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+
+            database.endTransaction();
+
+            close();
+        }
 
         return returnValue;
 
@@ -1006,6 +1025,43 @@ public class DBUtils {
         close();
 
         return returnValue;
+    }
+
+
+    @NonNull
+    private String createUpdateMediaSql(String dbName) {
+        return "update " + dbName + " set " +
+                DBHelper.MEDIA_KEY_UPLOADED + " = 0";
+
+    }
+
+
+    public long updateLocalMediasUploadedFalse() {
+
+        long returnValue = 0;
+
+        try {
+            openWritableDB();
+
+            String sql = createUpdateMediaSql(DBHelper.LOCAL_MEDIA_TABLE_NAME);
+
+            SQLiteStatement sqLiteStatement = database.compileStatement(sql);
+            database.beginTransaction();
+
+            returnValue = sqLiteStatement.executeUpdateDelete();
+
+            database.setTransactionSuccessful();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+
+            database.endTransaction();
+
+            close();
+        }
+
+        return returnValue;
+
     }
 
 }

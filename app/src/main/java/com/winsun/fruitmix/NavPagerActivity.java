@@ -47,6 +47,8 @@ public class NavPagerActivity extends AppCompatActivity
 
     @BindView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
+    @BindView(R.id.version_name)
+    TextView versionName;
 
     private Context mContext;
 
@@ -97,6 +99,8 @@ public class NavPagerActivity extends AppCompatActivity
         toggle.syncState();*/
 
         initNavigationView();
+
+        versionName.setText(String.format(getString(R.string.version_name), Util.getVersionName(mContext)));
 
         mediaMainFragment = MediaMainFragment.newInstance();
         fileMainFragment = FileMainFragment.newInstance();
@@ -149,7 +153,7 @@ public class NavPagerActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
 
-        instance.shutdownFixedThreadPool();
+        instance.shutdownFixedThreadPoolNow();
 
         instance = null;
         mContext = null;

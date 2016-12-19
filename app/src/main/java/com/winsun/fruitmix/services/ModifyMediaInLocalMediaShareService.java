@@ -38,6 +38,10 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
     private static final String EXTRA_DIFF_CONTENTS_MODIFIED_MEDIASHARE = "com.winsun.fruitmix.services.extra.diff_contents_in_modified_mediashare";
     private static final String EXTRA_MODIFIED_MEDIASHARE = "com.winsun.fruitmix.services.extra.modified_mediashare";
 
+    private static MediaShare mDiffContentsOriginalMediaShare;
+    private static MediaShare mDiffContentsModifiedMediaShare;
+    private static MediaShare mModifiedMediaShare;
+
     public ModifyMediaInLocalMediaShareService() {
         super("ModifyMediaInLocalMediaShareService");
     }
@@ -52,9 +56,11 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
     public static void startActionModifyMediaInLocalMediaShare(Context context, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
         Intent intent = new Intent(context, ModifyMediaInLocalMediaShareService.class);
         intent.setAction(ACTION_MODIFY_MEDIA_IN_LOCAL_MEDIASHARE);
-        intent.putExtra(EXTRA_DIFF_CONTENTS_IN_ORIGINAL_MEDIASHARE, diffContentsOriginalMediaShare);
-        intent.putExtra(EXTRA_DIFF_CONTENTS_MODIFIED_MEDIASHARE, diffContentsModifiedMediaShare);
-        intent.putExtra(EXTRA_MODIFIED_MEDIASHARE,modifiedMediaShare);
+
+        mDiffContentsOriginalMediaShare = diffContentsOriginalMediaShare;
+        mDiffContentsModifiedMediaShare = diffContentsModifiedMediaShare;
+        mModifiedMediaShare = modifiedMediaShare;
+
         context.startService(intent);
     }
 
@@ -64,10 +70,7 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_MODIFY_MEDIA_IN_LOCAL_MEDIASHARE.equals(action)) {
 
-                MediaShare diffContentsInOriginalMediaShare = intent.getParcelableExtra(EXTRA_DIFF_CONTENTS_IN_ORIGINAL_MEDIASHARE);
-                MediaShare diffContentsInModifiedMediaShare = intent.getParcelableExtra(EXTRA_DIFF_CONTENTS_MODIFIED_MEDIASHARE);
-                MediaShare modifiedMediaShare = intent.getParcelableExtra(EXTRA_MODIFIED_MEDIASHARE);
-                handleActionModifyMedia(diffContentsInOriginalMediaShare, diffContentsInModifiedMediaShare,modifiedMediaShare);
+                handleActionModifyMedia();
             }
         }
     }
@@ -76,7 +79,11 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
      * Handle action edit photo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionModifyMedia(MediaShare diffContentsInOriginalMediaShare, MediaShare diffContentsInModifiedMediaShare,MediaShare modifiedMediaShare) {
+    private void handleActionModifyMedia() {
+
+        MediaShare diffContentsInOriginalMediaShare = mDiffContentsOriginalMediaShare;
+        MediaShare diffContentsInModifiedMediaShare = mDiffContentsModifiedMediaShare;
+        MediaShare modifiedMediaShare = mModifiedMediaShare;
 
         List<MediaShareContent> differentContentsInOriginalMediaShare = diffContentsInOriginalMediaShare.getMediaShareContents();
         List<MediaShareContent> differentContentsInModifiedMediaShare = diffContentsInModifiedMediaShare.getMediaShareContents();
@@ -94,7 +101,7 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
             dbResult = dbUtils.insertLocalMediaShareContent(mediaShareContent, modifiedMediaShare.getUuid());
         }
 
-        if(dbResult > 0){
+        if (dbResult > 0) {
             Log.i(TAG, "modify media in local mediashare which source is network result:" + dbResult);
 
             MediaShare mapResult = LocalCache.LocalMediaShareMapKeyIsUUID.put(modifiedMediaShare.getUuid(), modifiedMediaShare);
@@ -103,7 +110,7 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
 
             operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED, new OperationSuccess());
 
-        }else {
+        } else {
 
             operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED, new OperationSQLException());
         }

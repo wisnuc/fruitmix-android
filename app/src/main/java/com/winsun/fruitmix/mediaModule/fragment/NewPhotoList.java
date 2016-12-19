@@ -438,7 +438,7 @@ public class NewPhotoList implements Page {
         return selectedImageUUIDs;
     }
 
-    private void clearSelectedPhoto() {
+    public void clearSelectedPhoto() {
         for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Media media : mediaList) {
                 media.setSelected(false);
@@ -462,7 +462,9 @@ public class NewPhotoList implements Page {
     public void createAlbum(List<String> selectUUIDs) {
         Intent intent = new Intent();
         intent.setClass(containerActivity, CreateAlbumActivity.class);
-        intent.putExtra(Util.KEY_NEW_SELECTED_IMAGE_UUID_ARRAY, selectUUIDs.toArray(new String[selectUUIDs.size()]));
+
+        LocalCache.mediaUUIDInCreateAlbum.addAll(selectUUIDs);
+
         containerActivity.startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
     }
 

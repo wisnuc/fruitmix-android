@@ -2,6 +2,8 @@ package com.winsun.fruitmix.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -214,7 +216,7 @@ public class Util {
         if (manager != null) {
             NetworkInfo info = manager.getActiveNetworkInfo();
             if (info != null && info.isConnected()) {
-                if (info.getState() == NetworkInfo.State.CONNECTED && loginState) {
+                if (info.getState() == NetworkInfo.State.CONNECTED) {
                     return true;
                 }
             }
@@ -341,4 +343,21 @@ public class Util {
     public static String removeWrap(String str) {
         return str.replaceAll("\r|\n", "");
     }
+
+
+    public static String getVersionName(Context context) {
+
+        try {
+            PackageManager pm = context.getPackageManager();
+            PackageInfo pi = pm.getPackageInfo(context.getPackageName(), 0);
+
+            return pi.versionName;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
 }

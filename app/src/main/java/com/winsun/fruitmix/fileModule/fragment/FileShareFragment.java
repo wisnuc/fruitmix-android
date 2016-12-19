@@ -302,6 +302,8 @@ public class FileShareFragment extends Fragment {
         LinearLayout remoteFolderItemLayout;
         @BindView(R.id.content_layout)
         RelativeLayout contentLayout;
+        @BindView(R.id.owner)
+        TextView ownerTextView;
 
         FolderShareRecyclerAdapterViewHolder(View itemView) {
             super(itemView);
@@ -323,6 +325,8 @@ public class FileShareFragment extends Fragment {
 
             fileName.setText(abstractRemoteFile.getName());
 
+            setOwner(abstractRemoteFile, ownerTextView);
+
             remoteFolderItemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -338,9 +342,10 @@ public class FileShareFragment extends Fragment {
                     handleTitle();
                 }
             });
-        }
-    }
 
+        }
+
+    }
 
     class FileShareRecyclerAdapterViewHolder extends BaseRecyclerViewHolder {
 
@@ -356,6 +361,8 @@ public class FileShareFragment extends Fragment {
         ImageView itemMenu;
         @BindView(R.id.content_layout)
         RelativeLayout contentLayout;
+        @BindView(R.id.owner)
+        TextView ownerTextView;
 
         FileShareRecyclerAdapterViewHolder(View itemView) {
             super(itemView);
@@ -376,13 +383,28 @@ public class FileShareFragment extends Fragment {
 
             AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
-            itemMenu.setVisibility(View.INVISIBLE);
+            itemMenu.setVisibility(View.GONE);
+
+            setOwner(abstractRemoteFile, ownerTextView);
 
             fileName.setText(abstractRemoteFile.getName());
             fileTime.setText(abstractRemoteFile.getTimeDateText());
 
         }
 
+    }
+
+    private void setOwner(AbstractRemoteFile abstractRemoteFile, TextView ownerTextView) {
+        List<String> owners = abstractRemoteFile.getOwners();
+        if (!owners.isEmpty()) {
+            String owner = owners.get(0);
+
+            if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(owner)) {
+
+                ownerTextView.setVisibility(View.VISIBLE);
+                ownerTextView.setText(LocalCache.RemoteUserMapKeyIsUUID.get(owner).getUserName());
+            }
+        }
     }
 
 }

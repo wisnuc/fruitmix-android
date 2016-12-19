@@ -26,6 +26,10 @@
 
     <string name="confirm_delete">Please confirm whether to delete</string>
 
+    <string name="ellipsize">…</string>
+
+    <string name="version_name">WISNUC V%1$s</string>
+
     <!-- slide menu -->
 
     <string name="person_data">Person Data</string>

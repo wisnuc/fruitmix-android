@@ -175,7 +175,7 @@ public class AlbumList implements Page {
             mNoContentLayout.setVisibility(View.GONE);
             mainListView.setVisibility(View.VISIBLE);
             ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
-            mainListView.setSelection(0);
+
         }
 
     }
@@ -221,7 +221,7 @@ public class AlbumList implements Page {
          */
         @Override
         public View generateView(int position, ViewGroup parent) {
-            View view = LayoutInflater.from(containerActivity).inflate(R.layout.album_list_item, null);
+            View view = LayoutInflater.from(containerActivity).inflate(R.layout.album_list_item, parent, false);
 
             AlbumListViewHolder viewHolder = new AlbumListViewHolder(view);
             view.setTag(viewHolder);
@@ -301,8 +301,6 @@ public class AlbumList implements Page {
         TextView lbDate;
         @BindView(R.id.owner)
         TextView lbOwner;
-        @BindView(R.id.photo_count_tv)
-        TextView lbPhotoCount;
         @BindView(R.id.delete)
         TextView lbDelete;
         @BindView(R.id.share)
@@ -349,9 +347,29 @@ public class AlbumList implements Page {
                 lbShare.setText(containerActivity.getString(R.string.private_text));
             }
 
-            lbTitle.setText(currentItem.getTitle());
-            lbPhotoCount.setText(String.format(containerActivity.getString(R.string.photo_count), String.valueOf(currentItem.getMediaShareContents().size())));
-            lbDesc.setText(currentItem.getDesc());
+            String photoCount = String.valueOf(currentItem.getMediaShareContents().size());
+
+            String title = currentItem.getTitle();
+
+            if (title.length() > 16) {
+                title = title.substring(0, 16);
+
+                title += containerActivity.getString(R.string.ellipsize);
+            }
+
+            title = String.format(containerActivity.getString(R.string.share_album_title), title, photoCount);
+
+            lbTitle.setText(title);
+
+            String desc = currentItem.getDesc();
+
+            if (desc == null || desc.length() == 0) {
+                lbDesc.setVisibility(View.GONE);
+            } else {
+                lbDesc.setVisibility(View.VISIBLE);
+                lbDesc.setText(currentItem.getDesc());
+            }
+
             lbDate.setText(currentItem.getDate().substring(0, 10));
 
             String createUUID = currentItem.getCreatorUUID();

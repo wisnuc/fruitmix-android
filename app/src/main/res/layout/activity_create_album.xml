@@ -79,7 +79,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="bottom"
-                android:hint="@string/title_text"
                 android:inputType="textMultiLine"
                 android:textColor="@color/black"
                 android:textSize="16dp"/>
@@ -131,6 +130,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="32dp"
+            android:visibility="gone"
             android:gravity="left"
             android:orientation="horizontal">
 

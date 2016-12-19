@@ -272,7 +272,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         if (requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            String[] selectedImageUUIDStr = data.getStringArrayExtra(Util.KEY_NEW_SELECTED_IMAGE_UUID_ARRAY);
+            String[] selectedImageUUIDStr = LocalCache.mediaUUIDInCreateAlbum.toArray(new String[LocalCache.mediaUUIDInCreateAlbum.size()]);
             fillPhotoList(selectedImageUUIDStr);
             fillMediaShareContents(selectedImageUUIDStr);
 

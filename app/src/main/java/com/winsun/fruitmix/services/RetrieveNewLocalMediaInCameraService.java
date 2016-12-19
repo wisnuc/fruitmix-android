@@ -11,7 +11,6 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.operationResult.OperationSQLException;
 import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -73,7 +72,7 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
 
         int retrieveMediaCount = 0;
 
-        localPhotoList = LocalCache.PhotoList(this,"Camera");
+        localPhotoList = LocalCache.PhotoList(this, "Camera");
 
         for (i = 0; i < localPhotoList.size(); i++) {
             itemRaw = localPhotoList.get(i);
@@ -101,25 +100,23 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
             media.setUuid(uuid);
             media.setOrientationNumber(1);
 
-            DBUtils dbUtils = DBUtils.getInstance(this);
+            retrieveMediaCount++;
 
-            long returnValue = dbUtils.insertLocalMedia(media);
+            Media mapResult = LocalCache.LocalMediaMapKeyIsThumb.put(media.getThumb(), media);
 
-            if (returnValue > 0) {
-                Log.i(TAG, "insert local media succeed");
+            Log.i(TAG, "insert local media to map key is thumb result:" + (mapResult != null ? "true" : "false"));
 
-                retrieveMediaCount++;
+            mapResult = LocalCache.LocalMediaMapKeyIsUUID.put(media.getUuid(), media);
 
-                Media mapResult = LocalCache.LocalMediaMapKeyIsThumb.put(media.getThumb(), media);
-
-                Log.i(TAG, "insert local media to map key is thumb result:" + (mapResult != null ? "true" : "false"));
-
-                mapResult = LocalCache.LocalMediaMapKeyIsUUID.put(media.getUuid(), media);
-
-                Log.i(TAG, "insert local media to map key is uuid result:" + (mapResult != null ? "true" : "false"));
-            }
+            Log.i(TAG, "insert local media to map key is uuid result:" + (mapResult != null ? "true" : "false"));
 
         }
+
+        DBUtils dbUtils = DBUtils.getInstance(this);
+
+        long returnValue = dbUtils.insertLocalMedias(LocalCache.LocalMediaMapKeyIsUUID);
+
+        Log.i(TAG, "insert local media result:" + returnValue);
 
         OperationEvent operationEvent;
         if (retrieveMediaCount > 0) {

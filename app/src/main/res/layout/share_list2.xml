@@ -11,7 +11,6 @@
         android:layout_height="match_parent"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
-        android:paddingBottom="8dp"
         android:scrollbars="vertical"
         android:scrollbarSize="3dp"
         android:scrollbarStyle="insideInset"
