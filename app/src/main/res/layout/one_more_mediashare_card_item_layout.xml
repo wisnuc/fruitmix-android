@@ -124,7 +124,7 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="18dp"
             android:gravity="center"
-            android:text="@string/share_comment_count"
+            android:text="@string/android_share_count"
             android:textSize="14dp"/>
 
         <TextView

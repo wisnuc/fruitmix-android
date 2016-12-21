@@ -16,10 +16,8 @@ import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.operationResult.OperationSuccess;
-import com.winsun.fruitmix.operationResult.OperationUploadPhotoFailed;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -87,7 +85,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
         } else {
 
             try {
-                HttpResponse httpResponse = FNAS.PostRemoteCall(String.format(getString(R.string.update_mediashare_url), Util.MEDIASHARE_PARAMETER, mediaShare.getUuid()), requestData);
+                HttpResponse httpResponse = FNAS.PostRemoteCall(String.format(getString(R.string.android_update_mediashare_url), Util.MEDIASHARE_PARAMETER, mediaShare.getUuid()), requestData);
 
                 if (httpResponse.getResponseCode() == 200) {
 

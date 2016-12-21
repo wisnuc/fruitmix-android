@@ -112,7 +112,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                     return;
                 }
 
-                mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
                 if (Util.getNetworkState(mContext)) {
                     FNAS.modifyRemoteMediaShare(mContext, mAlbumMap, requestData);

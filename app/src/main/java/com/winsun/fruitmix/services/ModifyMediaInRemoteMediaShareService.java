@@ -9,7 +9,6 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
-import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.operationResult.OperationIOException;
@@ -101,7 +100,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
 
         String data = getData(diffContentsInOriginalMediaShare, diffContentsInModifiedMediaShare);
 
-        String req = String.format(getString(R.string.update_mediashare_url), Util.MEDIASHARE_PARAMETER, diffContentsInModifiedMediaShare.getUuid());
+        String req = String.format(getString(R.string.android_update_mediashare_url), Util.MEDIASHARE_PARAMETER, diffContentsInModifiedMediaShare.getUuid());
 
         try {
             HttpResponse httpResponse = FNAS.PostRemoteCall(req, data);

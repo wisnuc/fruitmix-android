@@ -67,7 +67,7 @@
             android:layout_gravity="center"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="@string/album_text"
+            android:text="@string/album"
             android:textColor="@color/white"
             android:textSize="18dp"/>
     </android.support.v7.widget.Toolbar>

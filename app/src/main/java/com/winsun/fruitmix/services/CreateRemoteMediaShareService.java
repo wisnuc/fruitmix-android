@@ -3,7 +3,6 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
@@ -16,11 +15,9 @@ import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.operationResult.OperationSuccess;
-import com.winsun.fruitmix.operationResult.OperationUploadPhotoFailed;
 import com.winsun.fruitmix.parser.RemoteMediaShareJSONObjectParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -142,9 +139,13 @@ public class CreateRemoteMediaShareService extends IntentService {
 
         builder.append("\"contents\":[");
         StringBuilder contentsBuilder = new StringBuilder();
-        for (String content : mediaShare.getMediaDigestInMediaShareContents()) {
+        for (String content : mediaShare.getMediaKeyInMediaShareContents()) {
             contentsBuilder.append(",");
             contentsBuilder.append("\"");
+
+            if (content.contains("/"))
+                content = Util.CalcSHA256OfFile(content);
+
             contentsBuilder.append(content);
             contentsBuilder.append("\"");
         }

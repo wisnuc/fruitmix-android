@@ -96,7 +96,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         mEditPhotoRecyclerView.setAdapter(mAdapter);
 
         mPhotoList = new ArrayList<>();
-        fillPhotoList(mediaShare.getMediaDigestInMediaShareContents().toArray(new String[mediaShare.getMediaContentsListSize()]));
+        fillPhotoList(mediaShare.getMediaKeyInMediaShareContents());
         mAdapter.notifyDataSetChanged();
 
     }
@@ -165,15 +165,15 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
     }
 
-    private void fillPhotoList(String[] selectedImageUUIDs) {
+    private void fillPhotoList(List<String> selectedImageKeys) {
 
         Media picItem;
         Media picItemRaw;
-        for (String aStArr : selectedImageUUIDs) {
+        for (String aStArr : selectedImageKeys) {
             picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
             if (picItemRaw == null) {
 
-                picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
+                picItemRaw = LocalCache.LocalMediaMapKeyIsThumb.get(aStArr);
 
                 if (picItemRaw == null) {
                     picItem = new Media();
@@ -202,15 +202,15 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
     }
 
-    private void fillMediaShareContents(String[] selectedImageUUIDs) {
-        for (String imageUUID : selectedImageUUIDs) {
+    private void fillMediaShareContents(List<String> selectedImageKeys) {
+        for (String imageKey : selectedImageKeys) {
             MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setDigest(imageUUID);
+            mediaShareContent.setKey(imageKey);
             mediaShareContent.setAuthor(FNAS.userUUID);
             mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
             modifiedMediaShare.addMediaShareContent(mediaShareContent);
 
-            Log.i(TAG, "fillMediaShareContents: image uuid:" + imageUUID);
+            Log.i(TAG, "fillMediaShareContents: image uuid:" + imageKey);
         }
     }
 
@@ -224,9 +224,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             case R.id.add_album:
                 Intent intent = new Intent(mContext, NewAlbumPicChooseActivity.class);
 
-                String[] alreadySelectedImageUUIDArray = new String[mediaShare.getMediaContentsListSize()];
-                mediaShare.getMediaDigestInMediaShareContents().toArray(alreadySelectedImageUUIDArray);
-                intent.putStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST, (ArrayList<String>) mediaShare.getMediaDigestInMediaShareContents());
+                intent.putStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST, (ArrayList<String>) mediaShare.getMediaKeyInMediaShareContents());
                 intent.putExtra(Util.EDIT_PHOTO, true);
                 startActivityForResult(intent, Util.KEY_CHOOSE_PHOTO_REQUEST_CODE);
                 break;
@@ -247,12 +245,12 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                     finish();
                 }
 
-                mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
                 if (modifiedMediaShare.getMediaContentsListSize() != 0) {
-                    modifiedMediaShare.setCoverImageDigest(modifiedMediaShare.getFirstMediaDigestInMediaContentsList());
+                    modifiedMediaShare.setCoverImageKey(modifiedMediaShare.getFirstMediaDigestInMediaContentsList());
                 } else {
-                    modifiedMediaShare.setCoverImageDigest("");
+                    modifiedMediaShare.setCoverImageKey("");
                 }
 
                 if (Util.getNetworkState(mContext)) {
@@ -272,9 +270,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         if (requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            String[] selectedImageUUIDStr = LocalCache.mediaUUIDInCreateAlbum.toArray(new String[LocalCache.mediaUUIDInCreateAlbum.size()]);
-            fillPhotoList(selectedImageUUIDStr);
-            fillMediaShareContents(selectedImageUUIDStr);
+            fillPhotoList(LocalCache.mediaKeysInCreateAlbum);
+            fillMediaShareContents(LocalCache.mediaKeysInCreateAlbum);
 
             mAdapter.notifyDataSetChanged();
         }

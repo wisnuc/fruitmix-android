@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.winsun.fruitmix">
+    package="com.winsun.fruitmix">
 
     <!-- Include required permissions for Google Mobile Ads to run. -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".CustomApplication"
@@ -21,171 +21,155 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".NavPagerActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <!-- android:theme="@style/Theme.AppCompat.Light.NoActionBar" -->
         <!-- This meta-data tag is required to use Google Play Services. -->
         <meta-data
             android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version"/>
-
+            android:value="@integer/google_play_services_version" />
 
         <activity
             android:name="com.google.android.gms.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
-            android:theme="@android:style/Theme.Translucent"/>
-        <activity
-            android:name=".mediaModule.PhotoSliderActivity"
-            />
-
+            android:theme="@android:style/Theme.Translucent" />
+        <activity android:name=".mediaModule.PhotoSliderActivity" />
         <activity
             android:name=".mediaModule.CreateAlbumActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".mediaModule.ModifyAlbumActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".mediaModule.AlbumPicContentActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SplashScreenActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".mediaModule.MediaShareCommentActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".mediaModule.NewAlbumPicChooseActivity"
-            android:screenOrientation="portrait"/>
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".PersonInfoActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".UserManageActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".EquipmentSearchActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".LoginActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateVisible|adjustPan"/>
-        <activity android:name=".GalleryTestActivity"/>
+            android:windowSoftInputMode="stateVisible|adjustPan" />
+        <activity android:name=".GalleryTestActivity" />
         <activity
             android:name=".mediaModule.EditPhotoActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".services.CreateRemoteMediaShareService"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".services.CreateRemoteCommentService"
-            android:exported="false"/>
+            android:exported="false" />
 
         <activity
             android:name=".mediaModule.MoreMediaActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".services.CreateLocalMediaShareService"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".services.ModifyRemoteMediaShareService"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".services.DeleteRemoteMediaShareService"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".services.CreateLocalCommentService"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".services.RetrieveRemoteMediaShareService"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".services.ButlerService"
             android:enabled="true"
-            android:exported="false">
-        </service>
+            android:exported="false" />
         <service
             android:name=".services.ModifyMediaInRemoteMediaShareService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
         <service
             android:name=".services.RetrieveNewLocalMediaInCameraService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
         <service
             android:name=".services.DeleteLocalMediaShareService"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".services.ModifyLocalMediaShareService"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".services.RetrieveLocalMediaCommentService"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".services.DeleteLocalCommentService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
         <service
             android:name=".services.RetrieveLocalMediaService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
         <service
             android:name=".services.RetrieveLocalMediaShareService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
         <service
             android:name=".services.RetrieveRemoteMediaService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
         <service
             android:name=".services.RetrieveRemoteMediaCommentService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
         <service
             android:name=".services.RetrieveRemoteUserService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
         <service
             android:name=".services.RetrieveTokenService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
         <service
             android:name=".services.RetrieveDeviceIdService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
         <service
             android:name=".services.ModifyMediaInLocalMediaShareService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
 
         <activity
             android:name=".fileModule.LocalFileActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".services.RetrieveRemoteFileService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
         <service
             android:name=".services.RetrieveRemoteFileShareService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
 
-        <activity android:name=".CreateNewEquipmentActivity">
-        </activity>
+        <activity
+            android:name=".CreateNewEquipmentActivity"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".services.RetrieveDownloadedFileService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
+        <service
+            android:name=".services.CalcNewLocalMediaDigestService"
+            android:exported="false" />
     </application>
 
 </manifest>

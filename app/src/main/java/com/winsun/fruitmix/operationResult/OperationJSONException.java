@@ -3,6 +3,7 @@ package com.winsun.fruitmix.operationResult;
 import android.content.Context;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.model.ErrorCode;
 import com.winsun.fruitmix.util.OperationResultType;
 
 /**
@@ -12,7 +13,7 @@ import com.winsun.fruitmix.util.OperationResultType;
 public class OperationJSONException extends OperationResult {
     @Override
     public String getResultMessage(Context context) {
-        return context.getString(R.string.json_exception);
+        return String.format(context.getString(R.string.network_exception), ErrorCode.ERR_NETWORK_DATA_PARSE_FAILED.getCode());
     }
 
     @Override

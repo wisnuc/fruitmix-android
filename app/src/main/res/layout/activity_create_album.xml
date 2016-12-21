@@ -39,7 +39,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginLeft="32dp"
                     android:layout_toRightOf="@+id/back"
-                    android:text="@string/modify_album_text"
+                    android:text="@string/modify_album"
                     android:textColor="@color/white"
                     android:textSize="18dp"/>
 
@@ -98,7 +98,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="bottom"
-                android:hint="@string/description_text"
+                android:hint="@string/description"
                 android:inputType="textMultiLine"
                 android:textColor="@color/black"
                 android:textSize="16dp"/>

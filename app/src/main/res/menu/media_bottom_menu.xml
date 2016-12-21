@@ -9,11 +9,11 @@
     <item
         android:id="@+id/photo"
         android:icon="@drawable/ic_photo"
-        android:title="@string/photo_text"/>
+        android:title="@string/photo"/>
 
     <item
         android:id="@+id/album"
         android:icon="@drawable/ic_photo_album"
-        android:title="@string/album_text"/>
+        android:title="@string/album"/>
 
 </menu>

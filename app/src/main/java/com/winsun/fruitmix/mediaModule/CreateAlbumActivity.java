@@ -61,7 +61,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
     @BindView(R.id.layout_title)
     TextView mLayoutTitle;
 
-    private String[] mSelectedImageUUIDArray;
+    private List<String> mSelectedImageKeys;
 
     private Context mContext;
 
@@ -73,15 +73,15 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         mContext = this;
 
-        mSelectedImageUUIDArray = LocalCache.mediaUUIDInCreateAlbum.toArray(new String[LocalCache.mediaUUIDInCreateAlbum.size()]);
+        mSelectedImageKeys = LocalCache.mediaKeysInCreateAlbum;
 
         setContentView(R.layout.activity_create_album);
 
         ButterKnife.bind(this);
 
-        mLayoutTitle.setText(getString(R.string.create_album_text));
+        mLayoutTitle.setText(getString(R.string.create_album));
 
-        String mTitle = String.format(getString(R.string.title_hint), new SimpleDateFormat("yyyy-MM-dd", Locale.SIMPLIFIED_CHINESE).format(new Date(System.currentTimeMillis())));
+        String mTitle = String.format(getString(R.string.album_item_title), new SimpleDateFormat("yyyy-MM-dd", Locale.SIMPLIFIED_CHINESE).format(new Date(System.currentTimeMillis())));
         tfTitle.setHint(mTitle);
 
         ckPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -121,9 +121,9 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                 desc = tfDesc.getText().toString();
 
-                mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-                FNAS.createLocalMediaShare(mContext, generateMediaShare(sPublic, sSetMaintainer, title, desc, mSelectedImageUUIDArray));
+                FNAS.createLocalMediaShare(mContext, generateMediaShare(sPublic, sSetMaintainer, title, desc, mSelectedImageKeys));
 
             }
         });
@@ -195,17 +195,17 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
     }
 
-    private MediaShare generateMediaShare(boolean isPublic, boolean otherMaintainer, String title, String desc, String[] digests) {
+    private MediaShare generateMediaShare(boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaKeys) {
 
         MediaShare mediaShare = new MediaShare();
         mediaShare.setUuid(Util.createLocalUUid());
 
-        Log.i(TAG, "create album digest:" + digests);
+        Log.i(TAG, "create album digest:" + mediaKeys);
 
         List<MediaShareContent> mediaShareContents = new ArrayList<>();
-        for (String digest : digests) {
+        for (String digest : mediaKeys) {
             MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setDigest(digest);
+            mediaShareContent.setKey(digest);
             mediaShareContent.setAuthor(FNAS.userUUID);
             mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
             mediaShareContents.add(mediaShareContent);
@@ -213,7 +213,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         mediaShare.initMediaShareContents(mediaShareContents);
 
-        mediaShare.setCoverImageDigest(digests[0]);
+        mediaShare.setCoverImageKey(mediaKeys.get(0));
 
         mediaShare.setTitle(title);
         mediaShare.setDesc(desc);

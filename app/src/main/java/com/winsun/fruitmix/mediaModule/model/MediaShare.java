@@ -1,15 +1,11 @@
 package com.winsun.fruitmix.mediaModule.model;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -33,7 +29,7 @@ public class MediaShare implements Parcelable {
     private boolean isAlbum;
     private boolean isArchived;
     private String date;
-    private String coverImageDigest;
+    private String coverImageKey;
     private boolean isLocal;
     private String shareDigest;
     private boolean isSticky;
@@ -59,7 +55,7 @@ public class MediaShare implements Parcelable {
         isAlbum = in.readByte() != 0;
         isArchived = in.readByte() != 0;
         date = in.readString();
-        coverImageDigest = in.readString();
+        coverImageKey = in.readString();
         isLocal = in.readByte() != 0;
         shareDigest = in.readString();
         isSticky = in.readByte() != 0;
@@ -157,7 +153,12 @@ public class MediaShare implements Parcelable {
         stringBuilder.append("\",\"value\":[");
         for (MediaShareContent value : mediaShareContents) {
             stringBuilder.append("\"");
-            stringBuilder.append(value.getDigest());
+
+            String key = value.getKey();
+            if (key.contains("/"))
+                key = Util.CalcSHA256OfFile(key);
+
+            stringBuilder.append(key);
             stringBuilder.append("\",");
         }
 
@@ -195,7 +196,7 @@ public class MediaShare implements Parcelable {
         dest.writeByte((byte) (isAlbum ? 1 : 0));
         dest.writeByte((byte) (isArchived ? 1 : 0));
         dest.writeString(date);
-        dest.writeString(coverImageDigest);
+        dest.writeString(coverImageKey);
         dest.writeByte((byte) (isLocal ? 1 : 0));
         dest.writeString(shareDigest);
         dest.writeByte((byte) (isSticky ? 1 : 0));
@@ -266,12 +267,12 @@ public class MediaShare implements Parcelable {
         this.desc = desc;
     }
 
-    public String getCoverImageDigest() {
-        return coverImageDigest;
+    public String getCoverImageKey() {
+        return coverImageKey;
     }
 
-    public void setCoverImageDigest(String coverImageDigest) {
-        this.coverImageDigest = coverImageDigest;
+    public void setCoverImageKey(String coverImageKey) {
+        this.coverImageKey = coverImageKey;
     }
 
     public boolean isLocal() {
@@ -335,7 +336,7 @@ public class MediaShare implements Parcelable {
         cloneMediaShare.setAlbum(isAlbum());
         cloneMediaShare.setArchived(isArchived());
         cloneMediaShare.setDate(getDate());
-        cloneMediaShare.setCoverImageDigest(getCoverImageDigest());
+        cloneMediaShare.setCoverImageKey(getCoverImageKey());
         cloneMediaShare.setLocal(isLocal());
         cloneMediaShare.setShareDigest(getShareDigest());
         cloneMediaShare.setSticky(isSticky());
@@ -356,7 +357,7 @@ public class MediaShare implements Parcelable {
     }
 
     public String getFirstMediaDigestInMediaContentsList() {
-        return mediaShareContents.get(0).getDigest();
+        return mediaShareContents.get(0).getKey();
     }
 
     public List<String> getViewers() {
@@ -371,13 +372,13 @@ public class MediaShare implements Parcelable {
         return Collections.unmodifiableList(mediaShareContents);
     }
 
-    public List<String> getMediaDigestInMediaShareContents() {
-        List<String> mediaDigests = new ArrayList<>(getMediaContentsListSize());
+    public List<String> getMediaKeyInMediaShareContents() {
+        List<String> mediaKeys = new ArrayList<>(getMediaContentsListSize());
         for (MediaShareContent mediaShareContent : mediaShareContents) {
-            mediaDigests.add(mediaShareContent.getDigest());
+            mediaKeys.add(mediaShareContent.getKey());
         }
 
-        return mediaDigests;
+        return mediaKeys;
     }
 
     public void initMediaShareContents(List<MediaShareContent> mediaShareContents) {
@@ -444,18 +445,18 @@ public class MediaShare implements Parcelable {
     }
 
     public void sendModifyMediaShareRequest(Context context, String requestData) {
-        if(Util.getNetworkState(context)){
-            FNAS.modifyRemoteMediaShare(context,this,requestData);
-        }else {
-            FNAS.modifyLocalMediaShare(context,this,requestData);
+        if (Util.getNetworkState(context)) {
+            FNAS.modifyRemoteMediaShare(context, this, requestData);
+        } else {
+            FNAS.modifyLocalMediaShare(context, this, requestData);
         }
     }
 
     public void sendDeleteMediaShareRequest(Context context) {
-        if(Util.getNetworkState(context)){
-            FNAS.deleteRemoteMediaShare(context,this);
-        }else {
-            FNAS.deleteLocalMediaShare(context,this);
+        if (Util.getNetworkState(context)) {
+            FNAS.deleteRemoteMediaShare(context, this);
+        } else {
+            FNAS.deleteLocalMediaShare(context, this);
         }
     }
 

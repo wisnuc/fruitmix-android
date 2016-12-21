@@ -55,15 +55,16 @@ public class SplashScreenActivity extends Activity {
 
         LocalCache.Init();
 
-        boolean result = FileUtil.createDownloadFileStoreFolder(mContext);
+        boolean result = FileUtil.createDownloadFileStoreFolder();
 
         if (!result) {
-            Log.i(TAG, "onCreate: " + getString(R.string.create_download_file_store_folder_failed));
+            Log.i(TAG, "onCreate: Create download file store folder failed");
         }
-
 
         CustomHandler mHandler = new CustomHandler(this);
         mHandler.sendEmptyMessage(WELCOME);
+
+        FNAS.retrieveLocalMediaMap(getApplicationContext());
     }
 
     @Override

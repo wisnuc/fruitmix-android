@@ -43,10 +43,7 @@ public class Util {
     public static final String PASSWORD = "password";
     public static final String EDIT_PHOTO = "edit_photo";
     public static final String UPDATED_ALBUM_TITLE = "updated_album_title";
-    public static final String IMAGE_UUID = "image_uuid";
-    public static final String FOLDER_UUID = "folder_uuid";
-    public static final String FILE_UUID = "file_uuid";
-    public static final String FILE_NAME = "file_name";
+    public static final String IMAGE_KEY = "image_key";
 
     public static final String LOCAL_SHARE_CREATED = "local_share_created";
     public static final String LOCAL_SHARE_MODIFIED = "local_share_modified";
@@ -63,6 +60,8 @@ public class Util {
     public static final String LOCAL_COMMENT_DELETED = "local_comment_deleted";
 
     public static final String NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED = "new_local_media_in_camera_retrieved";
+
+    public static final String CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED = "calc_new_local_media_digest_finished";
 
     public static final String PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED = "photo_in_remote_media_share_modified";
     public static final String PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED = "photo_in_local_media_share_modified";
@@ -137,7 +136,7 @@ public class Util {
 
     public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
     public static final String CURRENT_PHOTO_POSITION = "current_photo_position";
-    public static final String CURRENT_MEDIA_UUID = "current_media_uuid";
+    public static final String CURRENT_MEDIA_KEY = "current_media_key";
     public static final String CURRENT_MEDIASHARE_TIME = "current_mediashare_time";
 
     public static final String KEY_MEDIASHARE = "key_mediashare";
@@ -248,7 +247,7 @@ public class Util {
             builder.append(new SimpleDateFormat("HH:mm:ss", Locale.SIMPLIFIED_CHINESE).format(new Date(createTime)));
 
         } else if (timeDifference < 24 * 3600 * 1000) {
-            builder.append(context.getString(R.string.yesterday));
+            builder.append(context.getString(R.string.android_yesterday));
             builder.append(new SimpleDateFormat("HH:mm", Locale.SIMPLIFIED_CHINESE).format(new Date(createTime)));
         } else if (timeDifference < 4 * 24 * 3600 * 1000) {
 
@@ -297,47 +296,22 @@ public class Util {
     }
 
     public static int[] formatPhotoWidthHeight(int width, int height) {
-        if (width >= height) {
-            width = width * 200 / height;
-            height = 200;
-        } else {
-            height = height * 200 / width;
-            width = 200;
-        }
+//        if (width >= height) {
+//            width = width * 200 / height;
+//            height = 200;
+//        } else {
+//            height = height * 200 / width;
+//            width = 200;
+//        }
 
-        return new int[]{width, height};
+        int actualWidth = 200;
+        int actualHeight = 200;
+
+        return new int[]{actualWidth, actualHeight};
     }
 
     public static boolean checkRunningOnLollipopOrHigher() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-    }
-
-    public static boolean uploadImageDigestsIfNotUpload(Context context, List<String> imageDigests) {
-        boolean uploadFileResult = true;
-        int uploadSucceedCount = 0;
-        Media media;
-
-        for (String imageDigest : imageDigests) {
-
-            media = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigest);
-            if (media != null) {
-                uploadFileResult = media.uploadIfNotDone(context);
-
-                if (!uploadFileResult)
-                    break;
-                else {
-                    uploadSucceedCount++;
-                }
-            }
-
-        }
-
-        if (uploadSucceedCount > 0) {
-
-            EventBus.getDefault().post(new OperationEvent(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED, new OperationSuccess()));
-        }
-
-        return uploadFileResult;
     }
 
     public static String removeWrap(String str) {

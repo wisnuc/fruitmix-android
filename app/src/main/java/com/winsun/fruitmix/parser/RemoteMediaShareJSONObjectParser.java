@@ -1,7 +1,5 @@
 package com.winsun.fruitmix.parser;
 
-import android.util.Log;
-
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 
@@ -61,7 +59,7 @@ public class RemoteMediaShareJSONObjectParser {
                 JSONObject jsonObject = jsonArr.getJSONObject(j);
 
                 mediaShareContent = new MediaShareContent();
-                mediaShareContent.setDigest(jsonObject.optString("digest").toLowerCase());
+                mediaShareContent.setKey(jsonObject.optString("digest").toLowerCase());
 
                 String author = jsonObject.optString("author");
                 if (author.equals("")) {
@@ -81,10 +79,10 @@ public class RemoteMediaShareJSONObjectParser {
                 mediaShare.addMediaShareContent(mediaShareContent);
             }
 
-            mediaShare.setCoverImageDigest(mediaShare.getFirstMediaDigestInMediaContentsList());
+            mediaShare.setCoverImageKey(mediaShare.getFirstMediaDigestInMediaContentsList());
         } else {
             mediaShare.clearMediaShareContents();
-            mediaShare.setCoverImageDigest("");
+            mediaShare.setCoverImageKey("");
         }
 
         jsonArr = itemRaw.getJSONArray("viewers");

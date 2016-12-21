@@ -99,17 +99,17 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     Media media = mediaList.get(currentPhotoPosition);
 
-                    String imageUUID = media.getUuid();
-                    names.add(imageUUID);
+                    String imageKey = media.getKey();
+                    names.add(imageKey);
 
                     String imageTag;
 
                     boolean isThumb = media.isLoaded();
                     imageTag = getImageUrl(isThumb, media);
 
-                    sharedElements.put(imageUUID, mViewPager.findViewWithTag(imageTag));
+                    sharedElements.put(imageKey, mViewPager.findViewWithTag(imageTag));
 
-                    Log.i(TAG, "onMapSharedElements: media uuid:" + imageUUID + " imageTag:" + imageTag);
+                    Log.i(TAG, "onMapSharedElements: media key:" + imageKey + " imageTag:" + imageTag);
                 }
             }
 
@@ -205,7 +205,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                         Intent intent = new Intent();
                         intent.setClass(PhotoSliderActivity.this, MediaShareCommentActivity.class);
-                        intent.putExtra(Util.IMAGE_UUID, imageUUID);
+                        intent.putExtra(Util.IMAGE_KEY, imageUUID);
 
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, currentPhotoPosition);
 
@@ -283,7 +283,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
         intent.putExtra(Util.CURRENT_PHOTO_POSITION, currentPhotoPosition);
 
-        intent.putExtra(Util.CURRENT_MEDIA_UUID, mediaList.get(currentPhotoPosition).getUuid());
+        intent.putExtra(Util.CURRENT_MEDIA_KEY, mediaList.get(currentPhotoPosition).getKey());
         intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, getIntent().getStringExtra(Util.CURRENT_MEDIASHARE_TIME));
         setResult(RESULT_OK, intent);
 
@@ -313,7 +313,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             String title = mediaList.get(position).getTime();
             if (title == null || title.contains("1916-01-01")) {
-                lbDate.setText(getString(R.string.unknown_time_text));
+                lbDate.setText(getString(R.string.unknown_time));
             } else {
                 lbDate.setText(title);
             }
@@ -547,7 +547,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 if (transitionMediaNeedShowThumb && !media.isLocal()) {
 
                     if (position == initialPhotoPosition)
-                        ViewCompat.setTransitionName(mainPic, media.getUuid());
+                        ViewCompat.setTransitionName(mainPic, media.getKey());
 
                     String thumbImageUrl = media.getImageThumbUrl(mContext);
                     mainPic.setTag(thumbImageUrl);
@@ -557,7 +557,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 } else {
 
                     if (position == initialPhotoPosition)
-                        ViewCompat.setTransitionName(mainPic, media.getUuid());
+                        ViewCompat.setTransitionName(mainPic, media.getKey());
 
                     mainPic.setOrientationNumber(media.getOrientationNumber());
 

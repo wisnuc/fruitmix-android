@@ -24,7 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.BounceInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -49,6 +48,7 @@ import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
+import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -123,16 +123,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private boolean mRemoteMediaLoaded = false;
 
-    private boolean mLocalMediaInCameraLoaded = false;
-
     private boolean mRemoteMediaShareLoaded = false;
     private boolean mLocalMediaShareLoaded = false;
 
     private boolean onResume = false;
 
     private OnMainFragmentInteractionListener mListener;
-
-    private int mNeedUploadPhotoNumber = 0;
 
     public MediaMainFragment() {
         // Required empty public constructor
@@ -210,13 +206,14 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         if (isHidden()) return;
 
         if (!onResume) {
-            FNAS.retrieveLocalMediaMap(mContext);
+
+            FNAS.retrieveRemoteMediaMap(mContext);
 //            FNAS.retrieveLocalMediaCommentMap(mContext);
 
             onResume = true;
         } else {
 
-            if(viewPager.getCurrentItem() != PAGE_PHOTO){
+            if (viewPager.getCurrentItem() != PAGE_PHOTO) {
                 pageList.get(viewPager.getCurrentItem()).refreshView();
             }
 
@@ -359,8 +356,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 mRemoteMediaLoaded = true;
 
+                NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+                Util.needRefreshPhotoSliderList = true;
                 photoList.refreshView();
-                photoList.fillLocalCachePhotoData();
 
                 if (!mRemoteMediaShareLoaded) {
                     FNAS.retrieveRemoteMediaShare(mContext, true);
@@ -397,23 +395,13 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             handleLocalCommentDeleted(operationEvent);
 
-        } else if (action.equals(Util.LOCAL_PHOTO_UPLOAD_STATE_CHANGED)) {
+        } else if (action.equals(Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED)) {
 
-            handleLocalPhotoUploadStateChanged();
+            Log.i(TAG, "handleOperationEvent: finish calc new local media digest and refresh view");
 
-        } else if (action.equals(Util.LOCAL_MEDIA_RETRIEVED)) {
-
-            Log.i(TAG, "local media loaded");
-
-            if (!mLocalMediaInCameraLoaded) {
-                FNAS.retrieveLocalMediaInCamera(mContext);
-
-                mLocalMediaInCameraLoaded = true;
-            }
-
-        } else if (action.equals(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED)) {
-
-            FNAS.retrieveRemoteMediaMap(mContext);
+            NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+            Util.needRefreshPhotoSliderList = true;
+            photoList.refreshView();
 
         } else if (action.equals(Util.REMOTE_MEDIA_SHARE_RETRIEVED)) {
             Log.i(TAG, "remote share loaded");
@@ -435,8 +423,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             pageList.get(PAGE_ALBUM).refreshView();
             pageList.get(PAGE_SHARE).refreshView();
-
-            startUploadAllLocalPhoto();
 
             doCreateMediaShareInLocalMediaShareMapFunction();
         } else if (action.equals(Util.LOCAL_MEDIA_COMMENT_RETRIEVED)) {
@@ -493,28 +479,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     }
 
-    private void startUploadAllLocalPhoto() {
-        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
-            if (!media.isUploaded()) {
-
-                mNeedUploadPhotoNumber++;
-
-                FNAS.createRemoteMedia(mContext, media);
-            }
-        }
-
-    }
-
-    private void handleLocalPhotoUploadStateChanged() {
-        Log.i(TAG, "local photo upload state changed");
-
-        mNeedUploadPhotoNumber--;
-
-        if (mNeedUploadPhotoNumber == 0) {
-            photoList.refreshView();
-        }
-
-    }
 
     private void handleLocalCommentDeleted(OperationEvent operationEvent) {
         Log.i(TAG, "local comment changed");
@@ -695,7 +659,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         sInChooseMode = false;
         photoList.setSelectMode(sInChooseMode);
-        setSelectCountText(getString(R.string.photo_text));
+        setSelectCountText(getString(R.string.photo));
 
         mListener.unlockDrawer();
     }
@@ -804,23 +768,23 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     @Override
     public void onClick(View v) {
-        List<String> selectUUIDs;
+        List<String> selectMediaKeys;
         switch (v.getId()) {
             case R.id.bt_album:
-                selectUUIDs = photoList.getSelectedImageUUIDs();
-                if (showNothingSelectToast(selectUUIDs)) return;
+                selectMediaKeys = photoList.getSelectedImageKeys();
+                if (showNothingSelectToast(selectMediaKeys)) return;
 
-                photoList.createAlbum(selectUUIDs);
+                photoList.createAlbum(selectMediaKeys);
                 hideChooseHeader();
                 showBottomNavAnim();
                 break;
             case R.id.bt_share:
-                selectUUIDs = photoList.getSelectedImageUUIDs();
-                if (showNothingSelectToast(selectUUIDs)) return;
+                selectMediaKeys = photoList.getSelectedImageKeys();
+                if (showNothingSelectToast(selectMediaKeys)) return;
 
-                mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-                doCreateShareFunction(selectUUIDs);
+                doCreateShareFunction(selectMediaKeys);
                 break;
             case R.id.fab:
                 refreshFabState();
@@ -841,20 +805,20 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         return false;
     }
 
-    private void doCreateShareFunction(List<String> selectUUIDs) {
+    private void doCreateShareFunction(List<String> selectMediaKeys) {
 
-        FNAS.createLocalMediaShare(mContext, createMediaShare(selectUUIDs));
+        FNAS.createLocalMediaShare(mContext, createMediaShare(selectMediaKeys));
     }
 
-    private MediaShare createMediaShare(List<String> selectUUIDs) {
+    private MediaShare createMediaShare(List<String> selectMediaKeys) {
 
         MediaShare mediaShare = new MediaShare();
         mediaShare.setUuid(Util.createLocalUUid());
 
         List<MediaShareContent> mediaShareContents = new ArrayList<>();
-        for (String digest : selectUUIDs) {
+        for (String digest : selectMediaKeys) {
             MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setDigest(digest);
+            mediaShareContent.setKey(digest);
             mediaShareContent.setAuthor(FNAS.userUUID);
             mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
             mediaShareContents.add(mediaShareContent);
@@ -862,7 +826,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         mediaShare.initMediaShareContents(mediaShareContents);
 
-        mediaShare.setCoverImageDigest(selectUUIDs.get(0));
+        mediaShare.setCoverImageKey(selectMediaKeys.get(0));
         mediaShare.setTitle("");
         mediaShare.setDesc("");
         for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
@@ -950,13 +914,13 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void modifyMediaShare(MediaShare mediaShare) {
 
         if (mediaShare.checkPermissionToOperate()) {
-            mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+            mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
             String requestData = mediaShare.createToggleShareStateRequestData();
 
             mediaShare.sendModifyMediaShareRequest(mContext, requestData);
         } else {
-            Toast.makeText(mContext, getString(R.string.no_operate_mediashare_permission), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, getString(R.string.no_operate_media_share_permission), Toast.LENGTH_SHORT).show();
 
         }
 
@@ -965,11 +929,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     @Override
     public void deleteMediaShare(MediaShare mediaShare) {
         if (mediaShare.checkPermissionToOperate()) {
-            mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+            mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
             mediaShare.sendDeleteMediaShareRequest(mContext);
         } else {
-            Toast.makeText(mContext, getString(R.string.no_operate_mediashare_permission), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, getString(R.string.no_operate_media_share_permission), Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -987,12 +951,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 lbRight.setVisibility(View.GONE);
                 break;
             case PAGE_PHOTO:
-                title.setText(getString(R.string.photo_text));
+                title.setText(getString(R.string.photo));
                 lbRight.setVisibility(View.VISIBLE);
                 fab.setVisibility(View.GONE);
                 break;
             case PAGE_ALBUM:
-                title.setText(getString(R.string.album_text));
+                title.setText(getString(R.string.album));
                 fab.setVisibility(View.GONE);
                 ivBtAlbum.setVisibility(View.GONE);
                 ivBtShare.setVisibility(View.GONE);

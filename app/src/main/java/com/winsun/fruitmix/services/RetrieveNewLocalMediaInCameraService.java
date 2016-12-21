@@ -15,6 +15,9 @@ import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -65,66 +68,13 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
      */
     private void handleActionRetrieveLocalMedia() {
 
-        List<Map<String, String>> localPhotoList;
-        int i;
-        Map<String, String> itemRaw;
-        Media media;
+        Log.i(TAG, "handleActionRetrieveLocalMedia: before retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-        int retrieveMediaCount = 0;
+        LocalCache.PhotoList(this, "Camera");
 
-        localPhotoList = LocalCache.PhotoList(this, "Camera");
+        Log.i(TAG, "handleActionRetrieveLocalMedia: after retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-        for (i = 0; i < localPhotoList.size(); i++) {
-            itemRaw = localPhotoList.get(i);
-
-            if (LocalCache.LocalMediaMapKeyIsThumb.containsKey(itemRaw.get("thumb"))) {
-                continue;
-            }
-            String uuid = Util.CalcSHA256OfFile(itemRaw.get("thumb"));
-
-            if (LocalCache.LocalMediaMapKeyIsUUID.containsKey(uuid)) {
-                continue;
-            }
-
-            media = new Media();
-            media.setThumb(itemRaw.get("thumb"));
-            media.setWidth(itemRaw.get("width"));
-            media.setHeight(itemRaw.get("height"));
-            media.setTime(itemRaw.get("lastModified"));
-            media.setUploaded(false);
-            media.setSelected(false);
-            media.setLoaded(false);
-            media.setOrientationNumber(1);
-            media.setLocal(true);
-            media.setSharing(true);
-            media.setUuid(uuid);
-            media.setOrientationNumber(1);
-
-            retrieveMediaCount++;
-
-            Media mapResult = LocalCache.LocalMediaMapKeyIsThumb.put(media.getThumb(), media);
-
-            Log.i(TAG, "insert local media to map key is thumb result:" + (mapResult != null ? "true" : "false"));
-
-            mapResult = LocalCache.LocalMediaMapKeyIsUUID.put(media.getUuid(), media);
-
-            Log.i(TAG, "insert local media to map key is uuid result:" + (mapResult != null ? "true" : "false"));
-
-        }
-
-        DBUtils dbUtils = DBUtils.getInstance(this);
-
-        long returnValue = dbUtils.insertLocalMedias(LocalCache.LocalMediaMapKeyIsUUID);
-
-        Log.i(TAG, "insert local media result:" + returnValue);
-
-        OperationEvent operationEvent;
-        if (retrieveMediaCount > 0) {
-            operationEvent = new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, new OperationSuccess());
-        } else {
-            operationEvent = new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, new OperationSQLException());
-        }
-        EventBus.getDefault().post(operationEvent);
+        CalcNewLocalMediaDigestService.startActionCalcNewLocalMediaDigest(this);
     }
 
 }

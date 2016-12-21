@@ -10,7 +10,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +19,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.command.ChangeToDownloadPageCommand;
@@ -390,7 +388,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
                 } else {
 
-                    Toast.makeText(getActivity(), getString(R.string.no_write_external_storage_permission), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), getString(R.string.android_no_write_external_storage_permission), Toast.LENGTH_SHORT).show();
 
                 }
 

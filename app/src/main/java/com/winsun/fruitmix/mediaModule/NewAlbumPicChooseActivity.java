@@ -49,11 +49,11 @@ public class NewAlbumPicChooseActivity extends Activity {
 
         mNewPhotoList = new NewPhotoList(this,null);
 
-        List<String> alreadySelectedImageUUIDArrayList = getIntent().getStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST);
+        List<String> alreadySelectedImageKeyArrayList = getIntent().getStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST);
 
         mMainFrameLayout.addView(mNewPhotoList.getView());
         mNewPhotoList.setSelectMode(true);
-        mNewPhotoList.setAlreadySelectedImageUUIDArrayList(alreadySelectedImageUUIDArrayList);
+        mNewPhotoList.setAlreadySelectedImageKeyArrayList(alreadySelectedImageKeyArrayList);
         mNewPhotoList.refreshView();
 
         ivBack.setOnClickListener(new View.OnClickListener() {
@@ -67,8 +67,8 @@ public class NewAlbumPicChooseActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                List<String> selectImageUUIDs = getSelectedImageUUIDs();
-                if (selectImageUUIDs.size() == 0) {
+                List<String> selectImageKeys = getSelectedImageKeys();
+                if (selectImageKeys.size() == 0) {
                     Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -77,7 +77,7 @@ public class NewAlbumPicChooseActivity extends Activity {
 
                 if (intent.getBooleanExtra(Util.EDIT_PHOTO, false)) {
 
-                    LocalCache.mediaUUIDInCreateAlbum.addAll(selectImageUUIDs);
+                    LocalCache.mediaKeysInCreateAlbum.addAll(selectImageKeys);
 
                     setResult(RESULT_OK, intent);
                     finish();
@@ -86,7 +86,7 @@ public class NewAlbumPicChooseActivity extends Activity {
                     intent = new Intent();
                     intent.setClass(NewAlbumPicChooseActivity.this, CreateAlbumActivity.class);
 
-                    LocalCache.mediaUUIDInCreateAlbum.addAll(selectImageUUIDs);
+                    LocalCache.mediaKeysInCreateAlbum.addAll(selectImageKeys);
 
                     startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
                 }
@@ -112,8 +112,8 @@ public class NewAlbumPicChooseActivity extends Activity {
     }
 
 
-    public List<String> getSelectedImageUUIDs() {
-        return mNewPhotoList.getSelectedImageUUIDs();
+    public List<String> getSelectedImageKeys() {
+        return mNewPhotoList.getSelectedImageKeys();
     }
 
 }

@@ -18,7 +18,7 @@
             android:layout_gravity="center"
             android:background="@drawable/share_portrait_bg"
             android:gravity="center"
-            android:text="@string/name_abbreviations"
+            android:text="@string/user_name_abbreviations"
             android:textColor="@color/white"
             android:textSize="18dp" />
 

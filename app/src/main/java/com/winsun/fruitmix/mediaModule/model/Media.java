@@ -248,8 +248,9 @@ public class Media implements Parcelable {
 
             int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            imageUrl = String.format(context.getString(R.string.thumb_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid(),
+            imageUrl = String.format(context.getString(R.string.android_thumb_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid(),
                     String.valueOf(result[0]), String.valueOf(result[1]));
+
         }
         return imageUrl;
     }
@@ -260,7 +261,7 @@ public class Media implements Parcelable {
         if (isLocal()) {
             imageUrl = getThumb();
         } else {
-            imageUrl = String.format(context.getString(R.string.original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid());
+            imageUrl = String.format(context.getString(R.string.android_original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid());
         }
         return imageUrl;
     }
@@ -284,5 +285,12 @@ public class Media implements Parcelable {
         media.setType(getType());
 
         return media;
+    }
+
+    public String getKey() {
+        if (isLocal())
+            return getThumb();
+        else
+            return getUuid();
     }
 }

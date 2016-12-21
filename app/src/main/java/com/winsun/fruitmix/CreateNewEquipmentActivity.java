@@ -47,7 +47,7 @@ public class CreateNewEquipmentActivity extends AppCompatActivity implements Vie
 
                 if (ip.equals("")) {
 
-                    Toast.makeText(CreateNewEquipmentActivity.this, getString(R.string.edit_ip_text), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CreateNewEquipmentActivity.this, "请输入ip", Toast.LENGTH_SHORT).show();
 
                 } else {
                     Intent intent = new Intent();

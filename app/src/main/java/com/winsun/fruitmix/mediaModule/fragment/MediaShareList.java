@@ -44,7 +44,6 @@ import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -204,7 +203,7 @@ public class MediaShareList implements Page {
 
                 int currentMediaSharePosition = findShareItemPosition(currentMediaShareTime);
 
-                List<String> currentMediaUUIDs = mediaShareList.get(currentMediaSharePosition).getMediaDigestInMediaShareContents();
+                List<String> currentMediaUUIDs = mediaShareList.get(currentMediaSharePosition).getMediaKeyInMediaShareContents();
 
                 String currentMediaUUID = currentMediaUUIDs.get(currentPhotoPosition);
 
@@ -272,11 +271,11 @@ public class MediaShareList implements Page {
         return returnPosition;
     }
 
-    private String findMediaTagByMediaUUID(String imageUUID) {
+    private String findMediaTagByMediaUUID(String imageKey) {
         String currentMediaTag;
-        Media currentMedia = LocalCache.RemoteMediaMapKeyIsUUID.get(imageUUID);
+        Media currentMedia = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKey);
         if (currentMedia == null) {
-            currentMedia = LocalCache.LocalMediaMapKeyIsUUID.get(imageUUID);
+            currentMedia = LocalCache.LocalMediaMapKeyIsThumb.get(imageKey);
         }
         currentMediaTag = currentMedia.getImageThumbUrl(containerActivity);
         return currentMediaTag;
@@ -440,11 +439,11 @@ public class MediaShareList implements Page {
         }
 
         private void refreshViewAttributeWhenIsAlbum() {
-            lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.share_album_title), currentItem.getTitle(), String.valueOf(currentItem.getMediaShareContents().size())));
+            lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.android_share_album_title), currentItem.getTitle(), String.valueOf(currentItem.getMediaContentsListSize())));
 
-            coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
+            coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageKey());
             if (coverImg == null) {
-                coverImg = LocalCache.LocalMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
+                coverImg = LocalCache.LocalMediaMapKeyIsThumb.get(currentItem.getCoverImageKey());
             }
             if (coverImg != null) {
 
@@ -489,7 +488,7 @@ public class MediaShareList implements Page {
 
         Media itemImg;
 
-        List<String> imageDigests;
+        List<String> imageKeys;
 
 
         OneMediaShareCardItemViewHolder(View view, Map<String, List<Comment>> commentMap) {
@@ -506,16 +505,16 @@ public class MediaShareList implements Page {
         public void refreshView(MediaShare mediaShare, int position) {
             super.refreshView(mediaShare, position);
 
-            imageDigests = mediaShare.getMediaDigestInMediaShareContents();
+            imageKeys = mediaShare.getMediaKeyInMediaShareContents();
 
             refreshViewAttributeWhenOneImage(commentMap);
         }
 
         private void refreshViewAttributeWhenOneImage(Map<String, List<Comment>> commentMap) {
-            Log.i(TAG, "images[0]:" + imageDigests.get(0));
-            itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(0));
+            Log.i(TAG, "images[0]:" + imageKeys.get(0));
+            itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(0));
             if (itemImg == null) {
-                itemImg = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigests.get(0));
+                itemImg = LocalCache.LocalMediaMapKeyIsThumb.get(imageKeys.get(0));
             }
 
             if (itemImg != null) {
@@ -531,7 +530,7 @@ public class MediaShareList implements Page {
                 if (commentMap.containsKey(uuid)) {
                     List<Comment> commentList = commentMap.get(uuid);
                     if (commentList.size() != 0) {
-                        mShareCommentTextView.setText(String.format(containerActivity.getString(R.string.share_comment_text), nickName, commentList.get(0).getText()));
+                        mShareCommentTextView.setText(String.format(containerActivity.getString(R.string.android_share_comment_text), nickName, commentList.get(0).getText()));
                     } else {
                         mShareCommentTextView.setText("");
                     }
@@ -572,7 +571,7 @@ public class MediaShareList implements Page {
             ivCover.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
+                    List<Media> imageList = getImgList(currentItem.getMediaKeyInMediaShareContents());
 
                     fillLocalCachePhotoList(imageList);
 
@@ -585,16 +584,16 @@ public class MediaShareList implements Page {
                     intent.putExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, false);
                     intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                    if(ivCover.isLoaded()){
+                    if (ivCover.isLoaded()) {
 
-                        String transitionName = String.valueOf(imageList.get(0).getUuid());
+                        String transitionName = imageList.get(0).getKey();
 
                         ViewCompat.setTransitionName(ivCover, transitionName);
 
                         ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
 
                         containerActivity.startActivity(intent, options.toBundle());
-                    }else {
+                    } else {
 
                         intent.putExtra(Util.KEY_NEED_TRANSITION, false);
                         containerActivity.startActivity(intent);
@@ -607,11 +606,11 @@ public class MediaShareList implements Page {
 
         private void gotoMediaShareCommentActivity(boolean showSoftInputWhenEnter) {
             Intent intent = new Intent(containerActivity, MediaShareCommentActivity.class);
-            intent.putExtra(Util.IMAGE_UUID, imageDigests.get(0));
+            intent.putExtra(Util.IMAGE_KEY, imageKeys.get(0));
             intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
             intent.putExtra(Util.KEY_SHOW_SOFT_INPUT_WHEN_ENTER, showSoftInputWhenEnter);
 
-            String transitionName = String.valueOf(imageDigests.get(0));
+            String transitionName = String.valueOf(imageKeys.get(0));
 
             ViewCompat.setTransitionName(ivCover, transitionName);
 
@@ -648,7 +647,7 @@ public class MediaShareList implements Page {
 
         Media itemImg;
 
-        List<String> imageDigests;
+        List<String> imageKeys;
 
         OneMoreMediaShareCardItemViewHolder(View view) {
             super(view);
@@ -673,7 +672,7 @@ public class MediaShareList implements Page {
         public void refreshView(MediaShare mediaShare, int position) {
             super.refreshView(mediaShare, position);
 
-            imageDigests = mediaShare.getMediaDigestInMediaShareContents();
+            imageKeys = mediaShare.getMediaKeyInMediaShareContents();
 
             refreshViewVisibilityWhenNotOneImage();
 
@@ -683,7 +682,7 @@ public class MediaShareList implements Page {
         }
 
         private void refreshViewVisibilityWhenNotOneImage() {
-            if (imageDigests.size() <= 3) {
+            if (imageKeys.size() <= 3) {
 
                 llPic1.setVisibility(View.VISIBLE);
                 llPic2.setVisibility(View.GONE);
@@ -691,7 +690,7 @@ public class MediaShareList implements Page {
 
                 mCheckMorePhoto.setVisibility(View.GONE);
 
-            } else if (imageDigests.size() <= 6) {
+            } else if (imageKeys.size() <= 6) {
 
                 llPic1.setVisibility(View.VISIBLE);
                 llPic2.setVisibility(View.VISIBLE);
@@ -705,7 +704,7 @@ public class MediaShareList implements Page {
                 llPic2.setVisibility(View.VISIBLE);
                 llPic3.setVisibility(View.VISIBLE);
 
-                if (imageDigests.size() > 9) {
+                if (imageKeys.size() > 9) {
                     mCheckMorePhoto.setVisibility(View.VISIBLE);
                     mCheckMorePhoto.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
                     mCheckMorePhoto.getPaint().setAntiAlias(true);
@@ -728,9 +727,9 @@ public class MediaShareList implements Page {
         }
 
         private void setShareCountText() {
-            String shareCountText = String.format(containerActivity.getString(R.string.share_comment_count), String.valueOf(imageDigests.size()));
-            int start = shareCountText.indexOf(String.valueOf(imageDigests.size()));
-            int end = start + String.valueOf(imageDigests.size()).length();
+            String shareCountText = String.format(containerActivity.getString(R.string.android_share_count), String.valueOf(imageKeys.size()));
+            int start = shareCountText.indexOf(String.valueOf(imageKeys.size()));
+            int end = start + String.valueOf(imageKeys.size()).length();
             SpannableStringBuilder builder = new SpannableStringBuilder(shareCountText);
             ForegroundColorSpan span = new ForegroundColorSpan(ContextCompat.getColor(containerActivity, R.color.light_black));
             ForegroundColorSpan beforeSpan = new ForegroundColorSpan(ContextCompat.getColor(containerActivity, R.color.light_gray));
@@ -746,16 +745,16 @@ public class MediaShareList implements Page {
                 ivItems[i].setVisibility(View.INVISIBLE);
             }
 
-            int imageDigestSize = imageDigests.size();
+            int imageKeySize = imageKeys.size();
 
-            int length = imageDigestSize > 9 ? 9 : imageDigestSize;
+            int length = imageKeySize > 9 ? 9 : imageKeySize;
 
             for (int i = 0; i < length; i++) {
 
                 ivItems[i].setVisibility(View.VISIBLE);
-                itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageDigests.get(i));
+                itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(i));
                 if (itemImg == null)
-                    itemImg = LocalCache.LocalMediaMapKeyIsUUID.get(imageDigests.get(i));
+                    itemImg = LocalCache.LocalMediaMapKeyIsThumb.get(imageKeys.get(i));
 
                 if (itemImg != null) {
 
@@ -776,7 +775,7 @@ public class MediaShareList implements Page {
                     @Override
                     public void onClick(View v) {
 
-                        List<Media> imageList = getImgList(currentItem.getMediaDigestInMediaShareContents());
+                        List<Media> imageList = getImgList(currentItem.getMediaKeyInMediaShareContents());
 
                         fillLocalCachePhotoList(imageList);
 
@@ -790,9 +789,9 @@ public class MediaShareList implements Page {
 
                         View transitionView = ivItems[mItemPosition];
 
-                        if(((NetworkImageView)transitionView).isLoaded()) {
+                        if (((NetworkImageView) transitionView).isLoaded()) {
 
-                            String transitionName = String.valueOf(imageList.get(mItemPosition).getUuid());
+                            String transitionName = String.valueOf(imageList.get(mItemPosition).getKey());
 
                             ViewCompat.setTransitionName(ivItems[mItemPosition], transitionName);
 
@@ -800,7 +799,7 @@ public class MediaShareList implements Page {
 
                             containerActivity.startActivity(intent, options.toBundle());
 
-                        }else {
+                        } else {
 
                             intent.putExtra(Util.KEY_NEED_TRANSITION, false);
                             containerActivity.startActivity(intent);
@@ -818,19 +817,19 @@ public class MediaShareList implements Page {
         Util.needRefreshPhotoSliderList = true;
     }
 
-    private List<Media> getImgList(List<String> imageDigests) {
+    private List<Media> getImgList(List<String> imageKeys) {
         ArrayList<Media> picList;
         Media picItem;
         Media picItemRaw;
 
         picList = new ArrayList<>();
 
-        for (String aStArr : imageDigests) {
+        for (String aStArr : imageKeys) {
 
             picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
             if (picItemRaw == null) {
 
-                picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
+                picItemRaw = LocalCache.LocalMediaMapKeyIsThumb.get(aStArr);
 
                 if (picItemRaw == null) {
                     picItem = new Media();

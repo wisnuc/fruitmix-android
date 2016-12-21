@@ -77,6 +77,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_equipment_search);
 
+        // 处理同一台设备 两个ip
+
         ButterKnife.bind(this);
 
         mContext = this;

@@ -1,16 +1,13 @@
 package com.winsun.fruitmix.mediaModule;
 
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -133,7 +130,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         setSupportActionBar(toolbar);
 
-        collapsingToolbarLayout.setTitle(getString(R.string.comment_text));
+        collapsingToolbarLayout.setTitle(getString(R.string.comment));
         collapsingToolbarLayout.setExpandedTitleColor(ContextCompat.getColor(mContext, R.color.white));
         collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedToolbarTitle);
 
@@ -181,7 +178,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         showSoftInputWhenEnter = getIntent().getBooleanExtra(Util.KEY_SHOW_SOFT_INPUT_WHEN_ENTER, false);
 
-        retrieveMediaByImageUUID();
+        retrieveMediaByImageKey();
 
         loadMedia();
 
@@ -197,14 +194,14 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                 mComment = tfContent.getText() + "";
 
                 if (mComment.isEmpty()) {
-                    Toast.makeText(mContext, getString(R.string.no_comment_content), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, getString(R.string.send_comment_hint), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 Log.d(TAG, tfContent.getText() + "");
                 Log.i(TAG, "onClick: mediaUUID:" + media.getUuid());
 
-                mDialog = ProgressDialog.show(mContext, getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
                 FNAS.createLocalMediaComment(mContext, media.getUuid(), createComment(media.getBelongingMediaShareUUID(), mComment));
             }
@@ -236,19 +233,16 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         ivMain.setImageUrl(url, mImageLoader);
     }
 
-    private void retrieveMediaByImageUUID() {
+    private void retrieveMediaByImageKey() {
         Media imageRaw;
 
-        String imageUUID = getIntent().getStringExtra(Util.IMAGE_UUID);
-        imageRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(imageUUID);
+        String imageKey = getIntent().getStringExtra(Util.IMAGE_KEY);
+        imageRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKey);
         if (imageRaw == null) {
-            imageRaw = LocalCache.LocalMediaMapKeyIsUUID.get(imageUUID);
+            imageRaw = LocalCache.LocalMediaMapKeyIsThumb.get(imageKey);
 
             if (imageRaw == null) {
-                media = new Media();
-                media.setUuid(imageUUID);
-                media.setLocal(false);
-
+                return;
             } else {
                 media = imageRaw.cloneSelf();
                 media.setLocal(true);
@@ -264,7 +258,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         for (MediaShare shareRaw : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
 
-            if (shareRaw.getMediaDigestInMediaShareContents().contains(media.getUuid())) {
+            if (shareRaw.getMediaKeyInMediaShareContents().contains(media.getUuid())) {
                 Log.d(TAG, "shareRaw uuid: " + shareRaw.getUuid());
 
                 media.setBelongingMediaShareUUID(shareRaw.getUuid());

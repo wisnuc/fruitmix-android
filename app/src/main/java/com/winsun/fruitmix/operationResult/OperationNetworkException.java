@@ -25,7 +25,7 @@ public class OperationNetworkException extends OperationResult {
         if (responseCode == 401) {
             resultMessage = context.getString(R.string.password_error);
         } else {
-            resultMessage = String.format(context.getString(R.string.network_exception), responseCode);
+            resultMessage = String.format(context.getString(R.string.network_exception), "http " + responseCode);
         }
 
         return resultMessage;

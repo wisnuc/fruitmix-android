@@ -44,7 +44,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
                     android:layout_toRightOf="@+id/avatar"
-                    android:text="@string/admin_default_name"
+                    android:text="@string/user_default_name"
                     android:textColor="#888888"
                     android:textSize="20dp" />
 
@@ -55,7 +55,6 @@
                     android:layout_below="@+id/nick"
                     android:layout_marginTop="2dp"
                     android:layout_toRightOf="@+id/avatar"
-                    android:text="@string/share_item_date"
                     android:textColor="#979797"
                     android:textSize="16dp" />
             </RelativeLayout>

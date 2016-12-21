@@ -77,9 +77,9 @@ public class FileUtil {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
     }
 
-    public static boolean createDownloadFileStoreFolder(Context context) {
+    public static boolean createDownloadFileStoreFolder() {
         if (!checkExternalStorageState()) {
-            Log.i(TAG, "createDownloadFileStoreFolder: " + context.getString(R.string.external_storage_not_mounted));
+            Log.i(TAG, "createDownloadFileStoreFolder: External storage not mounted");
             return false;
         }
         File downloadFileStoreFolder = new File(getDownloadFileStoreFolderPath());

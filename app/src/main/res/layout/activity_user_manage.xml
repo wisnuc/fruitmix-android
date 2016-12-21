@@ -57,7 +57,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/winsun_group_name"
+                android:text="@string/equipment_group_default_text"
                 android:textSize="24dp"/>
 
         </LinearLayout>
@@ -80,7 +80,7 @@
             android:layout_margin="8dp"
             android:background="@color/white"
             android:gravity="center"
-            android:text="@string/no_user_text"
+            android:text="@string/no_user"
             android:textSize="24dp"
             android:visibility="gone"/>
 

@@ -1,48 +1,35 @@
-<android.support.v7.widget.CardView
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    card_view:cardCornerRadius="2dp"
-    card_view:cardElevation="2dp">
+    android:layout_height="wrap_content">
 
-    <!-- Main Content View -->
-    <LinearLayout
-        android:layout_height="wrap_content"
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/mainPic"
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:padding="3dp"
-        >
+        android:layout_height="114dp"
+        android:layout_margin="1dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/default_img" />
 
-        <LinearLayout
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:orientation="horizontal">
-            <ImageView
-                android:id="@+id/selectAll"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginLeft="6dp"
-                android:visibility="gone"
-                android:src="@drawable/unselected"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-               android:layout_marginBottom="3dp"
-                android:layout_marginLeft="6dp"
-                android:textSize="20dip"
-                android:textColor="#2E2E2E"
-                android:id="@+id/title"
-                android:text="@string/today_text" />
-        </LinearLayout>
-        <com.winsun.fruitmix.component.FullGridView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:numColumns="3"
-            android:id="@+id/grid">
-        </com.winsun.fruitmix.component.FullGridView>
+    <ImageView
+        android:id="@+id/lock"
+        android:layout_width="20dp"
+        android:layout_height="25dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="5dp"
+        android:paddingBottom="5dp"
+        android:src="@drawable/lock_photo"
+        android:visibility="gone" />
 
+    <ImageView
+        android:id="@+id/select"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="5dp"
+        android:src="@drawable/select"
+        android:visibility="gone" />
 
-    </LinearLayout>
-</android.support.v7.widget.CardView>
+</RelativeLayout>

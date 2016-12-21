@@ -104,7 +104,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                     Media media = mediaList.get(currentPhotoPosition);
 
-                    String sharedElementName = media.getUuid();
+                    String sharedElementName = media.getKey();
                     View newSharedElement = mainGridView.findViewWithTag(sharedElementName);
 
                     names.add(sharedElementName);
@@ -152,8 +152,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mediaList = new ArrayList<>();
-        List<String> mediaUUIDList = new ArrayList<>(mediaShare.getMediaDigestInMediaShareContents());
-        fillPicList(mediaUUIDList);
+        List<String> mediaKeyList = mediaShare.getMediaKeyInMediaShareContents();
+        fillPicList(mediaKeyList);
         ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
 
     }
@@ -288,19 +288,19 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
     }
 
-    private void fillPicList(List<String> imageDigests) {
+    private void fillPicList(List<String> imageKeys) {
 
         Media picItemRaw;
 
         Media picItem;
         mediaList.clear();
 
-        for (String aStArr : imageDigests) {
+        for (String aStArr : imageKeys) {
 
             picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
 
             if (picItemRaw == null) {
-                picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(aStArr);
+                picItemRaw = LocalCache.LocalMediaMapKeyIsThumb.get(aStArr);
 
                 if (picItemRaw == null) {
                     picItem = new Media();
@@ -381,7 +381,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             final NetworkImageView ivMain;
 
             if (convertView == null)
-                view = LayoutInflater.from(activity).inflate(R.layout.photo_list_cell_cell, parent, false);
+                view = LayoutInflater.from(activity).inflate(R.layout.photo_list_cell, parent, false);
             else view = convertView;
 
             currentItem = (Media) this.getItem(position);
@@ -398,9 +398,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
 
-                    String sharedElementName = currentItem.getUuid();
+                    String sharedElementName = currentItem.getKey();
                     ViewCompat.setTransitionName(ivMain, sharedElementName);
-                    activity.showPhotoSlider(position, ivMain, currentItem.getUuid());
+                    activity.showPhotoSlider(position, ivMain, currentItem.getKey());
                 }
             });
 
@@ -456,7 +456,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
 
         if (!checkPermissionToOperate()) {
-            Toast.makeText(mContext, getString(R.string.no_operate_mediashare_permission), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, getString(R.string.no_operate_media_share_permission), Toast.LENGTH_SHORT).show();
 
             return true;
         }
@@ -497,7 +497,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             mediaShare = data.getParcelableExtra(Util.KEY_MEDIASHARE);
 
-            fillPicList(mediaShare.getMediaDigestInMediaShareContents());
+            fillPicList(mediaShare.getMediaKeyInMediaShareContents());
             ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
         } else if (requestCode == Util.KEY_MODIFY_ALBUM_REQUEST_CODE && resultCode == RESULT_OK) {
             String title = data.getStringExtra(Util.UPDATED_ALBUM_TITLE);
@@ -515,7 +515,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
+                        mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
                         if (Util.getNetworkState(mContext)) {
                             FNAS.deleteRemoteMediaShare(mContext, mediaShare);
@@ -555,7 +555,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         stringBuilder.append("]");
         requestData = stringBuilder.toString();
 
-        mDialog = ProgressDialog.show(mContext, getString(R.string.loading_title), getString(R.string.loading_message), true, false);
+        mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
         if (Util.getNetworkState(mContext)) {
             FNAS.modifyRemoteMediaShare(mContext, cloneMediaShare, requestData);

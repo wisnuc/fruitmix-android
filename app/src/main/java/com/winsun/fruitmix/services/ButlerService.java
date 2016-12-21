@@ -342,9 +342,6 @@ public class ButlerService extends Service {
                 RetrieveTokenService.startActionRetrieveToken(this, gateway, userUUID, userPassword);
 
                 break;
-            case LOCAL_MEDIA_IN_CAMERA:
-                RetrieveNewLocalMediaInCameraService.startActionRetrieveNewLocalMediaInCamera(this);
-                break;
             case REMOTE_FILE:
                 String folderUUID = ((AbstractFileRequestEvent) requestEvent).getFolderUUID();
                 RetrieveRemoteFileService.startActionRetrieveRemoteFile(this, folderUUID);

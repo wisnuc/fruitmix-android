@@ -74,7 +74,7 @@ public class MoreMediaActivity extends AppCompatActivity {
         mMorePhotoRecyclerView.setAdapter(mAdapter);
 
         mPhotos = new ArrayList<>();
-        fillPhotoList(mediaShare.getMediaDigestInMediaShareContents());
+        fillPhotoList(mediaShare.getMediaKeyInMediaShareContents());
         mAdapter.notifyDataSetChanged();
 
     }
@@ -94,30 +94,28 @@ public class MoreMediaActivity extends AppCompatActivity {
         mImageLoader.setHeaders(headers);
     }
 
-    private void fillPhotoList(List<String> imageDigests) {
+    private void fillPhotoList(List<String> imageKeys) {
 
         mPhotos.clear();
 
         Media picItem;
         Media picItemRaw;
-        for (String str : imageDigests) {
+        for (String str : imageKeys) {
 
             picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(str);
             if (picItemRaw == null) {
 
-                picItemRaw = LocalCache.LocalMediaMapKeyIsUUID.get(str);
+                picItemRaw = LocalCache.LocalMediaMapKeyIsThumb.get(str);
 
                 if (picItemRaw == null) {
-                    picItem = new Media();
-                    picItem.setUuid(str);
-                    picItem.setLocal(false);
+                    continue;
                 } else {
 
                     picItem = picItemRaw.cloneSelf();
                     picItem.setLocal(true);
                 }
 
-            }else {
+            } else {
 
                 picItem = picItemRaw.cloneSelf();
                 picItem.setLocal(false);
@@ -142,7 +140,7 @@ public class MoreMediaActivity extends AppCompatActivity {
         LocalCache.photoSliderList.clear();
         LocalCache.photoSliderList.addAll(mPhotos);
 
-         Util.needRefreshPhotoSliderList = true;
+        Util.needRefreshPhotoSliderList = true;
     }
 
     private void fillLocalCachePhotoMap() {

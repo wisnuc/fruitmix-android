@@ -78,7 +78,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String FILE_KEY_TIME = "file_time";
     public static final String FILE_KEY_SIZE = "file_size";
 
-    static final String DB_NAME = "fruitmix";
+    private static final String DB_NAME = "fruitmix";
     static final String TASK_TABLE_NAME = "task";
     static final String REMOTE_COMMENT_TABLE_NAME = "remote_comment";
     static final String LOCAL_COMMENT_TABLE_NAME = "local_comment";

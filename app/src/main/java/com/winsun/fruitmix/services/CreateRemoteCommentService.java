@@ -3,7 +3,6 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.R;
@@ -16,10 +15,8 @@ import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.operationResult.OperationSuccess;
-import com.winsun.fruitmix.operationResult.OperationUploadPhotoFailed;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -28,7 +25,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -86,7 +82,7 @@ public class CreateRemoteCommentService extends IntentService {
 
         MediaShareCommentOperationEvent mediaShareCommentOperationEvent;
 
-        String request = String.format(getString(R.string.photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID);
+        String request = String.format(getString(R.string.android_photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID);
         String data = "{\"shareid\":\"" + comment.getShareId() + "\", \"text\":\"" + comment.getText() + "\"}";
 
         try {

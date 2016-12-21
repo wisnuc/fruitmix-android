@@ -1,7 +1,5 @@
 package com.winsun.fruitmix.util;
 
-import android.app.Activity;
-import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -51,7 +49,6 @@ public class LocalCache {
     public static ConcurrentMap<String, User> RemoteUserMapKeyIsUUID = null;
     public static ConcurrentMap<String, Media> RemoteMediaMapKeyIsUUID = null;
     public static ConcurrentMap<String, Media> LocalMediaMapKeyIsThumb = null;
-    public static ConcurrentMap<String, Media> LocalMediaMapKeyIsUUID = null;
     public static ConcurrentMap<String, AbstractRemoteFile> RemoteFileMapKeyIsUUID = null;
     public static List<AbstractRemoteFile> RemoteFileShareList = null;
 
@@ -60,7 +57,7 @@ public class LocalCache {
     public static List<Media> photoSliderList = null;
     public static Map<String, Media> photoSliderMap = null;
 
-    public static List<String> mediaUUIDInCreateAlbum = null;
+    public static List<String> mediaKeysInCreateAlbum = null;
 
     //optimize get media from db, modify send media info mode: use static list instead of put it into bundle
 
@@ -110,15 +107,17 @@ public class LocalCache {
         LocalMediaShareMapKeyIsUUID = new ConcurrentHashMap<>();
         RemoteUserMapKeyIsUUID = new ConcurrentHashMap<>();
         RemoteMediaMapKeyIsUUID = new ConcurrentHashMap<>();
-        LocalMediaMapKeyIsThumb = new ConcurrentHashMap<>();
-        BuildLocalImagesMapsKeyIsUUID();
         RemoteFileMapKeyIsUUID = new ConcurrentHashMap<>();
+
+        if (LocalMediaMapKeyIsThumb == null)
+            LocalMediaMapKeyIsThumb = new ConcurrentHashMap<>();
+
         RemoteFileShareList = new ArrayList<>();
 
         photoSliderList = new ArrayList<>();
         photoSliderMap = new HashMap<>();
 
-        mediaUUIDInCreateAlbum = new ArrayList<>();
+        mediaKeysInCreateAlbum = new ArrayList<>();
 
         return true;
     }
@@ -157,16 +156,6 @@ public class LocalCache {
             mediaConcurrentMap.put(media.getThumb(), media);
         }
         return mediaConcurrentMap;
-    }
-
-    public static void BuildLocalImagesMapsKeyIsUUID() {
-        Media itemRaw;
-
-        LocalCache.LocalMediaMapKeyIsUUID = new ConcurrentHashMap<>();
-        for (String key : LocalCache.LocalMediaMapKeyIsThumb.keySet()) {
-            itemRaw = LocalCache.LocalMediaMapKeyIsThumb.get(key);
-            LocalCache.LocalMediaMapKeyIsUUID.put(itemRaw.getUuid(), itemRaw);
-        }
     }
 
     public static ConcurrentMap<String, Comment> BuildRemoteMediaCommentsAboutOneMedia(List<Comment> comments, String mediaUUID) {
@@ -420,12 +409,12 @@ public class LocalCache {
 
     }
 
-    public static List<Map<String, String>> PhotoList(Context context, String bucketName) {
+    public static List<Media> PhotoList(Context context, String bucketName) {
         ContentResolver cr;
         String[] fields = {MediaStore.Images.Media._ID, MediaStore.Images.Media.BUCKET_ID, MediaStore.Images.Media.HEIGHT, MediaStore.Images.Media.WIDTH, MediaStore.Images.Media.PICASA_ID, MediaStore.Images.Media.DATA, MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.TITLE, MediaStore.Images.Media.SIZE, MediaStore.Images.Media.BUCKET_DISPLAY_NAME};
         Cursor cursor;
-        List<Map<String, String>> imageList;
-        Map<String, String> image;
+        List<Media> mediaList;
+        Media media;
         File f;
         SimpleDateFormat df;
         Calendar date;
@@ -436,29 +425,53 @@ public class LocalCache {
 
         cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, null, null, null);
 
-        imageList = new ArrayList<Map<String, String>>();
-        if (cursor == null || !cursor.moveToFirst()) return imageList;
+        mediaList = new ArrayList<>();
+        if (cursor == null || !cursor.moveToFirst()) return mediaList;
 
         df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         date = Calendar.getInstance();
 
         do {
-            image = new HashMap<String, String>();
-            image.put("title", cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)));
-            image.put("bucket", cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)));
-            image.put("thumb", cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)));
-            image.put("width", cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)));
-            image.put("height", cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)));
+
+            String thumb = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+
+            if (LocalCache.LocalMediaMapKeyIsThumb.containsKey(thumb)) {
+                continue;
+            }
+
+//            Log.i(TAG, "handleActionRetrieveLocalMedia: before calc digest" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
+
+//            Log.i(TAG, "handleActionRetrieveLocalMedia: after calc digest" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
+            media = new Media();
+            media.setThumb(thumb);
+            media.setWidth(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)));
+            media.setHeight(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)));
             f = new File(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)));
             date.setTimeInMillis(f.lastModified());
-            image.put("lastModified", df.format(date.getTime()));
-            imageList.add(image);
+            media.setTime(df.format(date.getTime()));
+            media.setUploaded(false);
+            media.setSelected(false);
+            media.setLoaded(false);
+            media.setOrientationNumber(1);
+            media.setLocal(true);
+            media.setSharing(true);
+            media.setUuid("");
+            media.setOrientationNumber(1);
+
+            mediaList.add(media);
+
+            Media mapResult = LocalCache.LocalMediaMapKeyIsThumb.put(media.getThumb(), media);
+
+//            Log.i(TAG, "insert local media to map key is thumb result:" + (mapResult != null ? "true" : "false"));
+
         }
         while (cursor.moveToNext());
 
         cursor.close();
 
-        return imageList;
+        return mediaList;
     }
 
     private static List<Map<String, String>> getAllLocalMedia() {
@@ -477,7 +490,6 @@ public class LocalCache {
 
         return fileList;
     }
-
 
     private static List<Map<String, String>> fileList = new ArrayList<>();
 

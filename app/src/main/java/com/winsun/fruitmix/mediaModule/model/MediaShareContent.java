@@ -11,7 +11,7 @@ public class MediaShareContent implements Parcelable{
 
     private String id;
     private String author;
-    private String digest;
+    private String key;
     private String time;
 
     public MediaShareContent(){
@@ -20,7 +20,7 @@ public class MediaShareContent implements Parcelable{
 
     private MediaShareContent(Parcel in) {
         author = in.readString();
-        digest = in.readString();
+        key = in.readString();
         time = in.readString();
         id = in.readString();
     }
@@ -28,7 +28,7 @@ public class MediaShareContent implements Parcelable{
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(author);
-        dest.writeString(digest);
+        dest.writeString(key);
         dest.writeString(time);
         dest.writeString(id);
     }
@@ -58,12 +58,12 @@ public class MediaShareContent implements Parcelable{
         this.author = author;
     }
 
-    public String getDigest() {
-        return digest;
+    public String getKey() {
+        return key;
     }
 
-    public void setDigest(String digest) {
-        this.digest = digest;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getTime() {
@@ -89,7 +89,7 @@ public class MediaShareContent implements Parcelable{
             return true;
 
         if(o instanceof MediaShareContent){
-            return ((MediaShareContent) o).getDigest().equals(this.getDigest());
+            return ((MediaShareContent) o).getKey().equals(this.getKey());
         }
 
         return super.equals(o);
@@ -97,6 +97,6 @@ public class MediaShareContent implements Parcelable{
 
     @Override
     public int hashCode() {
-        return getDigest().hashCode();
+        return getKey().hashCode();
     }
 }

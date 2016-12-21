@@ -34,6 +34,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.util.Collection;
 
 /**
  * Created by Administrator on 2016/4/22.
@@ -113,7 +114,7 @@ public class FNAS {
     }
 
     public static HttpResponse loadRemoteMediaComment(Context context, String mediaUUID) throws MalformedURLException, IOException, SocketTimeoutException {
-        return FNAS.RemoteCall(String.format(context.getString(R.string.photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID));
+        return FNAS.RemoteCall(String.format(context.getString(R.string.android_photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID));
     }
 
     public static HttpResponse loadToken(Context context, String gateway, String userUUID, String userPassword) throws MalformedURLException, SocketTimeoutException, IOException {
@@ -174,9 +175,9 @@ public class FNAS {
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIA_SHARE));
     }
 
-    public static void retrieveRemoteMediaShare(Context context,boolean loadMediaShareInDBWhenExceptionOccur) {
+    public static void retrieveRemoteMediaShare(Context context, boolean loadMediaShareInDBWhenExceptionOccur) {
 
-        EventBus.getDefault().post(new RetrieveMediaShareRequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIA_SHARE,loadMediaShareInDBWhenExceptionOccur));
+        EventBus.getDefault().post(new RetrieveMediaShareRequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIA_SHARE, loadMediaShareInDBWhenExceptionOccur));
     }
 
     public static void retrieveLocalMediaInCamera(Context context) {
@@ -258,14 +259,14 @@ public class FNAS {
         EventBus.getDefault().post(new MediaCommentRequestEvent(OperationType.DELETE, OperationTargetType.LOCAL_MEDIA_COMMENT, imageUUID, comment));
     }
 
-    public static void editPhotoInRemoteMediaShare(Context context, MediaShare diffContentsInOriginalMediaShare, MediaShare diffContentsInModifiedMediaShare,MediaShare modifiedMediaShare) {
+    public static void editPhotoInRemoteMediaShare(Context context, MediaShare diffContentsInOriginalMediaShare, MediaShare diffContentsInModifiedMediaShare, MediaShare modifiedMediaShare) {
 
-        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.REMOTE_MEDIA_SHARE, diffContentsInOriginalMediaShare,diffContentsInModifiedMediaShare, modifiedMediaShare));
+        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.REMOTE_MEDIA_SHARE, diffContentsInOriginalMediaShare, diffContentsInModifiedMediaShare, modifiedMediaShare));
     }
 
     public static void editPhotoInLocalMediaShare(Context context, MediaShare diffContentsInOriginalMediaShare, MediaShare diffContentsInModifiedMediaShare, MediaShare modifiedMediaShare) {
 
-        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.LOCAL_MEDIA_SHARE, diffContentsInOriginalMediaShare,diffContentsInModifiedMediaShare, modifiedMediaShare));
+        EventBus.getDefault().post(new EditPhotoInMediaShareRequestEvent(OperationType.EDIT_PHOTO_IN_MEDIASHARE, OperationTargetType.LOCAL_MEDIA_SHARE, diffContentsInOriginalMediaShare, diffContentsInModifiedMediaShare, modifiedMediaShare));
 
     }
 
@@ -410,7 +411,9 @@ public class FNAS {
 
         DBUtils dbUtils = DBUtils.getInstance(context);
 
-        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+        Collection<Media> medias = LocalCache.LocalMediaMapKeyIsThumb.values();
+
+        for (Media media : medias) {
             media.restoreUploadState();
         }
 

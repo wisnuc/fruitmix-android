@@ -64,8 +64,6 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
         mContext = this;
 
-        ButlerService.startButlerService(mContext);
-
         mBack.setOnClickListener(this);
         mPwdEdit.setOnFocusChangeListener(this);
         mLoginBtn.setOnClickListener(this);

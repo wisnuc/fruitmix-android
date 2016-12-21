@@ -1,195 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--begin add by liang.wu-->
+    <!-- android begin -->
+
+    <string name="android_version_name">WISNUC V%1$s</string>
+    <string name="android_finishAppToast">再次点击返回键退出WISNUC</string>
+
+    <!-- url -->
+    <string name="android_new_thumb_photo_url">%1$s/download</string>
+    <string name="android_thumb_photo_url">%1$s/thumbnail?width=%2$s&amp;height=%3$s&amp;autoOrient=true&amp;modifier=caret</string>
+    <string name="android_original_photo_url">%1$s/download</string>
+    <string name="android_photo_comment_url">%1$s?type=comments</string>
+    <string name="android_update_mediashare_url">%1$s/%2$s/update</string>
+    <!-- 格式化时间-->
+    <string name="android_seconds_ago">%1$s秒前</string>
+    <string name="android_minutes_ago">%1$s分钟前</string>
+    <string name="android_hours_ago">%1$s小时前</string>
+    <string name="android_yesterday">昨天</string>
+    <!-- 第一个值是相册名字，第二个是照片张数-->
+    <string name="android_share_album_title">%1$s·%2$s张</string>
+    <string name="android_share_count">分享了%1$s张照片</string>
+    <string name="android_share_comment_text">%1$s : %2$s</string>
+
+    <!-- Symbo -->
+    <string name="android_ellipsize">…</string>
+
+    <string name="android_no_write_external_storage_permission">SD卡没有写权限</string>
+
+    <!-- android end -->
+
+    <!-- iOS begin -->
+
+    <!-- iOS end -->
+
+    <!-- commmon-->
     <string name="app_name">WISNUC</string>
 
     <string name="finish_text">完成</string>
-
     <string name="choose_text">选择</string>
-
     <string name="delete_text">删除</string>
-
-    <string name="loading_title">正在加载…</string>
-
-    <string name="loading_message">请稍候!</string>
-
-    <string name="operating_title">正在执行…</string>
-
-    <string name="no_content">暂无可显示内容!</string>
-
-    <string name="coming_soon">该功能敬请期待</string>
-
-    <string name="finishAppToast">请再次点击返回键以退出应用</string>
-
+    <string name="loading">正在加载…</string>        <!-- loading resource: photos, file, data -->
+    <!--   <string name="loading_message">请稍候</string>-->
+    <string name="operating_title">正在执行…</string> <!-- waiting for server response -->
+    <string name="no_content">没有内容</string>       <!-- empty list -->
+    <string name="coming_soon">功能暂未实现</string>
     <string name="ok">确定</string>
     <string name="cancel">取消</string>
     <string name="clear_select_item">清除选择</string>
-
     <string name="confirm_delete">是否删除</string>
 
-    <string name="ellipsize">…</string>
+    <!-- 头像显示用户名首字母的默认值 -->
+    <string name="user_name_abbreviations">未知</string>
 
-    <string name="version_name">WISNUC V%1$s</string>
+    <!-- 默认用户名 -->
+    <string name="user_default_name">未知</string>
 
-    <!-- slide menu -->
+    <!-- 未选择内容提示-->
+    <string name="select_nothing">请选择照片</string>
+
+    <!-- 侧边栏 -->
     <string name="person_data">个人信息</string>
-    <string name="cloud">我的私有云</string>
     <string name="user_manage">用户管理</string>
     <string name="setting">设置</string>
     <string name="help">帮助</string>
     <string name="logout">注销</string>
-
     <string name="my_file">我的文件</string>
     <string name="my_photo">我的照片</string>
 
-    <!-- login -->
-
+    <!-- 登录 -->
     <string name="login">登录</string>
+    <string name="password_error">密码错误！</string>
 
-    <!-- personal data -->
-
-    <string name="email_text">电子邮件</string>
+    <!-- 个人信息界面 -->
+    <!--
     <string name="password_text">密码</string>
     <string name="confirm_password_text">确认密码</string>
     <string name="login_by_password_text">通过密码登录</string>
+    <string name="email_text">电子邮件</string>
+     -->
 
-    <!-- album -->
-
-    <string name="album_text">相册</string>
-
-    <string name="set_maintainer">他人可否添加</string>
-
-    <string name="modify_album_text">修改相册</string>
-
-    <string name="create_album_text">创建相册</string>
-
-    <string name="title_text">标题</string>
-    <string name="title_hint">无标题 %1$s</string>
-    <string name="description_text">描述</string>
-
+    <!-- 主界面-相册模块 -->
+    <string name="album">相册</string>
+    <string name="album_item_title">未命名 %1$s</string>      <!-- defaut name + date&Time -->
     <string name="private_text">私密</string>
-
-    <string name="album_item_title">New York</string>
-    <string name="album_item_desc">2016–02–09 ~ 2017–05–05</string>
-    <string name="album_item_date">2016–02–01</string>
-
-    <!-- ablum content menu -->
-    <string name="set_private">设置为私密</string>
-    <string name="set_public">设置为公开</string>
-
-    <string name="setting_album">设置相册</string>
-    <string name="edit_photo">编辑照片</string>
-    <string name="modify_cover">修改封面</string>
-    <string name="delete_album">删除相册</string>
-
-    <!-- equipment -->
-
-    <string name="search_equipment">搜索设备</string>
-
-    <!-- share -->
-
-    <string name="winsun_group_name">Winsun</string>
-    <string name="name_abbreviations">D</string>
-    <string name="admin_default_name">Default</string>
-
     <string name="share_text">分享</string>
 
-    <string name="today_text">今天</string>
-    <string name="test_text">测试</string>
-    <string name="share_item_date">21:08 昨天</string>
-
-    <string name="check_more_photos">查看更多照片</string>
-
-    <string name="share_comment_count">分享了%1$s张照片</string>
-    <string name="share_comment_text">%1$s : %2$s</string>
-    <string name="photo_count">%1$s张</string>
-
-    <string name="share_album_title">%1$s·%2$s张</string>
-
-
-    <!-- share comment -->
-
-    <string name="comment_text">评论</string>
-    <string name="send_comment_hint">说点什么吧…</string>
-
-    <string name="no_comment_content">请填写内容</string>
-
-    <!-- user manage -->
-
-    <string name="no_user_text">无用户</string>
-
-    <string name="user_email">example@qq.com</string>
-
-    <!-- photo -->
-
-    <string name="photo_text">照片</string>
-    <string name="unknown_time_text">未知时间</string>
-
+    <!-- 主界面-照片模块 -->
+    <string name="photo">照片</string>
+    <string name="unknown_time">未知时间</string>
     <string name="choose_photo">选择照片</string>
     <string name="select_count">已选%1$d张</string>
 
-    <string name="select_nothing">未选择内容，请进行选择</string>
+    <!-- 主界面-分享模块 -->
+    <string name="check_more_photos">查看更多照片</string>
 
+    <!-- 创建、修改相册 -->
+    <string name="create_album">新相册</string>
+    <string name="modify_album">修改相册</string>
+    <string name="set_maintainer">他人是否可添加</string>
+    <string name="description">描述</string>
 
-    <!-- time format -->
-    <string name="seconds_ago">%1$s秒前</string>
-    <string name="minutes_ago">%1$s分钟前</string>
-    <string name="hours_ago">%1$s小时前</string>
-    <string name="yesterday">昨天</string>
+    <!-- 相册内容界面 菜单 -->
+    <string name="set_private">设置为私密</string>
+    <string name="set_public">设置为公开</string>
+    <string name="set_album">设置相册</string>
+    <string name="edit_photo">编辑照片</string>
+    <string name="delete_album">删除相册</string>
 
-    <string name="new_thumb_photo_url">%1$s/download</string>
-    <string name="thumb_photo_url">%1$s/thumbnail?width=%2$s&amp;height=%3$s&amp;autoOrient=true&amp;modifier=caret</string>
-    <string name="original_photo_url">%1$s/download</string>
-    <string name="photo_comment_url">%1$s?type=comments</string>
-    <string name="update_mediashare_url">%1$s/%2$s/update</string>
+    <!-- 设备 -->
+    <string name="search_equipment">搜索设备</string>
 
-    <!-- file -->
+    <!-- 设备名 默认值-->
+    <string name="equipment_group_default_text">WISNUC</string>
 
+    <!-- 评论界面 -->
+    <string name="comment">评论</string>
+    <string name="send_comment_hint">说点什么吧…</string> <!-- 未输入评论，评论发送按钮灰显-->
+
+    <!-- 用户管理界面 -->
+    <string name="no_user">没有用户</string>
+
+    <!-- 文件 -->
     <string name="file">文件</string>
     <string name="download">下载</string>
     <string name="select_file">选择文件</string>
-    <string name="quit_select_file">结束选择</string>
+    <string name="download_select_item">下载所选项</string>
+    <string name="download_the_item">下载该文件</string>
 
+    <!-- 文件-下载模块 -->
     <string name="downloading">正在下载</string>
     <string name="downloaded">已下载</string>
     <string name="download_failed">下载失败</string>
 
-    <string name="download_select_item">下载所选项</string>
-    <string name="download_the_item">下载该文件</string>
-
-    <!-- input ip -->
-
-    <string name="manual_add_new_equipment">手动输入ip</string>
-    <string name="ip_title_text">IP</string>
-    <string name="edit_ip_text">请输入ip</string>
-
-    <!-- operation result -->
+    <!-- Hints -->
     <string name="success">操作成功</string>
-    <string name="local_media_share_uploading">对不起，相册正在上传，请稍后操作！</string>
+    <string name="local_media_share_uploading">相册正在上传，请稍后操作</string>
+
+    <!-- Errors -->
+    <string name="network_exception">网络数据异常，错误码：%1$s</string>    <!-- String + ErrorCode -->
+
+    <!-- network error -->
     <string name="no_network">没有网络，请检查</string>
-    <string name="io_exception">网络IO异常</string>
-    <string name="json_exception">解析网络数据出错</string>
     <string name="socket_timeout_exception">服务器超时</string>
-    <string name="malformed_url_exception">错误的url</string>
-    <string name="network_exception">网络%1$d错误</string>
-    <string name="sql_exception">SQL错误</string>
-    <string name="file_not_found_exception">文件未找到</string>
 
-    <string name="upload_photo_failed">上传照片失败</string>
-
-    <string name="no_operate_mediashare_permission">你没有权限操作此相册</string>
-    <string name="password_error">输入密码错误</string>
-    <string name="already_select_media">对不起，该照片已在相册中</string>
-    <string name="photo_not_sharing">对不起，该照片不能被分享</string>
-    <string name="open_file_failed">对不起，无法打开此文件</string>
-    <string name="no_write_external_storage_permission">对不起，没有写权限</string>
-    <string name="no_enough_space">存储空间不足，请确认</string>
-
-    <string name="create_download_file_store_folder_failed">Create download file store folder failed</string>
-    <string name="external_storage_not_mounted">External storage not mounted</string>
-
-    <!-- finish add by liang.wu-->
-
+    <string name="no_operate_media_share_permission">没有操作权限</string>
+    <string name="already_select_media">该照片已在相册中</string>
+    <string name="photo_not_sharing">他人分享的照片不能再分享</string>
+    <string name="open_file_failed">文件类型不支持</string> <!--原 “无法打开此文件” -->
+    <string name="no_enough_space">手机存储空间不足！</string>
 
 </resources>

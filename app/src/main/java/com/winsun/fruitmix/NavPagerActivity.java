@@ -100,7 +100,7 @@ public class NavPagerActivity extends AppCompatActivity
 
         initNavigationView();
 
-        versionName.setText(String.format(getString(R.string.version_name), Util.getVersionName(mContext)));
+        versionName.setText(String.format(getString(R.string.android_version_name), Util.getVersionName(mContext)));
 
         mediaMainFragment = MediaMainFragment.newInstance();
         fileMainFragment = FileMainFragment.newInstance();
@@ -135,6 +135,9 @@ public class NavPagerActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
+
+        if(user == null)
+            return;
 
         String userName = user.getUserName();
         TextView mUserNameTextView = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name_textview);
@@ -232,7 +235,7 @@ public class NavPagerActivity extends AppCompatActivity
             super.onBackPressed();
         } else {
 
-            Toast.makeText(mContext, getString(R.string.finishAppToast), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, getString(R.string.android_finishAppToast), Toast.LENGTH_SHORT).show();
         }
 
         backPressedTimeMillis = System.currentTimeMillis();
@@ -284,7 +287,7 @@ public class NavPagerActivity extends AppCompatActivity
                 protected void onPreExecute() {
                     super.onPreExecute();
 
-                    mDialog = ProgressDialog.show(mContext, mContext.getString(R.string.operating_title), getString(R.string.loading_message), true, false);
+                    mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
                 }
 

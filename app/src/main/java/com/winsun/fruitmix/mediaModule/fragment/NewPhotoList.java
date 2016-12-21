@@ -37,14 +37,13 @@ import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +115,7 @@ public class NewPhotoList implements Page {
 
     private Bundle reenterState;
 
-    private List<String> alreadySelectedImageUUIDArrayList;
+    private List<String> alreadySelectedImageKeyArrayList;
 
     public NewPhotoList(Activity activity, OnMediaFragmentInteractionListener listener) {
         containerActivity = activity;
@@ -128,12 +127,6 @@ public class NewPhotoList implements Page {
         ButterKnife.bind(this, view);
 
         initImageLoader();
-
-        mPhotoDateGroups = new ArrayList<>();
-        mMapKeyIsDateValueIsPhotoList = new HashMap<>();
-
-        mMapKeyIsPhotoPositionValueIsPhotoDate = new HashMap<>();
-        mMapKeyIsPhotoPositionValueIsPhoto = new HashMap<>();
 
         mPhotoListListeners = new ArrayList<>();
 
@@ -186,20 +179,36 @@ public class NewPhotoList implements Page {
         mPhotoRecycleAdapter.notifyDataSetChanged();
     }
 
-    public void setAlreadySelectedImageUUIDArrayList(List<String> alreadySelectedImageUUIDArrayList) {
-        this.alreadySelectedImageUUIDArrayList = alreadySelectedImageUUIDArrayList;
+    public void setAlreadySelectedImageKeyArrayList(List<String> alreadySelectedImageKeyArrayList) {
+        this.alreadySelectedImageKeyArrayList = alreadySelectedImageKeyArrayList;
     }
 
     @Override
     public void refreshView() {
 
-        mLoadingLayout.setVisibility(View.VISIBLE);
-
         if (listener != null && !listener.isRemoteMediaLoaded()) {
+            mLoadingLayout.setVisibility(View.VISIBLE);
             return;
         }
 
-        reloadData();
+        final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
+
+        loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
+            @Override
+            public void onDataLoadFinished() {
+                doAfterReloadData(loader);
+            }
+        });
+
+    }
+
+    private void doAfterReloadData(NewPhotoListDataLoader loader) {
+
+        mPhotoDateGroups = loader.getmPhotoDateGroups();
+        mAdapterItemTotalCount = loader.getmAdapterItemTotalCount();
+        mMapKeyIsDateValueIsPhotoList = loader.getmMapKeyIsDateValueIsPhotoList();
+        mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getmMapKeyIsPhotoPositionValueIsPhotoDate();
+        mMapKeyIsPhotoPositionValueIsPhoto = loader.getmMapKeyIsPhotoPositionValueIsPhoto();
 
         mLoadingLayout.setVisibility(View.GONE);
         if (mPhotoDateGroups.size() == 0) {
@@ -220,6 +229,9 @@ public class NewPhotoList implements Page {
 
         clearSelectedPhoto();
 
+        if (Util.needRefreshPhotoSliderList) {
+            fillLocalCachePhotoData();
+        }
     }
 
 
@@ -299,76 +311,6 @@ public class NewPhotoList implements Page {
         return view;
     }
 
-    private void reloadData() {
-
-        String date;
-        List<Media> mediaList;
-
-        mPhotoDateGroups.clear();
-        mMapKeyIsDateValueIsPhotoList.clear();
-
-        mMapKeyIsPhotoPositionValueIsPhotoDate.clear();
-        mMapKeyIsPhotoPositionValueIsPhoto.clear();
-
-        List<String> localUploadMediaUUID = new ArrayList<>();
-
-        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
-
-            localUploadMediaUUID.add(media.getUuid());
-
-            date = media.getTime().substring(0, 10);
-            if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
-                mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
-            } else {
-                mPhotoDateGroups.add(date);
-                mediaList = new ArrayList<>();
-                mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
-            }
-
-            Media localMedia = media.cloneSelf();
-            localMedia.setLocal(true);
-            localMedia.setDate(date);
-            localMedia.setSelected(false);
-
-            mediaList.add(localMedia);
-        }
-
-        for (Media media : LocalCache.RemoteMediaMapKeyIsUUID.values()) {
-
-            if (localUploadMediaUUID.contains(media.getUuid()))
-                continue;
-
-            date = media.getTime().substring(0, 10);
-            if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
-                mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
-            } else {
-                mPhotoDateGroups.add(date);
-                mediaList = new ArrayList<>();
-                mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
-            }
-
-            Media remoteMedia = media.cloneSelf();
-            remoteMedia.setLocal(false);
-            remoteMedia.setDate(date);
-            remoteMedia.setSelected(false);
-
-            mediaList.add(remoteMedia);
-
-        }
-
-        Collections.sort(mPhotoDateGroups, new Comparator<String>() {
-            @Override
-            public int compare(String lhs, String rhs) {
-                return -lhs.compareTo(rhs);
-            }
-        });
-
-        calcPhotoPositionNumber();
-
-        // go to PhotoSliderActivity may be a little slow,continue check it,and add android-gif-drawable
-
-    }
-
     public void fillLocalCachePhotoData() {
         fillLocalCachePhotoList();
 
@@ -392,50 +334,19 @@ public class NewPhotoList implements Page {
 
     }
 
-    private void calcPhotoPositionNumber() {
-
-        int titlePosition = 0;
-        int photoListSize;
-        mAdapterItemTotalCount = 0;
-
-        for (String title : mPhotoDateGroups) {
-            mMapKeyIsPhotoPositionValueIsPhotoDate.put(titlePosition, title);
-
-            mAdapterItemTotalCount++;
-
-            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(title);
-            photoListSize = mediaList.size();
-            mAdapterItemTotalCount += photoListSize;
-
-            Collections.sort(mediaList, new Comparator<Media>() {
-                @Override
-                public int compare(Media lhs, Media rhs) {
-                    return -lhs.getTime().compareTo(rhs.getTime());
-                }
-            });
-
-            for (int i = 0; i < photoListSize; i++) {
-                mMapKeyIsPhotoPositionValueIsPhoto.put(titlePosition + 1 + i, mediaList.get(i));
-            }
-
-            titlePosition = mAdapterItemTotalCount;
-        }
-
-    }
-
     @NonNull
-    public List<String> getSelectedImageUUIDs() {
+    public List<String> getSelectedImageKeys() {
 
-        List<String> selectedImageUUIDs = new ArrayList<>();
+        List<String> selectedImageKeys = new ArrayList<>();
         for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Media media : mediaList) {
                 if (media.isSelected()) {
-                    selectedImageUUIDs.add(media.getUuid());
+                    selectedImageKeys.add(media.getKey());
                 }
             }
         }
 
-        return selectedImageUUIDs;
+        return selectedImageKeys;
     }
 
     public void clearSelectedPhoto() {
@@ -459,11 +370,11 @@ public class NewPhotoList implements Page {
 
     }
 
-    public void createAlbum(List<String> selectUUIDs) {
+    public void createAlbum(List<String> selectKeys) {
         Intent intent = new Intent();
         intent.setClass(containerActivity, CreateAlbumActivity.class);
 
-        LocalCache.mediaUUIDInCreateAlbum.addAll(selectUUIDs);
+        LocalCache.mediaKeysInCreateAlbum.addAll(selectKeys);
 
         containerActivity.startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
     }
@@ -482,7 +393,7 @@ public class NewPhotoList implements Page {
 
             int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
             int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
-            String currentMediaUUID = reenterState.getString(Util.CURRENT_MEDIA_UUID);
+            String currentMediaKey = reenterState.getString(Util.CURRENT_MEDIA_KEY);
 
             if (initialPhotoPosition != currentPhotoPosition) {
 
@@ -492,14 +403,14 @@ public class NewPhotoList implements Page {
                 Media media = null;
 
                 for (Media media1 : mMapKeyIsPhotoPositionValueIsPhoto.values()) {
-                    if (media1.getUuid().equals(currentMediaUUID))
+                    if (media1.getKey().equals(currentMediaKey))
                         media = media1;
                 }
 
                 if (media == null) return;
 
                 View newSharedElement = mRecyclerView.findViewWithTag(findPhotoTag(media));
-                String sharedElementName = media.getUuid();
+                String sharedElementName = media.getKey();
 
                 names.add(sharedElementName);
                 sharedElements.put(sharedElementName, newSharedElement);
@@ -514,14 +425,14 @@ public class NewPhotoList implements Page {
         reenterState = new Bundle(data.getExtras());
         int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
         int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
-        String currentMediaUUID = reenterState.getString(Util.CURRENT_MEDIA_UUID);
+        String currentMediaKey = reenterState.getString(Util.CURRENT_MEDIA_KEY);
 
         if (initialPhotoPosition != currentPhotoPosition) {
 
             int scrollToPosition = 0;
 
             for (Map.Entry<Integer, Media> entry : mMapKeyIsPhotoPositionValueIsPhoto.entrySet()) {
-                if (entry.getValue().getUuid().equals(currentMediaUUID))
+                if (entry.getValue().getKey().equals(currentMediaKey))
                     scrollToPosition = entry.getKey();
             }
 
@@ -652,7 +563,7 @@ public class NewPhotoList implements Page {
             }
 
             if (title.contains("1916-01-01")) {
-                return containerActivity.getString(R.string.unknown_time_text);
+                return containerActivity.getString(R.string.unknown_time);
             } else {
                 String[] titleSplit = title.split("-");
                 return titleSplit[0] + "年" + titleSplit[1] + "月";
@@ -696,7 +607,7 @@ public class NewPhotoList implements Page {
             }
 
             if (date.equals("1916-01-01")) {
-                mPhotoTitle.setText(containerActivity.getString(R.string.unknown_time_text));
+                mPhotoTitle.setText(containerActivity.getString(R.string.unknown_time));
             } else {
                 mPhotoTitle.setText(date);
             }
@@ -872,7 +783,7 @@ public class NewPhotoList implements Page {
                         if (!currentMedia.isSharing()) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.photo_not_sharing), Toast.LENGTH_SHORT).show();
                             return;
-                        } else if (alreadySelectedImageUUIDArrayList != null && alreadySelectedImageUUIDArrayList.contains(currentMedia.getUuid())) {
+                        } else if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getKey())) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -913,7 +824,7 @@ public class NewPhotoList implements Page {
 
                             Media media = LocalCache.photoSliderList.get(initialPhotoPosition);
 
-                            if (media.getUuid().equals(currentMedia.getUuid()))
+                            if (media.getKey().equals(currentMedia.getKey()))
                                 break;
 
                         }
@@ -925,9 +836,9 @@ public class NewPhotoList implements Page {
 
                         if (mPhotoIv.isLoaded()) {
 
-                            ViewCompat.setTransitionName(mPhotoIv, currentMedia.getUuid());
+                            ViewCompat.setTransitionName(mPhotoIv, currentMedia.getKey());
 
-                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, mPhotoIv, currentMedia.getUuid());
+                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, mPhotoIv, currentMedia.getKey());
 
                             containerActivity.startActivity(intent, options.toBundle());
                         } else {
@@ -940,7 +851,7 @@ public class NewPhotoList implements Page {
 
                     }
 
-                    Log.i(TAG, "image digest:" + currentMedia.getUuid());
+                    Log.i(TAG, "image key:" + currentMedia.getKey());
                 }
             });
 
@@ -990,7 +901,7 @@ public class NewPhotoList implements Page {
             for (int i = 0; i < mediaList.size(); i++) {
                 Media media1 = mediaList.get(i);
 
-                if (media.getUuid().equals(media1.getUuid())) {
+                if (media.getKey().equals(media1.getKey())) {
                     position = i;
                 }
             }
@@ -1040,7 +951,7 @@ public class NewPhotoList implements Page {
                 if (mSpanCount > mSpanMinCount) {
                     mSpanCount--;
                     calcPhotoItemWidth();
-                    calcPhotoPositionNumber();
+                    NewPhotoListDataLoader.INSTANCE.calcPhotoPositionNumber();
                     ((GridLayoutManager) mLayoutManager).setSpanCount(mSpanCount);
                     mRecyclerView.setLayoutManager(mLayoutManager);
                     mPhotoRecycleAdapter.notifyItemRangeChanged(0, mPhotoRecycleAdapter.getItemCount());
@@ -1053,7 +964,7 @@ public class NewPhotoList implements Page {
                 if (mSpanCount < mSpanMaxCount) {
                     mSpanCount++;
                     calcPhotoItemWidth();
-                    calcPhotoPositionNumber();
+                    NewPhotoListDataLoader.INSTANCE.calcPhotoPositionNumber();
                     ((GridLayoutManager) mLayoutManager).setSpanCount(mSpanCount);
                     mRecyclerView.setLayoutManager(mLayoutManager);
                     mPhotoRecycleAdapter.notifyItemRangeChanged(0, mPhotoRecycleAdapter.getItemCount());

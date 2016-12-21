@@ -321,9 +321,9 @@ public class AlbumList implements Page {
             currentItem = mediaShare;
             restoreSwipeLayoutState();
 
-            coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
+            coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageKey());
             if (coverImg == null) {
-                coverImg = LocalCache.LocalMediaMapKeyIsUUID.get(currentItem.getCoverImageDigest());
+                coverImg = LocalCache.LocalMediaMapKeyIsThumb.get(currentItem.getCoverImageKey());
             }
 
             if (coverImg != null) {
@@ -354,10 +354,10 @@ public class AlbumList implements Page {
             if (title.length() > 16) {
                 title = title.substring(0, 16);
 
-                title += containerActivity.getString(R.string.ellipsize);
+                title += containerActivity.getString(R.string.android_ellipsize);
             }
 
-            title = String.format(containerActivity.getString(R.string.share_album_title), title, photoCount);
+            title = String.format(containerActivity.getString(R.string.android_share_album_title), title, photoCount);
 
             lbTitle.setText(title);
 

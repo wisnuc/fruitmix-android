@@ -31,7 +31,7 @@
                 android:id="@+id/equipment_group_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/test_text"
+                android:text="@string/equipment_group_default_text"
                 android:textColor="@color/light_black"
                 android:textSize="16dp" />
 

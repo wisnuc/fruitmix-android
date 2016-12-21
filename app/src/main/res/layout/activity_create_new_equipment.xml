@@ -34,7 +34,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="32dp"
                 android:layout_toRightOf="@+id/back"
-                android:text="@string/manual_add_new_equipment"
+                android:text="手动输入ip"
                 android:textColor="@color/white"
                 android:textSize="18dp" />
 
@@ -65,7 +65,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="bottom"
-            android:hint="@string/edit_ip_text"
+            android:hint="请输入ip"
             android:inputType="textAutoComplete"
             android:textColor="@color/content_text"
             android:textColorHighlight="#f57c00" />

@@ -118,7 +118,7 @@ public class DBUtils {
     private ContentValues createMediaShareContentContentValues(MediaShareContent mediaShareContent, String mediaShareUUID) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.SHARE_CONTENT_KEY_SHARE_UUID, mediaShareUUID);
-        contentValues.put(DBHelper.SHARE_CONTENT_KEY_DIGEST, mediaShareContent.getDigest());
+        contentValues.put(DBHelper.SHARE_CONTENT_KEY_DIGEST, mediaShareContent.getKey());
         contentValues.put(DBHelper.SHARE_CONTENT_KEY_CREATOR_UUID, mediaShareContent.getAuthor());
         contentValues.put(DBHelper.SHARE_CONTENT_KEY_TIME, mediaShareContent.getTime());
 
@@ -127,7 +127,7 @@ public class DBUtils {
 
     private void bindMediaShareContent(SQLiteStatement sqLiteStatement, MediaShareContent mediaShareContent, String mediaShareUUID) {
         sqLiteStatement.bindString(1, mediaShareUUID);
-        sqLiteStatement.bindString(2, mediaShareContent.getDigest());
+        sqLiteStatement.bindString(2, mediaShareContent.getKey());
         sqLiteStatement.bindString(3, mediaShareContent.getAuthor());
         sqLiteStatement.bindString(4, mediaShareContent.getTime());
     }
@@ -209,7 +209,7 @@ public class DBUtils {
         contentValues.put(DBHelper.SHARE_KEY_IS_ALBUM, mediaShare.isAlbum() ? 1 : 0);
         contentValues.put(DBHelper.SHARE_KEY_IS_ARCHIVED, mediaShare.isArchived() ? 1 : 0);
         contentValues.put(DBHelper.SHARE_KEY_IS_DATE, mediaShare.getDate());
-        contentValues.put(DBHelper.SHARE_KEY_IS_COVER_IMAGE_DIGEST, mediaShare.getCoverImageDigest());
+        contentValues.put(DBHelper.SHARE_KEY_IS_COVER_IMAGE_DIGEST, mediaShare.getCoverImageKey());
         contentValues.put(DBHelper.SHARE_KEY_IS_LOCAL, mediaShare.isLocal() ? 1 : 0);
         contentValues.put(DBHelper.SHARE_KEY_DIGEST, mediaShare.getShareDigest());
         contentValues.put(DBHelper.SHARE_KEY_IS_STICKY, mediaShare.isSticky() ? 1 : 0);
@@ -244,7 +244,7 @@ public class DBUtils {
         sqLiteStatement.bindLong(8, mediaShare.isAlbum() ? 1 : 0);
         sqLiteStatement.bindLong(9, mediaShare.isArchived() ? 1 : 0);
         sqLiteStatement.bindString(10, mediaShare.getDate());
-        sqLiteStatement.bindString(11, mediaShare.getCoverImageDigest());
+        sqLiteStatement.bindString(11, mediaShare.getCoverImageKey());
         sqLiteStatement.bindLong(12, mediaShare.isLocal() ? 1 : 0);
         sqLiteStatement.bindString(13, mediaShare.getShareDigest());
         sqLiteStatement.bindLong(14, mediaShare.isSticky() ? 1 : 0);
@@ -468,7 +468,7 @@ public class DBUtils {
                 "values(?,?,?,?,?,?,?,?,?,?)";
     }
 
-    public long insertLocalMedias(ConcurrentMap<String, Media> medias) {
+    public long insertLocalMedias(List<Media> medias) {
 
 
         long returnValue = 0;
@@ -481,7 +481,7 @@ public class DBUtils {
             SQLiteStatement sqLiteStatement = database.compileStatement(sql);
             database.beginTransaction();
 
-            for (Media media : medias.values()) {
+            for (Media media : medias) {
 
                 bindData(sqLiteStatement, media);
 
