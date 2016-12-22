@@ -8,6 +8,7 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.operationResult.OperationNoChanged;
 import com.winsun.fruitmix.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -72,6 +73,8 @@ public class CalcNewLocalMediaDigestService extends IntentService {
 
         List<Media> newMediaList = new ArrayList<>();
 
+        OperationEvent operationEvent;
+
         Log.i(TAG, "handleActionCalcNewLocalMediaDigest: start calc media digest" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         for (Media media : medias) {
@@ -85,28 +88,20 @@ public class CalcNewLocalMediaDigestService extends IntentService {
 
         Log.i(TAG, "handleActionCalcNewLocalMediaDigest: end calc media digest" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-        DBUtils dbUtils = DBUtils.getInstance(this);
-
-        long returnValue = dbUtils.insertLocalMedias(newMediaList);
-
-        Log.i(TAG, "insert local media result:" + returnValue + " time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-
         if (newMediaList.size() > 0) {
-            OperationEvent operationEvent = new OperationEvent(Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED, new OperationSuccess());
 
-            EventBus.getDefault().post(operationEvent);
+            DBUtils dbUtils = DBUtils.getInstance(this);
+
+            long returnValue = dbUtils.insertLocalMedias(newMediaList);
+
+            Log.i(TAG, "insert local media result:" + returnValue + " time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
+            operationEvent = new OperationEvent(Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED, new OperationSuccess());
+        } else {
+            operationEvent = new OperationEvent(Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED, new OperationNoChanged());
         }
 
-        startUploadAllLocalPhoto();
-
+        EventBus.getDefault().post(operationEvent);
     }
 
-    private void startUploadAllLocalPhoto() {
-        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
-            if (!media.isUploaded() && !LocalCache.RemoteMediaMapKeyIsUUID.containsKey(media.getUuid())) {
-
-                FNAS.createRemoteMedia(this, media);
-            }
-        }
-    }
 }

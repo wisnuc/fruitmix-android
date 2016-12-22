@@ -1,7 +1,5 @@
 package com.winsun.fruitmix.retrofit;
 
-import android.util.Log;
-
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
@@ -14,7 +12,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
-import retrofit2.http.Url;
 
 /**
  * Created by Administrator on 2016/11/3.
@@ -42,6 +39,7 @@ public enum RetrofitInstance {
                 .addInterceptor(createHeaderInterceptor())
                 .addInterceptor(createHttpInterceptor())
                 .connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(Util.HTTP_CONNECT_TIMEOUT,TimeUnit.SECONDS)
                 .build();
     }
 

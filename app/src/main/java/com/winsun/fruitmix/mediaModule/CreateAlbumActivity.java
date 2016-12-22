@@ -125,6 +125,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                 FNAS.createLocalMediaShare(mContext, generateMediaShare(sPublic, sSetMaintainer, title, desc, mSelectedImageKeys));
 
+                LocalCache.mediaKeysInCreateAlbum.clear();
             }
         });
 
@@ -203,9 +204,9 @@ public class CreateAlbumActivity extends AppCompatActivity {
         Log.i(TAG, "create album digest:" + mediaKeys);
 
         List<MediaShareContent> mediaShareContents = new ArrayList<>();
-        for (String digest : mediaKeys) {
+        for (String mediaKey : mediaKeys) {
             MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setKey(digest);
+            mediaShareContent.setKey(mediaKey);
             mediaShareContent.setAuthor(FNAS.userUUID);
             mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
             mediaShareContents.add(mediaShareContent);

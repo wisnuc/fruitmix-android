@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
 import com.winsun.fruitmix.eventbus.DownloadFileEvent;
@@ -17,6 +18,7 @@ import com.winsun.fruitmix.eventbus.MediaCommentRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.ModifyMediaShareRequestEvent;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
@@ -28,6 +30,7 @@ import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationTargetType;
 import com.winsun.fruitmix.util.OperationType;
 import com.winsun.fruitmix.util.Util;
@@ -47,9 +50,16 @@ public class ButlerService extends Service {
 
     private TimingRetrieveMediaShareTask task;
 
+    private boolean mCalcNewLocalMediaDigestFinished = false;
+    private boolean mRetrieveRemoteMediaFinished = false;
+
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
         context.startService(intent);
+    }
+
+    public static void stopBulterService(Context context) {
+        context.stopService(new Intent(context, ButlerService.class));
     }
 
     @Override
@@ -128,6 +138,41 @@ public class ButlerService extends Service {
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING)
+    public void handleOperationEvent(OperationEvent operationEvent) {
+
+        String action = operationEvent.getAction();
+
+        Log.i(TAG, "handleOperationEvent: action:" + action);
+
+        switch (action) {
+            case Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED:
+                mCalcNewLocalMediaDigestFinished = true;
+                startUpload();
+                break;
+            case Util.REMOTE_MEDIA_RETRIEVED:
+                mRetrieveRemoteMediaFinished = true;
+                startUpload();
+                break;
+        }
+
+
+    }
+
+    private void startUpload() {
+        if (mCalcNewLocalMediaDigestFinished && mRetrieveRemoteMediaFinished) {
+            startUploadAllLocalPhoto();
+        }
+    }
+
+    private void startUploadAllLocalPhoto() {
+        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+            if (!media.isUploaded()) {
+                FNAS.createRemoteMedia(this, media);
+            }
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.POSTING)
     public void handleRequestEvent(RequestEvent requestEvent) {
 
         OperationType operationType = requestEvent.getOperationType();
@@ -156,7 +201,8 @@ public class ButlerService extends Service {
 
         OperationTargetType targetType = requestEvent.getOperationTargetType();
 
-        Log.i(TAG, "handle create operation target type:" + targetType);
+        if (targetType != OperationTargetType.REMOTE_MEDIA)
+            Log.i(TAG, "handle create operation target type:" + targetType);
 
         String imageUUID;
         Comment comment;

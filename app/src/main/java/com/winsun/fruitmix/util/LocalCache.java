@@ -439,11 +439,6 @@ public class LocalCache {
                 continue;
             }
 
-//            Log.i(TAG, "handleActionRetrieveLocalMedia: before calc digest" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-
-
-//            Log.i(TAG, "handleActionRetrieveLocalMedia: after calc digest" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-
             media = new Media();
             media.setThumb(thumb);
             media.setWidth(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)));
@@ -458,7 +453,6 @@ public class LocalCache {
             media.setLocal(true);
             media.setSharing(true);
             media.setUuid("");
-            media.setOrientationNumber(1);
 
             mediaList.add(media);
 

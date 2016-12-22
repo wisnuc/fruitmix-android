@@ -213,9 +213,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             onResume = true;
         } else {
 
-            if (viewPager.getCurrentItem() != PAGE_PHOTO) {
-                pageList.get(viewPager.getCurrentItem()).refreshView();
-            }
+            albumList.refreshView();
+            shareList.refreshView();
 
         }
     }
@@ -399,9 +398,13 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             Log.i(TAG, "handleOperationEvent: finish calc new local media digest and refresh view");
 
-            NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
-            Util.needRefreshPhotoSliderList = true;
-            photoList.refreshView();
+            OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
+
+            if (result == OperationResultType.SUCCEED) {
+                NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+                Util.needRefreshPhotoSliderList = true;
+                photoList.refreshView();
+            }
 
         } else if (action.equals(Util.REMOTE_MEDIA_SHARE_RETRIEVED)) {
             Log.i(TAG, "remote share loaded");

@@ -36,6 +36,8 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Collection;
 
+import okhttp3.OkHttpClient;
+
 /**
  * Created by Administrator on 2016/4/22.
  */
@@ -270,16 +272,21 @@ public class FNAS {
 
     }
 
-
     private static HttpResponse RemoteCall(String req) throws MalformedURLException, IOException, SocketTimeoutException {
+
+        return GetRemoteCall(Gateway + ":" + FNAS.PORT + req);
+    }
+
+    public static HttpResponse GetRemoteCall(String url) throws MalformedURLException, IOException, SocketTimeoutException {
+
         HttpURLConnection conn;
         String str = "";
 
-        conn = (HttpURLConnection) (new URL(Gateway + ":" + FNAS.PORT + req).openConnection());
+        conn = (HttpURLConnection) (new URL(url).openConnection());
         conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         conn.setUseCaches(false);
         conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
-        Log.d(TAG, "NAS GET: " + (Gateway + ":" + FNAS.PORT + req));
+        Log.d(TAG, "NAS GET: " + (url));
 
         if (conn.getResponseCode() == 200) {
             str = FNAS.ReadFull(conn.getInputStream());
@@ -287,7 +294,9 @@ public class FNAS {
 
         return new HttpResponse(conn.getResponseCode(), str);
 
+
     }
+
 
     // create object and store it to the server
     public static HttpResponse PostRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
@@ -300,7 +309,8 @@ public class FNAS {
     }
 
     public static HttpResponse DeleteRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
-        return RemoteCallMethod(Util.HTTP_DELETE_METHOD, req, data);
+//        return RemoteCallMethod(Util.HTTP_DELETE_METHOD, req, data);
+        return OkHttpUtil.INSTANCE.remoteCallMethod(Util.HTTP_DELETE_METHOD, req, data);
     }
 
     private static HttpResponse RemoteCallMethod(String httpMethod, String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
@@ -326,9 +336,11 @@ public class FNAS {
         outStream.write(str.getBytes());
         outStream.flush();
 
-        Log.d("winsun", "NAS " + httpMethod + " : " + (Gateway + ":" + FNAS.PORT + req) + " " + conn.getResponseCode() + " " + str);
+        int responseCode = conn.getResponseCode();
 
-        if (conn.getResponseCode() == 200) {
+        Log.d("winsun", "NAS " + httpMethod + " : " + (Gateway + ":" + FNAS.PORT + req) + " " + responseCode + " " + str);
+
+        if (responseCode == 200) {
             str = FNAS.ReadFull(conn.getInputStream());
         }
 
@@ -337,7 +349,7 @@ public class FNAS {
         outStream.close();
         conn.disconnect();
 
-        return new HttpResponse(conn.getResponseCode(), str);
+        return new HttpResponse(responseCode, str);
 
     }
 

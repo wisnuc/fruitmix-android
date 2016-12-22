@@ -136,7 +136,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         String action = operationEvent.getAction();
 
-        if(action.equals(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED) || action.equals(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED)){
+        if (action.equals(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED) || action.equals(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED)) {
 
             if (mDialog != null && mDialog.isShowing())
                 mDialog.dismiss();
@@ -155,6 +155,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 case MALFORMED_URL_EXCEPTION:
                 case SOCKET_TIMEOUT_EXCEPTION:
                 case IO_EXCEPTION:
+                case NETWORK_EXCEPTION:
                     Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
                     EditPhotoActivity.this.setResult(RESULT_CANCELED, getIntent());
                     finish();
@@ -209,8 +210,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             mediaShareContent.setAuthor(FNAS.userUUID);
             mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
             modifiedMediaShare.addMediaShareContent(mediaShareContent);
-
-            Log.i(TAG, "fillMediaShareContents: image uuid:" + imageKey);
         }
     }
 
@@ -272,6 +271,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
             fillPhotoList(LocalCache.mediaKeysInCreateAlbum);
             fillMediaShareContents(LocalCache.mediaKeysInCreateAlbum);
+
+            LocalCache.mediaKeysInCreateAlbum.clear();
 
             mAdapter.notifyDataSetChanged();
         }

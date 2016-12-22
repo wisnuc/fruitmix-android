@@ -338,6 +338,8 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
 
                             deliverImageLoadFinish();
 
+                        } else if (mDefaultImageId != 0) {
+                            setImageResource(mDefaultImageId);
                         }
                     }
                 }, maxWidth, maxHeight, scaleType);

@@ -155,8 +155,15 @@ public class MediaShare implements Parcelable {
             stringBuilder.append("\"");
 
             String key = value.getKey();
-            if (key.contains("/"))
-                key = Util.CalcSHA256OfFile(key);
+            if (key.contains("/")) {
+
+                Media media = LocalCache.LocalMediaMapKeyIsThumb.get(key);
+                key = media.getUuid();
+                if (key.isEmpty()) {
+                    key = Util.CalcSHA256OfFile(key);
+                }
+
+            }
 
             stringBuilder.append(key);
             stringBuilder.append("\",");

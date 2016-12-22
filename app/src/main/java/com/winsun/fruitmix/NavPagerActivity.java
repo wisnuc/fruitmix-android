@@ -161,8 +161,6 @@ public class NavPagerActivity extends AppCompatActivity
         instance = null;
         mContext = null;
 
-        stopService(new Intent(this, ButlerService.class));
-
     }
 
     private void showExplanation(String title, String message) {
@@ -232,6 +230,9 @@ public class NavPagerActivity extends AppCompatActivity
     private void finishApp() {
 
         if (System.currentTimeMillis() - backPressedTimeMillis < TIME_INTERNAL) {
+
+            ButlerService.stopBulterService(mContext);
+
             super.onBackPressed();
         } else {
 

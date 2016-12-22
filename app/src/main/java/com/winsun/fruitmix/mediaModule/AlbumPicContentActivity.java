@@ -227,7 +227,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 case SUCCEED:
                     Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
 
-                    mediaShare = ((MediaShareOperationEvent)operationEvent).getMediaShare();
+                    mediaShare = ((MediaShareOperationEvent) operationEvent).getMediaShare();
 
                     if (mediaShare.getViewersListSize() == 0) {
                         mPrivatePublicMenu.setTitle(getString(R.string.set_public));
@@ -499,6 +499,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             fillPicList(mediaShare.getMediaKeyInMediaShareContents());
             ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
+
         } else if (requestCode == Util.KEY_MODIFY_ALBUM_REQUEST_CODE && resultCode == RESULT_OK) {
             String title = data.getStringExtra(Util.UPDATED_ALBUM_TITLE);
             mediaShare.setTitle(title);
