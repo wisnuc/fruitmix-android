@@ -1,5 +1,7 @@
 package com.winsun.fruitmix;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.content.Intent;
 import android.net.nsd.NsdManager;
@@ -8,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -24,6 +25,8 @@ import android.widget.TextView;
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
@@ -31,12 +34,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -66,11 +65,14 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private NsdManager mManager;
 
-    private List<List<Map<String, String>>> mUserExpandableLists;
+    private List<List<User>> mUserExpandableLists;
 
     private CustomHandler mHandler;
 
     private static final int DATA_CHANGE = 0x0001;
+
+    private static final String SYSTEM_PORT = "3000";
+    private static final String IPALIASING = "/system/ipaliasing";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,13 +101,13 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
 
-                Map<String, String> userMap = mUserExpandableLists.get(groupPosition).get(childPosition);
+                User user = mUserExpandableLists.get(groupPosition).get(childPosition);
 
                 Intent intent = new Intent(mContext, LoginActivity.class);
-                intent.putExtra(Util.GATEWAY, "http://" + mUserLoadedEquipments.get(groupPosition).getHost());
+                intent.putExtra(Util.GATEWAY, "http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0));
                 intent.putExtra(Util.EQUIPMENT_GROUP_NAME, mUserLoadedEquipments.get(groupPosition).getServiceName());
-                intent.putExtra(Util.EQUIPMENT_CHILD_NAME, userMap.get("username"));
-                intent.putExtra(Util.USER_UUID, userMap.get("uuid"));
+                intent.putExtra(Util.EQUIPMENT_CHILD_NAME, user.getUserName());
+                intent.putExtra(Util.USER_UUID, user.getUuid());
                 startActivityForResult(intent, Util.KEY_LOGIN_REQUEST_CODE);
 
                 return false;
@@ -119,7 +121,15 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 int count = mEquipmentExpandableListView.getExpandableListAdapter().getGroupCount();
                 for (int i = 0; i < count; i++) {
                     if (i != groupPosition) {
-                        mEquipmentExpandableListView.collapseGroup(i);
+
+                        if(mEquipmentExpandableListView.isGroupExpanded(i)){
+
+                            mEquipmentExpandableListView.collapseGroupWithAnimation(i);
+
+                            Animator animator = AnimatorInflater.loadAnimator(mContext, R.animator.ic_back_restore);
+                            animateArrow(i, animator);
+                        }
+
                     }
                 }
             }
@@ -129,11 +139,20 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
 
+                Animator animator;
+
                 if (mEquipmentExpandableListView.isGroupExpanded(groupPosition)) {
                     mEquipmentExpandableListView.collapseGroupWithAnimation(groupPosition);
+
+                    animator = AnimatorInflater.loadAnimator(mContext, R.animator.ic_back_restore);
                 } else {
                     mEquipmentExpandableListView.expandGroupWithAnimation(groupPosition);
+
+                    animator = AnimatorInflater.loadAnimator(mContext, R.animator.ic_back_remote);
+
                 }
+
+                animateArrow(groupPosition, animator);
 
                 return true;
             }
@@ -143,6 +162,12 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+    }
+
+    private void animateArrow(int groupPosition, Animator animator) {
+        ImageView mArrow = (ImageView) mEquipmentExpandableListView.getChildAt(groupPosition).findViewById(R.id.arrow);
+        animator.setTarget(mArrow);
+        animator.start();
     }
 
     @Override
@@ -181,7 +206,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
             String ip = data.getStringExtra(Util.KEY_MANUAL_INPUT_IP);
 
-            Equipment equipment = new Equipment("Winsuc Appliction " + ip, ip, 6666);
+            List<String> hosts = new ArrayList<>();
+            hosts.add(ip);
+
+            Equipment equipment = new Equipment("Winsuc Appliction " + ip, hosts, 6666);
             getUserList(equipment);
         }
     }
@@ -190,6 +218,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.back:
+
+                ButlerService.stopButlerService(mContext);
+
                 finish();
                 break;
             case R.id.fab:
@@ -200,11 +231,17 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        ButlerService.stopButlerService(mContext);
+
+        super.onBackPressed();
+    }
 
     class EquipmentExpandableAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter {
 
         List<Equipment> equipmentList;
-        List<List<Map<String, String>>> mapList;
+        List<List<User>> mapList;
         LruCache<Long, View> viewLruCache;
 
         EquipmentExpandableAdapter() {
@@ -222,7 +259,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         @Override
         public int getRealChildrenCount(int groupPosition) {
 
-            List<Map<String, String>> list = mapList.get(groupPosition);
+            List<User> list = mapList.get(groupPosition);
 
             return list == null ? 0 : list.size();
         }
@@ -327,12 +364,17 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 return;
             }
             mGroupName.setText(mAdapter.equipmentList.get(groupPosition).getServiceName());
-            mEquipmentIpTV.setText(mAdapter.equipmentList.get(groupPosition).getHost());
-            if (isExpanded) {
-                mArrow.setBackgroundResource(R.drawable.arrow_down);
-            } else {
-                mArrow.setBackgroundResource(R.drawable.arrow);
+
+            List<String> hosts = mAdapter.equipmentList.get(groupPosition).getHosts();
+
+            StringBuilder builder = new StringBuilder();
+            for (String host : hosts) {
+                builder.append(",");
+                builder.append(host);
             }
+
+            mEquipmentIpTV.setText(builder.substring(1));
+
         }
     }
 
@@ -353,10 +395,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             if (mAdapter.mapList.get(groupPosition) == null || mAdapter.mapList.get(groupPosition).size() == 0)
                 return;
 
-            Map<String, String> map = mAdapter.mapList.get(groupPosition).get(childPosition);
+            User user = mAdapter.mapList.get(groupPosition).get(childPosition);
 
 
-            String childName = map.get("username");
+            String childName = user.getUserName();
             mChildName.setText(childName);
 
             StringBuilder stringBuilder = new StringBuilder();
@@ -367,12 +409,12 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             mUserDefaultPortrait.setText(stringBuilder.toString());
 
             int color;
-            if (map.containsKey("userDefaultAvatarBgColor")) {
-                color = Integer.parseInt(map.get("userDefaultAvatarBgColor"));
+            if (user.getDefaultAvatarBgColor() != null) {
+                color = Integer.parseInt(user.getDefaultAvatarBgColor());
             } else {
                 color = (int) (Math.random() * 3);
 
-                map.put("userDefaultAvatarBgColor", String.valueOf(color));
+                user.setDefaultAvatarBgColor(String.valueOf(color));
             }
 
             switch (color) {
@@ -453,16 +495,23 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
                 Log.i(TAG, "onServiceResolved Service info:" + serviceInfo);
 
+                String serviceName = serviceInfo.getServiceName();
+                String hostAddress = serviceInfo.getHost().getHostAddress();
+
                 for (Equipment equipment : mFoundedEquipments) {
-                    if (equipment == null || serviceInfo.getServiceName().equals(equipment.getServiceName()) || (serviceInfo.getHost().getHostAddress().equals(equipment.getHost()))) {
+                    if (equipment == null || serviceName.equals(equipment.getServiceName()) || equipment.getHosts().contains(hostAddress)) {
                         return;
                     }
                 }
 
                 Equipment equipment = new Equipment();
-                equipment.setServiceName(serviceInfo.getServiceName());
-                Log.i(TAG, "host address:" + serviceInfo.getHost().getHostAddress());
-                equipment.setHost(serviceInfo.getHost().getHostAddress());
+                equipment.setServiceName(serviceName);
+                Log.i(TAG, "host address:" + hostAddress);
+
+                List<String> hosts = new ArrayList<>();
+                hosts.add(hostAddress);
+
+                equipment.setHosts(hosts);
                 equipment.setPort(serviceInfo.getPort());
 
                 mFoundedEquipments.add(equipment);
@@ -488,31 +537,52 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                Map<String, String> item;
-                List<Map<String, String>> itemList;
+                User user;
+                List<User> itemList;
                 JSONObject itemRaw;
                 JSONArray json;
-                HttpURLConnection conn;
                 String str;
 
                 try {
-                    Log.i(TAG, "login url:" + Util.HTTP + equipment.getHost() + ":" + FNAS.PORT + Util.LOGIN_PARAMETER);
-                    conn = (HttpURLConnection) (new URL(Util.HTTP + equipment.getHost() + ":" + FNAS.PORT + Util.LOGIN_PARAMETER)).openConnection();
-                    Log.i(TAG, "response code" + conn.getResponseCode() + "");
-                    str = FNAS.ReadFull(conn.getInputStream());
+
+                    String url = Util.HTTP + equipment.getHosts().get(0) + ":" + SYSTEM_PORT + IPALIASING;
+
+                    Log.i(TAG, "login retrieve equipment alias:" + url);
+
+                    str = FNAS.GetRemoteCall(url).getResponseData();
+
+                    json = new JSONArray(str);
+                    for (int i = 0; i < json.length(); i++) {
+                        itemRaw = json.getJSONObject(i);
+
+                        String ip = itemRaw.getString("ipv4");
+
+                        List<String> hosts = equipment.getHosts();
+                        if (!hosts.contains(ip)) {
+                            hosts.add(ip);
+                        }
+
+                    }
+
+                    url = Util.HTTP + equipment.getHosts().get(0) + ":" + FNAS.PORT + Util.LOGIN_PARAMETER;
+
+                    Log.i(TAG, "login url:" + url);
+
+                    str = FNAS.GetRemoteCall(url).getResponseData();
+
                     json = new JSONArray(str);
                     itemList = new ArrayList<>();
                     for (int i = 0; i < json.length(); i++) {
                         itemRaw = json.getJSONObject(i);
-                        item = new HashMap<>();
-                        item.put("username", itemRaw.getString("username"));
-                        item.put("uuid", itemRaw.getString("uuid"));
-                        item.put("avatar", itemRaw.getString("avatar"));
-                        itemList.add(item);
+                        user = new User();
+                        user.setUserName(itemRaw.getString("username"));
+                        user.setUuid(itemRaw.getString("uuid"));
+                        user.setAvatar(itemRaw.getString("avatar"));
+                        itemList.add(user);
                     }
 
                     for (Equipment equipment1 : mUserLoadedEquipments) {
-                        if (equipment1.getHost().equals(equipment.getHost()))
+                        if (equipment1.getHosts().contains(equipment.getHosts().get(0)))
                             return;
                     }
 
@@ -526,7 +596,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                 } catch (Exception e) {
                     e.printStackTrace();
-
                 }
 
             }

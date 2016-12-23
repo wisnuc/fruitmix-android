@@ -237,21 +237,24 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         Media imageRaw;
 
         String imageKey = getIntent().getStringExtra(Util.IMAGE_KEY);
-        imageRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKey);
+
+        imageRaw = LocalCache.findMediaInLocalMediaMap(imageKey);
         if (imageRaw == null) {
-            imageRaw = LocalCache.LocalMediaMapKeyIsThumb.get(imageKey);
+            imageRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKey);
 
             if (imageRaw == null) {
-                return;
+                media = new Media();
+                media.setUuid(imageKey);
+                media.setLocal(false);
             } else {
                 media = imageRaw.cloneSelf();
-                media.setLocal(true);
+                media.setLocal(false);
             }
 
         } else {
 
             media = imageRaw.cloneSelf();
-            media.setLocal(false);
+            media.setLocal(true);
         }
 
         media.setSelected(false);

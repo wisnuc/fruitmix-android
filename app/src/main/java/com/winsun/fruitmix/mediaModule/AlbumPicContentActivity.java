@@ -297,10 +297,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         for (String aStArr : imageKeys) {
 
-            picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
+            picItemRaw = LocalCache.findMediaInLocalMediaMap(aStArr);
 
             if (picItemRaw == null) {
-                picItemRaw = LocalCache.LocalMediaMapKeyIsThumb.get(aStArr);
+
+                picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
 
                 if (picItemRaw == null) {
                     picItem = new Media();
@@ -309,14 +310,14 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 } else {
 
                     picItem = picItemRaw.cloneSelf();
-                    picItem.setLocal(true);
+                    picItem.setLocal(false);
                 }
 
             } else {
 
                 picItem = picItemRaw.cloneSelf();
 
-                picItem.setLocal(false);
+                picItem.setLocal(true);
             }
 
             picItem.setSelected(false);

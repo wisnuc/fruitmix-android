@@ -26,6 +26,7 @@ import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -165,6 +166,18 @@ public class LocalCache {
             commentConcurrentMap.put(mediaUUID, comment);
         }
         return commentConcurrentMap;
+    }
+
+    public static Media findMediaInLocalMediaMap(String key){
+
+        Collection<Media> collection = LocalMediaMapKeyIsThumb.values();
+
+        for (Media media:collection){
+            if(media.getUuid().equals(key) || media.getThumb().equals(key))
+                return media;
+        }
+
+        return null;
     }
 
     public static String GetInnerTempFile() {

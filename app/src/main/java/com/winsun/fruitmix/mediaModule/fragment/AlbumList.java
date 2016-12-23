@@ -321,9 +321,10 @@ public class AlbumList implements Page {
             currentItem = mediaShare;
             restoreSwipeLayoutState();
 
-            coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageKey());
+            coverImg = LocalCache.findMediaInLocalMediaMap(currentItem.getCoverImageKey());
+
             if (coverImg == null) {
-                coverImg = LocalCache.LocalMediaMapKeyIsThumb.get(currentItem.getCoverImageKey());
+                coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageKey());
             }
 
             if (coverImg != null) {

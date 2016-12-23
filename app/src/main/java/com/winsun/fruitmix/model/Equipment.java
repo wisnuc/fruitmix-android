@@ -1,17 +1,19 @@
 package com.winsun.fruitmix.model;
 
+import java.util.List;
+
 /**
  * Created by Administrator on 2016/7/6.
  */
 public class Equipment {
 
     private String serviceName;
-    private String host;
+    private List<String> hosts;
     private int port;
 
-    public Equipment(String serviceName, String host, int port) {
+    public Equipment(String serviceName, List<String> hosts, int port) {
         this.serviceName = serviceName;
-        this.host = host;
+        this.hosts = hosts;
         this.port = port;
     }
 
@@ -26,19 +28,19 @@ public class Equipment {
         this.serviceName = serviceName;
     }
 
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
     public int getPort() {
         return port;
     }
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public List<String> getHosts() {
+        return hosts;
+    }
+
+    public void setHosts(List<String> hosts) {
+        this.hosts = hosts;
     }
 }

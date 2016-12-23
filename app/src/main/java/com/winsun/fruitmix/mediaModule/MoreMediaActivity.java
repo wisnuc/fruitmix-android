@@ -102,23 +102,26 @@ public class MoreMediaActivity extends AppCompatActivity {
         Media picItemRaw;
         for (String str : imageKeys) {
 
-            picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(str);
+            picItemRaw = LocalCache.findMediaInLocalMediaMap(str);
+
             if (picItemRaw == null) {
 
-                picItemRaw = LocalCache.LocalMediaMapKeyIsThumb.get(str);
+                picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(str);
 
                 if (picItemRaw == null) {
-                    continue;
+                    picItem = new Media();
+                    picItem.setUuid(str);
+                    picItem.setLocal(false);
                 } else {
 
                     picItem = picItemRaw.cloneSelf();
-                    picItem.setLocal(true);
+                    picItem.setLocal(false);
                 }
 
             } else {
 
                 picItem = picItemRaw.cloneSelf();
-                picItem.setLocal(false);
+                picItem.setLocal(true);
 
             }
 

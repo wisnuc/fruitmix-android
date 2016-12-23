@@ -58,7 +58,7 @@ public class ButlerService extends Service {
         context.startService(intent);
     }
 
-    public static void stopBulterService(Context context) {
+    public static void stopButlerService(Context context) {
         context.stopService(new Intent(context, ButlerService.class));
     }
 

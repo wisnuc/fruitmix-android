@@ -207,7 +207,7 @@ public class MediaShareList implements Page {
 
                 String currentMediaUUID = currentMediaUUIDs.get(currentPhotoPosition);
 
-                View currentSharedElementView = mainRecyclerView.findViewWithTag(findMediaTagByMediaUUID(currentMediaUUID));
+                View currentSharedElementView = mainRecyclerView.findViewWithTag(findMediaTagByMediaKey(currentMediaUUID));
 
                 names.add(currentMediaUUID);
                 sharedElements.put(currentMediaUUID, currentSharedElementView);
@@ -271,13 +271,18 @@ public class MediaShareList implements Page {
         return returnPosition;
     }
 
-    private String findMediaTagByMediaUUID(String imageKey) {
+    private String findMediaTagByMediaKey(String imageKey) {
         String currentMediaTag;
         Media currentMedia = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKey);
         if (currentMedia == null) {
-            currentMedia = LocalCache.LocalMediaMapKeyIsThumb.get(imageKey);
+            currentMedia = LocalCache.findMediaInLocalMediaMap(imageKey);
         }
-        currentMediaTag = currentMedia.getImageThumbUrl(containerActivity);
+
+        if (currentMedia == null)
+            currentMediaTag = "";
+        else
+            currentMediaTag = currentMedia.getImageThumbUrl(containerActivity);
+
         return currentMediaTag;
     }
 
@@ -441,9 +446,9 @@ public class MediaShareList implements Page {
         private void refreshViewAttributeWhenIsAlbum() {
             lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.android_share_album_title), currentItem.getTitle(), String.valueOf(currentItem.getMediaContentsListSize())));
 
-            coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageKey());
+            coverImg = LocalCache.findMediaInLocalMediaMap(currentItem.getCoverImageKey());
             if (coverImg == null) {
-                coverImg = LocalCache.LocalMediaMapKeyIsThumb.get(currentItem.getCoverImageKey());
+                coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageKey());
             }
             if (coverImg != null) {
 
@@ -512,9 +517,10 @@ public class MediaShareList implements Page {
 
         private void refreshViewAttributeWhenOneImage(Map<String, List<Comment>> commentMap) {
             Log.i(TAG, "images[0]:" + imageKeys.get(0));
-            itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(0));
+
+            itemImg = LocalCache.findMediaInLocalMediaMap(imageKeys.get(0));
             if (itemImg == null) {
-                itemImg = LocalCache.LocalMediaMapKeyIsThumb.get(imageKeys.get(0));
+                itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(0));
             }
 
             if (itemImg != null) {
@@ -752,9 +758,10 @@ public class MediaShareList implements Page {
             for (int i = 0; i < length; i++) {
 
                 ivItems[i].setVisibility(View.VISIBLE);
-                itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(i));
+                itemImg = LocalCache.findMediaInLocalMediaMap(imageKeys.get(i));
+
                 if (itemImg == null)
-                    itemImg = LocalCache.LocalMediaMapKeyIsThumb.get(imageKeys.get(i));
+                    itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(i));
 
                 if (itemImg != null) {
 
@@ -826,10 +833,11 @@ public class MediaShareList implements Page {
 
         for (String aStArr : imageKeys) {
 
-            picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
+            picItemRaw = LocalCache.findMediaInLocalMediaMap(aStArr);
+
             if (picItemRaw == null) {
 
-                picItemRaw = LocalCache.LocalMediaMapKeyIsThumb.get(aStArr);
+                picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
 
                 if (picItemRaw == null) {
                     picItem = new Media();
@@ -838,13 +846,13 @@ public class MediaShareList implements Page {
                 } else {
 
                     picItem = picItemRaw.cloneSelf();
-                    picItem.setLocal(true);
+                    picItem.setLocal(false);
                 }
 
             } else {
 
                 picItem = picItemRaw.cloneSelf();
-                picItem.setLocal(false);
+                picItem.setLocal(true);
 
             }
 

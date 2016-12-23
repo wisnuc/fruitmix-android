@@ -406,40 +406,7 @@ public class DBUtils {
         return contentValues;
     }
 
-    public long insertRemoteMedias(ConcurrentMap<String, Media> medias) {
-
-        long returnValue = 0;
-
-        try {
-            openWritableDB();
-
-            String sql = createInsertMediaSql(DBHelper.REMOTE_MEDIA_TABLE_NAME);
-
-            SQLiteStatement sqLiteStatement = database.compileStatement(sql);
-            database.beginTransaction();
-
-            for (Media media : medias.values()) {
-
-                bindData(sqLiteStatement, media);
-
-                returnValue = sqLiteStatement.executeInsert();
-
-            }
-            database.setTransactionSuccessful();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-
-            database.endTransaction();
-
-            close();
-        }
-
-        return returnValue;
-
-    }
-
-    private void bindData(SQLiteStatement sqLiteStatement, Media media) {
+    private void bindMedia(SQLiteStatement sqLiteStatement, Media media) {
         sqLiteStatement.bindString(1, media.getUuid());
         sqLiteStatement.bindString(2, media.getTime());
         sqLiteStatement.bindString(3, media.getWidth());
@@ -468,26 +435,24 @@ public class DBUtils {
                 "values(?,?,?,?,?,?,?,?,?,?)";
     }
 
-    public long insertLocalMedias(List<Media> medias) {
-
+    private long insertMedias(String dbName, Collection<Media> medias) {
 
         long returnValue = 0;
 
         try {
             openWritableDB();
 
-            String sql = createInsertMediaSql(DBHelper.LOCAL_MEDIA_TABLE_NAME);
+            String sql = createInsertMediaSql(dbName);
 
             SQLiteStatement sqLiteStatement = database.compileStatement(sql);
             database.beginTransaction();
 
             for (Media media : medias) {
 
-                bindData(sqLiteStatement, media);
+                bindMedia(sqLiteStatement, media);
 
                 returnValue = sqLiteStatement.executeInsert();
 
-                sqLiteStatement.execute();
             }
             database.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -500,6 +465,17 @@ public class DBUtils {
         }
 
         return returnValue;
+    }
+
+    public long insertRemoteMedias(ConcurrentMap<String, Media> medias) {
+
+        return insertMedias(DBHelper.REMOTE_MEDIA_TABLE_NAME, medias.values());
+
+    }
+
+    public long insertLocalMedias(List<Media> medias) {
+
+        return insertMedias(DBHelper.LOCAL_MEDIA_TABLE_NAME, medias);
 
     }
 
@@ -597,41 +573,79 @@ public class DBUtils {
         return deleteMediaShareContentByID(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, id);
     }
 
+    private long deleteShareByUUID(String shareDBName, String shareContentDBName, String uuid) {
+
+        long returnValue = 0L;
+
+        try {
+            openWritableDB();
+
+            database.beginTransaction();
+
+            database.delete(shareContentDBName, DBHelper.SHARE_CONTENT_KEY_SHARE_UUID + " = ?", new String[]{uuid});
+
+            returnValue = database.delete(shareDBName, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
+
+            database.setTransactionSuccessful();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+        } finally {
+
+            database.endTransaction();
+
+            close();
+        }
+
+        return returnValue;
+    }
+
     public long deleteLocalShareByUUid(String uuid) {
 
-        openWritableDB();
+        return deleteShareByUUID(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, uuid);
+    }
 
-        database.delete(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, DBHelper.SHARE_CONTENT_KEY_SHARE_UUID + " = ?", new String[]{uuid});
+    public long deleteRemoteShareByUUid(String uuid) {
 
-        long returnValue = database.delete(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
+        return deleteShareByUUID(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, uuid);
 
-        close();
+    }
+
+    private long deleteAllShare(String shareDBName, String shareContentDBName) {
+
+
+        long returnValue = 0L;
+
+        try {
+            openWritableDB();
+
+            database.beginTransaction();
+
+            database.delete(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, null, null);
+            returnValue = database.delete(DBHelper.LOCAL_SHARE_TABLE_NAME, null, null);
+
+            database.setTransactionSuccessful();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+        } finally {
+
+            database.endTransaction();
+
+            close();
+        }
 
         return returnValue;
     }
 
     public long deleteAllLocalShare() {
 
-        openWritableDB();
-
-        database.delete(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, null, null);
-        long returnValue = database.delete(DBHelper.LOCAL_SHARE_TABLE_NAME, null, null);
-
-        close();
-
-        return returnValue;
+        return deleteAllShare(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME);
     }
 
-    public long deleteRemoteShareByUUid(String uuid) {
+    public long deleteAllRemoteShare() {
 
-        openWritableDB();
-
-        database.delete(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, DBHelper.SHARE_CONTENT_KEY_SHARE_UUID + " = ?", new String[]{uuid});
-        long returnValue = database.delete(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
-
-        close();
-
-        return returnValue;
+        return deleteAllShare(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
     }
 
     public long deleteDownloadedFileByUUID(String fileUUID) {
@@ -639,18 +653,6 @@ public class DBUtils {
         openWritableDB();
 
         long returnValue = database.delete(DBHelper.DOWNLOADED_FILE_TABLE_NAME, DBHelper.FILE_KEY_UUID + " = ?", new String[]{fileUUID});
-
-        close();
-
-        return returnValue;
-    }
-
-    public long deleteAllRemoteShare() {
-
-        openWritableDB();
-
-        database.delete(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, null, null);
-        long returnValue = database.delete(DBHelper.REMOTE_SHARE_TABLE_NAME, null, null);
 
         close();
 
@@ -674,7 +676,6 @@ public class DBUtils {
 
     private List<MediaShareContent> getMediaShareContents(String mediashareContentTableName, String mediashareUUID) {
 
-
         List<MediaShareContent> mediashareContents = new ArrayList<>();
         MediaShareContentParser parser = new MediaShareContentParser();
         Cursor cursor = database.rawQuery("select * from " + mediashareContentTableName + " where " + DBHelper.SHARE_CONTENT_KEY_SHARE_UUID + " = ?", new String[]{mediashareUUID});
@@ -686,15 +687,14 @@ public class DBUtils {
         return mediashareContents;
     }
 
-    public Map<String, List<Comment>> getAllLocalImageCommentKeyIsImageUUID() {
-
+    private Map<String, List<Comment>> getAllImageCommentKeyIsImageUUID(String dbName) {
         openReadableDB();
 
         Map<String, List<Comment>> map = new HashMap<>();
 
         LocalDataParser<Comment> parser = new LocalMediaCommentParser();
 
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOCAL_COMMENT_TABLE_NAME, null);
+        Cursor cursor = database.rawQuery("select * from " + dbName, null);
         while (cursor.moveToNext()) {
             String imageUuid = cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_IMAGE_UUID));
             List<Comment> commentList;
@@ -717,83 +717,54 @@ public class DBUtils {
         close();
 
         return map;
+    }
+
+    public Map<String, List<Comment>> getAllLocalImageCommentKeyIsImageUUID() {
+
+        return getAllImageCommentKeyIsImageUUID(DBHelper.LOCAL_COMMENT_TABLE_NAME);
+    }
+
+
+    public Map<String, List<Comment>> getAllRemoteImageCommentKeyIsImageUUID() {
+
+        return getAllImageCommentKeyIsImageUUID(DBHelper.REMOTE_COMMENT_TABLE_NAME);
+    }
+
+    private List<Comment> getImageCommentByUUid(String dbName, String uuid) {
+        openReadableDB();
+
+        List<Comment> commentList = new ArrayList<>();
+        LocalDataParser<Comment> parser = new LocalMediaCommentParser();
+        Cursor cursor = database.rawQuery("select * from " + dbName + " where " + DBHelper.COMMENT_IMAGE_UUID + " = ?", new String[]{uuid});
+
+        while (cursor.moveToNext()) {
+
+            commentList.add(parser.parse(cursor));
+
+        }
+        cursor.close();
+
+        close();
+
+        return commentList;
     }
 
     public List<Comment> getLocalImageCommentByUUid(String uuid) {
 
-        openReadableDB();
-
-        List<Comment> commentList = new ArrayList<>();
-        LocalDataParser<Comment> parser = new LocalMediaCommentParser();
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOCAL_COMMENT_TABLE_NAME + " where " + DBHelper.COMMENT_IMAGE_UUID + " = ?", new String[]{uuid});
-
-        while (cursor.moveToNext()) {
-
-            commentList.add(parser.parse(cursor));
-
-        }
-        cursor.close();
-
-        close();
-
-        return commentList;
+        return getImageCommentByUUid(DBHelper.LOCAL_COMMENT_TABLE_NAME, uuid);
     }
 
     public List<Comment> getRemoteImageCommentByUUid(String uuid) {
 
-        openReadableDB();
-
-        List<Comment> commentList = new ArrayList<>();
-        LocalDataParser<Comment> parser = new LocalMediaCommentParser();
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_COMMENT_TABLE_NAME + " where " + DBHelper.COMMENT_IMAGE_UUID + " = ?", new String[]{uuid});
-        while (cursor.moveToNext()) {
-
-            commentList.add(parser.parse(cursor));
-
-        }
-        cursor.close();
-
-        close();
-
-        return commentList;
+        return getImageCommentByUUid(DBHelper.REMOTE_COMMENT_TABLE_NAME, uuid);
     }
 
-    public Map<String, List<Comment>> getAllRemoteImageCommentKeyIsImageUUID() {
-
-        openReadableDB();
-
-        Map<String, List<Comment>> map = new HashMap<>();
-        LocalDataParser<Comment> parser = new LocalMediaCommentParser();
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_COMMENT_TABLE_NAME, null);
-        while (cursor.moveToNext()) {
-            String imageUuid = cursor.getString(cursor.getColumnIndex(DBHelper.COMMENT_IMAGE_UUID));
-            List<Comment> commentList;
-            if (map.containsKey(imageUuid)) {
-
-                commentList = map.get(imageUuid);
-                commentList.add(parser.parse(cursor));
-
-            } else {
-                commentList = new ArrayList<>();
-                commentList.add(parser.parse(cursor));
-
-                map.put(imageUuid, commentList);
-            }
-        }
-        cursor.close();
-
-        close();
-
-        return map;
-    }
-
-    public List<MediaShare> getAllLocalShare() {
-
+    private List<MediaShare> getAllShare(String dbName) {
         openReadableDB();
 
         List<MediaShare> list = new ArrayList<>();
         LocalDataParser<MediaShare> parser = new LocalMediaShareParser();
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOCAL_SHARE_TABLE_NAME, null);
+        Cursor cursor = database.rawQuery("select * from " + dbName, null);
         while (cursor.moveToNext()) {
 
             list.add(parser.parse(cursor));
@@ -810,11 +781,22 @@ public class DBUtils {
         return list;
     }
 
-    public MediaShare getLocalShareByUuid(String uuid) {
+    public List<MediaShare> getAllLocalShare() {
+
+        return getAllShare(DBHelper.LOCAL_SHARE_TABLE_NAME);
+    }
+
+    public List<MediaShare> getAllRemoteShare() {
+
+        return getAllShare(DBHelper.REMOTE_SHARE_TABLE_NAME);
+
+    }
+
+    private MediaShare getShareByUuid(String dbName, String uuid) {
 
         openReadableDB();
 
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOCAL_SHARE_TABLE_NAME + " where " + DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
+        Cursor cursor = database.rawQuery("select * from " + dbName + " where " + DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
         MediaShare mediaShare = new MediaShare();
         LocalDataParser<MediaShare> parser = new LocalMediaShareParser();
         while (cursor.moveToNext()) {
@@ -829,50 +811,16 @@ public class DBUtils {
         return mediaShare;
     }
 
-    public List<MediaShare> getAllRemoteShare() {
+    public MediaShare getLocalShareByUuid(String uuid) {
 
-        openReadableDB();
+        return getShareByUuid(DBHelper.LOCAL_SHARE_TABLE_NAME, uuid);
 
-        List<MediaShare> mediaShares = new ArrayList<>();
-        LocalDataParser<MediaShare> parser = new LocalMediaShareParser();
-
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_SHARE_TABLE_NAME, null);
-        while (cursor.moveToNext()) {
-
-            mediaShares.add(parser.parse(cursor));
-        }
-        cursor.close();
-
-        for (MediaShare mediaShare : mediaShares) {
-
-            mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShare.getUuid()));
-        }
-
-
-        close();
-
-        return mediaShares;
     }
 
     public MediaShare getRemoteShareByUuid(String uuid) {
 
-        openReadableDB();
+        return getShareByUuid(DBHelper.REMOTE_SHARE_TABLE_NAME, uuid);
 
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_SHARE_TABLE_NAME + " where " + DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
-        MediaShare mediaShare = new MediaShare();
-
-        LocalDataParser<MediaShare> parser = new LocalMediaShareParser();
-
-        while (cursor.moveToNext()) {
-            mediaShare = parser.parse(cursor);
-        }
-        cursor.close();
-
-        mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShare.getUuid()));
-
-        close();
-
-        return mediaShare;
     }
 
     public List<User> getAllRemoteUser() {
@@ -925,15 +873,14 @@ public class DBUtils {
         return fileDownloadItems;
     }
 
-
-    public List<Media> getAllRemoteMedia() {
+    private List<Media> getAllMedia(String dbName) {
         openReadableDB();
 
         List<Media> medias = new ArrayList<>();
 
         LocalDataParser<Media> parser = new LocalMediaParser();
 
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_MEDIA_TABLE_NAME, null);
+        Cursor cursor = database.rawQuery("select * from " + dbName, null);
 
         while (cursor.moveToNext()) {
 
@@ -947,94 +894,67 @@ public class DBUtils {
         close();
 
         return medias;
+    }
+
+    public List<Media> getAllRemoteMedia() {
+        return getAllMedia(DBHelper.REMOTE_MEDIA_TABLE_NAME);
     }
 
     public List<Media> getAllLocalMedia() {
-        openReadableDB();
-
-        List<Media> medias = new ArrayList<>();
-
-        LocalDataParser<Media> parser = new LocalMediaParser();
-
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOCAL_MEDIA_TABLE_NAME, null);
-
-        while (cursor.moveToNext()) {
-
-            Media media = parser.parse(cursor);
-
-            medias.add(media);
-        }
-
-        cursor.close();
-
-        close();
-
-        return medias;
+        return getAllMedia(DBHelper.LOCAL_MEDIA_TABLE_NAME);
     }
 
-    public long updateLocalShare(MediaShare mediaShare) {
-
+    private long updateShare(String dbName, MediaShare mediaShare) {
         openWritableDB();
 
         ContentValues contentValues = createMediaShareContentValues(mediaShare);
 
-        long returnValue = database.update(DBHelper.LOCAL_SHARE_TABLE_NAME, contentValues, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{mediaShare.getUuid()});
+        long returnValue = database.update(dbName, contentValues, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{mediaShare.getUuid()});
 
         close();
 
         return returnValue;
+    }
+
+    public long updateLocalShare(MediaShare mediaShare) {
+        return updateShare(DBHelper.LOCAL_SHARE_TABLE_NAME, mediaShare);
     }
 
     public long updateRemoteShare(MediaShare mediaShare) {
 
+        return updateShare(DBHelper.REMOTE_SHARE_TABLE_NAME, mediaShare);
+
+    }
+
+    private long updateMedia(String dbName, Media media) {
         openWritableDB();
 
-        ContentValues contentValues = createMediaShareContentValues(mediaShare);
+        ContentValues contentValues = createMediaContentValues(media);
 
-        long returnValue = database.update(DBHelper.REMOTE_SHARE_TABLE_NAME, contentValues, DBHelper.SHARE_KEY_UUID + " = ?", new String[]{mediaShare.getUuid()});
+        long returnValue = database.update(dbName, contentValues, DBHelper.MEDIA_KEY_UUID + " = ?", new String[]{media.getUuid()});
+
+        Log.i(TAG, "update media uuid:" + media.getUuid());
 
         close();
 
         return returnValue;
     }
-
 
     public long updateRemoteMedia(Media media) {
 
-        openWritableDB();
+        return updateMedia(DBHelper.REMOTE_MEDIA_TABLE_NAME, media);
 
-        ContentValues contentValues = createMediaContentValues(media);
-
-        long returnValue = database.update(DBHelper.REMOTE_MEDIA_TABLE_NAME, contentValues, DBHelper.MEDIA_KEY_UUID + " = ?", new String[]{media.getUuid()});
-
-        close();
-
-        return returnValue;
     }
 
     public long updateLocalMedia(Media media) {
-
-        openWritableDB();
-
-        ContentValues contentValues = createMediaContentValues(media);
-
-        long returnValue = database.update(DBHelper.LOCAL_MEDIA_TABLE_NAME, contentValues, DBHelper.MEDIA_KEY_UUID + " = ?", new String[]{media.getUuid()});
-
-        Log.i(TAG, "update local media media uuid:" + media.getUuid());
-
-        close();
-
-        return returnValue;
+        return updateMedia(DBHelper.LOCAL_MEDIA_TABLE_NAME, media);
     }
-
 
     @NonNull
     private String createUpdateMediaSql(String dbName) {
         return "update " + dbName + " set " +
                 DBHelper.MEDIA_KEY_UPLOADED + " = 0";
-
     }
-
 
     public long updateLocalMediasUploadedFalse() {
 

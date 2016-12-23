@@ -9,6 +9,7 @@ import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
@@ -184,7 +185,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             public void onPageSelected(int position) {
                 Log.d(TAG, "onPageSelected:" + position);
                 setPosition(position);
-
             }
 
         });
@@ -424,6 +424,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             mediaAlreadyLoadedList.add(media);
         }
+
     }
 
     private void handleThumbLoaded(View view, Media media) {
@@ -432,11 +433,19 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             startLoadCurrentImageAfterTransition(view, media);
 
-
         } else {
 
             startLoadingOriginalPhoto(view, media);
         }
+
+        setViewWidthHeightMatchParent(view);
+    }
+
+    private void setViewWidthHeightMatchParent(View view) {
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+        layoutParams.width = RelativeLayout.LayoutParams.MATCH_PARENT;
+        layoutParams.height = RelativeLayout.LayoutParams.MATCH_PARENT;
+        view.setLayoutParams(layoutParams);
     }
 
     private void handleLocalMediaLoaded(Media media) {
@@ -536,7 +545,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 Log.i(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
 
-                setDefaultMainPicAndMainPicScreenHeight(mainPic, media);
+                setMainPicScreenHeight(mainPic, media);
 
                 mainPic.registerImageLoadListener(PhotoSliderActivity.this);
 
@@ -621,7 +630,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             }
         }
 
-        private void setDefaultMainPicAndMainPicScreenHeight(GifTouchNetworkImageView mainPic, Media media) {
+        private void setMainPicScreenHeight(GifTouchNetworkImageView mainPic, Media media) {
+
+            if (media.isLocal())
+                return;
 
             int mediaWidth = Integer.parseInt(media.getWidth());
             int mediaHeight = Integer.parseInt(media.getHeight());

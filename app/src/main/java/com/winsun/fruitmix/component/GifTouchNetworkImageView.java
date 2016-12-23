@@ -199,6 +199,8 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                     public void onErrorResponse(VolleyError error) {
                         if (mErrorImageId != 0) {
                             setImageResource(mErrorImageId);
+                        } else if (mDefaultImageId != 0) {
+                            setImageResource(mDefaultImageId);
                         }
 
                         deliverImageLoadFinish();
@@ -302,6 +304,8 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                     public void onErrorResponse(VolleyError error) {
                         if (mErrorImageId != 0) {
                             setImageResource(mErrorImageId);
+                        } else if (mDefaultImageId != 0) {
+                            setImageResource(mDefaultImageId);
                         }
 
                         deliverImageLoadFinish();
@@ -338,8 +342,6 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
 
                             deliverImageLoadFinish();
 
-                        } else if (mDefaultImageId != 0) {
-                            setImageResource(mDefaultImageId);
                         }
                     }
                 }, maxWidth, maxHeight, scaleType);

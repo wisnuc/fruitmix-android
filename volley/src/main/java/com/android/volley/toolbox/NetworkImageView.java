@@ -202,6 +202,8 @@ public class NetworkImageView extends ImageView {
                     public void onErrorResponse(final VolleyError error) {
                         if (mErrorImageId != 0) {
                             setImageResource(mErrorImageId);
+                        } else if (mDefaultImageId != 0) {
+                            setImageResource(mDefaultImageId);
                         }
 
                         if (error.networkResponse != null && error.networkResponse.statusCode == 500 && mCurrentRetryNum < mMaxRetryNum) {
@@ -259,8 +261,6 @@ public class NetworkImageView extends ImageView {
                                 }
                             });
 
-                        } else if (mDefaultImageId != 0) {
-                            setImageResource(mDefaultImageId);
                         }
                     }
                 }, maxWidth, maxHeight, scaleType);

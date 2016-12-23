@@ -231,7 +231,7 @@ public class NavPagerActivity extends AppCompatActivity
 
         if (System.currentTimeMillis() - backPressedTimeMillis < TIME_INTERNAL) {
 
-            ButlerService.stopBulterService(mContext);
+            ButlerService.stopButlerService(mContext);
 
             super.onBackPressed();
         } else {
