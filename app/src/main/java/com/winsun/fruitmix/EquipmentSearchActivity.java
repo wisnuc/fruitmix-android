@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -108,6 +109,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 intent.putExtra(Util.EQUIPMENT_GROUP_NAME, mUserLoadedEquipments.get(groupPosition).getServiceName());
                 intent.putExtra(Util.EQUIPMENT_CHILD_NAME, user.getUserName());
                 intent.putExtra(Util.USER_UUID, user.getUuid());
+                intent.putExtra(Util.EQUIPMENT_CHILD_BG_COLOR, user.getDefaultAvatarBgColor());
                 startActivityForResult(intent, Util.KEY_LOGIN_REQUEST_CODE);
 
                 return false;
@@ -122,7 +124,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 for (int i = 0; i < count; i++) {
                     if (i != groupPosition) {
 
-                        if(mEquipmentExpandableListView.isGroupExpanded(i)){
+                        if (mEquipmentExpandableListView.isGroupExpanded(i)) {
 
                             mEquipmentExpandableListView.collapseGroupWithAnimation(i);
 
@@ -401,12 +403,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             String childName = user.getUserName();
             mChildName.setText(childName);
 
-            StringBuilder stringBuilder = new StringBuilder();
-            String[] splitStrings = childName.split(" ");
-            for (String splitString : splitStrings) {
-                stringBuilder.append(splitString.substring(0, 1).toUpperCase());
-            }
-            mUserDefaultPortrait.setText(stringBuilder.toString());
+            String firstLetter = Util.getUserNameFirstLetter(childName);
+            mUserDefaultPortrait.setText(firstLetter);
 
             int color;
             if (user.getDefaultAvatarBgColor() != null) {
@@ -549,7 +547,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                     Log.i(TAG, "login retrieve equipment alias:" + url);
 
-                    str = FNAS.GetRemoteCall(url).getResponseData();
+                    str = FNAS.RemoteCall(url).getResponseData();
 
                     json = new JSONArray(str);
                     for (int i = 0; i < json.length(); i++) {
@@ -568,7 +566,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                     Log.i(TAG, "login url:" + url);
 
-                    str = FNAS.GetRemoteCall(url).getResponseData();
+                    str = FNAS.RemoteCall(url).getResponseData();
 
                     json = new JSONArray(str);
                     itemList = new ArrayList<>();
@@ -580,6 +578,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         user.setAvatar(itemRaw.getString("avatar"));
                         itemList.add(user);
                     }
+
+                    if (itemList.isEmpty())
+                        return;
 
                     for (Equipment equipment1 : mUserLoadedEquipments) {
                         if (equipment1.getHosts().contains(equipment.getHosts().get(0)))

@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -76,6 +77,8 @@ public class MediaShareList implements Page {
     FrameLayout mShareListFrameLayout;
     @BindView(R.id.mainList)
     RecyclerView mainRecyclerView;
+    @BindView(R.id.no_content_imageview)
+    ImageView noContentImageView;
 
     private List<MediaShare> mediaShareList;
     private Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
@@ -92,6 +95,8 @@ public class MediaShareList implements Page {
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(R.layout.share_list2, null);
 
         ButterKnife.bind(this, view);
+
+        noContentImageView.setImageResource(R.drawable.no_photo);
 
         initImageLoader();
 
@@ -224,20 +229,7 @@ public class MediaShareList implements Page {
         int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
         int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
 
-        ActivityCompat.postponeEnterTransition(containerActivity);
-        mainRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                mainRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
-                // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
-                mainRecyclerView.requestLayout();
-                ActivityCompat.startPostponedEnterTransition(containerActivity);
-
-                return true;
-            }
-        });
-
-/*        if (initialPhotoPosition != currentPhotoPosition) {
+        if (initialPhotoPosition != currentPhotoPosition) {
 
             ActivityCompat.postponeEnterTransition(containerActivity);
             mainRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -251,9 +243,8 @@ public class MediaShareList implements Page {
                     return true;
                 }
             });
-            ActivityCompat.startPostponedEnterTransition(containerActivity);
 
-        }*/
+        }
     }
 
     private int findShareItemPosition(String currentMediaShareTime) {
@@ -261,8 +252,8 @@ public class MediaShareList implements Page {
         int returnPosition = 0;
         for (int i = 0; i < mediaShareList.size(); i++) {
             MediaShare mediaShare = mediaShareList.get(i);
-            String mediashareTime = mediaShare.getTime();
-            if (currentMediaShareTime.equals(mediashareTime)) {
+            String mediaShareTime = mediaShare.getTime();
+            if (currentMediaShareTime.equals(mediaShareTime)) {
                 returnPosition = i;
                 break;
             }

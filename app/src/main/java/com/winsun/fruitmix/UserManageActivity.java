@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -163,12 +164,7 @@ public class UserManageActivity extends Activity implements View.OnClickListener
                 mUserEmail.setVisibility(View.GONE);
             }
 
-            StringBuilder stringBuilder = new StringBuilder();
-            String[] splitStrings = user.getUserName().split(" ");
-            for (String splitString : splitStrings) {
-                stringBuilder.append(splitString.substring(0, 1));
-            }
-            mUserDefaultPortrait.setText(stringBuilder.toString());
+            mUserDefaultPortrait.setText(Util.getUserNameFirstLetter(user.getUserName()));
         }
 
         void setDelUserVisibility(int visibility) {

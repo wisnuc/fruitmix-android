@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.parser;
 
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,13 +50,8 @@ public class RemoteUserParser implements RemoteDataParser<User> {
 
             user.setAdmin(itemRaw.optBoolean("isAdmin"));
 
-            StringBuilder stringBuilder = new StringBuilder();
-            String[] splitStrings = user.getUserName().split(" ");
-            for (String splitString : splitStrings) {
-                stringBuilder.append(splitString.substring(0, 1).toUpperCase());
-            }
             if (user.getDefaultAvatar() == null) {
-                user.setDefaultAvatar(stringBuilder.toString());
+                user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
             }
             if (user.getDefaultAvatarBgColor() == null) {
                 user.setDefaultAvatarBgColor(String.valueOf(new Random().nextInt(3)));

@@ -13,6 +13,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
@@ -37,15 +38,20 @@ public enum OkHttpUtil {
 
     public HttpResponse remoteCallMethod(String httpMethod, String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), data);
+        RequestBody requestBody;
 
         Request request = null;
 
         switch (httpMethod) {
+            case Util.HTTP_GET_METHOD:
+                request = new Request.Builder().url(FNAS.Gateway + ":" + FNAS.PORT + req).addHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT).get().build();
+                break;
             case Util.HTTP_POST_METHOD:
+                requestBody = RequestBody.create(MediaType.parse("application/json"), data);
                 request = new Request.Builder().url(FNAS.Gateway + ":" + FNAS.PORT + req).addHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT).post(requestBody).build();
                 break;
             case Util.HTTP_DELETE_METHOD:
+                requestBody = RequestBody.create(MediaType.parse("application/json"), data);
                 request = new Request.Builder().url(FNAS.Gateway + ":" + FNAS.PORT + req).addHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT).delete(requestBody).build();
                 break;
         }

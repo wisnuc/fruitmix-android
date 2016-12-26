@@ -72,6 +72,8 @@ public class NewPhotoList implements Page {
     LinearLayout mLoadingLayout;
     @BindView(R.id.no_content_layout)
     LinearLayout mNoContentLayout;
+    @BindView(R.id.no_content_imageview)
+    ImageView noContentImageView;
 
     private int mSpanCount = 3;
 
@@ -125,6 +127,8 @@ public class NewPhotoList implements Page {
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(R.layout.new_photo_layout, null);
 
         ButterKnife.bind(this, view);
+
+        noContentImageView.setImageResource(R.drawable.no_photo);
 
         initImageLoader();
 

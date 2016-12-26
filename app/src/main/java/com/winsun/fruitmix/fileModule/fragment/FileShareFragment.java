@@ -49,6 +49,8 @@ public class FileShareFragment extends Fragment {
     LinearLayout noContentLayout;
     @BindView(R.id.file_share_recyclerview)
     RecyclerView fileShareRecyclerView;
+    @BindView(R.id.no_content_imageview)
+    ImageView noContentImageView;
 
     private List<AbstractRemoteFile> abstractRemoteFiles;
     private FileShareRecyclerAdapter fileShareRecyclerAdapter;
@@ -108,6 +110,8 @@ public class FileShareFragment extends Fragment {
 
         fileShareRecyclerView.setAdapter(fileShareRecyclerAdapter);
         fileShareRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        noContentImageView.setImageResource(R.drawable.no_file);
 
         return view;
     }

@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -36,6 +37,7 @@ public class Util {
     public static final String SHOW_PHOTO_RETURN_TIPS = "show_photo_return_tips";
     public static final String EQUIPMENT_GROUP_NAME = "equipment_group_name";
     public static final String EQUIPMENT_CHILD_NAME = "equipment_child_name";
+    public static final String EQUIPMENT_CHILD_BG_COLOR = "equipment_child_bg_color";
     public static final String JWT = "jwt";
     public static final String GATEWAY = "gateway";
     public static final String USER_UUID = "user_uuid";
@@ -82,17 +84,6 @@ public class Util {
 
     public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
 
-    public static final String OPERATION = "operation";
-    public static final String OPERATION_RESULT_NAME = "operation_result";
-    public static final String OPERATION_TYPE_NAME = "operation_type";
-    public static final String OPERATION_TARGET_TYPE_NAME = "operation_target_type_name";
-    public static final String OPERATION_IMAGE_UUID = "operation_image_uuid";
-    public static final String OPERATION_COMMENT = "operation_comment";
-    public static final String OPERATION_MEDIA = "operatin_media";
-    public static final String OPERATION_MEDIASHARE = "operation_mediashare";
-    public static final String OPERATION_ORIGINAL_MEDIASHARE_WHEN_EDIT_PHOTO = "operation_original_mediashare";
-    public static final String OPERATION_MODIFIED_MEDIASHARE_WHEN_EDIT_PHOTO = "operation_modified_mediashare";
-
     public static final String NEED_SHOW_MENU = "need_show_menu";
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
     public static final String KEY_AUTHORIZATION = "Authorization";
@@ -129,6 +120,7 @@ public class Util {
 
     public static final String DEVICE_ID_MAP_NAME = "deviceID";
 
+    static final String HTTP_GET_METHOD = "GET";
     static final String HTTP_POST_METHOD = "POST";
     static final String HTTP_PATCH_METHOD = "PATCH";
     static final String HTTP_DELETE_METHOD = "DELETE";
@@ -141,8 +133,6 @@ public class Util {
 
     public static final String KEY_MEDIASHARE = "key_mediashare";
 
-    public static final String KEY_NEW_SELECTED_IMAGE_UUID_ARRAY = "key_new_selected_image_uuid_array";
-
     public static final String KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST = "key_already_selected_image_uuid_arraylist";
 
     public static final String KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB = "key_transition_photo_need_show_thumb";
@@ -150,8 +140,6 @@ public class Util {
     public static final String KEY_NEED_TRANSITION = "key_need_transition";
 
     public static final String KEY_SHOW_SOFT_INPUT_WHEN_ENTER = "key_show_soft_input_when_enter";
-
-    public static final String KEY_MODIFY_REMOTE_MEDIASHARE_REQUEST_DATA = "key_modify_remote_mediashare_request_data";
 
     public static final String KEY_MANUAL_INPUT_IP = "key_manual_input_ip";
 
@@ -333,5 +321,12 @@ public class Util {
         return "";
     }
 
-
+    public static String getUserNameFirstLetter(String userName) {
+        StringBuilder stringBuilder = new StringBuilder();
+        String[] splitStrings = userName.split(" ");
+        for (String splitString : splitStrings) {
+            stringBuilder.append(splitString.substring(0, 1).toUpperCase());
+        }
+        return stringBuilder.toString();
+    }
 }

@@ -65,6 +65,8 @@ public class AlbumList implements Page {
     LinearLayout mNoContentLayout;
     @BindView(R.id.mainList)
     ListView mainListView;
+    @BindView(R.id.no_content_imageview)
+    ImageView noContentImageView;
 
     private List<MediaShare> mediaShareList;
 
@@ -85,6 +87,8 @@ public class AlbumList implements Page {
         view = LayoutInflater.from(containerActivity).inflate(R.layout.album_list, null);
 
         ButterKnife.bind(this, view);
+
+        noContentImageView.setImageResource(R.drawable.no_photo);
 
         initImageLoader();
 

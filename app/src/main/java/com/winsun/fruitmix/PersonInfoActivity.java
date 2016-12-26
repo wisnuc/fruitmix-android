@@ -50,7 +50,7 @@ public class PersonInfoActivity extends Activity implements EditText.OnFocusChan
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
 
-        EditText editText = (EditText) v;
+/*        EditText editText = (EditText) v;
 
         switch (v.getId()) {
             case R.id.email_edit:
@@ -75,7 +75,7 @@ public class PersonInfoActivity extends Activity implements EditText.OnFocusChan
                 }
                 break;
             default:
-        }
+        }*/
     }
 
     @Override

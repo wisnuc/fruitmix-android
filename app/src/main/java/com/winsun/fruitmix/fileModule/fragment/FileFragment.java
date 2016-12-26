@@ -66,6 +66,8 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
     LinearLayout loadingLayout;
     @BindView(R.id.no_content_layout)
     LinearLayout noContentLayout;
+    @BindView(R.id.no_content_imageview)
+    ImageView noContentImageView;
 
     private FileRecyclerViewAdapter fileRecyclerViewAdapter;
 
@@ -147,6 +149,8 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         fileRecyclerViewAdapter = new FileRecyclerViewAdapter();
         fileRecyclerView.setAdapter(fileRecyclerViewAdapter);
         fileRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        noContentImageView.setImageResource(R.drawable.no_file);
 
         return view;
     }

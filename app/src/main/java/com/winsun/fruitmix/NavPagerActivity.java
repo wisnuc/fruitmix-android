@@ -136,7 +136,7 @@ public class NavPagerActivity extends AppCompatActivity
 
         User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
 
-        if(user == null)
+        if (user == null)
             return;
 
         String userName = user.getUserName();
@@ -299,6 +299,8 @@ public class NavPagerActivity extends AppCompatActivity
                     FNAS.restoreLocalPhotoUploadState(mContext);
 
                     instance.shutdownFixedThreadPoolNow();
+
+                    ButlerService.stopTimingRetrieveMediaShare();
 
                     return null;
                 }

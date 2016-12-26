@@ -73,6 +73,8 @@ public class RetrieveRemoteMediaShareService extends IntentService {
         ConcurrentMap<String, MediaShare> mediaShareConcurrentMap;
         DBUtils dbUtils = DBUtils.getInstance(this);
 
+        //TODO:update new media share by determine share digest
+
         try {
 
             HttpResponse httpResponse = FNAS.loadRemoteShare();

@@ -114,15 +114,15 @@ public enum NewPhotoListDataLoader {
         mMapKeyIsPhotoPositionValueIsPhotoDate.clear();
         mMapKeyIsPhotoPositionValueIsPhoto.clear();
 
-        List<String> localUploadMediaUUID = new ArrayList<>();
-
-        Collection<Media> mediaCollection = LocalCache.LocalMediaMapKeyIsThumb.values();
+        Collection<Media> medias = LocalCache.LocalMediaMapKeyIsThumb.values();
+        Map<String,Media> remoteMediaMap = new HashMap<>(LocalCache.RemoteMediaMapKeyIsUUID);
 
         Log.i(TAG, "reloadData: before add local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-        for (Media media : mediaCollection) {
+        for (Media media : medias) {
 
-            localUploadMediaUUID.add(media.getUuid());
+            String mediaUUID = media.getUuid();
+            remoteMediaMap.remove(mediaUUID);
 
             date = media.getTime().substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
@@ -142,12 +142,9 @@ public enum NewPhotoListDataLoader {
 
         Log.i(TAG, "reloadData: after add local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-        mediaCollection = LocalCache.RemoteMediaMapKeyIsUUID.values();
+        medias = remoteMediaMap.values();
 
-        for (Media media : mediaCollection) {
-
-            if (localUploadMediaUUID.contains(media.getUuid()))
-                continue;
+        for (Media media : medias) {
 
             date = media.getTime().substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {

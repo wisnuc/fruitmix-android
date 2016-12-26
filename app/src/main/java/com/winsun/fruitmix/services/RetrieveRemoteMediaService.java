@@ -94,9 +94,9 @@ public class RetrieveRemoteMediaService extends IntentService {
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: delete all remote media");
 
-            dbUtils.insertRemoteMedias(mediaConcurrentMap);
+            long result = dbUtils.insertRemoteMedias(mediaConcurrentMap);
 
-            Log.i(TAG, "handleActionRetrieveRemoteMedia: insert all remote media");
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: insert all remote media result:" + result);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -50,6 +50,7 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.operationResult.OperationResult;
+import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.OperationResultType;
@@ -417,7 +418,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             if (!mLocalMediaShareLoaded)
                 FNAS.retrieveLocalMediaShare(mContext);
 
-            startTimingRetrieveMediaShare();
+            ButlerService.startTimingRetrieveMediaShare();
 
         } else if (action.equals(Util.LOCAL_MEDIA_SHARE_RETRIEVED)) {
             Log.i(TAG, "local share loaded");
@@ -441,11 +442,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         }
 
-    }
-
-    private void startTimingRetrieveMediaShare() {
-        if (!Util.startTimingRetrieveMediaShare)
-            Util.startTimingRetrieveMediaShare = true;
     }
 
     private void doCreateRemoteMediaCommentInLocalMediaCommentMapFunction() {
@@ -788,6 +784,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
                 doCreateShareFunction(selectMediaKeys);
+                hideChooseHeader();
+                showBottomNavAnim();
                 break;
             case R.id.fab:
                 refreshFabState();

@@ -77,13 +77,8 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         mEquipmentGroupNameTextView.setText(mEquipmentGroupName);
         mEquipmentChildNameTextView.setText(mEquipmentChildName);
 
-        StringBuilder stringBuilder = new StringBuilder();
-        String[] splitStrings = mEquipmentChildName.split(" ");
-        for (String splitString : splitStrings) {
-            stringBuilder.append(splitString.substring(0, 1).toUpperCase());
-        }
-        mUserDefaultPortrait.setText(stringBuilder.toString());
-        int color = (int) (Math.random() * 3);
+        mUserDefaultPortrait.setText(Util.getUserNameFirstLetter(mEquipmentChildName));
+        int color = intent.getIntExtra(Util.EQUIPMENT_CHILD_BG_COLOR, 0);
         switch (color) {
             case 0:
                 mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_blue);

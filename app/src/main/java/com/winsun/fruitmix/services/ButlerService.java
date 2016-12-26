@@ -9,7 +9,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
 import com.winsun.fruitmix.eventbus.DownloadFileEvent;
@@ -62,6 +61,16 @@ public class ButlerService extends Service {
         context.stopService(new Intent(context, ButlerService.class));
     }
 
+    public static void stopTimingRetrieveMediaShare() {
+        if (Util.startTimingRetrieveMediaShare)
+            Util.startTimingRetrieveMediaShare = false;
+    }
+
+    public static void startTimingRetrieveMediaShare() {
+        if (!Util.startTimingRetrieveMediaShare)
+            Util.startTimingRetrieveMediaShare = true;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -91,7 +100,7 @@ public class ButlerService extends Service {
 
         task.removeMessages(RETRIEVE_REMOTE_MEDIA_SHARE);
 
-        Util.startTimingRetrieveMediaShare = false;
+        stopTimingRetrieveMediaShare();
 
         task = null;
 
@@ -105,7 +114,7 @@ public class ButlerService extends Service {
 
         TimingRetrieveMediaShareTask(ButlerService butlerService, Looper looper) {
             super(looper);
-            weakReference = new WeakReference<ButlerService>(butlerService);
+            weakReference = new WeakReference<>(butlerService);
         }
 
         @Override

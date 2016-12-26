@@ -272,12 +272,13 @@ public class FNAS {
 
     }
 
-    private static HttpResponse RemoteCall(String req) throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse RemoteCall(String req) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return GetRemoteCall(Gateway + ":" + FNAS.PORT + req);
+//        return GetRemoteCall(Gateway + ":" + FNAS.PORT + req);
+        return OkHttpUtil.INSTANCE.remoteCallMethod(Util.HTTP_GET_METHOD, req, null);
     }
 
-    public static HttpResponse GetRemoteCall(String url) throws MalformedURLException, IOException, SocketTimeoutException {
+    private static HttpResponse GetRemoteCall(String url) throws MalformedURLException, IOException, SocketTimeoutException {
 
         HttpURLConnection conn;
         String str = "";
@@ -300,7 +301,8 @@ public class FNAS {
 
     // create object and store it to the server
     public static HttpResponse PostRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
-        return RemoteCallMethod(Util.HTTP_POST_METHOD, req, data);
+//        return RemoteCallMethod(Util.HTTP_POST_METHOD, req, data);
+        return OkHttpUtil.INSTANCE.remoteCallMethod(Util.HTTP_POST_METHOD, req, data);
     }
 
     // modify data and save it
