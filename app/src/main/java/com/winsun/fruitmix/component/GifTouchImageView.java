@@ -741,7 +741,7 @@ public class GifTouchImageView extends GifImageView {
 
     @Override
     public boolean canScrollHorizontally(int direction) {
-/*        matrix.getValues(m);
+        matrix.getValues(m);
         float x = m[Matrix.MTRANS_X];
 
         Log.i(TAG, "canScrollHorizontally: viewWidth " + viewWidth);
@@ -759,9 +759,9 @@ public class GifTouchImageView extends GifImageView {
             return false;
         }
 
-        return true;*/
+        return true;
 
-        return isZoomed();
+//        return isZoomed();
 
     }
 

@@ -32,9 +32,7 @@ import android.widget.Toast;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
 import com.winsun.fruitmix.component.NavPageBar;
-import com.winsun.fruitmix.eventbus.MediaOperationEvent;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
-import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
@@ -45,15 +43,14 @@ import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Comment;
-import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
-import com.winsun.fruitmix.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
+import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -125,7 +122,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private boolean mRemoteMediaLoaded = false;
 
     private boolean mRemoteMediaShareLoaded = false;
-    private boolean mLocalMediaShareLoaded = false;
 
     private boolean onResume = false;
 
@@ -204,20 +200,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void onResume() {
         super.onResume();
 
-        if (isHidden()) return;
-
-        if (!onResume) {
-
-            FNAS.retrieveRemoteMediaMap(mContext);
-//            FNAS.retrieveLocalMediaCommentMap(mContext);
-
-            onResume = true;
-        } else {
-
-            albumList.refreshView();
-            shareList.refreshView();
-
-        }
     }
 
     @Override
@@ -269,6 +251,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             viewPager.setCurrentItem(PAGE_ALBUM);
             onDidAppear(PAGE_ALBUM);
             pageList.get(PAGE_ALBUM).onDidAppear();
+            pageList.get(PAGE_SHARE).onDidAppear();
         } else if (requestCode == Util.KEY_CREATE_SHARE_REQUEST_CODE && resultCode == RESULT_OK) {
 
             viewPager.setCurrentItem(PAGE_SHARE);
@@ -341,8 +324,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void handleStickyOperationEvent(MediaOperationEvent operationEvent) {
-        MediaOperationEvent stickyEvent = EventBus.getDefault().getStickyEvent(MediaOperationEvent.class);
+    public void handleStickyOperationEvent(OperationEvent operationEvent) {
+        OperationEvent stickyEvent = EventBus.getDefault().getStickyEvent(OperationEvent.class);
 
         Log.i(TAG, "handleStickyOperationEvent: action:" + stickyEvent.getAction());
 
@@ -360,10 +343,17 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 Util.needRefreshPhotoSliderList = true;
                 photoList.refreshView();
 
-                if (!mRemoteMediaShareLoaded) {
-                    FNAS.retrieveRemoteMediaShare(mContext, true);
-                }
+            } else if (action.equals(Util.REMOTE_MEDIA_SHARE_RETRIEVED)) {
+                Log.i(TAG, "remote share loaded");
 
+                EventBus.getDefault().removeStickyEvent(stickyEvent);
+
+                mRemoteMediaShareLoaded = true;
+
+                pageList.get(PAGE_ALBUM).refreshView();
+                pageList.get(PAGE_SHARE).refreshView();
+
+                ButlerService.startTimingRetrieveMediaShare();
             }
         }
     }
@@ -375,92 +365,57 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         Log.i(TAG, "handleOperationEvent: action:" + action);
 
-        if (action.equals(Util.LOCAL_SHARE_CREATED)) {
+        switch (action) {
+            case Util.REMOTE_SHARE_CREATED:
+                handleRemoteShareCreated(operationEvent);
+                break;
+            case Util.REMOTE_SHARE_MODIFIED:
+            case Util.REMOTE_SHARE_DELETED:
+                handleRemoteShareModifiedDeleted(operationEvent);
+                break;
+            case Util.REMOTE_COMMENT_CREATED:
+                handleRemoteCommentCreated(operationEvent);
+                break;
+            case Util.LOCAL_COMMENT_DELETED:
+                handleLocalCommentDeleted(operationEvent);
+                break;
+            case Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED:
 
-            handleLocalShareCreated(operationEvent);
+                Log.i(TAG, "handleOperationEvent: finish calc new local media digest and refresh view");
 
-        } else if (action.equals(Util.REMOTE_SHARE_CREATED)) {
+                OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
 
-            handleRemoteShareCreated(operationEvent);
+                if (result == OperationResultType.SUCCEED) {
+                    NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+                    Util.needRefreshPhotoSliderList = true;
+                    photoList.refreshView();
+                }
 
-        } else if (action.equals(Util.LOCAL_SHARE_DELETED) || action.equals(Util.REMOTE_SHARE_MODIFIED) || action.equals(Util.REMOTE_SHARE_DELETED) || action.equals(Util.LOCAL_SHARE_MODIFIED)) {
+                break;
+            case Util.LOCAL_MEDIA_COMMENT_RETRIEVED:
+                Log.i(TAG, "local media comment loaded");
+                ((MediaShareList) pageList.get(PAGE_SHARE)).refreshLocalComment();
 
-            handleLocalShareModifiedDeletedOrRemoteShareModifiedDeleted(operationEvent);
+                doCreateRemoteMediaCommentInLocalMediaCommentMapFunction();
+                break;
+            case Util.REMOTE_MEDIA_COMMENT_RETRIEVED:
 
-        } else if (action.equals(Util.REMOTE_COMMENT_CREATED)) {
+                Log.i(TAG, "remote media comment loaded ");
 
-            handleRemoteCommentCreated(operationEvent);
+                ((MediaShareList) pageList.get(PAGE_SHARE)).refreshRemoteComment();
 
-        } else if (action.equals(Util.LOCAL_COMMENT_DELETED)) {
-
-            handleLocalCommentDeleted(operationEvent);
-
-        } else if (action.equals(Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED)) {
-
-            Log.i(TAG, "handleOperationEvent: finish calc new local media digest and refresh view");
-
-            OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
-
-            if (result == OperationResultType.SUCCEED) {
-                NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
-                Util.needRefreshPhotoSliderList = true;
-                photoList.refreshView();
-            }
-
-        } else if (action.equals(Util.REMOTE_MEDIA_SHARE_RETRIEVED)) {
-            Log.i(TAG, "remote share loaded");
-
-            mRemoteMediaShareLoaded = true;
-
-            pageList.get(PAGE_ALBUM).refreshView();
-            pageList.get(PAGE_SHARE).refreshView();
-
-            if (!mLocalMediaShareLoaded)
-                FNAS.retrieveLocalMediaShare(mContext);
-
-            ButlerService.startTimingRetrieveMediaShare();
-
-        } else if (action.equals(Util.LOCAL_MEDIA_SHARE_RETRIEVED)) {
-            Log.i(TAG, "local share loaded");
-
-            mLocalMediaShareLoaded = true;
-
-            pageList.get(PAGE_ALBUM).refreshView();
-            pageList.get(PAGE_SHARE).refreshView();
-
-            doCreateMediaShareInLocalMediaShareMapFunction();
-        } else if (action.equals(Util.LOCAL_MEDIA_COMMENT_RETRIEVED)) {
-            Log.i(TAG, "local media comment loaded");
-            ((MediaShareList) pageList.get(PAGE_SHARE)).refreshLocalComment();
-
-            doCreateRemoteMediaCommentInLocalMediaCommentMapFunction();
-        } else if (action.equals(Util.REMOTE_MEDIA_COMMENT_RETRIEVED)) {
-
-            Log.i(TAG, "remote media comment loaded ");
-
-            ((MediaShareList) pageList.get(PAGE_SHARE)).refreshRemoteComment();
-
+                break;
         }
 
     }
 
     private void doCreateRemoteMediaCommentInLocalMediaCommentMapFunction() {
 
-
         for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
 
             for (Comment comment : entry.getValue()) {
                 FNAS.createRemoteMediaComment(mContext, entry.getKey(), comment);
             }
-
-        }
-    }
-
-    private void doCreateMediaShareInLocalMediaShareMapFunction() {
-
-        for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
-
-            FNAS.createRemoteMediaShare(mContext, mediaShare);
 
         }
     }
@@ -502,7 +457,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         }
     }
 
-    private void handleLocalShareModifiedDeletedOrRemoteShareModifiedDeleted(OperationEvent operationEvent) {
+    private void handleRemoteShareModifiedDeleted(OperationEvent operationEvent) {
         dismissDialog();
 
         OperationResult operationResult = operationEvent.getOperationResult();
@@ -525,54 +480,10 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         OperationResult operationResult = operationEvent.getOperationResult();
 
-        OperationResultType operationResultType = operationResult.getOperationResultType();
+        dismissDialog();
 
-        switch (operationResultType) {
-            case SUCCEED:
+        Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
 
-                MediaShare mediaShare = ((MediaShareOperationEvent) operationEvent).getMediaShare();
-                FNAS.deleteLocalMediaShare(mContext, mediaShare);
-
-                break;
-            default:
-
-                dismissDialog();
-
-                Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-
-                break;
-        }
-    }
-
-    private void handleLocalShareCreated(OperationEvent operationEvent) {
-
-        OperationResult operationResult = operationEvent.getOperationResult();
-
-        OperationResultType operationResultType = operationResult.getOperationResultType();
-
-        switch (operationResultType) {
-            case SUCCEED:
-
-                if (Util.getNetworkState(mContext)) {
-                    MediaShare mediaShare = ((MediaShareOperationEvent) operationEvent).getMediaShare();
-
-                    FNAS.createRemoteMediaShare(mContext, mediaShare);
-                }
-
-                onActivityResult(Util.KEY_CREATE_SHARE_REQUEST_CODE, RESULT_OK, null);
-                break;
-            case SQL_EXCEPTION:
-
-                dismissDialog();
-
-                Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-
-                break;
-        }
-    }
-
-    private void retrieveLocalMediaInCamera() {
-        FNAS.retrieveLocalMediaInCamera(mContext);
     }
 
     public void retrieveRemoteMediaComment(String mediaUUID) {
@@ -808,7 +719,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private void doCreateShareFunction(List<String> selectMediaKeys) {
 
-        FNAS.createLocalMediaShare(mContext, createMediaShare(selectMediaKeys));
+        FNAS.createRemoteMediaShare(mContext, createMediaShare(selectMediaKeys));
     }
 
     private MediaShare createMediaShare(List<String> selectMediaKeys) {

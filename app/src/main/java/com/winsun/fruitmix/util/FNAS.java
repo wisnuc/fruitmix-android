@@ -19,6 +19,9 @@ import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.LoginType;
+import com.winsun.fruitmix.model.OperationTargetType;
+import com.winsun.fruitmix.model.OperationType;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -36,8 +39,6 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Collection;
 
-import okhttp3.OkHttpClient;
-
 /**
  * Created by Administrator on 2016/4/22.
  */
@@ -51,7 +52,7 @@ public class FNAS {
 
     public static String PORT = "3721";
 
-    public static String ReadFull(InputStream ins) throws IOException {
+    static String ReadFull(InputStream ins) throws IOException {
         String result = "";
         int length;
         byte[] buffer = new byte[1024];
@@ -153,7 +154,7 @@ public class FNAS {
 
     public static void retrieveRemoteToken(Context context, String gateway, String userUUID, String pwd) {
 
-        EventBus.getDefault().post(new TokenRequestEvent(OperationType.GET, OperationTargetType.REMOTE_TOKEN, gateway, userUUID, pwd));
+        EventBus.getDefault().post(new TokenRequestEvent(OperationType.GET, OperationTargetType.REMOTE_TOKEN, gateway, userUUID,pwd));
     }
 
     public static void retrieveUserMap(Context context) {
@@ -180,11 +181,6 @@ public class FNAS {
     public static void retrieveRemoteMediaShare(Context context, boolean loadMediaShareInDBWhenExceptionOccur) {
 
         EventBus.getDefault().post(new RetrieveMediaShareRequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIA_SHARE, loadMediaShareInDBWhenExceptionOccur));
-    }
-
-    public static void retrieveLocalMediaInCamera(Context context) {
-
-        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIA_IN_CAMERA));
     }
 
     public static void retrieveLocalMediaCommentMap(Context context) {
@@ -278,7 +274,7 @@ public class FNAS {
         return OkHttpUtil.INSTANCE.remoteCallMethod(Util.HTTP_GET_METHOD, req, null);
     }
 
-    private static HttpResponse GetRemoteCall(String url) throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse GetRemoteCall(String url) throws MalformedURLException, IOException, SocketTimeoutException {
 
         HttpURLConnection conn;
         String str = "";

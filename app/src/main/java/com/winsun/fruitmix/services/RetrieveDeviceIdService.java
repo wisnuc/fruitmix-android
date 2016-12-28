@@ -7,15 +7,14 @@ import android.util.Log;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
-import com.winsun.fruitmix.operationResult.OperationIOException;
-import com.winsun.fruitmix.operationResult.OperationJSONException;
-import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
-import com.winsun.fruitmix.operationResult.OperationNetworkException;
-import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.model.operationResult.OperationJSONException;
+import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -121,7 +120,7 @@ public class RetrieveDeviceIdService extends IntentService {
 
         }
 
-        EventBus.getDefault().postSticky(operationEvent);
+        EventBus.getDefault().post(operationEvent);
 
     }
 

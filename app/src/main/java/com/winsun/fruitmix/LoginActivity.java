@@ -3,9 +3,7 @@ package com.winsun.fruitmix;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,11 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.operationResult.OperationResult;
-import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -49,7 +43,6 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
     private Context mContext;
 
-    private String mEquipmentGroupName;
     private String mEquipmentChildName;
     private String mUserUUid;
     private String mPwd;
@@ -69,24 +62,24 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         mLoginBtn.setOnClickListener(this);
 
         Intent intent = getIntent();
-        mEquipmentGroupName = intent.getStringExtra(Util.EQUIPMENT_GROUP_NAME);
-        mEquipmentChildName = intent.getStringExtra(Util.EQUIPMENT_CHILD_NAME);
+        String equipmentGroupName = intent.getStringExtra(Util.USER_GROUP_NAME);
+        mEquipmentChildName = intent.getStringExtra(Util.USER_NAME);
         mUserUUid = intent.getStringExtra(Util.USER_UUID);
         mGateway = intent.getStringExtra(Util.GATEWAY);
 
-        mEquipmentGroupNameTextView.setText(mEquipmentGroupName);
+        mEquipmentGroupNameTextView.setText(equipmentGroupName);
         mEquipmentChildNameTextView.setText(mEquipmentChildName);
 
         mUserDefaultPortrait.setText(Util.getUserNameFirstLetter(mEquipmentChildName));
-        int color = intent.getIntExtra(Util.EQUIPMENT_CHILD_BG_COLOR, 0);
+        int color = intent.getIntExtra(Util.USER_BG_COLOR, 0);
         switch (color) {
-            case 0:
+            case 1:
                 mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_blue);
                 break;
-            case 1:
+            case 2:
                 mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_green);
                 break;
-            case 2:
+            case 3:
                 mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
                 break;
         }
@@ -114,32 +107,17 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         mContext = null;
     }
 
-    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
-        OperationEvent stickyEvent = EventBus.getDefault().removeStickyEvent(OperationEvent.class);
+        String action = operationEvent.getAction();
 
-        if (stickyEvent != null) {
-            String action = stickyEvent.getAction();
+        switch (action) {
+            case Util.REFRESH_VIEW_AFTER_USER_RETRIEVED: {
 
-            switch (action) {
-                case Util.REMOTE_TOKEN_RETRIEVED: {
+                handleRetrieveUser();
 
-                    handleRetrieveToken(operationEvent);
-
-                    break;
-                }
-                case Util.REMOTE_DEVICEID_RETRIEVED: {
-
-                    handleRetrieveDeviceID(operationEvent);
-
-                    break;
-                }
-                case Util.REMOTE_USER_RETRIEVED:
-
-                    handleRetrieveUser();
-
-                    break;
+                break;
             }
         }
 
@@ -147,63 +125,9 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
     private void handleRetrieveUser() {
         Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
-        jumpIntent.putExtra(Util.EQUIPMENT_CHILD_NAME, mEquipmentChildName);
         startActivity(jumpIntent);
         LoginActivity.this.setResult(RESULT_OK);
         finish();
-    }
-
-    private void handleRetrieveDeviceID(OperationEvent operationEvent) {
-
-        OperationResult operationResult = operationEvent.getOperationResult();
-
-        OperationResultType resultType = operationResult.getOperationResultType();
-
-        switch (resultType) {
-            case SUCCEED:
-
-                Util.loginState = true;
-
-                FNAS.retrieveUserMap(mContext);
-
-                LocalCache.saveGateway(FNAS.Gateway, mContext);
-
-                setGroupNameUserName(mEquipmentGroupName, mEquipmentChildName);
-                setUuidPassword(FNAS.userUUID, mPwd);
-
-
-                break;
-            default:
-                Util.loginState = false;
-                Snackbar.make(mLoginBtn, operationResult.getResultMessage(this), Snackbar.LENGTH_SHORT).show();
-
-                break;
-        }
-    }
-
-    private void handleRetrieveToken(OperationEvent operationEvent) {
-        OperationResult result = operationEvent.getOperationResult();
-
-        OperationResultType resultType = result.getOperationResultType();
-
-        switch (resultType) {
-            case SUCCEED:
-
-                LocalCache.CleanAll(LoginActivity.this);
-
-                LocalCache.Init();
-
-                FNAS.Gateway = mGateway;
-                FNAS.userUUID = mUserUUid;
-
-                FNAS.retrieveRemoteDeviceID(mContext);
-
-                break;
-            default:
-                Util.loginState = false;
-                Snackbar.make(mLoginBtn, result.getResultMessage(this), Snackbar.LENGTH_SHORT).show();
-                break;
-        }
     }
 
 
@@ -241,25 +165,5 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
     }
 
-
-    private void setGroupNameUserName(String groupName, String userName) {
-        SharedPreferences sp;
-        SharedPreferences.Editor editor;
-        sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        editor = sp.edit();
-        editor.putString(Util.EQUIPMENT_GROUP_NAME, groupName);
-        editor.putString(Util.EQUIPMENT_CHILD_NAME, userName);
-        editor.apply();
-    }
-
-    private void setUuidPassword(String uuid, String password) {
-        SharedPreferences sp;
-        SharedPreferences.Editor editor;
-        sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        editor = sp.edit();
-        editor.putString(Util.USER_UUID, uuid);
-        editor.putString(Util.PASSWORD, password);
-        editor.apply();
-    }
 
 }

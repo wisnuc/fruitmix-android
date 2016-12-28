@@ -8,9 +8,8 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.operationResult.OperationNoChanged;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
-import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.model.operationResult.OperationNoChanged;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 

@@ -2,14 +2,7 @@ package com.winsun.fruitmix.executor;
 
 import android.content.Context;
 
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.operationResult.OperationIOException;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
-import com.winsun.fruitmix.util.OperationResultType;
-import com.winsun.fruitmix.util.Util;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.util.concurrent.Callable;
 

@@ -64,7 +64,8 @@ public class MoreMediaActivity extends AppCompatActivity {
 
         mContext = this;
 
-        MediaShare mediaShare = getIntent().getParcelableExtra(Util.KEY_MEDIASHARE);
+        String mediaShareUUID = getIntent().getStringExtra(Util.KEY_MEDIA_SHARE_UUID);
+        MediaShare mediaShare = LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID);
 
         GridLayoutManager mManager = new GridLayoutManager(mContext, mSpanCount);
         mMorePhotoRecyclerView.setLayoutManager(mManager);

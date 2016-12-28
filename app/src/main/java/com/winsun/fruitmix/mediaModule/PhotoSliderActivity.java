@@ -339,66 +339,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         }
 
-
-//        for (int i = 0; i < mediaList.size(); i++) {
-//            final Media media = mediaList.get(i);
-//
-//            final String imageUrl = getImageUrl(isImageThumb(url), media);
-//
-//            if (url.equals(imageUrl)) {
-//
-//                if (media.isLocal()) {
-//
-//                    if (isCurrentViewPage(i) && needTransition) {
-//                        ActivityCompat.startPostponedEnterTransition(this);
-//                    }
-//
-//                    if (!media.isLoaded()) {
-//                        media.setLoaded(true);
-//                    }
-//
-//                    if (isCurrentViewPage(i) && mDialog != null && mDialog.isShowing())
-//                        mDialog.dismiss();
-//
-//                } else {
-//
-//                    if (isImageThumb(url)) {
-//
-//                        if (isCurrentViewPage(i) && needTransition) {
-//                            ActivityCompat.startPostponedEnterTransition(this);
-//
-//                            startLoadCurrentImageAfterTransition(media);
-//                        } else {
-//                            String imageUUID = media.getUuid();
-//
-//                            startLoadingOriginalPhoto(imageUUID);
-//                        }
-//
-//                    } else {
-//
-//                        if (!transitionMediaNeedShowThumb && needTransition) {
-//                            ActivityCompat.startPostponedEnterTransition(this);
-//                            transitionMediaNeedShowThumb = true;
-//                        } else {
-//                            dismissCurrentImageThumb(media);
-//
-//                            view.setVisibility(View.VISIBLE);
-//                        }
-//
-//                        if (!media.isLoaded()) {
-//                            media.setLoaded(true);
-//                        }
-//
-//                        if (isCurrentViewPage(i) && mDialog != null && mDialog.isShowing())
-//                            mDialog.dismiss();
-//                    }
-//
-//                }
-//
-//            }
-//
-//        }
-
     }
 
     private void handleRemoteMediaLoaded(String url, View view, Media media) {

@@ -7,24 +7,18 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
-
-import org.greenrobot.eventbus.EventBus;
+import com.winsun.fruitmix.model.LoginType;
 
 import java.io.FileInputStream;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -35,9 +29,10 @@ public class Util {
 
     public static final String SHOW_ALBUM_TIPS = "show_album_tips";
     public static final String SHOW_PHOTO_RETURN_TIPS = "show_photo_return_tips";
-    public static final String EQUIPMENT_GROUP_NAME = "equipment_group_name";
-    public static final String EQUIPMENT_CHILD_NAME = "equipment_child_name";
-    public static final String EQUIPMENT_CHILD_BG_COLOR = "equipment_child_bg_color";
+    public static final String USER_GROUP_NAME = "user_group_name";
+    public static final String USER_NAME = "user_child_name";
+    public static final String USER_BG_COLOR = "user_bg_color";
+    public static final String USER_IS_ADMIN = "user_is_admin";
     public static final String JWT = "jwt";
     public static final String GATEWAY = "gateway";
     public static final String USER_UUID = "user_uuid";
@@ -79,6 +74,8 @@ public class Util {
     public static final String REMOTE_DEVICEID_RETRIEVED = "remote_deviceid_retrieved";
     public static final String REMOTE_FILE_RETRIEVED = "remote_file_retrieved";
     public static final String REMOTE_FILE_SHARE_RETRIEVED = "remote_file_share_retrieved";
+
+    public static final String REFRESH_VIEW_AFTER_USER_RETRIEVED = "refresh_view_after_user_retrieved";
 
     public static final String DOWNLOADED_FILE_RETRIEVED = "downloaded_file_retrieved";
 
@@ -131,7 +128,7 @@ public class Util {
     public static final String CURRENT_MEDIA_KEY = "current_media_key";
     public static final String CURRENT_MEDIASHARE_TIME = "current_mediashare_time";
 
-    public static final String KEY_MEDIASHARE = "key_mediashare";
+    public static final String KEY_MEDIA_SHARE_UUID = "key_media_share_uuid";
 
     public static final String KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST = "key_already_selected_image_uuid_arraylist";
 
@@ -151,6 +148,7 @@ public class Util {
 
     public static boolean needRefreshPhotoSliderList = false;
 
+    public static LoginType loginType = LoginType.LOGIN;
 
     /**
      * 将dp转化为px

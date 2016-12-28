@@ -42,7 +42,7 @@ import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
+import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;

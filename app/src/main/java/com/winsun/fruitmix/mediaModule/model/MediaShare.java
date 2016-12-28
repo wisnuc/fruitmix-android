@@ -3,7 +3,9 @@ package com.winsun.fruitmix.mediaModule.model;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.widget.Toast;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -455,7 +457,7 @@ public class MediaShare implements Parcelable {
         if (Util.getNetworkState(context)) {
             FNAS.modifyRemoteMediaShare(context, this, requestData);
         } else {
-            FNAS.modifyLocalMediaShare(context, this, requestData);
+            Toast.makeText(context, context.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -463,7 +465,7 @@ public class MediaShare implements Parcelable {
         if (Util.getNetworkState(context)) {
             FNAS.deleteRemoteMediaShare(context, this);
         } else {
-            FNAS.deleteLocalMediaShare(context, this);
+            Toast.makeText(context, context.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
         }
     }
 

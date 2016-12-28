@@ -12,7 +12,7 @@ public class User {
     private String avatar;
     private String email;
     private String defaultAvatar;
-    private String defaultAvatarBgColor;
+    private int defaultAvatarBgColor;
     private String home;
     private String library;
     private boolean admin;
@@ -57,23 +57,22 @@ public class User {
         this.defaultAvatar = defaultAvatar;
     }
 
-    public void setDefaultAvatarBgColor(String defaultAvatarBgColor) {
+    public void setDefaultAvatarBgColor(int defaultAvatarBgColor) {
         this.defaultAvatarBgColor = defaultAvatarBgColor;
     }
 
-    public String getDefaultAvatarBgColor() {
+    public int getDefaultAvatarBgColor() {
         return defaultAvatarBgColor;
     }
 
     public int getDefaultAvatarBgColorResourceId() {
 
-        int color = Integer.parseInt(defaultAvatarBgColor);
-        switch (color) {
-            case 0:
-                return R.drawable.user_portrait_bg_blue;
+        switch (defaultAvatarBgColor) {
             case 1:
-                return R.drawable.user_portrait_bg_green;
+                return R.drawable.user_portrait_bg_blue;
             case 2:
+                return R.drawable.user_portrait_bg_green;
+            case 3:
                 return R.drawable.user_portrait_bg_yellow;
             default:
                 return R.drawable.user_portrait_bg_blue;

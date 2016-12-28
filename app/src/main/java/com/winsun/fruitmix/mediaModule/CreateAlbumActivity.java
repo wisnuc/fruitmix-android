@@ -18,10 +18,10 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
-import com.winsun.fruitmix.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
+import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -32,7 +32,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -81,7 +80,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         mLayoutTitle.setText(getString(R.string.create_album));
 
-        String mTitle = String.format(getString(R.string.album_item_title), new SimpleDateFormat("yyyy-MM-dd", Locale.SIMPLIFIED_CHINESE).format(new Date(System.currentTimeMillis())));
+        String mTitle = String.format(getString(R.string.album_item_title), new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis())));
         tfTitle.setHint(mTitle);
 
         ckPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -105,6 +104,11 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                 Util.hideSoftInput(CreateAlbumActivity.this);
 
+                if (!Util.getNetworkState(mContext)) {
+                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 boolean sPublic, sSetMaintainer;
                 String title, desc;
 
@@ -123,7 +127,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                 mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-                FNAS.createLocalMediaShare(mContext, generateMediaShare(sPublic, sSetMaintainer, title, desc, mSelectedImageKeys));
+                FNAS.createRemoteMediaShare(mContext, generateMediaShare(sPublic, sSetMaintainer, title, desc, mSelectedImageKeys));
 
                 LocalCache.mediaKeysInCreateAlbum.clear();
             }
@@ -165,35 +169,33 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         String action = operationEvent.getAction();
 
-        if (action.equals(Util.LOCAL_SHARE_CREATED)) {
+        OperationResult operationResult = operationEvent.getOperationResult();
 
-            if (mDialog != null && mDialog.isShowing())
-                mDialog.dismiss();
+        OperationResultType operationResultType = operationResult.getOperationResultType();
 
+        switch (action) {
+            case Util.REMOTE_SHARE_CREATED:
 
-            OperationResult operationResult = operationEvent.getOperationResult();
+                dismissDialog();
 
-            OperationResultType operationResultType = operationResult.getOperationResultType();
+                Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
 
-            switch (operationResultType) {
-                case SUCCEED:
-                    if (Util.getNetworkState(mContext)) {
-                        MediaShare mediaShare = operationEvent.getMediaShare();
-
-                        FNAS.createRemoteMediaShare(mContext, mediaShare);
-                    }
-
+                boolean mCreateAlbumSucceed = operationResultType.equals(OperationResultType.SUCCEED);
+                if (mCreateAlbumSucceed)
                     CreateAlbumActivity.this.setResult(RESULT_OK);
-                    break;
-                default:
-                    Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+                else
                     CreateAlbumActivity.this.setResult(RESULT_CANCELED);
-                    break;
-            }
 
-            finish();
+                finish();
+
+                break;
         }
 
+    }
+
+    private void dismissDialog() {
+        if (mDialog != null && mDialog.isShowing())
+            mDialog.dismiss();
     }
 
     private MediaShare generateMediaShare(boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaKeys) {

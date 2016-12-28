@@ -10,11 +10,12 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.operationResult.OperationResult;
+import com.winsun.fruitmix.model.LoginType;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
+import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -61,24 +62,23 @@ public class SplashScreenActivity extends Activity {
             Log.i(TAG, "onCreate: Create download file store folder failed");
         }
 
-        CustomHandler mHandler = new CustomHandler(this);
-        mHandler.sendEmptyMessage(WELCOME);
-
         FNAS.retrieveLocalMediaMap(getApplicationContext());
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+        mGateway = LocalCache.getGateway(mContext);
+        mUuid = LocalCache.getUuidValue(mContext);
+        mPassword = LocalCache.getPasswordValue(mContext);
+        mToken = LocalCache.getToken(mContext);
 
-        EventBus.getDefault().register(this);
-    }
+        if (mUuid != null && mPassword != null && mGateway != null && mToken != null) {
 
-    @Override
-    protected void onStop() {
-        EventBus.getDefault().unregister(this);
+            Util.loginType = LoginType.SPLASH_SCREEN;
 
-        super.onStop();
+            FNAS.retrieveRemoteToken(mContext, mGateway, mUuid, mPassword);
+        }
+
+        CustomHandler mHandler = new CustomHandler(this);
+        mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
+
     }
 
     @Override
@@ -88,100 +88,18 @@ public class SplashScreenActivity extends Activity {
         mContext = null;
     }
 
-    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(OperationEvent operationEvent) {
-
-        OperationEvent stickyEvent = EventBus.getDefault().removeStickyEvent(OperationEvent.class);
-
-        if (stickyEvent != null) {
-            String action = stickyEvent.getAction();
-
-            if (action.equals(Util.REMOTE_TOKEN_RETRIEVED)) {
-
-                handleRemoteTokenRetrieved(stickyEvent);
-
-            } else if (action.equals(Util.REMOTE_DEVICEID_RETRIEVED)) {
-
-                handleRemoteDeviceIDRetrieved(stickyEvent);
-
-            } else if (action.equals(Util.REMOTE_USER_RETRIEVED)) {
-
-                startNavPagerActivity();
-
-            }
-        }
-
-    }
-
     private void startNavPagerActivity() {
         Intent jumpIntent = new Intent(SplashScreenActivity.this, NavPagerActivity.class);
-        jumpIntent.putExtra(Util.EQUIPMENT_CHILD_NAME, LocalCache.getUserNameValue(mContext));
         startActivity(jumpIntent);
         finish();
     }
 
-    private void handleRemoteDeviceIDRetrieved(OperationEvent operationEvent) {
-
-        OperationResult result = operationEvent.getOperationResult();
-
-        OperationResultType resultType = result.getOperationResultType();
-        switch (resultType) {
-            case SUCCEED:
-                Log.i(TAG, "login success");
-                Util.loginState = true;
-                break;
-            default:
-                Util.loginState = false;
-                LocalCache.DeviceID = LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME);
-                Toast.makeText(SplashScreenActivity.this, result.getResultMessage(this), Toast.LENGTH_SHORT).show();
-                break;
-        }
-
-        FNAS.retrieveUserMap(mContext);
-    }
-
-    private void handleRemoteTokenRetrieved(OperationEvent operationEvent) {
-
-        OperationResult result = operationEvent.getOperationResult();
-
-        OperationResultType resultType = result.getOperationResultType();
-        FNAS.userUUID = mUuid;
-        FNAS.Gateway = mGateway;
-
-        Log.i(TAG, "onReceive: remote token retrieve:" + resultType.name());
-
-        switch (resultType) {
-            case SUCCEED:
-
-                FNAS.retrieveRemoteDeviceID(mContext);
-
-                break;
-            default:
-
-                Util.loginState = false;
-
-                FNAS.JWT = mToken;
-
-                LocalCache.DeviceID = LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME);
-
-                Toast.makeText(SplashScreenActivity.this, result.getResultMessage(this), Toast.LENGTH_SHORT).show();
-
-                FNAS.retrieveUserMap(mContext);
-
-                break;
-        }
-    }
-
 
     private void welcome() {
-        mGateway = LocalCache.getGateway(mContext);
-        mUuid = LocalCache.getUuidValue(mContext);
-        mPassword = LocalCache.getPasswordValue(mContext);
-        mToken = LocalCache.getToken(mContext);
 
         if (mUuid != null && mPassword != null && mGateway != null && mToken != null) {
 
-            login();
+            startNavPagerActivity();
 
         } else {
             Intent intent = new Intent();
@@ -189,16 +107,6 @@ public class SplashScreenActivity extends Activity {
             startActivity(intent);
             finish();
         }
-    }
-
-
-    /**
-     * use uuid and password to login
-     */
-    private void login() {
-
-        FNAS.retrieveRemoteToken(mContext, mGateway, mUuid, mPassword);
-
     }
 
     private static class CustomHandler extends Handler {

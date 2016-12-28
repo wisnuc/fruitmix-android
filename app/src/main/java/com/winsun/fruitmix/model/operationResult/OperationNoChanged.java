@@ -1,8 +1,8 @@
-package com.winsun.fruitmix.operationResult;
+package com.winsun.fruitmix.model.operationResult;
 
 import android.content.Context;
 
-import com.winsun.fruitmix.util.OperationResultType;
+import com.winsun.fruitmix.model.OperationResultType;
 
 /**
  * Created by Administrator on 2016/12/22.

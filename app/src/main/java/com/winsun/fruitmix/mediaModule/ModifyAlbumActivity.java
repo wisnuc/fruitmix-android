@@ -16,9 +16,8 @@ import android.widget.TextView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
+import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -114,11 +113,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
                 mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-                if (Util.getNetworkState(mContext)) {
-                    FNAS.modifyRemoteMediaShare(mContext, mAlbumMap, requestData);
-                } else {
-                    FNAS.modifyLocalMediaShare(mContext, mAlbumMap, requestData);
-                }
+                mAlbumMap.sendModifyMediaShareRequest(mContext,requestData);
             }
         });
 

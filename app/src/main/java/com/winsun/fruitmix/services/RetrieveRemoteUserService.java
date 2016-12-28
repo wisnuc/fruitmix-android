@@ -9,12 +9,11 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.User;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteUserParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -81,6 +80,9 @@ public class RetrieveRemoteUserService extends IntentService {
             RemoteDataParser<User> parser = new RemoteUserParser();
             users = parser.parse(httpResponse.getResponseData());
 
+            User user = users.get(0);
+            LocalCache.saveUser(this, user.getUserName(), user.getDefaultAvatarBgColor(), user.isAdmin());
+
             List<User> otherUsers = parser.parse(FNAS.loadOtherUsers().getResponseData());
 
             addDifferentUsers(users, otherUsers);
@@ -107,7 +109,7 @@ public class RetrieveRemoteUserService extends IntentService {
         LocalCache.RemoteUserMapKeyIsUUID.putAll(userConcurrentMap);
 
         OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationSuccess());
-        EventBus.getDefault().postSticky(operationEvent);
+        EventBus.getDefault().post(operationEvent);
     }
 
     private void addDifferentUsers(List<User> users, List<User> otherUsers) {

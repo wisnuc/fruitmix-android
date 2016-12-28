@@ -7,15 +7,14 @@ import android.util.Log;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
-import com.winsun.fruitmix.operationResult.OperationIOException;
-import com.winsun.fruitmix.operationResult.OperationJSONException;
-import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
-import com.winsun.fruitmix.operationResult.OperationNetworkException;
-import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.model.operationResult.OperationJSONException;
+import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -24,7 +23,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
 
 /**
@@ -101,7 +99,13 @@ public class RetrieveTokenService extends IntentService {
 
                 FNAS.JWT = new JSONObject(httpResponse.getResponseData()).getString("token");
 
-                LocalCache.saveToken(this,FNAS.JWT);
+                LocalCache.saveToken(this, FNAS.JWT);
+
+                FNAS.Gateway = gateway;
+                FNAS.userUUID = userUUID;
+
+                LocalCache.saveGateway(FNAS.Gateway, this);
+                LocalCache.saveUuidPassword(this, userUUID, userPassword);
 
                 operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationSuccess());
 
@@ -129,7 +133,7 @@ public class RetrieveTokenService extends IntentService {
             operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationJSONException());
         }
 
-        EventBus.getDefault().postSticky(operationEvent);
+        EventBus.getDefault().post(operationEvent);
 
         Log.i(TAG, "handleActionRetrieveToken: post sticky finish");
 

@@ -11,11 +11,11 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
-import com.winsun.fruitmix.operationResult.OperationIOException;
-import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
-import com.winsun.fruitmix.operationResult.OperationNetworkException;
-import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -82,6 +82,10 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
             if (ACTION_MODIFY_MEDIA_IN_REMOTE_MEDIASHARE.equals(action)) {
 
                 handleActionModifyMedia();
+
+                mDiffContentsModifiedMediaShare = null;
+                mDiffContentsOriginalMediaShare = null;
+                mModifiedMediaShare = null;
             }
         }
     }

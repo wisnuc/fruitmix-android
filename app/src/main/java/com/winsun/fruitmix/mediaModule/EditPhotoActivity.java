@@ -27,10 +27,10 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
+import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -85,7 +85,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         mAddPhoto.setOnClickListener(this);
         mFinish.setOnClickListener(this);
 
-        mediaShare = getIntent().getParcelableExtra(Util.KEY_MEDIASHARE);
+        String mediaShareUUID = getIntent().getStringExtra(Util.KEY_MEDIA_SHARE_UUID);
+        mediaShare = LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID);
         modifiedMediaShare = mediaShare.cloneMyself();
 
         GridLayoutManager mManager = new GridLayoutManager(mContext, mSpanCount);
@@ -148,7 +149,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             switch (operationResultType) {
                 case SUCCEED:
                     Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-                    getIntent().putExtra(Util.KEY_MEDIASHARE, modifiedMediaShare);
+                    getIntent().putExtra(Util.KEY_MEDIA_SHARE_UUID, modifiedMediaShare.getUuid());
                     EditPhotoActivity.this.setResult(RESULT_OK, getIntent());
                     finish();
                     break;
@@ -187,7 +188,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                     picItem = picItemRaw.cloneSelf();
                     picItem.setLocal(false);
                 }
-
 
             } else {
 
@@ -257,7 +257,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 if (Util.getNetworkState(mContext)) {
                     FNAS.editPhotoInRemoteMediaShare(mContext, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
                 } else {
-                    FNAS.editPhotoInLocalMediaShare(mContext, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
+                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                 }
 
                 break;

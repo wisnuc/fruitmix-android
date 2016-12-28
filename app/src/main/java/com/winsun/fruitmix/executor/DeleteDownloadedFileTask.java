@@ -5,8 +5,7 @@ import android.content.Context;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
-import com.winsun.fruitmix.util.OperationResultType;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;

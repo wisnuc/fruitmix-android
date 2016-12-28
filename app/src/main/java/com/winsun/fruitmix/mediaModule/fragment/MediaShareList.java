@@ -460,7 +460,7 @@ public class MediaShareList implements Page {
                 public void onClick(View v) {
                     Intent intent = new Intent();
                     intent.setClass(containerActivity, AlbumPicContentActivity.class);
-                    intent.putExtra(Util.KEY_MEDIASHARE, currentItem);
+                    intent.putExtra(Util.KEY_MEDIA_SHARE_UUID, currentItem.getUuid());
                     intent.putExtra(Util.NEED_SHOW_MENU, false);
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                     containerActivity.startActivity(intent);
@@ -710,7 +710,7 @@ public class MediaShareList implements Page {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(containerActivity, MoreMediaActivity.class);
-                            intent.putExtra(Util.KEY_MEDIASHARE, currentItem);
+                            intent.putExtra(Util.KEY_MEDIA_SHARE_UUID, currentItem.getUuid());
                             containerActivity.startActivity(intent);
                         }
                     });

@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -26,6 +25,7 @@ import android.widget.TextView;
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
@@ -37,6 +37,7 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -75,6 +76,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     private static final String SYSTEM_PORT = "3000";
     private static final String IPALIASING = "/system/ipaliasing";
 
+    private boolean mStartDiscovery = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +88,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         ButterKnife.bind(this);
 
         mContext = this;
+
+        Util.loginType = LoginType.LOGIN;
 
         mUserExpandableLists = new ArrayList<>();
         mUserLoadedEquipments = new ArrayList<>();
@@ -106,10 +111,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                 Intent intent = new Intent(mContext, LoginActivity.class);
                 intent.putExtra(Util.GATEWAY, "http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0));
-                intent.putExtra(Util.EQUIPMENT_GROUP_NAME, mUserLoadedEquipments.get(groupPosition).getServiceName());
-                intent.putExtra(Util.EQUIPMENT_CHILD_NAME, user.getUserName());
+                intent.putExtra(Util.USER_GROUP_NAME, mUserLoadedEquipments.get(groupPosition).getServiceName());
+                intent.putExtra(Util.USER_NAME, user.getUserName());
                 intent.putExtra(Util.USER_UUID, user.getUuid());
-                intent.putExtra(Util.EQUIPMENT_CHILD_BG_COLOR, user.getDefaultAvatarBgColor());
+                intent.putExtra(Util.USER_BG_COLOR, user.getDefaultAvatarBgColor());
+
                 startActivityForResult(intent, Util.KEY_LOGIN_REQUEST_CODE);
 
                 return false;
@@ -406,26 +412,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             String firstLetter = Util.getUserNameFirstLetter(childName);
             mUserDefaultPortrait.setText(firstLetter);
 
-            int color;
-            if (user.getDefaultAvatarBgColor() != null) {
-                color = Integer.parseInt(user.getDefaultAvatarBgColor());
-            } else {
-                color = (int) (Math.random() * 3);
-
-                user.setDefaultAvatarBgColor(String.valueOf(color));
+            if (user.getDefaultAvatarBgColor() == 0) {
+                user.setDefaultAvatarBgColor(new Random().nextInt(3) + 1);
             }
 
-            switch (color) {
-                case 0:
-                    mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_blue);
-                    break;
-                case 1:
-                    mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_green);
-                    break;
-                case 2:
-                    mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
-                    break;
-            }
+            mUserDefaultPortrait.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
 
         }
     }
@@ -440,11 +431,15 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             @Override
             public void onStopDiscoveryFailed(String serviceType, int errorCode) {
 
+                Log.i(TAG, "onStopDiscoveryFailed: errorCode:" + errorCode);
             }
 
             @Override
             public void onStartDiscoveryFailed(String serviceType, int errorCode) {
 
+                Log.i(TAG, "onStartDiscoveryFailed: errorCode:" + errorCode);
+
+                mStartDiscovery = false;
             }
 
             @Override
@@ -474,6 +469,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             @Override
             public void onDiscoveryStarted(String serviceType) {
                 Log.i(TAG, "onDiscoveryStarted");
+
+                mStartDiscovery = true;
             }
         };
         mManager.discoverServices("_http._tcp", NsdManager.PROTOCOL_DNS_SD, nsDicListener);
@@ -524,7 +521,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         if (mManager == null)
             mManager = (NsdManager) context.getApplicationContext().getSystemService(Context.NSD_SERVICE);
 
-        if (listener != null) {
+        if (listener != null && mStartDiscovery) {
+
+            Log.i(TAG, "stopDiscoverServices: stopServiceDiscovery");
+
             mManager.stopServiceDiscovery(listener);
         }
     }
@@ -547,7 +547,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                     Log.i(TAG, "login retrieve equipment alias:" + url);
 
-                    str = FNAS.RemoteCall(url).getResponseData();
+                    str = FNAS.GetRemoteCall(url).getResponseData();
 
                     json = new JSONArray(str);
                     for (int i = 0; i < json.length(); i++) {
@@ -566,7 +566,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                     Log.i(TAG, "login url:" + url);
 
-                    str = FNAS.RemoteCall(url).getResponseData();
+                    str = FNAS.GetRemoteCall(url).getResponseData();
 
                     json = new JSONArray(str);
                     itemList = new ArrayList<>();

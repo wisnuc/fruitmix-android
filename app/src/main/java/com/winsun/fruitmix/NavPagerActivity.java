@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fragment.FileMainFragment;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
@@ -33,6 +34,10 @@ import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 import java.util.Map;
@@ -112,6 +117,20 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
     public void switchDrawerOpenState() {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
@@ -134,7 +153,22 @@ public class NavPagerActivity extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
+        refreshUserInNavigationView();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleOperationEvent(OperationEvent operationEvent) {
+
+        String action = operationEvent.getAction();
+        if (action.equals(Util.REFRESH_VIEW_AFTER_USER_RETRIEVED)) {
+
+            refreshUserInNavigationView();
+
+        }
+    }
+
+    private void refreshUserInNavigationView() {
+        User user = LocalCache.getUser(mContext);
 
         if (user == null)
             return;

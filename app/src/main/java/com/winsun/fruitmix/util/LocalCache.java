@@ -11,6 +11,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
@@ -168,16 +169,25 @@ public class LocalCache {
         return commentConcurrentMap;
     }
 
-    public static Media findMediaInLocalMediaMap(String key){
+    public static Media findMediaInLocalMediaMap(String key) {
 
         Collection<Media> collection = LocalMediaMapKeyIsThumb.values();
 
-        for (Media media:collection){
-            if(media.getUuid().equals(key) || media.getThumb().equals(key))
+        for (Media media : collection) {
+            if (media.getUuid().equals(key) || media.getThumb().equals(key))
                 return media;
         }
 
         return null;
+    }
+
+    public static MediaShare findMediaShareInLocalCacheMap(String mediaShareUUID) {
+
+        MediaShare mediaShare = LocalMediaShareMapKeyIsUUID.get(mediaShareUUID);
+        if (mediaShare == null)
+            mediaShare = RemoteMediaShareMapKeyIsUUID.get(mediaShareUUID);
+
+        return mediaShare;
     }
 
     public static String GetInnerTempFile() {
@@ -627,9 +637,37 @@ public class LocalCache {
         return sp.getString(Util.PASSWORD, null);
     }
 
-    public static String getUserNameValue(Context context) {
+    public static User getUser(Context context) {
         SharedPreferences sp;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        return sp.getString(Util.EQUIPMENT_CHILD_NAME, null);
+
+        User user = new User();
+        user.setUserName(sp.getString(Util.USER_NAME, context.getString(R.string.user_default_name)));
+        user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
+        user.setDefaultAvatarBgColor(sp.getInt(Util.USER_BG_COLOR, 0));
+        user.setAdmin(sp.getBoolean(Util.USER_IS_ADMIN, false));
+
+        return user;
+    }
+
+    public static void saveUser(Context context, String userName, int userDefaultAvatarBgColor, boolean userIsAdmin) {
+        SharedPreferences sp;
+        SharedPreferences.Editor editor;
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        editor = sp.edit();
+        editor.putString(Util.USER_NAME, userName);
+        editor.putInt(Util.USER_BG_COLOR, userDefaultAvatarBgColor);
+        editor.putBoolean(Util.USER_IS_ADMIN, userIsAdmin);
+        editor.apply();
+    }
+
+    public static void saveUuidPassword(Context context, String uuid, String password) {
+        SharedPreferences sp;
+        SharedPreferences.Editor editor;
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        editor = sp.edit();
+        editor.putString(Util.USER_UUID, uuid);
+        editor.putString(Util.PASSWORD, password);
+        editor.apply();
     }
 }

@@ -53,8 +53,8 @@ public class RemoteUserParser implements RemoteDataParser<User> {
             if (user.getDefaultAvatar() == null) {
                 user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
             }
-            if (user.getDefaultAvatarBgColor() == null) {
-                user.setDefaultAvatarBgColor(String.valueOf(new Random().nextInt(3)));
+            if (user.getDefaultAvatarBgColor() == 0) {
+                user.setDefaultAvatarBgColor(new Random().nextInt(3) + 1);
             }
 
             user.setHome(itemRaw.optString("home"));

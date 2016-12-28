@@ -9,16 +9,16 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteMediaShareParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
@@ -62,6 +62,46 @@ public class RetrieveRemoteMediaShareService extends IntentService {
         }
     }
 
+    private void handleActionRetrieveRemoteMediaShare() {
+
+        List<MediaShare> remoteMediaSharesFromNetwork;
+        List<MediaShare> remoteMediaSharesFromDB;
+
+        List<MediaShare> newMediaShares = new ArrayList<>();
+        List<MediaShare> needDeleteMediaShare = new ArrayList<>();
+
+        ConcurrentMap<String, MediaShare> mediaShareConcurrentMap;
+
+        DBUtils dbUtils = DBUtils.getInstance(this);
+
+        if (LocalCache.RemoteMediaShareMapKeyIsUUID.isEmpty()) {
+            remoteMediaSharesFromDB = dbUtils.getAllRemoteShare();
+            mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(remoteMediaSharesFromDB);
+
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: retrieve remote media share from db");
+
+            fillLocalCacheRemoteMediaShareMap(mediaShareConcurrentMap);
+        }
+
+        try {
+            HttpResponse httpResponse = FNAS.loadRemoteShare();
+
+            Log.i(TAG, "loadRemoteShare:" + httpResponse.getResponseData().equals(""));
+
+            RemoteDataParser<MediaShare> parser = new RemoteMediaShareParser();
+            remoteMediaSharesFromNetwork = parser.parse(httpResponse.getResponseData());
+
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: parse remote media share");
+
+            //TODO:update modified media share,insert new media share and delete useless media share
+
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
     /**
      * Handle action Foo in the provided background thread with the provided
      * parameters.
@@ -72,8 +112,6 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
         ConcurrentMap<String, MediaShare> mediaShareConcurrentMap;
         DBUtils dbUtils = DBUtils.getInstance(this);
-
-        //TODO:update new media share by determine share digest
 
         try {
 
@@ -94,7 +132,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: delete all remote share in db");
 
-            dbUtils.insertRemoteMediaShares(mediaShareConcurrentMap);
+            dbUtils.insertRemoteMediaShares(mediaShareConcurrentMap.values());
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: retrieve remote media share from network");
 
@@ -120,12 +158,11 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
         }
 
-
     }
 
     private void postEvent() {
         OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_RETRIEVED, new OperationSuccess());
-        EventBus.getDefault().post(operationEvent);
+        EventBus.getDefault().postSticky(operationEvent);
     }
 
     private void fillLocalCacheRemoteMediaShareMap(ConcurrentMap<String, MediaShare> mediaShareConcurrentMap) {

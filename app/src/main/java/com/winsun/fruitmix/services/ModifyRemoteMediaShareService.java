@@ -10,12 +10,12 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.operationResult.OperationIOException;
-import com.winsun.fruitmix.operationResult.OperationLocalMediaShareUploading;
-import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
-import com.winsun.fruitmix.operationResult.OperationNetworkException;
-import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.model.operationResult.OperationLocalMediaShareUploading;
+import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -36,7 +36,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
     private static final String ACTION_MODIFY_REMOTE_MEDIA_SHARE = "com.winsun.fruitmix.services.action.modify.remote.share";
 
-    private static final String EXTRA_MEDIA_SHARE = "com.winsun.fruitmix.services.extra.share";
+    private static final String EXTRA_MEDIA_SHARE_UUID = "com.winsun.fruitmix.services.extra.share.uuid";
 
     private static final String EXTRA_REQUEST_DATA = "com.wisnun.fruitmix.services.extra.request.data";
 
@@ -53,7 +53,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
     public static void startActionModifyRemoteMediaShare(Context context, MediaShare mediaShare, String requestData) {
         Intent intent = new Intent(context, ModifyRemoteMediaShareService.class);
         intent.setAction(ACTION_MODIFY_REMOTE_MEDIA_SHARE);
-        intent.putExtra(EXTRA_MEDIA_SHARE, mediaShare);
+        intent.putExtra(EXTRA_MEDIA_SHARE_UUID, mediaShare.getUuid());
         intent.putExtra(EXTRA_REQUEST_DATA, requestData);
         context.startService(intent);
     }
@@ -63,9 +63,9 @@ public class ModifyRemoteMediaShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_MODIFY_REMOTE_MEDIA_SHARE.equals(action)) {
-                MediaShare mediaShare = intent.getParcelableExtra(EXTRA_MEDIA_SHARE);
+                String mediaShareUUID = intent.getStringExtra(EXTRA_MEDIA_SHARE_UUID);
                 String requestData = intent.getStringExtra(EXTRA_REQUEST_DATA);
-                handleActionModifyRemoteShare(mediaShare, requestData);
+                handleActionModifyRemoteShare(LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID), requestData);
             }
         }
     }

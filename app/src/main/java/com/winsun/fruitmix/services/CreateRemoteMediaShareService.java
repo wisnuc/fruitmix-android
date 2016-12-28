@@ -9,12 +9,12 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.operationResult.OperationIOException;
-import com.winsun.fruitmix.operationResult.OperationJSONException;
-import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
-import com.winsun.fruitmix.operationResult.OperationNetworkException;
-import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.model.operationResult.OperationJSONException;
+import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteMediaShareJSONObjectParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -41,7 +41,7 @@ public class CreateRemoteMediaShareService extends IntentService {
     // TODO: Rename actions, choose action names that describe tasks that this
     private static final String ACTION_CREATE_REMOTE_MEDIASHARE_TASK = "com.winsun.fruitmix.action.create.remote.mediashare";
 
-    private static final String EXTRA_MEDIASHARE = "extra_mediashare";
+    private static MediaShare mMediaShare;
 
     public CreateRemoteMediaShareService() {
         super("CreateRemoteMediaShareService");
@@ -57,7 +57,7 @@ public class CreateRemoteMediaShareService extends IntentService {
     public static void startActionCreateRemoteMediaShareTask(Context context, MediaShare mediaShare) {
         Intent intent = new Intent(context, CreateRemoteMediaShareService.class);
         intent.setAction(ACTION_CREATE_REMOTE_MEDIASHARE_TASK);
-        intent.putExtra(EXTRA_MEDIASHARE, mediaShare);
+        mMediaShare = mediaShare;
         context.startService(intent);
     }
 
@@ -67,9 +67,9 @@ public class CreateRemoteMediaShareService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_CREATE_REMOTE_MEDIASHARE_TASK.equals(action)) {
 
-                MediaShare mediaShare = intent.getParcelableExtra(EXTRA_MEDIASHARE);
+                handleActionCreateRemoteMediaShareTask();
 
-                handleActionCreateRemoteMediaShareTask(mediaShare);
+                mMediaShare = null;
             }
         }
     }
@@ -78,7 +78,9 @@ public class CreateRemoteMediaShareService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionCreateRemoteMediaShareTask(MediaShare mediaShare) {
+    private void handleActionCreateRemoteMediaShareTask() {
+
+        MediaShare mediaShare = mMediaShare;
 
         MediaShareOperationEvent mediaShareOperationEvent;
 

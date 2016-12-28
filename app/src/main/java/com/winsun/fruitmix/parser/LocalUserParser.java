@@ -21,7 +21,7 @@ public class LocalUserParser implements LocalDataParser<User> {
         user.setAvatar(cursor.getString(cursor.getColumnIndex(DBHelper.USER_KEY_AVATAR)));
         user.setEmail(cursor.getString(cursor.getColumnIndex(DBHelper.USER_KEY_EMAIL)));
         user.setDefaultAvatar(cursor.getString(cursor.getColumnIndex(DBHelper.USER_KEY_DEFAULT_AVATAR)));
-        user.setDefaultAvatarBgColor(cursor.getString(cursor.getColumnIndex(DBHelper.USER_KEY_DEFAULT_AVATAR_BG_COLOR)));
+        user.setDefaultAvatarBgColor(cursor.getInt(cursor.getColumnIndex(DBHelper.USER_KEY_DEFAULT_AVATAR_BG_COLOR)));
         user.setHome(cursor.getString(cursor.getColumnIndex(DBHelper.USER_KEY_HOME)));
         user.setLibrary(cursor.getString(cursor.getColumnIndex(DBHelper.USER_KEY_LIBRARY)));
         user.setAdmin(cursor.getInt(cursor.getColumnIndex(DBHelper.USER_KEY_IS_ADMIN)) == 1);

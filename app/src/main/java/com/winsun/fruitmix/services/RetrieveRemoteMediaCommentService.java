@@ -3,19 +3,17 @@ package com.winsun.fruitmix.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.Comment;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteMediaCommentParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;

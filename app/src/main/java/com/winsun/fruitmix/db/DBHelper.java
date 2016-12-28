@@ -92,7 +92,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     static final String DOWNLOADED_FILE_TABLE_NAME = "downloaded_file";
 
-    private static final int DB_VERSION = 18;
+    private static final int DB_VERSION = 19;
 
     private static final String CREATE_TABLE = "create table ";
 
@@ -133,7 +133,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_REMOTE_USER_CREATE = CREATE_TABLE + REMOTE_USER_TABLE_NAME + " ("
             + USER_KEY_ID + " integer primary key autoincrement," + USER_KEY_UUID + " text not null,"
             + USER_KEY_USERNAME + " text not null," + USER_KEY_AVATAR + " text not null,"
-            + USER_KEY_EMAIL + " text," + USER_KEY_DEFAULT_AVATAR + " text not null," + USER_KEY_DEFAULT_AVATAR_BG_COLOR + " text not null,"
+            + USER_KEY_EMAIL + " text," + USER_KEY_DEFAULT_AVATAR + " text not null," + USER_KEY_DEFAULT_AVATAR_BG_COLOR + " integer not null,"
             + USER_KEY_HOME + " text not null," + USER_KEY_LIBRARY + " text not null," + USER_KEY_IS_ADMIN + " integer not null)";
 
     private static final String DATABASE_MEDIA_SHARE_CONTENT_CREATE = " (" + SHARE_CONTENT_KEY_ID + " integer primary key autoincrement,"

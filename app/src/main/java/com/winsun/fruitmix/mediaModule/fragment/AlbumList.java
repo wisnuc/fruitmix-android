@@ -103,7 +103,6 @@ public class AlbumList implements Page {
             }
         });
 
-
     }
 
     private void initImageLoader() {
@@ -356,8 +355,8 @@ public class AlbumList implements Page {
 
             String title = currentItem.getTitle();
 
-            if (title.length() > 16) {
-                title = title.substring(0, 16);
+            if (title.length() > 10) {
+                title = title.substring(0, 10);
 
                 title += containerActivity.getString(R.string.android_ellipsize);
             }
@@ -420,7 +419,7 @@ public class AlbumList implements Page {
                 public void onClick(View v) {
                     Intent intent = new Intent();
                     intent.setClass(containerActivity, AlbumPicContentActivity.class);
-                    intent.putExtra(Util.KEY_MEDIASHARE, currentItem);
+                    intent.putExtra(Util.KEY_MEDIA_SHARE_UUID, currentItem.getUuid());
                     containerActivity.startActivityForResult(intent, Util.KEY_ALBUM_CONTENT_REQUEST_CODE);
                 }
             });

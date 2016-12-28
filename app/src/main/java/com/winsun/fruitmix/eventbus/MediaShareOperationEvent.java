@@ -1,8 +1,7 @@
 package com.winsun.fruitmix.eventbus;
 
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.operationResult.OperationResult;
-import com.winsun.fruitmix.util.OperationResultType;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 
 /**
  * Created by Administrator on 2016/11/1.

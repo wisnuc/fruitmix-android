@@ -1,7 +1,7 @@
 package com.winsun.fruitmix.eventbus;
 
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
+import com.winsun.fruitmix.model.OperationTargetType;
+import com.winsun.fruitmix.model.OperationType;
 
 import java.util.Collections;
 import java.util.List;

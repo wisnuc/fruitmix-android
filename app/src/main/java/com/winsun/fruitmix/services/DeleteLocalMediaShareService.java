@@ -8,11 +8,10 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.operationResult.OperationNoNetworkException;
-import com.winsun.fruitmix.operationResult.OperationSQLException;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationNoNetworkException;
+import com.winsun.fruitmix.model.operationResult.OperationSQLException;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -27,11 +26,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
     private static final String ACTION_DELETE_LOCAL_SHARE = "com.winsun.fruitmix.services.action.delete.local.share";
 
-    private static final String EXTRA_LOCAL_MEDIASHARE_UUID = "com.winsun.fruitmix.services.extra.local_mediashare_uuid";
-
-    private static final String EXTRA_LOCAL_MEDIASHARE_LOCKED = "com.winsun.fruitmix.services.extra.local_mediashare_locked";
-
-    private static final String EXTRA_MEDIASHARE = "com.winsun.fruitmix.services.extra.mediashare";
+    private static final String EXTRA_LOCAL_MEDIA_SHARE_UUID = "com.winsun.fruitmix.services.extra.local_media_share_uuid";
 
     public DeleteLocalMediaShareService() {
         super("DeleteLocalMediaShareService");
@@ -46,7 +41,7 @@ public class DeleteLocalMediaShareService extends IntentService {
     public static void startActionDeleteLocalShare(Context context, MediaShare mediaShare) {
         Intent intent = new Intent(context, DeleteLocalMediaShareService.class);
         intent.setAction(ACTION_DELETE_LOCAL_SHARE);
-        intent.putExtra(EXTRA_MEDIASHARE, mediaShare);
+        intent.putExtra(EXTRA_LOCAL_MEDIA_SHARE_UUID, mediaShare.getUuid());
         context.startService(intent);
     }
 
@@ -55,8 +50,9 @@ public class DeleteLocalMediaShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_DELETE_LOCAL_SHARE.equals(action)) {
-                MediaShare mediaShare = intent.getParcelableExtra(EXTRA_MEDIASHARE);
-                handleActionDeleteLocalShare(mediaShare);
+                String mediaShareUUID = intent.getStringExtra(EXTRA_LOCAL_MEDIA_SHARE_UUID);
+
+                handleActionDeleteLocalShare(LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID));
             }
         }
     }
@@ -77,7 +73,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
             DBUtils dbUtils = DBUtils.getInstance(this);
 
-            long value = dbUtils.deleteLocalShareByUUid(mediaShare.getUuid());
+            long value = dbUtils.deleteLocalShareByUUIDs(new String[]{mediaShare.getUuid()});
 
             if (value > 0) {
 

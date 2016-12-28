@@ -1,8 +1,8 @@
 package com.winsun.fruitmix.command;
 
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
+import com.winsun.fruitmix.model.OperationTargetType;
+import com.winsun.fruitmix.model.OperationType;
 
 import org.greenrobot.eventbus.EventBus;
 

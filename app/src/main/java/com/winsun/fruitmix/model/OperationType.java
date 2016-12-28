@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.util;
+package com.winsun.fruitmix.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

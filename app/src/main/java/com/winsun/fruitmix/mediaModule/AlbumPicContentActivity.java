@@ -35,10 +35,10 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
+import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -128,7 +128,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         initImageLoader();
 
-        mediaShare = getIntent().getParcelableExtra(Util.KEY_MEDIASHARE);
+        String mediaShareUUID = getIntent().getStringExtra(Util.KEY_MEDIA_SHARE_UUID);
+        mediaShare = LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID);
+
         mShowMenu = getIntent().getBooleanExtra(Util.NEED_SHOW_MENU, true);
         mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
 
@@ -471,7 +473,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 break;
             case R.id.edit_photo:
                 intent = new Intent(this, EditPhotoActivity.class);
-                intent.putExtra(Util.KEY_MEDIASHARE, mediaShare);
+                intent.putExtra(Util.KEY_MEDIA_SHARE_UUID, mediaShare.getUuid());
                 startActivityForResult(intent, Util.KEY_EDIT_PHOTO_REQUEST_CODE);
                 break;
             case R.id.set_private_public:
@@ -496,7 +498,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         if (requestCode == Util.KEY_EDIT_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            mediaShare = data.getParcelableExtra(Util.KEY_MEDIASHARE);
+            String mediaShareUUID = data.getStringExtra(Util.KEY_MEDIA_SHARE_UUID);
+            mediaShare = LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID);
 
             fillPicList(mediaShare.getMediaKeyInMediaShareContents());
             ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
@@ -519,11 +522,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                         mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-                        if (Util.getNetworkState(mContext)) {
-                            FNAS.deleteRemoteMediaShare(mContext, mediaShare);
-                        } else {
-                            FNAS.deleteLocalMediaShare(mContext, mediaShare);
-                        }
+                        mediaShare.sendDeleteMediaShareRequest(mContext);
 
                     }
                 }).setNegativeButton(getString(R.string.cancel), null).create().show();
@@ -559,12 +558,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-        if (Util.getNetworkState(mContext)) {
-            FNAS.modifyRemoteMediaShare(mContext, cloneMediaShare, requestData);
-        } else {
-            FNAS.modifyLocalMediaShare(mContext, cloneMediaShare, requestData);
-        }
-
+        cloneMediaShare.sendModifyMediaShareRequest(mContext,requestData);
     }
 
 }

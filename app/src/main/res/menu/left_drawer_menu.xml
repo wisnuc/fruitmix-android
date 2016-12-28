@@ -32,7 +32,7 @@
         <item
             android:id="@+id/file"
             android:icon="@drawable/ic_folder"
-            android:title="@string/my_file"/>
+            android:title="@string/my_file" />
 
     </group>
 
@@ -43,20 +43,20 @@
         <item
             android:id="@+id/user_manage"
             android:icon="@drawable/ic_person_add"
-            android:title="@string/user_manage"/>
+            android:title="@string/user_manage"
+            android:visible="false" />
 
         <item
             android:id="@+id/setting"
             android:icon="@drawable/ic_settings"
-            android:title="@string/setting"/>
+            android:title="@string/setting" />
 
         <item
             android:id="@+id/logout"
             android:icon="@drawable/ic_logout"
-            android:title="@string/logout"/>
+            android:title="@string/logout" />
 
     </group>
-
 
 
 </menu>

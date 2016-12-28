@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
@@ -28,10 +29,13 @@ import com.winsun.fruitmix.executor.UploadMediaTask;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.LoginType;
+import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationTargetType;
-import com.winsun.fruitmix.util.OperationType;
+import com.winsun.fruitmix.model.OperationTargetType;
+import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -151,6 +155,9 @@ public class ButlerService extends Service {
 
         String action = operationEvent.getAction();
 
+        OperationResult operationResult = operationEvent.getOperationResult();
+        OperationResultType operationResultType = operationResult.getOperationResultType();
+
         Log.i(TAG, "handleOperationEvent: action:" + action);
 
         switch (action) {
@@ -162,9 +169,65 @@ public class ButlerService extends Service {
                 mRetrieveRemoteMediaFinished = true;
                 startUpload();
                 break;
+            case Util.REMOTE_TOKEN_RETRIEVED:
+
+                handleRemoteTokenRetrieved(operationResult, operationResultType);
+
+                break;
+            case Util.REMOTE_DEVICEID_RETRIEVED:
+
+                handleRemoteDeviceIdRetrieved(operationResult, operationResultType);
+                break;
+            case Util.REMOTE_USER_RETRIEVED:
+
+                EventBus.getDefault().post(new OperationEvent(Util.REFRESH_VIEW_AFTER_USER_RETRIEVED, operationResult));
+
+                FNAS.retrieveRemoteMediaMap(this);
+                FNAS.retrieveRemoteMediaShare(this,true);
+                break;
         }
 
+    }
 
+    private void handleRemoteDeviceIdRetrieved(OperationResult operationResult, OperationResultType operationResultType) {
+        switch (operationResultType) {
+            case SUCCEED:
+                FNAS.retrieveUserMap(this);
+                break;
+            default:
+
+                Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
+
+                if (Util.loginType == LoginType.SPLASH_SCREEN) {
+                    LocalCache.DeviceID = LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME);
+
+                    FNAS.retrieveUserMap(this);
+                }
+        }
+    }
+
+    private void handleRemoteTokenRetrieved(OperationResult operationResult, OperationResultType operationResultType) {
+        switch (operationResultType) {
+            case SUCCEED:
+                if (Util.loginType == LoginType.LOGIN) {
+                    LocalCache.CleanAll(this);
+                    LocalCache.Init();
+                }
+                FNAS.retrieveRemoteDeviceID(this);
+                break;
+            default:
+
+                Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
+
+                if (Util.loginType == LoginType.SPLASH_SCREEN) {
+                    FNAS.JWT = LocalCache.getToken(this);
+
+                    LocalCache.DeviceID = LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME);
+
+                    FNAS.retrieveUserMap(this);
+                }
+
+        }
     }
 
     private void startUpload() {
@@ -390,9 +453,9 @@ public class ButlerService extends Service {
 
                 TokenRequestEvent tokenRequestEvent = (TokenRequestEvent) requestEvent;
 
-                final String gateway = tokenRequestEvent.getGateway();
-                final String userUUID = tokenRequestEvent.getUserUUID();
-                final String userPassword = tokenRequestEvent.getUserPassword();
+                String gateway = tokenRequestEvent.getGateway();
+                String userUUID = tokenRequestEvent.getUserUUID();
+                String userPassword = tokenRequestEvent.getUserPassword();
 
                 RetrieveTokenService.startActionRetrieveToken(this, gateway, userUUID, userPassword);
 

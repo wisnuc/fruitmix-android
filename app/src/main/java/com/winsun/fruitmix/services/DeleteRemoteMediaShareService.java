@@ -8,14 +8,13 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.operationResult.OperationIOException;
-import com.winsun.fruitmix.operationResult.OperationLocalMediaShareUploading;
-import com.winsun.fruitmix.operationResult.OperationMalformedUrlException;
-import com.winsun.fruitmix.operationResult.OperationSocketTimeoutException;
-import com.winsun.fruitmix.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.model.operationResult.OperationLocalMediaShareUploading;
+import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
+import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -34,8 +33,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
 
     private static final String ACTION_DELETE_REMOTE_SHARE = "com.winsun.fruitmix.services.action.delete.remote.share";
 
-    // TODO: Rename parameters
-    private static final String EXTRA_SHARE = "com.winsun.fruitmix.services.extra.share";
+    private static final String EXTRA_SHARE_UUID = "com.winsun.fruitmix.services.extra.share.uuid";
 
     public DeleteRemoteMediaShareService() {
         super("DeleteRemoteMediaShareService");
@@ -50,7 +48,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
     public static void startActionDeleteRemoteShare(Context context, MediaShare mediaShare) {
         Intent intent = new Intent(context, DeleteRemoteMediaShareService.class);
         intent.setAction(ACTION_DELETE_REMOTE_SHARE);
-        intent.putExtra(EXTRA_SHARE, mediaShare);
+        intent.putExtra(EXTRA_SHARE_UUID, mediaShare.getUuid());
         context.startService(intent);
     }
 
@@ -59,8 +57,8 @@ public class DeleteRemoteMediaShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_DELETE_REMOTE_SHARE.equals(action)) {
-                final MediaShare mediaShare = intent.getParcelableExtra(EXTRA_SHARE);
-                handleActionDeleteRemoteShare(mediaShare);
+                String mediaShareUUID = intent.getStringExtra(EXTRA_SHARE_UUID);
+                handleActionDeleteRemoteShare(LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID));
             }
         }
     }
@@ -89,7 +87,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
                 Log.i(TAG, "delete remote mediashare which source is network succeed");
 
                 DBUtils dbUtils = DBUtils.getInstance(this);
-                long dbResult = dbUtils.deleteRemoteShareByUUid(mediaShare.getUuid());
+                long dbResult = dbUtils.deleteRemoteShareByUUIDs(new String[]{mediaShare.getUuid()});
 
                 Log.i(TAG, "delete remote mediashare which source is db result:" + dbResult);
 
