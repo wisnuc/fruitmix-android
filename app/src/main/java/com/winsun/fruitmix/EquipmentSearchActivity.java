@@ -63,9 +63,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private List<Equipment> mFoundedEquipments;
 
-    private NsdManager.DiscoveryListener mListener;
-
+    private NsdManager.DiscoveryListener mDiscoveryListener;
+    private NsdManager.ResolveListener mResolveListener;
     private NsdManager mManager;
+
+    private static final String SERVICE_PORT = "_http._tcp";
 
     private List<List<User>> mUserExpandableLists;
 
@@ -82,8 +84,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_equipment_search);
-
-        // 处理同一台设备 两个ip
 
         ButterKnife.bind(this);
 
@@ -170,6 +170,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        if (mManager == null)
+            mManager = (NsdManager) mContext.getApplicationContext().getSystemService(Context.NSD_SERVICE);
+
     }
 
     private void animateArrow(int groupPosition, Animator animator) {
@@ -179,22 +182,26 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     }
 
     @Override
+    protected void onStart() {
+
+        initResolveListener();
+
+        super.onStart();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
-        discoverService(mContext);
+        discoverService();
     }
 
     @Override
     protected void onPause() {
 
-        super.onPause();
+        stopDiscoverServices();
 
-        try {
-            stopDiscoverServices(mContext, mListener);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        super.onPause();
 
     }
 
@@ -421,65 +428,61 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         }
     }
 
+    private void initDiscoveryListener() {
+        if (mDiscoveryListener == null) {
 
-    private void discoverService(final Context context) {
+            mDiscoveryListener = new NsdManager.DiscoveryListener() {
+                @Override
+                public void onStopDiscoveryFailed(String serviceType, int errorCode) {
 
-        if (mManager == null)
-            mManager = (NsdManager) context.getApplicationContext().getSystemService(Context.NSD_SERVICE);
+                    Log.i(TAG, "onStopDiscoveryFailed: errorCode:" + errorCode);
 
-        NsdManager.DiscoveryListener nsDicListener = new NsdManager.DiscoveryListener() {
-            @Override
-            public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-
-                Log.i(TAG, "onStopDiscoveryFailed: errorCode:" + errorCode);
-            }
-
-            @Override
-            public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-
-                Log.i(TAG, "onStartDiscoveryFailed: errorCode:" + errorCode);
-
-                mStartDiscovery = false;
-            }
-
-            @Override
-            public void onServiceLost(NsdServiceInfo serviceInfo) {
-
-                Log.i(TAG, "onServiceLost");
-
-            }
-
-            @Override
-            public void onServiceFound(NsdServiceInfo serviceInfo) {
-
-                Log.i(TAG, "Service resolved: " + serviceInfo);
-
-                if (serviceInfo.getServiceName().toLowerCase().contains("wisnuc")) {
-                    resolveService(serviceInfo);
                 }
 
-            }
+                @Override
+                public void onStartDiscoveryFailed(String serviceType, int errorCode) {
 
-            @Override
-            public void onDiscoveryStopped(String serviceType) {
-                Log.i(TAG, "onDiscoveryStopped");
+                    Log.i(TAG, "onStartDiscoveryFailed: errorCode:" + errorCode);
 
-            }
+                    mStartDiscovery = false;
+                }
 
-            @Override
-            public void onDiscoveryStarted(String serviceType) {
-                Log.i(TAG, "onDiscoveryStarted");
+                @Override
+                public void onServiceLost(NsdServiceInfo serviceInfo) {
 
-                mStartDiscovery = true;
-            }
-        };
-        mManager.discoverServices("_http._tcp", NsdManager.PROTOCOL_DNS_SD, nsDicListener);
+                    Log.i(TAG, "onServiceLost");
 
-        mListener = nsDicListener;
+                }
+
+                @Override
+                public void onServiceFound(NsdServiceInfo serviceInfo) {
+
+                    Log.i(TAG, "Service resolved: " + serviceInfo);
+
+                    if (serviceInfo.getServiceName().toLowerCase().contains("wisnuc")) {
+                        resolveService(serviceInfo);
+                    }
+
+                }
+
+                @Override
+                public void onDiscoveryStopped(String serviceType) {
+                    Log.i(TAG, "onDiscoveryStopped");
+                }
+
+                @Override
+                public void onDiscoveryStarted(String serviceType) {
+                    Log.i(TAG, "onDiscoveryStarted");
+
+                    mStartDiscovery = true;
+                }
+            };
+        }
     }
 
-    private void resolveService(NsdServiceInfo serviceInfo) {
-        mManager.resolveService(serviceInfo, new NsdManager.ResolveListener() {
+    private void initResolveListener() {
+
+        mResolveListener = new NsdManager.ResolveListener() {
             @Override
             public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
 
@@ -513,19 +516,41 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                 getUserList(equipment);
             }
-        });
+        };
+
     }
 
-    private void stopDiscoverServices(Context context, NsdManager.DiscoveryListener listener) {
+    private void discoverService() {
 
-        if (mManager == null)
-            mManager = (NsdManager) context.getApplicationContext().getSystemService(Context.NSD_SERVICE);
+        stopDiscoverServices();
 
-        if (listener != null && mStartDiscovery) {
+        initDiscoveryListener();
+
+        mManager.discoverServices(SERVICE_PORT, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
+
+    }
+
+    private void resolveService(NsdServiceInfo serviceInfo) {
+
+        mResolveListener = null;
+        initResolveListener();
+
+        mManager.resolveService(serviceInfo, mResolveListener);
+    }
+
+    private void stopDiscoverServices() {
+
+        if (mDiscoveryListener != null && mStartDiscovery) {
 
             Log.i(TAG, "stopDiscoverServices: stopServiceDiscovery");
 
-            mManager.stopServiceDiscovery(listener);
+            try {
+                mManager.stopServiceDiscovery(mDiscoveryListener);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            mDiscoveryListener = null;
         }
     }
 

@@ -90,8 +90,6 @@ public class AlbumList implements Page {
 
         noContentImageView.setImageResource(R.drawable.no_photo);
 
-        initImageLoader();
-
         mainListView.setAdapter(new AlbumListAdapter(this));
 
         ivAdd.setOnClickListener(new View.OnClickListener() {
@@ -106,12 +104,18 @@ public class AlbumList implements Page {
     }
 
     private void initImageLoader() {
-        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(containerActivity).getRequestQueue();
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
+
+        if (mImageLoader == null) {
+
+            RequestQueue mRequestQueue = RequestQueueInstance.getInstance(containerActivity).getRequestQueue();
+            mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+            Map<String, String> headers = new HashMap<>();
+            headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+            Log.i(TAG, FNAS.JWT);
+            mImageLoader.setHeaders(headers);
+
+        }
+
     }
 
 
@@ -166,6 +170,8 @@ public class AlbumList implements Page {
         if (!listener.isRemoteMediaShareLoaded()) {
             return;
         }
+
+        initImageLoader();
 
         reloadList();
 

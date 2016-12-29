@@ -140,8 +140,6 @@ public class Util {
 
     public static final String KEY_MANUAL_INPUT_IP = "key_manual_input_ip";
 
-    public static boolean loginState = false;
-
     public static final int WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 1;
 
     public static boolean startTimingRetrieveMediaShare = false;

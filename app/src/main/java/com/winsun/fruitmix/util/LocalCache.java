@@ -42,7 +42,7 @@ public class LocalCache {
 
     private static final String TAG = LocalCache.class.getSimpleName();
 
-    public static String CacheRootPath;
+    private static String CacheRootPath;
 
     public static ConcurrentMap<String, List<Comment>> RemoteMediaCommentMapKeyIsImageUUID = null;
     public static ConcurrentMap<String, List<Comment>> LocalMediaCommentMapKeyIsImageUUID = null;

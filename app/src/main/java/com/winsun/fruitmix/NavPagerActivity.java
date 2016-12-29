@@ -125,9 +125,9 @@ public class NavPagerActivity extends AppCompatActivity
 
     @Override
     protected void onStop() {
-        super.onStop();
-
         EventBus.getDefault().unregister(this);
+
+        super.onStop();
     }
 
     @Override
@@ -156,15 +156,20 @@ public class NavPagerActivity extends AppCompatActivity
         refreshUserInNavigationView();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
         String action = operationEvent.getAction();
+
         if (action.equals(Util.REFRESH_VIEW_AFTER_USER_RETRIEVED)) {
 
+            Log.i(TAG, "handleOperationEvent: refreshUser");
+            
             refreshUserInNavigationView();
 
         }
+
+
     }
 
     private void refreshUserInNavigationView() {

@@ -98,8 +98,6 @@ public class MediaShareList implements Page {
 
         noContentImageView.setImageResource(R.drawable.no_photo);
 
-        initImageLoader();
-
         mAdapter = new ShareRecyclerViewAdapter();
         mainRecyclerView.setAdapter(mAdapter);
         mainRecyclerView.setLayoutManager(new LinearLayoutManager(containerActivity));
@@ -109,12 +107,16 @@ public class MediaShareList implements Page {
     }
 
     private void initImageLoader() {
-        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(containerActivity).getRequestQueue();
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
+
+        if (mImageLoader == null) {
+            RequestQueue mRequestQueue = RequestQueueInstance.getInstance(containerActivity).getRequestQueue();
+            mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+            Map<String, String> headers = new HashMap<>();
+            headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+            Log.i(TAG, FNAS.JWT);
+            mImageLoader.setHeaders(headers);
+        }
+
     }
 
     private void reloadList() {
@@ -169,9 +171,9 @@ public class MediaShareList implements Page {
             return;
         }
 
-        reloadList();
+        initImageLoader();
 
-        mMapKeyIsImageUUIDValueIsComments.clear();
+        reloadList();
 
         mLoadingLayout.setVisibility(View.GONE);
         if (mediaShareList.size() == 0) {
@@ -183,6 +185,8 @@ public class MediaShareList implements Page {
             mAdapter.notifyDataSetChanged();
 
         }
+
+        mMapKeyIsImageUUIDValueIsComments.clear();
 
         refreshRemoteComment();
         refreshLocalComment();
@@ -283,14 +287,11 @@ public class MediaShareList implements Page {
 
     private class ShareRecyclerViewAdapter extends RecyclerView.Adapter<CardItemViewHolder> {
 
-        Map<String, List<Comment>> commentMap;
-
         private static final int VIEW_ALBUM_CARD_ITEM = 0;
         private static final int VIEW_ONE_MORE_MEDIA_SHARE_CARD_ITEM = 1;
         private static final int VIEW_ONE_MEDIA_SHARE_CARD_ITEM = 2;
 
         ShareRecyclerViewAdapter() {
-            commentMap = new HashMap<>();
 
             setHasStableIds(true);
         }
@@ -304,7 +305,7 @@ public class MediaShareList implements Page {
                     return new AlbumCardItemViewHolder(view);
 
                 case VIEW_ONE_MEDIA_SHARE_CARD_ITEM:
-                    return new OneMediaShareCardItemViewHolder(view, commentMap);
+                    return new OneMediaShareCardItemViewHolder(view, mMapKeyIsImageUUIDValueIsComments);
 
                 case VIEW_ONE_MORE_MEDIA_SHARE_CARD_ITEM:
                     return new OneMoreMediaShareCardItemViewHolder(view);
@@ -881,7 +882,6 @@ public class MediaShareList implements Page {
         }
 
         if (mMapKeyIsImageUUIDValueIsComments.size() != 0) {
-            mAdapter.commentMap.putAll(mMapKeyIsImageUUIDValueIsComments);
             mAdapter.notifyDataSetChanged();
         }
 

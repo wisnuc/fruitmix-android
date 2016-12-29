@@ -179,7 +179,6 @@ public class DBUtils {
         return insertMediaShareContent(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShareContent, mediashareUUID);
     }
 
-
     private ContentValues createMediaShareContentValues(MediaShare mediaShare) {
 
         ContentValues contentValues = new ContentValues();
@@ -935,7 +934,7 @@ public class DBUtils {
         return getAllMedia(DBHelper.LOCAL_MEDIA_TABLE_NAME);
     }
 
-    private long updateShare(String dbName, MediaShare mediaShare) {
+    private long updateMediaShare(String dbName, MediaShare mediaShare) {
         openWritableDB();
 
         ContentValues contentValues = createMediaShareContentValues(mediaShare);
@@ -947,13 +946,13 @@ public class DBUtils {
         return returnValue;
     }
 
-    public long updateLocalShare(MediaShare mediaShare) {
-        return updateShare(DBHelper.LOCAL_SHARE_TABLE_NAME, mediaShare);
+    public long updateLocalMediaShare(MediaShare mediaShare) {
+        return updateMediaShare(DBHelper.LOCAL_SHARE_TABLE_NAME, mediaShare);
     }
 
-    public long updateRemoteShare(MediaShare mediaShare) {
+    public long updateRemoteMediaShare(MediaShare mediaShare) {
 
-        return updateShare(DBHelper.REMOTE_SHARE_TABLE_NAME, mediaShare);
+        return updateMediaShare(DBHelper.REMOTE_SHARE_TABLE_NAME, mediaShare);
 
     }
 
@@ -1004,6 +1003,74 @@ public class DBUtils {
             database.setTransactionSuccessful();
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
+
+            database.endTransaction();
+
+            close();
+        }
+
+        return returnValue;
+
+    }
+
+    public long deleteOldAndInsertNewRemoteMediaShare(Collection<MediaShare> oldMediaShares, Collection<MediaShare> newMediaShares){
+
+        return deleteOldAndInsertNewMediaShare(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,DBHelper.REMOTE_SHARE_TABLE_NAME,oldMediaShares,newMediaShares);
+
+    }
+
+    private long deleteOldAndInsertNewMediaShare(String shareContentDBName, String shareDBName, Collection<MediaShare> oldMediaShares, Collection<MediaShare> newMediaShares) {
+
+        long returnValue = 0L;
+
+        try {
+            openWritableDB();
+
+            String deleteShareContentSql = createDeleteShareContentSql(shareContentDBName);
+            String deleteShareSql = createDeleteShareSql(shareDBName);
+            SQLiteStatement deleteShareContentStatement = database.compileStatement(deleteShareContentSql);
+            SQLiteStatement deleteShareStatement = database.compileStatement(deleteShareSql);
+
+            String insertMediaShareContentSql = createInsertMediaShareContentSql(shareContentDBName);
+            SQLiteStatement mediaShareContentSQLiteStatement = database.compileStatement(insertMediaShareContentSql);
+            String insertMediaShareSql = createInsertMediaShareSql(shareDBName);
+            SQLiteStatement mediaShareSQLiteStatement = database.compileStatement(insertMediaShareSql);
+
+            database.beginTransaction();
+
+            for (MediaShare oldMediaShare : oldMediaShares) {
+
+                String uuid = oldMediaShare.getUuid();
+
+                bindMediaShareContent(deleteShareContentStatement, uuid);
+                deleteShareContentStatement.executeUpdateDelete();
+
+                bindMediaShare(deleteShareStatement, uuid);
+                returnValue = deleteShareStatement.executeUpdateDelete();
+
+            }
+
+            for (MediaShare mediashare : newMediaShares) {
+
+                for (MediaShareContent mediashareContent : mediashare.getMediaShareContents()) {
+
+                    bindMediaShareContent(mediaShareContentSQLiteStatement, mediashareContent, mediashare.getUuid());
+
+                    mediaShareContentSQLiteStatement.executeInsert();
+                }
+
+                bindMediaShare(mediaShareSQLiteStatement, mediashare);
+
+                returnValue = mediaShareSQLiteStatement.executeInsert();
+
+            }
+
+            database.setTransactionSuccessful();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
         } finally {
 
             database.endTransaction();

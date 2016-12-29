@@ -94,7 +94,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
                     Log.i(TAG, "modify remote share succeed");
 
                     DBUtils dbUtils = DBUtils.getInstance(this);
-                    long dbResult = dbUtils.updateRemoteShare(mediaShare);
+                    long dbResult = dbUtils.updateRemoteMediaShare(mediaShare);
 
                     Log.i(TAG, "modify media in remote mediashare which source is network result:" + dbResult);
 

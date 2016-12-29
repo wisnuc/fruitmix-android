@@ -18,7 +18,10 @@ import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
@@ -62,15 +65,22 @@ public class RetrieveRemoteMediaShareService extends IntentService {
         }
     }
 
-    private void handleActionRetrieveRemoteMediaShare() {
+    /*
+     * has memory issue,cause too much gc
+     */
+    @Deprecated
+    private void handleActionRetrieveRemoteMediaShares(boolean loadMediaShareInDBWhenExceptionOccur) {
 
         List<MediaShare> remoteMediaSharesFromNetwork;
         List<MediaShare> remoteMediaSharesFromDB;
 
         List<MediaShare> newMediaShares = new ArrayList<>();
-        List<MediaShare> needDeleteMediaShare = new ArrayList<>();
+        List<MediaShare> oldMediaShares = new ArrayList<>();
 
         ConcurrentMap<String, MediaShare> mediaShareConcurrentMap;
+
+        Collection<String> oldMediaShareMapKey;
+        Collection<String> newMediaShareMapKey;
 
         DBUtils dbUtils = DBUtils.getInstance(this);
 
@@ -91,27 +101,95 @@ public class RetrieveRemoteMediaShareService extends IntentService {
             RemoteDataParser<MediaShare> parser = new RemoteMediaShareParser();
             remoteMediaSharesFromNetwork = parser.parse(httpResponse.getResponseData());
 
-            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: parse remote media share");
+            mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(remoteMediaSharesFromNetwork);
 
-            //TODO:update modified media share,insert new media share and delete useless media share
+            oldMediaShareMapKey = LocalCache.RemoteMediaShareMapKeyIsUUID.keySet();
+            newMediaShareMapKey = mediaShareConcurrentMap.keySet();
 
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: parse remote media share" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
+            calcOldMediaSharesAndNewMediaShares(newMediaShares, oldMediaShares, mediaShareConcurrentMap, oldMediaShareMapKey, newMediaShareMapKey);
+
+            calcNewMediaShares(newMediaShares, mediaShareConcurrentMap, oldMediaShareMapKey, newMediaShareMapKey);
+
+            handleOldAndNewMediaShares(newMediaShares, oldMediaShares, dbUtils);
+
+            postStickyEvent();
 
         } catch (Exception ex) {
             ex.printStackTrace();
+
+            if (loadMediaShareInDBWhenExceptionOccur) {
+                postStickyEvent();
+            }
         }
 
     }
 
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
+    private void handleOldAndNewMediaShares(List<MediaShare> newMediaShares, List<MediaShare> oldMediaShares, DBUtils dbUtils) {
+        if (!oldMediaShares.isEmpty() || !newMediaShares.isEmpty()) {
+            dbUtils.deleteOldAndInsertNewRemoteMediaShare(oldMediaShares, newMediaShares);
+
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: finish delet old and insert new mediashares " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
+        } else {
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: no oldMediaShares or newMediaShares");
+        }
+    }
+
+    private void calcNewMediaShares(List<MediaShare> newMediaShares, ConcurrentMap<String, MediaShare> mediaShareConcurrentMap, Collection<String> oldMediaShareMapKey, Collection<String> newMediaShareMapKey) {
+        for (String newKey : newMediaShareMapKey) {
+
+            if (!oldMediaShareMapKey.contains(newKey)) {
+
+                MediaShare mediaShare = mediaShareConcurrentMap.get(newKey);
+
+                newMediaShares.add(mediaShare);
+
+                LocalCache.RemoteMediaShareMapKeyIsUUID.putIfAbsent(newKey, mediaShare);
+            }
+
+        }
+
+        Log.i(TAG, "handleActionRetrieveRemoteMediaShare: finish calc newMediaShares " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+    }
+
+    private void calcOldMediaSharesAndNewMediaShares(List<MediaShare> newMediaShares, List<MediaShare> oldMediaShares, ConcurrentMap<String, MediaShare> mediaShareConcurrentMap, Collection<String> oldMediaShareMapKey, Collection<String> newMediaShareMapKey) {
+        for (String oldKey : oldMediaShareMapKey) {
+
+            if (newMediaShareMapKey.contains(oldKey)) {
+
+                MediaShare oldMediaShare = LocalCache.RemoteMediaShareMapKeyIsUUID.get(oldKey);
+                MediaShare newMediaShare = mediaShareConcurrentMap.get(oldKey);
+
+                if (!newMediaShare.getShareDigest().equals(oldMediaShare.getShareDigest())) {
+
+                    oldMediaShares.add(oldMediaShare);
+                    newMediaShares.add(newMediaShare);
+
+                    LocalCache.RemoteMediaShareMapKeyIsUUID.put(oldKey, newMediaShare);
+                }
+
+            } else {
+                oldMediaShares.add(LocalCache.RemoteMediaShareMapKeyIsUUID.get(oldKey));
+
+                LocalCache.RemoteMediaShareMapKeyIsUUID.remove(oldKey);
+            }
+
+        }
+
+        Log.i(TAG, "handleActionRetrieveRemoteMediaShare: finish calc oldMediaShares and newMediaShares " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+    }
+
     private void handleActionRetrieveRemoteMediaShare(boolean loadMediaShareInDBWhenExceptionOccur) {
 
         List<MediaShare> mediaShares;
 
         ConcurrentMap<String, MediaShare> mediaShareConcurrentMap;
         DBUtils dbUtils = DBUtils.getInstance(this);
+
+        List<String> oldMediaSharesDigests;
+        List<String> newMediaSharesDigests;
 
         try {
 
@@ -128,6 +206,22 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: build media share map");
 
+            newMediaSharesDigests = new ArrayList<>(mediaShares.size());
+            for (MediaShare mediaShare : mediaShares) {
+                newMediaSharesDigests.add(mediaShare.getShareDigest());
+            }
+
+            oldMediaSharesDigests = new ArrayList<>(LocalCache.RemoteMediaShareMapKeyIsUUID.size());
+            for (MediaShare mediaShare : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
+                oldMediaSharesDigests.add(mediaShare.getShareDigest());
+            }
+
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: generate oldMediaShares and newMediaShares");
+
+            if (oldMediaSharesDigests.containsAll(newMediaSharesDigests)) {
+                return;
+            }
+
             dbUtils.deleteAllRemoteShare();
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: delete all remote share in db");
@@ -138,7 +232,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
             fillLocalCacheRemoteMediaShareMap(mediaShareConcurrentMap);
 
-            postEvent();
+            postStickyEvent();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -152,7 +246,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
                 fillLocalCacheRemoteMediaShareMap(mediaShareConcurrentMap);
 
-                postEvent();
+                postStickyEvent();
 
             }
 
@@ -160,7 +254,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
     }
 
-    private void postEvent() {
+    private void postStickyEvent() {
         OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_RETRIEVED, new OperationSuccess());
         EventBus.getDefault().postSticky(operationEvent);
     }

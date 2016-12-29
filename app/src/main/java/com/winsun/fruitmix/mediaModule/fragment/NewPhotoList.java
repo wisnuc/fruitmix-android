@@ -130,8 +130,6 @@ public class NewPhotoList implements Page {
 
         noContentImageView.setImageResource(R.drawable.no_photo);
 
-        initImageLoader();
-
         mPhotoListListeners = new ArrayList<>();
 
         calcScreenWidth();
@@ -159,12 +157,15 @@ public class NewPhotoList implements Page {
     }
 
     private void initImageLoader() {
-        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(containerActivity).getRequestQueue();
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
+
+        if (mImageLoader == null) {
+            RequestQueue mRequestQueue = RequestQueueInstance.getInstance(containerActivity).getRequestQueue();
+            mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+            Map<String, String> headers = new HashMap<>();
+            headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+            Log.i(TAG, FNAS.JWT);
+            mImageLoader.setHeaders(headers);
+        }
     }
 
     public void addPhotoListListener(IPhotoListListener listListener) {
@@ -194,6 +195,8 @@ public class NewPhotoList implements Page {
             mLoadingLayout.setVisibility(View.VISIBLE);
             return;
         }
+
+        initImageLoader();
 
         final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
 

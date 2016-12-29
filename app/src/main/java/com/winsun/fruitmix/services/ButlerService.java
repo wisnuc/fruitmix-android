@@ -180,10 +180,14 @@ public class ButlerService extends Service {
                 break;
             case Util.REMOTE_USER_RETRIEVED:
 
-                EventBus.getDefault().post(new OperationEvent(Util.REFRESH_VIEW_AFTER_USER_RETRIEVED, operationResult));
+                if (Util.loginType == LoginType.LOGIN) {
+                    EventBus.getDefault().post(new OperationEvent(Util.REFRESH_VIEW_AFTER_USER_RETRIEVED, operationResult));
+                } else {
+                    EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_USER_RETRIEVED, operationResult));
+                }
 
                 FNAS.retrieveRemoteMediaMap(this);
-                FNAS.retrieveRemoteMediaShare(this,true);
+                FNAS.retrieveRemoteMediaShare(this, true);
                 break;
         }
 

@@ -72,7 +72,7 @@ public class ModifyLocalMediaShareService extends IntentService {
 
             DBUtils dbUtils = DBUtils.getInstance(this);
 
-            long returnValue = dbUtils.updateLocalShare(mediaShare);
+            long returnValue = dbUtils.updateLocalMediaShare(mediaShare);
 
             if (returnValue > 0) {
 

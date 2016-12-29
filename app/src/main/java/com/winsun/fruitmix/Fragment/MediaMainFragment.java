@@ -327,9 +327,10 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void handleStickyOperationEvent(OperationEvent operationEvent) {
         OperationEvent stickyEvent = EventBus.getDefault().getStickyEvent(OperationEvent.class);
 
-        Log.i(TAG, "handleStickyOperationEvent: action:" + stickyEvent.getAction());
-
         if (stickyEvent != null) {
+
+            Log.i(TAG, "handleStickyOperationEvent: action:" + stickyEvent.getAction());
+
             String action = operationEvent.getAction();
 
             if (action.equals(Util.REMOTE_MEDIA_RETRIEVED)) {
