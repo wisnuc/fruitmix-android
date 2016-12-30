@@ -2,6 +2,7 @@ package com.winsun.fruitmix.fileModule.fragment;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -109,7 +110,6 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
      *
      * @return A new instance of fragment FileFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static FileFragment newInstance(OnFileInteractionListener onFileInteractionListener) {
         FileFragment fragment = new FileFragment();
         fragment.setOnFileInteractionListener(onFileInteractionListener);
@@ -159,9 +159,10 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
     public void onResume() {
         super.onResume();
 
-        User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
-
         if (!remoteFileLoaded && !isHidden()) {
+
+            User user = LocalCache.getUser(getContext());
+
             currentFolderUUID = user.getHome();
 
             if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
@@ -249,7 +250,9 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
     }
 
     private boolean notRootFolder() {
-        User user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
+
+        User user = LocalCache.getUser(getContext());
+
         String homeFolderUUID = user.getHome();
 
         return !currentFolderUUID.equals(homeFolderUUID);
@@ -258,6 +261,11 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
     public void onBackPressed() {
 
         if (notRootFolder()) {
+
+            if (loadingLayout.getVisibility() == View.VISIBLE)
+                return;
+
+            loadingLayout.setVisibility(View.VISIBLE);
 
             retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
 
@@ -497,6 +505,8 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
                     currentFolderName = abstractRemoteFile.getName();
 
                     retrievedFolderNameList.add(currentFolderName);
+
+                    loadingLayout.setVisibility(View.VISIBLE);
 
                     abstractRemoteFile.openAbstractRemoteFile(getActivity());
 

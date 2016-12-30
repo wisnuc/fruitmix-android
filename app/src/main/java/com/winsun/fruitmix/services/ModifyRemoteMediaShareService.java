@@ -9,6 +9,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationLocalMediaShareUploading;
@@ -36,7 +37,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
     private static final String ACTION_MODIFY_REMOTE_MEDIA_SHARE = "com.winsun.fruitmix.services.action.modify.remote.share";
 
-    private static final String EXTRA_MEDIA_SHARE_UUID = "com.winsun.fruitmix.services.extra.share.uuid";
+    private static final String EXTRA_MEDIA_SHARE = "com.winsun.fruitmix.services.extra.share";
 
     private static final String EXTRA_REQUEST_DATA = "com.wisnun.fruitmix.services.extra.request.data";
 
@@ -53,7 +54,10 @@ public class ModifyRemoteMediaShareService extends IntentService {
     public static void startActionModifyRemoteMediaShare(Context context, MediaShare mediaShare, String requestData) {
         Intent intent = new Intent(context, ModifyRemoteMediaShareService.class);
         intent.setAction(ACTION_MODIFY_REMOTE_MEDIA_SHARE);
-        intent.putExtra(EXTRA_MEDIA_SHARE_UUID, mediaShare.getUuid());
+
+        mediaShare.clearMediaShareContents();
+
+        intent.putExtra(EXTRA_MEDIA_SHARE, mediaShare);
         intent.putExtra(EXTRA_REQUEST_DATA, requestData);
         context.startService(intent);
     }
@@ -63,9 +67,9 @@ public class ModifyRemoteMediaShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_MODIFY_REMOTE_MEDIA_SHARE.equals(action)) {
-                String mediaShareUUID = intent.getStringExtra(EXTRA_MEDIA_SHARE_UUID);
+                MediaShare mediaShare = intent.getParcelableExtra(EXTRA_MEDIA_SHARE);
                 String requestData = intent.getStringExtra(EXTRA_REQUEST_DATA);
-                handleActionModifyRemoteShare(LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID), requestData);
+                handleActionModifyRemoteShare(mediaShare, requestData);
             }
         }
     }

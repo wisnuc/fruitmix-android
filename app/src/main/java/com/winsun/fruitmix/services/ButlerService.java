@@ -186,8 +186,7 @@ public class ButlerService extends Service {
                     EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_USER_RETRIEVED, operationResult));
                 }
 
-                FNAS.retrieveRemoteMediaMap(this);
-                FNAS.retrieveRemoteMediaShare(this, true);
+                FNAS.retrieveRemoteMedia(this);
                 break;
         }
 
@@ -196,7 +195,7 @@ public class ButlerService extends Service {
     private void handleRemoteDeviceIdRetrieved(OperationResult operationResult, OperationResultType operationResultType) {
         switch (operationResultType) {
             case SUCCEED:
-                FNAS.retrieveUserMap(this);
+                FNAS.retrieveUser(this);
                 break;
             default:
 
@@ -205,7 +204,7 @@ public class ButlerService extends Service {
                 if (Util.loginType == LoginType.SPLASH_SCREEN) {
                     LocalCache.DeviceID = LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME);
 
-                    FNAS.retrieveUserMap(this);
+                    FNAS.retrieveUser(this);
                 }
         }
     }
@@ -228,7 +227,7 @@ public class ButlerService extends Service {
 
                     LocalCache.DeviceID = LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME);
 
-                    FNAS.retrieveUserMap(this);
+                    FNAS.retrieveUser(this);
                 }
 
         }

@@ -646,11 +646,21 @@ public class LocalCache {
         user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
         user.setDefaultAvatarBgColor(sp.getInt(Util.USER_BG_COLOR, 0));
         user.setAdmin(sp.getBoolean(Util.USER_IS_ADMIN, false));
+        user.setHome(sp.getString(Util.USER_HOME, ""));
+        user.setUuid(sp.getString(Util.USER_UUID,""));
 
         return user;
     }
 
-    public static void saveUser(Context context, String userName, int userDefaultAvatarBgColor, boolean userIsAdmin) {
+    public static String getUserUUID(Context context){
+        SharedPreferences sp;
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+
+        return sp.getString(Util.USER_UUID,"");
+
+    }
+
+    public static void saveUser(Context context, String userName, int userDefaultAvatarBgColor, boolean userIsAdmin, String userHome,String userUUID) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
@@ -658,6 +668,8 @@ public class LocalCache {
         editor.putString(Util.USER_NAME, userName);
         editor.putInt(Util.USER_BG_COLOR, userDefaultAvatarBgColor);
         editor.putBoolean(Util.USER_IS_ADMIN, userIsAdmin);
+        editor.putString(Util.USER_HOME, userHome);
+        editor.putString(Util.USER_UUID,userUUID);
         editor.apply();
     }
 

@@ -651,8 +651,8 @@ public class DBUtils {
 
             database.beginTransaction();
 
-            database.delete(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, null, null);
-            returnValue = database.delete(DBHelper.LOCAL_SHARE_TABLE_NAME, null, null);
+            database.delete(shareContentDBName, null, null);
+            returnValue = database.delete(shareDBName, null, null);
 
             database.setTransactionSuccessful();
         } catch (Exception ex) {
@@ -789,12 +789,12 @@ public class DBUtils {
         return getImageCommentByUUid(DBHelper.REMOTE_COMMENT_TABLE_NAME, uuid);
     }
 
-    private List<MediaShare> getAllShare(String dbName) {
+    private List<MediaShare> getAllShare(String shareDBName, String shareContentDBName) {
         openReadableDB();
 
         List<MediaShare> list = new ArrayList<>();
         LocalDataParser<MediaShare> parser = new LocalMediaShareParser();
-        Cursor cursor = database.rawQuery("select * from " + dbName, null);
+        Cursor cursor = database.rawQuery("select * from " + shareDBName, null);
         while (cursor.moveToNext()) {
 
             list.add(parser.parse(cursor));
@@ -803,7 +803,7 @@ public class DBUtils {
 
         for (MediaShare mediaShare : list) {
 
-            mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShare.getUuid()));
+            mediaShare.initMediaShareContents(getMediaShareContents(shareContentDBName, mediaShare.getUuid()));
         }
 
         close();
@@ -813,20 +813,20 @@ public class DBUtils {
 
     public List<MediaShare> getAllLocalShare() {
 
-        return getAllShare(DBHelper.LOCAL_SHARE_TABLE_NAME);
+        return getAllShare(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME);
     }
 
     public List<MediaShare> getAllRemoteShare() {
 
-        return getAllShare(DBHelper.REMOTE_SHARE_TABLE_NAME);
+        return getAllShare(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
 
     }
 
-    private MediaShare getShareByUuid(String dbName, String uuid) {
+    private MediaShare getShareByUuid(String shareDBName, String shareContentDBName, String uuid) {
 
         openReadableDB();
 
-        Cursor cursor = database.rawQuery("select * from " + dbName + " where " + DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
+        Cursor cursor = database.rawQuery("select * from " + shareDBName + " where " + DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
         MediaShare mediaShare = new MediaShare();
         LocalDataParser<MediaShare> parser = new LocalMediaShareParser();
         while (cursor.moveToNext()) {
@@ -834,7 +834,7 @@ public class DBUtils {
         }
         cursor.close();
 
-        mediaShare.initMediaShareContents(getMediaShareContents(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaShare.getUuid()));
+        mediaShare.initMediaShareContents(getMediaShareContents(shareContentDBName, mediaShare.getUuid()));
 
         close();
 
@@ -843,13 +843,13 @@ public class DBUtils {
 
     public MediaShare getLocalShareByUuid(String uuid) {
 
-        return getShareByUuid(DBHelper.LOCAL_SHARE_TABLE_NAME, uuid);
+        return getShareByUuid(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, uuid);
 
     }
 
     public MediaShare getRemoteShareByUuid(String uuid) {
 
-        return getShareByUuid(DBHelper.REMOTE_SHARE_TABLE_NAME, uuid);
+        return getShareByUuid(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, uuid);
 
     }
 
@@ -1014,9 +1014,9 @@ public class DBUtils {
 
     }
 
-    public long deleteOldAndInsertNewRemoteMediaShare(Collection<MediaShare> oldMediaShares, Collection<MediaShare> newMediaShares){
+    public long deleteOldAndInsertNewRemoteMediaShare(Collection<MediaShare> oldMediaShares, Collection<MediaShare> newMediaShares) {
 
-        return deleteOldAndInsertNewMediaShare(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME,DBHelper.REMOTE_SHARE_TABLE_NAME,oldMediaShares,newMediaShares);
+        return deleteOldAndInsertNewMediaShare(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, DBHelper.REMOTE_SHARE_TABLE_NAME, oldMediaShares, newMediaShares);
 
     }
 

@@ -323,40 +323,35 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         });
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void handleStickyOperationEvent(OperationEvent operationEvent) {
-        OperationEvent stickyEvent = EventBus.getDefault().getStickyEvent(OperationEvent.class);
 
-        if (stickyEvent != null) {
+        Log.i(TAG, "handleStickyOperationEvent: action:" + operationEvent.getAction());
 
-            Log.i(TAG, "handleStickyOperationEvent: action:" + stickyEvent.getAction());
+        String action = operationEvent.getAction();
 
-            String action = operationEvent.getAction();
+        if (action.equals(Util.REMOTE_MEDIA_RETRIEVED)) {
+            Log.i(TAG, "remote media loaded");
 
-            if (action.equals(Util.REMOTE_MEDIA_RETRIEVED)) {
-                Log.i(TAG, "remote media loaded");
+            mRemoteMediaLoaded = true;
 
-                EventBus.getDefault().removeStickyEvent(stickyEvent);
+            NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+            Util.needRefreshPhotoSliderList = true;
+            photoList.refreshView();
 
-                mRemoteMediaLoaded = true;
+            FNAS.retrieveRemoteMediaShare(mContext, true);
 
-                NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
-                Util.needRefreshPhotoSliderList = true;
-                photoList.refreshView();
+        } else if (action.equals(Util.REMOTE_MEDIA_SHARE_RETRIEVED)) {
+            Log.i(TAG, "remote share loaded");
 
-            } else if (action.equals(Util.REMOTE_MEDIA_SHARE_RETRIEVED)) {
-                Log.i(TAG, "remote share loaded");
+            mRemoteMediaShareLoaded = true;
 
-                EventBus.getDefault().removeStickyEvent(stickyEvent);
+            albumList.refreshView();
+            shareList.refreshView();
 
-                mRemoteMediaShareLoaded = true;
-
-                pageList.get(PAGE_ALBUM).refreshView();
-                pageList.get(PAGE_SHARE).refreshView();
-
-                ButlerService.startTimingRetrieveMediaShare();
-            }
+            ButlerService.startTimingRetrieveMediaShare();
         }
+
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -468,8 +463,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         switch (operationResultType) {
             case SUCCEED:
                 Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-                pageList.get(PAGE_ALBUM).refreshView();
-                pageList.get(PAGE_SHARE).refreshView();
+                albumList.refreshView();
+                shareList.refreshView();
                 break;
             default:
                 Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
@@ -482,6 +477,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         OperationResult operationResult = operationEvent.getOperationResult();
 
         dismissDialog();
+
+        if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
+            viewPager.setCurrentItem(PAGE_SHARE);
+            onDidAppear(PAGE_SHARE);
+            pageList.get(PAGE_SHARE).onDidAppear();
+        }
 
         Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
 

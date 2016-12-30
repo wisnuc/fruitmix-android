@@ -1,6 +1,7 @@
 package com.winsun.fruitmix;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -43,10 +44,11 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
     private Context mContext;
 
-    private String mEquipmentChildName;
     private String mUserUUid;
     private String mPwd;
     private String mGateway;
+
+    private ProgressDialog mDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +65,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
         Intent intent = getIntent();
         String equipmentGroupName = intent.getStringExtra(Util.USER_GROUP_NAME);
-        mEquipmentChildName = intent.getStringExtra(Util.USER_NAME);
+        String mEquipmentChildName = intent.getStringExtra(Util.USER_NAME);
         mUserUUid = intent.getStringExtra(Util.USER_UUID);
         mGateway = intent.getStringExtra(Util.GATEWAY);
 
@@ -115,6 +117,9 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         switch (action) {
             case Util.REFRESH_VIEW_AFTER_USER_RETRIEVED: {
 
+                if (mDialog != null)
+                    mDialog.dismiss();
+
                 handleRetrieveUser();
 
                 break;
@@ -160,6 +165,8 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
      * use uuid and password to login
      */
     private void login() {
+
+        mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
         FNAS.retrieveRemoteToken(mContext, mGateway, mUserUUid, mPwd);
 

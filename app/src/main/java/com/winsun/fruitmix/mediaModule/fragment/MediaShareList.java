@@ -104,6 +104,7 @@ public class MediaShareList implements Page {
 
         mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
 
+        mediaShareList = new ArrayList<>();
     }
 
     private void initImageLoader() {
@@ -121,13 +122,11 @@ public class MediaShareList implements Page {
 
     private void reloadList() {
 
-        List<MediaShare> mediaShareList = new ArrayList<>();
+        mediaShareList.clear();
 
         fillMediaShareList(mediaShareList);
 
         sortMediaShareList(mediaShareList);
-
-        this.mediaShareList = mediaShareList;
 
     }
 

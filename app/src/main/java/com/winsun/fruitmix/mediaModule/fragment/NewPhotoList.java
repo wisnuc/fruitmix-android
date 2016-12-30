@@ -108,8 +108,6 @@ public class NewPhotoList implements Page {
 
     private boolean mUseAnim = false;
 
-    private int mAnimCount = 0;
-
     private ImageLoader mImageLoader;
 
     private float mOldSpan = 0;
@@ -621,10 +619,12 @@ public class NewPhotoList implements Page {
 
             if (mSelectMode) {
 
-                if (mUseAnim) {
-                    showPhotoTitleSelectImgAnim();
-                } else
-                    showPhotoTitleSelectImg();
+                if (!isPhotoTitleSelectImgVisible()) {
+                    if (mUseAnim) {
+                        showPhotoTitleSelectImgAnim();
+                    } else
+                        showPhotoTitleSelectImg();
+                }
 
                 List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
                 int selectNum = 0;
@@ -639,10 +639,12 @@ public class NewPhotoList implements Page {
 
             } else {
 
-                if (mUseAnim) {
-                    dismissPhotoTitleSelectImgAnim();
-                } else
-                    dismissPhotoTitleSelectImg();
+                if (isPhotoTitleSelectImgVisible()) {
+                    if (mUseAnim) {
+                        dismissPhotoTitleSelectImgAnim();
+                    } else
+                        dismissPhotoTitleSelectImg();
+                }
             }
 
 
@@ -670,25 +672,17 @@ public class NewPhotoList implements Page {
 
         }
 
+        private boolean isPhotoTitleSelectImgVisible() {
+            return mPhotoTitleSelectImg.getVisibility() == View.VISIBLE;
+        }
+
         private void showPhotoTitleSelectImgAnim() {
             mPhotoTitleSelectImg.setVisibility(View.VISIBLE);
 
             Animation animation = AnimationUtils.loadAnimation(containerActivity, R.anim.show_right_item_anim);
 
-            animation.setAnimationListener(new BaseAnimationListener() {
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    super.onAnimationEnd(animation);
-
-                    mAnimCount--;
-                    if (mAnimCount == 0)
-                        mUseAnim = false;
-                }
-            });
-
             mPhotoTitleSelectImg.startAnimation(animation);
 
-            mAnimCount++;
         }
 
         private void dismissPhotoTitleSelectImgAnim() {
@@ -701,16 +695,11 @@ public class NewPhotoList implements Page {
 
                     mPhotoTitleSelectImg.setVisibility(View.GONE);
 
-                    mAnimCount--;
-                    if (mAnimCount == 0)
-                        mUseAnim = false;
-
                 }
             });
 
             mPhotoTitleSelectImg.startAnimation(animation);
 
-            mAnimCount++;
         }
 
         private void showPhotoTitleSelectImg() {

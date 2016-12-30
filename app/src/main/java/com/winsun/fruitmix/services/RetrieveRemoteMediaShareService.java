@@ -202,10 +202,6 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: parse remote media share");
 
-            mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
-
-            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: build media share map");
-
             newMediaSharesDigests = new ArrayList<>(mediaShares.size());
             for (MediaShare mediaShare : mediaShares) {
                 newMediaSharesDigests.add(mediaShare.getShareDigest());
@@ -218,13 +214,23 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: generate oldMediaShares and newMediaShares");
 
-            if (oldMediaSharesDigests.containsAll(newMediaSharesDigests)) {
-                return;
+            if (oldMediaSharesDigests.containsAll(newMediaSharesDigests) && newMediaSharesDigests.containsAll(oldMediaSharesDigests)) {
+
+                Log.i(TAG, "handleActionRetrieveRemoteMediaShare: old media shares are same as newMediaShares");
+
+                if (!loadMediaShareInDBWhenExceptionOccur) {
+                    return;
+                }
+
             }
 
             dbUtils.deleteAllRemoteShare();
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: delete all remote share in db");
+
+            mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
+
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: build media share map");
 
             dbUtils.insertRemoteMediaShares(mediaShareConcurrentMap.values());
 
@@ -240,6 +246,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
             if (loadMediaShareInDBWhenExceptionOccur) {
 
                 mediaShares = dbUtils.getAllRemoteShare();
+
                 mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
 
                 Log.i(TAG, "handleActionRetrieveRemoteMediaShare: retrieve remote media share from db");

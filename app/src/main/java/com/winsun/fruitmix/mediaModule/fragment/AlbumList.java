@@ -101,6 +101,7 @@ public class AlbumList implements Page {
             }
         });
 
+        mediaShareList = new ArrayList<>();
     }
 
     private void initImageLoader() {
@@ -120,14 +121,13 @@ public class AlbumList implements Page {
 
 
     private void reloadList() {
-        List<MediaShare> mediaShareList;
-        mediaShareList = new ArrayList<>();
+        mediaShareList.clear();
 
         fillMediaShareList(mediaShareList);
 
         sortMediaShareList(mediaShareList);
 
-        this.mediaShareList = mediaShareList;
+
     }
 
     private void sortMediaShareList(List<MediaShare> mediaShareList) {
@@ -184,7 +184,6 @@ public class AlbumList implements Page {
             mNoContentLayout.setVisibility(View.GONE);
             mainListView.setVisibility(View.VISIBLE);
             ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
-
         }
 
     }

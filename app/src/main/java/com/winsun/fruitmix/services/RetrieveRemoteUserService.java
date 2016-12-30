@@ -81,7 +81,7 @@ public class RetrieveRemoteUserService extends IntentService {
             users = parser.parse(httpResponse.getResponseData());
 
             User user = users.get(0);
-            LocalCache.saveUser(this, user.getUserName(), user.getDefaultAvatarBgColor(), user.isAdmin());
+            LocalCache.saveUser(this, user.getUserName(), user.getDefaultAvatarBgColor(), user.isAdmin(),user.getHome(),user.getUuid());
 
             List<User> otherUsers = parser.parse(FNAS.loadOtherUsers().getResponseData());
 

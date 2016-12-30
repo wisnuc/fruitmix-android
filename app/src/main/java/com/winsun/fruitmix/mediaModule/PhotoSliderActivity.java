@@ -378,7 +378,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             startLoadingOriginalPhoto(view, media);
         }
 
-        setViewWidthHeightMatchParent(view);
     }
 
     private void setViewWidthHeightMatchParent(View view) {
@@ -419,6 +418,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 }
             });
+        } else {
+            startLoadingOriginalPhoto(view, media);
         }
     }
 
@@ -484,8 +485,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 Media media = mediaList.get(position);
 
                 Log.i(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
-
-                setMainPicScreenHeight(mainPic, media);
 
                 mainPic.registerImageLoadListener(PhotoSliderActivity.this);
 

@@ -164,7 +164,7 @@ public class NavPagerActivity extends AppCompatActivity
         if (action.equals(Util.REFRESH_VIEW_AFTER_USER_RETRIEVED)) {
 
             Log.i(TAG, "handleOperationEvent: refreshUser");
-            
+
             refreshUserInNavigationView();
 
         }
@@ -173,10 +173,8 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     private void refreshUserInNavigationView() {
-        User user = LocalCache.getUser(mContext);
 
-        if (user == null)
-            return;
+        User user = LocalCache.getUser(mContext);
 
         String userName = user.getUserName();
         TextView mUserNameTextView = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name_textview);
@@ -383,6 +381,8 @@ public class NavPagerActivity extends AppCompatActivity
 
             fragmentManager.beginTransaction().hide(mediaMainFragment).show(fileMainFragment).commit();
 
+            ButlerService.stopTimingRetrieveMediaShare();
+
         } else {
 
             currentPage = PAGE_MEDIA;
@@ -391,6 +391,8 @@ public class NavPagerActivity extends AppCompatActivity
             menuItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_folder));
 
             fragmentManager.beginTransaction().hide(fileMainFragment).show(mediaMainFragment).commit();
+
+            ButlerService.startTimingRetrieveMediaShare();
         }
 
     }

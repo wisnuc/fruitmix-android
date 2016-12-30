@@ -33,6 +33,7 @@ public class Util {
     public static final String USER_NAME = "user_child_name";
     public static final String USER_BG_COLOR = "user_bg_color";
     public static final String USER_IS_ADMIN = "user_is_admin";
+    public static final String USER_HOME = "user_home";
     public static final String JWT = "jwt";
     public static final String GATEWAY = "gateway";
     public static final String USER_UUID = "user_uuid";

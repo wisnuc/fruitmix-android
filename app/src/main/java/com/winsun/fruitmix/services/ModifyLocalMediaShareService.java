@@ -26,7 +26,7 @@ public class ModifyLocalMediaShareService extends IntentService {
 
     private static final String ACTION_MODIFY_LOCAL_MEDIA_SHARE = "com.winsun.fruitmix.services.action.modify.local.share";
 
-    private static final String EXTRA_MEDIA_SHARE_UUID = "com.winsun.fruitmix.services.extra.share.uuid";
+    private static final String EXTRA_MEDIA_SHARE = "com.winsun.fruitmix.services.extra.share";
 
     public ModifyLocalMediaShareService() {
         super("ModifyLocalMediaShareService");
@@ -41,7 +41,7 @@ public class ModifyLocalMediaShareService extends IntentService {
     public static void startActionModifyLocalMediaShare(Context context, MediaShare mediaShare) {
         Intent intent = new Intent(context, ModifyLocalMediaShareService.class);
         intent.setAction(ACTION_MODIFY_LOCAL_MEDIA_SHARE);
-        intent.putExtra(EXTRA_MEDIA_SHARE_UUID, mediaShare.getUuid());
+        intent.putExtra(EXTRA_MEDIA_SHARE, mediaShare);
         context.startService(intent);
     }
 
@@ -50,8 +50,8 @@ public class ModifyLocalMediaShareService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_MODIFY_LOCAL_MEDIA_SHARE.equals(action)) {
-                String mediaShareUUID = intent.getStringExtra(EXTRA_MEDIA_SHARE_UUID);
-                handleActionModifyLocalShare(LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID));
+                MediaShare mediaShare = intent.getParcelableExtra(EXTRA_MEDIA_SHARE);
+                handleActionModifyLocalShare(mediaShare);
             }
         }
     }
@@ -66,7 +66,7 @@ public class ModifyLocalMediaShareService extends IntentService {
 
         if (!mediaShare.isLocal()) {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, new OperationNoNetworkException(),mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, new OperationNoNetworkException(), mediaShare);
 
         } else {
 
@@ -76,15 +76,15 @@ public class ModifyLocalMediaShareService extends IntentService {
 
             if (returnValue > 0) {
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, new OperationSuccess(),mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, new OperationSuccess(), mediaShare);
 
-                Log.i(TAG,"modify local share succeed");
+                Log.i(TAG, "modify local share succeed");
 
             } else {
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, new OperationSQLException(),mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, new OperationSQLException(), mediaShare);
 
-                Log.i(TAG,"modify local share fail");
+                Log.i(TAG, "modify local share fail");
             }
 
         }

@@ -9,18 +9,11 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.model.LoginType;
-import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -62,7 +55,7 @@ public class SplashScreenActivity extends Activity {
             Log.i(TAG, "onCreate: Create download file store folder failed");
         }
 
-        FNAS.retrieveLocalMediaMap(getApplicationContext());
+        FNAS.retrieveLocalMedia(getApplicationContext());
 
         mGateway = LocalCache.getGateway(mContext);
         mUuid = LocalCache.getUuidValue(mContext);

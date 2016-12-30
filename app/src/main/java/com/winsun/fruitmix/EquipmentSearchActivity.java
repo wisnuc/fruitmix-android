@@ -522,6 +522,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private void discoverService() {
 
+        //TODO:use mdnsjava to discover equipment otherwise android NSD Manager
+
         stopDiscoverServices();
 
         initDiscoveryListener();

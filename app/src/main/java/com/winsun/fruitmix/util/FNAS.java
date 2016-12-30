@@ -157,17 +157,17 @@ public class FNAS {
         EventBus.getDefault().post(new TokenRequestEvent(OperationType.GET, OperationTargetType.REMOTE_TOKEN, gateway, userUUID,pwd));
     }
 
-    public static void retrieveUserMap(Context context) {
+    public static void retrieveUser(Context context) {
 
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_USER));
     }
 
-    public static void retrieveLocalMediaMap(Context context) {
+    public static void retrieveLocalMedia(Context context) {
 
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIA));
     }
 
-    public static void retrieveRemoteMediaMap(Context context) {
+    public static void retrieveRemoteMedia(Context context) {
 
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIA));
     }

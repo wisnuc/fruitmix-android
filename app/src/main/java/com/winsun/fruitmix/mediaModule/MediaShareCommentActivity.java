@@ -600,6 +600,9 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                     Util.showSoftInput(MediaShareCommentActivity.this, tfContent);
                 }
             });
+        } else {
+            tfContent.requestFocus();
+            Util.showSoftInput(MediaShareCommentActivity.this, tfContent);
         }
     }
 

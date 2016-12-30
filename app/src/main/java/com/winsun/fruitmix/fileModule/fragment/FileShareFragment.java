@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.fileModule.fragment;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +19,7 @@ import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
@@ -77,7 +79,6 @@ public class FileShareFragment extends Fragment {
      *
      * @return A new instance of fragment FileShareFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static FileShareFragment newInstance(OnFileInteractionListener onFileInteractionListener) {
         FileShareFragment fragment = new FileShareFragment();
         fragment.setOnFileInteractionListener(onFileInteractionListener);
@@ -120,7 +121,10 @@ public class FileShareFragment extends Fragment {
 
         if (!remoteFileShareLoaded && !isHidden()) {
 
-            currentFolderUUID = FNAS.userUUID;
+            if (FNAS.userUUID == null)
+                currentFolderUUID = LocalCache.getUserUUID(getContext());
+            else
+                currentFolderUUID = FNAS.userUUID;
 
             if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
                 retrievedFolderUUIDList.add(currentFolderUUID);
@@ -166,11 +170,13 @@ public class FileShareFragment extends Fragment {
     public void handleOperationEvent(OperationEvent operationEvent) {
 
         String action = operationEvent.getAction();
+
+        OperationResultType operationResultType = operationEvent.getOperationResult().getOperationResultType();
+
+        loadingLayout.setVisibility(View.INVISIBLE);
+
         if (action.equals(Util.REMOTE_FILE_SHARE_RETRIEVED)) {
 
-            loadingLayout.setVisibility(View.GONE);
-
-            OperationResultType operationResultType = operationEvent.getOperationResult().getOperationResultType();
             switch (operationResultType) {
                 case SUCCEED:
 
@@ -196,8 +202,7 @@ public class FileShareFragment extends Fragment {
 
         } else if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
 
-            OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
-            switch (result) {
+            switch (operationResultType) {
                 case SUCCEED:
 
                     List<AbstractRemoteFile> abstractRemoteFileList = LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent) operationEvent).getFolderUUID()).listChildAbstractRemoteFileList();
@@ -225,6 +230,12 @@ public class FileShareFragment extends Fragment {
 
 
     public void onBackPressed() {
+
+        if(loadingLayout.getVisibility() == View.VISIBLE){
+            return;
+        }
+
+        loadingLayout.setVisibility(View.VISIBLE);
 
         retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
 
@@ -338,6 +349,8 @@ public class FileShareFragment extends Fragment {
 
                     currentFolderName = abstractRemoteFile.getName();
                     retrievedFolderNameList.add(currentFolderName);
+
+                    loadingLayout.setVisibility(View.VISIBLE);
 
                     abstractRemoteFile.openAbstractRemoteFile(getActivity());
 
