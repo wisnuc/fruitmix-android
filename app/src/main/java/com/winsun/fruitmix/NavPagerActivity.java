@@ -96,7 +96,6 @@ public class NavPagerActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-        instance.startFixedThreadPool();
 
 /*        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -161,7 +160,7 @@ public class NavPagerActivity extends AppCompatActivity
 
         String action = operationEvent.getAction();
 
-        if (action.equals(Util.REFRESH_VIEW_AFTER_USER_RETRIEVED)) {
+        if (action.equals(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED)) {
 
             Log.i(TAG, "handleOperationEvent: refreshUser");
 

@@ -150,7 +150,7 @@ public class ButlerService extends Service {
 
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING)
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
         String action = operationEvent.getAction();
@@ -181,9 +181,9 @@ public class ButlerService extends Service {
             case Util.REMOTE_USER_RETRIEVED:
 
                 if (Util.loginType == LoginType.LOGIN) {
-                    EventBus.getDefault().post(new OperationEvent(Util.REFRESH_VIEW_AFTER_USER_RETRIEVED, operationResult));
+                    EventBus.getDefault().post(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
                 } else {
-                    EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_USER_RETRIEVED, operationResult));
+                    EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
                 }
 
                 FNAS.retrieveRemoteMedia(this);
@@ -199,13 +199,17 @@ public class ButlerService extends Service {
                 break;
             default:
 
-                Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
-
                 if (Util.loginType == LoginType.SPLASH_SCREEN) {
                     LocalCache.DeviceID = LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME);
 
                     FNAS.retrieveUser(this);
+
+                    Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
+
+                } else {
+                    EventBus.getDefault().post(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
                 }
+
         }
     }
 
@@ -220,14 +224,17 @@ public class ButlerService extends Service {
                 break;
             default:
 
-                Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
-
                 if (Util.loginType == LoginType.SPLASH_SCREEN) {
                     FNAS.JWT = LocalCache.getToken(this);
 
                     LocalCache.DeviceID = LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME);
 
                     FNAS.retrieveUser(this);
+
+                    Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
+
+                } else {
+                    EventBus.getDefault().post(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
                 }
 
         }

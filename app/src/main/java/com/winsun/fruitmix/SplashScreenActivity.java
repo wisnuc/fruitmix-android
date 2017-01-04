@@ -81,25 +81,17 @@ public class SplashScreenActivity extends Activity {
         mContext = null;
     }
 
-    private void startNavPagerActivity() {
-        Intent jumpIntent = new Intent(SplashScreenActivity.this, NavPagerActivity.class);
-        startActivity(jumpIntent);
-        finish();
-    }
-
-
     private void welcome() {
 
+        Intent intent = new Intent();
+
         if (mUuid != null && mPassword != null && mGateway != null && mToken != null) {
-
-            startNavPagerActivity();
-
+            intent.setClass(SplashScreenActivity.this, NavPagerActivity.class);
         } else {
-            Intent intent = new Intent();
             intent.setClass(SplashScreenActivity.this, EquipmentSearchActivity.class);
-            startActivity(intent);
-            finish();
         }
+        startActivity(intent);
+        finish();
     }
 
     private static class CustomHandler extends Handler {

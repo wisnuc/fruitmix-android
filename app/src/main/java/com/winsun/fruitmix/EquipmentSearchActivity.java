@@ -2,6 +2,7 @@ package com.winsun.fruitmix;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.net.nsd.NsdManager;
@@ -22,6 +23,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rxdnssd.RxDnssd;
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
@@ -41,6 +44,11 @@ import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import rx.Scheduler;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 public class EquipmentSearchActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -63,11 +71,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private List<Equipment> mFoundedEquipments;
 
-    private NsdManager.DiscoveryListener mDiscoveryListener;
-    private NsdManager.ResolveListener mResolveListener;
-    private NsdManager mManager;
-
     private static final String SERVICE_PORT = "_http._tcp";
+    private static final String DEMAIN = "local.";
 
     private List<List<User>> mUserExpandableLists;
 
@@ -78,7 +83,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     private static final String SYSTEM_PORT = "3000";
     private static final String IPALIASING = "/system/ipaliasing";
 
-    private boolean mStartDiscovery = false;
+    private boolean mStartAnimateArrow = false;
+
+    private RxDnssd mRxDnssd;
+    private Subscription mSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,45 +130,32 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             }
         });
 
-        mEquipmentExpandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-            @Override
-            public void onGroupExpand(int groupPosition) {
-
-                int count = mEquipmentExpandableListView.getExpandableListAdapter().getGroupCount();
-                for (int i = 0; i < count; i++) {
-                    if (i != groupPosition) {
-
-                        if (mEquipmentExpandableListView.isGroupExpanded(i)) {
-
-                            mEquipmentExpandableListView.collapseGroupWithAnimation(i);
-
-                            Animator animator = AnimatorInflater.loadAnimator(mContext, R.animator.ic_back_restore);
-                            animateArrow(i, animator);
-                        }
-
-                    }
-                }
-            }
-        });
-
         mEquipmentExpandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
 
-                Animator animator;
+                mStartAnimateArrow = true;
 
-                if (mEquipmentExpandableListView.isGroupExpanded(groupPosition)) {
-                    mEquipmentExpandableListView.collapseGroupWithAnimation(groupPosition);
+                int count = mAdapter.getGroupCount();
+                for (int i = 0; i < count; i++) {
 
-                    animator = AnimatorInflater.loadAnimator(mContext, R.animator.ic_back_restore);
-                } else {
-                    mEquipmentExpandableListView.expandGroupWithAnimation(groupPosition);
 
-                    animator = AnimatorInflater.loadAnimator(mContext, R.animator.ic_back_remote);
+                    if (i == groupPosition) {
 
+                        if (mEquipmentExpandableListView.isGroupExpanded(i)) {
+                            mEquipmentExpandableListView.collapseGroupWithAnimation(i);
+                        } else {
+                            mEquipmentExpandableListView.expandGroupWithAnimation(i);
+                        }
+
+                    } else {
+
+                        if (mEquipmentExpandableListView.isGroupExpanded(i)) {
+                            mEquipmentExpandableListView.collapseGroupWithAnimation(i);
+                        }
+
+                    }
                 }
-
-                animateArrow(groupPosition, animator);
 
                 return true;
             }
@@ -170,39 +165,21 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        if (mManager == null)
-            mManager = (NsdManager) mContext.getApplicationContext().getSystemService(Context.NSD_SERVICE);
-
-    }
-
-    private void animateArrow(int groupPosition, Animator animator) {
-        ImageView mArrow = (ImageView) mEquipmentExpandableListView.getChildAt(groupPosition).findViewById(R.id.arrow);
-        animator.setTarget(mArrow);
-        animator.start();
-    }
-
-    @Override
-    protected void onStart() {
-
-        initResolveListener();
-
-        super.onStart();
+        mRxDnssd = CustomApplication.getRxDnssd(mContext);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        discoverService();
+        startDiscovery();
     }
 
     @Override
     protected void onPause() {
-
-        stopDiscoverServices();
-
         super.onPause();
 
+        stopDiscovery();
     }
 
     @Override
@@ -378,9 +355,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             if (equipment == null) {
                 return;
             }
-            mGroupName.setText(mAdapter.equipmentList.get(groupPosition).getServiceName());
 
-            List<String> hosts = mAdapter.equipmentList.get(groupPosition).getHosts();
+            mGroupName.setText(equipment.getServiceName());
+
+            List<String> hosts = equipment.getHosts();
 
             StringBuilder builder = new StringBuilder();
             for (String host : hosts) {
@@ -390,9 +368,31 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
             mEquipmentIpTV.setText(builder.substring(1));
 
+            if (mStartAnimateArrow) {
+
+                Animator animator;
+
+                Boolean preIsExpanded = (Boolean) mArrow.getTag();
+                if (preIsExpanded != null && preIsExpanded == isExpanded) return;
+
+                if (isExpanded) {
+                    animator = AnimatorInflater.loadAnimator(mContext, R.animator.ic_back_remote);
+
+                } else {
+                    animator = AnimatorInflater.loadAnimator(mContext, R.animator.ic_back_restore);
+
+                }
+                animator.setTarget(mArrow);
+
+                animator.start();
+
+                mArrow.setTag(isExpanded);
+
+                Log.i(TAG, "refreshView: groupPosition:" + groupPosition + " preIsExpanded:" + preIsExpanded + " isExpanded:" + isExpanded);
+            }
+
         }
     }
-
 
     class ChildViewHolder {
 
@@ -428,131 +428,53 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         }
     }
 
-    private void initDiscoveryListener() {
-        if (mDiscoveryListener == null) {
+    private void startDiscovery() {
 
-            mDiscoveryListener = new NsdManager.DiscoveryListener() {
-                @Override
-                public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+        mSubscription = mRxDnssd.browse(SERVICE_PORT, DEMAIN)
+                .compose(mRxDnssd.resolve())
+                .compose(mRxDnssd.queryRecords())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<BonjourService>() {
+                    @Override
+                    public void call(BonjourService bonjourService) {
 
-                    Log.i(TAG, "onStopDiscoveryFailed: errorCode:" + errorCode);
+                        if (bonjourService.isLost()) return;
 
-                }
+                        String serviceName = bonjourService.getServiceName();
+                        if (!serviceName.toLowerCase().contains("wisnuc")) return;
 
-                @Override
-                public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+                        if (bonjourService.getInet4Address() == null) return;
+                        String hostAddress = bonjourService.getInet4Address().getHostAddress();
 
-                    Log.i(TAG, "onStartDiscoveryFailed: errorCode:" + errorCode);
+                        for (Equipment equipment : mFoundedEquipments) {
+                            if (equipment == null || serviceName.equals(equipment.getServiceName()) || equipment.getHosts().contains(hostAddress)) {
+                                return;
+                            }
+                        }
 
-                    mStartDiscovery = false;
-                }
+                        Equipment equipment = new Equipment();
+                        equipment.setServiceName(serviceName);
+                        Log.i(TAG, "host address:" + hostAddress);
 
-                @Override
-                public void onServiceLost(NsdServiceInfo serviceInfo) {
+                        List<String> hosts = new ArrayList<>();
+                        hosts.add(hostAddress);
 
-                    Log.i(TAG, "onServiceLost");
+                        equipment.setHosts(hosts);
+                        equipment.setPort(bonjourService.getPort());
 
-                }
+                        mFoundedEquipments.add(equipment);
 
-                @Override
-                public void onServiceFound(NsdServiceInfo serviceInfo) {
+                        getUserList(equipment);
 
-                    Log.i(TAG, "Service resolved: " + serviceInfo);
-
-                    if (serviceInfo.getServiceName().toLowerCase().contains("wisnuc")) {
-                        resolveService(serviceInfo);
                     }
-
-                }
-
-                @Override
-                public void onDiscoveryStopped(String serviceType) {
-                    Log.i(TAG, "onDiscoveryStopped");
-                }
-
-                @Override
-                public void onDiscoveryStarted(String serviceType) {
-                    Log.i(TAG, "onDiscoveryStarted");
-
-                    mStartDiscovery = true;
-                }
-            };
-        }
-    }
-
-    private void initResolveListener() {
-
-        mResolveListener = new NsdManager.ResolveListener() {
-            @Override
-            public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-
-                resolveService(serviceInfo);
-            }
-
-            @Override
-            public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                Log.i(TAG, "onServiceResolved Service info:" + serviceInfo);
-
-                String serviceName = serviceInfo.getServiceName();
-                String hostAddress = serviceInfo.getHost().getHostAddress();
-
-                for (Equipment equipment : mFoundedEquipments) {
-                    if (equipment == null || serviceName.equals(equipment.getServiceName()) || equipment.getHosts().contains(hostAddress)) {
-                        return;
-                    }
-                }
-
-                Equipment equipment = new Equipment();
-                equipment.setServiceName(serviceName);
-                Log.i(TAG, "host address:" + hostAddress);
-
-                List<String> hosts = new ArrayList<>();
-                hosts.add(hostAddress);
-
-                equipment.setHosts(hosts);
-                equipment.setPort(serviceInfo.getPort());
-
-                mFoundedEquipments.add(equipment);
-
-                getUserList(equipment);
-            }
-        };
+                });
 
     }
 
-    private void discoverService() {
-
-        //TODO:use mdnsjava to discover equipment otherwise android NSD Manager
-
-        stopDiscoverServices();
-
-        initDiscoveryListener();
-
-        mManager.discoverServices(SERVICE_PORT, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
-
-    }
-
-    private void resolveService(NsdServiceInfo serviceInfo) {
-
-        mResolveListener = null;
-        initResolveListener();
-
-        mManager.resolveService(serviceInfo, mResolveListener);
-    }
-
-    private void stopDiscoverServices() {
-
-        if (mDiscoveryListener != null && mStartDiscovery) {
-
-            Log.i(TAG, "stopDiscoverServices: stopServiceDiscovery");
-
-            try {
-                mManager.stopServiceDiscovery(mDiscoveryListener);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-            mDiscoveryListener = null;
+    private void stopDiscovery() {
+        if (mSubscription != null) {
+            mSubscription.unsubscribe();
         }
     }
 

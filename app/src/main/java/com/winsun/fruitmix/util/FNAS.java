@@ -524,12 +524,4 @@ public class FNAS {
         return false;
     }
 
-    public static boolean isPhotoInMediaMap(String imageUUID) {
-        return LocalCache.RemoteMediaMapKeyIsUUID.containsKey(imageUUID);
-    }
-
-    public static void delShareInDocumentsMapById(String uuid) {
-        LocalCache.RemoteMediaShareMapKeyIsUUID.remove(uuid);
-    }
-
 }

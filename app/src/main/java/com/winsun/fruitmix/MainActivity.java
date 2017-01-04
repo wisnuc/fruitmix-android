@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import android.support.v7.app.AppCompatActivity;
 
+import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -18,6 +19,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         ButlerService.startButlerService(getApplicationContext());
+
+        ExecutorServiceInstance.SINGLE_INSTANCE.startFixedThreadPool();
 
         Intent intent = new Intent();
         intent.setClass(MainActivity.this, SplashScreenActivity.class);

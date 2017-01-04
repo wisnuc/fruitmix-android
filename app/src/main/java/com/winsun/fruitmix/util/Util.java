@@ -76,7 +76,7 @@ public class Util {
     public static final String REMOTE_FILE_RETRIEVED = "remote_file_retrieved";
     public static final String REMOTE_FILE_SHARE_RETRIEVED = "remote_file_share_retrieved";
 
-    public static final String REFRESH_VIEW_AFTER_USER_RETRIEVED = "refresh_view_after_user_retrieved";
+    public static final String REFRESH_VIEW_AFTER_DATA_RETRIEVED = "refresh_view_after_data_retrieved";
 
     public static final String DOWNLOADED_FILE_RETRIEVED = "downloaded_file_retrieved";
 

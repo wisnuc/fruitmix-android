@@ -49,19 +49,19 @@
             android:id="@+id/owner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/item_menu"
             android:text="owner"
             android:textColor="#DE000000"
             android:textSize="16dp"
-            android:visibility="gone" />
+            android:visibility="invisible" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toLeftOf="@id/item_menu"
+            android:layout_toLeftOf="@id/owner"
             android:layout_toRightOf="@id/file_icon_layout"
             android:orientation="vertical">
 

@@ -10,8 +10,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
@@ -115,12 +118,18 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         String action = operationEvent.getAction();
 
         switch (action) {
-            case Util.REFRESH_VIEW_AFTER_USER_RETRIEVED: {
+            case Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED: {
 
                 if (mDialog != null)
                     mDialog.dismiss();
 
-                handleRetrieveUser();
+                OperationResult operationResult = operationEvent.getOperationResult();
+
+                if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
+                    handleRetrieveUser();
+                }else {
+                    Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
+                }
 
                 break;
             }
