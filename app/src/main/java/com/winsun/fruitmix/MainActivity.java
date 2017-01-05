@@ -20,8 +20,6 @@ public class MainActivity extends AppCompatActivity {
 
         ButlerService.startButlerService(getApplicationContext());
 
-        ExecutorServiceInstance.SINGLE_INSTANCE.startFixedThreadPool();
-
         Intent intent = new Intent();
         intent.setClass(MainActivity.this, SplashScreenActivity.class);
         startActivity(intent);

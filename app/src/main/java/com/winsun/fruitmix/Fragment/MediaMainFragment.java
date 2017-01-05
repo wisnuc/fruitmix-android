@@ -200,6 +200,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void onResume() {
         super.onResume();
 
+        if (isHidden()) return;
+
+        FNAS.retrieveLocalMediaInCamera();
     }
 
     @Override
@@ -399,6 +402,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 Log.i(TAG, "remote media comment loaded ");
 
                 ((MediaShareList) pageList.get(PAGE_SHARE)).refreshRemoteComment();
+
+                break;
+
+            case Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED:
+
+                photoList.refreshView();
 
                 break;
         }

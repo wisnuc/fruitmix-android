@@ -21,8 +21,12 @@
 
         <item name="android:windowContentTransitions">true</item>
 
-        <item name="android:windowSharedElementEnterTransition">@transition/change_image_transform_enter</item>
-        <item name="android:windowSharedElementReturnTransition">@transition/change_image_transform_exit</item>
+        <item name="android:windowSharedElementEnterTransition">
+            @transition/change_image_transform_enter
+        </item>
+        <item name="android:windowSharedElementReturnTransition">
+            @transition/change_image_transform_exit
+        </item>
 
     </style>
 

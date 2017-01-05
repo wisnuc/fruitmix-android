@@ -21,6 +21,7 @@
         <item name="android:textColorSecondary">@color/light_black</item>
         <item name="colorAccent">#f57c00</item>
         <item name="android:backgroundDimEnabled">false</item>
+
     </style>
 
     <style name="FastScrollTheme">
@@ -34,8 +35,8 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>

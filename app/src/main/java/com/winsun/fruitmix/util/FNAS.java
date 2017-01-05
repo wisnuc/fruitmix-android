@@ -162,6 +162,10 @@ public class FNAS {
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_USER));
     }
 
+    public static void retrieveLocalMediaInCamera() {
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIA_IN_CAMERA));
+    }
+
     public static void retrieveLocalMedia(Context context) {
 
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIA));

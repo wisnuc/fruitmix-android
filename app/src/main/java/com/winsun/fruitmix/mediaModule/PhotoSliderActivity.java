@@ -18,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -558,7 +559,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                         view.setTranslationY(lastY - y);
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    if (lastY - y > 200 && !view.isZoomed()) finishActivity();
+                    if (lastY - y > Util.dip2px(mContext,30) && !view.isZoomed()) finishActivity();
                     else if (!view.isZoomed()) {
                         view.setTranslationY(0);
                         if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {

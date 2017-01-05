@@ -26,29 +26,41 @@ public enum ExecutorServiceInstance {
         executorService.execute(runnable);
     }
 
-    public <V> Future<V> doOneTaskInCachedThreadUsingCallable(Callable<V> callable){
+    public <V> Future<V> doOneTaskInCachedThreadUsingCallable(Callable<V> callable) {
         return executorService.submit(callable);
     }
 
     public <V> Future<V> doOneTaskInFixedThreadPool(Callable<V> callable) {
+
+        if (fixedThreadPool == null || fixedThreadPool.isShutdown())
+            startFixedThreadPool();
+
         return fixedThreadPool.submit(callable);
     }
 
-    public void doOnTaskInFixedThreadPool(Runnable runnable){
+    public void doOnTaskInFixedThreadPool(Runnable runnable) {
+
+        if (fixedThreadPool == null || fixedThreadPool.isShutdown())
+            startFixedThreadPool();
+
         fixedThreadPool.execute(runnable);
     }
 
-    public void startFixedThreadPool(){
+    private void startFixedThreadPool() {
         fixedThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
     }
 
     public void shutdownFixedThreadPool() {
-        if (!fixedThreadPool.isShutdown())
+        if (fixedThreadPool != null && !fixedThreadPool.isShutdown()) {
             fixedThreadPool.shutdown();
+            fixedThreadPool = null;
+        }
     }
 
     public void shutdownFixedThreadPoolNow() {
-        if (!fixedThreadPool.isShutdown())
+        if (fixedThreadPool != null && !fixedThreadPool.isShutdown()) {
             fixedThreadPool.shutdownNow();
+            fixedThreadPool = null;
+        }
     }
 }

@@ -26,12 +26,17 @@ import com.winsun.fruitmix.command.ChangeToDownloadPageCommand;
 import com.winsun.fruitmix.command.NullCommand;
 import com.winsun.fruitmix.command.DownloadFileCommand;
 import com.winsun.fruitmix.command.MacroCommand;
+import com.winsun.fruitmix.command.OpenFileCommand;
 import com.winsun.fruitmix.command.ShowSelectModeViewCommand;
 import com.winsun.fruitmix.command.ShowUnSelectModeViewCommand;
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
+import com.winsun.fruitmix.fileModule.download.DownloadState;
+import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.fileModule.download.FileDownloadState;
+import com.winsun.fruitmix.fileModule.download.FileDownloadingState;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
@@ -278,20 +283,20 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
         } else {
             selectMode = false;
-            refreshSelectMode(selectMode);
+            refreshSelectMode(selectMode, null);
         }
 
         handleTitle();
 
     }
 
-    private void refreshSelectMode(boolean selectMode) {
+    private void refreshSelectMode(boolean selectMode, AbstractRemoteFile selectFile) {
 
         this.selectMode = selectMode;
 
-        if (!selectMode) {
-            selectedFiles.clear();
-        }
+        selectedFiles.clear();
+        if (selectFile != null)
+            selectedFiles.add(selectFile);
 
         fileRecyclerViewAdapter.notifyDataSetChanged();
 
@@ -300,13 +305,13 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
     @Override
     public void selectMode() {
         selectMode = true;
-        refreshSelectMode(selectMode);
+        refreshSelectMode(selectMode, null);
     }
 
     @Override
     public void unSelectMode() {
         selectMode = false;
-        refreshSelectMode(selectMode);
+        refreshSelectMode(selectMode, null);
     }
 
     public Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
@@ -589,19 +594,19 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
                         List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
 
-                        AbstractCommand macroCommand = new MacroCommand();
-
-                        AbstractCommand downloadFileCommand = new DownloadFileCommand(abstractRemoteFile);
-
-                        macroCommand.addCommand(downloadFileCommand);
-                        macroCommand.addCommand(new ChangeToDownloadPageCommand(onFileInteractionListener));
-
-                        BottomMenuItem downloadTheItem = new BottomMenuItem(getString(R.string.download_the_item), macroCommand);
-
-                        bottomMenuItems.add(downloadTheItem);
+                        BottomMenuItem menuItem;
+                        if (FileDownloadManager.INSTANCE.checkIsDownloaded(abstractRemoteFile.getUuid())) {
+                            menuItem = new BottomMenuItem(getString(R.string.open_the_item), new OpenFileCommand(getContext(), abstractRemoteFile.getName()));
+                        } else {
+                            AbstractCommand macroCommand = new MacroCommand();
+                            AbstractCommand downloadFileCommand = new DownloadFileCommand(abstractRemoteFile);
+                            macroCommand.addCommand(downloadFileCommand);
+                            macroCommand.addCommand(new ChangeToDownloadPageCommand(onFileInteractionListener));
+                            menuItem = new BottomMenuItem(getString(R.string.download_the_item), macroCommand);
+                        }
+                        bottomMenuItems.add(menuItem);
 
                         BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel), nullCommand);
-
                         bottomMenuItems.add(cancelMenuItem);
 
                         getBottomSheetDialog(bottomMenuItems).show();
@@ -634,7 +639,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
                     @Override
                     public boolean onLongClick(View view) {
                         selectMode = true;
-                        refreshSelectMode(selectMode);
+                        refreshSelectMode(selectMode, abstractRemoteFile);
 
                         return true;
                     }

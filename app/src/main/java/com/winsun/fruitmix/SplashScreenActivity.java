@@ -55,7 +55,7 @@ public class SplashScreenActivity extends Activity {
             Log.i(TAG, "onCreate: Create download file store folder failed");
         }
 
-        FNAS.retrieveLocalMedia(getApplicationContext());
+        FNAS.retrieveLocalMedia(mContext);
 
         mGateway = LocalCache.getGateway(mContext);
         mUuid = LocalCache.getUuidValue(mContext);

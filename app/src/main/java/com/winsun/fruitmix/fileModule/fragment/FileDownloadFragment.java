@@ -458,7 +458,6 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
                     }
                 });
 
-
             } else {
                 fileIconBg.setVisibility(View.INVISIBLE);
 

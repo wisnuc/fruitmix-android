@@ -116,7 +116,7 @@ public class UserManageActivity extends Activity implements View.OnClickListener
         public View getView(int position, View convertView, ViewGroup parent) {
             final ViewHolder viewHolder;
             if (convertView == null) {
-                convertView = LayoutInflater.from(mContext).inflate(R.layout.user_manage_item,parent,false);
+                convertView = LayoutInflater.from(mContext).inflate(R.layout.user_manage_item, parent, false);
 
                 viewHolder = new ViewHolder(convertView);
                 convertView.setTag(viewHolder);
@@ -126,7 +126,7 @@ public class UserManageActivity extends Activity implements View.OnClickListener
 
             viewHolder.refreshView(mUserList.get(position));
 
-            convertView.setOnClickListener(new View.OnClickListener() {
+/*            convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (viewHolder.getDelUserVisibility() != View.VISIBLE) {
@@ -135,7 +135,7 @@ public class UserManageActivity extends Activity implements View.OnClickListener
                         viewHolder.setDelUserVisibility(View.INVISIBLE);
                     }
                 }
-            });
+            });*/
 
             return convertView;
         }

@@ -5,10 +5,18 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -59,11 +67,16 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
 
         Log.i(TAG, "handleActionRetrieveLocalMedia: before retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-        LocalCache.PhotoList(this, "Camera");
+        List<Media> medias = LocalCache.PhotoList(this, "Camera");
 
         Log.i(TAG, "handleActionRetrieveLocalMedia: after retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-        CalcNewLocalMediaDigestService.startActionCalcNewLocalMediaDigest(this);
+        if(medias.size() != 0){
+
+            CalcNewLocalMediaDigestService.startActionCalcNewLocalMediaDigest(this);
+
+            EventBus.getDefault().post(new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, new OperationSuccess()));
+        }
     }
 
 }

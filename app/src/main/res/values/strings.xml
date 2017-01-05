@@ -150,6 +150,8 @@
     <string name="select_file">Select File</string>
     <string name="download_select_item">Download select item</string>
     <string name="download_the_item">Download the item</string>
+    <string name="open_the_item">Open the item</string>
+
 
     <!-- file download -->
 
