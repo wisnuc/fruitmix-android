@@ -40,7 +40,8 @@
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:theme="@android:style/Theme.Translucent" />
 
-        <activity android:name=".mediaModule.PhotoSliderActivity" />
+        <activity android:name=".mediaModule.PhotoSliderActivity"
+            android:configChanges="orientation|screenSize"/>
 
         <activity
             android:name=".mediaModule.CreateAlbumActivity"

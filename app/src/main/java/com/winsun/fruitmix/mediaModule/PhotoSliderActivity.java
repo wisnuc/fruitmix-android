@@ -3,6 +3,7 @@ package com.winsun.fruitmix.mediaModule;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.SharedElementCallback;
@@ -56,8 +57,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     TextView lbDate;
     @BindView(R.id.back)
     ImageView ivBack;
-    @BindView(R.id.comment)
+    @BindView(R.id.comment_layout)
     LinearLayout ivComment;
+    @BindView(R.id.comment)
+    ImageView commentImg;
     @BindView(R.id.chooseHeader)
     Toolbar rlChooseHeader;
     @BindView(R.id.panelFooter)
@@ -167,6 +170,16 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         initViewPager();
 
         setPosition(initialPhotoPosition);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        ivBack.setImageResource(R.drawable.ic_back);
+        commentImg.setImageResource(R.drawable.comment);
+        mReturnResize.setImageResource(R.drawable.return_resize);
+
     }
 
     @Override
@@ -424,15 +437,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         }
     }
 
-    private void dismissCurrentImageThumb(Media media) {
-        String thumbImageUrl = media.getImageThumbUrl(mContext);
-        View view = mViewPager.findViewWithTag(thumbImageUrl);
-
-        Log.i(TAG, "dismissCurrentImageThumb: view visibility:" + view.getVisibility());
-
-        view.setVisibility(View.INVISIBLE);
-    }
-
     private String getImageUrl(boolean isThumb, Media media) {
         String currentUrl;
 
@@ -559,7 +563,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                         view.setTranslationY(lastY - y);
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    if (lastY - y > Util.dip2px(mContext,30) && !view.isZoomed()) finishActivity();
+                    if (lastY - y > Util.dip2px(mContext, 30) && !view.isZoomed()) finishActivity();
                     else if (!view.isZoomed()) {
                         view.setTranslationY(0);
                         if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {

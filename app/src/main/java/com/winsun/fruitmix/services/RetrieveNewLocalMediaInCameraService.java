@@ -71,11 +71,12 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
 
         Log.i(TAG, "handleActionRetrieveLocalMedia: after retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-        if(medias.size() != 0){
+        if (medias.size() != 0) {
 
             CalcNewLocalMediaDigestService.startActionCalcNewLocalMediaDigest(this);
 
-            EventBus.getDefault().post(new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, new OperationSuccess()));
+            Log.i(TAG, "handleActionRetrieveLocalMedia: media size:" + medias.size());
+
         }
     }
 

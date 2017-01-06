@@ -18,12 +18,15 @@ android {
             minifyEnabled false
             zipAlignEnabled false
             shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
         }
         release {
-            minifyEnabled true
+            minifyEnabled false
             zipAlignEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
         }
 
     }
@@ -36,7 +39,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile(name:'android-gif-drawable-1.2.3', ext:'aar')
+    compile(name: 'android-gif-drawable-1.2.3', ext: 'aar')
     compile project(':volley')
     compile 'com.google.android.gms:play-services-ads:9.2.0'
     compile 'com.jakewharton:butterknife:8.1.0'

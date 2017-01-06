@@ -41,6 +41,9 @@ public class ModifyLocalMediaShareService extends IntentService {
     public static void startActionModifyLocalMediaShare(Context context, MediaShare mediaShare) {
         Intent intent = new Intent(context, ModifyLocalMediaShareService.class);
         intent.setAction(ACTION_MODIFY_LOCAL_MEDIA_SHARE);
+
+        mediaShare.clearMediaShareContents();
+
         intent.putExtra(EXTRA_MEDIA_SHARE, mediaShare);
         context.startService(intent);
     }

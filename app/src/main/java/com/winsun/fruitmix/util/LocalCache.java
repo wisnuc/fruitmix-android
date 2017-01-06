@@ -103,23 +103,65 @@ public class LocalCache {
 
     public static boolean Init() {
 
-        RemoteMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
-        LocalMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
-        RemoteMediaShareMapKeyIsUUID = new ConcurrentHashMap<>();
-        LocalMediaShareMapKeyIsUUID = new ConcurrentHashMap<>();
-        RemoteUserMapKeyIsUUID = new ConcurrentHashMap<>();
-        RemoteMediaMapKeyIsUUID = new ConcurrentHashMap<>();
-        RemoteFileMapKeyIsUUID = new ConcurrentHashMap<>();
+        if (RemoteMediaCommentMapKeyIsImageUUID == null)
+            RemoteMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
+        else
+            RemoteMediaCommentMapKeyIsImageUUID.clear();
+
+        if (LocalMediaCommentMapKeyIsImageUUID == null)
+            LocalMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
+        else
+            LocalMediaCommentMapKeyIsImageUUID.clear();
+
+        if (RemoteMediaShareMapKeyIsUUID == null)
+            RemoteMediaShareMapKeyIsUUID = new ConcurrentHashMap<>();
+        else
+            RemoteMediaShareMapKeyIsUUID.clear();
+
+        if (LocalMediaShareMapKeyIsUUID == null)
+            LocalMediaShareMapKeyIsUUID = new ConcurrentHashMap<>();
+        else
+            LocalMediaShareMapKeyIsUUID.clear();
+
+        if (RemoteUserMapKeyIsUUID == null)
+            RemoteUserMapKeyIsUUID = new ConcurrentHashMap<>();
+        else
+            RemoteUserMapKeyIsUUID.clear();
+
+        if (RemoteMediaMapKeyIsUUID == null)
+            RemoteMediaMapKeyIsUUID = new ConcurrentHashMap<>();
+        else
+            RemoteMediaMapKeyIsUUID.clear();
+
+        if (RemoteFileMapKeyIsUUID == null)
+            RemoteFileMapKeyIsUUID = new ConcurrentHashMap<>();
+        else
+            RemoteFileMapKeyIsUUID.clear();
 
         if (LocalMediaMapKeyIsThumb == null)
             LocalMediaMapKeyIsThumb = new ConcurrentHashMap<>();
+        else
+            LocalMediaMapKeyIsThumb.clear();
 
-        RemoteFileShareList = new ArrayList<>();
+        if (RemoteFileShareList == null)
+            RemoteFileShareList = new ArrayList<>();
+        else
+            RemoteFileShareList.clear();
 
-        photoSliderList = new ArrayList<>();
-        photoSliderMap = new HashMap<>();
+        if (photoSliderList == null)
+            photoSliderList = new ArrayList<>();
+        else
+            photoSliderList.clear();
 
-        mediaKeysInCreateAlbum = new ArrayList<>();
+        if (photoSliderMap == null)
+            photoSliderMap = new HashMap<>();
+        else
+            photoSliderMap.clear();
+
+        if (mediaKeysInCreateAlbum == null)
+            mediaKeysInCreateAlbum = new ArrayList<>();
+        else
+            mediaKeysInCreateAlbum.clear();
 
         return true;
     }
@@ -458,6 +500,9 @@ public class LocalCache {
 
             String thumb = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
 
+            if (LocalMediaMapKeyIsThumb == null)
+                break;
+
             if (LocalCache.LocalMediaMapKeyIsThumb.containsKey(thumb)) {
                 continue;
             }
@@ -647,20 +692,20 @@ public class LocalCache {
         user.setDefaultAvatarBgColor(sp.getInt(Util.USER_BG_COLOR, 0));
         user.setAdmin(sp.getBoolean(Util.USER_IS_ADMIN, false));
         user.setHome(sp.getString(Util.USER_HOME, ""));
-        user.setUuid(sp.getString(Util.USER_UUID,""));
+        user.setUuid(sp.getString(Util.USER_UUID, ""));
 
         return user;
     }
 
-    public static String getUserUUID(Context context){
+    public static String getUserUUID(Context context) {
         SharedPreferences sp;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
 
-        return sp.getString(Util.USER_UUID,"");
+        return sp.getString(Util.USER_UUID, "");
 
     }
 
-    public static void saveUser(Context context, String userName, int userDefaultAvatarBgColor, boolean userIsAdmin, String userHome,String userUUID) {
+    public static void saveUser(Context context, String userName, int userDefaultAvatarBgColor, boolean userIsAdmin, String userHome, String userUUID) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
@@ -669,7 +714,7 @@ public class LocalCache {
         editor.putInt(Util.USER_BG_COLOR, userDefaultAvatarBgColor);
         editor.putBoolean(Util.USER_IS_ADMIN, userIsAdmin);
         editor.putString(Util.USER_HOME, userHome);
-        editor.putString(Util.USER_UUID,userUUID);
+        editor.putString(Util.USER_UUID, userUUID);
         editor.apply();
     }
 

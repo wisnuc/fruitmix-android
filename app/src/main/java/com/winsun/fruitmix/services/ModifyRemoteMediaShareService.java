@@ -102,9 +102,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
                     Log.i(TAG, "modify media in remote mediashare which source is network result:" + dbResult);
 
-                    MediaShare mapResult = LocalCache.RemoteMediaShareMapKeyIsUUID.put(mediaShare.getUuid(), mediaShare);
-
-                    Log.i(TAG, "modify media in remote mediashare in map result:" + (mapResult != null ? "true" : "false"));
+                    updateMediaShareInLocalCacheMap(mediaShare);
 
                 } else {
                     mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, new OperationNetworkException(httpResponse.getResponseCode()), mediaShare);
@@ -135,6 +133,17 @@ public class ModifyRemoteMediaShareService extends IntentService {
         }
 
         EventBus.getDefault().post(mediaShareOperationEvent);
+    }
+
+    private void updateMediaShareInLocalCacheMap(MediaShare mediaShare) {
+        MediaShare originalMediaShare = LocalCache.RemoteMediaShareMapKeyIsUUID.get(mediaShare.getUuid());
+
+        originalMediaShare.setTitle(mediaShare.getTitle());
+        originalMediaShare.setDesc(mediaShare.getDesc());
+        originalMediaShare.clearViewers();
+        originalMediaShare.addViewers(mediaShare.getViewers());
+        originalMediaShare.clearMaintainers();
+        originalMediaShare.addMaintainers(mediaShare.getMaintainers());
     }
 
 }

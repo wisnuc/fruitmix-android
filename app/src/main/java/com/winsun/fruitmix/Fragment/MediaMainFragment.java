@@ -203,6 +203,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         if (isHidden()) return;
 
         FNAS.retrieveLocalMediaInCamera();
+
     }
 
     @Override
@@ -405,11 +406,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 break;
 
-            case Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED:
-
-                photoList.refreshView();
-
-                break;
         }
 
     }
@@ -424,20 +420,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         }
     }
-
-    private void handleNewLocalMediaInCameraRetrieved(OperationEvent operationEvent) {
-        OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
-
-        if (result == OperationResultType.SUCCEED) {
-
-            Log.i(TAG, "new local media in camera loaded");
-
-            photoList.refreshView();
-            photoList.fillLocalCachePhotoData();
-        }
-
-    }
-
 
     private void handleLocalCommentDeleted(OperationEvent operationEvent) {
         Log.i(TAG, "local comment changed");

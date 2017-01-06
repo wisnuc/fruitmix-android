@@ -23,8 +23,8 @@ public class LocalMediaShareParser implements LocalDataParser<MediaShare>{
         mediaShare.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_TIME)));
         mediaShare.setTitle(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_TITLE)));
         mediaShare.setDesc(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_DESC)));
-        mediaShare.initViewers(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_VIEWERS)).split(",")));
-        mediaShare.initMaintainers(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_MAINTAINERS)).split(",")));
+        mediaShare.addViewers(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_VIEWERS)).split(",")));
+        mediaShare.addMaintainers(Arrays.asList(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_MAINTAINERS)).split(",")));
         mediaShare.setAlbum(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_ALBUM)) == 1);
         mediaShare.setArchived(cursor.getInt(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_ARCHIVED)) == 1);
         mediaShare.setDate(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_KEY_IS_DATE)));

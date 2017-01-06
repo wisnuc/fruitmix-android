@@ -39,6 +39,8 @@ public class SplashScreenActivity extends Activity {
 
     public static final int DELAY_TIME_MILLISECOND = 3 * 1000;
 
+    private CustomHandler mHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,7 +71,7 @@ public class SplashScreenActivity extends Activity {
             FNAS.retrieveRemoteToken(mContext, mGateway, mUuid, mPassword);
         }
 
-        CustomHandler mHandler = new CustomHandler(this);
+        mHandler = new CustomHandler(this);
         mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
 
     }
@@ -79,6 +81,11 @@ public class SplashScreenActivity extends Activity {
         super.onDestroy();
 
         mContext = null;
+    }
+
+    @Override
+    public void onBackPressed() {
+        mHandler.removeMessages(WELCOME);
     }
 
     private void welcome() {

@@ -66,7 +66,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         mContext = this;
 
         String mMediaShareUuid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
-        mAlbumMap = LocalCache.RemoteMediaShareMapKeyIsUUID.get(mMediaShareUuid);
+        mAlbumMap = LocalCache.RemoteMediaShareMapKeyIsUUID.get(mMediaShareUuid).cloneMyself();
 
         mTitleLayout.getEditText().setText(mAlbumMap.getTitle());
         mDescLayout.getEditText().setText(mAlbumMap.getDesc());
@@ -103,7 +103,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                 desc = mDescLayout.getEditText().getText().toString();
 
                 String requestData = createRequestData(sPublic, sSetMaintainer, title, desc);
-                if (requestData == null){
+                if (requestData == null) {
 
                     ModifyAlbumActivity.this.setResult(RESULT_CANCELED);
                     finish();
@@ -113,7 +113,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
                 mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-                mAlbumMap.sendModifyMediaShareRequest(mContext,requestData);
+                mAlbumMap.sendModifyMediaShareRequest(mContext, requestData);
             }
         });
 

@@ -316,6 +316,7 @@ public class NewPhotoList implements Page {
         return view;
     }
 
+
     public void fillLocalCachePhotoData() {
         fillLocalCachePhotoList();
 

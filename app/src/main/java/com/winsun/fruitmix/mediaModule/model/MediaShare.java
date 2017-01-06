@@ -340,8 +340,8 @@ public class MediaShare implements Parcelable {
         cloneMediaShare.setTitle(getTitle());
         cloneMediaShare.setDesc(getDesc());
         cloneMediaShare.initMediaShareContents(getMediaShareContents());
-        cloneMediaShare.initViewers(getViewers());
-        cloneMediaShare.initMaintainers(getMaintainers());
+        cloneMediaShare.addViewers(getViewers());
+        cloneMediaShare.addMaintainers(getMaintainers());
         cloneMediaShare.setAlbum(isAlbum());
         cloneMediaShare.setArchived(isArchived());
         cloneMediaShare.setDate(getDate());
@@ -394,11 +394,11 @@ public class MediaShare implements Parcelable {
         this.mediaShareContents.addAll(mediaShareContents);
     }
 
-    public void initViewers(List<String> viewers) {
+    public void addViewers(List<String> viewers) {
         this.viewers.addAll(viewers);
     }
 
-    public void initMaintainers(List<String> maintainers) {
+    public void addMaintainers(List<String> maintainers) {
         this.maintainers.addAll(maintainers);
     }
 

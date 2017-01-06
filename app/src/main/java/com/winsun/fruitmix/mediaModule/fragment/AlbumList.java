@@ -358,6 +358,8 @@ public class AlbumList implements Page {
 
             String photoCount = String.valueOf(currentItem.getMediaShareContents().size());
 
+            //TODO:三星手机rxdnssd 混淆后进入app闪退，相册模块 相册标题长度限制存在适配
+
             String title = currentItem.getTitle();
 
             if (title.length() > 10) {
