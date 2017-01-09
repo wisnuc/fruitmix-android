@@ -16,7 +16,7 @@
         android:id="@+id/chooseHeader"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="#2B3443"
+        android:background="@color/colorPrimary"
         android:gravity="top"
         android:visibility="visible">
 
@@ -43,7 +43,6 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_gravity="bottom"
-        android:background="#2B3443"
         android:visibility="visible">
 
         <LinearLayout

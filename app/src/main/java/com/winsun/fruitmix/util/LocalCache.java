@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -138,11 +139,6 @@ public class LocalCache {
         else
             RemoteFileMapKeyIsUUID.clear();
 
-        if (LocalMediaMapKeyIsThumb == null)
-            LocalMediaMapKeyIsThumb = new ConcurrentHashMap<>();
-        else
-            LocalMediaMapKeyIsThumb.clear();
-
         if (RemoteFileShareList == null)
             RemoteFileShareList = new ArrayList<>();
         else
@@ -162,6 +158,9 @@ public class LocalCache {
             mediaKeysInCreateAlbum = new ArrayList<>();
         else
             mediaKeysInCreateAlbum.clear();
+
+        if (LocalMediaMapKeyIsThumb == null)
+            LocalMediaMapKeyIsThumb = new ConcurrentHashMap<>();
 
         return true;
     }
@@ -476,7 +475,7 @@ public class LocalCache {
 
     public static List<Media> PhotoList(Context context, String bucketName) {
         ContentResolver cr;
-        String[] fields = {MediaStore.Images.Media._ID, MediaStore.Images.Media.BUCKET_ID, MediaStore.Images.Media.HEIGHT, MediaStore.Images.Media.WIDTH, MediaStore.Images.Media.PICASA_ID, MediaStore.Images.Media.DATA, MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.TITLE, MediaStore.Images.Media.SIZE, MediaStore.Images.Media.BUCKET_DISPLAY_NAME};
+        String[] fields = {MediaStore.Images.Media.HEIGHT, MediaStore.Images.Media.WIDTH, MediaStore.Images.Media.DATA, MediaStore.Images.Media.ORIENTATION};
         Cursor cursor;
         List<Media> mediaList;
         Media media;
@@ -511,13 +510,34 @@ public class LocalCache {
             media.setThumb(thumb);
             media.setWidth(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)));
             media.setHeight(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)));
-            f = new File(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)));
+
+            f = new File(thumb);
             date.setTimeInMillis(f.lastModified());
             media.setTime(df.format(date.getTime()));
+
             media.setUploaded(false);
             media.setSelected(false);
             media.setLoaded(false);
-            media.setOrientationNumber(1);
+
+            int orientation = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.ORIENTATION));
+
+            switch (orientation) {
+                case 0:
+                    media.setOrientationNumber(1);
+                    break;
+                case 90:
+                    media.setOrientationNumber(6);
+                    break;
+                case 180:
+                    media.setOrientationNumber(4);
+                    break;
+                case 270:
+                    media.setOrientationNumber(3);
+                    break;
+                default:
+                    media.setOrientationNumber(1);
+            }
+
             media.setLocal(true);
             media.setSharing(true);
             media.setUuid("");

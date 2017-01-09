@@ -393,6 +393,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             String imageUrl = currentItem.getImageThumbUrl(mContext);
             mImageLoader.setShouldCache(!currentItem.isLocal());
+
+            if (currentItem.isLocal())
+                ivMain.setOrientationNumber(currentItem.getOrientationNumber());
+
             ivMain.setTag(imageUrl);
             ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
             ivMain.setImageUrl(imageUrl, mImageLoader);

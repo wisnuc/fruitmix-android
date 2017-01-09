@@ -149,6 +149,26 @@ public class Util {
 
     public static LoginType loginType = LoginType.LOGIN;
 
+    private static boolean localMediaInCameraLoaded = false;
+
+    private static boolean localMediaInDBLoaded = false;
+
+    public static boolean isLocalMediaInCameraLoaded() {
+        return localMediaInCameraLoaded;
+    }
+
+    public static void setLocalMediaInCameraLoaded(boolean localMediaInCameraLoaded) {
+        Util.localMediaInCameraLoaded = localMediaInCameraLoaded;
+    }
+
+    public static boolean isLocalMediaInDBLoaded() {
+        return localMediaInDBLoaded;
+    }
+
+    public static void setLocalMediaInDBLoaded(boolean localMediaInDBLoaded) {
+        Util.localMediaInDBLoaded = localMediaInDBLoaded;
+    }
+
     /**
      * 将dp转化为px
      */

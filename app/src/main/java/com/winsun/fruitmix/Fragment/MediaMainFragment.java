@@ -46,6 +46,7 @@ import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
+import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
@@ -202,7 +203,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         if (isHidden()) return;
 
-        FNAS.retrieveLocalMediaInCamera();
+        if (!onResume) {
+            onResume = true;
+        } else {
+            FNAS.retrieveLocalMediaInCamera();
+        }
 
     }
 
@@ -363,6 +368,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         String action = operationEvent.getAction();
 
+        OperationResultType result;
+
         Log.i(TAG, "handleOperationEvent: action:" + action);
 
         switch (action) {
@@ -379,19 +386,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             case Util.LOCAL_COMMENT_DELETED:
                 handleLocalCommentDeleted(operationEvent);
                 break;
-            case Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED:
-
-                Log.i(TAG, "handleOperationEvent: finish calc new local media digest and refresh view");
-
-                OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
-
-                if (result == OperationResultType.SUCCEED) {
-                    NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
-                    Util.needRefreshPhotoSliderList = true;
-                    photoList.refreshView();
-                }
-
-                break;
             case Util.LOCAL_MEDIA_COMMENT_RETRIEVED:
                 Log.i(TAG, "local media comment loaded");
                 ((MediaShareList) pageList.get(PAGE_SHARE)).refreshLocalComment();
@@ -403,6 +397,35 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 Log.i(TAG, "remote media comment loaded ");
 
                 ((MediaShareList) pageList.get(PAGE_SHARE)).refreshRemoteComment();
+
+                break;
+
+            case Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED:
+
+                result = operationEvent.getOperationResult().getOperationResultType();
+
+                if (result == OperationResultType.SUCCEED) {
+
+                    Log.i(TAG, "handleOperationEvent: new local media in camera retrieved succeed");
+
+                    NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+                    Util.needRefreshPhotoSliderList = true;
+                    photoList.refreshView();
+                }
+
+                break;
+            case Util.LOCAL_MEDIA_RETRIEVED:
+
+                result = operationEvent.getOperationResult().getOperationResultType();
+
+                if (result == OperationResultType.SUCCEED) {
+
+                    Log.i(TAG, "handleOperationEvent: local media in db retrieved succeed");
+
+                    NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+                    Util.needRefreshPhotoSliderList = true;
+                    photoList.refreshView();
+                }
 
                 break;
 

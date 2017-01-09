@@ -225,9 +225,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
+
         ButlerService.stopButlerService(mContext);
 
-        super.onBackPressed();
     }
 
     class EquipmentExpandableAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter {

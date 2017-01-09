@@ -339,6 +339,10 @@ public class AlbumList implements Page {
 
                 String imageUrl = coverImg.getImageThumbUrl(containerActivity);
                 mImageLoader.setShouldCache(!coverImg.isLocal());
+
+                if (coverImg.isLocal())
+                    ivMainPic.setOrientationNumber(coverImg.getOrientationNumber());
+
                 ivMainPic.setTag(imageUrl);
                 ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
                 ivMainPic.setImageUrl(imageUrl, mImageLoader);
@@ -356,14 +360,14 @@ public class AlbumList implements Page {
                 lbShare.setText(containerActivity.getString(R.string.private_text));
             }
 
-            String photoCount = String.valueOf(currentItem.getMediaShareContents().size());
-
             //TODO:三星手机rxdnssd 混淆后进入app闪退，相册模块 相册标题长度限制存在适配
 
             String title = currentItem.getTitle();
 
-            if (title.length() > 10) {
-                title = title.substring(0, 10);
+            String photoCount = String.valueOf(currentItem.getMediaShareContents().size());
+
+            if (title.length() > 8) {
+                title = title.substring(0, 8);
 
                 title += containerActivity.getString(R.string.android_ellipsize);
             }

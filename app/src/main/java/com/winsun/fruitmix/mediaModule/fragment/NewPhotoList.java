@@ -189,21 +189,23 @@ public class NewPhotoList implements Page {
     @Override
     public void refreshView() {
 
-        if (listener != null && !listener.isRemoteMediaLoaded()) {
+        if (listener != null && listener.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded()) {
+
+            initImageLoader();
+
+            final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
+
+            loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
+                @Override
+                public void onDataLoadFinished() {
+                    doAfterReloadData(loader);
+                }
+            });
+        } else {
+
             mLoadingLayout.setVisibility(View.VISIBLE);
-            return;
+
         }
-
-        initImageLoader();
-
-        final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
-
-        loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
-            @Override
-            public void onDataLoadFinished() {
-                doAfterReloadData(loader);
-            }
-        });
 
     }
 
@@ -741,6 +743,10 @@ public class NewPhotoList implements Page {
             if (!mIsFling) {
                 String imageUrl = currentMedia.getImageThumbUrl(containerActivity);
                 mImageLoader.setShouldCache(!currentMedia.isLocal());
+
+                if (currentMedia.isLocal())
+                    mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
+
                 mPhotoIv.setTag(imageUrl);
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(imageUrl, mImageLoader);
@@ -918,9 +924,13 @@ public class NewPhotoList implements Page {
 
             } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                mIsFling = false;
+                if (mIsFling) {
 
-                mPhotoRecycleAdapter.notifyDataSetChanged();
+                    mIsFling = false;
+
+                    mPhotoRecycleAdapter.notifyDataSetChanged();
+                }
+
             }
         }
 

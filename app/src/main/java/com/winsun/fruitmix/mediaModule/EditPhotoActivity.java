@@ -301,6 +301,10 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
             String imageUrl = mMap.getImageThumbUrl(mContext);
             mImageLoader.setShouldCache(!mMap.isLocal());
+
+            if (mMap.isLocal())
+                mPhotoItem.setOrientationNumber(mMap.getOrientationNumber());
+
             mPhotoItem.setTag(imageUrl);
             mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
             mPhotoItem.setImageUrl(imageUrl, mImageLoader);

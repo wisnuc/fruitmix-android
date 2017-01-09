@@ -168,7 +168,6 @@ public class NavPagerActivity extends AppCompatActivity
 
         }
 
-
     }
 
     private void refreshUserInNavigationView() {

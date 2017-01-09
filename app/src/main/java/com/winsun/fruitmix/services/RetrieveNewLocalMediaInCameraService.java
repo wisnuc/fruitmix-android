@@ -7,7 +7,6 @@ import android.util.Log;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -71,13 +70,18 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
 
         Log.i(TAG, "handleActionRetrieveLocalMedia: after retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
+        Util.setLocalMediaInCameraLoaded(true);
+
         if (medias.size() != 0) {
 
             CalcNewLocalMediaDigestService.startActionCalcNewLocalMediaDigest(this);
 
             Log.i(TAG, "handleActionRetrieveLocalMedia: media size:" + medias.size());
 
+            EventBus.getDefault().post(new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, new OperationSuccess()));
+
         }
+
     }
 
 }

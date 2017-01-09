@@ -162,7 +162,7 @@ public class MediaShareList implements Page {
     }
 
     private boolean isMediaSharePublic(MediaShare mediaShare) {
-        return LocalCache.RemoteUserMapKeyIsUUID.size() == 1 || (mediaShare.getViewersListSize() != 0 && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()));
+        return LocalCache.RemoteUserMapKeyIsUUID.size() == 1 || mediaShare.getCreatorUUID().equals(FNAS.userUUID) || (mediaShare.getViewersListSize() != 0 && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()));
     }
 
 
@@ -439,7 +439,20 @@ public class MediaShareList implements Page {
         }
 
         private void refreshViewAttributeWhenIsAlbum() {
-            lbAlbumTitle.setText(String.format(containerActivity.getString(R.string.android_share_album_title), currentItem.getTitle(), String.valueOf(currentItem.getMediaContentsListSize())));
+
+            String title = currentItem.getTitle();
+
+            String photoCount = String.valueOf(currentItem.getMediaShareContents().size());
+
+            if (title.length() > 8) {
+                title = title.substring(0, 8);
+
+                title += containerActivity.getString(R.string.android_ellipsize);
+            }
+
+            title = String.format(containerActivity.getString(R.string.android_share_album_title), title, photoCount);
+
+            lbAlbumTitle.setText(title);
 
             coverImg = LocalCache.findMediaInLocalMediaMap(currentItem.getCoverImageKey());
             if (coverImg == null) {
@@ -762,6 +775,10 @@ public class MediaShareList implements Page {
 
                     String imageUrl = itemImg.getImageThumbUrl(containerActivity);
                     mImageLoader.setShouldCache(!itemImg.isLocal());
+
+                    if (itemImg.isLocal())
+                        ivItems[i].setOrientationNumber(itemImg.getOrientationNumber());
+
                     ivItems[i].setTag(imageUrl);
                     ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
                     ivItems[i].setImageUrl(imageUrl, mImageLoader);

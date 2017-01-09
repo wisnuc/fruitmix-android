@@ -174,6 +174,10 @@ public class MoreMediaActivity extends AppCompatActivity {
 
             String imageUrl = media.getImageThumbUrl(mContext);
             mImageLoader.setShouldCache(!media.isLocal());
+
+            if (media.isLocal())
+                mPhotoItem.setOrientationNumber(media.getOrientationNumber());
+
             mPhotoItem.setTag(imageUrl);
             mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
             mPhotoItem.setImageUrl(imageUrl, mImageLoader);

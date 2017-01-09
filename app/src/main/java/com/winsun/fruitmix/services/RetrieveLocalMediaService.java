@@ -5,8 +5,13 @@ import android.content.Intent;
 import android.content.Context;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
@@ -69,6 +74,10 @@ public class RetrieveLocalMediaService extends IntentService {
         LocalCache.LocalMediaMapKeyIsThumb.clear();
 
         LocalCache.LocalMediaMapKeyIsThumb.putAll(mediaConcurrentMap);
+
+        Util.setLocalMediaInDBLoaded(true);
+
+        EventBus.getDefault().post(new OperationEvent(Util.LOCAL_MEDIA_RETRIEVED, new OperationSuccess()));
 
         RetrieveNewLocalMediaInCameraService.startActionRetrieveNewLocalMediaInCamera(this);
 

@@ -20,7 +20,6 @@
     <string name="android_minutes_ago">%1$s minutes ago</string>
     <string name="android_hours_ago">%1$s hours ago</string>
     <string name="android_yesterday">yesterday</string>
-
     <string name="android_share_album_title">%1$s·%2$sPhoto</string>
     <string name="android_share_count">Share %1$s Pictures</string>
     <string name="android_share_comment_text">%1$s : %2$s</string>

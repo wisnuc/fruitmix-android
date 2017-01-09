@@ -50,7 +50,7 @@
     <string name="confirm_delete">是否删除</string>
 
     <!-- 头像显示用户名首字母的默认值 -->
-    <string name="user_name_abbreviations">未知</string>
+    <string name="user_name_abbreviations">未</string>
 
     <!-- 默认用户名 -->
     <string name="user_default_name">未知</string>
