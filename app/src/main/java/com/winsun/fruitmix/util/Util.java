@@ -153,6 +153,16 @@ public class Util {
 
     private static boolean localMediaInDBLoaded = false;
 
+    private static boolean remoteMediaLoaded = false;
+
+    public static boolean isRemoteMediaLoaded() {
+        return remoteMediaLoaded;
+    }
+
+    public static void setRemoteMediaLoaded(boolean remoteMediaLoaded) {
+        Util.remoteMediaLoaded = remoteMediaLoaded;
+    }
+
     public static boolean isLocalMediaInCameraLoaded() {
         return localMediaInCameraLoaded;
     }

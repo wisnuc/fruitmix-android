@@ -37,6 +37,8 @@ public class NewAlbumPicChooseActivity extends Activity {
 
     private Context mContext;
 
+    private boolean onResume = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,14 +49,13 @@ public class NewAlbumPicChooseActivity extends Activity {
 
         mContext = this;
 
-        mNewPhotoList = new NewPhotoList(this,null);
+        mNewPhotoList = new NewPhotoList(this);
 
         List<String> alreadySelectedImageKeyArrayList = getIntent().getStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST);
 
         mMainFrameLayout.addView(mNewPhotoList.getView());
         mNewPhotoList.setSelectMode(true);
         mNewPhotoList.setAlreadySelectedImageKeyArrayList(alreadySelectedImageKeyArrayList);
-        mNewPhotoList.refreshView();
 
         ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,6 +95,16 @@ public class NewAlbumPicChooseActivity extends Activity {
                 mNewPhotoList.clearSelectedPhoto();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!onResume) {
+            mNewPhotoList.refreshView();
+            onResume = true;
+        }
     }
 
     @Override

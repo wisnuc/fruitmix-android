@@ -46,7 +46,6 @@ import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
-import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
@@ -310,7 +309,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private void initPageList() {
         shareList = new MediaShareList(getActivity(), this);
-        photoList = new NewPhotoList(getActivity(), this);
+        photoList = new NewPhotoList(getActivity());
         albumList = new AlbumList(getActivity(), this);
         pageList = new ArrayList<Page>();
         pageList.add(shareList);
@@ -450,7 +449,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
 
         if (result == OperationResultType.SUCCEED) {
-            pageList.get(PAGE_SHARE).refreshView();
+            shareList.refreshView();
         }
     }
 

@@ -70,13 +70,12 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     @BindView(R.id.viewPager)
     ViewPager mViewPager;
 
-    private List<Media> mediaList;
+    private static List<Media> mediaList;
+
     private int initialPhotoPosition = 0;
     private int currentPhotoPosition = 0;
 
     private List<Media> mediaAlreadyLoadedList;
-
-    private Map<String, Media> mediaMap;
 
     private boolean sInEdit;
 
@@ -146,10 +145,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         boolean mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
 
-        mediaList = LocalCache.photoSliderList;
-
-        mediaMap = LocalCache.photoSliderMap;
-
         mediaAlreadyLoadedList = new ArrayList<>();
 
         transitionMediaNeedShowThumb = getIntent().getBooleanExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, true);
@@ -187,6 +182,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         super.onDestroy();
 
         mContext = null;
+    }
+
+    public static void setMediaList(List<Media> mediaList) {
+        PhotoSliderActivity.mediaList = mediaList;
     }
 
     private void initViewPager() {
@@ -341,7 +340,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         if (url == null)
             return;
 
-        Media media = mediaMap.get(url);
+        Media media = ((GifTouchNetworkImageView) view).getCurrentMedia();
 
         if (media.isLocal()) {
 
@@ -496,6 +495,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 mainPic.setDefaultImageResId(R.drawable.placeholder_photo);
 
                 mImageLoader.setShouldCache(!media.isLocal());
+
+                mainPic.setCurrentMedia(media);
 
                 if (transitionMediaNeedShowThumb && !media.isLocal()) {
 

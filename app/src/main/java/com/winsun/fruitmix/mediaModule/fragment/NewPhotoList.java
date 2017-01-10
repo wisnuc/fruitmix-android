@@ -34,7 +34,6 @@ import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
-import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
@@ -43,7 +42,9 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,8 +61,6 @@ import io.github.sin3hz.fastjumper.callback.SpannableCallback;
 public class NewPhotoList implements Page {
 
     public static final String TAG = NewPhotoList.class.getSimpleName();
-
-    private OnMediaFragmentInteractionListener listener;
 
     private Activity containerActivity;
     private View view;
@@ -117,10 +116,8 @@ public class NewPhotoList implements Page {
 
     private List<String> alreadySelectedImageKeyArrayList;
 
-    public NewPhotoList(Activity activity, OnMediaFragmentInteractionListener listener) {
+    public NewPhotoList(Activity activity) {
         containerActivity = activity;
-
-        this.listener = listener;
 
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(R.layout.new_photo_layout, null);
 
@@ -189,7 +186,7 @@ public class NewPhotoList implements Page {
     @Override
     public void refreshView() {
 
-        if (listener != null && listener.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded()) {
+        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded()) {
 
             initImageLoader();
 
@@ -236,11 +233,7 @@ public class NewPhotoList implements Page {
 
         clearSelectedPhoto();
 
-        if (Util.needRefreshPhotoSliderList) {
-            fillLocalCachePhotoData();
-        }
     }
-
 
     private void setupFastJumper() {
         mLinearScrollCalculator = new LinearScrollCalculator(mRecyclerView) {
@@ -316,30 +309,6 @@ public class NewPhotoList implements Page {
     @Override
     public View getView() {
         return view;
-    }
-
-
-    public void fillLocalCachePhotoData() {
-        fillLocalCachePhotoList();
-
-        fillLocalCachePhotoMap();
-    }
-
-    private void fillLocalCachePhotoMap() {
-        LocalCache.photoSliderMap.clear();
-        for (Media media : LocalCache.photoSliderList) {
-            LocalCache.photoSliderMap.put(media.getImageThumbUrl(containerActivity), media);
-            LocalCache.photoSliderMap.put(media.getImageOriginalUrl(containerActivity), media);
-        }
-    }
-
-    private void fillLocalCachePhotoList() {
-        LocalCache.photoSliderList.clear();
-
-        for (String title : mPhotoDateGroups) {
-            LocalCache.photoSliderList.addAll(mMapKeyIsDateValueIsPhotoList.get(title));
-        }
-
     }
 
     @NonNull
@@ -813,14 +782,6 @@ public class NewPhotoList implements Page {
 
                     } else {
 
-                        if (Util.needRefreshPhotoSliderList) {
-
-                            fillLocalCachePhotoData();
-
-                            Util.needRefreshPhotoSliderList = false;
-
-                        }
-
                         int initialPhotoPosition;
 
                         for (initialPhotoPosition = 0; initialPhotoPosition < LocalCache.photoSliderList.size(); initialPhotoPosition++) {
@@ -831,6 +792,8 @@ public class NewPhotoList implements Page {
                                 break;
 
                         }
+
+                        PhotoSliderActivity.setMediaList(LocalCache.photoSliderList);
 
                         Intent intent = new Intent();
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
@@ -850,7 +813,6 @@ public class NewPhotoList implements Page {
                             containerActivity.startActivity(intent);
 
                         }
-
 
                     }
 

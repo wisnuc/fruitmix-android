@@ -337,6 +337,8 @@ public class NavPagerActivity extends AppCompatActivity
 
                     ButlerService.stopTimingRetrieveMediaShare();
 
+                    Util.setRemoteMediaLoaded(false);
+
                     return null;
                 }
 
@@ -390,7 +392,8 @@ public class NavPagerActivity extends AppCompatActivity
 
             fragmentManager.beginTransaction().hide(fileMainFragment).show(mediaMainFragment).commit();
 
-            ButlerService.startTimingRetrieveMediaShare();
+            if (mediaMainFragment.isRemoteMediaShareLoaded())
+                ButlerService.startTimingRetrieveMediaShare();
         }
 
     }

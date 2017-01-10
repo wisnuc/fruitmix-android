@@ -26,8 +26,9 @@
         android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
         android:src="@drawable/ic_add_white_24dp"
-        android:visibility="gone"
-        app:borderWidth="0dp" />
+        android:visibility="visible"
+        app:borderWidth="0dp"
+        app:fabSize="normal"/>
 
     <include layout="@layout/loading_layout" />
 

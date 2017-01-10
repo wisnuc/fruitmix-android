@@ -201,9 +201,9 @@ public class NetworkImageView extends ImageView {
                     @Override
                     public void onErrorResponse(final VolleyError error) {
                         if (mErrorImageId != 0) {
-                            setImageResource(mErrorImageId);
+                            setBackgroundResource(mErrorImageId);
                         } else if (mDefaultImageId != 0) {
-                            setImageResource(mDefaultImageId);
+                            setBackgroundResource(mDefaultImageId);
                         }
 
                         if (error.networkResponse != null && error.networkResponse.statusCode == 500 && mCurrentRetryNum < mMaxRetryNum) {
@@ -271,7 +271,7 @@ public class NetworkImageView extends ImageView {
 
     private void setDefaultImageOrNull() {
         if (mDefaultImageId != 0) {
-            setImageResource(mDefaultImageId);
+            setBackgroundResource(mDefaultImageId);
         } else {
             setImageBitmap(null);
         }

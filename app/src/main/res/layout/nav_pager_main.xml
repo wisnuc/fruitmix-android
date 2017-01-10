@@ -137,28 +137,16 @@
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:src="@drawable/ic_add_white_24dp"
             android:visibility="visible"
-            app:borderWidth="0dp" />
+            app:borderWidth="0dp"
+            app:fabSize="normal" />
 
     </LinearLayout>
 
-    <!--
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginRight="@dimen/fab_margin"
-        android:layout_marginBottom="60dp"
-        app:backgroundTint="#00F57C00"
-
-        android:src="@drawable/down" />
--->
 
     <ImageView
         android:id="@+id/album_balloon"

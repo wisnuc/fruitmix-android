@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -78,7 +79,6 @@ public enum NewPhotoListDataLoader {
 
         if (!needRefreshData) {
             listener.onDataLoadFinished();
-
             return;
         }
 
@@ -115,9 +115,7 @@ public enum NewPhotoListDataLoader {
         mMapKeyIsPhotoPositionValueIsPhoto.clear();
 
         Collection<Media> medias = LocalCache.LocalMediaMapKeyIsThumb.values();
-        Map<String,Media> remoteMediaMap = new HashMap<>(LocalCache.RemoteMediaMapKeyIsUUID);
-
-        Log.i(TAG, "reloadData: before add local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Map<String, Media> remoteMediaMap = new HashMap<>(LocalCache.RemoteMediaMapKeyIsUUID);
 
         for (Media media : medias) {
 
@@ -140,8 +138,6 @@ public enum NewPhotoListDataLoader {
             mediaList.add(media);
         }
 
-        Log.i(TAG, "reloadData: after add local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-
         medias = remoteMediaMap.values();
 
         for (Media media : medias) {
@@ -163,9 +159,6 @@ public enum NewPhotoListDataLoader {
 
         }
 
-        Log.i(TAG, "reloadData: after add remote media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-
-
         Collections.sort(mPhotoDateGroups, new Comparator<String>() {
             @Override
             public int compare(String lhs, String rhs) {
@@ -173,11 +166,18 @@ public enum NewPhotoListDataLoader {
             }
         });
 
-        Log.i(TAG, "reloadData: after sort photo date groups time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-
         calcPhotoPositionNumber();
 
-        Log.i(TAG, "reloadData: after calc photo position number time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "doAfterReloadData: before notify data set changed time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
+        if (Util.needRefreshPhotoSliderList) {
+            fillLocalCachePhotoData();
+
+            Util.needRefreshPhotoSliderList = false;
+
+        }
+
+        Log.i(TAG, "doAfterReloadData: after notify data set changed time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
     }
 
@@ -208,6 +208,20 @@ public enum NewPhotoListDataLoader {
             }
 
             titlePosition = mAdapterItemTotalCount;
+        }
+
+    }
+
+
+    private void fillLocalCachePhotoData() {
+        fillLocalCachePhotoList();
+    }
+
+    private void fillLocalCachePhotoList() {
+        LocalCache.photoSliderList.clear();
+
+        for (String title : mPhotoDateGroups) {
+            LocalCache.photoSliderList.addAll(mMapKeyIsDateValueIsPhotoList.get(title));
         }
 
     }

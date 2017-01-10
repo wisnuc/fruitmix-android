@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
               android:id="@+id/one_more_mediashare_card_item_layout"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
@@ -19,7 +18,7 @@
             android:layout_margin="1dp"
             android:layout_weight="1"
             android:scaleType="centerCrop"
-            android:src="@drawable/default_img"/>
+            android:background="@drawable/default_img"/>
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic1"
@@ -28,7 +27,7 @@
             android:layout_margin="1dp"
             android:layout_weight="1"
             android:scaleType="centerCrop"
-            android:src="@drawable/default_img"/>
+            android:background="@drawable/default_img"/>
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic2"
@@ -37,7 +36,7 @@
             android:layout_margin="1dp"
             android:layout_weight="1"
             android:scaleType="centerCrop"
-            android:src="@drawable/default_img"/>
+            android:background="@drawable/default_img"/>
 
     </LinearLayout>
 
@@ -54,7 +53,7 @@
             android:layout_margin="1dp"
             android:layout_weight="1"
             android:scaleType="centerCrop"
-            android:src="@drawable/default_img"/>
+            android:background="@drawable/default_img"/>
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic4"
@@ -63,7 +62,7 @@
             android:layout_margin="1dp"
             android:layout_weight="1"
             android:scaleType="centerCrop"
-            android:src="@drawable/default_img"/>
+            android:background="@drawable/default_img"/>
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic5"
@@ -72,7 +71,7 @@
             android:layout_margin="1dp"
             android:layout_weight="1"
             android:scaleType="centerCrop"
-            android:src="@drawable/default_img"/>
+            android:background="@drawable/default_img"/>
 
     </LinearLayout>
 
@@ -89,7 +88,7 @@
             android:layout_margin="1dp"
             android:layout_weight="1"
             android:scaleType="centerCrop"
-            android:src="@drawable/default_img"/>
+            android:background="@drawable/default_img"/>
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic7"
@@ -98,7 +97,7 @@
             android:layout_margin="1dp"
             android:layout_weight="1"
             android:scaleType="centerCrop"
-            android:src="@drawable/default_img"/>
+            android:background="@drawable/default_img"/>
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic8"
@@ -107,7 +106,7 @@
             android:layout_margin="1dp"
             android:layout_weight="1"
             android:scaleType="centerCrop"
-            android:src="@drawable/default_img"/>
+            android:background="@drawable/default_img"/>
 
     </LinearLayout>
 

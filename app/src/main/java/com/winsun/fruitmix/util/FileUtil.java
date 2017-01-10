@@ -64,15 +64,6 @@ public class FileUtil {
         return Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
-    public static String getDownloadFolderName(Context context) {
-        File file = context.getExternalFilesDir(null);
-        if (file != null) {
-            return file.getAbsolutePath();
-        } else {
-            return "";
-        }
-    }
-
     private static String getExternalDirectoryPathForDownload() {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
     }

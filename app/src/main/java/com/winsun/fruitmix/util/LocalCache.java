@@ -58,7 +58,6 @@ public class LocalCache {
     public static String DeviceID = null;
 
     public static List<Media> photoSliderList = null;
-    public static Map<String, Media> photoSliderMap = null;
 
     public static List<String> mediaKeysInCreateAlbum = null;
 
@@ -148,11 +147,6 @@ public class LocalCache {
             photoSliderList = new ArrayList<>();
         else
             photoSliderList.clear();
-
-        if (photoSliderMap == null)
-            photoSliderMap = new HashMap<>();
-        else
-            photoSliderMap.clear();
 
         if (mediaKeysInCreateAlbum == null)
             mediaKeysInCreateAlbum = new ArrayList<>();

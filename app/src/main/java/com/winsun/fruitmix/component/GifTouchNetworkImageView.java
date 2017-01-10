@@ -29,6 +29,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.IImageLoadListener;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.gif.GifLoader.GifContainer;
+import com.winsun.fruitmix.mediaModule.model.Media;
 
 import java.io.IOException;
 
@@ -73,6 +74,8 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
     private IImageLoadListener mImageLoadListener;
 
     private boolean isLoadGif = false;
+
+    private Media currentMedia;
 
     public GifTouchNetworkImageView(Context context) {
         this(context, null);
@@ -142,6 +145,14 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
 
     public void setOrientationNumber(int orientationNumber) {
         this.orientationNumber = orientationNumber;
+    }
+
+    public void setCurrentMedia(Media currentMedia) {
+        this.currentMedia = currentMedia;
+    }
+
+    public Media getCurrentMedia() {
+        return currentMedia;
     }
 
     /**

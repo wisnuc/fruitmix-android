@@ -20,7 +20,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
  * Created by Administrator on 2016/12/22.
  */
 
-public enum OkHttpUtil {
+enum OkHttpUtil {
 
     INSTANCE;
 

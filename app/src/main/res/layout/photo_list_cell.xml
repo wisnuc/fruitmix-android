@@ -9,7 +9,7 @@
         android:layout_height="114dp"
         android:layout_margin="1dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/default_img" />
+        android:background="@drawable/default_img" />
 
     <ImageView
         android:id="@+id/lock"
