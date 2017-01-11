@@ -10,8 +10,6 @@ public interface OnMediaFragmentInteractionListener {
 
     boolean isRemoteMediaShareLoaded();
 
-    boolean isRemoteMediaLoaded();
-
     void modifyMediaShare(MediaShare mediashare);
 
     void deleteMediaShare(MediaShare mediashare);

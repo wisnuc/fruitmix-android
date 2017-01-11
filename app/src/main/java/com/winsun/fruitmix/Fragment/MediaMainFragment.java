@@ -18,6 +18,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -118,8 +119,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private static final int PAGE_ALBUM = 2;
 
     private boolean sInChooseMode = false;
-
-    private boolean mRemoteMediaLoaded = false;
 
     private boolean mRemoteMediaShareLoaded = false;
 
@@ -317,6 +316,13 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         pageList.add(albumList);
     }
 
+    public void refreshUser(){
+
+        shareList.refreshView();
+        albumList.refreshView();
+
+    }
+
     private void initViewPager() {
         MyAdapter myAdapter = new MyAdapter();
         viewPager.setAdapter(myAdapter);
@@ -340,8 +346,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         if (action.equals(Util.REMOTE_MEDIA_RETRIEVED)) {
             Log.i(TAG, "remote media loaded");
-
-            mRemoteMediaLoaded = true;
 
             NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
             Util.needRefreshPhotoSliderList = true;
@@ -830,11 +834,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     @Override
     public boolean isRemoteMediaShareLoaded() {
         return mRemoteMediaShareLoaded;
-    }
-
-    @Override
-    public boolean isRemoteMediaLoaded() {
-        return mRemoteMediaLoaded;
     }
 
     @Override

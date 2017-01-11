@@ -86,8 +86,6 @@ public class NewPhotoList implements Page {
 
     private int mItemWidth;
 
-    private List<String> mPhotoDateGroups;
-
     private Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
 
     private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
@@ -208,7 +206,7 @@ public class NewPhotoList implements Page {
 
     private void doAfterReloadData(NewPhotoListDataLoader loader) {
 
-        mPhotoDateGroups = loader.getmPhotoDateGroups();
+        List<String> mPhotoDateGroups = loader.getmPhotoDateGroups();
         mAdapterItemTotalCount = loader.getmAdapterItemTotalCount();
         mMapKeyIsDateValueIsPhotoList = loader.getmMapKeyIsDateValueIsPhotoList();
         mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getmMapKeyIsPhotoPositionValueIsPhotoDate();

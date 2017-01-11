@@ -155,6 +155,11 @@ public class FileShareFragment extends Fragment {
         }
     }
 
+    public void refreshUser() {
+
+        fileShareRecyclerAdapter.notifyDataSetChanged();
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -231,7 +236,7 @@ public class FileShareFragment extends Fragment {
 
     public void onBackPressed() {
 
-        if(loadingLayout.getVisibility() == View.VISIBLE){
+        if (loadingLayout.getVisibility() == View.VISIBLE) {
             return;
         }
 

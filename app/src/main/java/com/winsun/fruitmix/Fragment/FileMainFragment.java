@@ -197,6 +197,11 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
         });
     }
 
+    public void refreshUser() {
+
+        fileShareFragment.refreshUser();
+    }
+
     @Override
     public void onStart() {
         super.onStart();

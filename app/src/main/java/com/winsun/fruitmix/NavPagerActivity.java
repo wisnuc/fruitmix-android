@@ -29,6 +29,7 @@ import com.winsun.fruitmix.fragment.FileMainFragment;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
@@ -166,13 +167,28 @@ public class NavPagerActivity extends AppCompatActivity
 
             refreshUserInNavigationView();
 
+            if (operationEvent.getOperationResult().getOperationResultType() == OperationResultType.SUCCEED) {
+
+                if (currentPage == PAGE_MEDIA) {
+                    mediaMainFragment.refreshUser();
+                } else {
+                    fileMainFragment.refreshUser();
+                }
+
+            }
         }
 
     }
 
     private void refreshUserInNavigationView() {
 
-        User user = LocalCache.getUser(mContext);
+        User user;
+
+        if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(FNAS.userUUID)) {
+            user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
+        } else {
+            user = LocalCache.getUser(mContext);
+        }
 
         String userName = user.getUserName();
         TextView mUserNameTextView = (TextView) navigationView.getHeaderView(0).findViewById(R.id.user_name_textview);

@@ -1007,7 +1007,7 @@ public class GifTouchImageView extends GifImageView {
             float t = interpolate();
             double deltaScale = calculateDeltaScale(t);
             scaleImage(deltaScale, bitmapX, bitmapY, stretchImageToSuper);
-            translateImageToCenterTouchPosition(t);
+//            translateImageToCenterTouchPosition(t);
             fixScaleTrans();
             setImageMatrix(matrix);
 

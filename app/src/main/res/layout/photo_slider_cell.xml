@@ -20,8 +20,6 @@
         android:id="@+id/mainPic"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true"
-        android:maxHeight="600dp"
         android:src="@drawable/placeholder_photo"
         android:visibility="visible" />
 
