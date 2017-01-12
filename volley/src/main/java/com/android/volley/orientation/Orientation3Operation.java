@@ -9,13 +9,14 @@ import android.graphics.Matrix;
 
 public class Orientation3Operation implements OrientationOperation {
 
-    Orientation3Operation(){}
+    Orientation3Operation() {
+    }
 
     @Override
     public Bitmap handleOrientationOperate(Bitmap originalBitmap) {
 
         Matrix matrix = new Matrix();
-        matrix = OrientationUtils.rotateBitmap(matrix,180,originalBitmap.getWidth() / 2,originalBitmap.getHeight() / 2);
+        matrix = OrientationUtils.rotateBitmap(matrix, 180, originalBitmap.getWidth() / 2, originalBitmap.getHeight() / 2);
         return Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, true);
 
     }

@@ -1,7 +1,9 @@
 package com.winsun.fruitmix.mediaModule.model;
 
 import android.os.AsyncTask;
+import android.support.v4.util.ArrayMap;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -30,8 +32,10 @@ public enum NewPhotoListDataLoader {
 
     private Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
 
-    private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
-    private Map<Integer, Media> mMapKeyIsPhotoPositionValueIsPhoto;
+    private SparseArray<String> mMapKeyIsPhotoPositionValueIsPhotoDate;
+    private SparseArray<Media> mMapKeyIsPhotoPositionValueIsPhoto;
+
+    private List<Media> medias;
 
     private int mAdapterItemTotalCount = 0;
 
@@ -40,11 +44,12 @@ public enum NewPhotoListDataLoader {
     NewPhotoListDataLoader() {
 
         mPhotoDateGroups = new ArrayList<>();
-        mMapKeyIsDateValueIsPhotoList = new HashMap<>();
+        mMapKeyIsDateValueIsPhotoList = new ArrayMap<>();
 
-        mMapKeyIsPhotoPositionValueIsPhotoDate = new HashMap<>();
-        mMapKeyIsPhotoPositionValueIsPhoto = new HashMap<>();
+        mMapKeyIsPhotoPositionValueIsPhotoDate = new SparseArray<>();
+        mMapKeyIsPhotoPositionValueIsPhoto = new SparseArray<>();
 
+        medias = new ArrayList<>();
     }
 
     public void setNeedRefreshData(boolean needRefreshData) {
@@ -59,12 +64,16 @@ public enum NewPhotoListDataLoader {
         return mMapKeyIsDateValueIsPhotoList;
     }
 
-    public Map<Integer, String> getmMapKeyIsPhotoPositionValueIsPhotoDate() {
+    public SparseArray<String> getmMapKeyIsPhotoPositionValueIsPhotoDate() {
         return mMapKeyIsPhotoPositionValueIsPhotoDate;
     }
 
-    public Map<Integer, Media> getmMapKeyIsPhotoPositionValueIsPhoto() {
+    public SparseArray<Media> getmMapKeyIsPhotoPositionValueIsPhoto() {
         return mMapKeyIsPhotoPositionValueIsPhoto;
+    }
+
+    public List<Media> getMedias() {
+        return medias;
     }
 
     public int getmAdapterItemTotalCount() {
@@ -115,12 +124,15 @@ public enum NewPhotoListDataLoader {
         mMapKeyIsPhotoPositionValueIsPhoto.clear();
 
         Collection<Media> medias = LocalCache.LocalMediaMapKeyIsThumb.values();
-        Map<String, Media> remoteMediaMap = new HashMap<>(LocalCache.RemoteMediaMapKeyIsUUID);
+
+        List<String> remoteMediaUUID = new ArrayList<>(LocalCache.RemoteMediaMapKeyIsUUID.size());
 
         for (Media media : medias) {
 
             String mediaUUID = media.getUuid();
-            remoteMediaMap.remove(mediaUUID);
+
+            if (mediaUUID != null && !mediaUUID.isEmpty())
+                remoteMediaUUID.add(mediaUUID);
 
             date = media.getTime().substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
@@ -138,9 +150,13 @@ public enum NewPhotoListDataLoader {
             mediaList.add(media);
         }
 
-        medias = remoteMediaMap.values();
+        medias = LocalCache.RemoteMediaMapKeyIsUUID.values();
 
         for (Media media : medias) {
+
+            if (remoteMediaUUID.contains(media.getUuid())) {
+                continue;
+            }
 
             date = media.getTime().substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
@@ -168,17 +184,6 @@ public enum NewPhotoListDataLoader {
 
         calcPhotoPositionNumber();
 
-        Log.i(TAG, "doAfterReloadData: before notify data set changed time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-
-        if (Util.needRefreshPhotoSliderList) {
-            fillLocalCachePhotoData();
-
-            Util.needRefreshPhotoSliderList = false;
-
-        }
-
-        Log.i(TAG, "doAfterReloadData: after notify data set changed time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-
     }
 
     public void calcPhotoPositionNumber() {
@@ -186,6 +191,8 @@ public enum NewPhotoListDataLoader {
         int titlePosition = 0;
         int photoListSize;
         mAdapterItemTotalCount = 0;
+
+            medias.clear();
 
         for (String title : mPhotoDateGroups) {
             mMapKeyIsPhotoPositionValueIsPhotoDate.put(titlePosition, title);
@@ -207,22 +214,11 @@ public enum NewPhotoListDataLoader {
                 mMapKeyIsPhotoPositionValueIsPhoto.put(titlePosition + 1 + i, mediaList.get(i));
             }
 
+            medias.addAll(mediaList);
+
             titlePosition = mAdapterItemTotalCount;
         }
 
     }
 
-
-    private void fillLocalCachePhotoData() {
-        fillLocalCachePhotoList();
-    }
-
-    private void fillLocalCachePhotoList() {
-        LocalCache.photoSliderList.clear();
-
-        for (String title : mPhotoDateGroups) {
-            LocalCache.photoSliderList.addAll(mMapKeyIsDateValueIsPhotoList.get(title));
-        }
-
-    }
 }

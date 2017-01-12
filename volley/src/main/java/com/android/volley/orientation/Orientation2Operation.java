@@ -9,7 +9,8 @@ import android.graphics.Matrix;
 
 public class Orientation2Operation implements OrientationOperation {
 
-    Orientation2Operation(){}
+    Orientation2Operation() {
+    }
 
     @Override
     public Bitmap handleOrientationOperate(Bitmap originalBitmap) {

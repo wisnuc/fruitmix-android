@@ -9,7 +9,8 @@ import android.graphics.Matrix;
 
 public class Orientation4Operation implements OrientationOperation {
 
-    Orientation4Operation(){}
+    Orientation4Operation() {
+    }
 
     @Override
     public Bitmap handleOrientationOperate(Bitmap originalBitmap) {
@@ -18,7 +19,7 @@ public class Orientation4Operation implements OrientationOperation {
 
         matrix = OrientationUtils.convertVerticalBitmap(matrix);
 
-        matrix = OrientationUtils.rotateBitmap(matrix,180,originalBitmap.getWidth() / 2,originalBitmap.getHeight() / 2);
+        matrix = OrientationUtils.rotateBitmap(matrix, 180, originalBitmap.getWidth() / 2, originalBitmap.getHeight() / 2);
         return Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, true);
 
     }

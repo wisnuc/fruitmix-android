@@ -11,6 +11,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -37,6 +38,7 @@ import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
+import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -88,8 +90,12 @@ public class NewPhotoList implements Page {
 
     private Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
 
-    private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
-    private Map<Integer, Media> mMapKeyIsPhotoPositionValueIsPhoto;
+    //TODO use SparseArray or ArrayMap to optimize memory use effect
+
+    private SparseArray<String> mMapKeyIsPhotoPositionValueIsPhotoDate;
+    private SparseArray<Media> mMapKeyIsPhotoPositionValueIsPhoto;
+
+    private List<Media> medias;
 
     private int mScreenWidth;
 
@@ -151,14 +157,9 @@ public class NewPhotoList implements Page {
 
     private void initImageLoader() {
 
-        if (mImageLoader == null) {
-            RequestQueue mRequestQueue = RequestQueueInstance.getInstance(containerActivity).getRequestQueue();
-            mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-            Map<String, String> headers = new HashMap<>();
-            headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-            Log.i(TAG, FNAS.JWT);
-            mImageLoader.setHeaders(headers);
-        }
+        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
+        mImageLoader = imageGifLoaderInstance.getImageLoader(containerActivity);
+
     }
 
     public void addPhotoListListener(IPhotoListListener listListener) {
@@ -211,6 +212,7 @@ public class NewPhotoList implements Page {
         mMapKeyIsDateValueIsPhotoList = loader.getmMapKeyIsDateValueIsPhotoList();
         mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getmMapKeyIsPhotoPositionValueIsPhotoDate();
         mMapKeyIsPhotoPositionValueIsPhoto = loader.getmMapKeyIsPhotoPositionValueIsPhoto();
+        medias = loader.getMedias();
 
         mLoadingLayout.setVisibility(View.GONE);
         if (mPhotoDateGroups.size() == 0) {
@@ -376,16 +378,20 @@ public class NewPhotoList implements Page {
                 sharedElements.clear();
 
                 Media media = null;
+                Media currentMedia = null;
 
-                for (Media media1 : mMapKeyIsPhotoPositionValueIsPhoto.values()) {
-                    if (media1.getKey().equals(currentMediaKey))
-                        media = media1;
+                int size = mMapKeyIsPhotoPositionValueIsPhoto.size();
+
+                for (int i = 0; i < size; i++) {
+                    media = mMapKeyIsPhotoPositionValueIsPhoto.valueAt(i);
+                    if (media.getKey().equals(currentMediaKey))
+                        currentMedia = media;
                 }
 
-                if (media == null) return;
+                if (currentMedia == null) return;
 
-                View newSharedElement = mRecyclerView.findViewWithTag(findPhotoTag(media));
-                String sharedElementName = media.getKey();
+                View newSharedElement = mRecyclerView.findViewWithTag(findPhotoTag(currentMedia));
+                String sharedElementName = currentMedia.getKey();
 
                 names.add(sharedElementName);
                 sharedElements.put(sharedElementName, newSharedElement);
@@ -406,9 +412,14 @@ public class NewPhotoList implements Page {
 
             int scrollToPosition = 0;
 
-            for (Map.Entry<Integer, Media> entry : mMapKeyIsPhotoPositionValueIsPhoto.entrySet()) {
-                if (entry.getValue().getKey().equals(currentMediaKey))
-                    scrollToPosition = entry.getKey();
+            Media media = null;
+
+            int size = mMapKeyIsPhotoPositionValueIsPhoto.size();
+
+            for (int i = 0; i < size; i++) {
+                media = mMapKeyIsPhotoPositionValueIsPhoto.valueAt(i);
+                if (media.getKey().equals(currentMediaKey))
+                    scrollToPosition = mMapKeyIsPhotoPositionValueIsPhoto.keyAt(i);
             }
 
             mRecyclerView.smoothScrollToPosition(scrollToPosition);
@@ -499,7 +510,7 @@ public class NewPhotoList implements Page {
 
         @Override
         public int getItemViewType(int position) {
-            if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsKey(position))
+            if (mMapKeyIsPhotoPositionValueIsPhotoDate.indexOfKey(position) >= 0)
                 return VIEW_TYPE_HEAD;
             else
                 return VIEW_TYPE_CONTENT;
@@ -531,7 +542,7 @@ public class NewPhotoList implements Page {
                 position = getItemCount() - 1;
             }
 
-            if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsKey(position))
+            if (mMapKeyIsPhotoPositionValueIsPhotoDate.indexOfKey(position) >= 0)
                 title = mMapKeyIsPhotoPositionValueIsPhotoDate.get(position);
             else {
                 title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDate();
@@ -782,16 +793,18 @@ public class NewPhotoList implements Page {
 
                         int initialPhotoPosition;
 
-                        for (initialPhotoPosition = 0; initialPhotoPosition < LocalCache.photoSliderList.size(); initialPhotoPosition++) {
+                        int size = medias.size();
 
-                            Media media = LocalCache.photoSliderList.get(initialPhotoPosition);
+                        for (initialPhotoPosition = 0; initialPhotoPosition < size; initialPhotoPosition++) {
+
+                            Media media = medias.get(initialPhotoPosition);
 
                             if (media.getKey().equals(currentMedia.getKey()))
                                 break;
 
                         }
 
-                        PhotoSliderActivity.setMediaList(LocalCache.photoSliderList);
+                        PhotoSliderActivity.setMediaList(medias);
 
                         Intent intent = new Intent();
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
@@ -823,7 +836,6 @@ public class NewPhotoList implements Page {
                 public boolean onLongClick(View v) {
 
                     currentMedia.setSelected(true);
-                    mPhotoRecycleAdapter.notifyDataSetChanged();
 
                     for (IPhotoListListener listListener : mPhotoListListeners) {
                         listListener.onPhotoItemLongClick();
@@ -860,8 +872,9 @@ public class NewPhotoList implements Page {
         private int getPosition(List<Media> mediaList, Media media) {
 
             int position = 0;
+            int size = mediaList.size();
 
-            for (int i = 0; i < mediaList.size(); i++) {
+            for (int i = 0; i < size; i++) {
                 Media media1 = mediaList.get(i);
 
                 if (media.getKey().equals(media1.getKey())) {

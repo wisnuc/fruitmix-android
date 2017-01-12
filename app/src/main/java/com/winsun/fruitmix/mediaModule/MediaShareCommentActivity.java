@@ -37,6 +37,7 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.CustomTransitionListener;
@@ -213,12 +214,9 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
     }
 
     private void initImageLoader() {
-        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(this).getRequestQueue();
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
+
+        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
+        mImageLoader = imageGifLoaderInstance.getImageLoader(mContext);
     }
 
     private void loadMedia() {

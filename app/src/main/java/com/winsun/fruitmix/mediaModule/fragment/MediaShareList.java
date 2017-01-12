@@ -40,6 +40,7 @@ import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
@@ -109,14 +110,8 @@ public class MediaShareList implements Page {
 
     private void initImageLoader() {
 
-        if (mImageLoader == null) {
-            RequestQueue mRequestQueue = RequestQueueInstance.getInstance(containerActivity).getRequestQueue();
-            mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-            Map<String, String> headers = new HashMap<>();
-            headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-            Log.i(TAG, FNAS.JWT);
-            mImageLoader.setHeaders(headers);
-        }
+        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
+        mImageLoader = imageGifLoaderInstance.getImageLoader(containerActivity);
 
     }
 
@@ -257,7 +252,8 @@ public class MediaShareList implements Page {
     private int findShareItemPosition(String currentMediaShareTime) {
 
         int returnPosition = 0;
-        for (int i = 0; i < mediaShareList.size(); i++) {
+        int size = mediaShareList.size();
+        for (int i = 0; i < size; i++) {
             MediaShare mediaShare = mediaShareList.get(i);
             String mediaShareTime = mediaShare.getTime();
             if (currentMediaShareTime.equals(mediaShareTime)) {

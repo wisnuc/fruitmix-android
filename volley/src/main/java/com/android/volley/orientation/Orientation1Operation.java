@@ -8,7 +8,8 @@ import android.graphics.Bitmap;
 
 public class Orientation1Operation implements OrientationOperation {
 
-    Orientation1Operation(){}
+    Orientation1Operation() {
+    }
 
     @Override
     public Bitmap handleOrientationOperate(Bitmap originalBitmap) {

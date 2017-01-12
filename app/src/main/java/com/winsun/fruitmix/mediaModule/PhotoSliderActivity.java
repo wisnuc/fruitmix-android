@@ -35,6 +35,7 @@ import com.winsun.fruitmix.component.GifTouchNetworkImageView;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.gif.GifLruCache;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
@@ -181,6 +182,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     protected void onDestroy() {
         super.onDestroy();
 
+        mediaList = null;
+
         mContext = null;
     }
 
@@ -255,15 +258,9 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     }
 
     private void initImageLoaderAndGifLoader() {
-        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(this).getRequestQueue();
-        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-        Map<String, String> headers = new HashMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        Log.i(TAG, FNAS.JWT);
-        mImageLoader.setHeaders(headers);
-
-        mGifLoader = new GifLoader(mRequestQueue, GifLruCache.instance());
-        mGifLoader.setHeaders(headers);
+        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
+        mImageLoader = imageGifLoaderInstance.getImageLoader(mContext);
+        mGifLoader = imageGifLoaderInstance.getGifLoader(mContext);
     }
 
     @Override

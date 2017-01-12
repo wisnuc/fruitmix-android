@@ -18,6 +18,7 @@ import com.winsun.fruitmix.util.Util;
 
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -57,7 +58,8 @@ public class UserManageActivity extends Activity implements View.OnClickListener
 
             mUserList = new ArrayList<>();
 
-            for (User user : LocalCache.RemoteUserMapKeyIsUUID.values()) {
+            Collection<User> collection = LocalCache.RemoteUserMapKeyIsUUID.values();
+            for (User user : collection) {
                 mUserList.add(user);
             }
 

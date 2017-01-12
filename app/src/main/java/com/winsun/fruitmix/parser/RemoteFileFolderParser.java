@@ -23,7 +23,10 @@ public class RemoteFileFolderParser implements RemoteDataParser<AbstractRemoteFi
 
         JSONArray jsonArray = new JSONArray(json);
 
-        for (int i = 0; i < jsonArray.length(); i++) {
+        int length = jsonArray.length();
+        int ownerLength;
+
+        for (int i = 0; i < length; i++) {
 
             JSONObject jsonObject = jsonArray.getJSONObject(i);
 
@@ -47,7 +50,9 @@ public class RemoteFileFolderParser implements RemoteDataParser<AbstractRemoteFi
             abstractRemoteFile.setName(jsonObject.optString("name"));
 
             JSONArray ownerArray = jsonObject.getJSONArray("owner");
-            for (int j = 0; j < ownerArray.length(); j++) {
+
+            ownerLength = ownerArray.length();
+            for (int j = 0; j < ownerLength; j++) {
                 abstractRemoteFile.addOwner(ownerArray.getString(j));
             }
 

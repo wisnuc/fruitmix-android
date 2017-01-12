@@ -18,7 +18,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,7 +31,6 @@ import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
-import com.winsun.fruitmix.component.NavPageBar;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
@@ -76,7 +74,7 @@ import static android.app.Activity.RESULT_OK;
  * Use the {@link MediaMainFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MediaMainFragment extends Fragment implements OnMediaFragmentInteractionListener, View.OnClickListener, IPhotoListListener, NavPageBar.OnTabChangedListener {
+public class MediaMainFragment extends Fragment implements OnMediaFragmentInteractionListener, View.OnClickListener, IPhotoListListener {
 
     public static final String TAG = MediaMainFragment.class.getSimpleName();
 
@@ -301,9 +299,13 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     private void resetBottomNavigationItemCheckState() {
-        for (int i = 0; i < bottomNavigationView.getMenu().size(); i++) {
+
+        int size = bottomNavigationView.getMenu().size();
+
+        for (int i = 0; i < size; i++) {
             bottomNavigationView.getMenu().getItem(i).setChecked(false);
         }
+
     }
 
     private void initPageList() {
@@ -348,7 +350,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             Log.i(TAG, "remote media loaded");
 
             NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
-            Util.needRefreshPhotoSliderList = true;
             photoList.refreshView();
 
             FNAS.retrieveRemoteMediaShare(mContext, true);
@@ -412,7 +413,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                     Log.i(TAG, "handleOperationEvent: new local media in camera retrieved succeed");
 
                     NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
-                    Util.needRefreshPhotoSliderList = true;
                     photoList.refreshView();
                 }
 
@@ -426,7 +426,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                     Log.i(TAG, "handleOperationEvent: local media in db retrieved succeed");
 
                     NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
-                    Util.needRefreshPhotoSliderList = true;
                     photoList.refreshView();
                 }
 
@@ -640,15 +639,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         bottomNavigationView.setVisibility(View.GONE);
     }
 
-
-    @Override
-    public void onTabChanged(int tabNum) {
-
-        if (tabNum == NavPageBar.TAB_ALBUM) {
-            showTips();
-        }
-    }
-
     public boolean handleBackPressedOrNot() {
         return sInChooseMode;
     }
@@ -680,6 +670,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         showChooseHeader();
 
         dismissBottomNavAnim();
+
+        setSelectCountText(String.format(getString(R.string.select_count), 1));
     }
 
     @Override

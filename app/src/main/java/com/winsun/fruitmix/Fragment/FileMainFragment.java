@@ -144,7 +144,10 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
     }
 
     private void resetBottomNavigationItemCheckState() {
-        for (int i = 0; i < bottomNavigationView.getMenu().size(); i++) {
+
+        int size = bottomNavigationView.getMenu().size();
+
+        for (int i = 0; i < size; i++) {
             bottomNavigationView.getMenu().getItem(i).setChecked(false);
         }
     }

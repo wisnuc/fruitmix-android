@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -14,6 +15,17 @@ import java.util.Date;
  */
 
 public class RemoteMediaShareJSONObjectParser {
+
+    private SimpleDateFormat mSimpleDateFormat;
+    private Date mDate;
+
+
+    public RemoteMediaShareJSONObjectParser(){
+
+        mSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        mDate = new Date();
+    }
+
 
     public MediaShare getRemoteMediaShare(JSONObject itemRaw) throws JSONException {
 
@@ -48,7 +60,8 @@ public class RemoteMediaShareJSONObjectParser {
 
         mediaShare.setArchived(false);
 
-        mediaShare.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(itemRaw.optString("mtime")))));
+        mDate.setTime(Long.parseLong(itemRaw.optString("mtime")));
+        mediaShare.setDate(mSimpleDateFormat.format(mDate));
 
         jsonArr = itemRaw.getJSONArray("contents");
         if (jsonArr.length() > 0) {
@@ -67,7 +80,6 @@ public class RemoteMediaShareJSONObjectParser {
                 }
 
                 mediaShareContent.setAuthor(author.toLowerCase());
-
 
                 String time = jsonObject.optString("time");
                 if (author.equals("")) {

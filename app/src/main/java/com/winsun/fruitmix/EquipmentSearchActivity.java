@@ -500,7 +500,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                     str = FNAS.GetRemoteCall(url).getResponseData();
 
                     json = new JSONArray(str);
-                    for (int i = 0; i < json.length(); i++) {
+
+                    int length = json.length();
+
+                    for (int i = 0; i < length; i++) {
                         itemRaw = json.getJSONObject(i);
 
                         String ip = itemRaw.getString("ipv4");
@@ -520,7 +523,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                     json = new JSONArray(str);
                     itemList = new ArrayList<>();
-                    for (int i = 0; i < json.length(); i++) {
+
+                    length = json.length();
+
+                    for (int i = 0; i < length; i++) {
                         itemRaw = json.getJSONObject(i);
                         user = new User();
                         user.setUserName(itemRaw.getString("username"));

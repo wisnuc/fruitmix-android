@@ -29,6 +29,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.util.FNAS;
@@ -106,16 +107,8 @@ public class AlbumList implements Page {
 
     private void initImageLoader() {
 
-        if (mImageLoader == null) {
-
-            RequestQueue mRequestQueue = RequestQueueInstance.getInstance(containerActivity).getRequestQueue();
-            mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
-            Map<String, String> headers = new HashMap<>();
-            headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-            Log.i(TAG, FNAS.JWT);
-            mImageLoader.setHeaders(headers);
-
-        }
+        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
+        mImageLoader = imageGifLoaderInstance.getImageLoader(containerActivity);
 
     }
 
@@ -126,7 +119,6 @@ public class AlbumList implements Page {
         fillMediaShareList(mediaShareList);
 
         sortMediaShareList(mediaShareList);
-
 
     }
 

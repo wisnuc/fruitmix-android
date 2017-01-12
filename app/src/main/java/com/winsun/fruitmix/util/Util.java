@@ -145,8 +145,6 @@ public class Util {
 
     public static boolean startTimingRetrieveMediaShare = false;
 
-    public static boolean needRefreshPhotoSliderList = false;
-
     public static LoginType loginType = LoginType.LOGIN;
 
     private static boolean localMediaInCameraLoaded = false;

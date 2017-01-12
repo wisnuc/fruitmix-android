@@ -57,8 +57,6 @@ public class LocalCache {
 
     public static String DeviceID = null;
 
-    public static List<Media> photoSliderList = null;
-
     public static List<String> mediaKeysInCreateAlbum = null;
 
     //optimize get media from db, modify send media info mode: use static list instead of put it into bundle
@@ -142,11 +140,6 @@ public class LocalCache {
             RemoteFileShareList = new ArrayList<>();
         else
             RemoteFileShareList.clear();
-
-        if (photoSliderList == null)
-            photoSliderList = new ArrayList<>();
-        else
-            photoSliderList.clear();
 
         if (mediaKeysInCreateAlbum == null)
             mediaKeysInCreateAlbum = new ArrayList<>();
