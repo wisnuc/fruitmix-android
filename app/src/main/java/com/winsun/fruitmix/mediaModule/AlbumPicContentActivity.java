@@ -306,17 +306,15 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                 if (picItemRaw == null) {
                     picItem = new Media();
-                    picItem.setUuid(aStArr);
-                    picItem.setLocal(false);
                 } else {
 
-                    picItem = picItemRaw.cloneSelf();
+                    picItem = picItemRaw;
                     picItem.setLocal(false);
                 }
 
             } else {
 
-                picItem = picItemRaw.cloneSelf();
+                picItem = picItemRaw;
 
                 picItem.setLocal(true);
             }
@@ -328,7 +326,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
     }
 
-    public void showPhotoSlider(int position, View sharedElement, String sharedElementName) {
+    private void showPhotoSlider(int position, View sharedElement, String sharedElementName) {
 
         PhotoSliderActivity.setMediaList(mediaList);
 

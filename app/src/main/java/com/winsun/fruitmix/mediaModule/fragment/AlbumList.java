@@ -352,8 +352,6 @@ public class AlbumList implements Page {
                 lbShare.setText(containerActivity.getString(R.string.private_text));
             }
 
-            //TODO:三星手机rxdnssd 混淆后进入app闪退，相册模块 相册标题长度限制存在适配
-
             String title = currentItem.getTitle();
 
             String photoCount = String.valueOf(currentItem.getMediaShareContents().size());

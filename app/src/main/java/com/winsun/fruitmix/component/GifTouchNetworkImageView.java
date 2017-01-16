@@ -204,7 +204,9 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
 
         // The pre-existing content of this view didn't match the current URL. Load the new image
         // from the network.
-        GifContainer newContainer = mGifLoader.get(mUrl,
+
+        // update the ImageContainer to be the new bitmap container.
+        mGifContainer = mGifLoader.get(mUrl,
                 new GifLoader.GifListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
@@ -255,9 +257,6 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                         }
                     }
                 });
-
-        // update the ImageContainer to be the new bitmap container.
-        mGifContainer = newContainer;
     }
 
     void loadImageIfNecessary(final boolean isInLayoutPass) {
@@ -309,7 +308,9 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
 
         // The pre-existing content of this view didn't match the current URL. Load the new image
         // from the network.
-        ImageLoader.ImageContainer newContainer = mImageLoader.get(mUrl,
+
+        // update the ImageContainer to be the new bitmap container.
+        mImageContainer = mImageLoader.get(mUrl,
                 new ImageLoader.ImageListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
@@ -356,9 +357,6 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                         }
                     }
                 }, maxWidth, maxHeight, scaleType);
-
-        // update the ImageContainer to be the new bitmap container.
-        mImageContainer = newContainer;
     }
 
     private void deliverImageLoadFinish() {

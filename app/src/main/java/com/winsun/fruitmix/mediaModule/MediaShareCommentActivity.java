@@ -246,16 +246,15 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
             if (imageRaw == null) {
                 media = new Media();
-                media.setUuid(imageKey);
-                media.setLocal(false);
+
             } else {
-                media = imageRaw.cloneSelf();
+                media = imageRaw;
                 media.setLocal(false);
             }
 
         } else {
 
-            media = imageRaw.cloneSelf();
+            media = imageRaw;
             media.setLocal(true);
         }
 

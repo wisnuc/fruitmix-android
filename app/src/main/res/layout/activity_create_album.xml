@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                 xmlns:tools="http://schemas.android.com/tools"
-                                                 android:layout_width="match_parent"
-                                                 android:layout_height="match_parent"
-                                                 android:fitsSystemWindows="true"
-                                                 tools:context="com.winsun.fruitmix.MainActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.winsun.fruitmix.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -30,18 +30,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/ic_back"/>
-
-                <TextView
-                    android:id="@+id/layout_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="32dp"
-                    android:layout_toRightOf="@+id/back"
-                    android:text="@string/modify_album"
-                    android:textColor="@color/white"
-                    android:textSize="18dp"/>
+                    android:src="@drawable/ic_back" />
 
                 <TextView
                     android:id="@+id/ok"
@@ -52,7 +41,20 @@
                     android:layout_marginRight="16dp"
                     android:text="@string/finish_text"
                     android:textColor="@color/white"
-                    android:textSize="16dp"/>
+                    android:textSize="16dp" />
+
+                <TextView
+                    android:id="@+id/layout_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="32dp"
+                    android:layout_toLeftOf="@id/ok"
+                    android:layout_toRightOf="@+id/back"
+                    android:text="@string/modify_album"
+                    android:textColor="@color/white"
+                    android:textSize="18dp" />
+
 
             </RelativeLayout>
 
@@ -81,7 +83,7 @@
                 android:gravity="bottom"
                 android:inputType="textMultiLine"
                 android:textColor="@color/black"
-                android:textSize="16dp"/>
+                android:textSize="16dp" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -101,7 +103,7 @@
                 android:hint="@string/description"
                 android:inputType="textMultiLine"
                 android:textColor="@color/black"
-                android:textSize="16dp"/>
+                android:textSize="16dp" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -115,14 +117,14 @@
             <CheckBox
                 android:id="@+id/sPublic"
                 android:layout_width="32dp"
-                android:layout_height="32dp"/>
+                android:layout_height="32dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/share_text"
                 android:textColor="@color/content_text"
-                android:textSize="14dp"/>
+                android:textSize="14dp" />
 
         </LinearLayout>
 
@@ -130,21 +132,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="32dp"
-            android:visibility="gone"
             android:gravity="left"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <CheckBox
                 android:id="@+id/set_maintainer"
                 android:layout_width="32dp"
-                android:layout_height="32dp"/>
+                android:layout_height="32dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/set_maintainer"
                 android:textColor="@color/content_text"
-                android:textSize="14dp"/>
+                android:textSize="14dp" />
 
         </LinearLayout>
 

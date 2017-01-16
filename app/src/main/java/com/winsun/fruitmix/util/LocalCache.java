@@ -470,7 +470,6 @@ public class LocalCache {
         SimpleDateFormat df;
         Calendar date;
 
-
         cr = context.getContentResolver();
 //        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "='" + bucketName + "'", null, null);
 

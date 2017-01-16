@@ -2,19 +2,14 @@ package com.winsun.fruitmix.mediaModule.model;
 
 import android.os.AsyncTask;
 import android.support.v4.util.ArrayMap;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.Util;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -192,7 +187,7 @@ public enum NewPhotoListDataLoader {
         int photoListSize;
         mAdapterItemTotalCount = 0;
 
-            medias.clear();
+        medias.clear();
 
         for (String title : mPhotoDateGroups) {
             mMapKeyIsPhotoPositionValueIsPhotoDate.put(titlePosition, title);

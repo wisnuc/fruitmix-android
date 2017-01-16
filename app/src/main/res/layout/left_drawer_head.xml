@@ -6,35 +6,28 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/avatar"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/share_portrait_bg"
+        android:gravity="center"
+        android:text="@string/user_name_abbreviations"
+        android:textColor="@color/white"
+        android:textSize="18dp" />
+
+    <TextView
+        android:id="@+id/user_name_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/avatar"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:background="@drawable/share_portrait_bg"
-            android:gravity="center"
-            android:text="@string/user_name_abbreviations"
-            android:textColor="@color/white"
-            android:textSize="18dp" />
-
-        <TextView
-            android:id="@+id/user_name_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_marginTop="@dimen/nav_header_vertical_spacing"
-            android:text="@string/user_default_name"
-            android:textColor="@color/white"
-            android:textSize="14dp" />
-
-
-    </LinearLayout>
+        android:layout_marginTop="@dimen/nav_header_vertical_spacing"
+        android:gravity="center"
+        android:text="@string/user_default_name"
+        android:textColor="@color/white"
+        android:textSize="14dp" />
 
 
 </LinearLayout>

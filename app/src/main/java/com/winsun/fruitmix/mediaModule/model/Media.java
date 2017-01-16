@@ -34,6 +34,7 @@ public class Media implements Parcelable {
     private String type;
 
     public Media() {
+        uuid = "";
         orientationNumber = 1;
         belongingMediaShareUUID = "";
         width = "200";
@@ -42,6 +43,7 @@ public class Media implements Parcelable {
         type = "JPEG";
         date = "";
         belongingMediaShareUUID = "";
+        local = false;
     }
 
     protected Media(Parcel in) {

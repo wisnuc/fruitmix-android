@@ -3,17 +3,17 @@
 
     <item
         android:id="@+id/share"
-        android:icon="@drawable/ic_share_bottom"
+        android:icon="@drawable/ic_share"
         android:title="@string/share_text"/>
 
     <item
         android:id="@+id/file"
-        android:icon="@drawable/ic_storage_bottom"
+        android:icon="@drawable/ic_storage"
         android:title="@string/file"/>
 
     <item
         android:id="@+id/download"
-        android:icon="@drawable/ic_smartphone_bottom"
+        android:icon="@drawable/ic_smartphone"
         android:title="@string/download"/>
 
 

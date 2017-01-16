@@ -184,7 +184,7 @@ public class NavPagerActivity extends AppCompatActivity
 
         User user;
 
-        if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(FNAS.userUUID)) {
+        if (FNAS.userUUID != null && !LocalCache.RemoteUserMapKeyIsUUID.isEmpty() && LocalCache.RemoteUserMapKeyIsUUID.containsKey(FNAS.userUUID)) {
             user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
         } else {
             user = LocalCache.getUser(mContext);

@@ -834,17 +834,16 @@ public class MediaShareList implements Page {
 
                 if (picItemRaw == null) {
                     picItem = new Media();
-                    picItem.setUuid(aStArr);
-                    picItem.setLocal(false);
+
                 } else {
 
-                    picItem = picItemRaw.cloneSelf();
+                    picItem = picItemRaw;
                     picItem.setLocal(false);
                 }
 
             } else {
 
-                picItem = picItemRaw.cloneSelf();
+                picItem = picItemRaw;
                 picItem.setLocal(true);
 
             }

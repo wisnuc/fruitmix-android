@@ -30,13 +30,13 @@ import java.util.List;
  */
 public class CalcNewLocalMediaDigestService extends IntentService {
 
-    public static final String TAG = CalcNewLocalMediaDigestService.class.getSimpleName();
+    private static final String TAG = CalcNewLocalMediaDigestService.class.getSimpleName();
 
     public CalcNewLocalMediaDigestService() {
         super("CalcNewLocalMediaDigestService");
     }
 
-    public static final String ACTION_CALC_NEW_LOCAL_MEDIA_DIGEST = "com.winsun.fruitmix.services.action.calc.new.local.media.digest";
+    private static final String ACTION_CALC_NEW_LOCAL_MEDIA_DIGEST = "com.winsun.fruitmix.services.action.calc.new.local.media.digest";
 
     /**
      * Starts this service to perform action Foo with the given parameters. If
