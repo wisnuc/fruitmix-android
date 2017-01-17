@@ -2,14 +2,18 @@ package com.winsun.fruitmix.mediaModule.model;
 
 import android.os.AsyncTask;
 import android.support.v4.util.ArrayMap;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.winsun.fruitmix.util.LocalCache;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -119,15 +123,14 @@ public enum NewPhotoListDataLoader {
         mMapKeyIsPhotoPositionValueIsPhoto.clear();
 
         Collection<Media> medias = LocalCache.LocalMediaMapKeyIsThumb.values();
+        Map<String,Media> remoteMediaMap = new HashMap<>(LocalCache.RemoteMediaMapKeyIsUUID);
 
-        List<String> remoteMediaUUID = new ArrayList<>(LocalCache.RemoteMediaMapKeyIsUUID.size());
+        Log.i(TAG, "reloadData: before load loacal key is date value is photo list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         for (Media media : medias) {
 
             String mediaUUID = media.getUuid();
-
-            if (mediaUUID != null && !mediaUUID.isEmpty())
-                remoteMediaUUID.add(mediaUUID);
+            remoteMediaMap.remove(mediaUUID);
 
             date = media.getTime().substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
@@ -143,15 +146,16 @@ public enum NewPhotoListDataLoader {
             media.setSelected(false);
 
             mediaList.add(media);
+
         }
 
-        medias = LocalCache.RemoteMediaMapKeyIsUUID.values();
+        Log.i(TAG, "reloadData: after load local key is date value is photo list" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
+        medias = remoteMediaMap.values();
+
+        Log.i(TAG, "reloadData: remote media length:" + medias.size());
 
         for (Media media : medias) {
-
-            if (remoteMediaUUID.contains(media.getUuid())) {
-                continue;
-            }
 
             date = media.getTime().substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
@@ -170,6 +174,8 @@ public enum NewPhotoListDataLoader {
 
         }
 
+        Log.i(TAG, "reloadData: after load remote key is date value is photo list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
         Collections.sort(mPhotoDateGroups, new Comparator<String>() {
             @Override
             public int compare(String lhs, String rhs) {
@@ -177,8 +183,11 @@ public enum NewPhotoListDataLoader {
             }
         });
 
+        Log.i(TAG, "reloadData: after sort photo date groups :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
         calcPhotoPositionNumber();
 
+        Log.i(TAG, "reloadData: after calc photo position number" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
     }
 
     public void calcPhotoPositionNumber() {

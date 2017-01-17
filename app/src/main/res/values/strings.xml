@@ -6,6 +6,8 @@
 
     <string name="android_finishAppToast">Please click BACK again to exit</string>
 
+    <string name="and"> 和 </string>
+
     <!-- url -->
 
     <string name="android_new_thumb_photo_url">%1$s/download</string>

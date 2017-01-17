@@ -1,10 +1,14 @@
 package com.winsun.fruitmix.util;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.http.HttpResponse;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
@@ -23,6 +27,8 @@ import okhttp3.logging.HttpLoggingInterceptor;
 enum OkHttpUtil {
 
     INSTANCE;
+
+    public static final String TAG = OkHttpUtil.class.getSimpleName();
 
     private OkHttpClient okHttpClient;
 
@@ -56,7 +62,11 @@ enum OkHttpUtil {
                 break;
         }
 
+        Log.i(TAG, "remoteCallMethod: before execute" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
         Response response = okHttpClient.newCall(request).execute();
+
+        Log.i(TAG, "remoteCallMethod: after execute " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         String str = "";
         int responseCode = response.code();
@@ -64,6 +74,8 @@ enum OkHttpUtil {
         if (responseCode == 200) {
             str = FNAS.ReadFull(response.body().byteStream());
         }
+
+        Log.i(TAG, "remoteCallMethod: after read response body" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         return new HttpResponse(responseCode, str);
     }

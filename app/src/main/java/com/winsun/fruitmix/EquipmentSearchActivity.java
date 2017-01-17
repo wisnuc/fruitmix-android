@@ -361,9 +361,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
             List<String> hosts = equipment.getHosts();
 
+            String and = getString(R.string.and);
+
             StringBuilder builder = new StringBuilder();
             for (String host : hosts) {
-                builder.append(",");
+                builder.append(and);
                 builder.append(host);
             }
 

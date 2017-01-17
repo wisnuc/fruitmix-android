@@ -93,7 +93,7 @@
         <EditText
             android:id="@+id/pwd_edit"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="wrap_content"
             android:hint="@string/password_text"
             android:inputType="textPassword"
             android:textColor="@color/light_gray"

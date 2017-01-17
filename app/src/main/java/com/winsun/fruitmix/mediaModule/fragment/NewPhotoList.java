@@ -37,6 +37,8 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.RequestQueueInstance;
@@ -354,8 +356,50 @@ public class NewPhotoList implements Page {
         LocalCache.mediaKeysInCreateAlbum.addAll(selectKeys);
 
         containerActivity.startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
+
+        clearSelectedPhoto();
     }
 
+    public void createShare(List<String> selectMediaKeys) {
+
+        FNAS.createRemoteMediaShare(containerActivity, createMediaShare(selectMediaKeys));
+
+        clearSelectedPhoto();
+    }
+
+    private MediaShare createMediaShare(List<String> selectMediaKeys) {
+
+        MediaShare mediaShare = new MediaShare();
+        mediaShare.setUuid(Util.createLocalUUid());
+
+        List<MediaShareContent> mediaShareContents = new ArrayList<>();
+        for (String digest : selectMediaKeys) {
+            MediaShareContent mediaShareContent = new MediaShareContent();
+            mediaShareContent.setKey(digest);
+            mediaShareContent.setAuthor(FNAS.userUUID);
+            mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
+            mediaShareContents.add(mediaShareContent);
+        }
+
+        mediaShare.initMediaShareContents(mediaShareContents);
+
+        mediaShare.setCoverImageKey(selectMediaKeys.get(0));
+        mediaShare.setTitle("");
+        mediaShare.setDesc("");
+        for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+            mediaShare.addViewer(userUUID);
+        }
+        mediaShare.addMaintainer(FNAS.userUUID);
+        mediaShare.setCreatorUUID(FNAS.userUUID);
+        mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
+        mediaShare.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(mediaShare.getTime()))));
+        mediaShare.setArchived(false);
+        mediaShare.setAlbum(false);
+        mediaShare.setLocal(true);
+
+        return mediaShare;
+
+    }
 
     @Override
     public void onDidAppear() {

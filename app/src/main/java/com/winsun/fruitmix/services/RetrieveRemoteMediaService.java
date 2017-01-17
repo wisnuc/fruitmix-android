@@ -18,6 +18,8 @@ import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
@@ -76,9 +78,11 @@ public class RetrieveRemoteMediaService extends IntentService {
 
         try {
 
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: before load" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
             HttpResponse httpResponse = FNAS.loadMedia();
 
-            Log.i(TAG, "handleActionRetrieveRemoteMedia: load media finish");
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: load media finish" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
             RemoteDataParser<Media> parser = new RemoteMediaParser();
             medias = parser.parse(httpResponse.getResponseData());
@@ -89,13 +93,19 @@ public class RetrieveRemoteMediaService extends IntentService {
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: build media map");
 
+            fillRemoteMediaMap(mediaConcurrentMap);
+
+            Util.setRemoteMediaLoaded(true);
+
+            sendEvent();
+
             dbUtils.deleteAllRemoteMedia();
 
-            Log.i(TAG, "handleActionRetrieveRemoteMedia: delete all remote media");
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: delete all remote media" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
             long result = dbUtils.insertRemoteMedias(mediaConcurrentMap);
 
-            Log.i(TAG, "handleActionRetrieveRemoteMedia: insert all remote media result:" + result);
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: insert all remote media result:" + result + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,17 +115,25 @@ public class RetrieveRemoteMediaService extends IntentService {
             mediaConcurrentMap = LocalCache.BuildMediaMapKeyIsUUID(medias);
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: retrieve media from db");
+
+            fillRemoteMediaMap(mediaConcurrentMap);
+
+            Util.setRemoteMediaLoaded(true);
+
+            sendEvent();
+
         }
 
+    }
+
+    private void fillRemoteMediaMap(ConcurrentMap<String, Media> mediaConcurrentMap) {
         LocalCache.RemoteMediaMapKeyIsUUID.clear();
-
         LocalCache.RemoteMediaMapKeyIsUUID.putAll(mediaConcurrentMap);
+    }
 
-        Util.setRemoteMediaLoaded(true);
-
+    private void sendEvent() {
         OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_RETRIEVED, new OperationSuccess());
         EventBus.getDefault().postSticky(operationEvent);
-
     }
 
 }

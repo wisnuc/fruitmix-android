@@ -30,6 +30,9 @@ import com.android.volley.orientation.OrientationOperationFactory;
 import com.android.volley.toolbox.ImageLoader.ImageContainer;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Handles fetching an image from a URL as well as the life-cycle of the
  * associated request.
@@ -62,8 +65,7 @@ public class NetworkImageView extends ImageView {
 
     private boolean loaded = false;
 
-    private int mMaxRetryNum = 10;
-    private int mCurrentRetryNum = 0;
+    private boolean cancelRequest = false;
 
     /**
      * Current ImageContainer. (either in-flight or finished)
@@ -99,6 +101,9 @@ public class NetworkImageView extends ImageView {
     public void setImageUrl(String url, ImageLoader imageLoader) {
         mUrl = url;
         mImageLoader = imageLoader;
+
+        cancelRequest = false;
+
         // The URL has potentially changed. See if we need to load it.
         loadImageIfNecessary(false);
     }
@@ -206,17 +211,31 @@ public class NetworkImageView extends ImageView {
                             setBackgroundResource(mDefaultImageId);
                         }
 
-                        if (error.networkResponse != null && error.networkResponse.statusCode == 500 && mCurrentRetryNum < mMaxRetryNum) {
+                        if (error.networkResponse != null && error.networkResponse.statusCode == 500 && !cancelRequest) {
 
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mImageContainer = null;
-                                    mCurrentRetryNum++;
-                                    loadImageIfNecessary(false);
+                            String status = "";
 
-                                }
-                            }, 3000);
+                            try {
+                                status = new JSONObject(new String(error.networkResponse.data)).optString("status");
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                            Log.i(TAG, "onErrorResponse: status:" + status);
+
+                            if (status.equals("pending")) {
+
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mImageContainer = null;
+                                        loadImageIfNecessary(false);
+
+                                    }
+                                }, 3000);
+
+                            }
+
                         }
                     }
 
@@ -292,8 +311,7 @@ public class NetworkImageView extends ImageView {
             setImageBitmap(null);
             // also clear out the container so we can reload the image if necessary.
             mImageContainer = null;
-
-            mCurrentRetryNum = 0;
+            cancelRequest = true;
         }
         super.onDetachedFromWindow();
     }

@@ -705,7 +705,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-                doCreateShareFunction(selectMediaKeys);
+                photoList.createShare(selectMediaKeys);
                 hideChooseHeader();
                 showBottomNavAnim();
                 break;
@@ -726,45 +726,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             return true;
         }
         return false;
-    }
-
-    private void doCreateShareFunction(List<String> selectMediaKeys) {
-
-        FNAS.createRemoteMediaShare(mContext, createMediaShare(selectMediaKeys));
-    }
-
-    private MediaShare createMediaShare(List<String> selectMediaKeys) {
-
-        MediaShare mediaShare = new MediaShare();
-        mediaShare.setUuid(Util.createLocalUUid());
-
-        List<MediaShareContent> mediaShareContents = new ArrayList<>();
-        for (String digest : selectMediaKeys) {
-            MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setKey(digest);
-            mediaShareContent.setAuthor(FNAS.userUUID);
-            mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
-            mediaShareContents.add(mediaShareContent);
-        }
-
-        mediaShare.initMediaShareContents(mediaShareContents);
-
-        mediaShare.setCoverImageKey(selectMediaKeys.get(0));
-        mediaShare.setTitle("");
-        mediaShare.setDesc("");
-        for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-            mediaShare.addViewer(userUUID);
-        }
-        mediaShare.addMaintainer(FNAS.userUUID);
-        mediaShare.setCreatorUUID(FNAS.userUUID);
-        mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
-        mediaShare.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(mediaShare.getTime()))));
-        mediaShare.setArchived(false);
-        mediaShare.setAlbum(false);
-        mediaShare.setLocal(true);
-
-        return mediaShare;
-
     }
 
     private void refreshFabState() {

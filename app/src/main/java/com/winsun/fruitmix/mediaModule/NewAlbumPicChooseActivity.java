@@ -79,20 +79,16 @@ public class NewAlbumPicChooseActivity extends Activity {
                 if (intent.getBooleanExtra(Util.EDIT_PHOTO, false)) {
 
                     LocalCache.mediaKeysInCreateAlbum.addAll(selectImageKeys);
+                    mNewPhotoList.clearSelectedPhoto();
 
                     setResult(RESULT_OK, intent);
                     finish();
 
                 } else {
-                    intent = new Intent();
-                    intent.setClass(NewAlbumPicChooseActivity.this, CreateAlbumActivity.class);
-
-                    LocalCache.mediaKeysInCreateAlbum.addAll(selectImageKeys);
-
-                    startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
+                    mNewPhotoList.createAlbum(selectImageKeys);
                 }
 
-                mNewPhotoList.clearSelectedPhoto();
+
             }
         });
     }
