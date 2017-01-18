@@ -20,45 +20,16 @@ public class RemoteUserParser implements RemoteDataParser<User> {
     public List<User> parse(String json) throws JSONException {
 
         List<User> users = new ArrayList<>();
-        String uuid;
         JSONArray jsonArray;
         JSONObject itemRaw;
-        User user;
 
+        RemoteUserJSONObjectParser remoteUserJSONObjectParser = new RemoteUserJSONObjectParser();
         jsonArray = new JSONArray(json);
+
         for (int i = 0; i < jsonArray.length(); i++) {
             itemRaw = jsonArray.getJSONObject(i);
 
-            user = new User();
-            uuid = itemRaw.optString("uuid");
-            user.setUuid(uuid);
-            user.setUserName(itemRaw.optString("username"));
-
-            String avatar = itemRaw.optString("avatar");
-            if (avatar.equals("null")) {
-                user.setAvatar("defaultAvatar.jpg");
-            } else {
-                user.setAvatar(avatar);
-            }
-
-            String email = itemRaw.optString("email");
-            if (email.equals("null")) {
-                user.setEmail("");
-            } else {
-                user.setEmail(email);
-            }
-
-            user.setAdmin(itemRaw.optBoolean("isAdmin"));
-
-            if (user.getDefaultAvatar() == null) {
-                user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
-            }
-            if (user.getDefaultAvatarBgColor() == 0) {
-                user.setDefaultAvatarBgColor(new Random().nextInt(3) + 1);
-            }
-
-            user.setHome(itemRaw.optString("home"));
-            user.setLibrary(itemRaw.optString("library"));
+            User user = remoteUserJSONObjectParser.getUser(itemRaw);
 
             users.add(user);
 

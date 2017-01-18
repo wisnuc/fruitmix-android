@@ -90,7 +90,7 @@ public class RetrieveRemoteUserService extends IntentService {
             userConcurrentMap = LocalCache.BuildRemoteUserMapKeyIsUUID(users);
 
             dbUtils.deleteAllRemoteUser();
-            dbUtils.insertRemoteUsers(userConcurrentMap);
+            dbUtils.insertRemoteUsers(userConcurrentMap.values());
 
             Log.i(TAG, "handleActionRetrieveRemoteUser: retrieve user from network");
 

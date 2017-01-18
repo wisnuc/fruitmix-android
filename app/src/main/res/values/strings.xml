@@ -144,6 +144,14 @@
 
     <string name="no_user">No User</string>
 
+    <!-- create user -->
+    <string name="user_name">User Name</string>
+    <string name="confirm_user_password">Confirm User Password</string>
+    <string name="create_user">Create User</string>
+    <string name="username_not_unique">User name is not unique</string>
+    <string name="empty_username">Empty username</string>
+    <string name="not_same_password">Not same password</string>
+
     <!-- file -->
 
     <string name="file">File</string>
@@ -176,5 +184,7 @@
     <string name="photo_not_sharing">Sorry,the photo can not be shared</string>
     <string name="open_file_failed">Sorry,open this file failed</string>
     <string name="no_enough_space">No enough space</string>
+
+    <string name="max_select_photo">Max photo count</string>
 
 </resources>

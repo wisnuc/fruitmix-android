@@ -12,9 +12,11 @@ import com.winsun.fruitmix.eventbus.MediaCommentRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.ModifyMediaShareRequestEvent;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
+import com.winsun.fruitmix.eventbus.UserRequestEvent;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -52,7 +54,7 @@ public class FNAS {
 
     public static String PORT = "3721";
 
-    static String ReadFull(InputStream ins) throws IOException {
+    private static String ReadFull(InputStream ins) throws IOException {
         String result = "";
         int length;
         byte[] buffer = new byte[1024];
@@ -120,18 +122,41 @@ public class FNAS {
         return FNAS.RemoteCall(String.format(context.getString(R.string.android_photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID));
     }
 
-    public static HttpResponse loadToken(Context context, String gateway, String userUUID, String userPassword) throws MalformedURLException, SocketTimeoutException, IOException {
+    public static HttpResponse loadToken(Context context, String gateway, String userUUID, String userPassword) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        HttpURLConnection conn;
+        HttpURLConnection conn = null;
         String str = "";
-        conn = (HttpURLConnection) (new URL(gateway + ":" + FNAS.PORT + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
-        conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((userUUID + ":" + userPassword).getBytes(), Base64.DEFAULT));
-        conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
-        if (conn.getResponseCode() == 200) {
-            str = FNAS.ReadFull(conn.getInputStream());
-        }
 
-        HttpResponse httpResponse = new HttpResponse(conn.getResponseCode(), str);
+        HttpResponse httpResponse = new HttpResponse();
+
+        try {
+
+            conn = (HttpURLConnection) (new URL(gateway + ":" + FNAS.PORT + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
+            conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((userUUID + ":" + userPassword).getBytes(), Base64.DEFAULT));
+            conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
+            if (conn.getResponseCode() == 200) {
+                str = FNAS.ReadFull(conn.getInputStream());
+            }
+
+            httpResponse.setResponseCode(conn.getResponseCode());
+            httpResponse.setResponseData(str);
+
+        } catch (MalformedURLException | SocketTimeoutException ex) {
+
+            ex.printStackTrace();
+
+            throw ex;
+
+        } catch (IOException ex) {
+
+            ex.printStackTrace();
+
+            throw ex;
+
+        } finally {
+            if (conn != null)
+                conn.disconnect();
+        }
 
         Log.i(TAG, "loadToken: " + str);
 
@@ -154,7 +179,7 @@ public class FNAS {
 
     public static void retrieveRemoteToken(Context context, String gateway, String userUUID, String pwd) {
 
-        EventBus.getDefault().post(new TokenRequestEvent(OperationType.GET, OperationTargetType.REMOTE_TOKEN, gateway, userUUID,pwd));
+        EventBus.getDefault().post(new TokenRequestEvent(OperationType.GET, OperationTargetType.REMOTE_TOKEN, gateway, userUUID, pwd));
     }
 
     public static void retrieveUser(Context context) {
@@ -209,6 +234,10 @@ public class FNAS {
 
     public static void retrieveDownloadedFile() {
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.DOWNLOADED_FILE));
+    }
+
+    public static void createRemoteUser(String userName, String userPassword) {
+        EventBus.getDefault().post(new UserRequestEvent(OperationType.CREATE, OperationTargetType.REMOTE_USER, userName, userPassword));
     }
 
     public static void createRemoteMedia(Context context, Media media) {
@@ -280,21 +309,46 @@ public class FNAS {
 
     public static HttpResponse GetRemoteCall(String url) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        HttpURLConnection conn;
+        HttpURLConnection conn = null;
         String str = "";
 
-        conn = (HttpURLConnection) (new URL(url).openConnection());
-        conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
-        conn.setUseCaches(false);
-        conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
-        Log.d(TAG, "NAS GET: " + (url));
+        HttpResponse httpResponse = new HttpResponse();
 
-        if (conn.getResponseCode() == 200) {
-            str = FNAS.ReadFull(conn.getInputStream());
+        try {
+
+            conn = (HttpURLConnection) (new URL(url).openConnection());
+            conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
+            conn.setUseCaches(false);
+            conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
+            Log.d(TAG, "NAS GET: " + (url));
+
+            if (conn.getResponseCode() == 200) {
+                str = FNAS.ReadFull(conn.getInputStream());
+            }
+
+            httpResponse.setResponseCode(conn.getResponseCode());
+            httpResponse.setResponseData(str);
+
+        } catch (MalformedURLException | SocketTimeoutException ex) {
+
+            ex.printStackTrace();
+
+            throw ex;
+
+        } catch (IOException ex) {
+
+            ex.printStackTrace();
+
+            throw ex;
+
+        } finally {
+
+            if (conn != null)
+                conn.disconnect();
         }
 
-        return new HttpResponse(conn.getResponseCode(), str);
 
+        return httpResponse;
 
     }
 

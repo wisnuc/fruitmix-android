@@ -18,7 +18,7 @@ public enum FileDownloadManager {
 
     private List<FileDownloadItem> fileDownloadItems;
 
-    private static int FILE_DOWNLOADING_MAX_NUM = 5;
+    private static int FILE_DOWNLOADING_MAX_NUM = 3;
 
     FileDownloadManager() {
         fileDownloadItems = new ArrayList<>();

@@ -1,8 +1,10 @@
 package com.winsun.fruitmix;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
+import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,9 +40,14 @@ public class UserManageActivity extends Activity implements View.OnClickListener
     @BindView(R.id.user_list_empty)
     TextView mUserListEmpty;
 
+    @BindView(R.id.add_user)
+    FloatingActionButton mAddUserBtn;
+
     private List<User> mUserList;
 
     private Context mContext;
+
+    private UserListAdapter mUserListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,34 +58,10 @@ public class UserManageActivity extends Activity implements View.OnClickListener
 
         mContext = this;
 
-        if (LocalCache.RemoteUserMapKeyIsUUID != null && !LocalCache.RemoteUserMapKeyIsUUID.isEmpty()) {
-
-            mUserListEmpty.setVisibility(View.GONE);
-            mUserListView.setVisibility(View.VISIBLE);
-
-            mUserList = new ArrayList<>();
-
-            Collection<User> collection = LocalCache.RemoteUserMapKeyIsUUID.values();
-            for (User user : collection) {
-                mUserList.add(user);
-            }
-
-            Collections.sort(mUserList, new Comparator<User>() {
-                @Override
-                public int compare(User lhs, User rhs) {
-                    return Collator.getInstance(Locale.CHINESE).compare(lhs.getUserName(), (rhs.getUserName()));
-                }
-            });
-
-            UserListAdapter mUserListAdapter = new UserListAdapter();
-            mUserListView.setAdapter(mUserListAdapter);
-
-        } else {
-            mUserListView.setVisibility(View.GONE);
-            mUserListEmpty.setVisibility(View.VISIBLE);
-        }
-
         mBack.setOnClickListener(this);
+        mAddUserBtn.setOnClickListener(this);
+
+        refreshView();
     }
 
     @Override
@@ -88,13 +71,72 @@ public class UserManageActivity extends Activity implements View.OnClickListener
         mContext = null;
     }
 
+    private void refreshView() {
+
+        if (LocalCache.RemoteUserMapKeyIsUUID != null && !LocalCache.RemoteUserMapKeyIsUUID.isEmpty()) {
+
+            mUserListEmpty.setVisibility(View.GONE);
+            mUserListView.setVisibility(View.VISIBLE);
+
+            refreshUserList();
+
+            if (mUserListAdapter == null) {
+                mUserListAdapter = new UserListAdapter();
+                mUserListView.setAdapter(mUserListAdapter);
+            } else {
+                mUserListAdapter.notifyDataSetChanged();
+            }
+
+        } else {
+            mUserListView.setVisibility(View.GONE);
+            mUserListEmpty.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    private void refreshUserList() {
+
+        if (mUserList == null)
+            mUserList = new ArrayList<>();
+        else
+            mUserList.clear();
+
+        Collection<User> collection = LocalCache.RemoteUserMapKeyIsUUID.values();
+        for (User user : collection) {
+            mUserList.add(user);
+        }
+
+        Collections.sort(mUserList, new Comparator<User>() {
+            @Override
+            public int compare(User lhs, User rhs) {
+                return Collator.getInstance(Locale.CHINESE).compare(lhs.getUserName(), (rhs.getUserName()));
+            }
+        });
+
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.back:
                 finish();
                 break;
+            case R.id.add_user:
+
+                Intent intent = new Intent(mContext, CreateUserActivity.class);
+                startActivityForResult(intent, Util.KEY_CREATE_USER_REQUEST_CODE);
+
+                break;
             default:
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == Util.KEY_CREATE_USER_REQUEST_CODE && resultCode == RESULT_OK) {
+            refreshView();
         }
     }
 

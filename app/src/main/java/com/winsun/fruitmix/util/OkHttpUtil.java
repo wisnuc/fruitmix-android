@@ -4,6 +4,9 @@ import android.util.Log;
 
 import com.winsun.fruitmix.http.HttpResponse;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -72,8 +75,10 @@ enum OkHttpUtil {
         int responseCode = response.code();
 
         if (responseCode == 200) {
-            str = FNAS.ReadFull(response.body().byteStream());
+            str = response.body().string();
         }
+
+        response.body().close();
 
         Log.i(TAG, "remoteCallMethod: after read response body" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 

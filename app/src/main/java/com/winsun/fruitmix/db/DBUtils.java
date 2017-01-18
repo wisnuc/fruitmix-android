@@ -347,7 +347,7 @@ public class DBUtils {
         return contentValues;
     }
 
-    public long insertRemoteUsers(ConcurrentMap<String, User> users) {
+    public long insertRemoteUsers(Collection<User> users) {
 
         openWritableDB();
 
@@ -355,7 +355,7 @@ public class DBUtils {
 
         ContentValues contentValues;
 
-        for (User user : users.values()) {
+        for (User user : users) {
 
             contentValues = createUserContentValues(user);
 
@@ -365,6 +365,12 @@ public class DBUtils {
         close();
 
         return returnValue;
+    }
+
+    public long insertRemoteUser(User user){
+
+        return insertRemoteUsers(Collections.singletonList(user));
+
     }
 
     private ContentValues createDownloadedFileContentValues(FileDownloadItem fileDownloadItem) {

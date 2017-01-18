@@ -88,7 +88,7 @@
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/add_album"
+        android:id="@+id/add_user"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
@@ -97,6 +97,6 @@
         android:src="@drawable/ic_add_white_24dp"
         app:borderWidth="0dp"
         app:fabSize="normal"
-        android:visibility="gone"/>
+        android:visibility="visible"/>
 
 </merge>

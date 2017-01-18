@@ -318,7 +318,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         pageList.add(albumList);
     }
 
-    public void refreshUser(){
+    public void refreshUser() {
 
         shareList.refreshView();
         albumList.refreshView();
@@ -331,6 +331,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         viewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
+
                 onDidAppear(position);
 
                 resetBottomNavigationItemCheckState();
@@ -818,8 +819,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     private void onDidAppear(int position) {
-        hideChooseHeader();
-        showBottomNav();
+
+        if (sInChooseMode) {
+            hideChooseHeader();
+            showBottomNav();
+        }
 
         switch (position) {
             case PAGE_SHARE:

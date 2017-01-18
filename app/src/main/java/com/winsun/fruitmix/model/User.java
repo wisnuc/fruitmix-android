@@ -103,4 +103,11 @@ public class User {
     public void setAdmin(boolean admin) {
         this.admin = admin;
     }
+
+    public static String generateCreateRemoteUserBody(String userName, String userPassword) {
+
+        return "{\"username\":\"" + userName + "\",\"password\":\"" + userPassword + "\"}";
+
+    }
+
 }

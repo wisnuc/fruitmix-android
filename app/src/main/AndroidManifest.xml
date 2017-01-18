@@ -39,10 +39,9 @@
             android:name="com.google.android.gms.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:theme="@android:style/Theme.Translucent" />
-
-        <activity android:name=".mediaModule.PhotoSliderActivity"
-            android:configChanges="orientation|screenSize"/>
-
+        <activity
+            android:name=".mediaModule.PhotoSliderActivity"
+            android:configChanges="orientation|screenSize" />
         <activity
             android:name=".mediaModule.CreateAlbumActivity"
             android:screenOrientation="portrait" />
@@ -74,9 +73,7 @@
             android:name=".LoginActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateVisible|adjustPan" />
-
         <activity android:name=".GalleryTestActivity" />
-
         <activity
             android:name=".mediaModule.EditPhotoActivity"
             android:screenOrientation="portrait" />
@@ -174,6 +171,14 @@
             android:exported="false" />
         <service
             android:name=".services.CalcNewLocalMediaDigestService"
+            android:exported="false" />
+
+        <activity
+            android:name=".CreateUserActivity"
+            android:screenOrientation="portrait" />
+
+        <service
+            android:name=".services.CreateRemoteUserService"
             android:exported="false" />
     </application>
 

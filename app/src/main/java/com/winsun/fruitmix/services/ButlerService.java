@@ -22,6 +22,7 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
+import com.winsun.fruitmix.eventbus.UserRequestEvent;
 import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.DownloadFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
@@ -327,6 +328,15 @@ public class ButlerService extends Service {
                 comment = remoteMediaShareCommentOperationEvent.getComment();
 
                 CreateRemoteCommentService.startActionCreateRemoteCommentTask(this, comment, imageUUID);
+                break;
+            case REMOTE_USER:
+
+                UserRequestEvent userRequestEvent = (UserRequestEvent) requestEvent;
+                String userName = userRequestEvent.getmUserName();
+                String userPassword = userRequestEvent.getmUserPassword();
+
+                CreateRemoteUserService.startActionCreateRemoteUser(this, userName, userPassword);
+
                 break;
         }
 

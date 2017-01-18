@@ -43,6 +43,8 @@ public class Util {
     public static final String UPDATED_ALBUM_TITLE = "updated_album_title";
     public static final String IMAGE_KEY = "image_key";
 
+    public static final String REMOTE_USER_CREATED = "remote_user_created";
+
     public static final String LOCAL_SHARE_CREATED = "local_share_created";
     public static final String LOCAL_SHARE_MODIFIED = "local_share_modified";
     public static final String LOCAL_SHARE_DELETED = "local_share_deleted";
@@ -99,7 +101,7 @@ public class Util {
     public static final int KEY_ALBUM_CONTENT_REQUEST_CODE = 105;
     public static final int KEY_CREATE_SHARE_REQUEST_CODE = 106;
     public static final int KEY_MANUAL_INPUT_IP_REQUEST_CODE = 107;
-
+    public static final int KEY_CREATE_USER_REQUEST_CODE = 108;
 
     public static final String HTTP = "http://";
     public static final String MEDIASHARE_PARAMETER = "/mediashare";

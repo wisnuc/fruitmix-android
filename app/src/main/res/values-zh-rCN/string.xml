@@ -123,6 +123,14 @@
     <!-- 用户管理界面 -->
     <string name="no_user">没有用户</string>
 
+    <!-- create user -->
+    <string name="user_name">用户名</string>
+    <string name="confirm_user_password">确认密码</string>
+    <string name="create_user">添加用户</string>
+    <string name="username_not_unique">用户名不唯一</string>
+    <string name="empty_username">用户名不能为空</string>
+    <string name="not_same_password">密码不一致</string>
+
     <!-- 文件 -->
     <string name="file">文件</string>
     <string name="download">下载</string>
@@ -152,5 +160,8 @@
     <string name="photo_not_sharing">他人分享的照片不能再分享</string>
     <string name="open_file_failed">文件类型不支持</string> <!--原 “无法打开此文件” -->
     <string name="no_enough_space">手机存储空间不足！</string>
+
+    <string name="max_select_photo">已选最大数量</string>
+
 
 </resources>

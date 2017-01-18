@@ -110,6 +110,11 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         super.onDestroy();
 
         mContext = null;
+
+        if (mDialog != null ) {
+            mDialog.dismiss();
+            mDialog = null;
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -127,7 +132,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
                 if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
                     handleRetrieveUser();
-                }else {
+                } else {
                     Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
                 }
 

@@ -125,7 +125,7 @@ public enum NewPhotoListDataLoader {
         Collection<Media> medias = LocalCache.LocalMediaMapKeyIsThumb.values();
         Map<String,Media> remoteMediaMap = new HashMap<>(LocalCache.RemoteMediaMapKeyIsUUID);
 
-        Log.i(TAG, "reloadData: before load loacal key is date value is photo list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "reloadData: before load local key is date value is photo list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         for (Media media : medias) {
 

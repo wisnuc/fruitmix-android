@@ -678,11 +678,22 @@ public class NewPhotoList implements Page {
                 public void onClick(View v) {
                     if (mSelectMode) {
 
-                        boolean selected = mPhotoTitleSelectImg.isSelected();
-                        mPhotoTitleSelectImg.setSelected(!selected);
                         List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
-                        for (Media media : mediaList)
-                            media.setSelected(!selected);
+                        boolean selected = mPhotoTitleSelectImg.isSelected();
+
+                        if (!selected && mediaList.size() + mSelectCount > 1000) {
+                            Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
+
+                            for (int i = 0; i < (1000 - mSelectCount); i++) {
+                                mediaList.get(i).setSelected(true);
+                            }
+
+                        } else {
+                            mPhotoTitleSelectImg.setSelected(!selected);
+
+                            for (Media media : mediaList)
+                                media.setSelected(!selected);
+                        }
 
                         mPhotoRecycleAdapter.notifyDataSetChanged();
 
@@ -748,17 +759,16 @@ public class NewPhotoList implements Page {
         @BindView(R.id.photo_select_img)
         ImageView mPhotoSelectedIv;
 
-        View view;
-
         PhotoHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
-            this.view = view;
         }
 
         public void refreshView(int position) {
 
             final Media currentMedia = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
+
+            if (currentMedia == null) return;
 
             mImageLoader.setTag(position);
 
@@ -800,7 +810,7 @@ public class NewPhotoList implements Page {
                 mPhotoSelectedIv.setVisibility(View.GONE);
             }
 
-            mPhotoIv.setOnClickListener(new View.OnClickListener() {
+            mImageLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mSelectMode) {
@@ -814,6 +824,13 @@ public class NewPhotoList implements Page {
                         }
 
                         boolean selected = currentMedia.isSelected();
+
+                        if (!selected && mSelectCount >= 1000) {
+
+                            Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
+
+                            return;
+                        }
 
                         if (selected) {
                             int selectMargin = Util.dip2px(containerActivity, 20);
@@ -875,7 +892,7 @@ public class NewPhotoList implements Page {
                 }
             });
 
-            mPhotoIv.setOnLongClickListener(new View.OnLongClickListener() {
+            mImageLayout.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
 
@@ -892,7 +909,7 @@ public class NewPhotoList implements Page {
         }
 
         private void setPhotoItemMargin(int mediaInListPosition) {
-            GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) view.getLayoutParams();
+            GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) mImageLayout.getLayoutParams();
 
             params.height = mItemWidth;
 
@@ -904,7 +921,7 @@ public class NewPhotoList implements Page {
                 params.setMargins(normalMargin, normalMargin, 0, 0);
             }
 
-            view.setLayoutParams(params);
+            mImageLayout.setLayoutParams(params);
         }
 
         private void setPhotoIvLayoutParams(int margin) {
