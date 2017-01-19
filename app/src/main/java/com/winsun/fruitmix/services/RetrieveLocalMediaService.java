@@ -8,6 +8,7 @@ import android.util.Log;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -83,6 +84,7 @@ public class RetrieveLocalMediaService extends IntentService {
         LocalCache.LocalMediaMapKeyIsThumb.putAll(mediaConcurrentMap);
 
         Util.setLocalMediaInDBLoaded(true);
+        NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
 
         EventBus.getDefault().post(new OperationEvent(Util.LOCAL_MEDIA_RETRIEVED, new OperationSuccess()));
 

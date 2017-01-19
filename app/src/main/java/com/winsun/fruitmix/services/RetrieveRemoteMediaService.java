@@ -9,6 +9,7 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
@@ -96,6 +97,7 @@ public class RetrieveRemoteMediaService extends IntentService {
             fillRemoteMediaMap(mediaConcurrentMap);
 
             Util.setRemoteMediaLoaded(true);
+            NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
 
             sendEvent();
 
@@ -121,10 +123,13 @@ public class RetrieveRemoteMediaService extends IntentService {
             fillRemoteMediaMap(mediaConcurrentMap);
 
             Util.setRemoteMediaLoaded(true);
+            NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
 
             sendEvent();
 
         }
+
+        FNAS.retrieveRemoteMediaShare(this, true);
 
     }
 
@@ -135,7 +140,7 @@ public class RetrieveRemoteMediaService extends IntentService {
 
     private void sendEvent() {
         OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_RETRIEVED, new OperationSuccess());
-        EventBus.getDefault().postSticky(operationEvent);
+        EventBus.getDefault().post(operationEvent);
     }
 
 }

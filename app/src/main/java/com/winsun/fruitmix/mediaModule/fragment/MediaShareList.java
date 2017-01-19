@@ -165,7 +165,7 @@ public class MediaShareList implements Page {
 
         mLoadingLayout.setVisibility(View.VISIBLE);
 
-        if (!listener.isRemoteMediaShareLoaded()) {
+        if (!Util.isRemoteMediaShareLoaded()) {
             return;
         }
 

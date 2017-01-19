@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     android:fitsSystemWindows="true"
     tools:context="com.winsun.fruitmix.mediaModule.PhotoSliderActivity">
 
     <android.support.v4.view.ViewPager
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#000000" />
+        android:layout_height="match_parent" />
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/chooseHeader"
@@ -75,4 +75,4 @@
         android:src="@drawable/return_resize"
         android:visibility="gone" />
 
-</merge>
+</FrameLayout>

@@ -499,7 +499,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                     Log.i(TAG, "login retrieve equipment alias:" + url);
 
-                    str = FNAS.GetRemoteCall(url).getResponseData();
+                    str = FNAS.RemoteCallWithUrl(url).getResponseData();
 
                     json = new JSONArray(str);
 
@@ -521,7 +521,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                     Log.i(TAG, "login url:" + url);
 
-                    str = FNAS.GetRemoteCall(url).getResponseData();
+                    str = FNAS.RemoteCallWithUrl(url).getResponseData();
 
                     json = new JSONArray(str);
                     itemList = new ArrayList<>();

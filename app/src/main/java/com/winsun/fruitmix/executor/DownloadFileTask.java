@@ -7,7 +7,7 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadState;
 import com.winsun.fruitmix.fileModule.interfaces.FileDownloadUploadInterface;
-import com.winsun.fruitmix.retrofit.RetrofitInstance;
+import com.winsun.fruitmix.http.retrofit.RetrofitInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;

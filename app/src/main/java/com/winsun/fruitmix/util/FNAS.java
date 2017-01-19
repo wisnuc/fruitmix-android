@@ -12,16 +12,16 @@ import com.winsun.fruitmix.eventbus.MediaCommentRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.ModifyMediaShareRequestEvent;
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.eventbus.UserRequestEvent;
+import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
 
@@ -34,7 +34,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -124,43 +123,10 @@ public class FNAS {
 
     public static HttpResponse loadToken(Context context, String gateway, String userUUID, String userPassword) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        HttpURLConnection conn = null;
-        String str = "";
+        String url = gateway + ":" + FNAS.PORT + Util.TOKEN_PARAMETER;
 
-        HttpResponse httpResponse = new HttpResponse();
+        return FNAS.RemoteCallWithUrl(url, Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((userUUID + ":" + userPassword).getBytes(), Base64.NO_WRAP));
 
-        try {
-
-            conn = (HttpURLConnection) (new URL(gateway + ":" + FNAS.PORT + Util.TOKEN_PARAMETER).openConnection()); //output:{"type":"JWT","token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiZGIzYWVlZWYtNzViYS00ZTY2LThmMGUtNWQ3MTM2NWEwNGRiIn0.LqISPNt6T5M1Ae4GN3iL0d8D1bj6m0tX7YOwqZqlnvg"}
-            conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((userUUID + ":" + userPassword).getBytes(), Base64.DEFAULT));
-            conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
-            if (conn.getResponseCode() == 200) {
-                str = FNAS.ReadFull(conn.getInputStream());
-            }
-
-            httpResponse.setResponseCode(conn.getResponseCode());
-            httpResponse.setResponseData(str);
-
-        } catch (MalformedURLException | SocketTimeoutException ex) {
-
-            ex.printStackTrace();
-
-            throw ex;
-
-        } catch (IOException ex) {
-
-            ex.printStackTrace();
-
-            throw ex;
-
-        } finally {
-            if (conn != null)
-                conn.disconnect();
-        }
-
-        Log.i(TAG, "loadToken: " + str);
-
-        return httpResponse;
     }
 
     public static HttpResponse loadDeviceId() throws MalformedURLException, IOException, SocketTimeoutException {
@@ -301,112 +267,65 @@ public class FNAS {
 
     }
 
-    public static HttpResponse RemoteCall(String req) throws MalformedURLException, IOException, SocketTimeoutException {
+    private static String generateUrl(String req) {
+        return Gateway + ":" + FNAS.PORT + req;
+    }
+
+    private static HttpResponse RemoteCall(String req) throws MalformedURLException, IOException, SocketTimeoutException {
 
 //        return GetRemoteCall(Gateway + ":" + FNAS.PORT + req);
-        return OkHttpUtil.INSTANCE.remoteCallMethod(Util.HTTP_GET_METHOD, req, null);
+
+        return RemoteCallWithUrl(generateUrl(req));
     }
 
-    public static HttpResponse GetRemoteCall(String url) throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse RemoteCallWithUrl(String url) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        HttpURLConnection conn = null;
-        String str = "";
+        HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
 
-        HttpResponse httpResponse = new HttpResponse();
-
-        try {
-
-            conn = (HttpURLConnection) (new URL(url).openConnection());
-            conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
-            conn.setUseCaches(false);
-            conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
-            Log.d(TAG, "NAS GET: " + (url));
-
-            if (conn.getResponseCode() == 200) {
-                str = FNAS.ReadFull(conn.getInputStream());
-            }
-
-            httpResponse.setResponseCode(conn.getResponseCode());
-            httpResponse.setResponseData(str);
-
-        } catch (MalformedURLException | SocketTimeoutException ex) {
-
-            ex.printStackTrace();
-
-            throw ex;
-
-        } catch (IOException ex) {
-
-            ex.printStackTrace();
-
-            throw ex;
-
-        } finally {
-
-            if (conn != null)
-                conn.disconnect();
-        }
-
-
-        return httpResponse;
+        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
 
     }
 
+    private static HttpResponse RemoteCallWithUrl(String url, String headerKey, String headerValue) throws MalformedURLException, IOException, SocketTimeoutException {
+
+        HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
+        httpRequest.setHeader(headerKey, headerValue);
+
+        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
+
+    }
 
     // create object and store it to the server
     public static HttpResponse PostRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
 //        return RemoteCallMethod(Util.HTTP_POST_METHOD, req, data);
-        return OkHttpUtil.INSTANCE.remoteCallMethod(Util.HTTP_POST_METHOD, req, data);
+
+        HttpRequest httpRequest = new HttpRequest(generateUrl(req), Util.HTTP_POST_METHOD);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
+        httpRequest.setBody(data);
+
+        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
     }
 
     // modify data and save it
     public static HttpResponse PatchRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
-        return RemoteCallMethod(Util.HTTP_PATCH_METHOD, req, data);
+//        return RemoteCallMethod(Util.HTTP_PATCH_METHOD, req, data);
+
+        HttpRequest httpRequest = new HttpRequest(generateUrl(req), Util.HTTP_PATCH_METHOD);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
+        httpRequest.setBody(data);
+
+        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
     }
 
     public static HttpResponse DeleteRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
 //        return RemoteCallMethod(Util.HTTP_DELETE_METHOD, req, data);
-        return OkHttpUtil.INSTANCE.remoteCallMethod(Util.HTTP_DELETE_METHOD, req, data);
-    }
 
-    private static HttpResponse RemoteCallMethod(String httpMethod, String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
-        HttpURLConnection conn;
-        OutputStream outStream;
-        String str;
+        HttpRequest httpRequest = new HttpRequest(generateUrl(req), Util.HTTP_DELETE_METHOD);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
+        httpRequest.setBody(data);
 
-        conn = (HttpURLConnection) (new URL(Gateway + ":" + FNAS.PORT + req).openConnection());
-        conn.setRequestMethod(httpMethod);
-        conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
-        conn.setDoInput(true);// 允许输入
-        conn.setDoOutput(true);// 允许输出
-        conn.setUseCaches(false);
-        conn.setRequestProperty("Connection", "keep-alive");
-        conn.setRequestProperty("Accept", "*/*");
-        conn.setRequestProperty("Charsert", "UTF-8");
-        conn.setRequestProperty("Content-Type", "application/json");
-        conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
-        conn.setReadTimeout(Util.HTTP_CONNECT_TIMEOUT);
-        outStream = new BufferedOutputStream(conn.getOutputStream());
-        if (data == null) str = "";
-        else str = data;
-        outStream.write(str.getBytes());
-        outStream.flush();
-
-        int responseCode = conn.getResponseCode();
-
-        Log.d("winsun", "NAS " + httpMethod + " : " + (Gateway + ":" + FNAS.PORT + req) + " " + responseCode + " " + str);
-
-        if (responseCode == 200) {
-            str = FNAS.ReadFull(conn.getInputStream());
-        }
-
-        Log.d("winsun", "NAS " + httpMethod + " END: " + (Gateway + ":" + FNAS.PORT + req) + " " + str);
-
-        outStream.close();
-        conn.disconnect();
-
-        return new HttpResponse(responseCode, str);
-
+        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
     }
 
     // get media files and cache it locally
@@ -514,7 +433,6 @@ public class FNAS {
             Log.d(TAG, "Photo UP: " + url);
             boundary = java.util.UUID.randomUUID().toString();
             conn = (HttpURLConnection) new URL(url).openConnection();
-            conn.setReadTimeout(60 * 1000);
             conn.setDoInput(true);// 允许输入
             conn.setDoOutput(true);// 允许输出
             conn.setUseCaches(false);
@@ -523,7 +441,8 @@ public class FNAS {
             conn.setRequestProperty("Connection", "keep-alive");
             conn.setRequestProperty("Charsert", "UTF-8");
             conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-            conn.setConnectTimeout(60 * 1000);
+            conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
+            conn.setReadTimeout(Util.HTTP_CONNECT_TIMEOUT);
 
             outStream = new BufferedOutputStream(conn.getOutputStream());
 

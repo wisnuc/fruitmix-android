@@ -120,11 +120,11 @@ public class Util {
 
     public static final String DEVICE_ID_MAP_NAME = "deviceID";
 
-    static final String HTTP_GET_METHOD = "GET";
-    static final String HTTP_POST_METHOD = "POST";
-    static final String HTTP_PATCH_METHOD = "PATCH";
-    static final String HTTP_DELETE_METHOD = "DELETE";
-    public static final int HTTP_CONNECT_TIMEOUT = 15 * 1000;
+    public static final String HTTP_GET_METHOD = "GET";
+    public static final String HTTP_POST_METHOD = "POST";
+    public static final String HTTP_PATCH_METHOD = "PATCH";
+    public static final String HTTP_DELETE_METHOD = "DELETE";
+    public static final int HTTP_CONNECT_TIMEOUT = 60 * 1000;
 
     public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
     public static final String CURRENT_PHOTO_POSITION = "current_photo_position";
@@ -155,6 +155,8 @@ public class Util {
 
     private static boolean remoteMediaLoaded = false;
 
+    private static boolean remoteMediaShareLoaded = false;
+
     public static boolean isRemoteMediaLoaded() {
         return remoteMediaLoaded;
     }
@@ -177,6 +179,14 @@ public class Util {
 
     public static void setLocalMediaInDBLoaded(boolean localMediaInDBLoaded) {
         Util.localMediaInDBLoaded = localMediaInDBLoaded;
+    }
+
+    public static boolean isRemoteMediaShareLoaded() {
+        return remoteMediaShareLoaded;
+    }
+
+    public static void setRemoteMediaShareLoaded(boolean remoteMediaShareLoaded) {
+        Util.remoteMediaShareLoaded = remoteMediaShareLoaded;
     }
 
     /**
@@ -355,5 +365,31 @@ public class Util {
             stringBuilder.append(splitString.substring(0, 1).toUpperCase());
         }
         return stringBuilder.toString();
+    }
+
+    public static void hideSystemUI(View view) {
+
+        // Set the IMMERSIVE flag.
+        // Set the content to appear under the system bars so that the content
+        // doesn't resize when the system bars hide and show.
+        view.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE);
+
+    }
+
+    public static void showSystemUI(View view) {
+
+        // This snippet shows the system bars. It does this by removing all the flags
+        // except for the ones that make the content appear under the system bars.
+        view.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
     }
 }

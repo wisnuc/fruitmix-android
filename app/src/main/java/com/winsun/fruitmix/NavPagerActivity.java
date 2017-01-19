@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -114,6 +115,8 @@ public class NavPagerActivity extends AppCompatActivity
         fragmentManager.beginTransaction().add(R.id.frame_layout, mediaMainFragment).add(R.id.frame_layout, fileMainFragment).hide(fileMainFragment).commit();
 
         currentPage = PAGE_MEDIA;
+
+        Log.i(TAG, "onCreate: ");
     }
 
     @Override
@@ -128,6 +131,26 @@ public class NavPagerActivity extends AppCompatActivity
         EventBus.getDefault().unregister(this);
 
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        instance.shutdownFixedThreadPoolNow();
+
+        Util.setRemoteMediaLoaded(false);
+        Util.setRemoteMediaShareLoaded(false);
+
+        instance = null;
+        mContext = null;
+
+        Log.i(TAG, "onDestroy: ");
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -164,6 +187,8 @@ public class NavPagerActivity extends AppCompatActivity
         if (action.equals(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED)) {
 
             Log.i(TAG, "handleOperationEvent: refreshUser");
+
+            EventBus.getDefault().removeStickyEvent(operationEvent);
 
             refreshUserInNavigationView();
 
@@ -203,17 +228,6 @@ public class NavPagerActivity extends AppCompatActivity
         userManage.setVisible(user.isAdmin());
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        instance.shutdownFixedThreadPoolNow();
-
-        instance = null;
-        mContext = null;
-
-    }
-
     private void showExplanation(String title, String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title)
@@ -241,7 +255,7 @@ public class NavPagerActivity extends AppCompatActivity
     public void onActivityReenter(int resultCode, Intent data) {
         super.onActivityReenter(resultCode, data);
 
-        if (currentPage == PAGE_MEDIA)
+        if (currentPage == PAGE_MEDIA && mediaMainFragment.isResumed())
             mediaMainFragment.onActivityReenter(resultCode, data);
 
     }
@@ -354,6 +368,7 @@ public class NavPagerActivity extends AppCompatActivity
                     ButlerService.stopTimingRetrieveMediaShare();
 
                     Util.setRemoteMediaLoaded(false);
+                    Util.setRemoteMediaShareLoaded(false);
 
                     return null;
                 }
@@ -405,8 +420,6 @@ public class NavPagerActivity extends AppCompatActivity
 
             fragmentManager.beginTransaction().hide(fileMainFragment).show(mediaMainFragment).commit();
 
-            if (mediaMainFragment.isRemoteMediaShareLoaded())
-                ButlerService.startTimingRetrieveMediaShare();
         }
 
     }

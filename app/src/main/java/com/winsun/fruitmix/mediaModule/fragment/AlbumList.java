@@ -159,7 +159,7 @@ public class AlbumList implements Page {
         mLoadingLayout.setVisibility(View.VISIBLE);
         ivAdd.setVisibility(View.INVISIBLE);
 
-        if (!listener.isRemoteMediaShareLoaded()) {
+        if (!Util.isRemoteMediaShareLoaded()) {
             return;
         }
 

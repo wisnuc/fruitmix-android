@@ -1,11 +1,8 @@
-package com.winsun.fruitmix.util;
+package com.winsun.fruitmix.http;
 
 import android.util.Log;
 
-import com.winsun.fruitmix.http.HttpResponse;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.winsun.fruitmix.util.Util;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -20,14 +17,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
  * Created by Administrator on 2016/12/22.
  */
 
-enum OkHttpUtil {
+public enum OkHttpUtil {
 
     INSTANCE;
 
@@ -36,7 +32,7 @@ enum OkHttpUtil {
     private OkHttpClient okHttpClient;
 
     OkHttpUtil() {
-        okHttpClient = new OkHttpClient.Builder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(15, TimeUnit.SECONDS).addInterceptor(createHttpInterceptor()).build();
+        okHttpClient = new OkHttpClient.Builder().connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.SECONDS).readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.SECONDS).addInterceptor(createHttpInterceptor()).build();
     }
 
     private Interceptor createHttpInterceptor() {
@@ -45,23 +41,34 @@ enum OkHttpUtil {
         return loggingInterceptor;
     }
 
-    public HttpResponse remoteCallMethod(String httpMethod, String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
+    public HttpResponse remoteCallMethod(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException {
 
         RequestBody requestBody;
 
         Request request = null;
 
-        switch (httpMethod) {
+        Request.Builder builder = new Request.Builder().url(httpRequest.getUrl());
+
+        String headerKey = httpRequest.getHeaderKey();
+        if (headerKey != null) {
+            builder.addHeader(headerKey, httpRequest.getHeaderValue());
+        }
+
+        switch (httpRequest.getHttpMethod()) {
             case Util.HTTP_GET_METHOD:
-                request = new Request.Builder().url(FNAS.Gateway + ":" + FNAS.PORT + req).addHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT).get().build();
+                request = builder.get().build();
                 break;
             case Util.HTTP_POST_METHOD:
-                requestBody = RequestBody.create(MediaType.parse("application/json"), data);
-                request = new Request.Builder().url(FNAS.Gateway + ":" + FNAS.PORT + req).addHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT).post(requestBody).build();
+                requestBody = RequestBody.create(MediaType.parse("application/json"), httpRequest.getBody());
+                request = builder.post(requestBody).build();
                 break;
             case Util.HTTP_DELETE_METHOD:
-                requestBody = RequestBody.create(MediaType.parse("application/json"), data);
-                request = new Request.Builder().url(FNAS.Gateway + ":" + FNAS.PORT + req).addHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT).delete(requestBody).build();
+                requestBody = RequestBody.create(MediaType.parse("application/json"), httpRequest.getBody());
+                request = builder.delete(requestBody).build();
+                break;
+            case Util.HTTP_PATCH_METHOD:
+                requestBody = RequestBody.create(MediaType.parse("application/json"), httpRequest.getBody());
+                request = builder.patch(requestBody).build();
                 break;
         }
 

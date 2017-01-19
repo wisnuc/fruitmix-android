@@ -2,6 +2,7 @@ package com.winsun.fruitmix.mediaModule;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -86,6 +87,11 @@ public class MoreMediaActivity extends AppCompatActivity {
         super.onDestroy();
 
         mContext = null;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
     private void initImageLoader() {

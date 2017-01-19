@@ -93,6 +93,12 @@ public class RetrieveTokenService extends IntentService {
 
             httpResponse = FNAS.loadToken(this, gateway, userUUID, userPassword);
 
+            FNAS.Gateway = gateway;
+            FNAS.userUUID = userUUID;
+
+            LocalCache.saveGateway(FNAS.Gateway, this);
+            LocalCache.saveUuidPassword(this, userUUID, userPassword);
+
             int responseCode = httpResponse.getResponseCode();
 
             if (responseCode == 200) {
@@ -100,12 +106,6 @@ public class RetrieveTokenService extends IntentService {
                 FNAS.JWT = new JSONObject(httpResponse.getResponseData()).getString("token");
 
                 LocalCache.saveToken(this, FNAS.JWT);
-
-                FNAS.Gateway = gateway;
-                FNAS.userUUID = userUUID;
-
-                LocalCache.saveGateway(FNAS.Gateway, this);
-                LocalCache.saveUuidPassword(this, userUUID, userPassword);
 
                 operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationSuccess());
 
@@ -135,7 +135,7 @@ public class RetrieveTokenService extends IntentService {
 
         EventBus.getDefault().post(operationEvent);
 
-        Log.i(TAG, "handleActionRetrieveToken: post sticky finish");
+        Log.i(TAG, "handleActionRetrieveToken: post finish");
 
     }
 

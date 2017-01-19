@@ -33,7 +33,6 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.fragment.AlbumList;
@@ -43,10 +42,7 @@ import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionList
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
-import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationResultType;
@@ -57,7 +53,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -66,14 +61,6 @@ import butterknife.ButterKnife;
 
 import static android.app.Activity.RESULT_OK;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link OnFileInteractionListener} interface
- * to handle interaction events.
- * Use the {@link MediaMainFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class MediaMainFragment extends Fragment implements OnMediaFragmentInteractionListener, View.OnClickListener, IPhotoListListener {
 
     public static final String TAG = MediaMainFragment.class.getSimpleName();
@@ -118,11 +105,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private boolean sInChooseMode = false;
 
-    private boolean mRemoteMediaShareLoaded = false;
-
     private boolean onResume = false;
 
     private OnMainFragmentInteractionListener mListener;
+
+    private boolean mPhotoListRefresh = false;
+    private boolean mShareAlbumListRefresh = false;
 
     public MediaMainFragment() {
         // Required empty public constructor
@@ -150,6 +138,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         initPageList();
 
+        Log.i(TAG, "onCreate: ");
     }
 
     @Override
@@ -182,6 +171,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         photoList.addPhotoListListener(this);
 
+        Log.i(TAG, "onCreateView: ");
 
         return view;
     }
@@ -191,6 +181,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         super.onStart();
 
         EventBus.getDefault().register(this);
+
+        Log.i(TAG, "onStart: ");
     }
 
     @Override
@@ -205,6 +197,20 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             FNAS.retrieveLocalMediaInCamera();
         }
 
+        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && !mPhotoListRefresh) {
+            photoList.refreshView();
+
+            mPhotoListRefresh = true;
+        }
+
+        if (!mShareAlbumListRefresh && Util.isRemoteMediaShareLoaded()) {
+            shareList.refreshView();
+            albumList.refreshView();
+
+            mShareAlbumListRefresh = true;
+        }
+
+        Log.i(TAG, "onResume: ");
     }
 
     @Override
@@ -214,6 +220,15 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         super.onStop();
 
+        Log.i(TAG, "onStop: ");
+
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        Log.i(TAG, "onDestroyView: ");
     }
 
     @Override
@@ -223,6 +238,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         photoList.removePhotoListListener(this);
 
         mContext = null;
+
+        Log.i(TAG, "onDestroy: ");
     }
 
     @Override
@@ -340,40 +357,10 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         });
     }
 
-    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
-    public void handleStickyOperationEvent(OperationEvent operationEvent) {
-
-        Log.i(TAG, "handleStickyOperationEvent: action:" + operationEvent.getAction());
-
-        String action = operationEvent.getAction();
-
-        if (action.equals(Util.REMOTE_MEDIA_RETRIEVED)) {
-            Log.i(TAG, "remote media loaded");
-
-            NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
-            photoList.refreshView();
-
-            FNAS.retrieveRemoteMediaShare(mContext, true);
-
-        } else if (action.equals(Util.REMOTE_MEDIA_SHARE_RETRIEVED)) {
-            Log.i(TAG, "remote share loaded");
-
-            mRemoteMediaShareLoaded = true;
-
-            albumList.refreshView();
-            shareList.refreshView();
-
-            ButlerService.startTimingRetrieveMediaShare();
-        }
-
-    }
-
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
         String action = operationEvent.getAction();
-
-        OperationResultType result;
 
         Log.i(TAG, "handleOperationEvent: action:" + action);
 
@@ -407,33 +394,56 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             case Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED:
 
-                result = operationEvent.getOperationResult().getOperationResultType();
+                Log.i(TAG, "handleOperationEvent: new local media in camera retrieved succeed");
 
-                if (result == OperationResultType.SUCCEED) {
+                setPhotoListRefresh();
 
-                    Log.i(TAG, "handleOperationEvent: new local media in camera retrieved succeed");
-
-                    NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
-                    photoList.refreshView();
-                }
+                photoList.refreshView();
 
                 break;
             case Util.LOCAL_MEDIA_RETRIEVED:
 
-                result = operationEvent.getOperationResult().getOperationResultType();
+                Log.i(TAG, "handleOperationEvent: local media in db retrieved succeed");
 
-                if (result == OperationResultType.SUCCEED) {
+                setPhotoListRefresh();
 
-                    Log.i(TAG, "handleOperationEvent: local media in db retrieved succeed");
+                photoList.refreshView();
 
-                    NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
-                    photoList.refreshView();
-                }
+                break;
+
+            case Util.REMOTE_MEDIA_RETRIEVED:
+
+                Log.i(TAG, "remote media loaded");
+
+                setPhotoListRefresh();
+
+                photoList.refreshView();
+
+                break;
+
+            case Util.REMOTE_MEDIA_SHARE_RETRIEVED:
+
+                Log.i(TAG, "remote share loaded");
+
+                setShareAlbumListRefresh();
+
+                albumList.refreshView();
+                shareList.refreshView();
 
                 break;
 
         }
 
+    }
+
+    public void setPhotoListRefresh() {
+        if (Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && Util.isRemoteMediaLoaded())
+            mPhotoListRefresh = true;
+    }
+
+    public void setShareAlbumListRefresh() {
+        if (Util.isRemoteMediaShareLoaded())
+            mShareAlbumListRefresh = true;
     }
 
     private void doCreateRemoteMediaCommentInLocalMediaCommentMapFunction() {
@@ -783,11 +793,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mAnimator.setTarget(ivBtShare);
         mAnimator.start();
 
-    }
-
-    @Override
-    public boolean isRemoteMediaShareLoaded() {
-        return mRemoteMediaShareLoaded;
     }
 
     @Override

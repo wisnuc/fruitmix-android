@@ -114,13 +114,13 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
             handleOldAndNewMediaShares(newMediaShares, oldMediaShares, dbUtils);
 
-            postStickyEvent();
+            postEvent();
 
         } catch (Exception ex) {
             ex.printStackTrace();
 
             if (loadMediaShareInDBWhenExceptionOccur) {
-                postStickyEvent();
+                postEvent();
             }
         }
 
@@ -238,7 +238,9 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
             fillLocalCacheRemoteMediaShareMap(mediaShareConcurrentMap);
 
-            postStickyEvent();
+            Util.setRemoteMediaShareLoaded(true);
+
+            postEvent();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -253,17 +255,21 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
                 fillLocalCacheRemoteMediaShareMap(mediaShareConcurrentMap);
 
-                postStickyEvent();
+                Util.setRemoteMediaShareLoaded(true);
+
+                postEvent();
 
             }
 
         }
 
+        ButlerService.startTimingRetrieveMediaShare();
+
     }
 
-    private void postStickyEvent() {
+    private void postEvent() {
         OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_RETRIEVED, new OperationSuccess());
-        EventBus.getDefault().postSticky(operationEvent);
+        EventBus.getDefault().post(operationEvent);
     }
 
     private void fillLocalCacheRemoteMediaShareMap(ConcurrentMap<String, MediaShare> mediaShareConcurrentMap) {

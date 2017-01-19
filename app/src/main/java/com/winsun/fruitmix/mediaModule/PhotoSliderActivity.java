@@ -78,7 +78,9 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
     private List<Media> mediaAlreadyLoadedList;
 
-    private boolean sInEdit;
+    private boolean sInEdit = true;
+
+    private boolean mIsFullScreen = false;
 
     private ImageLoader mImageLoader;
 
@@ -161,11 +163,36 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         initCommentBtn(mShowCommentBtn);
 
-        sInEdit = true;
-
         initViewPager();
 
         setPosition(initialPhotoPosition);
+
+        View decorView = getWindow().getDecorView();
+        decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
+            @Override
+            public void onSystemUiVisibilityChange(int visibility) {
+                // Note that system bars will only be "visible" if none of the
+                // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
+                if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                    // TODO: The system bars are visible. Make any desired
+                    // adjustments to your UI, such as showing the action bar or
+                    // other navigational controls.
+
+                    if (!sInEdit) {
+                        convertEditState();
+                    }
+
+                } else {
+                    // TODO: The system bars are NOT visible. Make any desired
+                    // adjustments to your UI, such as hiding the action bar or
+                    // other navigational controls.
+
+                    if (sInEdit) {
+                        convertEditState();
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -176,6 +203,15 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         commentImg.setImageResource(R.drawable.comment);
         mReturnResize.setImageResource(R.drawable.return_resize);
 
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+
+        if (hasFocus && mIsFullScreen) {
+            Util.hideSystemUI(getWindow().getDecorView());
+        }
     }
 
     @Override
@@ -565,6 +601,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                     else if (!view.isZoomed()) {
                         view.setTranslationY(0);
                         if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
+                            toggleFullScreenState(getWindow().getDecorView());
                             convertEditState();
                         }
                     }
@@ -612,17 +649,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             return (mediaWidth > mediaHeight && media.getOrientationNumber() <= 4) || (mediaWidth < mediaHeight && media.getOrientationNumber() > 4);
         }
 
-        private void convertEditState() {
-            sInEdit = !sInEdit;
-            if (sInEdit) {
-                rlChooseHeader.setVisibility(View.VISIBLE);
-                rlPanelFooter.setVisibility(View.VISIBLE);
-            } else {
-                rlChooseHeader.setVisibility(View.GONE);
-                rlPanelFooter.setVisibility(View.GONE);
-            }
-        }
-
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
 
@@ -647,4 +673,23 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         }
     }
 
+    private void convertEditState() {
+        sInEdit = !sInEdit;
+        if (sInEdit) {
+            rlChooseHeader.setVisibility(View.VISIBLE);
+            rlPanelFooter.setVisibility(View.VISIBLE);
+        } else {
+            rlChooseHeader.setVisibility(View.GONE);
+            rlPanelFooter.setVisibility(View.GONE);
+        }
+    }
+
+    private void toggleFullScreenState(View view) {
+        mIsFullScreen = !mIsFullScreen;
+        if (mIsFullScreen) {
+            Util.hideSystemUI(view);
+        } else {
+            Util.showSystemUI(view);
+        }
+    }
 }

@@ -8,8 +8,6 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 
 public interface OnMediaFragmentInteractionListener {
 
-    boolean isRemoteMediaShareLoaded();
-
     void modifyMediaShare(MediaShare mediashare);
 
     void deleteMediaShare(MediaShare mediashare);
