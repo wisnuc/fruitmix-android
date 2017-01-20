@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
@@ -91,13 +92,10 @@ public class RetrieveTokenService extends IntentService {
 
         try {
 
-            httpResponse = FNAS.loadToken(this, gateway, userUUID, userPassword);
-
             FNAS.Gateway = gateway;
             FNAS.userUUID = userUUID;
 
-            LocalCache.saveGateway(FNAS.Gateway, this);
-            LocalCache.saveUuidPassword(this, userUUID, userPassword);
+            httpResponse = FNAS.loadToken(this, gateway, userUUID, userPassword);
 
             int responseCode = httpResponse.getResponseCode();
 
@@ -106,6 +104,11 @@ public class RetrieveTokenService extends IntentService {
                 FNAS.JWT = new JSONObject(httpResponse.getResponseData()).getString("token");
 
                 LocalCache.saveToken(this, FNAS.JWT);
+
+                if (Util.loginType == LoginType.LOGIN) {
+                    LocalCache.saveGateway(this, FNAS.Gateway);
+                    LocalCache.saveUuidPassword(this, userUUID, userPassword);
+                }
 
                 operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationSuccess());
 
@@ -135,7 +138,7 @@ public class RetrieveTokenService extends IntentService {
 
         EventBus.getDefault().post(operationEvent);
 
-        Log.i(TAG, "handleActionRetrieveToken: post finish");
+        Log.d(TAG, "handleActionRetrieveToken: post finish");
 
     }
 

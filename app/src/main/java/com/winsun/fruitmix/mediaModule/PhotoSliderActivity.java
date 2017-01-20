@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.PagerAdapter;
@@ -116,7 +117,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     sharedElements.put(imageKey, mViewPager.findViewWithTag(imageTag));
 
-                    Log.i(TAG, "onMapSharedElements: media key:" + imageKey + " imageTag:" + imageTag);
+                    Log.d(TAG, "onMapSharedElements: media key:" + imageKey + " imageTag:" + imageTag);
                 }
             }
 
@@ -135,7 +136,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         needTransition = getIntent().getBooleanExtra(Util.KEY_NEED_TRANSITION, true);
 
-        Log.i(TAG, "onCreate: needTransition:" + needTransition);
+        Log.d(TAG, "onCreate: needTransition:" + needTransition);
 
         if (needTransition) {
             ActivityCompat.postponeEnterTransition(this);
@@ -521,7 +522,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 Media media = mediaList.get(position);
 
-                Log.i(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
+                Log.d(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
 
                 mainPic.registerImageLoadListener(PhotoSliderActivity.this);
 
@@ -565,7 +566,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             container.addView(view);
 
-            Log.i(TAG, "inistatiate position : " + position);
+            Log.d(TAG, "inistatiate position : " + position);
 
             return view;
 
@@ -597,14 +598,25 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                         view.setTranslationY(lastY - y);
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    if (lastY - y > Util.dip2px(mContext, 30) && !view.isZoomed()) finishActivity();
-                    else if (!view.isZoomed()) {
-                        view.setTranslationY(0);
-                        if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
-                            toggleFullScreenState(getWindow().getDecorView());
-                            convertEditState();
-                        }
+
+                    if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
+
+                        view.setNeedFitImageToView(false);
+                        convertEditState();
+                        toggleFullScreenState(getWindow().getDecorView());
+
+                    } else if (lastY - y > Util.dip2px(mContext, 30)) {
+
+                        view.setNeedFitImageToView(true);
+                        if (!view.isZoomed())
+                            finishActivity();
+                    } else {
+
+                        view.setNeedFitImageToView(true);
+                        if (!view.isZoomed())
+                            view.setTranslationY(0);
                     }
+
                 }
             }
         }
@@ -679,12 +691,13 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             rlChooseHeader.setVisibility(View.VISIBLE);
             rlPanelFooter.setVisibility(View.VISIBLE);
         } else {
-            rlChooseHeader.setVisibility(View.GONE);
-            rlPanelFooter.setVisibility(View.GONE);
+            rlChooseHeader.setVisibility(View.INVISIBLE);
+            rlPanelFooter.setVisibility(View.INVISIBLE);
         }
     }
 
     private void toggleFullScreenState(View view) {
+
         mIsFullScreen = !mIsFullScreen;
         if (mIsFullScreen) {
             Util.hideSystemUI(view);

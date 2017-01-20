@@ -12,7 +12,6 @@ import com.winsun.fruitmix.gif.GifLruCache;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -41,7 +40,7 @@ public enum ImageGifLoaderInstance {
             if (headers == null) {
                 headers = new ArrayMap<>();
                 headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-                Log.i(TAG, FNAS.JWT);
+                Log.i(TAG, "FNAS JWT: " + FNAS.JWT);
             }
 
             mImageLoader.setHeaders(headers);
@@ -61,7 +60,7 @@ public enum ImageGifLoaderInstance {
             if (headers == null) {
                 headers = new ArrayMap<>();
                 headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-                Log.i(TAG, FNAS.JWT);
+                Log.i(TAG, "FNAS JWT: " + FNAS.JWT);
             }
 
             mImageLoader.setHeaders(headers);

@@ -74,7 +74,7 @@ public class CalcNewLocalMediaDigestService extends IntentService {
 
         OperationEvent operationEvent;
 
-        Log.i(TAG, "handleActionCalcNewLocalMediaDigest: start calc media digest" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.d(TAG, "handleActionCalcNewLocalMediaDigest: start calc media digest" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         for (Media media : medias) {
             if (media.getUuid().isEmpty()) {
@@ -85,7 +85,7 @@ public class CalcNewLocalMediaDigestService extends IntentService {
             }
         }
 
-        Log.i(TAG, "handleActionCalcNewLocalMediaDigest: end calc media digest" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.d(TAG, "handleActionCalcNewLocalMediaDigest: end calc media digest" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         if (newMediaList.size() > 0) {
 

@@ -43,11 +43,11 @@ public class DownloadFileTask implements Callable<Boolean> {
 
         Call<ResponseBody> call = fileDownloadUploadInterface.downloadFile(FNAS.Gateway + ":" + FNAS.PORT + Util.FILE_PARAMETER + "/" + fileDownloadState.getFileUUID());
 
-        Log.i(TAG, "call: fileDownloadInterface downloadFile");
+        Log.d(TAG, "call: fileDownloadInterface downloadFile");
 
         boolean result = FileUtil.writeResponseBodyToFolder(call.execute().body(), fileDownloadState);
 
-        Log.i(TAG, "call: download result:" + result);
+        Log.d(TAG, "call: download result:" + result);
 
         if (result) {
             DBUtils dbUtils = DBUtils.getInstance(context);

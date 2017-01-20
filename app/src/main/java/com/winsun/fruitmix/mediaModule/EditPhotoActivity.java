@@ -229,6 +229,11 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 break;
             case R.id.finish:
 
+                if (!Util.getNetworkState(mContext)) {
+                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 MediaShare diffContentsOriginalMediaShare = mediaShare.cloneMyself();
                 diffContentsOriginalMediaShare.clearMediaShareContents();
                 diffContentsOriginalMediaShare.initMediaShareContents(mediaShare.getDifferentMediaShareContentInCurrentMediaShare(modifiedMediaShare));
@@ -244,19 +249,15 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                     finish();
                 }
 
-                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
-
                 if (modifiedMediaShare.getMediaContentsListSize() != 0) {
                     modifiedMediaShare.setCoverImageKey(modifiedMediaShare.getFirstMediaDigestInMediaContentsList());
                 } else {
                     modifiedMediaShare.setCoverImageKey("");
                 }
 
-                if (Util.getNetworkState(mContext)) {
-                    FNAS.editPhotoInRemoteMediaShare(mContext, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
-                } else {
-                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-                }
+                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+
+                FNAS.editPhotoInRemoteMediaShare(mContext, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
 
                 break;
             default:

@@ -379,11 +379,11 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
 
             fileName.setText(fileDownloadItem.getFileName());
 
-            Log.i(TAG, "refreshView: currentDownloadSize:" + fileDownloadItem.getFileCurrentDownloadSize() + " fileSize:" + fileDownloadItem.getFileSize());
+            Log.d(TAG, "refreshView: currentDownloadSize:" + fileDownloadItem.getFileCurrentDownloadSize() + " fileSize:" + fileDownloadItem.getFileSize());
 
             float currentProgress = fileDownloadItem.getFileCurrentDownloadSize() * 100 / fileDownloadItem.getFileSize();
 
-            Log.i(TAG, "refreshView: currentProgress:" + currentProgress);
+            Log.d(TAG, "refreshView: currentProgress:" + currentProgress);
 
             downloadingProgressBar.setProgress((int) currentProgress);
 

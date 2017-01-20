@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.ArrayMap;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -103,7 +104,7 @@ public class MediaShareList implements Page {
         mainRecyclerView.setAdapter(mAdapter);
         mainRecyclerView.setLayoutManager(new LinearLayoutManager(containerActivity));
 
-        mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
+        mMapKeyIsImageUUIDValueIsComments = new ArrayMap<>();
 
         mediaShareList = new ArrayList<>();
     }
@@ -157,7 +158,7 @@ public class MediaShareList implements Page {
     }
 
     private boolean isMediaSharePublic(MediaShare mediaShare) {
-        return LocalCache.RemoteUserMapKeyIsUUID.size() == 1 || mediaShare.getCreatorUUID().equals(FNAS.userUUID) || (mediaShare.getViewersListSize() != 0 && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()));
+        return LocalCache.RemoteUserMapKeyIsUUID.size() == 1 || (FNAS.userUUID != null && mediaShare.getCreatorUUID().equals(FNAS.userUUID)) || (mediaShare.getViewersListSize() != 0 && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()));
     }
 
 
@@ -520,7 +521,7 @@ public class MediaShareList implements Page {
         }
 
         private void refreshViewAttributeWhenOneImage(Map<String, List<Comment>> commentMap) {
-            Log.i(TAG, "images[0]:" + imageKeys.get(0));
+            Log.d(TAG, "images[0]:" + imageKeys.get(0));
 
             itemImg = LocalCache.findMediaInLocalMediaMap(imageKeys.get(0));
             if (itemImg == null) {

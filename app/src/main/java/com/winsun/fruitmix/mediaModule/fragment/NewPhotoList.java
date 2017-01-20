@@ -888,7 +888,7 @@ public class NewPhotoList implements Page {
 
                     }
 
-                    Log.i(TAG, "image key:" + currentMedia.getKey());
+                    Log.d(TAG, "image key:" + currentMedia.getKey());
                 }
             });
 

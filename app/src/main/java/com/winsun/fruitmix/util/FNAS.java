@@ -343,7 +343,7 @@ public class FNAS {
             conn = (HttpURLConnection) (new URL(Gateway + ":" + FNAS.PORT + req).openConnection());
             conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
             conn.setConnectTimeout(15 * 1000);
-            Log.d("winsun", Gateway + ":" + FNAS.PORT + req + "  " + JWT);
+            Log.d(TAG, Gateway + ":" + FNAS.PORT + req + "  " + JWT);
             bin = new BufferedInputStream(conn.getInputStream());
             bout = new BufferedOutputStream(new FileOutputStream(tempFile));
             while (true) {
@@ -354,7 +354,7 @@ public class FNAS {
             bin.close();
             bout.close();
             LocalCache.MoveTempFileToThumbCache(tempFile, key);
-            Log.d("winsun", Gateway + ":" + FNAS.PORT + req + "  Success!");
+            Log.d(TAG, Gateway + ":" + FNAS.PORT + req + "  Success!");
             return 1;
         } catch (Exception e) {
             e.printStackTrace();
@@ -426,7 +426,7 @@ public class FNAS {
             localHashMap = LocalCache.LocalMediaMapKeyIsThumb.get(fileName);
             hash = localHashMap.getUuid();
 
-            Log.i(TAG, "thumb:" + fileName + "hash:" + hash);
+            Log.d(TAG, "thumb:" + fileName + "hash:" + hash);
 
             // head
             url = Gateway + ":" + FNAS.PORT + Util.DEVICE_ID_PARAMETER + "/" + LocalCache.DeviceID;

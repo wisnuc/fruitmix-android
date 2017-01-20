@@ -79,11 +79,11 @@ public class RetrieveRemoteMediaService extends IntentService {
 
         try {
 
-            Log.i(TAG, "handleActionRetrieveRemoteMedia: before load" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.d(TAG, "handleActionRetrieveRemoteMedia: before load" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
             HttpResponse httpResponse = FNAS.loadMedia();
 
-            Log.i(TAG, "handleActionRetrieveRemoteMedia: load media finish" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.d(TAG, "handleActionRetrieveRemoteMedia: load media finish" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
             RemoteDataParser<Media> parser = new RemoteMediaParser();
             medias = parser.parse(httpResponse.getResponseData());
@@ -101,11 +101,11 @@ public class RetrieveRemoteMediaService extends IntentService {
 
             sendEvent();
 
-            Log.i(TAG, "handleActionRetrieveRemoteMedia: before delete all remote media" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.d(TAG, "handleActionRetrieveRemoteMedia: before delete all remote media" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
             dbUtils.deleteAllRemoteMedia();
 
-            Log.i(TAG, "handleActionRetrieveRemoteMedia: after delete all remote media" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.d(TAG, "handleActionRetrieveRemoteMedia: after delete all remote media" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
             long result = dbUtils.insertRemoteMedias(mediaConcurrentMap);
 

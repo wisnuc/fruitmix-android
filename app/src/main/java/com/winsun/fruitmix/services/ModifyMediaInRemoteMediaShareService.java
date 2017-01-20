@@ -71,7 +71,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
 
         context.startService(intent);
 
-        Log.i(TAG, "startActionModifyMediaInRemoteMediaShare: start service");
+        Log.d(TAG, "startActionModifyMediaInRemoteMediaShare: start service");
     }
 
     @Override

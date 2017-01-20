@@ -26,16 +26,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
@@ -48,7 +45,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -430,7 +426,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        Log.i("islock", mediaShare.isLocal() + "");
+        Log.d(TAG, mediaShare.isLocal() + "");
 
         if (Util.getNetworkState(mContext)) {
             if (mediaShare.isLocal()) {
@@ -506,9 +502,14 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+                        if (Util.getNetworkState(mContext)) {
 
-                        mediaShare.sendDeleteMediaShareRequest(mContext);
+                            mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+                            FNAS.deleteRemoteMediaShare(mContext, mediaShare);
+
+                        } else {
+                            Toast.makeText(mContext, mContext.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+                        }
 
                     }
                 }).setNegativeButton(getString(R.string.cancel), null).create().show();
@@ -516,6 +517,12 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     }
 
     private void setPublicPrivate() {
+
+        if (!Util.getNetworkState(mContext)) {
+            Toast.makeText(mContext, mContext.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+
+            return;
+        }
 
         MediaShare cloneMediaShare = mediaShare.cloneMyself();
         String requestData;
@@ -544,7 +551,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-        cloneMediaShare.sendModifyMediaShareRequest(mContext,requestData);
+        FNAS.modifyRemoteMediaShare(mContext, cloneMediaShare, requestData);
+
     }
 
 }

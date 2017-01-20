@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
+import android.support.v4.util.ArrayMap;
 import android.util.Log;
 
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
@@ -726,7 +727,7 @@ public class DBUtils {
     private Map<String, List<Comment>> getAllImageCommentKeyIsImageUUID(String dbName) {
         openReadableDB();
 
-        Map<String, List<Comment>> map = new HashMap<>();
+        Map<String, List<Comment>> map = new ArrayMap<>();
 
         LocalDataParser<Comment> parser = new LocalMediaCommentParser();
 
@@ -969,7 +970,7 @@ public class DBUtils {
 
         long returnValue = database.update(dbName, contentValues, DBHelper.MEDIA_KEY_UUID + " = ?", new String[]{media.getUuid()});
 
-        Log.i(TAG, "update media uuid:" + media.getUuid());
+        Log.d(TAG, "update media uuid:" + media.getUuid());
 
         close();
 

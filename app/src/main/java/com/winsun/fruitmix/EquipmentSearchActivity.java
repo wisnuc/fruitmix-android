@@ -391,7 +391,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                 mArrow.setTag(isExpanded);
 
-                Log.i(TAG, "refreshView: groupPosition:" + groupPosition + " preIsExpanded:" + preIsExpanded + " isExpanded:" + isExpanded);
+                Log.d(TAG, "refreshView: groupPosition:" + groupPosition + " preIsExpanded:" + preIsExpanded + " isExpanded:" + isExpanded);
             }
 
         }
@@ -458,7 +458,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                         Equipment equipment = new Equipment();
                         equipment.setServiceName(serviceName);
-                        Log.i(TAG, "host address:" + hostAddress);
+                        Log.d(TAG, "host address:" + hostAddress);
 
                         List<String> hosts = new ArrayList<>();
                         hosts.add(hostAddress);
@@ -497,7 +497,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                     String url = Util.HTTP + equipment.getHosts().get(0) + ":" + SYSTEM_PORT + IPALIASING;
 
-                    Log.i(TAG, "login retrieve equipment alias:" + url);
+                    Log.d(TAG, "login retrieve equipment alias:" + url);
 
                     str = FNAS.RemoteCallWithUrl(url).getResponseData();
 
@@ -514,12 +514,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         if (!hosts.contains(ip)) {
                             hosts.add(ip);
                         }
-
                     }
 
                     url = Util.HTTP + equipment.getHosts().get(0) + ":" + FNAS.PORT + Util.LOGIN_PARAMETER;
 
-                    Log.i(TAG, "login url:" + url);
+                    Log.d(TAG, "login url:" + url);
 
                     str = FNAS.RemoteCallWithUrl(url).getResponseData();
 
@@ -548,7 +547,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                     mUserLoadedEquipments.add(equipment);
                     mUserExpandableLists.add(itemList);
 
-                    Log.i(TAG, "EquipmentSearch: " + mUserExpandableLists.toString());
+                    Log.d(TAG, "EquipmentSearch: " + mUserExpandableLists.toString());
 
                     //update list
                     mHandler.sendEmptyMessage(DATA_CHANGE);

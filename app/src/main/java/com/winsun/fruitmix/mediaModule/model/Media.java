@@ -218,7 +218,7 @@ public class Media implements Parcelable {
 
         if (LocalCache.RemoteMediaMapKeyIsUUID.containsKey(getUuid())) {
 
-            Log.i(TAG, "upload file is already uploaded");
+            Log.d(TAG, "upload file is already uploaded");
 
             uploaded = true;
 

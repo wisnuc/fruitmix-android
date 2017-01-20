@@ -2,7 +2,6 @@ package com.winsun.fruitmix.fileModule.fragment;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;

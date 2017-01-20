@@ -324,7 +324,7 @@ public class LocalCache {
 
                         //BigLittleImageView.HotView.setImageResource(R.drawable.yesshou);
                         System.gc();
-                        Log.d("winsun", "Recycled");
+                        Log.d(TAG, "Recycled");
                     }
                     iv.setImageBitmap(bmp);
 
@@ -624,7 +624,7 @@ public class LocalCache {
         mEditor.apply();
     }
 
-    static void DropGlobalData(Context context, String name) {
+    private static void DropGlobalData(Context context, String name) {
         SharedPreferences sp;
         SharedPreferences.Editor mEditor;
 
@@ -643,23 +643,6 @@ public class LocalCache {
         editor.apply();
     }
 
-
-    public static void saveGateway(String gateway, Context context) {
-        SharedPreferences sp;
-        SharedPreferences.Editor editor;
-        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        editor = sp.edit();
-        editor.putString(Util.GATEWAY, gateway);
-        editor.apply();
-    }
-
-    public static String getGateway(Context context) {
-        SharedPreferences sp;
-        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-
-        return sp.getString(Util.GATEWAY, null);
-    }
-
     public static void saveToken(Context context, String jwt) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
@@ -676,16 +659,46 @@ public class LocalCache {
         return sp.getString(Util.JWT, null);
     }
 
-    public static String getUuidValue(Context context) {
+    public static void saveGateway(Context context,String gateway) {
         SharedPreferences sp;
+        SharedPreferences.Editor editor;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        return sp.getString(Util.USER_UUID, null);
+        editor = sp.edit();
+        editor.putString(Util.GATEWAY, gateway);
+        editor.apply();
     }
 
-    public static String getPasswordValue(Context context) {
+    public static String getGateway(Context context) {
+        SharedPreferences sp;
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+
+        return sp.getString(Util.GATEWAY, null);
+    }
+
+
+    public static String getUserUUID(Context context) {
+        SharedPreferences sp;
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+
+        return sp.getString(Util.USER_UUID, "");
+
+    }
+
+    public static String getUserPassword(Context context) {
         SharedPreferences sp;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         return sp.getString(Util.PASSWORD, null);
+    }
+
+
+    public static void saveUuidPassword(Context context, String uuid, String password) {
+        SharedPreferences sp;
+        SharedPreferences.Editor editor;
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        editor = sp.edit();
+        editor.putString(Util.USER_UUID, uuid);
+        editor.putString(Util.PASSWORD, password);
+        editor.apply();
     }
 
     public static User getUser(Context context) {
@@ -703,14 +716,6 @@ public class LocalCache {
         return user;
     }
 
-    public static String getUserUUID(Context context) {
-        SharedPreferences sp;
-        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-
-        return sp.getString(Util.USER_UUID, "");
-
-    }
-
     public static void saveUser(Context context, String userName, int userDefaultAvatarBgColor, boolean userIsAdmin, String userHome, String userUUID) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
@@ -724,13 +729,4 @@ public class LocalCache {
         editor.apply();
     }
 
-    public static void saveUuidPassword(Context context, String uuid, String password) {
-        SharedPreferences sp;
-        SharedPreferences.Editor editor;
-        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        editor = sp.edit();
-        editor.putString(Util.USER_UUID, uuid);
-        editor.putString(Util.PASSWORD, password);
-        editor.apply();
-    }
 }

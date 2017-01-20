@@ -130,7 +130,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
         if (!oldMediaShares.isEmpty() || !newMediaShares.isEmpty()) {
             dbUtils.deleteOldAndInsertNewRemoteMediaShare(oldMediaShares, newMediaShares);
 
-            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: finish delet old and insert new mediashares " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: finish delete old and insert new mediashares " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         } else {
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: no oldMediaShares or newMediaShares");
@@ -151,7 +151,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
         }
 
-        Log.i(TAG, "handleActionRetrieveRemoteMediaShare: finish calc newMediaShares " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.d(TAG, "handleActionRetrieveRemoteMediaShare: finish calc newMediaShares " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
     }
 
     private void calcOldMediaSharesAndNewMediaShares(List<MediaShare> newMediaShares, List<MediaShare> oldMediaShares, ConcurrentMap<String, MediaShare> mediaShareConcurrentMap, Collection<String> oldMediaShareMapKey, Collection<String> newMediaShareMapKey) {
@@ -178,7 +178,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
         }
 
-        Log.i(TAG, "handleActionRetrieveRemoteMediaShare: finish calc oldMediaShares and newMediaShares " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.d(TAG, "handleActionRetrieveRemoteMediaShare: finish calc oldMediaShares and newMediaShares " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
     }
 
     private void handleActionRetrieveRemoteMediaShare(boolean loadMediaShareInDBWhenExceptionOccur) {
@@ -195,12 +195,12 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
             HttpResponse httpResponse = FNAS.loadRemoteShare();
 
-            Log.i(TAG, "loadRemoteShare:" + httpResponse.getResponseData().equals(""));
+            Log.d(TAG, "loadRemoteShare:" + httpResponse.getResponseData().equals(""));
 
             RemoteDataParser<MediaShare> parser = new RemoteMediaShareParser();
             mediaShares = parser.parse(httpResponse.getResponseData());
 
-            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: parse remote media share");
+            Log.d(TAG, "handleActionRetrieveRemoteMediaShare: parse remote media share");
 
             newMediaSharesDigests = new ArrayList<>(mediaShares.size());
             for (MediaShare mediaShare : mediaShares) {
@@ -212,11 +212,11 @@ public class RetrieveRemoteMediaShareService extends IntentService {
                 oldMediaSharesDigests.add(mediaShare.getShareDigest());
             }
 
-            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: generate oldMediaShares and newMediaShares");
+            Log.d(TAG, "handleActionRetrieveRemoteMediaShare: generate oldMediaShares and newMediaShares");
 
             if (oldMediaSharesDigests.containsAll(newMediaSharesDigests) && newMediaSharesDigests.containsAll(oldMediaSharesDigests)) {
 
-                Log.i(TAG, "handleActionRetrieveRemoteMediaShare: old media shares are same as newMediaShares");
+                Log.d(TAG, "handleActionRetrieveRemoteMediaShare: old media shares are same as newMediaShares");
 
                 if (!loadMediaShareInDBWhenExceptionOccur) {
                     return;
@@ -226,11 +226,11 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
             dbUtils.deleteAllRemoteShare();
 
-            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: delete all remote share in db");
+            Log.d(TAG, "handleActionRetrieveRemoteMediaShare: delete all remote share in db");
 
             mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
 
-            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: build media share map");
+            Log.d(TAG, "handleActionRetrieveRemoteMediaShare: build media share map");
 
             dbUtils.insertRemoteMediaShares(mediaShareConcurrentMap.values());
 

@@ -60,11 +60,11 @@ public class SplashScreenActivity extends Activity {
         FNAS.retrieveLocalMedia(mContext);
 
         mGateway = LocalCache.getGateway(mContext);
-        mUuid = LocalCache.getUuidValue(mContext);
-        mPassword = LocalCache.getPasswordValue(mContext);
+        mUuid = LocalCache.getUserUUID(mContext);
+        mPassword = LocalCache.getUserPassword(mContext);
         mToken = LocalCache.getToken(mContext);
 
-        if (mUuid != null && mPassword != null && mGateway != null && mToken != null) {
+        if (!mUuid.isEmpty() && mPassword != null && mGateway != null && mToken != null) {
 
             Util.loginType = LoginType.SPLASH_SCREEN;
 

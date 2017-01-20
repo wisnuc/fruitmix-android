@@ -65,11 +65,11 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
      */
     private void handleActionRetrieveLocalMedia() {
 
-        Log.i(TAG, "handleActionRetrieveLocalMedia: before retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.d(TAG, "handleActionRetrieveLocalMedia: before retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         List<Media> medias = LocalCache.PhotoList(this, "Camera");
 
-        Log.i(TAG, "handleActionRetrieveLocalMedia: after retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.d(TAG, "handleActionRetrieveLocalMedia: after retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         Util.setLocalMediaInCameraLoaded(true);
 

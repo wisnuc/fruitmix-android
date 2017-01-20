@@ -139,6 +139,11 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
 
                 Util.hideSoftInput(this);
 
+                if (!Util.getNetworkState(this)) {
+                    Toast.makeText(this, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 String userName = userNameEditText.getText().toString();
 
                 if (remoteUserNames.contains(userName)) {
@@ -179,7 +184,6 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
                 mDialog = ProgressDialog.show(CreateUserActivity.this, null, getString(R.string.operating_title), true, false);
 
                 FNAS.createRemoteUser(userName, password);
-
 
                 break;
         }

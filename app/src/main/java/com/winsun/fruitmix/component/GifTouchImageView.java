@@ -100,6 +100,8 @@ public class GifTouchImageView extends GifImageView {
     private OnTouchListener userTouchListener = null;
     private OnTouchImageViewListener touchImageViewListener = null;
 
+    private boolean needFitImageToView = true;
+
     public GifTouchImageView(Context context) {
         super(context);
         sharedConstructing(context);
@@ -136,6 +138,10 @@ public class GifTouchImageView extends GifImageView {
         setState(State.NONE);
         onDrawReady = false;
         super.setOnTouchListener(new PrivateOnTouchListener());
+    }
+
+    public void setNeedFitImageToView(boolean needFitImageToView) {
+        this.needFitImageToView = needFitImageToView;
     }
 
     @Override
@@ -181,6 +187,9 @@ public class GifTouchImageView extends GifImageView {
 
     @Override
     public void setScaleType(ScaleType type) {
+
+        Log.d(TAG, "setScaleType: ");
+
         if (type == ScaleType.FIT_START || type == ScaleType.FIT_END) {
             throw new UnsupportedOperationException("TouchImageView does not support FIT_START or FIT_END");
         }
@@ -247,6 +256,9 @@ public class GifTouchImageView extends GifImageView {
 
     @Override
     public Parcelable onSaveInstanceState() {
+
+        Log.d(TAG, "onSaveInstanceState: ");
+
         Bundle bundle = new Bundle();
         bundle.putParcelable("instanceState", super.onSaveInstanceState());
         bundle.putFloat("saveScale", normalizedScale);
@@ -262,6 +274,9 @@ public class GifTouchImageView extends GifImageView {
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
+
+        Log.d(TAG, "onRestoreInstanceState: ");
+
         if (state instanceof Bundle) {
             Bundle bundle = (Bundle) state;
             normalizedScale = bundle.getFloat("saveScale");
@@ -281,6 +296,9 @@ public class GifTouchImageView extends GifImageView {
 
     @Override
     protected void onDraw(Canvas canvas) {
+
+        Log.d(TAG, "onDraw: ");
+
         onDrawReady = true;
         imageRenderedAtLeastOnce = true;
         if (delayedZoomVariables != null) {
@@ -527,6 +545,9 @@ public class GifTouchImageView extends GifImageView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+
+        Log.d(TAG, "onMeasure: ");
+
         Drawable drawable = getDrawable();
         if (drawable == null || drawable.getIntrinsicWidth() == 0 || drawable.getIntrinsicHeight() == 0) {
             setMeasuredDimension(0, 0);
@@ -550,7 +571,9 @@ public class GifTouchImageView extends GifImageView {
         //
         // Fit content within view
         //
-        fitImageToView();
+
+        if (needFitImageToView)
+            fitImageToView();
     }
 
     /**
@@ -744,10 +767,10 @@ public class GifTouchImageView extends GifImageView {
         matrix.getValues(m);
         float x = m[Matrix.MTRANS_X];
 
-        Log.i(TAG, "canScrollHorizontally: viewWidth " + viewWidth);
-        Log.i(TAG, "canScrollHorizontally: getImageWidth " + getImageWidth());
-        Log.i(TAG, "canScrollHorizontally: normalizedScale " + normalizedScale);
-        Log.i(TAG, "canScrollHorizontally: matchViewWidth " + matchViewWidth);
+        Log.d(TAG, "canScrollHorizontally: viewWidth " + viewWidth);
+        Log.d(TAG, "canScrollHorizontally: getImageWidth " + getImageWidth());
+        Log.d(TAG, "canScrollHorizontally: normalizedScale " + normalizedScale);
+        Log.d(TAG, "canScrollHorizontally: matchViewWidth " + matchViewWidth);
 
         if (getImageWidth() < viewWidth) {
             return false;
@@ -775,6 +798,9 @@ public class GifTouchImageView extends GifImageView {
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
+
+            Log.d(TAG, "onSingleTapConfirmed: ");
+
             if (doubleTapListener != null) {
                 return doubleTapListener.onSingleTapConfirmed(e);
             }
@@ -788,6 +814,9 @@ public class GifTouchImageView extends GifImageView {
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+
+            Log.d(TAG, "onFling: ");
+
             if (fling != null) {
                 //
                 // If a previous fling is still active, it should be cancelled so that two flings
@@ -802,6 +831,9 @@ public class GifTouchImageView extends GifImageView {
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
+
+            Log.d(TAG, "onDoubleTap: ");
+
             boolean consumed = false;
             if (doubleTapListener != null) {
                 consumed = doubleTapListener.onDoubleTap(e);
@@ -817,6 +849,9 @@ public class GifTouchImageView extends GifImageView {
 
         @Override
         public boolean onDoubleTapEvent(MotionEvent e) {
+
+            Log.d(TAG, "onDoubleTapEvent: ");
+
             return doubleTapListener != null && doubleTapListener.onDoubleTapEvent(e);
         }
     }
@@ -840,6 +875,9 @@ public class GifTouchImageView extends GifImageView {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
+
+            Log.d(TAG, "onTouch: ");
+
             mScaleDetector.onTouchEvent(event);
             mGestureDetector.onTouchEvent(event);
             PointF curr = new PointF(event.getX(), event.getY());
@@ -903,12 +941,18 @@ public class GifTouchImageView extends GifImageView {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
+
+            Log.d(TAG, "onScaleBegin: ");
+
             setState(State.ZOOM);
             return true;
         }
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
+
+            Log.d(TAG, "onScale: ");
+
             scaleImage(detector.getScaleFactor(), detector.getFocusX(), detector.getFocusY(), true);
 
             //
@@ -922,6 +966,9 @@ public class GifTouchImageView extends GifImageView {
 
         @Override
         public void onScaleEnd(ScaleGestureDetector detector) {
+
+            Log.d(TAG, "onScaleEnd: ");
+
             super.onScaleEnd(detector);
             setState(State.NONE);
             boolean animateToZoomBoundary = false;
@@ -1004,6 +1051,9 @@ public class GifTouchImageView extends GifImageView {
 
         @Override
         public void run() {
+
+            Log.d(TAG, "DoubleTapZoom run: ");
+
             float t = interpolate();
             double deltaScale = calculateDeltaScale(t);
             scaleImage(deltaScale, bitmapX, bitmapY, stretchImageToSuper);
@@ -1170,6 +1220,8 @@ public class GifTouchImageView extends GifImageView {
 
         @Override
         public void run() {
+
+            Log.d(TAG, "Fling run: ");
 
             //
             // OnTouchImageViewListener is set: TouchImageView listener has been flung by user.

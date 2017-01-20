@@ -192,6 +192,11 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                 tfContent.clearFocus();
                 Util.hideSoftInput(MediaShareCommentActivity.this);
 
+                if(!Util.getNetworkState(mContext)){
+                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 mComment = tfContent.getText() + "";
 
                 if (mComment.isEmpty()) {
@@ -199,7 +204,6 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                     return;
                 }
 
-                Log.d(TAG, tfContent.getText() + "");
                 Log.i(TAG, "onClick: mediaUUID:" + media.getUuid());
 
                 mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);

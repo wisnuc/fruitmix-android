@@ -12,10 +12,12 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
@@ -94,6 +96,15 @@ public class ModifyAlbumActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Util.hideSoftInput(ModifyAlbumActivity.this);
 
+                if (!Util.getNetworkState(mContext)) {
+                    Toast.makeText(mContext, mContext.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+
+                    ModifyAlbumActivity.this.setResult(RESULT_CANCELED);
+                    finish();
+
+                    return;
+                }
+
                 final boolean sPublic, sSetMaintainer;
                 final String title, desc;
 
@@ -113,7 +124,8 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
                 mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-                mAlbumMap.sendModifyMediaShareRequest(mContext, requestData);
+                FNAS.modifyRemoteMediaShare(mContext, mAlbumMap, requestData);
+
             }
         });
 

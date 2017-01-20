@@ -71,11 +71,11 @@ public class RetrieveLocalMediaService extends IntentService {
         ConcurrentMap<String, Media> mediaConcurrentMap;
         DBUtils dbUtils = DBUtils.getInstance(this);
 
-        Log.i(TAG, "handleActionRetrieveLocalMedia: before retrieve " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.d(TAG, "handleActionRetrieveLocalMedia: before retrieve " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         medias = dbUtils.getAllLocalMedia();
 
-        Log.i(TAG, "handleActionRetrieveLocalMedia: after retrieve " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.d(TAG, "handleActionRetrieveLocalMedia: after retrieve " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         mediaConcurrentMap = LocalCache.BuildMediaMapKeyIsThumb(medias);
 

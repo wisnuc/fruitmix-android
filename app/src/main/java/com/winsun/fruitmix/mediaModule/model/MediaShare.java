@@ -453,22 +453,6 @@ public class MediaShare implements Parcelable {
         return mediaShareContents;
     }
 
-    public void sendModifyMediaShareRequest(Context context, String requestData) {
-        if (Util.getNetworkState(context)) {
-            FNAS.modifyRemoteMediaShare(context, this, requestData);
-        } else {
-            Toast.makeText(context, context.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void sendDeleteMediaShareRequest(Context context) {
-        if (Util.getNetworkState(context)) {
-            FNAS.deleteRemoteMediaShare(context, this);
-        } else {
-            Toast.makeText(context, context.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-        }
-    }
-
     public boolean checkPermissionToOperate() {
         return checkMaintainersListContainCurrentUserUUID() || getCreatorUUID().equals(FNAS.userUUID);
     }

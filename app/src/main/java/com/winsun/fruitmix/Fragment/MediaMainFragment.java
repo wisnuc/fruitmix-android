@@ -138,7 +138,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         initPageList();
 
-        Log.i(TAG, "onCreate: ");
+        Log.d(TAG, "onCreate: ");
     }
 
     @Override
@@ -171,7 +171,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         photoList.addPhotoListListener(this);
 
-        Log.i(TAG, "onCreateView: ");
+        Log.d(TAG, "onCreateView: ");
 
         return view;
     }
@@ -182,7 +182,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         EventBus.getDefault().register(this);
 
-        Log.i(TAG, "onStart: ");
+        Log.d(TAG, "onStart: ");
     }
 
     @Override
@@ -210,7 +210,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             mShareAlbumListRefresh = true;
         }
 
-        Log.i(TAG, "onResume: ");
+        Log.d(TAG, "onResume: ");
     }
 
     @Override
@@ -220,7 +220,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         super.onStop();
 
-        Log.i(TAG, "onStop: ");
+        Log.d(TAG, "onStop: ");
 
     }
 
@@ -228,7 +228,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void onDestroyView() {
         super.onDestroyView();
 
-        Log.i(TAG, "onDestroyView: ");
+        Log.d(TAG, "onDestroyView: ");
     }
 
     @Override
@@ -239,7 +239,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         mContext = null;
 
-        Log.i(TAG, "onDestroy: ");
+        Log.d(TAG, "onDestroy: ");
     }
 
     @Override
@@ -688,7 +688,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     @Override
     public void onNoPhotoItem(boolean noPhotoItem) {
 
-        Log.i(TAG, "onNoPhotoItem:" + noPhotoItem);
+        Log.d(TAG, "onNoPhotoItem:" + noPhotoItem);
+
         int currentItem = viewPager.getCurrentItem();
 
         if (noPhotoItem && currentItem == PAGE_PHOTO) {
@@ -711,6 +712,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 showBottomNavAnim();
                 break;
             case R.id.bt_share:
+
+                if (!Util.getNetworkState(mContext)) {
+                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 selectMediaKeys = photoList.getSelectedImageKeys();
                 if (showNothingSelectToast(selectMediaKeys)) return;
 
@@ -798,27 +805,41 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     @Override
     public void modifyMediaShare(MediaShare mediaShare) {
 
-        if (mediaShare.checkPermissionToOperate()) {
-            mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+        if (Util.getNetworkState(mContext)) {
 
-            String requestData = mediaShare.createToggleShareStateRequestData();
+            if (mediaShare.checkPermissionToOperate()) {
+                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-            mediaShare.sendModifyMediaShareRequest(mContext, requestData);
+                String requestData = mediaShare.createToggleShareStateRequestData();
+
+                FNAS.modifyRemoteMediaShare(mContext, mediaShare, requestData);
+            } else {
+                Toast.makeText(mContext, getString(R.string.no_operate_media_share_permission), Toast.LENGTH_SHORT).show();
+
+            }
+
         } else {
-            Toast.makeText(mContext, getString(R.string.no_operate_media_share_permission), Toast.LENGTH_SHORT).show();
-
+            Toast.makeText(mContext, mContext.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
         }
 
     }
 
     @Override
     public void deleteMediaShare(MediaShare mediaShare) {
-        if (mediaShare.checkPermissionToOperate()) {
-            mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-            mediaShare.sendDeleteMediaShareRequest(mContext);
+        if (Util.getNetworkState(mContext)) {
+
+            if (mediaShare.checkPermissionToOperate()) {
+                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+
+                FNAS.deleteRemoteMediaShare(mContext, mediaShare);
+            } else {
+                Toast.makeText(mContext, getString(R.string.no_operate_media_share_permission), Toast.LENGTH_SHORT).show();
+
+            }
+
         } else {
-            Toast.makeText(mContext, getString(R.string.no_operate_media_share_permission), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, mContext.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
         }
 
     }

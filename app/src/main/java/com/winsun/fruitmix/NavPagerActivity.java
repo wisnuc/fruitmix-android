@@ -116,7 +116,7 @@ public class NavPagerActivity extends AppCompatActivity
 
         currentPage = PAGE_MEDIA;
 
-        Log.i(TAG, "onCreate: ");
+        Log.d(TAG, "onCreate: ");
     }
 
     @Override
@@ -145,7 +145,7 @@ public class NavPagerActivity extends AppCompatActivity
         instance = null;
         mContext = null;
 
-        Log.i(TAG, "onDestroy: ");
+        Log.d(TAG, "onDestroy: ");
     }
 
     @Override
@@ -209,7 +209,7 @@ public class NavPagerActivity extends AppCompatActivity
 
         User user;
 
-        if (FNAS.userUUID != null && !LocalCache.RemoteUserMapKeyIsUUID.isEmpty() && LocalCache.RemoteUserMapKeyIsUUID.containsKey(FNAS.userUUID)) {
+        if (FNAS.userUUID != null && LocalCache.RemoteUserMapKeyIsUUID != null && LocalCache.RemoteUserMapKeyIsUUID.containsKey(FNAS.userUUID)) {
             user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
         } else {
             user = LocalCache.getUser(mContext);

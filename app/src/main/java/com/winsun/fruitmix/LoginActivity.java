@@ -159,6 +159,11 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
             case R.id.login_btn:
                 Util.hideSoftInput(LoginActivity.this);
 
+                if (!Util.getNetworkState(mContext)) {
+                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 mPwd = mPwdEdit.getText().toString();
                 login();
                 break;
