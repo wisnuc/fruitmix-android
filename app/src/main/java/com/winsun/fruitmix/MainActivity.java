@@ -18,6 +18,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Util.setRemoteMediaLoaded(false);
+        Util.setRemoteMediaShareLoaded(false);
+
         ButlerService.startButlerService(getApplicationContext());
 
         Intent intent = new Intent();

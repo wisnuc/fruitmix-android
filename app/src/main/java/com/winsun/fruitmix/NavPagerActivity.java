@@ -139,9 +139,6 @@ public class NavPagerActivity extends AppCompatActivity
 
         instance.shutdownFixedThreadPoolNow();
 
-        Util.setRemoteMediaLoaded(false);
-        Util.setRemoteMediaShareLoaded(false);
-
         instance = null;
         mContext = null;
 

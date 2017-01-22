@@ -173,7 +173,11 @@ public class NewPhotoList implements Page {
     }
 
     public void setSelectMode(boolean selectMode) {
+
         mSelectMode = selectMode;
+
+        if (mSelectMode)
+            clearSelectedPhoto();
 
         mUseAnim = true;
 
@@ -329,6 +333,9 @@ public class NewPhotoList implements Page {
     }
 
     public void clearSelectedPhoto() {
+
+        if (mMapKeyIsPhotoPositionValueIsPhoto == null) return;
+
         for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Media media : mediaList) {
                 media.setSelected(false);
@@ -681,11 +688,30 @@ public class NewPhotoList implements Page {
                         List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
                         boolean selected = mPhotoTitleSelectImg.isSelected();
 
-                        if (!selected && mediaList.size() + mSelectCount > 1000) {
+                        int unSelectNumInList = 0;
+
+                        for (Media media : mediaList) {
+                            if (!media.isSelected())
+                                unSelectNumInList++;
+                        }
+
+                        if (!selected && unSelectNumInList + mSelectCount > 1000) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
 
-                            for (int i = 0; i < (1000 - mSelectCount); i++) {
-                                mediaList.get(i).setSelected(true);
+                            int newSelectItemCount = 0;
+                            int newSelectItemTotalCount = 1000 - mSelectCount;
+                            if (newSelectItemTotalCount != 0) {
+
+                                for (Media media : mediaList) {
+
+                                    if (!media.isSelected()) {
+                                        media.setSelected(true);
+                                        newSelectItemCount++;
+                                        if (newSelectItemCount == newSelectItemTotalCount)
+                                            break;
+                                    }
+
+                                }
                             }
 
                         } else {
@@ -770,6 +796,10 @@ public class NewPhotoList implements Page {
 
             if (currentMedia == null) return;
 
+            // because alreadySelectedImageKeyArrayList is media share content,it must be uuid about media now
+            if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getUuid()))
+                currentMedia.setSelected(true);
+
             mImageLoader.setTag(position);
 
             if (!mIsFling) {
@@ -818,7 +848,7 @@ public class NewPhotoList implements Page {
                         if (!currentMedia.isSharing()) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.photo_not_sharing), Toast.LENGTH_SHORT).show();
                             return;
-                        } else if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getKey())) {
+                        } else if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getUuid())) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -896,11 +926,13 @@ public class NewPhotoList implements Page {
                 @Override
                 public boolean onLongClick(View v) {
 
-                    currentMedia.setSelected(true);
-
                     for (IPhotoListListener listListener : mPhotoListListeners) {
                         listListener.onPhotoItemLongClick();
                     }
+
+                    currentMedia.setSelected(true);
+
+                    mSelectCount = 1;
 
                     return true;
                 }

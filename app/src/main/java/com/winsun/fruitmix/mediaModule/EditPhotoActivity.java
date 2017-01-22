@@ -13,8 +13,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +26,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.MediaInMediaShareLoader;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.RequestQueueInstance;
@@ -58,6 +61,10 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     RecyclerView mEditPhotoRecyclerView;
     @BindView(R.id.add_album)
     FloatingActionButton mAddPhoto;
+    @BindView(R.id.loading_layout)
+    LinearLayout loadingLayout;
+    @BindView(R.id.no_content_layout)
+    LinearLayout noContentLayout;
 
     private int mSpanCount = 3;
     private Context mContext;
@@ -70,6 +77,9 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     private ImageLoader mImageLoader;
 
     private ProgressDialog mDialog;
+
+    private MediaInMediaShareLoader loader;
+    private MediaInMediaShareLoader.OnMediaInMediaShareLoadListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,10 +107,35 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         mAdapter = new EditPhotoAdapter();
         mEditPhotoRecyclerView.setAdapter(mAdapter);
 
-        mPhotoList = new ArrayList<>();
-        fillPhotoList(mediaShare.getMediaKeyInMediaShareContents());
-        mAdapter.notifyDataSetChanged();
+        loader = MediaInMediaShareLoader.INSTANCE;
+        initOnMediaInMediaShareLoadListener();
+        loadMedia(mediaShare.getMediaKeyInMediaShareContents(), false, false);
+    }
 
+    private void loadMedia(List<String> mediaKeyList, boolean clearMedias, boolean reloadMedias) {
+        loader.startLoad(mediaKeyList, listener, clearMedias, reloadMedias);
+    }
+
+    private void initOnMediaInMediaShareLoadListener() {
+        listener = new MediaInMediaShareLoader.OnMediaInMediaShareLoadListener() {
+            @Override
+            public void onMediaInMediaShareLoaded() {
+
+                mPhotoList = new ArrayList<>(loader.getMedias());
+
+                if (loadingLayout.getVisibility() != View.GONE)
+                    loadingLayout.setVisibility(View.GONE);
+
+                if (mPhotoList.isEmpty()) {
+                    mEditPhotoRecyclerView.setVisibility(View.GONE);
+                    noContentLayout.setVisibility(View.VISIBLE);
+                } else {
+                    mEditPhotoRecyclerView.setVisibility(View.VISIBLE);
+                    noContentLayout.setVisibility(View.GONE);
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        };
     }
 
     private void initImageLoader() {
@@ -114,7 +149,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         super.onStart();
 
         EventBus.getDefault().register(this);
-
     }
 
     @Override
@@ -166,42 +200,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
     }
 
-    private void fillPhotoList(List<String> selectedImageKeys) {
-
-        Media picItem;
-        Media picItemRaw;
-        for (String aStArr : selectedImageKeys) {
-
-            picItemRaw = LocalCache.findMediaInLocalMediaMap(aStArr);
-
-            if (picItemRaw == null) {
-
-                picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
-
-                if (picItemRaw == null) {
-                    picItem = new Media();
-
-                } else {
-
-                    picItem = picItemRaw;
-                    picItem.setLocal(false);
-                }
-
-            } else {
-
-                picItem = picItemRaw;
-                picItem.setLocal(true);
-
-            }
-
-            picItem.setSelected(false);
-
-            mPhotoList.add(picItem);
-
-
-        }
-
-    }
 
     private void fillMediaShareContents(List<String> selectedImageKeys) {
         for (String imageKey : selectedImageKeys) {
@@ -212,7 +210,6 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             modifiedMediaShare.addMediaShareContent(mediaShareContent);
         }
     }
-
 
     @Override
     public void onClick(View v) {
@@ -270,12 +267,11 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         if (requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            fillPhotoList(LocalCache.mediaKeysInCreateAlbum);
-            fillMediaShareContents(LocalCache.mediaKeysInCreateAlbum);
+            loadMedia(new ArrayList<>(LocalCache.mediaKeysInCreateAlbum), false, true);
 
+            fillMediaShareContents(LocalCache.mediaKeysInCreateAlbum);
             LocalCache.mediaKeysInCreateAlbum.clear();
 
-            mAdapter.notifyDataSetChanged();
         }
     }
 

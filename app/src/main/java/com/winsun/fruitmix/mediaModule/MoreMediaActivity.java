@@ -20,6 +20,7 @@ import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.MediaInMediaShareLoader;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.RequestQueueInstance;
@@ -42,11 +43,17 @@ public class MoreMediaActivity extends AppCompatActivity {
     ImageView mBack;
     @BindView(R.id.more_photo_gridview)
     RecyclerView mMorePhotoRecyclerView;
+    @BindView(R.id.loading_layout)
+    LinearLayout loadingLayout;
+    @BindView(R.id.no_content_layout)
+    LinearLayout noContentLayout;
 
     private int mSpanCount = 3;
     private Context mContext;
     private List<Media> mPhotos;
     private ImageLoader mImageLoader;
+    private MediaShare mediaShare;
+    private MorePhotoAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,19 +74,36 @@ public class MoreMediaActivity extends AppCompatActivity {
         mContext = this;
 
         String mediaShareUUID = getIntent().getStringExtra(Util.KEY_MEDIA_SHARE_UUID);
-        MediaShare mediaShare = LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID);
+        mediaShare = LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID);
 
         GridLayoutManager mManager = new GridLayoutManager(mContext, mSpanCount);
         mMorePhotoRecyclerView.setLayoutManager(mManager);
         mMorePhotoRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        MorePhotoAdapter mAdapter = new MorePhotoAdapter();
+        mAdapter = new MorePhotoAdapter();
         mMorePhotoRecyclerView.setAdapter(mAdapter);
 
-        mPhotos = new ArrayList<>();
-        fillPhotoList(mediaShare.getMediaKeyInMediaShareContents());
-        mAdapter.notifyDataSetChanged();
+        loadMedia();
+    }
 
+    private void loadMedia() {
+        final MediaInMediaShareLoader loader = MediaInMediaShareLoader.INSTANCE;
+        loader.startLoad(mediaShare.getMediaKeyInMediaShareContents(), new MediaInMediaShareLoader.OnMediaInMediaShareLoadListener() {
+            @Override
+            public void onMediaInMediaShareLoaded() {
+
+                mPhotos = new ArrayList<>(loader.getMedias());
+
+                loadingLayout.setVisibility(View.GONE);
+                if (mPhotos.isEmpty()) {
+                    noContentLayout.setVisibility(View.VISIBLE);
+                } else {
+                    mMorePhotoRecyclerView.setVisibility(View.VISIBLE);
+                    mAdapter.notifyDataSetChanged();
+                }
+
+            }
+        },true,true);
     }
 
     @Override
@@ -98,43 +122,6 @@ public class MoreMediaActivity extends AppCompatActivity {
 
         ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
         mImageLoader = imageGifLoaderInstance.getImageLoader(mContext);
-    }
-
-    private void fillPhotoList(List<String> imageKeys) {
-
-        mPhotos.clear();
-
-        Media picItem;
-        Media picItemRaw;
-        for (String str : imageKeys) {
-
-            picItemRaw = LocalCache.findMediaInLocalMediaMap(str);
-
-            if (picItemRaw == null) {
-
-                picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(str);
-
-                if (picItemRaw == null) {
-                    picItem = new Media();
-
-                } else {
-
-                    picItem = picItemRaw;
-                    picItem.setLocal(false);
-                }
-
-            } else {
-
-                picItem = picItemRaw;
-                picItem.setLocal(true);
-
-            }
-
-            picItem.setSelected(false);
-
-            mPhotos.add(picItem);
-        }
-
     }
 
     class MorePhotoViewHolder extends RecyclerView.ViewHolder {

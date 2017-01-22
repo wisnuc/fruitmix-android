@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                 xmlns:tools="http://schemas.android.com/tools"
-                                                 android:layout_width="match_parent"
-                                                 android:layout_height="match_parent"
-                                                 android:fitsSystemWindows="true"
-                                                 tools:context="com.winsun.fruitmix.MainActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.winsun.fruitmix.MainActivity">
 
     <!--<android.support.design.widget.AppBarLayout-->
     <!--android:layout_width="match_parent"-->
@@ -58,7 +58,7 @@
             android:layout_height="24dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="16dp"
-            android:src="@drawable/ic_back"/>
+            android:src="@drawable/ic_back" />
 
         <TextView
             android:id="@+id/title"
@@ -69,14 +69,28 @@
             android:maxLines="1"
             android:text="@string/album"
             android:textColor="@color/white"
-            android:textSize="18dp"/>
+            android:textSize="18dp" />
     </android.support.v7.widget.Toolbar>
 
-    <GridView
-        android:id="@+id/mainGrid"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:numColumns="3"/>
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize">
+
+        <GridView
+            android:id="@+id/mainGrid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:numColumns="3" />
+
+        <include
+            layout="@layout/loading_layout"
+            android:visibility="visible" />
+
+        <include layout="@layout/no_content_layout"/>
+
+    </FrameLayout>
+
 
 </android.support.design.widget.CoordinatorLayout>

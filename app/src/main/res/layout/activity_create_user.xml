@@ -49,7 +49,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/user_name"
-            android:inputType="text" />
+            android:inputType="textMultiLine"
+            android:maxLength="20" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -68,7 +69,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/password_text"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:maxLength="40" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -87,7 +89,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/confirm_user_password"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:maxLength="40" />
 
     </android.support.design.widget.TextInputLayout>
 

@@ -100,6 +100,7 @@ public class GifTouchImageView extends GifImageView {
     private OnTouchListener userTouchListener = null;
     private OnTouchImageViewListener touchImageViewListener = null;
 
+    // when hide system ui if is zoomed,fitImageToView will move image, so call fitImageToView if this value is true,otherwise not call it
     private boolean needFitImageToView = true;
 
     public GifTouchImageView(Context context) {

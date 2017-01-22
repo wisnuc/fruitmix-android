@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
@@ -23,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +34,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.MediaInMediaShareLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -44,7 +47,9 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +71,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     TextView mTitleTextView;
     @BindView(R.id.toolbar)
     Toolbar mToolBar;
+    @BindView(R.id.loading_layout)
+    LinearLayout loadingLayout;
+    @BindView(R.id.no_content_layout)
+    LinearLayout noContentLayout;
 
     private List<Media> mediaList;
 
@@ -86,6 +95,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     private boolean isOperated = false;
 
     private Bundle reenterState;
+
+    private MediaInMediaShareLoader loader;
+    private MediaInMediaShareLoader.OnMediaInMediaShareLoadListener listener;
 
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
@@ -151,11 +163,35 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        mediaList = new ArrayList<>();
-        List<String> mediaKeyList = mediaShare.getMediaKeyInMediaShareContents();
-        fillPicList(mediaKeyList);
-        ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
+        loader = MediaInMediaShareLoader.INSTANCE;
+        initOnMediaInMediaShareLoadListener();
+        loadMedia(true, true);
+    }
 
+    private void loadMedia(boolean clearMedias, boolean reloadMedias) {
+        loader.startLoad(mediaShare.getMediaKeyInMediaShareContents(), listener, clearMedias, reloadMedias);
+    }
+
+    private void initOnMediaInMediaShareLoadListener() {
+        listener = new MediaInMediaShareLoader.OnMediaInMediaShareLoadListener() {
+            @Override
+            public void onMediaInMediaShareLoaded() {
+
+                mediaList = new ArrayList<>(loader.getMedias());
+
+                if (loadingLayout.getVisibility() != View.GONE)
+                    loadingLayout.setVisibility(View.GONE);
+
+                if (mediaList.isEmpty()) {
+                    mainGridView.setVisibility(View.GONE);
+                    noContentLayout.setVisibility(View.VISIBLE);
+                } else {
+                    mainGridView.setVisibility(View.VISIBLE);
+                    noContentLayout.setVisibility(View.GONE);
+                    ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
+                }
+            }
+        };
     }
 
     private void initImageLoader() {
@@ -288,43 +324,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 }
             });*/
             ActivityCompat.startPostponedEnterTransition(AlbumPicContentActivity.this);
-        }
-    }
-
-    private void fillPicList(List<String> imageKeys) {
-
-        Media picItemRaw;
-
-        Media picItem;
-        mediaList.clear();
-
-        for (String aStArr : imageKeys) {
-
-            picItemRaw = LocalCache.findMediaInLocalMediaMap(aStArr);
-
-            if (picItemRaw == null) {
-
-                picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
-
-                if (picItemRaw == null) {
-                    picItem = new Media();
-                } else {
-
-                    picItem = picItemRaw;
-                    picItem.setLocal(false);
-                }
-
-            } else {
-
-                picItem = picItemRaw;
-
-                picItem.setLocal(true);
-            }
-
-            picItem.setSelected(false);
-
-            mediaList.add(picItem);
-
         }
     }
 
@@ -483,8 +482,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             String mediaShareUUID = data.getStringExtra(Util.KEY_MEDIA_SHARE_UUID);
             mediaShare = LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID);
 
-            fillPicList(mediaShare.getMediaKeyInMediaShareContents());
-            ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
+            loadMedia(true,true);
 
         } else if (requestCode == Util.KEY_MODIFY_ALBUM_REQUEST_CODE && resultCode == RESULT_OK) {
             String title = data.getStringExtra(Util.UPDATED_ALBUM_TITLE);

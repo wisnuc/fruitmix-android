@@ -599,6 +599,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
 
+                    //TODO:use double tap listener for on click event
+
                     if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
 
                         view.setNeedFitImageToView(false);

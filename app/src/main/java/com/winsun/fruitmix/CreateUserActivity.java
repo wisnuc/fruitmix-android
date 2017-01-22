@@ -44,7 +44,7 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
     @BindView(R.id.confirm_password_layout)
     TextInputLayout confirmPasswordLayout;
     @BindView(R.id.confirm_password_edittext)
-    TextInputEditText confirmPasswordEdittext;
+    TextInputEditText confirmPasswordEditText;
     @BindView(R.id.create_user_button)
     Button createUserBtn;
 
@@ -166,7 +166,7 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
 
                 String password = userPasswordEditText.getText().toString();
 
-                String confirmPassword = confirmPasswordEdittext.getText().toString();
+                String confirmPassword = confirmPasswordEditText.getText().toString();
 
                 if (!password.equals(confirmPassword)) {
 
