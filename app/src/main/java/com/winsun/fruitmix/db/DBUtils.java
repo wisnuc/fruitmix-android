@@ -727,7 +727,7 @@ public class DBUtils {
     private Map<String, List<Comment>> getAllImageCommentKeyIsImageUUID(String dbName) {
         openReadableDB();
 
-        Map<String, List<Comment>> map = new ArrayMap<>();
+        Map<String, List<Comment>> map = new HashMap<>();
 
         LocalDataParser<Comment> parser = new LocalMediaCommentParser();
 

@@ -5,6 +5,10 @@ import android.os.AsyncTask;
 import com.winsun.fruitmix.util.LocalCache;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -15,17 +19,17 @@ public enum MediaInMediaShareLoader {
 
     INSTANCE;
 
-    private List<Media> medias;
+    private LinkedList<Media> medias;
 
     private boolean mClearMedias = true;
     private boolean mReloadMedias = true;
 
     MediaInMediaShareLoader() {
-        medias = new ArrayList<>();
+        medias = new LinkedList<>();
     }
 
     public List<Media> getMedias() {
-        return medias;
+        return new ArrayList<>(medias);
     }
 
     public interface OnMediaInMediaShareLoadListener {
@@ -100,8 +104,17 @@ public enum MediaInMediaShareLoader {
 
             picItem.setSelected(false);
 
-            medias.add(picItem);
-
+            if (mClearMedias)
+                medias.add(picItem);
+            else
+                medias.addFirst(picItem);
         }
+
+        Collections.sort(medias, new Comparator<Media>() {
+            @Override
+            public int compare(Media lhs, Media rhs) {
+                return -lhs.getTime().compareTo(rhs.getTime());
+            }
+        });
     }
 }

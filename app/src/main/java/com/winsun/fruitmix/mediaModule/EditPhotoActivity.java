@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -109,7 +110,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         loader = MediaInMediaShareLoader.INSTANCE;
         initOnMediaInMediaShareLoadListener();
-        loadMedia(mediaShare.getMediaKeyInMediaShareContents(), false, false);
+        loadMedia(mediaShare.getMediaKeyInMediaShareContents(), true, true);
     }
 
     private void loadMedia(List<String> mediaKeyList, boolean clearMedias, boolean reloadMedias) {
@@ -121,7 +122,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             @Override
             public void onMediaInMediaShareLoaded() {
 
-                mPhotoList = new ArrayList<>(loader.getMedias());
+                mPhotoList = loader.getMedias();
 
                 if (loadingLayout.getVisibility() != View.GONE)
                     loadingLayout.setVisibility(View.GONE);
@@ -267,7 +268,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         if (requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            loadMedia(new ArrayList<>(LocalCache.mediaKeysInCreateAlbum), false, true);
+            loadMedia(new ArrayList<>(LocalCache.mediaKeysInCreateAlbum), true, true);
 
             fillMediaShareContents(LocalCache.mediaKeysInCreateAlbum);
             LocalCache.mediaKeysInCreateAlbum.clear();

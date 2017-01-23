@@ -219,9 +219,18 @@ public class RetrieveRemoteMediaShareService extends IntentService {
                 Log.d(TAG, "handleActionRetrieveRemoteMediaShare: old media shares are same as newMediaShares");
 
                 if (!loadMediaShareInDBWhenExceptionOccur) {
+
+                    Util.refreshMediaShareDelayTime = Util.refreshMediaShareDelayTime * 2;
+
+                    if (Util.refreshMediaShareDelayTime > Util.MAX_REFRESH_MEDIA_SHARE_DELAY_TIME) {
+                        Util.refreshMediaShareDelayTime = Util.MAX_REFRESH_MEDIA_SHARE_DELAY_TIME;
+                    }
+
                     return;
                 }
 
+            } else {
+                Util.refreshMediaShareDelayTime = Util.DEFAULT_REFRESH_MEDIA_SHARE_DELAY_TIME;
             }
 
             dbUtils.deleteAllRemoteShare();

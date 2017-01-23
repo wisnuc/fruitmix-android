@@ -27,6 +27,7 @@ import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.DownloadFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.UploadMediaTask;
+import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -107,6 +108,8 @@ public class ButlerService extends Service {
 
         stopTimingRetrieveMediaShare();
 
+        OkHttpUtil.INSTANCE.cancelAllNotFinishCall();
+
         task = null;
 
         super.onDestroy();
@@ -134,7 +137,7 @@ public class ButlerService extends Service {
                     if (Util.startTimingRetrieveMediaShare)
                         FNAS.retrieveRemoteMediaShare(butlerService, false);
 
-                    task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_MEDIA_SHARE, 20 * 1000);
+                    task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_MEDIA_SHARE, Util.refreshMediaShareDelayTime);
 
                     break;
             }

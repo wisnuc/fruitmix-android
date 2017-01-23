@@ -8,9 +8,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Call;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -31,8 +34,12 @@ public enum OkHttpUtil {
 
     private OkHttpClient okHttpClient;
 
+    private List<Call> calls;
+
     OkHttpUtil() {
         okHttpClient = new OkHttpClient.Builder().connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.SECONDS).readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.SECONDS).addInterceptor(createHttpInterceptor()).build();
+
+        calls = new ArrayList<>();
     }
 
     private Interceptor createHttpInterceptor() {
@@ -74,7 +81,11 @@ public enum OkHttpUtil {
 
         Log.d(TAG, "remoteCallMethod: before execute" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-        Response response = okHttpClient.newCall(request).execute();
+        Call call = okHttpClient.newCall(request);
+
+        calls.add(call);
+
+        Response response = call.execute();
 
         Log.d(TAG, "remoteCallMethod: after execute " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
@@ -87,9 +98,17 @@ public enum OkHttpUtil {
 
         response.body().close();
 
+        calls.remove(call);
+
         Log.d(TAG, "remoteCallMethod: after read response body" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         return new HttpResponse(responseCode, str);
+    }
+
+    public void cancelAllNotFinishCall() {
+        for (Call call : calls) {
+            call.cancel();
+        }
     }
 
 }

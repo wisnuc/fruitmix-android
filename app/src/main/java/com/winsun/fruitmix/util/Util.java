@@ -147,6 +147,14 @@ public class Util {
 
     public static boolean startTimingRetrieveMediaShare = false;
 
+    public static final long DEFAULT_REFRESH_MEDIA_SHARE_DELAY_TIME = 20 * 1000;
+
+    public static long refreshMediaShareDelayTime = DEFAULT_REFRESH_MEDIA_SHARE_DELAY_TIME;
+
+    public static final long MAX_REFRESH_MEDIA_SHARE_DELAY_TIME = 60 * 1000;
+
+    public static final int MAX_PHOTO_SIZE = 1000;
+
     public static LoginType loginType = LoginType.LOGIN;
 
     private static boolean localMediaInCameraLoaded = false;

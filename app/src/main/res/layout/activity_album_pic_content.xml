@@ -81,14 +81,12 @@
             android:id="@+id/mainGrid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:numColumns="3" />
+            android:numColumns="3"
+            android:visibility="gone" />
 
-        <include
-            layout="@layout/loading_layout"
-            android:visibility="visible" />
+        <include layout="@layout/loading_layout" />
 
-        <include layout="@layout/no_content_layout"/>
+        <include layout="@layout/no_content_layout" />
 
     </FrameLayout>
 

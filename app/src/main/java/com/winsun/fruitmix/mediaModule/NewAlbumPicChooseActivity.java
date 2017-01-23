@@ -16,6 +16,7 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -51,7 +52,7 @@ public class NewAlbumPicChooseActivity extends Activity {
 
         mNewPhotoList = new NewPhotoList(this);
 
-        List<String> alreadySelectedImageKeyArrayList = getIntent().getStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST);
+        final List<String> alreadySelectedImageKeyArrayList = getIntent().getStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST);
 
         mMainFrameLayout.addView(mNewPhotoList.getView());
         mNewPhotoList.setSelectMode(true);

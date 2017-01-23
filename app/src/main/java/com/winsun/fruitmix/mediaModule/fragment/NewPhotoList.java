@@ -50,8 +50,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -321,10 +323,25 @@ public class NewPhotoList implements Page {
     public List<String> getSelectedImageKeys() {
 
         List<String> selectedImageKeys = new ArrayList<>();
+
         for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Media media : mediaList) {
                 if (media.isSelected()) {
-                    selectedImageKeys.add(media.getKey());
+
+                    String mediaUUID = media.getUuid();
+                    if (mediaUUID.isEmpty()) {
+                        mediaUUID = Util.CalcSHA256OfFile(media.getThumb());
+                    }
+
+                    selectedImageKeys.add(mediaUUID);
+                }
+            }
+        }
+
+        if (alreadySelectedImageKeyArrayList != null) {
+            for (String mediaUUID : alreadySelectedImageKeyArrayList) {
+                if (!selectedImageKeys.contains(mediaUUID)) {
+                    selectedImageKeys.add(mediaUUID);
                 }
             }
         }
@@ -380,12 +397,14 @@ public class NewPhotoList implements Page {
         mediaShare.setUuid(Util.createLocalUUid());
 
         List<MediaShareContent> mediaShareContents = new ArrayList<>();
-        for (String digest : selectMediaKeys) {
+
+        for (String mediaKey : selectMediaKeys) {
             MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setKey(digest);
+            mediaShareContent.setKey(mediaKey);
             mediaShareContent.setAuthor(FNAS.userUUID);
             mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
             mediaShareContents.add(mediaShareContent);
+
         }
 
         mediaShare.initMediaShareContents(mediaShareContents);
@@ -695,11 +714,11 @@ public class NewPhotoList implements Page {
                                 unSelectNumInList++;
                         }
 
-                        if (!selected && unSelectNumInList + mSelectCount > 1000) {
+                        if (!selected && unSelectNumInList + mSelectCount > Util.MAX_PHOTO_SIZE) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
 
                             int newSelectItemCount = 0;
-                            int newSelectItemTotalCount = 1000 - mSelectCount;
+                            int newSelectItemTotalCount = Util.MAX_PHOTO_SIZE - mSelectCount;
                             if (newSelectItemTotalCount != 0) {
 
                                 for (Media media : mediaList) {
@@ -855,7 +874,7 @@ public class NewPhotoList implements Page {
 
                         boolean selected = currentMedia.isSelected();
 
-                        if (!selected && mSelectCount >= 1000) {
+                        if (!selected && mSelectCount >= Util.MAX_PHOTO_SIZE) {
 
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
 

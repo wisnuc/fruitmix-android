@@ -104,7 +104,7 @@ public class MediaShareList implements Page {
         mainRecyclerView.setAdapter(mAdapter);
         mainRecyclerView.setLayoutManager(new LinearLayoutManager(containerActivity));
 
-        mMapKeyIsImageUUIDValueIsComments = new ArrayMap<>();
+        mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
 
         mediaShareList = new ArrayList<>();
     }

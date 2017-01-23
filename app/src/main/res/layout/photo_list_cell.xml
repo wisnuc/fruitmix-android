@@ -8,8 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="114dp"
         android:layout_margin="1dp"
-        android:scaleType="centerCrop"
-        android:background="@drawable/default_img" />
+        android:background="@drawable/default_img"
+        android:scaleType="centerCrop" />
 
     <ImageView
         android:id="@+id/lock"

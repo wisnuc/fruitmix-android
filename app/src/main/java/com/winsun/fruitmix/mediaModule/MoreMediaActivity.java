@@ -92,7 +92,7 @@ public class MoreMediaActivity extends AppCompatActivity {
             @Override
             public void onMediaInMediaShareLoaded() {
 
-                mPhotos = new ArrayList<>(loader.getMedias());
+                mPhotos = loader.getMedias();
 
                 loadingLayout.setVisibility(View.GONE);
                 if (mPhotos.isEmpty()) {

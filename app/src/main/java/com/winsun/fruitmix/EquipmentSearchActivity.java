@@ -415,8 +415,13 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
             User user = mAdapter.mapList.get(groupPosition).get(childPosition);
 
-
             String childName = user.getUserName();
+
+            if (childName.length() > 20) {
+                childName = childName.substring(0, 20);
+                childName += mContext.getString(R.string.android_ellipsize);
+            }
+
             mChildName.setText(childName);
 
             String firstLetter = Util.getUserNameFirstLetter(childName);

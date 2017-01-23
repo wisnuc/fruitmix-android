@@ -177,7 +177,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             @Override
             public void onMediaInMediaShareLoaded() {
 
-                mediaList = new ArrayList<>(loader.getMedias());
+                mediaList = loader.getMedias();
 
                 if (loadingLayout.getVisibility() != View.GONE)
                     loadingLayout.setVisibility(View.GONE);

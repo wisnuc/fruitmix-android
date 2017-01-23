@@ -200,7 +200,15 @@ public class UserManageActivity extends Activity implements View.OnClickListener
         }
 
         public void refreshView(User user) {
-            mUserName.setText(user.getUserName());
+
+            String userName = user.getUserName();
+
+            if (userName.length() > 20) {
+                userName = userName.substring(0, 20);
+                userName += mContext.getString(R.string.android_ellipsize);
+            }
+
+            mUserName.setText(userName);
             if (user.getEmail().length() > 0) {
                 mUserEmail.setVisibility(View.VISIBLE);
                 mUserEmail.setText(user.getEmail());
