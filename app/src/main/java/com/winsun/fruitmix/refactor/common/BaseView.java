@@ -12,4 +12,14 @@ public interface BaseView {
 
     void showNoNetwork();
 
+    void showLoadingUI();
+
+    void dismissLoadingUI();
+
+    void showNoContentUI();
+
+    void showDialog();
+
+    void dismissDialog();
+
 }

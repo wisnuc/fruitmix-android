@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.refactor.contract;
 
+import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
 
 /**
@@ -8,11 +9,7 @@ import com.winsun.fruitmix.refactor.common.BaseView;
 
 public interface CreateUserContract {
 
-    interface View extends BaseView {
-
-        void showDialog();
-
-        void dismissDialog();
+    interface CreateUserView extends BaseView {
 
         void showEmptyUserName();
 
@@ -24,7 +21,16 @@ public interface CreateUserContract {
 
         void showNotSamePassword();
 
+        void handleCreateUserFail();
+
+        void handleCreateUserSucceed();
+
     }
 
+    interface CreateUserPresenter extends BasePresenter<CreateUserView> {
+
+        void createUser(String userName, String userPassword, String userConfirmPassword);
+
+    }
 
 }
