@@ -9,7 +9,7 @@ import com.winsun.fruitmix.refactor.common.BaseView;
 
 public interface OriginalMediaContract {
 
-    interface OriginalMediaView extends BaseView{
+    interface OriginalMediaView extends BaseView {
 
         void setDate(String date);
 
@@ -23,10 +23,10 @@ public interface OriginalMediaContract {
 
     }
 
-    interface OriginalMediaPresenter extends BasePresenter<OriginalMediaView>{
+    interface OriginalMediaPresenter extends BasePresenter<OriginalMediaView> {
 
         void onPageChanged(int position);
-        
+
     }
 
 }

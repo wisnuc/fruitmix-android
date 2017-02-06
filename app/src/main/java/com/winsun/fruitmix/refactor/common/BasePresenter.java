@@ -10,7 +10,7 @@ public interface BasePresenter<T> {
 
     void detachView();
 
-    void startBindDataToView();
+    void startMission();
 
     void handleBackEvent();
 

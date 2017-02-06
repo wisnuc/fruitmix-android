@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.refactor.data;
 
+import com.android.volley.toolbox.StringRequest;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -78,7 +79,9 @@ public interface DataSource {
 
     void retrieveUser(RetrieveUserOperationCallback callback);
 
-    void retrieveMedia(RetrieveMediaOperationCallback callback);
+    void retrieveLocalMedia(RetrieveMediaOperationCallback callback);
+
+    void retrieveRemoteMedia(RetrieveMediaOperationCallback callback);
 
     void retrieveMediaShare(RetrieveMediaShareOperationCallback callback);
 
@@ -87,4 +90,6 @@ public interface DataSource {
     void retrieveFileShare(RetrieveFileOperationCallback callback);
 
     void retrieveToken(RetrieveTokenOperationCallback callback);
+
+
 }
