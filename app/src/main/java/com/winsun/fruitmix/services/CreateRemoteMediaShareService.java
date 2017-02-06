@@ -141,7 +141,7 @@ public class CreateRemoteMediaShareService extends IntentService {
 
         builder.append("\"contents\":[");
         StringBuilder contentsBuilder = new StringBuilder();
-        for (String content : mediaShare.getMediaKeyInMediaShareContents()) {
+        for (String content : mediaShare.getMediaUUIDInMediaShareContents()) {
             contentsBuilder.append(",");
             contentsBuilder.append("\"");
 

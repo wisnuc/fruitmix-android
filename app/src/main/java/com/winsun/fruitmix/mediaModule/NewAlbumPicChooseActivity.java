@@ -16,7 +16,6 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -69,7 +68,7 @@ public class NewAlbumPicChooseActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                List<String> selectImageKeys = getSelectedImageKeys();
+                List<String> selectImageKeys = getSelectedImageUUIDs();
                 if (selectImageKeys.size() == 0) {
                     Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
                     return;
@@ -120,8 +119,8 @@ public class NewAlbumPicChooseActivity extends Activity {
     }
 
 
-    public List<String> getSelectedImageKeys() {
-        return mNewPhotoList.getSelectedImageKeys();
+    public List<String> getSelectedImageUUIDs() {
+        return mNewPhotoList.getSelectedImageUUIDs();
     }
 
 }

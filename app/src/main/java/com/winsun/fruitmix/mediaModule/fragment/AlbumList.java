@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +15,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.daimajia.swipe.SimpleSwipeListener;
 import com.daimajia.swipe.SwipeLayout;
@@ -30,18 +27,14 @@ import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionList
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -321,10 +314,10 @@ public class AlbumList implements Page {
             currentItem = mediaShare;
             restoreSwipeLayoutState();
 
-            coverImg = LocalCache.findMediaInLocalMediaMap(currentItem.getCoverImageKey());
+            coverImg = LocalCache.findMediaInLocalMediaMap(currentItem.getCoverImageUUID());
 
             if (coverImg == null) {
-                coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageKey());
+                coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageUUID());
             }
 
             if (coverImg != null) {

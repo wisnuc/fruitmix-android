@@ -110,11 +110,11 @@ public enum MediaInMediaShareLoader {
                 medias.addFirst(picItem);
         }
 
-        Collections.sort(medias, new Comparator<Media>() {
-            @Override
-            public int compare(Media lhs, Media rhs) {
-                return -lhs.getTime().compareTo(rhs.getTime());
-            }
-        });
+//        Collections.sort(medias, new Comparator<Media>() {
+//            @Override
+//            public int compare(Media lhs, Media rhs) {
+//                return -lhs.getTime().compareTo(rhs.getTime());
+//            }
+//        });
     }
 }

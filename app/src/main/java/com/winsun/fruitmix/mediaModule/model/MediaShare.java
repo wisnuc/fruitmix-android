@@ -1,11 +1,8 @@
 package com.winsun.fruitmix.mediaModule.model;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.widget.Toast;
 
-import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -31,7 +28,7 @@ public class MediaShare implements Parcelable {
     private boolean isAlbum;
     private boolean isArchived;
     private String date;
-    private String coverImageKey;
+    private String coverImageUUID;
     private boolean isLocal;
     private String shareDigest;
     private boolean isSticky;
@@ -57,7 +54,7 @@ public class MediaShare implements Parcelable {
         isAlbum = in.readByte() != 0;
         isArchived = in.readByte() != 0;
         date = in.readString();
-        coverImageKey = in.readString();
+        coverImageUUID = in.readString();
         isLocal = in.readByte() != 0;
         shareDigest = in.readString();
         isSticky = in.readByte() != 0;
@@ -156,18 +153,18 @@ public class MediaShare implements Parcelable {
         for (MediaShareContent value : mediaShareContents) {
             stringBuilder.append("\"");
 
-            String key = value.getKey();
-            if (key.contains("/")) {
+            String mediaUUID = value.getMediaUUID();
+            if (mediaUUID.contains("/")) {
 
-                Media media = LocalCache.LocalMediaMapKeyIsThumb.get(key);
-                key = media.getUuid();
-                if (key.isEmpty()) {
-                    key = Util.CalcSHA256OfFile(key);
+                Media media = LocalCache.LocalMediaMapKeyIsThumb.get(mediaUUID);
+                mediaUUID = media.getUuid();
+                if (mediaUUID.isEmpty()) {
+                    mediaUUID = Util.CalcSHA256OfFile(mediaUUID);
                 }
 
             }
 
-            stringBuilder.append(key);
+            stringBuilder.append(mediaUUID);
             stringBuilder.append("\",");
         }
 
@@ -205,7 +202,7 @@ public class MediaShare implements Parcelable {
         dest.writeByte((byte) (isAlbum ? 1 : 0));
         dest.writeByte((byte) (isArchived ? 1 : 0));
         dest.writeString(date);
-        dest.writeString(coverImageKey);
+        dest.writeString(coverImageUUID);
         dest.writeByte((byte) (isLocal ? 1 : 0));
         dest.writeString(shareDigest);
         dest.writeByte((byte) (isSticky ? 1 : 0));
@@ -276,12 +273,12 @@ public class MediaShare implements Parcelable {
         this.desc = desc;
     }
 
-    public String getCoverImageKey() {
-        return coverImageKey;
+    public String getCoverImageUUID() {
+        return getFirstMediaDigestInMediaContentsList();
     }
 
-    public void setCoverImageKey(String coverImageKey) {
-        this.coverImageKey = coverImageKey;
+    public void setCoverImageUUID(String coverImageUUID) {
+        this.coverImageUUID = coverImageUUID;
     }
 
     public boolean isLocal() {
@@ -345,7 +342,7 @@ public class MediaShare implements Parcelable {
         cloneMediaShare.setAlbum(isAlbum());
         cloneMediaShare.setArchived(isArchived());
         cloneMediaShare.setDate(getDate());
-        cloneMediaShare.setCoverImageKey(getCoverImageKey());
+        cloneMediaShare.setCoverImageUUID(getCoverImageUUID());
         cloneMediaShare.setLocal(isLocal());
         cloneMediaShare.setShareDigest(getShareDigest());
         cloneMediaShare.setSticky(isSticky());
@@ -366,7 +363,11 @@ public class MediaShare implements Parcelable {
     }
 
     public String getFirstMediaDigestInMediaContentsList() {
-        return mediaShareContents.get(0).getKey();
+
+        if (mediaShareContents.size() == 0)
+            return "";
+        else
+            return mediaShareContents.get(0).getMediaUUID();
     }
 
     public List<String> getViewers() {
@@ -381,13 +382,13 @@ public class MediaShare implements Parcelable {
         return Collections.unmodifiableList(mediaShareContents);
     }
 
-    public List<String> getMediaKeyInMediaShareContents() {
-        List<String> mediaKeys = new ArrayList<>(getMediaContentsListSize());
+    public List<String> getMediaUUIDInMediaShareContents() {
+        List<String> mediaUUIDs = new ArrayList<>(getMediaContentsListSize());
         for (MediaShareContent mediaShareContent : mediaShareContents) {
-            mediaKeys.add(mediaShareContent.getKey());
+            mediaUUIDs.add(mediaShareContent.getMediaUUID());
         }
 
-        return mediaKeys;
+        return mediaUUIDs;
     }
 
     public void initMediaShareContents(List<MediaShareContent> mediaShareContents) {

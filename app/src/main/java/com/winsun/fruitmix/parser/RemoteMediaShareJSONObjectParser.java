@@ -72,7 +72,7 @@ public class RemoteMediaShareJSONObjectParser {
                 JSONObject jsonObject = jsonArr.getJSONObject(j);
 
                 mediaShareContent = new MediaShareContent();
-                mediaShareContent.setKey(jsonObject.optString("digest").toLowerCase());
+                mediaShareContent.setMediaUUID(jsonObject.optString("digest").toLowerCase());
 
                 String author = jsonObject.optString("author");
                 if (author.equals("")) {
@@ -91,10 +91,10 @@ public class RemoteMediaShareJSONObjectParser {
                 mediaShare.addMediaShareContent(mediaShareContent);
             }
 
-            mediaShare.setCoverImageKey(mediaShare.getFirstMediaDigestInMediaContentsList());
+            mediaShare.setCoverImageUUID(mediaShare.getFirstMediaDigestInMediaContentsList());
         } else {
             mediaShare.clearMediaShareContents();
-            mediaShare.setCoverImageKey("");
+            mediaShare.setCoverImageUUID("");
         }
 
         jsonArr = itemRaw.getJSONArray("viewers");

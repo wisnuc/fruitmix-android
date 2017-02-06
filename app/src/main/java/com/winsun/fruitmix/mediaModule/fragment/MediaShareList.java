@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.util.ArrayMap;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,9 +26,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.mediaModule.AlbumPicContentActivity;
 import com.winsun.fruitmix.mediaModule.MediaShareCommentActivity;
@@ -42,7 +39,6 @@ import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -211,7 +207,7 @@ public class MediaShareList implements Page {
 
                 int currentMediaSharePosition = findShareItemPosition(currentMediaShareTime);
 
-                List<String> currentMediaUUIDs = mediaShareList.get(currentMediaSharePosition).getMediaKeyInMediaShareContents();
+                List<String> currentMediaUUIDs = mediaShareList.get(currentMediaSharePosition).getMediaUUIDInMediaShareContents();
 
                 String currentMediaUUID = currentMediaUUIDs.get(currentPhotoPosition);
 
@@ -451,9 +447,9 @@ public class MediaShareList implements Page {
 
             lbAlbumTitle.setText(title);
 
-            coverImg = LocalCache.findMediaInLocalMediaMap(currentItem.getCoverImageKey());
+            coverImg = LocalCache.findMediaInLocalMediaMap(currentItem.getCoverImageUUID());
             if (coverImg == null) {
-                coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageKey());
+                coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageUUID());
             }
             if (coverImg != null) {
 
@@ -515,7 +511,7 @@ public class MediaShareList implements Page {
         public void refreshView(MediaShare mediaShare, int position) {
             super.refreshView(mediaShare, position);
 
-            imageKeys = mediaShare.getMediaKeyInMediaShareContents();
+            imageKeys = mediaShare.getMediaUUIDInMediaShareContents();
 
             refreshViewAttributeWhenOneImage(commentMap);
         }
@@ -582,7 +578,7 @@ public class MediaShareList implements Page {
             ivCover.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    List<Media> imageList = getImgList(currentItem.getMediaKeyInMediaShareContents());
+                    List<Media> imageList = getImgList(currentItem.getMediaUUIDInMediaShareContents());
 
                     fillLocalCachePhotoData(imageList);
 
@@ -673,7 +669,7 @@ public class MediaShareList implements Page {
         public void refreshView(MediaShare mediaShare, int position) {
             super.refreshView(mediaShare, position);
 
-            imageKeys = mediaShare.getMediaKeyInMediaShareContents();
+            imageKeys = mediaShare.getMediaUUIDInMediaShareContents();
 
             refreshViewVisibilityWhenNotOneImage();
 
@@ -781,7 +777,7 @@ public class MediaShareList implements Page {
                     @Override
                     public void onClick(View v) {
 
-                        List<Media> imageList = getImgList(currentItem.getMediaKeyInMediaShareContents());
+                        List<Media> imageList = getImgList(currentItem.getMediaUUIDInMediaShareContents());
 
                         fillLocalCachePhotoData(imageList);
 

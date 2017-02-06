@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,22 +15,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaInMediaShareLoader;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.model.RequestQueueInstance;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -88,7 +81,7 @@ public class MoreMediaActivity extends AppCompatActivity {
 
     private void loadMedia() {
         final MediaInMediaShareLoader loader = MediaInMediaShareLoader.INSTANCE;
-        loader.startLoad(mediaShare.getMediaKeyInMediaShareContents(), new MediaInMediaShareLoader.OnMediaInMediaShareLoadListener() {
+        loader.startLoad(mediaShare.getMediaUUIDInMediaShareContents(), new MediaInMediaShareLoader.OnMediaInMediaShareLoadListener() {
             @Override
             public void onMediaInMediaShareLoaded() {
 

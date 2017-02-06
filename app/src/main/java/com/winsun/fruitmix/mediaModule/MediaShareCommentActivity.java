@@ -25,9 +25,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.IImageLoadListener;
 import com.winsun.fruitmix.R;
@@ -38,7 +36,6 @@ import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
@@ -55,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -266,7 +262,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         for (MediaShare shareRaw : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
 
-            if (shareRaw.getMediaKeyInMediaShareContents().contains(media.getUuid())) {
+            if (shareRaw.getMediaUUIDInMediaShareContents().contains(media.getUuid())) {
                 Log.d(TAG, "shareRaw uuid: " + shareRaw.getUuid());
 
                 media.setBelongingMediaShareUUID(shareRaw.getUuid());

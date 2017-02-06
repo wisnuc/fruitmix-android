@@ -66,28 +66,28 @@ public class MediaShareMethodTest {
         MediaShare mediaShare2 = new MediaShare();
 
         MediaShareContent mediaShareContent = new MediaShareContent();
-        mediaShareContent.setKey("65fac2a5c61906c851727076cc25d2da54d0a908ec492b8307be595f83bb7705");
+        mediaShareContent.setMediaUUID("65fac2a5c61906c851727076cc25d2da54d0a908ec492b8307be595f83bb7705");
         mediaShare1.addMediaShareContent(mediaShareContent);
 
         mediaShareContent = new MediaShareContent();
-        mediaShareContent.setKey("ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16");
+        mediaShareContent.setMediaUUID("ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16");
         mediaShare1.addMediaShareContent(mediaShareContent);
 
         mediaShareContent = new MediaShareContent();
-        mediaShareContent.setKey("ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16");
+        mediaShareContent.setMediaUUID("ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16");
         mediaShare2.addMediaShareContent(mediaShareContent);
 
         mediaShareContent = new MediaShareContent();
-        mediaShareContent.setKey("4a12da6e30c4281518ad4551bce953f45a653862e4d1b8849ca73bfc52d19fb9");
+        mediaShareContent.setMediaUUID("4a12da6e30c4281518ad4551bce953f45a653862e4d1b8849ca73bfc52d19fb9");
         mediaShare2.addMediaShareContent(mediaShareContent);
 
         List<MediaShareContent> diff1 = mediaShare1.getDifferentMediaShareContentInCurrentMediaShare(mediaShare2);
         mediaShareContent = diff1.get(0);
-        Assert.assertEquals(mediaShareContent.getKey(),"65fac2a5c61906c851727076cc25d2da54d0a908ec492b8307be595f83bb7705");
+        Assert.assertEquals(mediaShareContent.getMediaUUID(),"65fac2a5c61906c851727076cc25d2da54d0a908ec492b8307be595f83bb7705");
 
         List<MediaShareContent> diff2 = mediaShare2.getDifferentMediaShareContentInCurrentMediaShare(mediaShare1);
         mediaShareContent = diff2.get(0);
-        Assert.assertEquals(mediaShareContent.getKey(),"4a12da6e30c4281518ad4551bce953f45a653862e4d1b8849ca73bfc52d19fb9");
+        Assert.assertEquals(mediaShareContent.getMediaUUID(),"4a12da6e30c4281518ad4551bce953f45a653862e4d1b8849ca73bfc52d19fb9");
 
     }
 

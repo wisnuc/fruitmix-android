@@ -32,7 +32,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -210,7 +209,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         for (String mediaKey : mediaKeys) {
             MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setKey(mediaKey);
+            mediaShareContent.setMediaUUID(mediaKey);
             mediaShareContent.setAuthor(FNAS.userUUID);
             mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
             mediaShareContents.add(mediaShareContent);
@@ -219,7 +218,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         mediaShare.initMediaShareContents(mediaShareContents);
 
-        mediaShare.setCoverImageKey(mediaKeys.get(0));
+        mediaShare.setCoverImageUUID(mediaKeys.get(0));
 
         mediaShare.setTitle(title);
         mediaShare.setDesc(desc);

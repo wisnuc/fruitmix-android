@@ -26,9 +26,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
 import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
@@ -41,19 +39,14 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -319,10 +312,29 @@ public class NewPhotoList implements Page {
         return view;
     }
 
-    @NonNull
-    public List<String> getSelectedImageKeys() {
+    public List<String> getSelectedImageThumbs() {
 
-        List<String> selectedImageKeys = new ArrayList<>();
+        List<String> selectedImageThumbs = new ArrayList<>();
+
+        for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
+            for (Media media : mediaList) {
+                if (media.isSelected()) {
+
+                    String mediaThumb = media.getThumb();
+
+                    if (mediaThumb.length() != 0)
+                        selectedImageThumbs.add(mediaThumb);
+                }
+            }
+        }
+
+        return selectedImageThumbs;
+    }
+
+    @NonNull
+    public List<String> getSelectedImageUUIDs() {
+
+        List<String> selectedImageUUIDs = new ArrayList<>();
 
         for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Media media : mediaList) {
@@ -333,20 +345,20 @@ public class NewPhotoList implements Page {
                         mediaUUID = Util.CalcSHA256OfFile(media.getThumb());
                     }
 
-                    selectedImageKeys.add(mediaUUID);
+                    selectedImageUUIDs.add(mediaUUID);
                 }
             }
         }
 
         if (alreadySelectedImageKeyArrayList != null) {
             for (String mediaUUID : alreadySelectedImageKeyArrayList) {
-                if (!selectedImageKeys.contains(mediaUUID)) {
-                    selectedImageKeys.add(mediaUUID);
+                if (!selectedImageUUIDs.contains(mediaUUID)) {
+                    selectedImageUUIDs.add(mediaUUID);
                 }
             }
         }
 
-        return selectedImageKeys;
+        return selectedImageUUIDs;
     }
 
     public void clearSelectedPhoto() {
@@ -400,7 +412,7 @@ public class NewPhotoList implements Page {
 
         for (String mediaKey : selectMediaKeys) {
             MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setKey(mediaKey);
+            mediaShareContent.setMediaUUID(mediaKey);
             mediaShareContent.setAuthor(FNAS.userUUID);
             mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
             mediaShareContents.add(mediaShareContent);
@@ -409,7 +421,7 @@ public class NewPhotoList implements Page {
 
         mediaShare.initMediaShareContents(mediaShareContents);
 
-        mediaShare.setCoverImageKey(selectMediaKeys.get(0));
+        mediaShare.setCoverImageUUID(selectMediaKeys.get(0));
         mediaShare.setTitle("");
         mediaShare.setDesc("");
         for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {

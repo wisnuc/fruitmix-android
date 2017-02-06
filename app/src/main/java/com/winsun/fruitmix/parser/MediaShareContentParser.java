@@ -16,7 +16,7 @@ public class MediaShareContentParser implements LocalDataParser<MediaShareConten
 
         MediaShareContent mediaShareContent = new MediaShareContent();
         mediaShareContent.setId(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_CONTENT_KEY_ID)));
-        mediaShareContent.setKey(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_CONTENT_KEY_DIGEST)));
+        mediaShareContent.setMediaUUID(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_CONTENT_KEY_DIGEST)));
         mediaShareContent.setAuthor(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_CONTENT_KEY_CREATOR_UUID)));
         mediaShareContent.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.SHARE_CONTENT_KEY_TIME)));
 

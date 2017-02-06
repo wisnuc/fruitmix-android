@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,7 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
@@ -29,7 +27,6 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaInMediaShareLoader;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
@@ -42,10 +39,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -110,7 +104,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         loader = MediaInMediaShareLoader.INSTANCE;
         initOnMediaInMediaShareLoadListener();
-        loadMedia(mediaShare.getMediaKeyInMediaShareContents(), true, true);
+        loadMedia(mediaShare.getMediaUUIDInMediaShareContents(), true, true);
     }
 
     private void loadMedia(List<String> mediaKeyList, boolean clearMedias, boolean reloadMedias) {
@@ -205,7 +199,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     private void fillMediaShareContents(List<String> selectedImageKeys) {
         for (String imageKey : selectedImageKeys) {
             MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setKey(imageKey);
+            mediaShareContent.setMediaUUID(imageKey);
             mediaShareContent.setAuthor(FNAS.userUUID);
             mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
             modifiedMediaShare.addMediaShareContent(mediaShareContent);
@@ -221,7 +215,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             case R.id.add_album:
                 Intent intent = new Intent(mContext, NewAlbumPicChooseActivity.class);
 
-                intent.putStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST, (ArrayList<String>) mediaShare.getMediaKeyInMediaShareContents());
+                intent.putStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST, (ArrayList<String>) mediaShare.getMediaUUIDInMediaShareContents());
                 intent.putExtra(Util.EDIT_PHOTO, true);
                 startActivityForResult(intent, Util.KEY_CHOOSE_PHOTO_REQUEST_CODE);
                 break;
@@ -248,9 +242,9 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
                 }
 
                 if (modifiedMediaShare.getMediaContentsListSize() != 0) {
-                    modifiedMediaShare.setCoverImageKey(modifiedMediaShare.getFirstMediaDigestInMediaContentsList());
+                    modifiedMediaShare.setCoverImageUUID(modifiedMediaShare.getFirstMediaDigestInMediaContentsList());
                 } else {
-                    modifiedMediaShare.setCoverImageKey("");
+                    modifiedMediaShare.setCoverImageUUID("");
                 }
 
                 mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);

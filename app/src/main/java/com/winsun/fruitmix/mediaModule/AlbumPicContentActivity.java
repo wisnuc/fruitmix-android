@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
@@ -47,9 +46,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -169,7 +165,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     }
 
     private void loadMedia(boolean clearMedias, boolean reloadMedias) {
-        loader.startLoad(mediaShare.getMediaKeyInMediaShareContents(), listener, clearMedias, reloadMedias);
+        loader.startLoad(mediaShare.getMediaUUIDInMediaShareContents(), listener, clearMedias, reloadMedias);
     }
 
     private void initOnMediaInMediaShareLoadListener() {

@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -85,6 +86,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     ImageView mAlbumBalloon;
     @BindView(R.id.bottom_navigation_view)
     BottomNavigationView bottomNavigationView;
+    @BindView(R.id.system_share)
+    ImageView mSystemShareBtn;
 
     private List<Page> pageList;
     private AlbumList albumList;
@@ -168,6 +171,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         ivBtShare.setOnClickListener(this);
         fab.setOnClickListener(this);
         lbRight.setOnClickListener(this);
+        mSystemShareBtn.setOnClickListener(this);
 
         photoList.addPhotoListListener(this);
 
@@ -701,13 +705,40 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     @Override
     public void onClick(View v) {
-        List<String> selectMediaKeys;
+        List<String> selectMediaUUIDs;
         switch (v.getId()) {
-            case R.id.bt_album:
-                selectMediaKeys = photoList.getSelectedImageKeys();
-                if (showNothingSelectToast(selectMediaKeys)) return;
+            case R.id.system_share:
 
-                photoList.createAlbum(selectMediaKeys);
+                if (!Util.getNetworkState(mContext)) {
+                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                List<String> selectMediaThumbs = photoList.getSelectedImageThumbs();
+                if (showNothingSelectToast(selectMediaThumbs)) return;
+
+                ArrayList<Uri> uris = new ArrayList<>();
+
+                for (String thumb : selectMediaThumbs) {
+                    Uri uri = Uri.parse(thumb);
+                    uris.add(uri);
+                }
+
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_SEND_MULTIPLE);
+                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+                intent.setType("image/*");
+                startActivity(Intent.createChooser(intent, getString(R.string.share_text)));
+
+                hideChooseHeader();
+                showBottomNavAnim();
+
+                break;
+            case R.id.bt_album:
+                selectMediaUUIDs = photoList.getSelectedImageUUIDs();
+                if (showNothingSelectToast(selectMediaUUIDs)) return;
+
+                photoList.createAlbum(selectMediaUUIDs);
                 hideChooseHeader();
                 showBottomNavAnim();
                 break;
@@ -718,12 +749,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                     return;
                 }
 
-                selectMediaKeys = photoList.getSelectedImageKeys();
-                if (showNothingSelectToast(selectMediaKeys)) return;
+                selectMediaUUIDs = photoList.getSelectedImageUUIDs();
+                if (showNothingSelectToast(selectMediaUUIDs)) return;
 
                 mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-                photoList.createShare(selectMediaKeys);
+                photoList.createShare(selectMediaUUIDs);
                 hideChooseHeader();
                 showBottomNavAnim();
                 break;
@@ -770,6 +801,10 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mAnimator.setTarget(ivBtShare);
         mAnimator.start();
 
+        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.system_share_btn_restore);
+        mAnimator.setTarget(mSystemShareBtn);
+        mAnimator.start();
+
         mAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -777,6 +812,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 ivBtAlbum.setVisibility(View.GONE);
                 ivBtShare.setVisibility(View.GONE);
+                mSystemShareBtn.setVisibility(View.GONE);
 
             }
         });
@@ -787,6 +823,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         ivBtAlbum.setVisibility(View.VISIBLE);
         ivBtShare.setVisibility(View.VISIBLE);
+        mSystemShareBtn.setVisibility(View.VISIBLE);
 
         mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.fab_remote);
         mAnimator.setTarget(fab);
@@ -800,6 +837,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mAnimator.setTarget(ivBtShare);
         mAnimator.start();
 
+        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.system_share_btn_translation);
+        mAnimator.setTarget(mSystemShareBtn);
+        mAnimator.start();
     }
 
     @Override
