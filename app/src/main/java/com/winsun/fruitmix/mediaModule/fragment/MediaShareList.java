@@ -190,6 +190,7 @@ public class MediaShareList implements Page {
     public void onDidAppear() {
 
         refreshView();
+        mainRecyclerView.smoothScrollToPosition(0);
 
     }
 

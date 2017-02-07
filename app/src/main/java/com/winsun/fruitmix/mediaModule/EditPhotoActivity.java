@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -96,7 +97,10 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         modifiedMediaShare = mediaShare.cloneMyself();
 
         GridLayoutManager mManager = new GridLayoutManager(mContext, mSpanCount);
-        mEditPhotoRecyclerView.setLayoutManager(mManager);
+
+        StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL);
+
+        mEditPhotoRecyclerView.setLayoutManager(manager);
         mEditPhotoRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         mAdapter = new EditPhotoAdapter();

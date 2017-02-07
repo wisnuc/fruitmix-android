@@ -176,6 +176,7 @@ public class AlbumList implements Page {
     public void onDidAppear() {
 
         refreshView();
+        mainListView.smoothScrollToPosition(0);
     }
 
 
