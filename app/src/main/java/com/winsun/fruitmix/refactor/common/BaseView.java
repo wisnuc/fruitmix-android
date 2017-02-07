@@ -6,10 +6,6 @@ package com.winsun.fruitmix.refactor.common;
 
 public interface BaseView {
 
-    void registerPresenter(BasePresenter presenter);
-
-    void unregisterPresenter(BasePresenter presenter);
-
     void showNoNetwork();
 
     void showLoadingUI();

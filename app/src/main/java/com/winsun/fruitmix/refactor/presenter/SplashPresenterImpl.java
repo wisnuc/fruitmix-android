@@ -4,7 +4,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.refactor.business.LoadTokenParam;
+import com.winsun.fruitmix.refactor.common.callback.LoadTokenOperationCallback;
 import com.winsun.fruitmix.refactor.contract.SplashContract;
+import com.winsun.fruitmix.refactor.business.DataRepository;
 import com.winsun.fruitmix.refactor.ui.SplashScreenActivity;
 import com.winsun.fruitmix.util.FileUtil;
 
@@ -26,15 +30,15 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
 
     private CustomHandler mHandler;
 
-    public void retrieveLocalMedia() {
+    private DataRepository mRepository;
+
+    public SplashPresenterImpl(DataRepository repository) {
+
+        mRepository = repository;
 
     }
 
-    public void retrieveToken() {
-
-    }
-
-    public void createDownloadFileStoreFolder() {
+    private void createDownloadFileStoreFolder() {
         boolean result = FileUtil.createDownloadFileStoreFolder();
 
         if (!result) {
@@ -55,6 +59,35 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
     @Override
     public void startMission() {
 
+        createDownloadFileStoreFolder();
+
+        final String tokenInDB = mRepository.loadTokenInDB();
+
+        if (tokenInDB.isEmpty()) {
+            mView.emptyCacheToken();
+        } else {
+
+            mHandler = new CustomHandler(this);
+            mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
+
+            mRepository.loadRemoteToken(mRepository.getLoadTokenParamInDB(), new LoadTokenOperationCallback.LoadTokenCallback() {
+                @Override
+                public void onLoadSucceed(OperationResult result, String token) {
+
+                    mRepository.loadUsers(token, null);
+                    mRepository.loadMedias(token, null);
+                    mRepository.loadMediaShares(token, null);
+
+                }
+
+                @Override
+                public void onLoadFail(OperationResult result) {
+                    mRepository.loadUsers(tokenInDB, null);
+                    mRepository.loadMedias(tokenInDB, null);
+                    mRepository.loadMediaShares(tokenInDB, null);
+                }
+            });
+        }
 
     }
 
@@ -70,16 +103,17 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
 
     private static class CustomHandler extends Handler {
 
-        WeakReference<SplashScreenActivity> weakReference = null;
+        WeakReference<SplashPresenterImpl> weakReference = null;
 
-        CustomHandler(SplashScreenActivity activity) {
-            weakReference = new WeakReference<>(activity);
+        CustomHandler(SplashPresenterImpl splashPresenter) {
+            weakReference = new WeakReference<>(splashPresenter);
         }
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case WELCOME:
+                    weakReference.get().mView.welcome();
                     break;
                 default:
             }

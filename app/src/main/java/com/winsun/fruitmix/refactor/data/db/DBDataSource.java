@@ -1,82 +1,103 @@
 package com.winsun.fruitmix.refactor.data.db;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.refactor.business.LoadTokenParam;
 import com.winsun.fruitmix.refactor.data.DataSource;
+import com.winsun.fruitmix.util.Util;
+
+import java.util.List;
 
 /**
- * Created by Administrator on 2017/2/6.
+ * Created by Administrator on 2017/2/7.
  */
 
 public class DBDataSource implements DataSource {
-    @Override
-    public void saveUser(User user, DataOperationCallback callback) {
 
+    private DBUtils mDBUtils;
+    private SharedPreferences mSharedPreferences;
+
+    public DBDataSource(Context context){
+
+        mDBUtils = DBUtils.getInstance(context);
+        mSharedPreferences = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME,Context.MODE_PRIVATE);
+
+        loadLocalMedias();
     }
 
     @Override
-    public void saveMedia(Media media, DataOperationCallback callback) {
-
+    public boolean saveUser(User user) {
+        return false;
     }
 
     @Override
-    public void saveMediaShare(MediaShare mediaShare, DataOperationCallback callback) {
-
+    public boolean saveMediaShare(MediaShare mediaShare) {
+        return false;
     }
 
     @Override
-    public void modifyMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare, DataOperationCallback callback) {
-
+    public boolean modifyMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
+        return false;
     }
 
     @Override
-    public void modifyMediaInMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare, DataOperationCallback callback) {
-
+    public boolean modifyMediaInMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
+        return false;
     }
 
     @Override
-    public void deleteMediaShare(MediaShare mediaShare, DataOperationCallback callback) {
-
+    public boolean deleteMediaShare(MediaShare mediaShare) {
+        return false;
     }
 
     @Override
-    public void retrieveDeviceID(RetrieveDeviceIDOperationCallback callback) {
-
+    public String loadDeviceID() {
+        return null;
     }
 
     @Override
-    public void retrieveUser(RetrieveUserOperationCallback callback) {
-
+    public List<User> loadUsers() {
+        return null;
     }
 
     @Override
-    public void retrieveLocalMedia(RetrieveMediaOperationCallback callback) {
-
+    public List<Media> loadMedias() {
+        return null;
     }
 
     @Override
-    public void retrieveRemoteMedia(RetrieveMediaOperationCallback callback) {
-
+    public List<MediaShare> loadMediaShares() {
+        return null;
     }
 
     @Override
-    public void retrieveMediaShare(RetrieveMediaShareOperationCallback callback) {
-
+    public List<AbstractRemoteFile> loadFile() {
+        return null;
     }
 
     @Override
-    public void retrieveFile(RetrieveFileOperationCallback callback) {
-
+    public List<AbstractRemoteFile> loadFileShare() {
+        return null;
     }
 
     @Override
-    public void retrieveFileShare(RetrieveFileOperationCallback callback) {
+    public String loadToken() {
+        return mSharedPreferences.getString(Util.JWT,"");
+    }
+
+    private void loadLocalMedias(){
 
     }
 
-    @Override
-    public void retrieveToken(RetrieveTokenOperationCallback callback) {
+    public LoadTokenParam getLoadTokenParam(){
+
+        return new LoadTokenParam(mSharedPreferences.getString(Util.GATEWAY, null),mSharedPreferences.getString(Util.USER_UUID,""),mSharedPreferences.getString(Util.PASSWORD,""));
 
     }
 }

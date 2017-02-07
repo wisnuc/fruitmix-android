@@ -13,7 +13,7 @@ public interface SplashContract {
 
         void emptyCacheToken();
 
-        void notEmptyCacheToken();
+        void welcome();
     }
 
     interface SplashPresenter extends BasePresenter<SplashView> {

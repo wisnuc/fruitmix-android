@@ -1,9 +1,6 @@
 package com.winsun.fruitmix.refactor.common;
 
-import com.winsun.fruitmix.refactor.business.DataBusiness;
-import com.winsun.fruitmix.refactor.data.cache.CacheDataSource;
-import com.winsun.fruitmix.refactor.data.db.DBDataSource;
-import com.winsun.fruitmix.refactor.data.server.ServerDataSource;
+import com.winsun.fruitmix.refactor.business.DataRepository;
 
 /**
  * Created by Administrator on 2017/2/6.
@@ -11,9 +8,9 @@ import com.winsun.fruitmix.refactor.data.server.ServerDataSource;
 
 public class Injection {
 
-    public static DataBusiness injectDataBusiness() {
+    public static DataRepository injectDataRepository() {
 
-        return DataBusiness.getInstance(new CacheDataSource(), new DBDataSource(), new ServerDataSource());
+        return null;
 
     }
 

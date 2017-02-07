@@ -15,81 +15,29 @@ import java.util.List;
 
 public interface DataSource {
 
-    interface DataOperationCallback {
+    boolean saveUser(User user);
 
-        void onOperationFinish(OperationResult operationResult);
+    boolean saveMediaShare(MediaShare mediaShare);
 
-    }
+    boolean modifyMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare);
 
-    interface RetrieveDeviceIDOperationCallback {
+    boolean modifyMediaInMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare);
 
-        void onOperationSucceed(OperationResult operationResult, String deviceID);
+    boolean deleteMediaShare(MediaShare mediaShare);
 
-        void onOperationFail(OperationResult operationResult);
-    }
+    String loadDeviceID();
 
-    interface RetrieveTokenOperationCallback {
+    List<User> loadUsers();
 
-        void onOperationSucceed(OperationResult operationResult, String token);
+    List<Media> loadMedias();
 
-        void onOperationFail(OperationResult operationResult);
-    }
+    List<MediaShare> loadMediaShares();
 
-    interface RetrieveUserOperationCallback {
-        void onOperationSucceed(OperationResult operationResult, List<User> users);
+    List<AbstractRemoteFile> loadFile();
 
-        void onOperationFail(OperationResult operationResult);
-    }
+    List<AbstractRemoteFile> loadFileShare();
 
-    interface RetrieveMediaOperationCallback {
-
-        void onOperationSucceed(OperationResult operationResult, List<Media> medias);
-
-        void onOperationFail(OperationResult operationResult);
-    }
-
-    interface RetrieveMediaShareOperationCallback {
-
-        void onOperationSucceed(OperationResult operationResult, List<MediaShare> mediaShares);
-
-        void onOperationFail(OperationResult operationResult);
-    }
-
-    interface RetrieveFileOperationCallback {
-
-        void onOperationSucceed(OperationResult operationResult, List<AbstractRemoteFile> mediaShares);
-
-        void onOperationFail(OperationResult operationResult);
-
-    }
-
-    void saveUser(User user, DataOperationCallback callback);
-
-    void saveMedia(Media media, DataOperationCallback callback);
-
-    void saveMediaShare(MediaShare mediaShare, DataOperationCallback callback);
-
-    void modifyMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare, DataOperationCallback callback);
-
-    void modifyMediaInMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare, DataOperationCallback callback);
-
-    void deleteMediaShare(MediaShare mediaShare, DataOperationCallback callback);
-
-    void retrieveDeviceID(RetrieveDeviceIDOperationCallback callback);
-
-    void retrieveUser(RetrieveUserOperationCallback callback);
-
-    void retrieveLocalMedia(RetrieveMediaOperationCallback callback);
-
-    void retrieveRemoteMedia(RetrieveMediaOperationCallback callback);
-
-    void retrieveMediaShare(RetrieveMediaShareOperationCallback callback);
-
-    void retrieveFile(RetrieveFileOperationCallback callback);
-
-    void retrieveFileShare(RetrieveFileOperationCallback callback);
-
-    void retrieveToken(RetrieveTokenOperationCallback callback);
+    String loadToken();
 
 
 }
