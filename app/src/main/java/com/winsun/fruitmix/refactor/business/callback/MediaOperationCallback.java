@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.refactor.common.callback;
+package com.winsun.fruitmix.refactor.business.callback;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;

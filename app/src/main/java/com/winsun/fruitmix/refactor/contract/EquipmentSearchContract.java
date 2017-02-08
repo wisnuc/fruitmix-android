@@ -3,7 +3,9 @@ package com.winsun.fruitmix.refactor.contract;
 import android.view.View;
 import android.widget.ExpandableListView;
 
+import com.github.druk.rxdnssd.RxDnssd;
 import com.winsun.fruitmix.model.Equipment;
+import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
 
@@ -23,7 +25,13 @@ public interface EquipmentSearchContract {
 
         void expandGroup(int position);
 
-        void isGroupExpanded(int position);
+        boolean isGroupExpanded(int position);
+
+        void login(String gateway, String userGroupName, User user);
+
+        int getGroupCount();
+
+        void finishActivity();
 
     }
 
@@ -33,7 +41,7 @@ public interface EquipmentSearchContract {
 
         boolean onEquipmentListViewChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id);
 
-        void startDiscovery();
+        void startDiscovery(RxDnssd rxDnssd);
 
         void stopDiscovery();
 

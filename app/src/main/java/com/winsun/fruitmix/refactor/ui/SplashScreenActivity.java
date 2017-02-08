@@ -29,11 +29,6 @@ public class SplashScreenActivity extends BaseActivity implements SplashContract
 
     public static final String TAG = SplashScreenActivity.class.getSimpleName();
 
-    private String mUuid;
-    private String mPassword;
-    private String mGateway;
-    private String mToken;
-
     private Context mContext;
 
     private SplashContract.SplashPresenter mSplashPresenter;

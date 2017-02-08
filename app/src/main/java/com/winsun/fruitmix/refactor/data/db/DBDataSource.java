@@ -8,8 +8,17 @@ import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.refactor.business.LoadTokenParam;
 import com.winsun.fruitmix.refactor.data.DataSource;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.DeviceIDLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.FileSharesLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.FilesLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.MediaSharesLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.MediasLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.TokenLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.UsersLoadOperationResult;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;
@@ -32,63 +41,69 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public boolean saveUser(User user) {
-        return false;
-    }
-
-    @Override
-    public boolean saveMediaShare(MediaShare mediaShare) {
-        return false;
-    }
-
-    @Override
-    public boolean modifyMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
-        return false;
-    }
-
-    @Override
-    public boolean modifyMediaInMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
-        return false;
-    }
-
-    @Override
-    public boolean deleteMediaShare(MediaShare mediaShare) {
-        return false;
-    }
-
-    @Override
-    public String loadDeviceID() {
+    public OperationResult saveUser(User user) {
         return null;
     }
 
     @Override
-    public List<User> loadUsers() {
+    public OperationResult saveMediaShare(MediaShare mediaShare) {
         return null;
     }
 
     @Override
-    public List<Media> loadMedias() {
+    public OperationResult modifyMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
         return null;
     }
 
     @Override
-    public List<MediaShare> loadMediaShares() {
+    public OperationResult modifyMediaInMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
         return null;
     }
 
     @Override
-    public List<AbstractRemoteFile> loadFile() {
+    public OperationResult deleteMediaShare(MediaShare mediaShare) {
         return null;
     }
 
     @Override
-    public List<AbstractRemoteFile> loadFileShare() {
+    public DeviceIDLoadOperationResult loadDeviceID() {
         return null;
     }
 
     @Override
-    public String loadToken() {
-        return mSharedPreferences.getString(Util.JWT,"");
+    public UsersLoadOperationResult loadUsers() {
+        return null;
+    }
+
+    @Override
+    public MediasLoadOperationResult loadMedias() {
+        return null;
+    }
+
+    @Override
+    public MediaSharesLoadOperationResult loadMediaShares() {
+        return null;
+    }
+
+    @Override
+    public FilesLoadOperationResult loadFiles() {
+        return null;
+    }
+
+    @Override
+    public FileSharesLoadOperationResult loadFileShares() {
+        return null;
+    }
+
+    @Override
+    public TokenLoadOperationResult loadToken(LoadTokenParam param) {
+
+        String token = mSharedPreferences.getString(Util.JWT,"");
+
+        TokenLoadOperationResult result = new TokenLoadOperationResult();
+        result.setToken(token);
+
+        return result;
     }
 
     private void loadLocalMedias(){

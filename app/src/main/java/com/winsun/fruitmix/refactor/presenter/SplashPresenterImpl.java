@@ -1,15 +1,14 @@
 package com.winsun.fruitmix.refactor.presenter;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.refactor.business.LoadTokenParam;
-import com.winsun.fruitmix.refactor.common.callback.LoadTokenOperationCallback;
+import com.winsun.fruitmix.refactor.business.callback.LoadTokenOperationCallback;
 import com.winsun.fruitmix.refactor.contract.SplashContract;
 import com.winsun.fruitmix.refactor.business.DataRepository;
-import com.winsun.fruitmix.refactor.ui.SplashScreenActivity;
 import com.winsun.fruitmix.util.FileUtil;
 
 import java.lang.ref.WeakReference;
@@ -97,8 +96,7 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
     }
 
     @Override
-    public void handleOnActivityResult(int requestCode, int resultCode) {
-
+    public void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
     }
 
     private static class CustomHandler extends Handler {

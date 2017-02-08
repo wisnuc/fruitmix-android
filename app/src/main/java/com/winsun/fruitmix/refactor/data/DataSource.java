@@ -6,6 +6,14 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.refactor.business.LoadTokenParam;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.DeviceIDLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.FileSharesLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.FilesLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.MediaSharesLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.MediasLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.TokenLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.UsersLoadOperationResult;
 
 import java.util.List;
 
@@ -15,29 +23,29 @@ import java.util.List;
 
 public interface DataSource {
 
-    boolean saveUser(User user);
+    OperationResult saveUser(User user);
 
-    boolean saveMediaShare(MediaShare mediaShare);
+    OperationResult saveMediaShare(MediaShare mediaShare);
 
-    boolean modifyMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare);
+    OperationResult modifyMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare);
 
-    boolean modifyMediaInMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare);
+    OperationResult modifyMediaInMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare);
 
-    boolean deleteMediaShare(MediaShare mediaShare);
+    OperationResult deleteMediaShare(MediaShare mediaShare);
 
-    String loadDeviceID();
+    DeviceIDLoadOperationResult loadDeviceID();
 
-    List<User> loadUsers();
+    UsersLoadOperationResult loadUsers();
 
-    List<Media> loadMedias();
+    MediasLoadOperationResult loadMedias();
 
-    List<MediaShare> loadMediaShares();
+    MediaSharesLoadOperationResult loadMediaShares();
 
-    List<AbstractRemoteFile> loadFile();
+    FilesLoadOperationResult loadFiles();
 
-    List<AbstractRemoteFile> loadFileShare();
+    FileSharesLoadOperationResult loadFileShares();
 
-    String loadToken();
+    TokenLoadOperationResult loadToken(LoadTokenParam param);
 
 
 }

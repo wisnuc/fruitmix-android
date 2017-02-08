@@ -1,12 +1,18 @@
 package com.winsun.fruitmix.refactor.business;
 
-import com.winsun.fruitmix.refactor.common.callback.LoadTokenOperationCallback;
-import com.winsun.fruitmix.refactor.common.callback.MediaOperationCallback;
-import com.winsun.fruitmix.refactor.common.callback.MediaShareOperationCallback;
-import com.winsun.fruitmix.refactor.common.callback.UserOperationCallback;
+import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.refactor.business.callback.LoadTokenOperationCallback;
+import com.winsun.fruitmix.refactor.business.callback.MediaOperationCallback;
+import com.winsun.fruitmix.refactor.business.callback.MediaShareOperationCallback;
+import com.winsun.fruitmix.refactor.business.callback.UserOperationCallback;
 import com.winsun.fruitmix.refactor.data.DataSource;
 import com.winsun.fruitmix.refactor.data.db.DBDataSource;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.TokenLoadOperationResult;
+import com.winsun.fruitmix.refactor.model.EquipmentAlias;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/2/6.
@@ -35,35 +41,50 @@ public class DataRepository {
         return INSTANCE;
     }
 
-    public String loadTokenInDB(){
-        return mDBDataSource.loadToken();
+    public String loadTokenInDB() {
+        return mDBDataSource.loadToken(null).getToken();
     }
 
-    public void loadRemoteToken(LoadTokenParam param, LoadTokenOperationCallback.LoadTokenCallback callback){
+    public void loadRemoteToken(LoadTokenParam param, LoadTokenOperationCallback.LoadTokenCallback callback) {
 
-        mServerDataSource.loadToken();
-
-    }
-
-    public void loadUsers(String token, UserOperationCallback.LoadUsersCallback callback){
-
-    }
-
-    public void loadMedias(String token, MediaOperationCallback.LoadMediasCallback callback){
-
+        TokenLoadOperationResult result = mServerDataSource.loadToken(param);
+        if (result.getOperationResult().getOperationResultType().equals(OperationResultType.SUCCEED)) {
+            callback.onLoadSucceed(result.getOperationResult(), result.getToken());
+        } else {
+            callback.onLoadFail(result.getOperationResult());
+        }
 
     }
 
-    public void loadMediaShares(String token, MediaShareOperationCallback.LoadMediaSharesCallback callback){
+    public void loadUsers(String token, UserOperationCallback.LoadUsersCallback callback) {
+
+    }
+
+    public void loadMedias(String token, MediaOperationCallback.LoadMediasCallback callback) {
+
+
+    }
+
+    public void loadMediaShares(String token, MediaShareOperationCallback.LoadMediaSharesCallback callback) {
 
     }
 
 
-    public LoadTokenParam getLoadTokenParamInDB(){
+    public LoadTokenParam getLoadTokenParamInDB() {
 
-        return ((DBDataSource)mDBDataSource).getLoadTokenParam();
+        return ((DBDataSource) mDBDataSource).getLoadTokenParam();
 
     }
 
+    public List<EquipmentAlias> loadEquipmentAlais(String url) {
+
+        List<EquipmentAlias> equipmentAliases = new ArrayList<>();
+
+        return equipmentAliases;
+    }
+
+    public List<User> loadUserByLoginApi(String url){
+        return new ArrayList<>();
+    }
 
 }
