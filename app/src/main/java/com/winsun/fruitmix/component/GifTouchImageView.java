@@ -575,6 +575,8 @@ public class GifTouchImageView extends GifImageView {
 
         if (needFitImageToView)
             fitImageToView();
+        else
+            needFitImageToView = true;
     }
 
     /**
@@ -1058,7 +1060,7 @@ public class GifTouchImageView extends GifImageView {
             float t = interpolate();
             double deltaScale = calculateDeltaScale(t);
             scaleImage(deltaScale, bitmapX, bitmapY, stretchImageToSuper);
-//            translateImageToCenterTouchPosition(t);
+            translateImageToCenterTouchPosition(t);
             fixScaleTrans();
             setImageMatrix(matrix);
 
@@ -1081,6 +1083,7 @@ public class GifTouchImageView extends GifImageView {
                 // Finished zooming
                 //
                 setState(State.NONE);
+
             }
         }
 

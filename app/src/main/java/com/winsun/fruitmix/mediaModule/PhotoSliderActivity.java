@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -203,6 +204,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         ivBack.setImageResource(R.drawable.ic_back);
         commentImg.setImageResource(R.drawable.comment);
         mReturnResize.setImageResource(R.drawable.return_resize);
+
 
     }
 
@@ -561,6 +563,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 }
 
                 mainPic.setOnTouchListener(new CustomTouchListener());
+                mainPic.setOnDoubleTapListener(new CustomTapListener(mainPic));
 
             }
 
@@ -570,6 +573,58 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             return view;
 
+        }
+
+        private class CustomTapListener implements GestureDetector.OnDoubleTapListener {
+
+            private GifTouchNetworkImageView mView;
+
+            CustomTapListener(GifTouchNetworkImageView view) {
+                mView = view;
+            }
+
+            /**
+             * Notified when a single-tap occurs.
+             * <p>
+             * Unlike {@link OnGestureListener#onSingleTapUp(MotionEvent)}, this
+             * will only be called after the detector is confident that the user's
+             * first tap is not followed by a second tap leading to a double-tap
+             * gesture.
+             *
+             * @param e The down motion event of the single-tap.
+             * @return true if the event is consumed, else false
+             */
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                mView.setNeedFitImageToView(false);
+                convertEditState();
+                toggleFullScreenState(getWindow().getDecorView());
+
+                return true;
+            }
+
+            /**
+             * Notified when a double-tap occurs.
+             *
+             * @param e The down motion event of the first tap of the double-tap.
+             * @return true if the event is consumed, else false
+             */
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                return false;
+            }
+
+            /**
+             * Notified when an event within a double-tap gesture occurs, including
+             * the down, move, and up events.
+             *
+             * @param e The motion event that occurred during the double-tap gesture.
+             * @return true if the event is consumed, else false
+             */
+            @Override
+            public boolean onDoubleTapEvent(MotionEvent e) {
+                return false;
+            }
         }
 
         private class CustomTouchListener implements View.OnTouchListener {
@@ -601,20 +656,12 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     //TODO:use double tap listener for on click event
 
-                    if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
+                    if (lastY - y > Util.dip2px(mContext, 30)) {
 
-                        view.setNeedFitImageToView(false);
-                        convertEditState();
-                        toggleFullScreenState(getWindow().getDecorView());
-
-                    } else if (lastY - y > Util.dip2px(mContext, 30)) {
-
-                        view.setNeedFitImageToView(true);
                         if (!view.isZoomed())
                             finishActivity();
                     } else {
 
-                        view.setNeedFitImageToView(true);
                         if (!view.isZoomed())
                             view.setTranslationY(0);
                     }
