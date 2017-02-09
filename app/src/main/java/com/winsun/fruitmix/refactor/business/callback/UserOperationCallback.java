@@ -11,17 +11,25 @@ import java.util.List;
 
 public interface UserOperationCallback {
 
-    interface LoadUsersCallback{
+    interface LoadUsersCallback {
 
-        void onLoadSucceed(OperationResult operationResult,List<User> users);
+        void onLoadSucceed(OperationResult operationResult, List<User> users);
 
         void onLoadFail(OperationResult operationResult);
 
     }
 
-    interface OperateUserCallback{
+    interface LoadCurrentUserCallback {
 
-        void onOperateSucceed(OperationResult operationResult,User user);
+        void onLoadSucceed(OperationResult operationResult, User user);
+
+        void onLoadFail(OperationResult operationResult);
+
+    }
+
+    interface OperateUserCallback {
+
+        void onOperateSucceed(OperationResult operationResult, User user);
 
         void onOperateFail(OperationResult operationResult);
 

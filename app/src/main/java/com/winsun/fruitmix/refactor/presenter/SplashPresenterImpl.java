@@ -72,22 +72,22 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
             mRepository.loadRemoteToken(mRepository.getLoadTokenParamInDB(), new LoadTokenOperationCallback.LoadTokenCallback() {
                 @Override
                 public void onLoadSucceed(OperationResult result, String token) {
-
-                    mRepository.loadUsers(token, null);
-                    mRepository.loadMedias(token, null);
-                    mRepository.loadMediaShares(token, null);
-
+                    loadData();
                 }
 
                 @Override
                 public void onLoadFail(OperationResult result) {
-                    mRepository.loadUsers(tokenInDB, null);
-                    mRepository.loadMedias(tokenInDB, null);
-                    mRepository.loadMediaShares(tokenInDB, null);
+                    loadData();
                 }
             });
         }
 
+    }
+
+    private void loadData() {
+        mRepository.loadUsers(null);
+        mRepository.loadMedias(null);
+        mRepository.loadMediaShares(null);
     }
 
     @Override

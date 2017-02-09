@@ -6,6 +6,8 @@ package com.winsun.fruitmix.refactor.common;
 
 public interface BaseView {
 
+    boolean isNetworkAlive();
+
     void showNoNetwork();
 
     void showLoadingUI();
@@ -17,5 +19,7 @@ public interface BaseView {
     void showDialog();
 
     void dismissDialog();
+
+    void hideSoftInput();
 
 }

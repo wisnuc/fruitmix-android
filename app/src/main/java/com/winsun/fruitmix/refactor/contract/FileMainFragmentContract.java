@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.refactor.contract;
 
+import android.support.annotation.NonNull;
+
 import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
 
@@ -38,6 +40,11 @@ public interface FileMainFragmentContract {
         void onPageFileDownloadSelect();
 
         void onToolbarClick();
+
+        boolean handleBackPressedOrNot();
+
+        void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults);
+
     }
 
 }

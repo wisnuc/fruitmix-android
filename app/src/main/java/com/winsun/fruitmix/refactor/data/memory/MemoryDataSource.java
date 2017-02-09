@@ -1,15 +1,9 @@
-package com.winsun.fruitmix.refactor.data.db;
+package com.winsun.fruitmix.refactor.data.memory;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
-import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.refactor.business.LoadTokenParam;
 import com.winsun.fruitmix.refactor.data.DataSource;
 import com.winsun.fruitmix.refactor.data.loadOperationResult.DeviceIDLoadOperationResult;
@@ -19,27 +13,22 @@ import com.winsun.fruitmix.refactor.data.loadOperationResult.MediaSharesLoadOper
 import com.winsun.fruitmix.refactor.data.loadOperationResult.MediasLoadOperationResult;
 import com.winsun.fruitmix.refactor.data.loadOperationResult.TokenLoadOperationResult;
 import com.winsun.fruitmix.refactor.data.loadOperationResult.UsersLoadOperationResult;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.Util;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
- * Created by Administrator on 2017/2/7.
+ * Created by Administrator on 2017/2/9.
  */
 
-public class DBDataSource implements DataSource {
+public class MemoryDataSource implements DataSource {
 
-    private DBUtils mDBUtils;
-    private SharedPreferences mSharedPreferences;
+    public void logout(){
+        Collection<Media> medias = LocalCache.LocalMediaMapKeyIsThumb.values();
 
-    public DBDataSource(Context context){
-
-        mDBUtils = DBUtils.getInstance(context);
-        mSharedPreferences = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME,Context.MODE_PRIVATE);
-
-        loadLocalMedias();
+        for (Media media : medias) {
+            media.restoreUploadState();
+        }
     }
 
     @Override
@@ -99,36 +88,11 @@ public class DBDataSource implements DataSource {
 
     @Override
     public TokenLoadOperationResult loadToken(LoadTokenParam param) {
-
-        String token = mSharedPreferences.getString(Util.JWT,"");
-
-        TokenLoadOperationResult result = new TokenLoadOperationResult();
-        result.setToken(token);
-
-        return result;
+        return null;
     }
 
     @Override
     public User loadCurrentUser() {
         return null;
-    }
-
-    private void loadLocalMedias(){
-
-    }
-
-    public LoadTokenParam getLoadTokenParam(){
-
-        return new LoadTokenParam(mSharedPreferences.getString(Util.GATEWAY, null),mSharedPreferences.getString(Util.USER_UUID,""),mSharedPreferences.getString(Util.PASSWORD,""));
-
-    }
-
-    public void logout(){
-
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString(Util.JWT, null);
-        editor.apply();
-
-        mDBUtils.updateLocalMediasUploadedFalse();
     }
 }

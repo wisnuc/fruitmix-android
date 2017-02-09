@@ -31,6 +31,10 @@ import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.refactor.common.BaseActivity;
+import com.winsun.fruitmix.refactor.common.Injection;
+import com.winsun.fruitmix.refactor.contract.EquipmentSearchContract;
+import com.winsun.fruitmix.refactor.presenter.EquipmentSearchPresenterImpl;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
@@ -50,7 +54,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class EquipmentSearchActivity extends AppCompatActivity implements View.OnClickListener {
+public class EquipmentSearchActivity extends BaseActivity implements View.OnClickListener, EquipmentSearchContract.EquipmentSearchView {
 
     public static final String TAG = EquipmentSearchActivity.class.getSimpleName();
 
@@ -67,26 +71,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private EquipmentExpandableAdapter mAdapter;
 
-    private List<Equipment> mUserLoadedEquipments;
-
-    private List<Equipment> mFoundedEquipments;
-
-    private static final String SERVICE_PORT = "_http._tcp";
-    private static final String DEMAIN = "local.";
-
-    private List<List<User>> mUserExpandableLists;
-
-    private CustomHandler mHandler;
-
-    private static final int DATA_CHANGE = 0x0001;
-
-    private static final String SYSTEM_PORT = "3000";
-    private static final String IPALIASING = "/system/ipaliasing";
-
     private boolean mStartAnimateArrow = false;
 
     private RxDnssd mRxDnssd;
-    private Subscription mSubscription;
+
+    private EquipmentSearchContract.EquipmentSearchPresenter mPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,13 +88,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         Util.loginType = LoginType.LOGIN;
 
-        mUserExpandableLists = new ArrayList<>();
-        mUserLoadedEquipments = new ArrayList<>();
-
-        mFoundedEquipments = new ArrayList<>();
-
-        mHandler = new CustomHandler(this, getMainLooper());
-
         mAdapter = new EquipmentExpandableAdapter();
         mEquipmentExpandableListView.setAdapter(mAdapter);
 
@@ -115,16 +97,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
 
-                User user = mUserExpandableLists.get(groupPosition).get(childPosition);
-
-                Intent intent = new Intent(mContext, LoginActivity.class);
-                intent.putExtra(Util.GATEWAY, "http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0));
-                intent.putExtra(Util.USER_GROUP_NAME, mUserLoadedEquipments.get(groupPosition).getServiceName());
-                intent.putExtra(Util.USER_NAME, user.getUserName());
-                intent.putExtra(Util.USER_UUID, user.getUuid());
-                intent.putExtra(Util.USER_BG_COLOR, user.getDefaultAvatarBgColor());
-
-                startActivityForResult(intent, Util.KEY_LOGIN_REQUEST_CODE);
+                mPresenter.onEquipmentListViewChildClick(parent, v, groupPosition, childPosition, id);
 
                 return false;
             }
@@ -136,26 +109,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                 mStartAnimateArrow = true;
 
-                int count = mAdapter.getGroupCount();
-                for (int i = 0; i < count; i++) {
-
-
-                    if (i == groupPosition) {
-
-                        if (mEquipmentExpandableListView.isGroupExpanded(i)) {
-                            mEquipmentExpandableListView.collapseGroupWithAnimation(i);
-                        } else {
-                            mEquipmentExpandableListView.expandGroupWithAnimation(i);
-                        }
-
-                    } else {
-
-                        if (mEquipmentExpandableListView.isGroupExpanded(i)) {
-                            mEquipmentExpandableListView.collapseGroupWithAnimation(i);
-                        }
-
-                    }
-                }
+                mPresenter.onEquipmentListViewGroupClick(parent, v, groupPosition, id);
 
                 return true;
             }
@@ -166,25 +120,30 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mRxDnssd = CustomApplication.getRxDnssd(mContext);
+
+        mPresenter = new EquipmentSearchPresenterImpl(Injection.injectDataRepository());
+        mPresenter.attachView(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        startDiscovery();
+        mPresenter.startDiscovery(mRxDnssd);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
-        stopDiscovery();
+        mPresenter.stopDiscovery();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        mPresenter.detachView();
 
         mContext = null;
     }
@@ -192,18 +151,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == Util.KEY_LOGIN_REQUEST_CODE && resultCode == RESULT_OK) {
-            finish();
-        } else if (requestCode == Util.KEY_MANUAL_INPUT_IP_REQUEST_CODE && resultCode == RESULT_OK) {
-
-            String ip = data.getStringExtra(Util.KEY_MANUAL_INPUT_IP);
-
-            List<String> hosts = new ArrayList<>();
-            hosts.add(ip);
-
-            Equipment equipment = new Equipment("Winsuc Appliction " + ip, hosts, 6666);
-            getUserList(equipment);
-        }
+        mPresenter.handleOnActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -214,6 +162,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 ButlerService.stopButlerService(mContext);
 
                 finish();
+
+                mPresenter.handleBackEvent();
+
                 break;
             case R.id.fab:
                 Intent intent = new Intent(mContext, CreateNewEquipmentActivity.class);
@@ -229,6 +180,61 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         ButlerService.stopButlerService(mContext);
 
+        mPresenter.handleBackEvent();
+    }
+
+    @Override
+    public void showEquipmentsAndUsers(List<Equipment> equipments, List<List<User>> users) {
+
+        if (mEquipmentExpandableListView.getVisibility() == View.GONE) {
+            mEquipmentExpandableListView.setVisibility(View.VISIBLE);
+            mLoadingLayout.setVisibility(View.GONE);
+        }
+
+        mAdapter.equipmentList.clear();
+        mAdapter.mapList.clear();
+        mAdapter.equipmentList.addAll(equipments);
+        mAdapter.mapList.addAll(users);
+        mAdapter.viewLruCache.evictAll();
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void collapseGroup(int position) {
+        mEquipmentExpandableListView.collapseGroupWithAnimation(position);
+    }
+
+    @Override
+    public void expandGroup(int position) {
+        mEquipmentExpandableListView.expandGroupWithAnimation(position);
+    }
+
+    @Override
+    public boolean isGroupExpanded(int position) {
+        return mEquipmentExpandableListView.isGroupExpanded(position);
+    }
+
+    @Override
+    public void login(String gateway, String userGroupName, User user) {
+
+        Intent intent = new Intent(mContext, LoginActivity.class);
+        intent.putExtra(Util.GATEWAY, gateway);
+        intent.putExtra(Util.USER_GROUP_NAME, userGroupName);
+        intent.putExtra(Util.USER_NAME, user.getUserName());
+        intent.putExtra(Util.USER_UUID, user.getUuid());
+        intent.putExtra(Util.USER_BG_COLOR, user.getDefaultAvatarBgColor());
+
+        startActivityForResult(intent, Util.KEY_LOGIN_REQUEST_CODE);
+    }
+
+    @Override
+    public int getGroupCount() {
+        return mAdapter.getGroupCount();
+    }
+
+    @Override
+    public void finishActivity() {
+        finish();
     }
 
     class EquipmentExpandableAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter {
@@ -436,170 +442,5 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         }
     }
 
-    private void startDiscovery() {
-
-        mSubscription = mRxDnssd.browse(SERVICE_PORT, DEMAIN)
-                .compose(mRxDnssd.resolve())
-                .compose(mRxDnssd.queryRecords())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<BonjourService>() {
-                    @Override
-                    public void call(BonjourService bonjourService) {
-
-                        if (bonjourService.isLost()) return;
-
-                        String serviceName = bonjourService.getServiceName();
-                        if (!serviceName.toLowerCase().contains("wisnuc")) return;
-
-                        if (bonjourService.getInet4Address() == null) return;
-                        String hostAddress = bonjourService.getInet4Address().getHostAddress();
-
-                        for (Equipment equipment : mFoundedEquipments) {
-                            if (equipment == null || serviceName.equals(equipment.getServiceName()) || equipment.getHosts().contains(hostAddress)) {
-                                return;
-                            }
-                        }
-
-                        Equipment equipment = new Equipment();
-                        equipment.setServiceName(serviceName);
-                        Log.d(TAG, "host address:" + hostAddress);
-
-                        List<String> hosts = new ArrayList<>();
-                        hosts.add(hostAddress);
-
-                        equipment.setHosts(hosts);
-                        equipment.setPort(bonjourService.getPort());
-
-                        mFoundedEquipments.add(equipment);
-
-                        getUserList(equipment);
-
-                    }
-                });
-
-    }
-
-    private void stopDiscovery() {
-        if (mSubscription != null) {
-            mSubscription.unsubscribe();
-        }
-    }
-
-    private void getUserList(final Equipment equipment) {
-
-        //get user list;
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                User user;
-                List<User> itemList;
-                JSONObject itemRaw;
-                JSONArray json;
-                String str;
-
-                try {
-
-                    String url = Util.HTTP + equipment.getHosts().get(0) + ":" + SYSTEM_PORT + IPALIASING;
-
-                    Log.d(TAG, "login retrieve equipment alias:" + url);
-
-                    str = FNAS.RemoteCallWithUrl(url).getResponseData();
-
-                    json = new JSONArray(str);
-
-                    int length = json.length();
-
-                    for (int i = 0; i < length; i++) {
-                        itemRaw = json.getJSONObject(i);
-
-                        String ip = itemRaw.getString("ipv4");
-
-                        List<String> hosts = equipment.getHosts();
-                        if (!hosts.contains(ip)) {
-                            hosts.add(ip);
-                        }
-                    }
-
-                    url = Util.HTTP + equipment.getHosts().get(0) + ":" + FNAS.PORT + Util.LOGIN_PARAMETER;
-
-                    Log.d(TAG, "login url:" + url);
-
-                    str = FNAS.RemoteCallWithUrl(url).getResponseData();
-
-                    json = new JSONArray(str);
-                    itemList = new ArrayList<>();
-
-                    length = json.length();
-
-                    for (int i = 0; i < length; i++) {
-                        itemRaw = json.getJSONObject(i);
-                        user = new User();
-                        user.setUserName(itemRaw.getString("username"));
-                        user.setUuid(itemRaw.getString("uuid"));
-                        user.setAvatar(itemRaw.getString("avatar"));
-                        itemList.add(user);
-                    }
-
-                    if (itemList.isEmpty())
-                        return;
-
-                    for (Equipment equipment1 : mUserLoadedEquipments) {
-                        if (equipment1.getHosts().contains(equipment.getHosts().get(0)))
-                            return;
-                    }
-
-                    mUserLoadedEquipments.add(equipment);
-                    mUserExpandableLists.add(itemList);
-
-                    Log.d(TAG, "EquipmentSearch: " + mUserExpandableLists.toString());
-
-                    //update list
-                    mHandler.sendEmptyMessage(DATA_CHANGE);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-        };
-
-        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-        instance.doOneTaskInCachedThread(runnable);
-
-    }
-
-    private class CustomHandler extends Handler {
-
-        WeakReference<EquipmentSearchActivity> weakReference = null;
-
-        CustomHandler(EquipmentSearchActivity activity, Looper looper) {
-            super(looper);
-            weakReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case DATA_CHANGE:
-
-                    if (mEquipmentExpandableListView.getVisibility() == View.GONE) {
-                        mEquipmentExpandableListView.setVisibility(View.VISIBLE);
-                        mLoadingLayout.setVisibility(View.GONE);
-                    }
-
-                    EquipmentExpandableAdapter adapter = weakReference.get().mAdapter;
-
-                    adapter.equipmentList.clear();
-                    adapter.mapList.clear();
-                    adapter.equipmentList.addAll(mUserLoadedEquipments);
-                    adapter.mapList.addAll(mUserExpandableLists);
-                    adapter.viewLruCache.evictAll();
-                    adapter.notifyDataSetChanged();
-                    break;
-                default:
-            }
-        }
-    }
 
 }

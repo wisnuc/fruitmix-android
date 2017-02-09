@@ -19,7 +19,7 @@ public interface EquipmentSearchContract {
 
     interface EquipmentSearchView extends BaseView {
 
-        void showEquipments(List<Equipment> equipments);
+        void showEquipmentsAndUsers(List<Equipment> equipments, List<List<User>> users);
 
         void collapseGroup(int position);
 

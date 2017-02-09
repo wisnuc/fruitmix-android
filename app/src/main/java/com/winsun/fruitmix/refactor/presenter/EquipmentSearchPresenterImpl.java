@@ -9,8 +9,13 @@ import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.business.DataRepository;
+import com.winsun.fruitmix.refactor.business.callback.LoadEquipmentAliasCallback;
+import com.winsun.fruitmix.refactor.business.callback.UserOperationCallback;
 import com.winsun.fruitmix.refactor.contract.EquipmentSearchContract;
+import com.winsun.fruitmix.refactor.model.EquipmentAlias;
+import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -36,6 +41,9 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
     private static final String SERVICE_PORT = "_http._tcp";
     private static final String DEMAIN = "local.";
 
+    private static final String SYSTEM_PORT = "3000";
+    private static final String IPALIASING = "/system/ipaliasing";
+
     private List<List<User>> mUserExpandableLists;
     private List<Equipment> mUserLoadedEquipments;
 
@@ -45,8 +53,13 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
 
     private DataRepository mRepository;
 
-    public EquipmentSearchPresenterImpl(DataRepository repository){
+    public EquipmentSearchPresenterImpl(DataRepository repository) {
+
         mRepository = repository;
+
+        mUserExpandableLists = new ArrayList<>();
+        mUserLoadedEquipments = new ArrayList<>();
+        mFoundedEquipments = new ArrayList<>();
     }
 
     @Override
@@ -173,14 +186,62 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
         }
     }
 
-    private void loadUsersAboutEquipment(Equipment equipment){
+    private void loadUsersAboutEquipment(final Equipment equipment) {
 
         for (Equipment equipment1 : mUserLoadedEquipments) {
             if (equipment1.getHosts().contains(equipment.getHosts().get(0)))
                 return;
         }
 
+        String url = Util.HTTP + equipment.getHosts().get(0) + ":" + SYSTEM_PORT + IPALIASING;
 
+        Log.d(TAG, "login retrieve equipment alias:" + url);
+
+        mRepository.loadEquipmentAlias(url, new LoadEquipmentAliasCallback() {
+            @Override
+            public void onLoadSucceed(OperationResult result, List<EquipmentAlias> equipmentAliases) {
+
+                List<String> hosts = equipment.getHosts();
+
+                for (EquipmentAlias alias : equipmentAliases) {
+
+                    String ip = alias.getIpv4();
+                    if (!hosts.contains(ip)) {
+                        hosts.add(ip);
+                    }
+
+                }
+
+                String url = Util.HTTP + equipment.getHosts().get(0) + ":" + FNAS.PORT + Util.LOGIN_PARAMETER;
+
+                Log.d(TAG, "login url:" + url);
+
+                mRepository.loadUserByLoginApi(url, new UserOperationCallback.LoadUsersCallback() {
+                    @Override
+                    public void onLoadSucceed(OperationResult operationResult, List<User> users) {
+
+                        if (users.isEmpty())
+                            return;
+
+                        mUserLoadedEquipments.add(equipment);
+                        mUserExpandableLists.add(users);
+
+                        if (mView != null)
+                            mView.showEquipmentsAndUsers(mUserLoadedEquipments, mUserExpandableLists);
+                    }
+
+                    @Override
+                    public void onLoadFail(OperationResult operationResult) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onLoadFail(OperationResult result) {
+
+            }
+        });
 
     }
 }

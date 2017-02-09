@@ -2,6 +2,7 @@ package com.winsun.fruitmix.refactor.contract;
 
 import android.content.Context;
 
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
 
@@ -23,13 +24,20 @@ public interface LoginContract {
 
         void handleLoginSucceed();
 
-        void handleLoginFail();
+        void handleLoginFail(OperationResult result);
+
+        void finishActivity();
+
+        void hidePwdEditHint();
+
+        void showPwdEditHint();
     }
 
     interface LoginPresenter extends BasePresenter<LoginView> {
 
-        void login(Context context, String gateway, String userUUID, String userPassword);
+        void login(String userPassword);
 
+        void onFocusChange(boolean hasFocus);
     }
 
 }

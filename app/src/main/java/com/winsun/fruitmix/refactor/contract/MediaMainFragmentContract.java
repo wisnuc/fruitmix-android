@@ -1,7 +1,13 @@
 package com.winsun.fruitmix.refactor.contract;
 
+import android.content.Intent;
+import android.view.View;
+
 import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/2/4.
@@ -27,24 +33,25 @@ public interface MediaMainFragmentContract {
 
         void dismissBottomNavAnim();
 
+        MediaMainFragmentPresenter getPresenter();
+
     }
 
     interface MediaMainFragmentPresenter extends BasePresenter<MediaMainFragmentView>{
 
-        void onShareNavigationItemSelected();
+        void onNavigationItemSelected(int itemID);
 
-        void onMediaNavigationItemSelected();
-
-        void onAlbumNavigationItemSelected();
-
-        void onPageMediaSelect();
-
-        void onPageMediaShareSelect();
-
-        void onPageAlbumSelect();
+        void onPageSelected(int position);
 
         void onToolbarClick();
 
+        boolean handleBackPressedOrNot();
+
+        void onActivityReenter(int resultCode, Intent data);
+
+        boolean isResumed();
+
+        void onMapSharedElements(List<String> names, Map<String, View> sharedElements);
     }
 
 }
