@@ -57,6 +57,10 @@ public interface MainPageContract {
 
     interface MainPagePresenter extends BasePresenter<MainPageView> {
 
+        void setMediaMainFragmentPresenter(MediaMainFragmentContract.MediaMainFragmentPresenter presenter);
+
+        void setFileMainFragmentPresenter(FileMainFragmentContract.FileMainFragmentPresenter presenter);
+
         void onNavigationItemSelected(int itemId);
 
         void switchDrawerOpenState();

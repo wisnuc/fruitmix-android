@@ -41,11 +41,19 @@ public class MainPagePresenterImpl implements MainPageContract.MainPagePresenter
     private static final int TIME_INTERNAL = 2 * 1000;
     private long backPressedTimeMillis = 0;
 
-    public MainPagePresenterImpl(DataRepository repository, MediaMainFragmentContract.MediaMainFragmentPresenter mediaMainFragmentPresenter, FileMainFragmentContract.FileMainFragmentPresenter fileMainFragmentPresenter) {
+    public MainPagePresenterImpl(DataRepository repository) {
         mRepository = repository;
 
-        mMediaMainFragmentPresenter = mediaMainFragmentPresenter;
-        mFileMainFragmentPresenter = fileMainFragmentPresenter;
+    }
+
+    @Override
+    public void setMediaMainFragmentPresenter(MediaMainFragmentContract.MediaMainFragmentPresenter presenter) {
+        mMediaMainFragmentPresenter = presenter;
+    }
+
+    @Override
+    public void setFileMainFragmentPresenter(FileMainFragmentContract.FileMainFragmentPresenter presenter) {
+        mFileMainFragmentPresenter = presenter;
     }
 
     private void onUserManageNavigationItemSelected() {

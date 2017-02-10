@@ -4,6 +4,8 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -122,7 +124,16 @@ public class DataRepository {
 
     }
 
+    public void loadLoadMediaInCamera(MediaOperationCallback.LoadMediasCallback callback){
+
+    }
+
     public void loadMedias(MediaOperationCallback.LoadMediasCallback callback) {
+
+
+    }
+
+    public void handleMediasForMediaFragment(List<Media> medias, MediaOperationCallback.HandleMediaForMediaFragmentCallback callback){
 
 
     }
@@ -186,10 +197,6 @@ public class DataRepository {
 
     }
 
-    public void createUser(String userName, String userPassword, UserOperationCallback.OperateUserCallback callback) {
-
-    }
-
     public void logout(OperationCallback callback) {
 
         ((MemoryDataSource)mMemoryDataSource).logout();
@@ -222,4 +229,11 @@ public class DataRepository {
         mLoadCurrentUserCallback = callback;
     }
 
+    public void createUser(String userName, String userPassword, UserOperationCallback.OperateUserCallback callback) {
+
+    }
+
+    public void createMediaShare(MediaShare mediaShare, MediaShareOperationCallback.OperateMediaShareCallback callback){
+
+    }
 }

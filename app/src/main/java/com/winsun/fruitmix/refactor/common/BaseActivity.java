@@ -48,7 +48,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
 
     @Override
     public void showDialog() {
-
+        dialog = ProgressDialog.show(this, getString(R.string.operating_title), null, true, false);
     }
 
     @Override

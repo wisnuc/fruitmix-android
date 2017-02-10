@@ -2,6 +2,7 @@ package com.winsun.fruitmix.refactor.business.callback;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.refactor.model.MediaFragmentDataLoader;
 
 import java.util.List;
 
@@ -16,6 +17,12 @@ public interface MediaOperationCallback {
         void onLoadSucceed(OperationResult operationResult, List<Media> medias);
 
         void onLoadFail(OperationResult operationResult);
+
+    }
+
+    interface HandleMediaForMediaFragmentCallback{
+
+        void onOperateFinished(MediaFragmentDataLoader loader);
 
     }
 

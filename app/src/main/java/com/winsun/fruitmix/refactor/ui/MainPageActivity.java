@@ -28,7 +28,6 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.UserManageActivity;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.fragment.FileMainFragment;
-import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
 import com.winsun.fruitmix.refactor.common.Injection;
@@ -93,7 +92,10 @@ public class MainPageActivity extends BaseActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        mediaMainFragment = MediaMainFragment.newInstance();
+        mPresenter = new MainPagePresenterImpl(Injection.injectDataRepository());
+        mPresenter.attachView(this);
+
+        mediaMainFragment = MediaMainFragment.newInstance(mPresenter);
         fileMainFragment = FileMainFragment.newInstance();
 
         fragmentManager = getSupportFragmentManager();
@@ -109,8 +111,6 @@ public class MainPageActivity extends BaseActivity
     protected void onResume() {
         super.onResume();
 
-        mPresenter = new MainPagePresenterImpl(Injection.injectDataRepository(), null, null);
-        mPresenter.attachView(this);
         mPresenter.startMission();
     }
 

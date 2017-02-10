@@ -44,6 +44,9 @@ import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.refactor.contract.MainPageContract;
+import com.winsun.fruitmix.refactor.contract.MediaMainFragmentContract;
+import com.winsun.fruitmix.refactor.presenter.MediaMainFragmentPresenterImpl;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -61,7 +64,7 @@ import butterknife.ButterKnife;
 
 import static android.app.Activity.RESULT_OK;
 
-public class MediaMainFragment extends Fragment implements OnMediaFragmentInteractionListener, View.OnClickListener, IPhotoListListener {
+public class MediaMainFragment extends Fragment implements OnMediaFragmentInteractionListener,IPhotoListListener, MediaMainFragmentContract.MediaMainFragmentView {
 
     public static final String TAG = MediaMainFragment.class.getSimpleName();
 
@@ -80,7 +83,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private List<Page> pageList;
     private AlbumList albumList;
-    private NewPhotoList photoList;
+    private MediaFragment mediaFragment;
     private MediaShareList shareList;
 
     private Context mContext;
@@ -95,10 +98,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private boolean onResume = false;
 
-    private OnMainFragmentInteractionListener mListener;
-
     private boolean mPhotoListRefresh = false;
     private boolean mShareAlbumListRefresh = false;
+
+    private MediaMainFragmentContract.MediaMainFragmentPresenter mPresenter;
+    private MainPageContract.MainPagePresenter mMainPagePresenter;
 
     public MediaMainFragment() {
         // Required empty public constructor
@@ -110,9 +114,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
      *
      * @return A new instance of fragment MediaMainFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static MediaMainFragment newInstance() {
+    public static MediaMainFragment newInstance(MainPageContract.MainPagePresenter mainPagePresenter) {
         MediaMainFragment fragment = new MediaMainFragment();
+        fragment.mMainPagePresenter = mainPagePresenter;
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -125,6 +129,10 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mContext = getActivity();
 
         initPageList();
+
+        mPresenter = new MediaMainFragmentPresenterImpl(mMainPagePresenter, null, null, null);
+        mPresenter.attachView(this);
+        mMainPagePresenter = null;
 
         Log.d(TAG, "onCreate: ");
     }
@@ -142,7 +150,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.switchDrawerOpenState();
+                mPresenter.switchDrawerOpenState();
             }
         });
 
@@ -152,9 +160,13 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         viewPager.setCurrentItem(PAGE_PHOTO);
 
-        lbRight.setOnClickListener(this);
+        lbRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPresenter.selectModeBtnClick();
+            }
+        });
 
-        photoList.addPhotoListListener(this);
 
         Log.d(TAG, "onCreateView: ");
 
@@ -174,28 +186,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void onResume() {
         super.onResume();
 
-        if (isHidden()) return;
+        mPresenter.startMission();
 
-        if (!onResume) {
-            onResume = true;
-        } else {
-            FNAS.retrieveLocalMediaInCamera();
-        }
-
-        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && !mPhotoListRefresh) {
-            photoList.refreshView();
-
-            mPhotoListRefresh = true;
-        }
-
-        if (!mShareAlbumListRefresh && Util.isRemoteMediaShareLoaded()) {
-            shareList.refreshView();
-            albumList.refreshView();
-
-            mShareAlbumListRefresh = true;
-        }
-
-        Log.d(TAG, "onResume: ");
     }
 
     @Override
@@ -213,6 +205,10 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void onDestroyView() {
         super.onDestroyView();
 
+        mPresenter.detachView();
+
+        mediaFragment.onDestroyView();
+
         Log.d(TAG, "onDestroyView: ");
     }
 
@@ -220,77 +216,18 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void onDestroy() {
         super.onDestroy();
 
-        photoList.removePhotoListListener(this);
-
         mContext = null;
 
         Log.d(TAG, "onDestroy: ");
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnMainFragmentInteractionListener) {
-            mListener = (OnMainFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public void onActivityReenter(int resultCode, Intent data) {
-        if (viewPager.getCurrentItem() == PAGE_PHOTO) {
-            ((NewPhotoList) pageList.get(viewPager.getCurrentItem())).onActivityReenter(resultCode, data);
-        } else if (viewPager.getCurrentItem() == PAGE_SHARE) {
-            ((MediaShareList) pageList.get(viewPager.getCurrentItem())).onActivityReenter(resultCode, data);
-        }
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if ((requestCode == Util.KEY_ALBUM_CONTENT_REQUEST_CODE || requestCode == Util.KEY_CREATE_ALBUM_REQUEST_CODE || requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE) && resultCode == RESULT_OK) {
-
-            viewPager.setCurrentItem(PAGE_ALBUM);
-            onDidAppear(PAGE_ALBUM);
-            pageList.get(PAGE_ALBUM).onDidAppear();
-            pageList.get(PAGE_SHARE).onDidAppear();
-        } else if (requestCode == Util.KEY_CREATE_SHARE_REQUEST_CODE && resultCode == RESULT_OK) {
-
-            viewPager.setCurrentItem(PAGE_SHARE);
-            onDidAppear(PAGE_SHARE);
-            pageList.get(PAGE_SHARE).onDidAppear();
-        }
-    }
-
-    public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-        if (viewPager.getCurrentItem() == PAGE_PHOTO) {
-            ((NewPhotoList) pageList.get(viewPager.getCurrentItem())).onMapSharedElements(names, sharedElements);
-        } else if (viewPager.getCurrentItem() == PAGE_SHARE) {
-            ((MediaShareList) pageList.get(viewPager.getCurrentItem())).onMapSharedElements(names, sharedElements);
-        }
-    }
 
     private void initNavigationView() {
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-                switch (item.getItemId()) {
-                    case R.id.share:
-                        viewPager.setCurrentItem(PAGE_SHARE);
-                        break;
-                    case R.id.photo:
-                        viewPager.setCurrentItem(PAGE_PHOTO);
-                        break;
-                    case R.id.album:
-                        viewPager.setCurrentItem(PAGE_ALBUM);
-                        break;
-                }
+                mPresenter.onNavigationItemSelected(item.getItemId());
 
                 return true;
             }
@@ -300,7 +237,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     }
 
-    private void resetBottomNavigationItemCheckState() {
+    public void resetBottomNavigationItemCheckState() {
 
         int size = bottomNavigationView.getMenu().size();
 
@@ -310,21 +247,44 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     }
 
+    @Override
+    public void setBottomNavigationItemChecked(int position) {
+        bottomNavigationView.getMenu().getItem(position).setChecked(true);
+    }
+
+    @Override
+    public void setViewPageCurrentItem(int position) {
+        viewPager.setCurrentItem(position);
+    }
+
+    @Override
+    public void setTitleText(int resID) {
+        title.setText(getString(resID));
+    }
+
+    @Override
+    public void setTitleText(String titleText) {
+        title.setText(titleText);
+    }
+
+    @Override
+    public void setToolbarNavigationIcon(int resID) {
+        toolbar.setNavigationIcon(resID);
+    }
+
+    @Override
+    public void setSelectModeBtnVisibility(int visibility) {
+        lbRight.setVisibility(visibility);
+    }
+
     private void initPageList() {
         shareList = new MediaShareList(getActivity(), this);
-        photoList = new NewPhotoList(getActivity());
+
         albumList = new AlbumList(getActivity(), this);
         pageList = new ArrayList<Page>();
         pageList.add(shareList);
-        pageList.add(photoList);
+
         pageList.add(albumList);
-    }
-
-    public void refreshUser() {
-
-        shareList.refreshView();
-        albumList.refreshView();
-
     }
 
     private void initViewPager() {
@@ -334,10 +294,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             @Override
             public void onPageSelected(int position) {
 
-                onDidAppear(position);
+                mPresenter.onPageSelected(position);
 
-                resetBottomNavigationItemCheckState();
-                bottomNavigationView.getMenu().getItem(position).setChecked(true);
             }
         });
     }
@@ -383,7 +341,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 setPhotoListRefresh();
 
-                photoList.refreshView();
+
 
                 break;
             case Util.LOCAL_MEDIA_RETRIEVED:
@@ -392,7 +350,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 setPhotoListRefresh();
 
-                photoList.refreshView();
+
 
                 break;
 
@@ -402,7 +360,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 setPhotoListRefresh();
 
-                photoList.refreshView();
+
 
                 break;
 
@@ -492,7 +450,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
             viewPager.setCurrentItem(PAGE_SHARE);
-            onDidAppear(PAGE_SHARE);
+
             pageList.get(PAGE_SHARE).onDidAppear();
         }
 
@@ -539,52 +497,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         editor.apply();
     }
 
-    private void showChooseHeader() {
 
-        toolbar.setNavigationIcon(R.drawable.ic_back);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (sInChooseMode) {
-                    hideChooseHeader();
-                    showBottomNavAnim();
-                } else {
-                    mListener.onBackPress();
-                }
-
-            }
-        });
-        lbRight.setVisibility(View.GONE);
-
-        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
-        lp.bottomMargin = 0;
-        viewPager.setLayoutParams(lp);
-        sInChooseMode = true;
-        photoList.setSelectMode(sInChooseMode);
-        setSelectCountText(getString(R.string.choose_photo));
-
-        mListener.lockDrawer();
-    }
-
-    private void hideChooseHeader() {
-
-        toolbar.setNavigationIcon(R.drawable.menu);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.switchDrawerOpenState();
-            }
-        });
-        lbRight.setVisibility(View.VISIBLE);
-
-        sInChooseMode = false;
-        photoList.setSelectMode(sInChooseMode);
-        setSelectCountText(getString(R.string.photo));
-
-        mListener.unlockDrawer();
-    }
-
-    private void showBottomNavAnim() {
+    public void showBottomNavAnim() {
 
         bottomNavigationView.setVisibility(View.VISIBLE);
 
@@ -610,10 +524,19 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         bottomNavigationView.setVisibility(View.VISIBLE);
     }
 
-    private void dismissBottomNavAnim() {
+    public void dismissBottomNavAnim() {
 
         Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.dismiss_bottom_item_anim);
         animation.setAnimationListener(new BaseAnimationListener() {
+
+            @Override
+            public void onAnimationStart(Animation animation) {
+                super.onAnimationStart(animation);
+
+                CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
+                lp.bottomMargin = 0;
+                viewPager.setLayoutParams(lp);
+            }
 
             @Override
             public void onAnimationEnd(Animation animation) {
@@ -626,21 +549,16 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         bottomNavigationView.startAnimation(animation);
     }
 
-
-    private void dismissBottomNav() {
-        bottomNavigationView.setVisibility(View.GONE);
+    @Override
+    public void setToolbarNavigationOnClickListener(View.OnClickListener listener) {
+        toolbar.setNavigationOnClickListener(listener);
     }
 
-    public boolean handleBackPressedOrNot() {
-        return sInChooseMode;
+    @Override
+    public int getCurrentViewPageItem() {
+        return viewPager.getCurrentItem();
     }
 
-    public void handleBackPressed() {
-
-        hideChooseHeader();
-        showBottomNavAnim();
-
-    }
 
     @Override
     public void onPhotoItemClick(int selectedItemCount) {
@@ -655,7 +573,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     @Override
     public void onPhotoItemLongClick() {
-        showChooseHeader();
 
         dismissBottomNavAnim();
 
@@ -673,42 +590,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             lbRight.setVisibility(View.GONE);
         } else if (!noPhotoItem && currentItem == PAGE_PHOTO) {
             lbRight.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        List<String> selectMediaKeys;
-        switch (v.getId()) {
-            case R.id.bt_album:
-                selectMediaKeys = photoList.getSelectedImageKeys();
-                if (showNothingSelectToast(selectMediaKeys)) return;
-
-                photoList.createAlbum(selectMediaKeys);
-                hideChooseHeader();
-                showBottomNavAnim();
-                break;
-            case R.id.bt_share:
-
-                if (!Util.getNetworkState(mContext)) {
-                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                selectMediaKeys = photoList.getSelectedImageKeys();
-                if (showNothingSelectToast(selectMediaKeys)) return;
-
-                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
-
-                photoList.createShare(selectMediaKeys);
-                hideChooseHeader();
-                showBottomNavAnim();
-                break;
-            case R.id.right:
-                showChooseHeader();
-                dismissBottomNavAnim();
-                break;
-            default:
         }
     }
 
@@ -762,31 +643,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     }
 
-    private void onDidAppear(int position) {
-
-        if (sInChooseMode) {
-            hideChooseHeader();
-            showBottomNav();
-        }
-
-        switch (position) {
-            case PAGE_SHARE:
-                title.setText(getString(R.string.share_text));
-                lbRight.setVisibility(View.GONE);
-                break;
-            case PAGE_PHOTO:
-                title.setText(getString(R.string.photo));
-                lbRight.setVisibility(View.VISIBLE);
-                break;
-            case PAGE_ALBUM:
-                title.setText(getString(R.string.album));
-                lbRight.setVisibility(View.GONE);
-                break;
-            default:
-        }
-
-
-    }
 
     private class MyAdapter extends PagerAdapter {
 

@@ -15,35 +15,65 @@ import java.util.Map;
 
 public interface MediaMainFragmentContract {
 
-    interface MediaMainFragmentView extends BaseView {
+    interface MediaMainFragmentView {
 
         void resetBottomNavigationItemCheckState();
 
         void setBottomNavigationItemChecked(int position);
 
-        void setViewPagerCurrentItem(int position);
+        void setViewPageCurrentItem(int position);
+
+        void setTitleText(int resID);
 
         void setTitleText(String titleText);
 
-        void setToolbarNavigationIcon(int icon);
+        void setToolbarNavigationIcon(int resID);
 
-        void setChooseModeBtnVisibility(int visibility);
+        void setSelectModeBtnVisibility(int visibility);
 
         void showBottomNavAnim();
 
         void dismissBottomNavAnim();
 
-        MediaMainFragmentPresenter getPresenter();
+        void setToolbarNavigationOnClickListener(View.OnClickListener listener);
+
+        int getCurrentViewPageItem();
+
+        boolean isResumed();
+
+        boolean isHidden();
 
     }
 
     interface MediaMainFragmentPresenter extends BasePresenter<MediaMainFragmentView>{
 
+        void setViewPageCurrentItem(int position);
+
+        void selectModeBtnClick();
+
+        void switchDrawerOpenState();
+
+        void lockDrawer();
+
+        void unlockDrawer();
+
         void onNavigationItemSelected(int itemID);
 
         void onPageSelected(int position);
 
-        void onToolbarClick();
+        void setTitleText(int resID);
+
+        void setTitleText(String titleText);
+
+        void setToolbarNavigationIcon(int resID);
+
+        void setSelectModeBtnVisibility(int visibility);
+
+        void showBottomNavAnim();
+
+        void dismissBottomNavAnim();
+
+        void setToolbarNavigationOnClickListener(View.OnClickListener listener);
 
         boolean handleBackPressedOrNot();
 

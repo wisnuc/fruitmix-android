@@ -30,6 +30,10 @@ public interface AlbumFragmentContract {
 
         void deleteMediaShare(MediaShare mediaShare);
 
+        void refreshData();
+
+        void onPageSelected();
+
     }
 
 }
