@@ -6,8 +6,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -38,23 +36,17 @@ import com.winsun.fruitmix.anim.BaseAnimationListener;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
-import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.MediaFragmentContract;
 import com.winsun.fruitmix.refactor.contract.MediaMainFragmentContract;
+import com.winsun.fruitmix.refactor.model.MediaFragmentDataLoader;
 import com.winsun.fruitmix.refactor.presenter.MediaFragmentPresenterImpl;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -64,7 +56,7 @@ import io.github.sin3hz.fastjumper.FastJumper;
 import io.github.sin3hz.fastjumper.callback.LinearScrollCalculator;
 import io.github.sin3hz.fastjumper.callback.SpannableCallback;
 
-public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
+public class MediaFragment implements MediaFragmentContract.MediaFragmentView, View.OnClickListener {
 
     public static final String TAG = MediaFragment.class.getSimpleName();
 
@@ -104,8 +96,6 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
 
     private boolean mIsFling = false;
 
-    private List<IPhotoListListener> mPhotoListListeners;
-
     private boolean mUseAnim = false;
 
     private ImageLoader mImageLoader;
@@ -128,7 +118,7 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
 
         noContentImageView.setImageResource(R.drawable.no_photo);
 
-        mPhotoListListeners = new ArrayList<>();
+        initImageLoader();
 
         calcScreenWidth();
 
@@ -154,6 +144,26 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
 
         mPresenter = new MediaFragmentPresenterImpl(presenter, Injection.injectDataRepository(), alreadySelectedImageKeyArrayList);
         mPresenter.attachView(this);
+
+        fab.setOnClickListener(this);
+        ivBtAlbum.setOnClickListener(this);
+        ivBtShare.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+
+        switch (v.getId()) {
+            case R.id.fab:
+                mPresenter.fabOnClick();
+                break;
+            case R.id.bt_album:
+                mPresenter.albumBtnOnClick();
+                break;
+            case R.id.bt_share:
+                mPresenter.shareBtnOnClick();
+                break;
+        }
 
     }
 
@@ -209,15 +219,10 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
     }
 
     @Override
-    public void showMedias(SparseArray<String> mapKeyIsPhotoPositionValueIsPhotoDate, SparseArray<Media> mapKeyIsPhotoPositionValueIsPhoto, Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList, List<Media> medias) {
+    public void showMedias(MediaFragmentDataLoader loader) {
 
-        mNoContentLayout.setVisibility(View.GONE);
-        mRecyclerView.setVisibility(View.VISIBLE);
-        mPhotoRecycleAdapter.setData(mapKeyIsPhotoPositionValueIsPhotoDate, mapKeyIsPhotoPositionValueIsPhoto, mMapKeyIsDateValueIsPhotoList, medias);
+        mPhotoRecycleAdapter.setData(loader);
         mPhotoRecycleAdapter.notifyDataSetChanged();
-
-        for (IPhotoListListener listener : mPhotoListListeners)
-            listener.onNoPhotoItem(false);
 
     }
 
@@ -226,14 +231,6 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
         ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
         mImageLoader = imageGifLoaderInstance.getImageLoader(containerActivity);
 
-    }
-
-    public void addPhotoListListener(IPhotoListListener listListener) {
-        mPhotoListListeners.add(listListener);
-    }
-
-    public void removePhotoListListener(IPhotoListListener listListener) {
-        mPhotoListListeners.remove(listListener);
     }
 
     public void setAlreadySelectedImageKeyArrayList(List<String> alreadySelectedImageKeyArrayList) {
@@ -406,10 +403,21 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
     @Override
     public void showNoContentUI() {
         mNoContentLayout.setVisibility(View.VISIBLE);
-        mRecyclerView.setVisibility(View.GONE);
+    }
 
-        for (IPhotoListListener listener : mPhotoListListeners)
-            listener.onNoPhotoItem(true);
+    @Override
+    public void dismissNoContentUI() {
+        mNoContentLayout.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showContentUI() {
+        mRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissContentUI() {
+        mRecyclerView.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -435,7 +443,7 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
 
         private int mSubHeaderHeight = containerActivity.getResources().getDimensionPixelSize(R.dimen.photo_title_height);
 
-        private int adapterItemTotalCount = 0;
+        private int mAdapterItemTotalCount = 0;
         private SparseArray<String> mMapKeyIsPhotoPositionValueIsPhotoDate;
         private SparseArray<Media> mMapKeyIsPhotoPositionValueIsPhoto;
         private Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
@@ -445,11 +453,12 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
             setHasStableIds(true);
         }
 
-        void setData(SparseArray<String> mapKeyIsPhotoPositionValueIsPhotoDate, SparseArray<Media> mapKeyIsPhotoPositionValueIsPhoto, Map<String, List<Media>> mapKeyIsDateValueIsPhotoList, List<Media> medias) {
-            mMapKeyIsDateValueIsPhotoList = mapKeyIsDateValueIsPhotoList;
-            mMapKeyIsPhotoPositionValueIsPhoto = mapKeyIsPhotoPositionValueIsPhoto;
-            mMapKeyIsPhotoPositionValueIsPhotoDate = mapKeyIsPhotoPositionValueIsPhotoDate;
-            mMedias = medias;
+        void setData(MediaFragmentDataLoader loader) {
+            mMapKeyIsDateValueIsPhotoList = loader.getmMapKeyIsDateValueIsPhotoList();
+            mMapKeyIsPhotoPositionValueIsPhoto = loader.getmMapKeyIsPhotoPositionValueIsPhoto();
+            mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getmMapKeyIsPhotoPositionValueIsPhotoDate();
+            mMedias = loader.getMedias();
+            mAdapterItemTotalCount = loader.getmAdapterItemTotalCount();
         }
 
         @Override
@@ -500,7 +509,7 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
 
         @Override
         public int getItemCount() {
-            return adapterItemTotalCount;
+            return mAdapterItemTotalCount;
         }
 
         @Override
@@ -677,9 +686,7 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
 
                         mPresenter.calcSelectedPhoto();
 
-                        for (IPhotoListListener listListener : mPhotoListListeners) {
-                            listListener.onPhotoItemClick(selectCount);
-                        }
+                        mPresenter.setSelectCountText(String.format(containerActivity.getString(R.string.select_count), mPresenter.getSelectCount()));
                     }
                 }
             });
@@ -838,9 +845,7 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
 
                         mPresenter.calcSelectedPhoto();
 
-                        for (IPhotoListListener listListener : mPhotoListListeners) {
-                            listListener.onPhotoItemClick(selectCount);
-                        }
+                        mPresenter.setSelectCountText(String.format(containerActivity.getString(R.string.select_count), mPresenter.getSelectCount()));
 
                     } else {
 
@@ -888,7 +893,13 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
                 @Override
                 public boolean onLongClick(View v) {
 
-                    mPresenter.imageOnLongClick(currentMedia, containerActivity);
+                    mPresenter.enterChooseMode();
+
+                    currentMedia.setSelected(true);
+
+                    mPresenter.calcSelectedPhoto();
+
+                    mPresenter.setSelectCountText(String.format(containerActivity.getString(R.string.select_count), mPresenter.getSelectCount()));
 
                     return true;
                 }
@@ -980,7 +991,6 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
                 if (mSpanCount > mSpanMinCount) {
                     mSpanCount--;
                     calcPhotoItemWidth();
-                    NewPhotoListDataLoader.INSTANCE.calcPhotoPositionNumber();
                     ((GridLayoutManager) mLayoutManager).setSpanCount(mSpanCount);
                     mRecyclerView.setLayoutManager(mLayoutManager);
                     mPhotoRecycleAdapter.notifyItemRangeChanged(0, mPhotoRecycleAdapter.getItemCount());
@@ -993,7 +1003,6 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView {
                 if (mSpanCount < mSpanMaxCount) {
                     mSpanCount++;
                     calcPhotoItemWidth();
-                    NewPhotoListDataLoader.INSTANCE.calcPhotoPositionNumber();
                     ((GridLayoutManager) mLayoutManager).setSpanCount(mSpanCount);
                     mRecyclerView.setLayoutManager(mLayoutManager);
                     mPhotoRecycleAdapter.notifyItemRangeChanged(0, mPhotoRecycleAdapter.getItemCount());

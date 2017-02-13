@@ -40,6 +40,9 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.refactor.common.Injection;
+import com.winsun.fruitmix.refactor.contract.MediaShareFragmentContract;
+import com.winsun.fruitmix.refactor.presenter.MediaShareFragmentPresenterImpl;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -58,11 +61,9 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/4/19.
  */
-public class MediaShareFragment implements Page {
+public class MediaShareFragment implements MediaShareFragmentContract.MediaShareFragmentView {
 
     public static final String TAG = MediaShareFragment.class.getSimpleName();
-
-    private OnMediaFragmentInteractionListener listener;
 
     private Activity containerActivity;
     private View view;
@@ -78,17 +79,15 @@ public class MediaShareFragment implements Page {
     @BindView(R.id.no_content_imageview)
     ImageView noContentImageView;
 
-    private List<MediaShare> mediaShareList;
     private Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
     private ShareRecyclerViewAdapter mAdapter;
 
     private ImageLoader mImageLoader;
-    private Bundle reenterState;
 
-    public MediaShareFragment(Activity activity_, OnMediaFragmentInteractionListener listener) {
+    private MediaShareFragmentContract.MediaShareFragmentPresenter mPresenter;
+
+    public MediaShareFragment(Activity activity_) {
         containerActivity = activity_;
-
-        this.listener = listener;
 
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(R.layout.share_list2, null);
 
@@ -102,7 +101,10 @@ public class MediaShareFragment implements Page {
 
         mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
 
-        mediaShareList = new ArrayList<>();
+        initImageLoader();
+
+        mPresenter = new MediaShareFragmentPresenterImpl(Injection.injectDataRepository());
+        mPresenter.attachView(this);
     }
 
     private void initImageLoader() {
@@ -112,173 +114,117 @@ public class MediaShareFragment implements Page {
 
     }
 
-    private void reloadList() {
-
-        mediaShareList.clear();
-
-        fillMediaShareList(mediaShareList);
-
-        sortMediaShareList(mediaShareList);
-
-    }
-
-    private void sortMediaShareList(List<MediaShare> mediaShareList) {
-        Collections.sort(mediaShareList, new Comparator<MediaShare>() {
-            @Override
-            public int compare(MediaShare lhs, MediaShare rhs) {
-                long time1 = Long.parseLong(lhs.getTime());
-                long time2 = Long.parseLong(rhs.getTime());
-
-                if (time1 < time2)
-                    return 1;
-                else if (time1 > time2)
-                    return -1;
-                else return 0;
-
-            }
-        });
-    }
-
-    private void fillMediaShareList(List<MediaShare> mediaShareList) {
-        for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
-            if (isMediaSharePublic(mediaShare)) {
-                mediaShareList.add(mediaShare);
-            }
-        }
-
-        for (MediaShare mediaShare : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
-            if (isMediaSharePublic(mediaShare)) {
-                mediaShareList.add(mediaShare);
-            }
-        }
-    }
-
-    private boolean isMediaSharePublic(MediaShare mediaShare) {
-        return LocalCache.RemoteUserMapKeyIsUUID.size() == 1 || (FNAS.userUUID != null && mediaShare.getCreatorUUID().equals(FNAS.userUUID)) || (mediaShare.getViewersListSize() != 0 && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()));
-    }
-
-
-    public void refreshView() {
-
-        mLoadingLayout.setVisibility(View.VISIBLE);
-
-        if (!Util.isRemoteMediaShareLoaded()) {
-            return;
-        }
-
-        initImageLoader();
-
-        reloadList();
-
-        mLoadingLayout.setVisibility(View.GONE);
-        if (mediaShareList.size() == 0) {
-            mNoContentLayout.setVisibility(View.VISIBLE);
-            mainRecyclerView.setVisibility(View.GONE);
-        } else {
-            mNoContentLayout.setVisibility(View.GONE);
-            mainRecyclerView.setVisibility(View.VISIBLE);
-            mAdapter.notifyDataSetChanged();
-
-        }
-
-        mMapKeyIsImageUUIDValueIsComments.clear();
-
-        refreshRemoteComment();
-        refreshLocalComment();
-    }
-
-    public void onDidAppear() {
-
-        refreshView();
-
-    }
-
     public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
 
-        if (reenterState != null) {
-
-            int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
-            int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
-            String currentMediaShareTime = reenterState.getString(Util.CURRENT_MEDIASHARE_TIME);
-            if (initialPhotoPosition != currentPhotoPosition) {
-
-                names.clear();
-                sharedElements.clear();
-
-                int currentMediaSharePosition = findShareItemPosition(currentMediaShareTime);
-
-                List<String> currentMediaUUIDs = mediaShareList.get(currentMediaSharePosition).getMediaKeyInMediaShareContents();
-
-                String currentMediaUUID = currentMediaUUIDs.get(currentPhotoPosition);
-
-                View currentSharedElementView = mainRecyclerView.findViewWithTag(findMediaTagByMediaKey(currentMediaUUID));
-
-                names.add(currentMediaUUID);
-                sharedElements.put(currentMediaUUID, currentSharedElementView);
-
-            }
-
-        }
-        reenterState = null;
+        mPresenter.onMapSharedElements(names, sharedElements);
 
     }
 
     public void onActivityReenter(int resultCode, Intent data) {
-        reenterState = new Bundle(data.getExtras());
-        int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
-        int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
 
-        if (initialPhotoPosition != currentPhotoPosition) {
+        mPresenter.onActivityReenter(resultCode, data);
 
-            ActivityCompat.postponeEnterTransition(containerActivity);
-            mainRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    mainRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
-                    // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
-                    mainRecyclerView.requestLayout();
-                    ActivityCompat.startPostponedEnterTransition(containerActivity);
-
-                    return true;
-                }
-            });
-
-        }
-    }
-
-    private int findShareItemPosition(String currentMediaShareTime) {
-
-        int returnPosition = 0;
-        int size = mediaShareList.size();
-        for (int i = 0; i < size; i++) {
-            MediaShare mediaShare = mediaShareList.get(i);
-            String mediaShareTime = mediaShare.getTime();
-            if (currentMediaShareTime.equals(mediaShareTime)) {
-                returnPosition = i;
-                break;
-            }
-        }
-
-        return returnPosition;
-    }
-
-    private String findMediaTagByMediaKey(String imageKey) {
-        String currentMediaTag;
-        Media currentMedia = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKey);
-        if (currentMedia == null) {
-            currentMedia = LocalCache.findMediaInLocalMediaMap(imageKey);
-        }
-
-        if (currentMedia == null)
-            currentMediaTag = "";
-        else
-            currentMediaTag = currentMedia.getImageThumbUrl(containerActivity);
-
-        return currentMediaTag;
     }
 
     public View getView() {
         return view;
+    }
+
+    @Override
+    public void showMediaShares(List<MediaShare> mediaShares) {
+
+        mAdapter.setMediaShares(mediaShares);
+        mAdapter.notifyDataSetChanged();
+
+    }
+
+    @Override
+    public View findViewWithMedia(Media media) {
+
+        String currentMediaTag;
+
+        if (media == null)
+            currentMediaTag = "";
+        else
+            currentMediaTag = media.getImageThumbUrl(containerActivity);
+
+        return mainRecyclerView.findViewWithTag(currentMediaTag);
+    }
+
+    @Override
+    public void startPostponedEnterTransition() {
+        ActivityCompat.postponeEnterTransition(containerActivity);
+        mainRecyclerView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                mainRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                // TODO: figure out why it is necessary to request layout here in order to get a smooth transition.
+                mainRecyclerView.requestLayout();
+                ActivityCompat.startPostponedEnterTransition(containerActivity);
+
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public void onDestroyView() {
+        mPresenter.detachView();
+    }
+
+    @Override
+    public boolean isNetworkAlive() {
+        return Util.getNetworkState(containerActivity);
+    }
+
+    @Override
+    public void showNoNetwork() {
+        Toast.makeText(containerActivity, containerActivity.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showLoadingUI() {
+        mLoadingLayout.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissLoadingUI() {
+        mLoadingLayout.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showNoContentUI() {
+        mNoContentLayout.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissNoContentUI() {
+        mNoContentLayout.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showContentUI() {
+        mainRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissContentUI() {
+        mainRecyclerView.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showDialog() {
+
+    }
+
+    @Override
+    public void dismissDialog() {
+
+    }
+
+    @Override
+    public void hideSoftInput() {
+
     }
 
     private class ShareRecyclerViewAdapter extends RecyclerView.Adapter<CardItemViewHolder> {
@@ -287,9 +233,16 @@ public class MediaShareFragment implements Page {
         private static final int VIEW_ONE_MORE_MEDIA_SHARE_CARD_ITEM = 1;
         private static final int VIEW_ONE_MEDIA_SHARE_CARD_ITEM = 2;
 
+        private List<MediaShare> mMediaShares;
+
         ShareRecyclerViewAdapter() {
 
             setHasStableIds(true);
+            mMediaShares = new ArrayList<>();
+        }
+
+        void setMediaShares(List<MediaShare> mediaShares) {
+            mMediaShares.addAll(mediaShares);
         }
 
         @Override
@@ -313,7 +266,7 @@ public class MediaShareFragment implements Page {
         @Override
         public void onBindViewHolder(CardItemViewHolder holder, int position) {
 
-            MediaShare mediaShare = mediaShareList.get(position);
+            MediaShare mediaShare = mMediaShares.get(position);
 
             holder.refreshView(mediaShare, position);
 
@@ -322,8 +275,8 @@ public class MediaShareFragment implements Page {
         @Override
         public int getItemCount() {
 
-            if (mediaShareList == null) return 0;
-            return mediaShareList.size();
+            if (mMediaShares == null) return 0;
+            return mMediaShares.size();
         }
 
         @Override
@@ -333,7 +286,7 @@ public class MediaShareFragment implements Page {
 
         @Override
         public int getItemViewType(int position) {
-            MediaShare mediaShare = mediaShareList.get(position);
+            MediaShare mediaShare = mMediaShares.get(position);
             if (mediaShare.isAlbum()) {
                 return VIEW_ALBUM_CARD_ITEM;
             } else if (mediaShare.getMediaContentsListSize() == 1) {
@@ -382,13 +335,13 @@ public class MediaShareFragment implements Page {
             }
             cardView.setLayoutParams(layoutParams);
 
-
             lbTime.setText(Util.formatTime(containerActivity, Long.parseLong(currentItem.getTime())));
 
             String createUUID = currentItem.getCreatorUUID();
-            if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(createUUID)) {
 
-                User user = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreatorUUID());
+            User user = mPresenter.loadUser(createUUID);
+
+            if (user != null) {
 
                 nickName = user.getUserName();
                 lbNick.setText(nickName);
@@ -447,10 +400,8 @@ public class MediaShareFragment implements Page {
 
             lbAlbumTitle.setText(title);
 
-            coverImg = LocalCache.findMediaInLocalMediaMap(currentItem.getCoverImageKey());
-            if (coverImg == null) {
-                coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageKey());
-            }
+            coverImg = mPresenter.loadMedia(currentItem.getCoverImageKey());
+
             if (coverImg != null) {
 
                 String imageUrl = coverImg.getImageOriginalUrl(containerActivity);
@@ -519,10 +470,7 @@ public class MediaShareFragment implements Page {
         private void refreshViewAttributeWhenOneImage(Map<String, List<Comment>> commentMap) {
             Log.d(TAG, "images[0]:" + imageKeys.get(0));
 
-            itemImg = LocalCache.findMediaInLocalMediaMap(imageKeys.get(0));
-            if (itemImg == null) {
-                itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(0));
-            }
+            itemImg = mPresenter.loadMedia(imageKeys.get(0));
 
             if (itemImg != null) {
 
@@ -578,7 +526,7 @@ public class MediaShareFragment implements Page {
             ivCover.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    List<Media> imageList = getImgList(currentItem.getMediaKeyInMediaShareContents());
+                    List<Media> imageList = mPresenter.loadMedias(currentItem.getMediaKeyInMediaShareContents());
 
                     fillLocalCachePhotoData(imageList);
 
@@ -749,10 +697,8 @@ public class MediaShareFragment implements Page {
             for (int i = 0; i < length; i++) {
 
                 ivItems[i].setVisibility(View.VISIBLE);
-                itemImg = LocalCache.findMediaInLocalMediaMap(imageKeys.get(i));
 
-                if (itemImg == null)
-                    itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(i));
+                itemImg = mPresenter.loadMedia(imageKeys.get(i));
 
                 if (itemImg != null) {
 
@@ -777,7 +723,7 @@ public class MediaShareFragment implements Page {
                     @Override
                     public void onClick(View v) {
 
-                        List<Media> imageList = getImgList(currentItem.getMediaKeyInMediaShareContents());
+                        List<Media> imageList = mPresenter.loadMedias(currentItem.getMediaKeyInMediaShareContents());
 
                         fillLocalCachePhotoData(imageList);
 
@@ -813,46 +759,6 @@ public class MediaShareFragment implements Page {
     private void fillLocalCachePhotoData(List<Media> imageList) {
         PhotoSliderActivity.setMediaList(imageList);
     }
-
-    private List<Media> getImgList(List<String> imageKeys) {
-        ArrayList<Media> picList;
-        Media picItem;
-        Media picItemRaw;
-
-        picList = new ArrayList<>();
-
-        for (String aStArr : imageKeys) {
-
-            picItemRaw = LocalCache.findMediaInLocalMediaMap(aStArr);
-
-            if (picItemRaw == null) {
-
-                picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
-
-                if (picItemRaw == null) {
-                    picItem = new Media();
-
-                } else {
-
-                    picItem = picItemRaw;
-                    picItem.setLocal(false);
-                }
-
-            } else {
-
-                picItem = picItemRaw;
-                picItem.setLocal(true);
-
-            }
-
-            picItem.setSelected(false);
-
-            picList.add(picItem);
-        }
-
-        return picList;
-    }
-
 
     public void refreshRemoteComment() {
 

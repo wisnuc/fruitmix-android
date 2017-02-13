@@ -46,6 +46,9 @@ public class SplashScreenActivity extends BaseActivity implements SplashContract
         mSplashPresenter = new SplashPresenterImpl(Injection.injectDataRepository());
 
         mSplashPresenter.attachView(this);
+
+        mSplashPresenter.createDownloadFileStoreFolder();
+        mSplashPresenter.loadToken();
     }
 
     @Override

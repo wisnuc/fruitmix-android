@@ -37,7 +37,8 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
 
     }
 
-    private void createDownloadFileStoreFolder() {
+    @Override
+    public void createDownloadFileStoreFolder() {
         boolean result = FileUtil.createDownloadFileStoreFolder();
 
         if (!result) {
@@ -56,9 +57,7 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
     }
 
     @Override
-    public void startMission() {
-
-        createDownloadFileStoreFolder();
+    public void loadToken() {
 
         final String tokenInDB = mRepository.loadTokenInDB();
 

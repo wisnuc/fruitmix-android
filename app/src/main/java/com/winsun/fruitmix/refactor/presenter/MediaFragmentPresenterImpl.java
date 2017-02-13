@@ -51,8 +51,6 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
     private List<String> mAlreadySelectedImageKeyArrayList;
 
-    private int mAdapterItemTotalCount = 0;
-
     private int mSelectCount;
 
     private boolean mSelectMode = false;
@@ -76,6 +74,11 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
                 media.setSelected(false);
             }
         }
+    }
+
+    @Override
+    public void setSelectCountText(String selectCountText) {
+        mMediaMainFragmentPresenter.setTitleText(selectCountText);
     }
 
     @Override
@@ -358,7 +361,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     }
 
     @Override
-    public void onResume() {
+    public void onResume(){
         if (mPhotoListRefresh) {
             mRepository.loadLoadMediaInCamera(new MediaOperationCallback.LoadMediasCallback() {
                 @Override
@@ -375,17 +378,6 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     }
 
     @Override
-    public void imageOnLongClick(Media media, Context context) {
-
-        enterChooseMode();
-
-        media.setSelected(true);
-
-        mSelectCount = 1;
-        mMediaMainFragmentPresenter.setTitleText(String.format(context.getString(R.string.select_count), mSelectCount));
-    }
-
-    @Override
     public void attachView(MediaFragmentContract.MediaFragmentView view) {
         mView = view;
     }
@@ -396,7 +388,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     }
 
     @Override
-    public void startMission() {
+    public void onCreate() {
 
         mRepository.loadMedias(new MediaOperationCallback.LoadMediasCallback() {
             @Override
@@ -422,16 +414,22 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
                 mMapKeyIsPhotoPositionValueIsPhoto = loader.getmMapKeyIsPhotoPositionValueIsPhoto();
                 mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getmMapKeyIsPhotoPositionValueIsPhotoDate();
                 mMapKeyIsDateValueIsPhotoList = loader.getmMapKeyIsDateValueIsPhotoList();
-                mAdapterItemTotalCount = loader.getmAdapterItemTotalCount();
                 mMedias = loader.getMedias();
 
                 clearSelectPhoto();
 
                 mView.dismissLoadingUI();
                 if(mPhotoDateGroups.size() == 0){
-                    mView.showMedias(mMapKeyIsPhotoPositionValueIsPhotoDate, mMapKeyIsPhotoPositionValueIsPhoto,mMapKeyIsDateValueIsPhotoList,mMedias);
+                    mView.dismissNoContentUI();
+                    mView.showContentUI();
+                    mView.showMedias(loader);
+
+                    mMediaMainFragmentPresenter.setSelectModeBtnVisibility(View.VISIBLE);
                 }else {
                     mView.showNoContentUI();
+                    mView.dismissContentUI();
+
+                    mMediaMainFragmentPresenter.setSelectModeBtnVisibility(View.INVISIBLE);
                 }
 
             }

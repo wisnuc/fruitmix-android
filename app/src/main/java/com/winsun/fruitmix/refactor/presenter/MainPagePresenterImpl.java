@@ -178,8 +178,7 @@ public class MainPagePresenterImpl implements MainPageContract.MainPagePresenter
     }
 
     @Override
-    public void startMission() {
-        mView.setVersionNameText(mView.getVersionName());
+    public void loadCurrentUser() {
 
         mRepository.loadCurrentUser(new UserOperationCallback.LoadCurrentUserCallback() {
             @Override

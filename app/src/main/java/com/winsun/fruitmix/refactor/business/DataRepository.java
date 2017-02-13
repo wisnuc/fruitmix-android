@@ -66,7 +66,7 @@ public class DataRepository {
         return INSTANCE;
     }
 
-    public void shutdownFixedThreadPoolNow(){
+    public void shutdownFixedThreadPoolNow() {
 
         instance.shutdownFixedThreadPoolNow();
         instance = null;
@@ -124,8 +124,20 @@ public class DataRepository {
 
     }
 
-    public void loadLoadMediaInCamera(MediaOperationCallback.LoadMediasCallback callback){
+    public void loadLoadMediaInCamera(MediaOperationCallback.LoadMediasCallback callback) {
 
+    }
+
+    public Media loadMediaFromMemory(String mediaKey) {
+        return ((MemoryDataSource) mMemoryDataSource).loadMedia(mediaKey);
+    }
+
+    public User loadUserFromMemory(String userUUID) {
+        return ((MemoryDataSource) mMemoryDataSource).loadUser(userUUID);
+    }
+
+    public MediaShare loadMediaShareFromMemory(String mediaShareUUID){
+        return ((MemoryDataSource) mMemoryDataSource).loadMediaShare(mediaShareUUID);
     }
 
     public void loadMedias(MediaOperationCallback.LoadMediasCallback callback) {
@@ -133,7 +145,13 @@ public class DataRepository {
 
     }
 
-    public void handleMediasForMediaFragment(List<Media> medias, MediaOperationCallback.HandleMediaForMediaFragmentCallback callback){
+    public void loadMediaInMediaShareFromMemory(MediaShare mediaShare, MediaOperationCallback.LoadMediasCallback callback){
+
+
+
+    }
+
+    public void handleMediasForMediaFragment(List<Media> medias, MediaOperationCallback.HandleMediaForMediaFragmentCallback callback) {
 
 
     }
@@ -142,6 +160,21 @@ public class DataRepository {
 
     }
 
+    public boolean isMediaSharePublic(MediaShare mediaShare) {
+        return ((MemoryDataSource) mMemoryDataSource).isMediaSharePublic(mediaShare);
+    }
+
+    public boolean checkPermissionToOperateMediaShare(MediaShare mediaShare){
+        return ((MemoryDataSource) mMemoryDataSource).checkPermissionToOperateMediaShare(mediaShare);
+    }
+
+    public boolean getShowAlbumTipsValue() {
+        return ((DBDataSource) mDBDataSource).getShowAlbumTipsValue();
+    }
+
+    public void saveShowAlbumTipsValue(boolean value) {
+        ((DBDataSource) mDBDataSource).saveShowAlbumTipsValue(value);
+    }
 
     public LoadTokenParam getLoadTokenParamInDB() {
 
@@ -199,8 +232,8 @@ public class DataRepository {
 
     public void logout(OperationCallback callback) {
 
-        ((MemoryDataSource)mMemoryDataSource).logout();
-        ((DBDataSource)mDBDataSource).logout();
+        ((MemoryDataSource) mMemoryDataSource).logout();
+        ((DBDataSource) mDBDataSource).logout();
 
         instance.shutdownFixedThreadPoolNow();
 
@@ -233,7 +266,15 @@ public class DataRepository {
 
     }
 
-    public void createMediaShare(MediaShare mediaShare, MediaShareOperationCallback.OperateMediaShareCallback callback){
+    public void createMediaShare(MediaShare mediaShare, MediaShareOperationCallback.OperateMediaShareCallback callback) {
+
+    }
+
+    public void modifyMediaShare(MediaShare mediaShare, MediaShareOperationCallback.OperateMediaShareCallback callback) {
+
+    }
+
+    public void deleteMediaShare(MediaShare mediaShare, MediaShareOperationCallback.OperateMediaShareCallback callback) {
 
     }
 }

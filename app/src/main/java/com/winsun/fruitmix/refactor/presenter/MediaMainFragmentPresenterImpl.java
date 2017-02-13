@@ -196,13 +196,24 @@ public class MediaMainFragmentPresenterImpl implements MediaMainFragmentContract
     }
 
     @Override
-    public void startMission() {
-
+    public void onCreate() {
         if (mView.isHidden())
             return;
 
-        mMediaFragmentPresenter.startMission();
+        mMediaFragmentPresenter.onCreate();
+    }
 
+    @Override
+    public void onCreateView() {
+        mView.setViewPageCurrentItem(PAGE_PHOTO);
+    }
+
+    @Override
+    public void onResume() {
+        if (mView.isHidden())
+            return;
+
+        mMediaFragmentPresenter.onResume();
     }
 
     @Override

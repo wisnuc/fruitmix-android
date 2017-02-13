@@ -90,11 +90,7 @@ public class CreateUserPresenterImpl implements CreateUserContract.CreateUserPre
     }
 
     @Override
-    public void startMission() {
-        loadUserNames();
-    }
-
-    private void loadUserNames() {
+    public void loadUserNames() {
 
         mRepository.loadUsers(new UserOperationCallback.LoadUsersCallback() {
             @Override

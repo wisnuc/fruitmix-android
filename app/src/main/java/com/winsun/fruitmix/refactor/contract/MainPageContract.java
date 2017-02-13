@@ -23,8 +23,6 @@ public interface MainPageContract {
 
         void refreshUserInNavigationView(User user);
 
-        void setVersionNameText(String versionNameText);
-
         void switchDrawerOpenState();
 
         void lockDrawer();
@@ -36,8 +34,6 @@ public interface MainPageContract {
         void gotoUserManageActivity();
 
         void gotoEquipmentActivity();
-
-        String getVersionName();
 
         void setFileItemMenuTitle(int resID);
 
@@ -56,6 +52,8 @@ public interface MainPageContract {
     }
 
     interface MainPagePresenter extends BasePresenter<MainPageView> {
+
+        void loadCurrentUser();
 
         void setMediaMainFragmentPresenter(MediaMainFragmentContract.MediaMainFragmentPresenter presenter);
 

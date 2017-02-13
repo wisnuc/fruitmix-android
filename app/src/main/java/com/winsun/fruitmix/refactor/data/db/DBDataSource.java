@@ -131,4 +131,17 @@ public class DBDataSource implements DataSource {
 
         mDBUtils.updateLocalMediasUploadedFalse();
     }
+
+    public boolean getShowAlbumTipsValue() {
+
+        return mSharedPreferences.getBoolean(Util.SHOW_ALBUM_TIPS, true);
+    }
+
+    public void saveShowAlbumTipsValue(boolean value) {
+
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean(Util.SHOW_ALBUM_TIPS, value);
+        editor.apply();
+    }
+
 }

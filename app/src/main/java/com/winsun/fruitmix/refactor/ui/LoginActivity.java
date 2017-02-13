@@ -63,7 +63,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
         mPresenter = new LoginPresenterImpl(Injection.injectDataRepository(),equipmentGroupName,equipmentChildName,color,userUUid,gateway);
         mPresenter.attachView(this);
-        mPresenter.startMission();
+        mPresenter.showEquipmentAndUser();
     }
 
     @Override

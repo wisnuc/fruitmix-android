@@ -12,8 +12,6 @@ public interface BasePresenter<T> {
 
     void detachView();
 
-    void startMission();
-
     void handleBackEvent();
 
     void handleOnActivityResult(int requestCode, int resultCode,Intent data);

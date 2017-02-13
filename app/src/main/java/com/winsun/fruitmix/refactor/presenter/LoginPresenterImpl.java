@@ -89,14 +89,12 @@ public class LoginPresenterImpl implements LoginContract.LoginPresenter {
     }
 
     @Override
-    public void startMission() {
-
+    public void showEquipmentAndUser() {
         mView.setEquipmentGroupNameText(mEquipmentGroupName);
         mView.setEquipmentChildNameText(mEquipmentChildName);
 
         mView.setUserDefaultPortraitText(Util.getUserNameFirstLetter(mEquipmentChildName));
         mView.setUserDefaultPortraitBgColor(mUserDefaultBgColor);
-
     }
 
     @Override

@@ -35,6 +35,8 @@ public interface LoginContract {
 
     interface LoginPresenter extends BasePresenter<LoginView> {
 
+        void showEquipmentAndUser();
+
         void login(String userPassword);
 
         void onFocusChange(boolean hasFocus);

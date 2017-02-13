@@ -47,6 +47,12 @@ public interface MediaMainFragmentContract {
 
     interface MediaMainFragmentPresenter extends BasePresenter<MediaMainFragmentView>{
 
+        void onCreate();
+
+        void onCreateView();
+
+        void onResume();
+
         void setViewPageCurrentItem(int position);
 
         void selectModeBtnClick();

@@ -1,17 +1,11 @@
 package com.winsun.fruitmix.refactor.ui;
 
-import android.animation.Animator;
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorListenerAdapter;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -24,8 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,11 +25,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.interfaces.IPhotoListListener;
-import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
-import com.winsun.fruitmix.mediaModule.fragment.AlbumList;
 import com.winsun.fruitmix.mediaModule.fragment.MediaShareList;
-import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Comment;
@@ -56,15 +44,14 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static android.app.Activity.RESULT_OK;
-
-public class MediaMainFragment extends Fragment implements OnMediaFragmentInteractionListener,IPhotoListListener, MediaMainFragmentContract.MediaMainFragmentView {
+public class MediaMainFragment extends Fragment implements MediaMainFragmentContract.MediaMainFragmentView {
 
     public static final String TAG = MediaMainFragment.class.getSimpleName();
 
@@ -76,30 +63,16 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     TextView lbRight;
     @BindView(R.id.viewPager)
     ViewPager viewPager;
-    @BindView(R.id.album_balloon)
-    ImageView mAlbumBalloon;
     @BindView(R.id.bottom_navigation_view)
     BottomNavigationView bottomNavigationView;
 
-    private List<Page> pageList;
-    private AlbumList albumList;
-    private MediaFragment mediaFragment;
-    private MediaShareList shareList;
+    private AlbumFragment mAlbumFragment;
+    private MediaFragment mMediaFragment;
+    private MediaShareFragment mMediaShareFragment;
 
     private Context mContext;
 
     private ProgressDialog mDialog;
-
-    private static final int PAGE_SHARE = 0;
-    private static final int PAGE_PHOTO = 1;
-    private static final int PAGE_ALBUM = 2;
-
-    private boolean sInChooseMode = false;
-
-    private boolean onResume = false;
-
-    private boolean mPhotoListRefresh = false;
-    private boolean mShareAlbumListRefresh = false;
 
     private MediaMainFragmentContract.MediaMainFragmentPresenter mPresenter;
     private MainPageContract.MainPagePresenter mMainPagePresenter;
@@ -128,11 +101,13 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         mContext = getActivity();
 
-        initPageList();
+        initPage();
 
         mPresenter = new MediaMainFragmentPresenterImpl(mMainPagePresenter, null, null, null);
         mPresenter.attachView(this);
         mMainPagePresenter = null;
+
+        mPresenter.onCreate();
 
         Log.d(TAG, "onCreate: ");
     }
@@ -158,7 +133,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         initViewPager();
 
-        viewPager.setCurrentItem(PAGE_PHOTO);
+        mPresenter.onCreateView();
 
         lbRight.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -166,7 +141,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 mPresenter.selectModeBtnClick();
             }
         });
-
 
         Log.d(TAG, "onCreateView: ");
 
@@ -186,8 +160,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void onResume() {
         super.onResume();
 
-        mPresenter.startMission();
-
+        mPresenter.onResume();
     }
 
     @Override
@@ -207,7 +180,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         mPresenter.detachView();
 
-        mediaFragment.onDestroyView();
+        mMediaFragment.onDestroyView();
+        mAlbumFragment.onDestroyView();
+        mMediaShareFragment.onDestroyView();
 
         Log.d(TAG, "onDestroyView: ");
     }
@@ -217,6 +192,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         super.onDestroy();
 
         mContext = null;
+        mPresenter.detachView();
 
         Log.d(TAG, "onDestroy: ");
     }
@@ -237,6 +213,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     }
 
+    @Override
     public void resetBottomNavigationItemCheckState() {
 
         int size = bottomNavigationView.getMenu().size();
@@ -277,14 +254,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         lbRight.setVisibility(visibility);
     }
 
-    private void initPageList() {
-        shareList = new MediaShareList(getActivity(), this);
+    private void initPage() {
 
-        albumList = new AlbumList(getActivity(), this);
-        pageList = new ArrayList<Page>();
-        pageList.add(shareList);
+        mMediaFragment = new MediaFragment(getActivity(), Collections.<String>emptyList(), mPresenter);
+        mMediaShareFragment = new MediaShareFragment(getActivity());
+        mAlbumFragment = new AlbumFragment(getActivity());
 
-        pageList.add(albumList);
     }
 
     private void initViewPager() {
@@ -323,7 +298,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 break;
             case Util.LOCAL_MEDIA_COMMENT_RETRIEVED:
                 Log.i(TAG, "local media comment loaded");
-                ((MediaShareList) pageList.get(PAGE_SHARE)).refreshLocalComment();
 
                 doCreateRemoteMediaCommentInLocalMediaCommentMapFunction();
                 break;
@@ -331,15 +305,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 Log.i(TAG, "remote media comment loaded ");
 
-                ((MediaShareList) pageList.get(PAGE_SHARE)).refreshRemoteComment();
 
                 break;
 
             case Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED:
 
                 Log.i(TAG, "handleOperationEvent: new local media in camera retrieved succeed");
-
-                setPhotoListRefresh();
 
 
 
@@ -348,18 +319,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 Log.i(TAG, "handleOperationEvent: local media in db retrieved succeed");
 
-                setPhotoListRefresh();
-
-
 
                 break;
 
             case Util.REMOTE_MEDIA_RETRIEVED:
 
                 Log.i(TAG, "remote media loaded");
-
-                setPhotoListRefresh();
-
 
 
                 break;
@@ -368,25 +333,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 Log.i(TAG, "remote share loaded");
 
-                setShareAlbumListRefresh();
-
-                albumList.refreshView();
-                shareList.refreshView();
 
                 break;
 
         }
 
-    }
-
-    public void setPhotoListRefresh() {
-        if (Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && Util.isRemoteMediaLoaded())
-            mPhotoListRefresh = true;
-    }
-
-    public void setShareAlbumListRefresh() {
-        if (Util.isRemoteMediaShareLoaded())
-            mShareAlbumListRefresh = true;
     }
 
     private void doCreateRemoteMediaCommentInLocalMediaCommentMapFunction() {
@@ -405,9 +356,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
 
-        if (result == OperationResultType.SUCCEED) {
-            shareList.refreshView();
-        }
+
     }
 
     private void handleRemoteCommentCreated(OperationEvent operationEvent) {
@@ -433,8 +382,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         switch (operationResultType) {
             case SUCCEED:
                 Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-                albumList.refreshView();
-                shareList.refreshView();
+
+
                 break;
             default:
                 Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
@@ -448,11 +397,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         dismissDialog();
 
-        if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
-            viewPager.setCurrentItem(PAGE_SHARE);
-
-            pageList.get(PAGE_SHARE).onDidAppear();
-        }
 
         Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
 
@@ -467,37 +411,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         title.setText(text);
     }
 
-    public void showTips() {
-        if (getShowAlbumTipsValue()) {
-            setShowAlbumTipsValue(false);
-            if (mAlbumBalloon != null) {
-                mAlbumBalloon.setVisibility(View.VISIBLE);
-                mAlbumBalloon.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mAlbumBalloon.setVisibility(View.GONE);
-                    }
-                });
-            }
-        }
-    }
-
-    private boolean getShowAlbumTipsValue() {
-        SharedPreferences sp;
-        sp = getActivity().getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        return sp.getBoolean(Util.SHOW_ALBUM_TIPS, true);
-    }
-
-    private void setShowAlbumTipsValue(boolean value) {
-        SharedPreferences sp;
-        SharedPreferences.Editor editor;
-        sp = getActivity().getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        editor = sp.edit();
-        editor.putBoolean(Util.SHOW_ALBUM_TIPS, value);
-        editor.apply();
-    }
-
-
+    @Override
     public void showBottomNavAnim() {
 
         bottomNavigationView.setVisibility(View.VISIBLE);
@@ -520,10 +434,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         bottomNavigationView.startAnimation(animation);
     }
 
-    private void showBottomNav() {
-        bottomNavigationView.setVisibility(View.VISIBLE);
-    }
-
+    @Override
     public void dismissBottomNavAnim() {
 
         Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.dismiss_bottom_item_anim);
@@ -559,49 +470,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         return viewPager.getCurrentItem();
     }
 
-
-    @Override
-    public void onPhotoItemClick(int selectedItemCount) {
-
-        setSelectCountText(String.format(getString(R.string.select_count), selectedItemCount));
-    }
-
     private void dismissDialog() {
         if (mDialog != null && mDialog.isShowing())
             mDialog.dismiss();
     }
 
-    @Override
-    public void onPhotoItemLongClick() {
-
-        dismissBottomNavAnim();
-
-        setSelectCountText(String.format(getString(R.string.select_count), 1));
-    }
-
-    @Override
-    public void onNoPhotoItem(boolean noPhotoItem) {
-
-        Log.d(TAG, "onNoPhotoItem:" + noPhotoItem);
-
-        int currentItem = viewPager.getCurrentItem();
-
-        if (noPhotoItem && currentItem == PAGE_PHOTO) {
-            lbRight.setVisibility(View.GONE);
-        } else if (!noPhotoItem && currentItem == PAGE_PHOTO) {
-            lbRight.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private boolean showNothingSelectToast(List<String> selectUUIDs) {
-        if (selectUUIDs.size() == 0) {
-            Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public void modifyMediaShare(MediaShare mediaShare) {
 
         if (Util.getNetworkState(mContext)) {
@@ -623,7 +496,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     }
 
-    @Override
     public void deleteMediaShare(MediaShare mediaShare) {
 
         if (Util.getNetworkState(mContext)) {
@@ -655,7 +527,19 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
 
-            View view = pageList.get(position).getView();
+            View view = null;
+
+            switch (position) {
+                case 0:
+                    view = mAlbumFragment.getView();
+                    break;
+                case 1:
+                    view = mMediaFragment.getView();
+                    break;
+                case 2:
+                    view = mMediaShareFragment.getView();
+                    break;
+            }
 
             container.addView(view);
 
@@ -665,7 +549,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
             container.removeView((View) object);
-
         }
 
         @Override

@@ -1,6 +1,11 @@
 package com.winsun.fruitmix.refactor.contract;
 
+import android.view.View;
+
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
 
@@ -16,15 +21,22 @@ public interface AlbumFragmentContract {
 
         void setAlbumBalloonVisibility(int visibility);
 
-        void setNoContentImageView(int resID);
+        void setAlbumBalloonOnClickListener(View.OnClickListener listener);
 
         void showAlbums(List<MediaShare> mediaShares);
 
+        void onDestroyView();
+
+        void setAddAlbumBtnVisibility(int visibility);
+
+        void showOperationResultToast(OperationResult result);
+
+        void showNoOperatePermission();
     }
 
     interface AlbumFragmentPresenter extends BasePresenter<AlbumFragmentView> {
 
-        void createAlbum();
+        void createAlbumBtnOnClick();
 
         void modifyMediaShare(MediaShare mediaShare);
 
@@ -32,8 +44,13 @@ public interface AlbumFragmentContract {
 
         void refreshData();
 
-        void onPageSelected();
+        void onResume();
 
+        void onCreate();
+
+        Media loadMedia(String mediaKey);
+
+        User loadUser(String userUUID);
     }
 
 }

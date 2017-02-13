@@ -69,7 +69,7 @@ public class CreateUserActivity extends BaseActivity implements View.OnClickList
         mPresenter = new CreateUserPresenterImpl(Injection.injectDataRepository());
         mPresenter.attachView(this);
 
-        mPresenter.startMission();
+        mPresenter.loadUserNames();
     }
 
     @Override

@@ -103,15 +103,10 @@ public class MainPageActivity extends BaseActivity
 
         fileMenuItem = navigationView.getMenu().findItem(R.id.file);
 
+        setVersionNameText(getVersionName());
+        mPresenter.loadCurrentUser();
+
         Log.d(TAG, "onCreate: ");
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        mPresenter.startMission();
     }
 
     @Override
@@ -145,8 +140,7 @@ public class MainPageActivity extends BaseActivity
         userManage.setVisible(user.isAdmin());
     }
 
-    @Override
-    public void setVersionNameText(String versionNameText) {
+    private void setVersionNameText(String versionNameText) {
         versionName.setText(String.format(getString(R.string.android_version_name), versionNameText));
     }
 
@@ -186,8 +180,7 @@ public class MainPageActivity extends BaseActivity
         startActivity(intent);
     }
 
-    @Override
-    public String getVersionName() {
+    private String getVersionName() {
         return Util.getVersionName(mContext);
     }
 

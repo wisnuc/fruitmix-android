@@ -16,6 +16,12 @@ public interface BaseView {
 
     void showNoContentUI();
 
+    void dismissNoContentUI();
+
+    void showContentUI();
+
+    void dismissContentUI();
+
     void showDialog();
 
     void dismissDialog();

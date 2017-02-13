@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.refactor.ui;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
@@ -8,12 +9,12 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
@@ -23,17 +24,17 @@ import com.daimajia.swipe.adapters.BaseSwipeAdapter;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.AlbumPicContentActivity;
 import com.winsun.fruitmix.mediaModule.NewAlbumPicChooseActivity;
-import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
-import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.refactor.common.Injection;
+import com.winsun.fruitmix.refactor.contract.AlbumFragmentContract;
+import com.winsun.fruitmix.refactor.presenter.AlbumFragmentPresenterImpl;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -42,11 +43,9 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/4/19.
  */
-public class AlbumFragment implements Page {
+public class AlbumFragment implements AlbumFragmentContract.AlbumFragmentView {
 
     public static final String TAG = AlbumFragment.class.getSimpleName();
-
-    private OnMediaFragmentInteractionListener listener;
 
     private Activity containerActivity;
     private View view;
@@ -61,22 +60,22 @@ public class AlbumFragment implements Page {
     ListView mainListView;
     @BindView(R.id.no_content_imageview)
     ImageView noContentImageView;
-
-    private List<MediaShare> mediaShareList;
-
-    private long mDownTime = 0;
-    private double mDiffTimeMilliSecond = 200;
+    @BindView(R.id.album_balloon)
+    ImageView mAlbumBalloon;
 
     private ImageLoader mImageLoader;
 
     private SwipeLayout lastSwipeLayout;
 
+    private AlbumListAdapter mAdapter;
 
-    public AlbumFragment(Activity activity_, OnMediaFragmentInteractionListener listener) {
+    private AlbumFragmentContract.AlbumFragmentPresenter mPresenter;
+
+    private ProgressDialog mDialog;
+
+    public AlbumFragment(Activity activity_) {
 
         containerActivity = activity_;
-
-        this.listener = listener;
 
         view = LayoutInflater.from(containerActivity).inflate(R.layout.album_list, null);
 
@@ -84,18 +83,25 @@ public class AlbumFragment implements Page {
 
         noContentImageView.setImageResource(R.drawable.no_photo);
 
-        mainListView.setAdapter(new AlbumListAdapter(this));
+        mAdapter = new AlbumListAdapter();
+        mainListView.setAdapter(mAdapter);
 
         ivAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                mPresenter.createAlbumBtnOnClick();
+
                 Intent intent = new Intent();
                 intent.setClass(containerActivity, NewAlbumPicChooseActivity.class);
                 containerActivity.startActivityForResult(intent, Util.KEY_CHOOSE_PHOTO_REQUEST_CODE);
             }
         });
 
-        mediaShareList = new ArrayList<>();
+        initImageLoader();
+
+        mPresenter = new AlbumFragmentPresenterImpl(Injection.injectDataRepository());
+        mPresenter.attachView(this);
     }
 
     private void initImageLoader() {
@@ -105,90 +111,114 @@ public class AlbumFragment implements Page {
 
     }
 
-
-    private void reloadList() {
-        mediaShareList.clear();
-
-        fillMediaShareList(mediaShareList);
-
-        sortMediaShareList(mediaShareList);
-
-    }
-
-    private void sortMediaShareList(List<MediaShare> mediaShareList) {
-        Collections.sort(mediaShareList, new Comparator<MediaShare>() {
-            @Override
-            public int compare(MediaShare lhs, MediaShare rhs) {
-
-                long time1 = Long.parseLong(lhs.getTime());
-                long time2 = Long.parseLong(rhs.getTime());
-                if (time1 < time2)
-                    return 1;
-                else if (time1 > time2)
-                    return -1;
-                else return 0;
-            }
-        });
-    }
-
-    private void fillMediaShareList(List<MediaShare> mediaShareList) {
-        for (MediaShare mediaShare : LocalCache.LocalMediaShareMapKeyIsUUID.values()) {
-
-            if (mediaShare.isAlbum() && !mediaShare.isArchived()) {
-                mediaShareList.add(mediaShare);
-            }
-        }
-
-        for (MediaShare mediaShare : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
-
-            if (mediaShare.isAlbum() && !mediaShare.isArchived()) {
-                mediaShareList.add(mediaShare);
-            }
-        }
-    }
-
-    public void refreshView() {
-
-        mLoadingLayout.setVisibility(View.VISIBLE);
-        ivAdd.setVisibility(View.INVISIBLE);
-
-        if (!Util.isRemoteMediaShareLoaded()) {
-            return;
-        }
-
-        initImageLoader();
-
-        reloadList();
-
-        mLoadingLayout.setVisibility(View.GONE);
-        ivAdd.setVisibility(View.VISIBLE);
-        if (mediaShareList.size() == 0) {
-            mNoContentLayout.setVisibility(View.VISIBLE);
-            mainListView.setVisibility(View.GONE);
-        } else {
-            mNoContentLayout.setVisibility(View.GONE);
-            mainListView.setVisibility(View.VISIBLE);
-            ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
-        }
-
-    }
-
-    public void onDidAppear() {
-
-        refreshView();
-    }
-
-
     public View getView() {
         return view;
     }
 
+    @Override
+    public void setAlbumBalloonVisibility(int visibility) {
+        mAlbumBalloon.setVisibility(visibility);
+    }
+
+    @Override
+    public void setAlbumBalloonOnClickListener(View.OnClickListener listener) {
+        mAlbumBalloon.setOnClickListener(listener);
+    }
+
+    @Override
+    public void showAlbums(List<MediaShare> mediaShares) {
+        mAdapter.setAlbumList(mediaShares);
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onDestroyView() {
+        mPresenter.detachView();
+    }
+
+    @Override
+    public void setAddAlbumBtnVisibility(int visibility) {
+        ivAdd.setVisibility(visibility);
+    }
+
+    @Override
+    public void showOperationResultToast(OperationResult result) {
+        Toast.makeText(containerActivity, result.getResultMessage(containerActivity), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showNoOperatePermission() {
+        Toast.makeText(containerActivity, containerActivity.getString(R.string.no_operate_media_share_permission), Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public boolean isNetworkAlive() {
+        return Util.getNetworkState(containerActivity);
+    }
+
+    @Override
+    public void showNoNetwork() {
+        Toast.makeText(containerActivity, containerActivity.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public void showLoadingUI() {
+        mLoadingLayout.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissLoadingUI() {
+        mLoadingLayout.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showNoContentUI() {
+        mNoContentLayout.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissNoContentUI() {
+        mNoContentLayout.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showContentUI() {
+        mainListView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissContentUI() {
+        mainListView.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showDialog() {
+        mDialog = ProgressDialog.show(containerActivity, containerActivity.getString(R.string.operating_title), null, true, false);
+    }
+
+    @Override
+    public void dismissDialog() {
+        if (mDialog != null && mDialog.isShowing())
+            mDialog.dismiss();
+    }
+
+    @Override
+    public void hideSoftInput() {
+
+    }
+
     private class AlbumListAdapter extends BaseSwipeAdapter {
 
-        AlbumFragment albumList;
+        private List<MediaShare> mAlbumList;
 
-        AlbumListAdapter(AlbumFragment albumList) {
-            this.albumList = albumList;
+        AlbumListAdapter() {
+            mAlbumList = new ArrayList<>();
+        }
+
+        void setAlbumList(List<MediaShare> albumList) {
+            mAlbumList.addAll(albumList);
         }
 
         /**
@@ -249,8 +279,8 @@ public class AlbumFragment implements Page {
          */
         @Override
         public int getCount() {
-            if (albumList.mediaShareList == null) return 0;
-            return albumList.mediaShareList.size();
+            if (mAlbumList == null) return 0;
+            return mAlbumList.size();
         }
 
         /**
@@ -262,7 +292,7 @@ public class AlbumFragment implements Page {
          */
         @Override
         public Object getItem(int position) {
-            return albumList.mediaShareList.get(position);
+            return mAlbumList.get(position);
         }
 
         /**
@@ -314,11 +344,7 @@ public class AlbumFragment implements Page {
             currentItem = mediaShare;
             restoreSwipeLayoutState();
 
-            coverImg = LocalCache.findMediaInLocalMediaMap(currentItem.getCoverImageKey());
-
-            if (coverImg == null) {
-                coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageKey());
-            }
+            coverImg = mPresenter.loadMedia(currentItem.getCoverImageKey());
 
             if (coverImg != null) {
 
@@ -370,9 +396,9 @@ public class AlbumFragment implements Page {
 
             lbDate.setText(currentItem.getDate().substring(0, 10));
 
-            String createUUID = currentItem.getCreatorUUID();
-            if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(createUUID)) {
-                lbOwner.setText(LocalCache.RemoteUserMapKeyIsUUID.get(createUUID).getUserName());
+            User user = mPresenter.loadUser(currentItem.getCreatorUUID());
+            if (user != null) {
+                lbOwner.setText(user.getUserName());
             }
 
             lbShare.setOnClickListener(new View.OnClickListener() {
@@ -383,7 +409,7 @@ public class AlbumFragment implements Page {
 
                     MediaShare cloneMediaShare = currentItem.cloneMyself();
 
-                    listener.modifyMediaShare(cloneMediaShare);
+                    mPresenter.modifyMediaShare(cloneMediaShare);
 
                 }
             });
@@ -399,7 +425,7 @@ public class AlbumFragment implements Page {
 
                                     restoreSwipeLayoutState();
 
-                                    listener.deleteMediaShare(currentItem);
+                                    mPresenter.deleteMediaShare(currentItem);
 
                                 }
                             }).setNegativeButton(containerActivity.getString(R.string.cancel), null).create().show();

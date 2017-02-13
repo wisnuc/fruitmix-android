@@ -47,6 +47,21 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     }
 
     @Override
+    public void dismissNoContentUI() {
+
+    }
+
+    @Override
+    public void showContentUI() {
+
+    }
+
+    @Override
+    public void dismissContentUI() {
+
+    }
+
+    @Override
     public void showDialog() {
         dialog = ProgressDialog.show(this, getString(R.string.operating_title), null, true, false);
     }

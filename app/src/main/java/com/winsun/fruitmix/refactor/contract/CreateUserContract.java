@@ -34,6 +34,8 @@ public interface CreateUserContract {
 
     interface CreateUserPresenter extends BasePresenter<CreateUserView> {
 
+        void loadUserNames();
+
         void createUser(String userName, String userPassword, String userConfirmPassword);
 
     }

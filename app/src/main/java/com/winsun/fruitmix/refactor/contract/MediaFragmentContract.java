@@ -8,6 +8,7 @@ import android.view.View;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
+import com.winsun.fruitmix.refactor.model.MediaFragmentDataLoader;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ public interface MediaFragmentContract {
 
         void expandFab();
 
-        void showMedias(SparseArray<String> mapKeyIsPhotoPositionValueIsPhotoDate, SparseArray<Media> mapKeyIsPhotoPositionValueIsPhoto,Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList,List<Media> medias);
+        void showMedias(MediaFragmentDataLoader loader);
 
         View getView();
 
@@ -46,6 +47,8 @@ public interface MediaFragmentContract {
     }
 
     interface MediaFragmentPresenter extends BasePresenter<MediaFragmentView> {
+
+        void setSelectCountText(String selectCountText);
 
         int getSelectCount();
 
@@ -67,10 +70,9 @@ public interface MediaFragmentContract {
 
         void onMapSharedElements(List<String> names, Map<String, View> sharedElements);
 
+        void onCreate();
+
         void onResume();
-
-        void imageOnLongClick(Media media, Context context);
-
     }
 
 

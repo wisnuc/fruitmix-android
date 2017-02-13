@@ -5,6 +5,7 @@ import android.view.View;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
 
@@ -19,15 +20,18 @@ public interface MediaShareFragmentContract {
 
     interface MediaShareFragmentView extends BaseView {
 
-        void setNoContentImageView(int resID);
-
         void showMediaShares(List<MediaShare> mediaShares);
 
+        View findViewWithMedia(Media media);
+
+        void startPostponedEnterTransition();
+
+        void onDestroyView();
     }
 
     interface MediaShareFragmentPresenter extends BasePresenter<MediaShareFragmentView> {
 
-        List<Media> getMedias(List<String> imageKeys);
+        List<Media> loadMedias(List<String> imageKeys);
 
         void onActivityReenter(int resultCode, Intent data);
 
@@ -36,6 +40,13 @@ public interface MediaShareFragmentContract {
         void refreshData();
 
         void onPageSelected();
+
+        void loadMediaShares();
+
+        User loadUser(String userUUID);
+
+        Media loadMedia(String mediaKey);
+
     }
 
 }
