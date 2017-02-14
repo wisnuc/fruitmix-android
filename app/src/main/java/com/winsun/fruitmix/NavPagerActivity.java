@@ -387,6 +387,12 @@ public class NavPagerActivity extends AppCompatActivity
         } else if (id == R.id.file) {
 
             toggleFileOrMediaFragment();
+
+        } else if (id == R.id.setting) {
+
+            Intent intent = new Intent(this, SettingActivity.class);
+            startActivity(intent);
+
         }
 
         mDrawerLayout.closeDrawer(GravityCompat.START);

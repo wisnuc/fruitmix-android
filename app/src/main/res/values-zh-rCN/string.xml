@@ -123,6 +123,12 @@
     <!-- 用户管理界面 -->
     <string name="no_user">没有用户</string>
 
+    <!-- 设置  -->
+    <string name="setting_text">设置</string>
+    <string name="photo_auto_upload_setting_text">照片自动备份</string>
+    <string name="mobile_network_upload">手机网络上传</string>
+    <string name="clear_cache">清除缓存</string>
+
     <!-- create user -->
     <string name="user_name">用户名</string>
     <string name="confirm_user_password">确认密码</string>

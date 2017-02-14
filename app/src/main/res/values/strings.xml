@@ -144,6 +144,13 @@
 
     <string name="no_user">No User</string>
 
+    <!-- setting -->
+
+    <string name="setting_text">Setting</string>
+    <string name="photo_auto_upload_setting_text">Auto upload photos</string>
+    <string name="mobile_network_upload">Mobile network upload</string>
+    <string name="clear_cache">Clear cache</string>
+
     <!-- create user -->
     <string name="user_name">User Name</string>
     <string name="confirm_user_password">Confirm User Password</string>
@@ -186,5 +193,6 @@
     <string name="no_enough_space">No enough space</string>
 
     <string name="max_select_photo">Max photo count</string>
+    <string name="title_activity_setting">Setting</string>
 
 </resources>

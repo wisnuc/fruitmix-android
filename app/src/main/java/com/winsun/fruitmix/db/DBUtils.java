@@ -13,6 +13,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.parser.LocalDataParser;
 import com.winsun.fruitmix.parser.LocalMediaCommentParser;
@@ -367,11 +368,45 @@ public class DBUtils {
         return returnValue;
     }
 
-    public long insertRemoteUser(User user){
+    public long insertRemoteUser(User user) {
 
         return insertRemoteUsers(Collections.singletonList(user));
 
     }
+
+    private ContentValues createLoggedInUserContentValues(LoggedInUser loggedInUser) {
+
+        ContentValues contentValues = createUserContentValues(loggedInUser.getUser());
+        contentValues.put(DBHelper.LOGGED_IN_USER_GATEWAY, loggedInUser.getGateway());
+        contentValues.put(DBHelper.LOGGED_IN_USER_EQUIPMENT_NAME, loggedInUser.getEquipmentName());
+        contentValues.put(DBHelper.LOGGED_IN_USER_TOKEN, loggedInUser.getToken());
+        contentValues.put(DBHelper.LOGGED_IN_USER_DEVICE_ID, loggedInUser.getDeviceID());
+
+        return contentValues;
+    }
+
+    public long insertLoggedInUserInDB(List<LoggedInUser> loggedInUsers) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues;
+
+        for (LoggedInUser loggedInUser : loggedInUsers) {
+
+            contentValues = createLoggedInUserContentValues(loggedInUser);
+
+            returnValue = database.insert(DBHelper.LOGGED_IN_USER_TABLE_NAME, null, contentValues);
+        }
+
+        close();
+
+        return returnValue;
+
+        //TODO: parse logged in user loaded from db
+    }
+
 
     private ContentValues createDownloadedFileContentValues(FileDownloadItem fileDownloadItem) {
 

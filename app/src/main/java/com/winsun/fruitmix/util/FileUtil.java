@@ -6,10 +6,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
-import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.fileModule.download.FileDownloadErrorState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadFinishedState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
@@ -21,7 +19,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.text.DecimalFormat;
 
 import okhttp3.ResponseBody;
@@ -294,19 +291,73 @@ public class FileUtil {
 
         } else if (fileSize < 1024L * 1024L) {
 
-            formatFileSize = decimalFormat.format(fileSize / 1024) + " KB";
+            formatFileSize = decimalFormat.format(fileSize / (float)1024) + " KB";
 
         } else if (fileSize < 1024L * 1024L * 1024L) {
 
-            formatFileSize = decimalFormat.format(fileSize / 1024 / 1024) + " MB";
+            formatFileSize = decimalFormat.format(fileSize / (float)1024 / 1024) + " MB";
 
         } else if (fileSize < 1024L * 1024L * 1024L * 1024L) {
 
-            formatFileSize = decimalFormat.format(fileSize / 1024 / 1024 / 1024 / 1024) + " GB";
+            formatFileSize = decimalFormat.format(fileSize / (float)1024 / 1024 / 1024 / 1024) + " GB";
 
         }
 
         return formatFileSize;
+    }
+
+    public static long getTotalCacheSize(Context context) {
+        long cacheSize = getFolderSize(context.getCacheDir());
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            cacheSize += getFolderSize(context.getExternalCacheDir());
+        }
+        return cacheSize;
+    }
+
+    private static long getFolderSize(File file) {
+        long size = 0;
+
+        File[] fileList = file.listFiles();
+        int fileListLength;
+        if (fileList != null) {
+            fileListLength = fileList.length;
+            for (int i = 0; i < fileListLength; i++) {
+                if (fileList[i].isDirectory()) {
+                    size = size + getFolderSize(fileList[i]);
+                } else {
+                    size = size + fileList[i].length();
+                }
+            }
+        }
+
+        return size;
+    }
+
+    public static void clearAllCache(Context context) {
+        deleteDir(context.getCacheDir());
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            deleteDir(context.getExternalCacheDir());
+        }
+    }
+
+    private static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            int length;
+            if (children != null) {
+                length = children.length;
+                for (int i = 0; i < length; i++) {
+                    boolean success = deleteDir(new File(dir, children[i]));
+                    if (!success) {
+                        return false;
+                    }
+                }
+            }
+
+        }
+        return dir == null || dir.delete();
     }
 
 }

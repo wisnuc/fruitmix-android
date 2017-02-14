@@ -28,8 +28,8 @@
         </activity>
         <activity
             android:name=".NavPagerActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize"/>
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait" />
         <!-- android:theme="@style/Theme.AppCompat.Light.NoActionBar" -->
         <!-- This meta-data tag is required to use Google Play Services. -->
         <meta-data
@@ -51,8 +51,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".mediaModule.AlbumPicContentActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize"/>
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SplashScreenActivity"
             android:screenOrientation="portrait" />
@@ -89,8 +89,8 @@
 
         <activity
             android:name=".mediaModule.MoreMediaActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize"/>
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".services.CreateLocalMediaShareService"
@@ -183,6 +183,10 @@
         <service
             android:name=".services.CreateRemoteUserService"
             android:exported="false" />
+
+        <activity
+            android:name=".SettingActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
