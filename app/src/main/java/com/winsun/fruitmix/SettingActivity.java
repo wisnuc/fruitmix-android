@@ -11,12 +11,20 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.eventbus.RequestEvent;
+import com.winsun.fruitmix.model.OperationType;
+import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class SettingActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener, View.OnClickListener {
+public class SettingActivity extends AppCompatActivity implements View.OnClickListener {
 
     @BindView(R.id.back)
     ImageView mBackImageView;
@@ -29,6 +37,8 @@ public class SettingActivity extends AppCompatActivity implements CompoundButton
     @BindView(R.id.clear_cache_layout)
     ViewGroup mClearCacheLayout;
 
+    private boolean mAutoUploadOrNot = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,10 +48,33 @@ public class SettingActivity extends AppCompatActivity implements CompoundButton
 
         mBackImageView.setOnClickListener(this);
         mClearCacheLayout.setOnClickListener(this);
-        mAutoUploadPhotosSwitch.setOnCheckedChangeListener(this);
-        mMobileNetworkUploadSwitch.setOnCheckedChangeListener(this);
 
         mCacheSize.setText(FileUtil.formatFileSize(FileUtil.getTotalCacheSize(this)));
+
+        mAutoUploadOrNot = LocalCache.getAutoUploadOrNot(this);
+        if (mAutoUploadOrNot) {
+            mAutoUploadPhotosSwitch.setChecked(true);
+        } else {
+            mAutoUploadPhotosSwitch.setChecked(false);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        boolean isChecked = mAutoUploadPhotosSwitch.isChecked();
+
+        if (mAutoUploadOrNot != isChecked) {
+            LocalCache.setAutoUploadOrNot(this, isChecked);
+
+            if(isChecked){
+                EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD,null));
+            }else {
+                EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD,null));
+            }
+        }
+
     }
 
     @Override
@@ -69,13 +102,4 @@ public class SettingActivity extends AppCompatActivity implements CompoundButton
 
     }
 
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        switch (buttonView.getId()) {
-            case R.id.auto_upload_photos_switch:
-                break;
-            case R.id.mobile_network_upload_switch:
-                break;
-        }
-    }
 }

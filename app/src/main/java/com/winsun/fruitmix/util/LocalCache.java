@@ -19,6 +19,7 @@ import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.User;
 
 import java.io.File;
@@ -56,6 +57,8 @@ public class LocalCache {
     public static List<AbstractRemoteFile> RemoteFileShareList = null;
 
     public static String DeviceID = null;
+
+    public static List<LoggedInUser> LocalLoggedInUsers = null;
 
     public static List<String> mediaKeysInCreateAlbum = null;
 
@@ -148,6 +151,9 @@ public class LocalCache {
 
         if (LocalMediaMapKeyIsThumb == null)
             LocalMediaMapKeyIsThumb = new ConcurrentHashMap<>();
+
+        if (LocalLoggedInUsers == null)
+            LocalLoggedInUsers = new ArrayList<>();
 
         return true;
     }
@@ -500,8 +506,6 @@ public class LocalCache {
             f = new File(thumb);
             date.setTimeInMillis(f.lastModified());
             media.setTime(df.format(date.getTime()));
-
-            media.setUploaded(false);
             media.setSelected(false);
             media.setLoaded(false);
 
@@ -659,7 +663,7 @@ public class LocalCache {
         return sp.getString(Util.JWT, null);
     }
 
-    public static void saveGateway(Context context,String gateway) {
+    public static void saveGateway(Context context, String gateway) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
@@ -684,20 +688,12 @@ public class LocalCache {
 
     }
 
-    public static String getUserPassword(Context context) {
-        SharedPreferences sp;
-        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        return sp.getString(Util.PASSWORD, null);
-    }
-
-
-    public static void saveUuidPassword(Context context, String uuid, String password) {
+    public static void saveUserUUID(Context context, String uuid) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
         editor.putString(Util.USER_UUID, uuid);
-        editor.putString(Util.PASSWORD, password);
         editor.apply();
     }
 
@@ -728,5 +724,36 @@ public class LocalCache {
         editor.putString(Util.USER_UUID, userUUID);
         editor.apply();
     }
+
+    public static String getCurrentUploadDeviceID(Context context) {
+        SharedPreferences sp;
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        return sp.getString(Util.CURRENT_UPLOAD_DEVICE_ID, "");
+    }
+
+    public static void setCurrentUploadDeviceID(Context context, String currentUploadDeviceID) {
+        SharedPreferences sp;
+        SharedPreferences.Editor editor;
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        editor = sp.edit();
+        editor.putString(Util.CURRENT_UPLOAD_DEVICE_ID, currentUploadDeviceID);
+        editor.apply();
+    }
+
+    public static boolean getAutoUploadOrNot(Context context) {
+        SharedPreferences sp;
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        return sp.getBoolean(Util.AUTO_UPLOAD_OR_NOT, true);
+    }
+
+    public static void setAutoUploadOrNot(Context context, boolean autoUploadOrNot) {
+        SharedPreferences sp;
+        SharedPreferences.Editor editor;
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        editor = sp.edit();
+        editor.putBoolean(Util.AUTO_UPLOAD_OR_NOT, autoUploadOrNot);
+        editor.apply();
+    }
+
 
 }

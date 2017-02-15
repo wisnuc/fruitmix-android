@@ -28,7 +28,7 @@ public class Media implements Parcelable {
     private String date;
     private boolean loaded;
     private String belongingMediaShareUUID;
-    private boolean uploaded;
+    private String uploadedDeviceIDs;
     private boolean sharing;
     private int orientationNumber;
     private String type;
@@ -57,7 +57,7 @@ public class Media implements Parcelable {
         date = in.readString();
         loaded = in.readByte() != 0;
         belongingMediaShareUUID = in.readString();
-        uploaded = in.readByte() != 0;
+        uploadedDeviceIDs = in.readString();
         orientationNumber = in.readInt();
         type = in.readString();
     }
@@ -74,7 +74,7 @@ public class Media implements Parcelable {
         dest.writeString(date);
         dest.writeByte((byte) (loaded ? 1 : 0));
         dest.writeString(belongingMediaShareUUID);
-        dest.writeByte((byte) (uploaded ? 1 : 0));
+        dest.writeString(uploadedDeviceIDs);
         dest.writeInt(orientationNumber);
         dest.writeString(type);
     }
@@ -176,16 +176,12 @@ public class Media implements Parcelable {
         this.belongingMediaShareUUID = belongingMediaShareUUID;
     }
 
-    public void restoreUploadState() {
-        uploaded = false;
+    public String getUploadedDeviceIDs() {
+        return uploadedDeviceIDs;
     }
 
-    public boolean isUploaded() {
-        return uploaded;
-    }
-
-    public void setUploaded(boolean uploaded) {
-        this.uploaded = uploaded;
+    public void setUploadedDeviceIDs(String uploadedDeviceIDs) {
+        this.uploadedDeviceIDs = uploadedDeviceIDs;
     }
 
     public boolean isSharing() {
@@ -216,26 +212,27 @@ public class Media implements Parcelable {
 
         DBUtils dbUtils = DBUtils.getInstance(context);
 
+        boolean uploaded;
+
         if (LocalCache.RemoteMediaMapKeyIsUUID.containsKey(getUuid())) {
 
             Log.d(TAG, "upload file is already uploaded");
-
             uploaded = true;
 
-            dbUtils.updateLocalMedia(this);
-        }
-
-        if (!uploaded) {
+        } else {
             uploaded = FNAS.UploadFile(thumb);
-
-            if (uploaded) {
-
-                dbUtils.updateLocalMedia(this);
-            }
-
         }
 
-        return uploaded;
+        if (!uploaded) return false;
+
+        if (getUploadedDeviceIDs() == null) {
+            setUploadedDeviceIDs(LocalCache.DeviceID);
+        } else if (!getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
+            setUploadedDeviceIDs(getUploadedDeviceIDs() + "," + LocalCache.DeviceID);
+        }
+        dbUtils.updateLocalMedia(this);
+
+        return true;
     }
 
     public String getImageThumbUrl(Context context) {
@@ -266,27 +263,6 @@ public class Media implements Parcelable {
             imageUrl = String.format(context.getString(R.string.android_original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid());
         }
         return imageUrl;
-    }
-
-    public Media cloneSelf() {
-
-        Media media = new Media();
-        media.setUuid(getUuid());
-        media.setThumb(getThumb());
-        media.setTime(getTime());
-        media.setWidth(getWidth());
-        media.setHeight(getHeight());
-        media.setSelected(isSelected());
-        media.setLocal(isLocal());
-        media.setDate(getDate());
-        media.setLoaded(isLoaded());
-        media.setBelongingMediaShareUUID(getBelongingMediaShareUUID());
-        media.setUploaded(isUploaded());
-        media.setSharing(isSharing());
-        media.setOrientationNumber(getOrientationNumber());
-        media.setType(getType());
-
-        return media;
     }
 
     public String getKey() {

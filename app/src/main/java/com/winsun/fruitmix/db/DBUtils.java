@@ -438,7 +438,7 @@ public class DBUtils {
         contentValues.put(DBHelper.MEDIA_KEY_HEIGHT, media.getHeight());
         contentValues.put(DBHelper.MEDIA_KEY_THUMB, media.getThumb());
         contentValues.put(DBHelper.MEDIA_KEY_LOCAL, media.isLocal() ? 1 : 0);
-        contentValues.put(DBHelper.MEDIA_KEY_UPLOADED, media.isUploaded() ? 1 : 0);
+        contentValues.put(DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID, media.getUploadedDeviceIDs());
         contentValues.put(DBHelper.MEDIA_KEY_SHARING, media.isSharing() ? 1 : 0);
         contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER, media.getOrientationNumber());
         contentValues.put(DBHelper.MEDIA_KEY_TYPE, media.getType());
@@ -453,7 +453,7 @@ public class DBUtils {
         sqLiteStatement.bindString(4, media.getHeight());
         sqLiteStatement.bindString(5, media.getThumb());
         sqLiteStatement.bindLong(6, media.isLocal() ? 1 : 0);
-        sqLiteStatement.bindLong(7, media.isUploaded() ? 1 : 0);
+        sqLiteStatement.bindString(7, media.getUploadedDeviceIDs());
         sqLiteStatement.bindLong(8, media.isSharing() ? 1 : 0);
         sqLiteStatement.bindLong(9, media.getOrientationNumber());
         sqLiteStatement.bindString(10, media.getType());
@@ -468,7 +468,7 @@ public class DBUtils {
                 DBHelper.MEDIA_KEY_HEIGHT + "," +
                 DBHelper.MEDIA_KEY_THUMB + "," +
                 DBHelper.MEDIA_KEY_LOCAL + "," +
-                DBHelper.MEDIA_KEY_UPLOADED + "," +
+                DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID + "," +
                 DBHelper.MEDIA_KEY_SHARING + "," +
                 DBHelper.MEDIA_KEY_ORIENTATION_NUMBER + "," +
                 DBHelper.MEDIA_KEY_TYPE + ")" +
@@ -917,6 +917,39 @@ public class DBUtils {
         return users;
     }
 
+    public List<LoggedInUser> getAllLoggedInUser() {
+        openReadableDB();
+
+        List<LoggedInUser> loggedInUsers = new ArrayList<>();
+
+        User user;
+        String gateway;
+        String equipmentName;
+        String token;
+        String deviceID;
+        LocalDataParser<User> parser = new LocalUserParser();
+
+        Cursor cursor = database.rawQuery("select * from" + DBHelper.LOGGED_IN_USER_TABLE_NAME, null);
+
+        while (cursor.moveToNext()) {
+            user = parser.parse(cursor);
+
+            gateway = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_GATEWAY));
+            equipmentName = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_EQUIPMENT_NAME));
+            token = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_TABLE_NAME));
+            deviceID = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_DEVICE_ID));
+
+            loggedInUsers.add(new LoggedInUser(deviceID, token, gateway, equipmentName, user));
+        }
+
+        cursor.close();
+
+        close();
+
+        return loggedInUsers;
+    }
+
+
     public List<FileDownloadItem> getAllDownloadedFile() {
 
         openReadableDB();
@@ -1024,7 +1057,7 @@ public class DBUtils {
     @NonNull
     private String createUpdateMediaSql(String dbName) {
         return "update " + dbName + " set " +
-                DBHelper.MEDIA_KEY_UPLOADED + " = 0";
+                DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID + " = 0";
     }
 
     public long updateLocalMediasUploadedFalse() {

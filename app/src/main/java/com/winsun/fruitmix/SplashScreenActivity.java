@@ -29,7 +29,6 @@ public class SplashScreenActivity extends Activity {
     public static final String TAG = SplashScreenActivity.class.getSimpleName();
 
     private String mUuid;
-    private String mPassword;
     private String mGateway;
     private String mToken;
 
@@ -59,16 +58,17 @@ public class SplashScreenActivity extends Activity {
 
         FNAS.retrieveLocalMedia(mContext);
 
+        FNAS.retrieveLocalLoggedInUser();
+
         mGateway = LocalCache.getGateway(mContext);
         mUuid = LocalCache.getUserUUID(mContext);
-        mPassword = LocalCache.getUserPassword(mContext);
         mToken = LocalCache.getToken(mContext);
 
-        if (!mUuid.isEmpty() && mPassword != null && mGateway != null && mToken != null) {
+        if (!mUuid.isEmpty() && mGateway != null && mToken != null) {
 
             Util.loginType = LoginType.SPLASH_SCREEN;
 
-            FNAS.retrieveRemoteToken(mContext, mGateway, mUuid, mPassword);
+            FNAS.retrieveRemoteDeviceID(this);
         }
 
         mHandler = new CustomHandler(this);
@@ -92,7 +92,7 @@ public class SplashScreenActivity extends Activity {
 
         Intent intent = new Intent();
 
-        if (mUuid != null && mPassword != null && mGateway != null && mToken != null) {
+        if (mUuid != null && mGateway != null && mToken != null) {
             intent.setClass(SplashScreenActivity.this, NavPagerActivity.class);
         } else {
             intent.setClass(SplashScreenActivity.this, EquipmentSearchActivity.class);

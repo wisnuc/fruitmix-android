@@ -12,10 +12,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.eventbus.LoggedInUserRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.OperationTargetType;
+import com.winsun.fruitmix.model.OperationType;
+import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -51,6 +57,8 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
     private String mPwd;
     private String mGateway;
 
+    private String mEquipmentGroupName;
+
     private ProgressDialog mDialog;
 
     @Override
@@ -67,12 +75,12 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
         mLoginBtn.setOnClickListener(this);
 
         Intent intent = getIntent();
-        String equipmentGroupName = intent.getStringExtra(Util.USER_GROUP_NAME);
+        mEquipmentGroupName = intent.getStringExtra(Util.USER_GROUP_NAME);
         String mEquipmentChildName = intent.getStringExtra(Util.USER_NAME);
         mUserUUid = intent.getStringExtra(Util.USER_UUID);
         mGateway = intent.getStringExtra(Util.GATEWAY);
 
-        mEquipmentGroupNameTextView.setText(equipmentGroupName);
+        mEquipmentGroupNameTextView.setText(mEquipmentGroupName);
         mEquipmentChildNameTextView.setText(mEquipmentChildName);
 
         mUserDefaultPortrait.setText(Util.getUserNameFirstLetter(mEquipmentChildName));
@@ -111,7 +119,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
         mContext = null;
 
-        if (mDialog != null ) {
+        if (mDialog != null) {
             mDialog.dismiss();
             mDialog = null;
         }
@@ -131,6 +139,12 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
                 OperationResult operationResult = operationEvent.getOperationResult();
 
                 if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
+
+                    User currentUser = LocalCache.getUser(this);
+
+                    LoggedInUser loggedInUser = new LoggedInUser(LocalCache.DeviceID, FNAS.JWT, FNAS.Gateway, mEquipmentGroupName, currentUser);
+                    EventBus.getDefault().post(new LoggedInUserRequestEvent(OperationType.CREATE, OperationTargetType.LOCAL_LOGGED_IN_USER, loggedInUser));
+
                     handleRetrieveUser();
                 } else {
                     Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();

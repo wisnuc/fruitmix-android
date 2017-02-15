@@ -38,10 +38,12 @@ public class Util {
     public static final String GATEWAY = "gateway";
     public static final String USER_UUID = "user_uuid";
     public static final String MEDIASHARE_UUID = "mediashare_uuid";
-    public static final String PASSWORD = "password";
     public static final String EDIT_PHOTO = "edit_photo";
     public static final String UPDATED_ALBUM_TITLE = "updated_album_title";
     public static final String IMAGE_KEY = "image_key";
+
+    public static final String CURRENT_UPLOAD_DEVICE_ID = "current_upload_device_id";
+    public static final String AUTO_UPLOAD_OR_NOT = "auto_upload_or_not";
 
     public static final String REMOTE_USER_CREATED = "remote_user_created";
 

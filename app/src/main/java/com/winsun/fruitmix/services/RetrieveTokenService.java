@@ -107,7 +107,7 @@ public class RetrieveTokenService extends IntentService {
 
                 if (Util.loginType == LoginType.LOGIN) {
                     LocalCache.saveGateway(this, FNAS.Gateway);
-                    LocalCache.saveUuidPassword(this, userUUID, userPassword);
+                    LocalCache.saveUserUUID(this, userUUID);
                 }
 
                 operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationSuccess());

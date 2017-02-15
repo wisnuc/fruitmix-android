@@ -346,6 +346,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     }
 
+    public void refreshAllViews(){
+        shareList.refreshView();
+        albumList.refreshView();
+        photoList.refreshView();
+    }
+
     private void initViewPager() {
         MyAdapter myAdapter = new MyAdapter();
         viewPager.setAdapter(myAdapter);

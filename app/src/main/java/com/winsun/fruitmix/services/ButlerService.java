@@ -10,10 +10,12 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
 import com.winsun.fruitmix.eventbus.DownloadFileEvent;
 import com.winsun.fruitmix.eventbus.EditPhotoInMediaShareRequestEvent;
+import com.winsun.fruitmix.eventbus.LoggedInUserRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaCommentRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaShareRequestEvent;
@@ -31,6 +33,7 @@ import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -45,6 +48,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.List;
 
 public class ButlerService extends Service {
@@ -245,14 +249,18 @@ public class ButlerService extends Service {
     }
 
     private void startUpload() {
-        if (mCalcNewLocalMediaDigestFinished && mRetrieveRemoteMediaFinished) {
+        if (mCalcNewLocalMediaDigestFinished && mRetrieveRemoteMediaFinished && LocalCache.getAutoUploadOrNot(this)) {
             startUploadAllLocalPhoto();
         }
     }
 
+    private void stopUpload() {
+        ExecutorServiceInstance.SINGLE_INSTANCE.shutdownFixedThreadPoolNow();
+    }
+
     private void startUploadAllLocalPhoto() {
         for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
-            if (!media.isUploaded()) {
+            if (!media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
                 FNAS.createRemoteMedia(this, media);
             }
         }
@@ -277,6 +285,12 @@ public class ButlerService extends Service {
                 break;
             case GET:
                 handleGetOperation(requestEvent);
+                break;
+            case START_UPLOAD:
+                startUpload();
+                break;
+            case STOP_UPLOAD:
+                stopUpload();
                 break;
         }
 
@@ -341,6 +355,10 @@ public class ButlerService extends Service {
                 CreateRemoteUserService.startActionCreateRemoteUser(this, userName, userPassword);
 
                 break;
+            case LOCAL_LOGGED_IN_USER:
+                LoggedInUserRequestEvent loggedInUserRequestEvent = (LoggedInUserRequestEvent) requestEvent;
+                LoggedInUser loggedInUser = loggedInUserRequestEvent.getmLoggedInUser();
+                DBUtils.getInstance(this).insertLoggedInUserInDB(Collections.singletonList(loggedInUser));
         }
 
     }
@@ -495,6 +513,10 @@ public class ButlerService extends Service {
                 break;
             case DOWNLOADED_FILE:
                 RetrieveDownloadedFileService.startActionRetrieveDownloadedFile(this);
+                break;
+            case LOCAL_LOGGED_IN_USER:
+                DBUtils dbUtils = DBUtils.getInstance(this);
+                LocalCache.LocalLoggedInUsers.addAll(dbUtils.getAllLoggedInUser());
                 break;
         }
     }

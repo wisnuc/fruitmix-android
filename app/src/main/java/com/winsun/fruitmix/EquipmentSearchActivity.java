@@ -28,10 +28,12 @@ import com.github.druk.rxdnssd.RxDnssd;
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONArray;
@@ -116,6 +118,31 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
 
                 User user = mUserExpandableLists.get(groupPosition).get(childPosition);
+
+                for (LoggedInUser loggedInUser : LocalCache.LocalLoggedInUsers) {
+
+                    if (loggedInUser.getUser().getUuid().equals(user.getUuid())) {
+
+                        Util.loginType = LoginType.SPLASH_SCREEN;
+
+                        FNAS.Gateway = "http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0);
+                        FNAS.userUUID = loggedInUser.getUser().getUuid();
+                        FNAS.JWT = loggedInUser.getToken();
+                        LocalCache.DeviceID = loggedInUser.getDeviceID();
+
+                        LocalCache.saveToken(mContext, FNAS.JWT);
+                        LocalCache.saveGateway(mContext, FNAS.Gateway);
+                        LocalCache.saveUserUUID(mContext, FNAS.userUUID);
+                        LocalCache.SetGlobalData(mContext, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
+
+                        FNAS.retrieveUser(mContext);
+                        startActivity(new Intent(mContext, NavPagerActivity.class));
+                        finish();
+
+                        return true;
+                    }
+
+                }
 
                 Intent intent = new Intent(mContext, LoginActivity.class);
                 intent.putExtra(Util.GATEWAY, "http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0));

@@ -162,6 +162,10 @@ public class FNAS {
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIA));
     }
 
+    public static void retrieveLocalLoggedInUser(){
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET,OperationTargetType.LOCAL_LOGGED_IN_USER));
+    }
+
     public static void retrieveRemoteMedia(Context context) {
 
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIA));
@@ -391,20 +395,6 @@ public class FNAS {
                 }
             }
         }).start();
-
-    }
-
-    public static void restoreLocalPhotoUploadState(Context context) {
-
-        DBUtils dbUtils = DBUtils.getInstance(context);
-
-        Collection<Media> medias = LocalCache.LocalMediaMapKeyIsThumb.values();
-
-        for (Media media : medias) {
-            media.restoreUploadState();
-        }
-
-        dbUtils.updateLocalMediasUploadedFalse();
 
     }
 
