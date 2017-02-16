@@ -65,7 +65,7 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
 
         mView.showDialog();
 
-        mRepository.modifyMediaShare(mediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
+        mRepository.modifyMediaShare(mediaShare.createToggleShareStateRequestData(),mediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
 

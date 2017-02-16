@@ -144,4 +144,16 @@ public class DBDataSource implements DataSource {
         editor.apply();
     }
 
+    public boolean getShowPhotoReturnTipsValue() {
+
+        return mSharedPreferences.getBoolean(Util.SHOW_PHOTO_RETURN_TIPS, true);
+    }
+
+    public void setShowPhotoReturnTipsValue(boolean value) {
+
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean(Util.SHOW_PHOTO_RETURN_TIPS, value);
+        editor.apply();
+    }
+
 }

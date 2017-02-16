@@ -6,6 +6,7 @@ import android.os.Looper;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -27,6 +28,9 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -136,7 +140,7 @@ public class DataRepository {
         return ((MemoryDataSource) mMemoryDataSource).loadUser(userUUID);
     }
 
-    public MediaShare loadMediaShareFromMemory(String mediaShareUUID){
+    public MediaShare loadMediaShareFromMemory(String mediaShareUUID) {
         return ((MemoryDataSource) mMemoryDataSource).loadMediaShare(mediaShareUUID);
     }
 
@@ -145,8 +149,7 @@ public class DataRepository {
 
     }
 
-    public void loadMediaInMediaShareFromMemory(MediaShare mediaShare, MediaOperationCallback.LoadMediasCallback callback){
-
+    public void loadMediaInMediaShareFromMemory(MediaShare mediaShare, MediaOperationCallback.LoadMediasCallback callback) {
 
 
     }
@@ -164,7 +167,7 @@ public class DataRepository {
         return ((MemoryDataSource) mMemoryDataSource).isMediaSharePublic(mediaShare);
     }
 
-    public boolean checkPermissionToOperateMediaShare(MediaShare mediaShare){
+    public boolean checkPermissionToOperateMediaShare(MediaShare mediaShare) {
         return ((MemoryDataSource) mMemoryDataSource).checkPermissionToOperateMediaShare(mediaShare);
     }
 
@@ -174,6 +177,16 @@ public class DataRepository {
 
     public void saveShowAlbumTipsValue(boolean value) {
         ((DBDataSource) mDBDataSource).saveShowAlbumTipsValue(value);
+    }
+
+    public boolean getShowPhotoReturnTipsValue() {
+
+        return ((DBDataSource) mDBDataSource).getShowPhotoReturnTipsValue();
+    }
+
+    public void setShowPhotoReturnTipsValue(boolean value) {
+
+        ((DBDataSource) mDBDataSource).setShowPhotoReturnTipsValue(value);
     }
 
     public LoadTokenParam getLoadTokenParamInDB() {
@@ -270,7 +283,56 @@ public class DataRepository {
 
     }
 
-    public void modifyMediaShare(MediaShare mediaShare, MediaShareOperationCallback.OperateMediaShareCallback callback) {
+    public MediaShare createMediaShareInMemory(boolean isAlbum, boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaKeys) {
+
+        MediaShare mediaShare = new MediaShare();
+        mediaShare.setUuid(Util.createLocalUUid());
+
+        List<MediaShareContent> mediaShareContents = new ArrayList<>();
+
+        for (String mediaKey : mediaKeys) {
+            MediaShareContent mediaShareContent = new MediaShareContent();
+            mediaShareContent.setKey(mediaKey);
+            mediaShareContent.setAuthor(FNAS.userUUID);
+            mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
+            mediaShareContents.add(mediaShareContent);
+
+        }
+
+        mediaShare.initMediaShareContents(mediaShareContents);
+
+        mediaShare.setCoverImageKey(mediaKeys.get(0));
+
+        mediaShare.setTitle(title);
+        mediaShare.setDesc(desc);
+
+        if (isPublic) {
+            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+                mediaShare.addViewer(userUUID);
+            }
+        } else mediaShare.clearViewers();
+
+        if (otherMaintainer) {
+            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+                mediaShare.addMaintainer(userUUID);
+            }
+        } else {
+            mediaShare.clearMaintainers();
+            mediaShare.addMaintainer(FNAS.userUUID);
+        }
+
+        mediaShare.setCreatorUUID(FNAS.userUUID);
+        mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
+        mediaShare.setAlbum(isAlbum);
+        mediaShare.setLocal(true);
+        mediaShare.setArchived(false);
+        mediaShare.setDate(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(mediaShare.getTime()))));
+
+        return mediaShare;
+
+    }
+
+    public void modifyMediaShare(String requestData, MediaShare mediaShare, MediaShareOperationCallback.OperateMediaShareCallback callback) {
 
     }
 

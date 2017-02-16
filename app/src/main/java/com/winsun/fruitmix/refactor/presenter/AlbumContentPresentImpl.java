@@ -5,16 +5,20 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.business.DataRepository;
 import com.winsun.fruitmix.refactor.business.callback.MediaOperationCallback;
+import com.winsun.fruitmix.refactor.business.callback.MediaShareOperationCallback;
 import com.winsun.fruitmix.refactor.contract.AlbumContentContract;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;
 import java.util.Map;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by Administrator on 2017/2/13.
@@ -24,6 +28,7 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
 
     private AlbumContentContract.AlbumContentView mView;
 
+    private String mMediaShareUUID;
     private MediaShare mMediaShare;
     private List<Media> mMedias;
 
@@ -37,18 +42,64 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
 
         mRepository = repository;
 
-        mMediaShare = mRepository.loadMediaShareFromMemory(mediaShareUUID);
+        mMediaShareUUID = mediaShareUUID;
+        mMediaShare = mRepository.loadMediaShareFromMemory(mMediaShareUUID);
 
     }
 
     @Override
     public void toggleAlbumPublicState() {
 
+        mView.showDialog();
+
+        MediaShare cloneMediaShare = mMediaShare.cloneMyself();
+
+        mRepository.modifyMediaShare(cloneMediaShare.createToggleShareStateRequestData(), cloneMediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
+            @Override
+            public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
+                mView.dismissDialog();
+
+                isOperated = true;
+
+                mMediaShare = mRepository.loadMediaShareFromMemory(mMediaShareUUID);
+                showMenuItemPrivateOrPublic();
+
+                isOperated = true;
+
+            }
+
+            @Override
+            public void onOperateFail(OperationResult operationResult) {
+                mView.dismissDialog();
+
+                mView.showOperationResultToast(operationResult);
+            }
+        });
+
     }
 
     @Override
     public void deleteCurrentAlbum() {
 
+        mView.showDialog();
+
+        mRepository.deleteMediaShare(mMediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
+            @Override
+            public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
+                mView.dismissDialog();
+
+                isOperated = true;
+                handleBackEvent();
+            }
+
+            @Override
+            public void onOperateFail(OperationResult operationResult) {
+                mView.dismissDialog();
+
+                mView.showOperationResultToast(operationResult);
+                handleBackEvent();
+            }
+        });
     }
 
     @Override
@@ -135,6 +186,8 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
     @Override
     public void loadMediaInMediaShare() {
 
+        mView.showLoadingUI();
+
         mRepository.loadMediaInMediaShareFromMemory(mMediaShare, new MediaOperationCallback.LoadMediasCallback() {
             @Override
             public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
@@ -163,6 +216,27 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
     }
 
     @Override
+    public void showMenuItemPrivateOrPublic() {
+
+        if (mMediaShare.getViewersListSize() == 0) {
+            mView.setPrivatePublicMenuItemTitle(R.string.set_public);
+        } else {
+            mView.setPrivatePublicMenuItemTitle(R.string.set_private);
+        }
+
+    }
+
+    @Override
+    public List<Media> getMedias() {
+        return mMedias;
+    }
+
+    @Override
+    public String getMediaShareUUID() {
+        return mMediaShareUUID;
+    }
+
+    @Override
     public void attachView(AlbumContentContract.AlbumContentView view) {
         mView = view;
     }
@@ -176,13 +250,26 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
     public void handleBackEvent() {
 
         if (isOperated)
-            mView.setResult(Activity.RESULT_OK);
+            mView.setResult(RESULT_OK);
 
         mView.finishActivity();
     }
 
     @Override
     public void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == Util.KEY_EDIT_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
+
+            loadMediaInMediaShare();
+
+            isOperated = true;
+
+        } else if (requestCode == Util.KEY_MODIFY_ALBUM_REQUEST_CODE && resultCode == RESULT_OK) {
+
+            mView.setTitle(mMediaShare.getTitle());
+
+            isOperated = true;
+        }
 
     }
 }

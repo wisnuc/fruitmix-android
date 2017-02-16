@@ -16,10 +16,13 @@ public interface MoreMediaContract {
 
         void showMedias(List<Media> medias);
 
+        void finishActivity();
+
     }
 
     interface MoreMediaPresenter extends BasePresenter<MoreMediaView> {
 
+        void loadMediaInMediaShare();
 
     }
 

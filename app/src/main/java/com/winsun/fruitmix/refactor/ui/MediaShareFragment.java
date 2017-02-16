@@ -242,6 +242,8 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
         }
 
         void setMediaShares(List<MediaShare> mediaShares) {
+
+            mMediaShares.clear();
             mMediaShares.addAll(mediaShares);
         }
 

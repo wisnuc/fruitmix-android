@@ -218,6 +218,7 @@ public class AlbumFragment implements AlbumFragmentContract.AlbumFragmentView {
         }
 
         void setAlbumList(List<MediaShare> albumList) {
+            mAlbumList.clear();
             mAlbumList.addAll(albumList);
         }
 

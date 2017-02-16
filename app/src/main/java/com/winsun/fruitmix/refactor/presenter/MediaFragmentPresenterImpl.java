@@ -224,44 +224,8 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
     }
 
-    private MediaShare createMediaShareInMemory(List<String> selectMediaKeys) {
-
-        MediaShare mediaShare = new MediaShare();
-        mediaShare.setUuid(Util.createLocalUUid());
-
-        List<MediaShareContent> mediaShareContents = new ArrayList<>();
-
-        for (String mediaKey : selectMediaKeys) {
-            MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setKey(mediaKey);
-            mediaShareContent.setAuthor(FNAS.userUUID);
-            mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
-            mediaShareContents.add(mediaShareContent);
-
-        }
-
-        mediaShare.initMediaShareContents(mediaShareContents);
-
-        mediaShare.setCoverImageKey(selectMediaKeys.get(0));
-        mediaShare.setTitle("");
-        mediaShare.setDesc("");
-        for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-            mediaShare.addViewer(userUUID);
-        }
-        mediaShare.addMaintainer(FNAS.userUUID);
-        mediaShare.setCreatorUUID(FNAS.userUUID);
-        mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
-        mediaShare.setDate(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(mediaShare.getTime()))));
-        mediaShare.setArchived(false);
-        mediaShare.setAlbum(false);
-        mediaShare.setLocal(true);
-
-        return mediaShare;
-
-    }
-
     private void createMediaShare(List<String> selectMediaKeys) {
-        mRepository.createMediaShare(createMediaShareInMemory(selectMediaKeys), new MediaShareOperationCallback.OperateMediaShareCallback() {
+        mRepository.createMediaShare(mRepository.createMediaShareInMemory(false,true,false,"","",selectMediaKeys), new MediaShareOperationCallback.OperateMediaShareCallback() {
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
 

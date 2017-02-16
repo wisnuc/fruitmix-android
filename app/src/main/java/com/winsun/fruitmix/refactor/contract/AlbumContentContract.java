@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.view.View;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
 
@@ -36,6 +37,10 @@ public interface AlbumContentContract {
 
         void showUploadingToast();
 
+        void showOperationResultToast(OperationResult result);
+
+        void setPrivatePublicMenuItemTitle(int titleResID);
+
     }
 
     interface AlbumContentPresenter extends BasePresenter<AlbumContentView> {
@@ -53,5 +58,11 @@ public interface AlbumContentContract {
         void setMediaShareTitle();
 
         void loadMediaInMediaShare();
+
+        void showMenuItemPrivateOrPublic();
+
+        List<Media> getMedias();
+
+        String getMediaShareUUID();
     }
 }
