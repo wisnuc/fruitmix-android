@@ -404,7 +404,6 @@ public class DBUtils {
 
         return returnValue;
 
-        //TODO: parse logged in user loaded from db
     }
 
 
@@ -929,14 +928,14 @@ public class DBUtils {
         String deviceID;
         LocalDataParser<User> parser = new LocalUserParser();
 
-        Cursor cursor = database.rawQuery("select * from" + DBHelper.LOGGED_IN_USER_TABLE_NAME, null);
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOGGED_IN_USER_TABLE_NAME, null);
 
         while (cursor.moveToNext()) {
             user = parser.parse(cursor);
 
             gateway = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_GATEWAY));
             equipmentName = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_EQUIPMENT_NAME));
-            token = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_TABLE_NAME));
+            token = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_TOKEN));
             deviceID = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_DEVICE_ID));
 
             loggedInUsers.add(new LoggedInUser(deviceID, token, gateway, equipmentName, user));

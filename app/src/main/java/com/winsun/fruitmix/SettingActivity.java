@@ -15,6 +15,7 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.services.ButlerService;
+import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -68,10 +69,11 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         if (mAutoUploadOrNot != isChecked) {
             LocalCache.setAutoUploadOrNot(this, isChecked);
 
-            if(isChecked){
-                EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD,null));
-            }else {
-                EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD,null));
+            if (isChecked) {
+                LocalCache.setCurrentUploadDeviceID(this, LocalCache.DeviceID);
+                EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
+            } else {
+                EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
             }
         }
 

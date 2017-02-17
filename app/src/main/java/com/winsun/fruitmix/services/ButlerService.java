@@ -249,8 +249,13 @@ public class ButlerService extends Service {
     }
 
     private void startUpload() {
+
+        Log.i(TAG, "startUpload: auto upload:" + LocalCache.getAutoUploadOrNot(this));
+
         if (mCalcNewLocalMediaDigestFinished && mRetrieveRemoteMediaFinished && LocalCache.getAutoUploadOrNot(this)) {
             startUploadAllLocalPhoto();
+
+            Log.i(TAG, "startUpload");
         }
     }
 

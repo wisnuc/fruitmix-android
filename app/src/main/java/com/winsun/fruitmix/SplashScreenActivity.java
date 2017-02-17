@@ -9,6 +9,7 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
@@ -31,6 +32,7 @@ public class SplashScreenActivity extends Activity {
     private String mUuid;
     private String mGateway;
     private String mToken;
+    private String mDeviceID;
 
     private Context mContext;
 
@@ -58,17 +60,26 @@ public class SplashScreenActivity extends Activity {
 
         FNAS.retrieveLocalMedia(mContext);
 
-        FNAS.retrieveLocalLoggedInUser();
+        DBUtils dbUtils = DBUtils.getInstance(this);
+        LocalCache.LocalLoggedInUsers.addAll(dbUtils.getAllLoggedInUser());
+
+        Log.i(TAG, "onCreate: LocalLoggedInUsers size: " + LocalCache.LocalLoggedInUsers.size());
 
         mGateway = LocalCache.getGateway(mContext);
         mUuid = LocalCache.getUserUUID(mContext);
         mToken = LocalCache.getToken(mContext);
+        mDeviceID = LocalCache.GetGlobalData(mContext, Util.DEVICE_ID_MAP_NAME);
 
         if (!mUuid.isEmpty() && mGateway != null && mToken != null) {
 
             Util.loginType = LoginType.SPLASH_SCREEN;
 
-            FNAS.retrieveRemoteDeviceID(this);
+            FNAS.Gateway = mGateway;
+            FNAS.JWT = mToken;
+            LocalCache.DeviceID = mDeviceID;
+            FNAS.userUUID = mUuid;
+
+            FNAS.retrieveUser(this);
         }
 
         mHandler = new CustomHandler(this);

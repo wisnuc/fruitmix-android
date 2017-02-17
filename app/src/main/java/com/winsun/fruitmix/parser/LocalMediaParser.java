@@ -20,7 +20,11 @@ public class LocalMediaParser implements LocalDataParser<Media> {
         media.setHeight(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_HEIGHT)));
         media.setThumb(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_THUMB)));
         media.setLocal(cursor.getInt(cursor.getColumnIndex(DBHelper.MEDIA_KEY_LOCAL)) == 1);
-        media.setUploadedDeviceIDs(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID)));
+
+        if(!cursor.isNull(cursor.getColumnIndex(DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID))){
+            media.setUploadedDeviceIDs(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID)));
+        }
+
         media.setOrientationNumber(cursor.getInt(cursor.getColumnIndex(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER)));
         media.setSharing(cursor.getInt(cursor.getColumnIndex(DBHelper.MEDIA_KEY_SHARING)) == 1);
         media.setType(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_TYPE)));

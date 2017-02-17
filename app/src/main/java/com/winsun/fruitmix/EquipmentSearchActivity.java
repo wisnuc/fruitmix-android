@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -22,6 +23,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
@@ -135,6 +137,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         LocalCache.saveUserUUID(mContext, FNAS.userUUID);
                         LocalCache.SetGlobalData(mContext, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
 
+                        checkAutoUpload();
+
                         FNAS.retrieveUser(mContext);
                         startActivity(new Intent(mContext, NavPagerActivity.class));
                         finish();
@@ -214,6 +218,20 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         super.onDestroy();
 
         mContext = null;
+    }
+
+    private void checkAutoUpload() {
+        for (LoggedInUser loggedInUser : LocalCache.LocalLoggedInUsers) {
+
+            if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
+                if (!LocalCache.getCurrentUploadDeviceID(mContext).equals(LocalCache.DeviceID)) {
+                    LocalCache.setAutoUploadOrNot(mContext, false);
+                    Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
+                } else {
+                    LocalCache.setAutoUploadOrNot(mContext, true);
+                }
+            }
+        }
     }
 
     @Override

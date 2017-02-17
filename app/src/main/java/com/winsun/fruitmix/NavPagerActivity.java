@@ -15,7 +15,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.SharedElementCallback;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,12 +22,11 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,13 +34,14 @@ import android.widget.Toast;
 import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.fragment.FileMainFragment;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
-import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
@@ -55,6 +54,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -72,6 +72,8 @@ public class NavPagerActivity extends AppCompatActivity
 
     @BindView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
+    @BindView(R.id.frame_layout)
+    FrameLayout mFrameLayout;
     @BindView(R.id.version_name)
     TextView versionName;
     @BindView(R.id.avatar)
@@ -83,13 +85,11 @@ public class NavPagerActivity extends AppCompatActivity
     @BindView(R.id.logged_in_user1_avatar)
     TextView mLoggedInUser1Avatar;
     @BindView(R.id.navigation_header_arrow)
-    TextView mNavigationHeaderArrow;
+    ImageView mNavigationHeaderArrow;
     @BindView(R.id.navigation_menu_recycler_view)
     RecyclerView mNavigationMenuRecyclerView;
 
     private Context mContext;
-
-    private ExecutorServiceInstance instance;
 
     private ProgressDialog mDialog;
 
@@ -186,10 +186,8 @@ public class NavPagerActivity extends AppCompatActivity
         public void onClick() {
 
             mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
-
             startDiscovery(loggedInUser);
-            mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT, 1000);
-            //TODO:finish logged in user onclick function and recycler view adapter
+            mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT, 10 * 1000);
         }
 
     }
@@ -227,6 +225,8 @@ public class NavPagerActivity extends AppCompatActivity
 
                     Toast.makeText(weakReference.get(), "操作失败", Toast.LENGTH_SHORT).show();
 
+                    weakReference.get().mDrawerLayout.closeDrawer(GravityCompat.START);
+
                     break;
                 default:
             }
@@ -242,14 +242,15 @@ public class NavPagerActivity extends AppCompatActivity
 
         setExitSharedElementCallback(sharedElementCallback);
 
-        ButterKnife.bind(this);
-
-        instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+        ButterKnife.bind(NavPagerActivity.this);
 
 /*        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.setDrawerListener(toggle);
         toggle.syncState();*/
+
+        mNavigationItemMenu = new ArrayList<>();
+        mNavigationItemLoggedInUser = new ArrayList<>();
 
         initNavigationMenuRecyclerView();
 
@@ -270,7 +271,6 @@ public class NavPagerActivity extends AppCompatActivity
 
         currentPage = PAGE_MEDIA;
 
-        mRxDnssd = CustomApplication.getRxDnssd(mContext);
         mCustomHandler = new CustomHandler(this);
 
         Log.d(TAG, "onCreate: ");
@@ -285,10 +285,8 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     private void initNavigationItemMenu() {
-        mNavigationItemMenu = new ArrayList<>();
-        mNavigationItemLoggedInUser = new ArrayList<>();
 
-        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_folder, getString(R.string.file)) {
+        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_folder, getString(R.string.my_file)) {
             @Override
             public void onClick() {
                 toggleFileOrMediaFragment();
@@ -312,6 +310,9 @@ public class NavPagerActivity extends AppCompatActivity
 
     private void startDiscovery(final LoggedInUser loggedInUser) {
 
+        if (mRxDnssd == null)
+            mRxDnssd = CustomApplication.getRxDnssd(mContext);
+
         mSubscription = mRxDnssd.browse(SERVICE_PORT, DEMAIN)
                 .compose(mRxDnssd.resolve())
                 .compose(mRxDnssd.queryRecords())
@@ -328,6 +329,11 @@ public class NavPagerActivity extends AppCompatActivity
 
                         if (bonjourService.getInet4Address() == null) return;
 
+                        mDialog.dismiss();
+                        stopDiscovery();
+
+                        mCustomHandler.removeMessages(DISCOVERY_TIMEOUT);
+
                         String hostAddress = bonjourService.getInet4Address().getHostAddress();
 
                         FNAS.Gateway = "http://" + hostAddress;
@@ -340,15 +346,36 @@ public class NavPagerActivity extends AppCompatActivity
                         LocalCache.saveUserUUID(mContext, FNAS.userUUID);
                         LocalCache.SetGlobalData(mContext, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
 
+                        EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
+
+                        ButlerService.stopTimingRetrieveMediaShare();
+
                         FNAS.retrieveUser(mContext);
+
+                        checkAutoUpload();
 
                         Util.setRemoteMediaShareLoaded(false);
                         Util.setRemoteMediaLoaded(false);
                         mediaMainFragment.refreshAllViews();
 
+                        mDrawerLayout.closeDrawer(GravityCompat.START);
                     }
                 });
 
+    }
+
+    private void checkAutoUpload() {
+        for (LoggedInUser loggedInUser : LocalCache.LocalLoggedInUsers) {
+
+            if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
+                if (!LocalCache.getCurrentUploadDeviceID(mContext).equals(LocalCache.DeviceID)) {
+                    LocalCache.setAutoUploadOrNot(mContext, false);
+                    Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
+                } else {
+                    LocalCache.setAutoUploadOrNot(mContext, true);
+                }
+            }
+        }
     }
 
     private void stopDiscovery() {
@@ -376,9 +403,8 @@ public class NavPagerActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
 
-        instance.shutdownFixedThreadPoolNow();
+        ExecutorServiceInstance.SINGLE_INSTANCE.shutdownFixedThreadPoolNow();
 
-        instance = null;
         mContext = null;
 
         Log.d(TAG, "onDestroy: ");
@@ -459,57 +485,72 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     private void initLoggedInUserNavigationItem() {
-        int loggedInUserListSize = LocalCache.LocalLoggedInUsers.size();
+
+        List<LoggedInUser> loggedInUsers = new ArrayList<>(LocalCache.LocalLoggedInUsers);
+
+        Iterator<LoggedInUser> iterator = loggedInUsers.iterator();
+        while (iterator.hasNext()) {
+            LoggedInUser loggedInUser = iterator.next();
+            if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
+                iterator.remove();
+                break;
+            }
+        }
+
+        int loggedInUserListSize = loggedInUsers.size();
+        User user0;
+        User user1;
+
         if (loggedInUserListSize > 0) {
+
             mNavigationHeaderArrow.setVisibility(View.VISIBLE);
+
+            mNavigationHeaderArrowExpanded = false;
+            refreshNavigationHeader();
 
             mNavigationHeaderArrow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-                    if (mNavigationHeaderArrowExpanded) {
-
-                        if (mLoggedInUser1Avatar.getVisibility() == View.INVISIBLE) {
-                            mLoggedInUser1Avatar.setVisibility(View.VISIBLE);
-                        }
-                        if (mLoggedInUser0Avatar.getVisibility() == View.INVISIBLE) {
-                            mLoggedInUser0Avatar.setVisibility(View.VISIBLE);
-                        }
-
-                        mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemMenu);
-                        mNavigationItemAdapter.notifyDataSetChanged();
-
-                    } else {
-
-                        if (mLoggedInUser1Avatar.getVisibility() == View.VISIBLE) {
-                            mLoggedInUser1Avatar.setVisibility(View.INVISIBLE);
-                        }
-                        if (mLoggedInUser0Avatar.getVisibility() == View.VISIBLE) {
-                            mLoggedInUser0Avatar.setVisibility(View.INVISIBLE);
-                        }
-
-                        mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemLoggedInUser);
-                        mNavigationItemAdapter.notifyDataSetChanged();
-
-                    }
-
+                    mNavigationHeaderArrowExpanded = !mNavigationHeaderArrowExpanded;
+                    refreshNavigationHeader();
                 }
             });
 
-            User loggedInUser0 = LocalCache.LocalLoggedInUsers.get(0).getUser();
-            mLoggedInUser0Avatar.setVisibility(View.VISIBLE);
-            mLoggedInUser0Avatar.setText(loggedInUser0.getDefaultAvatar());
-            mLoggedInUser0Avatar.setBackgroundResource(loggedInUser0.getDefaultAvatarBgColorResourceId());
-
-            if (loggedInUserListSize > 1) {
-                User loggedInUser1 = LocalCache.LocalLoggedInUsers.get(1).getUser();
-                mLoggedInUser1Avatar.setVisibility(View.VISIBLE);
-                mLoggedInUser1Avatar.setText(loggedInUser1.getDefaultAvatar());
-                mLoggedInUser1Avatar.setBackgroundResource(loggedInUser1.getDefaultAvatarBgColorResourceId());
+            mNavigationItemLoggedInUser.clear();
+            for (LoggedInUser loggedInUser : loggedInUsers) {
+                mNavigationItemLoggedInUser.add(new NavigationLoggerInUserItem(loggedInUser));
             }
 
-            for (LoggedInUser loggedInUser : LocalCache.LocalLoggedInUsers) {
-                mNavigationItemLoggedInUser.add(new NavigationLoggerInUserItem(loggedInUser));
+            user0 = loggedInUsers.get(0).getUser();
+
+            mLoggedInUser0Avatar.setVisibility(View.VISIBLE);
+            mLoggedInUser0Avatar.setText(user0.getDefaultAvatar());
+            mLoggedInUser0Avatar.setBackgroundResource(user0.getDefaultAvatarBgColorResourceId());
+            mLoggedInUser0Avatar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ((NavigationLoggerInUserItem) mNavigationItemLoggedInUser.get(0)).onClick();
+                }
+            });
+
+            if (loggedInUserListSize > 1) {
+                user1 = loggedInUsers.get(1).getUser();
+
+                mLoggedInUser1Avatar.setVisibility(View.VISIBLE);
+                mLoggedInUser1Avatar.setText(user1.getDefaultAvatar());
+                mLoggedInUser1Avatar.setBackgroundResource(user1.getDefaultAvatarBgColorResourceId());
+
+                mLoggedInUser1Avatar.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        ((NavigationLoggerInUserItem) mNavigationItemLoggedInUser.get(1)).onClick();
+
+                    }
+                });
+
+            } else {
+                mLoggedInUser1Avatar.setVisibility(View.GONE);
             }
 
         } else {
@@ -519,17 +560,56 @@ public class NavPagerActivity extends AppCompatActivity
         }
     }
 
+    private void refreshNavigationHeader() {
+        if (mNavigationHeaderArrowExpanded) {
+
+            mNavigationHeaderArrow.setImageResource(R.drawable.navigation_header_arrow_down);
+
+            if (mLoggedInUser1Avatar.getVisibility() == View.VISIBLE) {
+                mLoggedInUser1Avatar.setVisibility(View.INVISIBLE);
+            }
+            if (mLoggedInUser0Avatar.getVisibility() == View.VISIBLE) {
+                mLoggedInUser0Avatar.setVisibility(View.INVISIBLE);
+            }
+
+            mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemLoggedInUser);
+            mNavigationItemAdapter.notifyDataSetChanged();
+
+
+        } else {
+
+            mNavigationHeaderArrow.setImageResource(R.drawable.navigation_header_arrow_up);
+
+            if (mLoggedInUser1Avatar.getVisibility() == View.INVISIBLE) {
+                mLoggedInUser1Avatar.setVisibility(View.VISIBLE);
+            }
+            if (mLoggedInUser0Avatar.getVisibility() == View.INVISIBLE) {
+                mLoggedInUser0Avatar.setVisibility(View.VISIBLE);
+            }
+
+            mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemMenu);
+            mNavigationItemAdapter.notifyDataSetChanged();
+
+        }
+    }
+
     private void toggleUserManageNavigationItem(User user) {
         if (user.isAdmin()) {
-            mNavigationItemMenu.add(1, new NavigationMenuItem(R.drawable.ic_person_add, getString(R.string.user_manage)) {
-                @Override
-                public void onClick() {
-                    Intent intent = new Intent(NavPagerActivity.this, UserManageActivity.class);
-                    startActivity(intent);
-                }
-            });
+
+            if (mNavigationItemMenu.get(1).getType() != NAVIGATION_ITEM_TYPE_MENU) {
+                mNavigationItemMenu.add(1, new NavigationMenuItem(R.drawable.ic_person_add, getString(R.string.user_manage)) {
+                    @Override
+                    public void onClick() {
+                        Intent intent = new Intent(NavPagerActivity.this, UserManageActivity.class);
+                        startActivity(intent);
+                    }
+                });
+            }
+
         } else {
-            mNavigationItemMenu.remove(1);
+
+            if (mNavigationItemMenu.get(1).getType() == NAVIGATION_ITEM_TYPE_MENU)
+                mNavigationItemMenu.remove(1);
         }
     }
 
@@ -567,9 +647,8 @@ public class NavPagerActivity extends AppCompatActivity
 
     @Override
     public void onBackPress() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
@@ -581,6 +660,8 @@ public class NavPagerActivity extends AppCompatActivity
         if (currentPage == PAGE_FILE) {
             if (fileMainFragment.handleBackPressedOrNot()) {
                 fileMainFragment.handleBackPressed();
+            } else if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                mDrawerLayout.closeDrawer(GravityCompat.START);
             } else {
                 finishApp();
             }
@@ -588,6 +669,8 @@ public class NavPagerActivity extends AppCompatActivity
 
             if (mediaMainFragment.handleBackPressedOrNot()) {
                 mediaMainFragment.handleBackPressed();
+            } else if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                mDrawerLayout.closeDrawer(GravityCompat.START);
             } else {
                 finishApp();
             }
@@ -634,7 +717,7 @@ public class NavPagerActivity extends AppCompatActivity
             @Override
             protected Void doInBackground(Void... params) {
 
-                instance.shutdownFixedThreadPoolNow();
+                EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
 
                 ButlerService.stopTimingRetrieveMediaShare();
 
@@ -668,7 +751,7 @@ public class NavPagerActivity extends AppCompatActivity
             currentPage = PAGE_FILE;
 
             item.setMenuText(getString(R.string.my_photo));
-            item.setMenuIconResID(R.drawable.ic_photo);
+            item.setMenuIconResID(R.drawable.ic_photo_black);
 
             fragmentManager.beginTransaction().hide(mediaMainFragment).show(fileMainFragment).commit();
 
@@ -743,14 +826,14 @@ public class NavPagerActivity extends AppCompatActivity
 
     private abstract class BaseNavigationViewHolder extends RecyclerView.ViewHolder {
 
-        public BaseNavigationViewHolder(View itemView) {
+        BaseNavigationViewHolder(View itemView) {
             super(itemView);
         }
 
         public abstract void refreshView(NavigationItemType type);
     }
 
-    private class NavigationMenuViewHolder extends BaseNavigationViewHolder {
+    class NavigationMenuViewHolder extends BaseNavigationViewHolder {
 
         @BindView(R.id.menu_icon)
         ImageView menuIcon;
@@ -759,7 +842,7 @@ public class NavPagerActivity extends AppCompatActivity
         @BindView(R.id.menu_layout)
         ViewGroup menuLayout;
 
-        public NavigationMenuViewHolder(View itemView) {
+        NavigationMenuViewHolder(View itemView) {
             super(itemView);
 
             ButterKnife.bind(this, itemView);
@@ -783,7 +866,7 @@ public class NavPagerActivity extends AppCompatActivity
         }
     }
 
-    private class NavigationLoggedInUserViewHolder extends BaseNavigationViewHolder {
+    class NavigationLoggedInUserViewHolder extends BaseNavigationViewHolder {
 
         @BindView(R.id.avatar)
         TextView avatar;
@@ -794,7 +877,7 @@ public class NavPagerActivity extends AppCompatActivity
         @BindView(R.id.logged_in_user_item_layout)
         ViewGroup itemLayout;
 
-        public NavigationLoggedInUserViewHolder(View itemView) {
+        NavigationLoggedInUserViewHolder(View itemView) {
             super(itemView);
 
             ButterKnife.bind(this, itemView);
@@ -827,7 +910,7 @@ public class NavPagerActivity extends AppCompatActivity
     private class NavigationDividerViewHolder extends BaseNavigationViewHolder {
 
 
-        public NavigationDividerViewHolder(View itemView) {
+        NavigationDividerViewHolder(View itemView) {
             super(itemView);
         }
 

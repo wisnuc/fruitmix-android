@@ -17,6 +17,14 @@ public class User {
     private String library;
     private boolean admin;
 
+    public User() {
+
+        setAvatar("defaultAvatar.jpg");
+        setEmail("");
+        setLibrary("");
+
+    }
+
     public String getUserName() {
         return userName;
     }

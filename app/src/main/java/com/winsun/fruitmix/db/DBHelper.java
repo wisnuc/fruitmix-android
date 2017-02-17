@@ -97,7 +97,7 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String DOWNLOADED_FILE_TABLE_NAME = "downloaded_file";
     static final String LOGGED_IN_USER_TABLE_NAME = "logged_in_user";
 
-    private static final int DB_VERSION = 19;
+    private static final int DB_VERSION = 20;
 
     private static final String CREATE_TABLE = "create table ";
 

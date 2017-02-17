@@ -3,8 +3,11 @@ package com.winsun.fruitmix;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.LoggedInUserRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.model.LoggedInUser;
@@ -28,10 +32,14 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Collections;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class LoginActivity extends Activity implements View.OnClickListener, EditText.OnFocusChangeListener {
+
+    public static final String TAG = LoginActivity.class.getSimpleName();
 
     @BindView(R.id.back)
     ImageView mBack;
@@ -140,12 +148,40 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
                 if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
 
-                    User currentUser = LocalCache.getUser(this);
+                    if (LocalCache.LocalLoggedInUsers.isEmpty()) {
 
-                    LoggedInUser loggedInUser = new LoggedInUser(LocalCache.DeviceID, FNAS.JWT, FNAS.Gateway, mEquipmentGroupName, currentUser);
-                    EventBus.getDefault().post(new LoggedInUserRequestEvent(OperationType.CREATE, OperationTargetType.LOCAL_LOGGED_IN_USER, loggedInUser));
+                        LocalCache.setCurrentUploadDeviceID(mContext, LocalCache.DeviceID);
+                        LocalCache.setAutoUploadOrNot(mContext, true);
 
-                    handleRetrieveUser();
+                        saveLoggedUser();
+
+                        startNavPagerActivity();
+
+                    } else {
+
+                        saveLoggedUser();
+
+                        new AlertDialog.Builder(mContext).setMessage(getString(R.string.need_auto_upload)).setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                LocalCache.setCurrentUploadDeviceID(mContext, LocalCache.DeviceID);
+                                LocalCache.setAutoUploadOrNot(mContext, true);
+
+                                startNavPagerActivity();
+                            }
+                        }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                LocalCache.setAutoUploadOrNot(mContext, false);
+
+                                startNavPagerActivity();
+                            }
+                        }).setCancelable(false).create().show();
+
+                    }
+
                 } else {
                     Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
                 }
@@ -156,7 +192,18 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
     }
 
-    private void handleRetrieveUser() {
+    private void saveLoggedUser() {
+        User currentUser = LocalCache.getUser(this);
+
+        LoggedInUser loggedInUser = new LoggedInUser(LocalCache.DeviceID, FNAS.JWT, FNAS.Gateway, mEquipmentGroupName, currentUser);
+        long result = DBUtils.getInstance(this).insertLoggedInUserInDB(Collections.singletonList(loggedInUser));
+
+        Log.i(TAG, "saveLoggedUser: result:" + result);
+
+        LocalCache.LocalLoggedInUsers.add(loggedInUser);
+    }
+
+    private void startNavPagerActivity() {
         Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
         startActivity(jumpIntent);
         LoginActivity.this.setResult(RESULT_OK);

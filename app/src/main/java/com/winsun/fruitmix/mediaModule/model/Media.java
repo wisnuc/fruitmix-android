@@ -177,7 +177,7 @@ public class Media implements Parcelable {
     }
 
     public String getUploadedDeviceIDs() {
-        return uploadedDeviceIDs;
+        return uploadedDeviceIDs == null?"":uploadedDeviceIDs;
     }
 
     public void setUploadedDeviceIDs(String uploadedDeviceIDs) {
@@ -225,7 +225,7 @@ public class Media implements Parcelable {
 
         if (!uploaded) return false;
 
-        if (getUploadedDeviceIDs() == null) {
+        if (getUploadedDeviceIDs().isEmpty()) {
             setUploadedDeviceIDs(LocalCache.DeviceID);
         } else if (!getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
             setUploadedDeviceIDs(getUploadedDeviceIDs() + "," + LocalCache.DeviceID);
