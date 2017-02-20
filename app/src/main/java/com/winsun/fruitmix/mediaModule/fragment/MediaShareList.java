@@ -154,7 +154,7 @@ public class MediaShareList implements Page {
     }
 
     private boolean isMediaSharePublic(MediaShare mediaShare) {
-        return LocalCache.RemoteUserMapKeyIsUUID.size() == 1 || (FNAS.userUUID != null && mediaShare.getCreatorUUID().equals(FNAS.userUUID)) || (mediaShare.getViewersListSize() != 0 && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()));
+        return (LocalCache.RemoteUserMapKeyIsUUID.size() == 1 && FNAS.userUUID != null && mediaShare.getCreatorUUID().equals(FNAS.userUUID)) || (mediaShare.getViewersListSize() != 0 && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()));
     }
 
 
@@ -383,7 +383,6 @@ public class MediaShareList implements Page {
             }
             cardView.setLayoutParams(layoutParams);
 
-
             lbTime.setText(Util.formatTime(containerActivity, Long.parseLong(currentItem.getTime())));
 
             String createUUID = currentItem.getCreatorUUID();
@@ -448,10 +447,17 @@ public class MediaShareList implements Page {
 
             lbAlbumTitle.setText(title);
 
-            coverImg = LocalCache.findMediaInLocalMediaMap(currentItem.getCoverImageUUID());
-            if (coverImg == null) {
-                coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageUUID());
+            String key = currentItem.getCoverImageUUID();
+
+            if (key.isEmpty()) {
+                coverImg = null;
+            } else {
+                coverImg = LocalCache.findMediaInLocalMediaMap(key);
+                if (coverImg == null) {
+                    coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(key);
+                }
             }
+
             if (coverImg != null) {
 
                 String imageUrl = coverImg.getImageOriginalUrl(containerActivity);

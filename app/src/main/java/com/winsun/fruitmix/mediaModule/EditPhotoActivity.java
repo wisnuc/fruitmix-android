@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -77,6 +78,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
     private MediaInMediaShareLoader loader;
     private MediaInMediaShareLoader.OnMediaInMediaShareLoadListener listener;
 
+    public static final int SPAN_COUNT = 2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,7 +101,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
 
         GridLayoutManager mManager = new GridLayoutManager(mContext, mSpanCount);
 
-        StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL);
+        StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(SPAN_COUNT, StaggeredGridLayoutManager.VERTICAL);
 
         mEditPhotoRecyclerView.setLayoutManager(manager);
         mEditPhotoRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -299,6 +302,8 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             if (mMap.isLocal())
                 mPhotoItem.setOrientationNumber(mMap.getOrientationNumber());
 
+            setMainPicScreenHeight(mPhotoItem, mMap);
+
             mPhotoItem.setTag(imageUrl);
             mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
             mPhotoItem.setImageUrl(imageUrl, mImageLoader);
@@ -318,6 +323,25 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
             });
         }
 
+    }
+
+    private void setMainPicScreenHeight(NetworkImageView mainPic, Media media) {
+
+        if (media.isLocal())
+            return;
+
+        int mediaWidth = Integer.parseInt(media.getWidth());
+        int mediaHeight = Integer.parseInt(media.getHeight());
+        int actualWidth;
+        int actualHeight;
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) mainPic.getLayoutParams();
+
+        actualWidth = Util.calcScreenWidth(EditPhotoActivity.this) / SPAN_COUNT;
+        actualHeight = mediaHeight * actualWidth / mediaWidth;
+
+        layoutParams.height = actualHeight;
+
+        mainPic.setLayoutParams(layoutParams);
     }
 
     class EditPhotoAdapter extends RecyclerView.Adapter<EditPhotoViewHolder> {

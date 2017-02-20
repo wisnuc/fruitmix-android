@@ -315,10 +315,15 @@ public class AlbumList implements Page {
             currentItem = mediaShare;
             restoreSwipeLayoutState();
 
-            coverImg = LocalCache.findMediaInLocalMediaMap(currentItem.getCoverImageUUID());
+            String key = currentItem.getCoverImageUUID();
 
-            if (coverImg == null) {
-                coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(currentItem.getCoverImageUUID());
+            if (key.isEmpty()) {
+                coverImg = null;
+            } else {
+                coverImg = LocalCache.findMediaInLocalMediaMap(key);
+                if (coverImg == null) {
+                    coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(key);
+                }
             }
 
             if (coverImg != null) {
@@ -335,7 +340,8 @@ public class AlbumList implements Page {
 
             } else {
                 ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
-                ivMainPic.setImageUrl(null, mImageLoader);
+                ivMainPic.setBackgroundResource(R.drawable.placeholder_photo);
+                ivMainPic.setImageResource(R.drawable.placeholder_photo);
             }
 
             if (currentItem.getViewersListSize() == 0) {

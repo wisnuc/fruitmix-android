@@ -60,6 +60,9 @@
 
     <string name="confirm_delete">Please confirm whether to delete</string>
 
+    <string name="need_auto_upload">Need auto upload photo?</string>
+    <string name="photo_auto_upload_already_close">Photo auto upload closed,you can check setting module</string>
+
     <string name="user_name_abbreviations">D</string>
 
     <string name="user_default_name">Default</string>
@@ -193,6 +196,5 @@
     <string name="no_enough_space">No enough space</string>
 
     <string name="max_select_photo">Max photo count</string>
-    <string name="title_activity_setting">Setting</string>
 
 </resources>

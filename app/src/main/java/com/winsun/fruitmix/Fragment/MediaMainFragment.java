@@ -807,9 +807,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mAnimator.setTarget(ivBtShare);
         mAnimator.start();
 
-        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.system_share_btn_restore);
-        mAnimator.setTarget(mSystemShareBtn);
-        mAnimator.start();
+//        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.system_share_btn_restore);
+//        mAnimator.setTarget(mSystemShareBtn);
+//        mAnimator.start();
 
         mAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -818,7 +818,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 ivBtAlbum.setVisibility(View.GONE);
                 ivBtShare.setVisibility(View.GONE);
-                mSystemShareBtn.setVisibility(View.GONE);
+//                mSystemShareBtn.setVisibility(View.GONE);
 
             }
         });
@@ -829,7 +829,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         ivBtAlbum.setVisibility(View.VISIBLE);
         ivBtShare.setVisibility(View.VISIBLE);
-        mSystemShareBtn.setVisibility(View.VISIBLE);
+//        mSystemShareBtn.setVisibility(View.VISIBLE);
 
         mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.fab_remote);
         mAnimator.setTarget(fab);
@@ -843,9 +843,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mAnimator.setTarget(ivBtShare);
         mAnimator.start();
 
-        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.system_share_btn_translation);
-        mAnimator.setTarget(mSystemShareBtn);
-        mAnimator.start();
+//        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.system_share_btn_translation);
+//        mAnimator.setTarget(mSystemShareBtn);
+//        mAnimator.start();
     }
 
     @Override

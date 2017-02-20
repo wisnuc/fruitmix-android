@@ -363,7 +363,8 @@ public class NewPhotoList implements Page {
 
     public void clearSelectedPhoto() {
 
-        if (mMapKeyIsPhotoPositionValueIsPhoto == null) return;
+        if (mMapKeyIsPhotoPositionValueIsPhoto == null || mMapKeyIsPhotoPositionValueIsPhoto.size() == 0)
+            return;
 
         for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Media media : mediaList) {

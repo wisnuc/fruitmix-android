@@ -97,6 +97,7 @@ public class SplashScreenActivity extends Activity {
     @Override
     public void onBackPressed() {
         mHandler.removeMessages(WELCOME);
+        finish();
     }
 
     private void welcome() {

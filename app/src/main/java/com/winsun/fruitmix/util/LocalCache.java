@@ -154,6 +154,8 @@ public class LocalCache {
 
         if (LocalLoggedInUsers == null)
             LocalLoggedInUsers = new ArrayList<>();
+        else
+            LocalLoggedInUsers.clear();
 
         return true;
     }

@@ -13,6 +13,9 @@ import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +27,8 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +46,7 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -59,8 +65,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     public static final String TAG = AlbumPicContentActivity.class.getSimpleName();
 
-    @BindView(R.id.mainGrid)
-    GridView mainGridView;
+    @BindView(R.id.album_content_recycler_view)
+    RecyclerView albumContentRecyclerView;
     @BindView(R.id.back)
     ImageView ivBack;
     @BindView(R.id.title)
@@ -92,6 +98,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private Bundle reenterState;
 
+    public static final int SPAN_COUNT = 2;
+
     private MediaInMediaShareLoader loader;
     private MediaInMediaShareLoader.OnMediaInMediaShareLoadListener listener;
 
@@ -111,7 +119,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     Media media = mediaList.get(currentPhotoPosition);
 
                     String sharedElementName = media.getKey();
-                    View newSharedElement = mainGridView.findViewWithTag(sharedElementName);
+                    View newSharedElement = albumContentRecyclerView.findViewWithTag(sharedElementName);
 
                     names.add(sharedElementName);
                     sharedElements.put(sharedElementName, newSharedElement);
@@ -152,7 +160,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             }
         });
 
-        mainGridView.setAdapter(new PicGridViewAdapter(this));
+        albumContentRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        albumContentRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(SPAN_COUNT, StaggeredGridLayoutManager.VERTICAL));
+        albumContentRecyclerView.setAdapter(new PicGridViewAdapter(this));
 
         mTitleTextView.setText(mediaShare.getTitle());
 
@@ -179,12 +189,12 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     loadingLayout.setVisibility(View.GONE);
 
                 if (mediaList.isEmpty()) {
-                    mainGridView.setVisibility(View.GONE);
+                    albumContentRecyclerView.setVisibility(View.GONE);
                     noContentLayout.setVisibility(View.VISIBLE);
                 } else {
-                    mainGridView.setVisibility(View.VISIBLE);
+                    albumContentRecyclerView.setVisibility(View.VISIBLE);
                     noContentLayout.setVisibility(View.GONE);
-                    ((BaseAdapter) mainGridView.getAdapter()).notifyDataSetChanged();
+                    albumContentRecyclerView.getAdapter().notifyDataSetChanged();
                 }
             }
         };
@@ -305,7 +315,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         if (initialPhotoPosition != currentPhotoPosition) {
 
-            mainGridView.smoothScrollToPosition(currentPhotoPosition);
+            albumContentRecyclerView.smoothScrollToPosition(currentPhotoPosition);
 
 /*            ActivityCompat.postponeEnterTransition(AlbumPicContentActivity.this);
             mainGridView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -336,68 +346,107 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         startActivity(intent, optionsCompat.toBundle());
     }
 
-    class PicGridViewAdapter extends BaseAdapter {
+    class PicGridViewAdapter extends RecyclerView.Adapter<AlbumContentViewHolder> {
 
         AlbumPicContentActivity activity;
 
-        public PicGridViewAdapter(AlbumPicContentActivity activity_) {
+        PicGridViewAdapter(AlbumPicContentActivity activity_) {
             activity = activity_;
         }
 
         @Override
-        public int getCount() {
+        public AlbumContentViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            View view = LayoutInflater.from(activity).inflate(R.layout.photo_list_cell, parent, false);
+
+            return new AlbumContentViewHolder(view);
+        }
+
+
+        @Override
+        public void onBindViewHolder(AlbumContentViewHolder holder, int position) {
+            holder.refreshView(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        /**
+         * Returns the total number of items in the data set held by the adapter.
+         *
+         * @return The total number of items in this adapter.
+         */
+        @Override
+        public int getItemCount() {
             if (activity.mediaList == null) return 0;
             return activity.mediaList.size();
         }
 
+    }
+
+    class AlbumContentViewHolder extends BaseRecyclerViewHolder {
+
+        @BindView(R.id.mainPic)
+        NetworkImageView networkImageView;
+
+        public AlbumContentViewHolder(View itemView) {
+            super(itemView);
+
+            ButterKnife.bind(this, itemView);
+        }
+
         @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            View view;
-            final Media currentItem;
-            final NetworkImageView ivMain;
+        public void refreshView(final int position) {
 
-            if (convertView == null)
-                view = LayoutInflater.from(activity).inflate(R.layout.photo_list_cell, parent, false);
-            else view = convertView;
 
-            currentItem = (Media) this.getItem(position);
-
-            ivMain = (NetworkImageView) view.findViewById(R.id.mainPic);
+            final Media currentItem = mediaList.get(position);
 
             String imageUrl = currentItem.getImageThumbUrl(mContext);
             mImageLoader.setShouldCache(!currentItem.isLocal());
 
             if (currentItem.isLocal())
-                ivMain.setOrientationNumber(currentItem.getOrientationNumber());
+                networkImageView.setOrientationNumber(currentItem.getOrientationNumber());
 
-            ivMain.setTag(imageUrl);
-            ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
-            ivMain.setImageUrl(imageUrl, mImageLoader);
+            setMainPicScreenHeight(networkImageView, currentItem);
 
-            ivMain.setOnClickListener(new View.OnClickListener() {
+            networkImageView.setTag(imageUrl);
+            networkImageView.setDefaultImageResId(R.drawable.placeholder_photo);
+            networkImageView.setImageUrl(imageUrl, mImageLoader);
+
+            networkImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
                     String sharedElementName = currentItem.getKey();
-                    ViewCompat.setTransitionName(ivMain, sharedElementName);
-                    activity.showPhotoSlider(position, ivMain, currentItem.getKey());
+                    ViewCompat.setTransitionName(networkImageView, sharedElementName);
+                    showPhotoSlider(position, networkImageView, currentItem.getKey());
                 }
             });
 
-            return view;
-        }
-
-        @Override
-        public long getItemId(int position) {
-
-            return position;
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return activity.mediaList.get(position);
         }
     }
+
+    private void setMainPicScreenHeight(NetworkImageView mainPic, Media media) {
+
+        if (media.isLocal())
+            return;
+
+        int mediaWidth = Integer.parseInt(media.getWidth());
+        int mediaHeight = Integer.parseInt(media.getHeight());
+        int actualWidth;
+        int actualHeight;
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mainPic.getLayoutParams();
+
+        actualWidth = Util.calcScreenWidth(AlbumPicContentActivity.this) / SPAN_COUNT;
+        actualHeight = mediaHeight * actualWidth / mediaWidth;
+
+        layoutParams.height = actualHeight;
+
+        mainPic.setLayoutParams(layoutParams);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -478,7 +527,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
             String mediaShareUUID = data.getStringExtra(Util.KEY_MEDIA_SHARE_UUID);
             mediaShare = LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID);
 
-            loadMedia(true,true);
+            loadMedia(true, true);
 
         } else if (requestCode == Util.KEY_MODIFY_ALBUM_REQUEST_CODE && resultCode == RESULT_OK) {
             String title = data.getStringExtra(Util.UPDATED_ALBUM_TITLE);
