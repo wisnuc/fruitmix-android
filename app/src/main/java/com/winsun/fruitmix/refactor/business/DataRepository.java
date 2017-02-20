@@ -1,12 +1,20 @@
 package com.winsun.fruitmix.refactor.business;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
+import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.component.GifTouchNetworkImageView;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
+import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -48,6 +56,8 @@ public class DataRepository {
     private Handler mHandler;
 
     private ExecutorServiceInstance instance;
+
+    private ImageGifLoaderInstance imageGifLoaderInstance;
 
     private UserOperationCallback.LoadCurrentUserCallback mLoadCurrentUserCallback;
 
@@ -339,4 +349,45 @@ public class DataRepository {
     public void deleteMediaShare(MediaShare mediaShare, MediaShareOperationCallback.OperateMediaShareCallback callback) {
 
     }
+
+    private void loadMediaToGifTouchNetworkImageView(Context context,String remoteUrl,Media media,GifTouchNetworkImageView view){
+        view.setOrientationNumber(media.getOrientationNumber());
+
+        view.setDefaultImageResId(R.drawable.placeholder_photo);
+
+        view.setCurrentMedia(media);
+
+        view.setTag(remoteUrl);
+
+        if (media.getType().equalsIgnoreCase("gif")) {
+
+            GifLoader loader = imageGifLoaderInstance.getGifLoader(context);
+            loader.setShouldCache(!media.isLocal());
+
+            view.setGifUrl(remoteUrl, loader);
+        } else {
+
+            ImageLoader loader = imageGifLoaderInstance.getImageLoader(context);
+            loader.setShouldCache(!media.isLocal());
+
+            view.setImageUrl(remoteUrl, loader);
+        }
+    }
+
+    public void loadOriginalMediaToGifTouchNetworkImageView(Context context, Media media, GifTouchNetworkImageView view) {
+
+        String remoteUrl = media.getImageOriginalUrl(context);
+
+
+
+        loadMediaToGifTouchNetworkImageView(context,remoteUrl,media,view);
+    }
+
+    public void loadThumbMediaToGifTouchNetworkImageView(Context context, Media media, GifTouchNetworkImageView view){
+
+        String remoteUrl = media.getImageThumbUrl(context);
+
+        loadMediaToGifTouchNetworkImageView(context,remoteUrl,media,view);
+    }
+
 }
