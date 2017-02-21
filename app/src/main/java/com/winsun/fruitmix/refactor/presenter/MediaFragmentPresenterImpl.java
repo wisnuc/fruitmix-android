@@ -44,10 +44,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
     private Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
 
-    private SparseArray<String> mMapKeyIsPhotoPositionValueIsPhotoDate;
     private SparseArray<Media> mMapKeyIsPhotoPositionValueIsPhoto;
-
-    private List<Media> mMedias;
 
     private List<String> mAlreadySelectedImageKeyArrayList;
 
@@ -376,9 +373,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
             public void onOperateFinished(MediaFragmentDataLoader loader) {
                 mPhotoDateGroups = loader.getmPhotoDateGroups();
                 mMapKeyIsPhotoPositionValueIsPhoto = loader.getmMapKeyIsPhotoPositionValueIsPhoto();
-                mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getmMapKeyIsPhotoPositionValueIsPhotoDate();
                 mMapKeyIsDateValueIsPhotoList = loader.getmMapKeyIsDateValueIsPhotoList();
-                mMedias = loader.getMedias();
 
                 clearSelectPhoto();
 

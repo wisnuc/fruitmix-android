@@ -47,6 +47,6 @@ public interface DataSource {
 
     TokenLoadOperationResult loadToken(LoadTokenParam param);
 
-    User loadCurrentUser();
+    User loadCurrentLoginUser();
 
 }

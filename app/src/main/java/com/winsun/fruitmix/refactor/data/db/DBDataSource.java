@@ -109,7 +109,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public User loadCurrentUser() {
+    public User loadCurrentLoginUser() {
         return null;
     }
 

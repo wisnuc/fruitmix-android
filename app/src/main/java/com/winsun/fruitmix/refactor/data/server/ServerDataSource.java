@@ -144,7 +144,7 @@ public class ServerDataSource implements DataSource{
     }
 
     @Override
-    public User loadCurrentUser() {
+    public User loadCurrentLoginUser() {
         return null;
     }
 }

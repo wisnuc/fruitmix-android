@@ -180,7 +180,7 @@ public class MainPagePresenterImpl implements MainPageContract.MainPagePresenter
     @Override
     public void loadCurrentUser() {
 
-        mRepository.loadCurrentUser(new UserOperationCallback.LoadCurrentUserCallback() {
+        mRepository.loadCurrentLoginUser(new UserOperationCallback.LoadCurrentUserCallback() {
             @Override
             public void onLoadSucceed(OperationResult operationResult, User user) {
                 mView.refreshUserInNavigationView(user);

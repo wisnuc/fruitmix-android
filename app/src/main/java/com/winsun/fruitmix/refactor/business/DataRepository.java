@@ -3,10 +3,8 @@ package com.winsun.fruitmix.refactor.business;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.View;
 
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
@@ -18,6 +16,7 @@ import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.refactor.business.callback.FileOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.LoadEquipmentAliasCallback;
 import com.winsun.fruitmix.refactor.business.callback.LoadTokenOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.MediaOperationCallback;
@@ -131,7 +130,7 @@ public class DataRepository {
             //TODO:need call in main thread
             callback.onLoadSucceed(result.getOperationResult(), result.getUsers());
             if (mLoadCurrentUserCallback != null)
-                mLoadCurrentUserCallback.onLoadSucceed(result.getOperationResult(), mMemoryDataSource.loadCurrentUser());
+                mLoadCurrentUserCallback.onLoadSucceed(result.getOperationResult(), mMemoryDataSource.loadCurrentLoginUser());
 
         }
 
@@ -266,13 +265,17 @@ public class DataRepository {
         Util.setRemoteMediaShareLoaded(false);
     }
 
-    public void loadCurrentUser(UserOperationCallback.LoadCurrentUserCallback callback) {
+    public User loadCurrentLoginUserFromMemory(){
+        return mMemoryDataSource.loadCurrentLoginUser();
+    }
 
-        User user = mMemoryDataSource.loadCurrentUser();
+    public void loadCurrentLoginUser(UserOperationCallback.LoadCurrentUserCallback callback) {
+
+        User user = mMemoryDataSource.loadCurrentLoginUser();
         if (user != null) {
             callback.onLoadSucceed(new OperationSuccess(), user);
         } else {
-            user = mDBDataSource.loadCurrentUser();
+            user = mDBDataSource.loadCurrentLoginUser();
             callback.onLoadSucceed(new OperationSuccess(), user);
 
             addCallbackWhenLoadUsersFinished(callback);
@@ -388,6 +391,10 @@ public class DataRepository {
         String remoteUrl = media.getImageThumbUrl(context);
 
         loadMediaToGifTouchNetworkImageView(context,remoteUrl,media,view);
+    }
+
+    public void loadRemoteFolderContent(String folderUUID, FileOperationCallback.LoadFileOperationCallback callback){
+
     }
 
 }

@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.refactor.contract;
 
 import android.support.annotation.NonNull;
+import android.view.View;
 
 import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
@@ -21,30 +22,39 @@ public interface FileMainFragmentContract {
 
         void setTitleText(String titleText);
 
+        void setNavigationIcon(int resID);
+
         void setFileMainMenuVisibility(int visibility);
+
+        int getCurrentPage();
+
+        void setNavigationOnClickListener(View.OnClickListener listener);
 
     }
 
     interface FileMainFragmentPresenter extends BasePresenter<FileMainFragmentView> {
 
-        void onShareNavigationItemSelected();
+        void fileMainMenuOnClick();
 
-        void onFileNavigationItemSelected();
+        void setBottomNavigationItemChecked(int position);
 
-        void onDownloadNavigationItemSelected();
+        void onNavigationItemSelected(int itemID);
 
-        void onPageFileSelect();
-
-        void onPageFileShareSelect();
-
-        void onPageFileDownloadSelect();
-
-        void onToolbarClick();
+        void onPageSelected(int position);
 
         boolean handleBackPressedOrNot();
 
         void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults);
 
+        void initView();
+
+        void setTitleText(String titleText);
+
+        void setNavigationIcon(int resID);
+
+        void setDefaultNavigationOnClickListener();
+
+        void setNavigationOnClickListener(View.OnClickListener listener);
     }
 
 }

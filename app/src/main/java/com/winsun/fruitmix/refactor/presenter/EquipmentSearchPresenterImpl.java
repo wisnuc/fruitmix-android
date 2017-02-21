@@ -161,11 +161,6 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
     }
 
     @Override
-    public void startMission() {
-
-    }
-
-    @Override
     public void handleBackEvent() {
         mView.finishActivity();
     }
