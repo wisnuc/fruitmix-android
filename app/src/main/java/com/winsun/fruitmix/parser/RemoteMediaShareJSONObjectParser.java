@@ -56,11 +56,11 @@ public class RemoteMediaShareJSONObjectParser {
             mediaShare.setDesc(album.optString("text"));
         }
 
-        mediaShare.setTime(itemRaw.optString("mtime"));
+        mediaShare.setTime(itemRaw.optString("ctime"));
 
         mediaShare.setArchived(false);
 
-        mDate.setTime(Long.parseLong(itemRaw.optString("mtime")));
+        mDate.setTime(Long.parseLong(mediaShare.getTime()));
         mediaShare.setDate(mSimpleDateFormat.format(mDate));
 
         jsonArr = itemRaw.getJSONArray("contents");

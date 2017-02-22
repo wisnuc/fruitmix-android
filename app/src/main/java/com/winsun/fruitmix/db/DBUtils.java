@@ -21,6 +21,7 @@ import com.winsun.fruitmix.parser.LocalMediaParser;
 import com.winsun.fruitmix.parser.LocalMediaShareParser;
 import com.winsun.fruitmix.parser.LocalUserParser;
 import com.winsun.fruitmix.parser.MediaShareContentParser;
+import com.winsun.fruitmix.util.FNAS;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -414,6 +415,7 @@ public class DBUtils {
         contentValues.put(DBHelper.FILE_KEY_SIZE, fileDownloadItem.getFileSize());
         contentValues.put(DBHelper.FILE_KEY_UUID, fileDownloadItem.getFileUUID());
         contentValues.put(DBHelper.FILE_KEY_TIME, fileDownloadItem.getFileTime());
+        contentValues.put(DBHelper.FILE_KEY_CREATOR_UUID, fileDownloadItem.getFileCreatorUUID());
 
         return contentValues;
     }
@@ -718,6 +720,17 @@ public class DBUtils {
         return deleteAllShare(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
     }
 
+    public long deleteDownloadedFileByUUIDAndCreatorUUID(String fileUUID, String fileCreatorUUID) {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.DOWNLOADED_FILE_TABLE_NAME, DBHelper.FILE_KEY_UUID + " = ? and " + DBHelper.FILE_KEY_CREATOR_UUID + " = ?", new String[]{fileUUID, fileCreatorUUID});
+
+        close();
+
+        return returnValue;
+    }
+
     public long deleteDownloadedFileByUUID(String fileUUID) {
 
         openWritableDB();
@@ -728,6 +741,7 @@ public class DBUtils {
 
         return returnValue;
     }
+
 
     public long deleteAllRemoteUser() {
 
@@ -949,13 +963,13 @@ public class DBUtils {
     }
 
 
-    public List<FileDownloadItem> getAllDownloadedFile() {
+    public List<FileDownloadItem> getAllCurrentLoginUserDownloadedFile() {
 
         openReadableDB();
 
         List<FileDownloadItem> fileDownloadItems = new ArrayList<>();
 
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.DOWNLOADED_FILE_TABLE_NAME, null);
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.DOWNLOADED_FILE_TABLE_NAME + " where " + DBHelper.FILE_KEY_CREATOR_UUID + " = ?", new String[]{FNAS.userUUID});
         while (cursor.moveToNext()) {
 
             String fileName = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_NAME));
@@ -963,8 +977,16 @@ public class DBUtils {
             long fileSize = cursor.getLong(cursor.getColumnIndex(DBHelper.FILE_KEY_SIZE));
             long fileTime = cursor.getLong(cursor.getColumnIndex(DBHelper.FILE_KEY_TIME));
 
+            String fileCreatorUUID;
+            if (cursor.isNull(cursor.getColumnIndex(DBHelper.FILE_KEY_CREATOR_UUID))) {
+                fileCreatorUUID = FNAS.userUUID;
+            } else {
+                fileCreatorUUID = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_CREATOR_UUID));
+            }
+
             FileDownloadItem fileDownloadItem = new FileDownloadItem(fileName, fileSize, fileUUID);
             fileDownloadItem.setFileTime(fileTime);
+            fileDownloadItem.setFileCreatorUUID(fileCreatorUUID);
 
             fileDownloadItems.add(fileDownloadItem);
         }

@@ -11,6 +11,7 @@ public class FileDownloadItem {
     private long fileSize;
     private long fileTime;
     private long fileCurrentDownloadSize;
+    private String fileCreatorUUID;
     private FileDownloadState fileDownloadState;
 
     public FileDownloadItem(String fileName, long fileSize, String fileUUID) {
@@ -65,5 +66,13 @@ public class FileDownloadItem {
 
     public long getFileTime() {
         return fileTime;
+    }
+
+    public String getFileCreatorUUID() {
+        return fileCreatorUUID;
+    }
+
+    public void setFileCreatorUUID(String fileCreatorUUID) {
+        this.fileCreatorUUID = fileCreatorUUID;
     }
 }

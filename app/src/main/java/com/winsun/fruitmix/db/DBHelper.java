@@ -77,6 +77,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String FILE_KEY_UUID = "file_uuid";
     public static final String FILE_KEY_TIME = "file_time";
     public static final String FILE_KEY_SIZE = "file_size";
+    public static final String FILE_KEY_CREATOR_UUID = "file_creator_uuid";
 
     public static final String LOGGED_IN_USER_GATEWAY = "logged_in_user_gateway";
     public static final String LOGGED_IN_USER_EQUIPMENT_NAME = "logged_in_user_equipment_name";
@@ -97,7 +98,7 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String DOWNLOADED_FILE_TABLE_NAME = "downloaded_file";
     static final String LOGGED_IN_USER_TABLE_NAME = "logged_in_user";
 
-    private static final int DB_VERSION = 20;
+    private static final int DB_VERSION = 21;
 
     private static final String CREATE_TABLE = "create table ";
 
@@ -153,7 +154,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_LOCAL_MEDIA_SHARE_CONTENT_CREATE = CREATE_TABLE + LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME + DATABASE_MEDIA_SHARE_CONTENT_CREATE;
 
     private static final String DATABASE_DOWNLOADED_FILE_CREATE = CREATE_TABLE + DOWNLOADED_FILE_TABLE_NAME + " (" + FILE_KEY_ID + " integer primary key autoincrement,"
-            + FILE_KEY_NAME + " text," + FILE_KEY_UUID + " text not null," + FILE_KEY_TIME + " text," + FILE_KEY_SIZE + " text)";
+            + FILE_KEY_NAME + " text," + FILE_KEY_UUID + " text not null," + FILE_KEY_TIME + " text," + FILE_KEY_SIZE + " text," + FILE_KEY_CREATOR_UUID + " text not null)";
 
     private static final String DATABASE_LOGGED_IN_USER_CREATE = CREATE_TABLE + LOGGED_IN_USER_TABLE_NAME + USER_FIELD_CREATE + ","
             + LOGGED_IN_USER_GATEWAY + " text not null," + LOGGED_IN_USER_EQUIPMENT_NAME + " text not null," + LOGGED_IN_USER_TOKEN + " text not null,"

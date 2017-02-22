@@ -66,7 +66,7 @@ public class RetrieveDownloadedFileService extends IntentService {
 
         FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
 
-        List<FileDownloadItem> fileDownloadItems = dbUtils.getAllDownloadedFile();
+        List<FileDownloadItem> fileDownloadItems = dbUtils.getAllCurrentLoginUserDownloadedFile();
 
         String[] fileNames = new File(FileUtil.getDownloadFileStoreFolderPath()).list();
 

@@ -55,6 +55,7 @@ public class DownloadFileTask implements Callable<Boolean> {
             FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
 
             fileDownloadItem.setFileTime(System.currentTimeMillis());
+            fileDownloadItem.setFileCreatorUUID(FNAS.userUUID);
             dbUtils.insertDownloadedFile(fileDownloadItem);
         }
 

@@ -187,7 +187,7 @@ public class NavPagerActivity extends AppCompatActivity
 
             mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
             startDiscovery(loggedInUser);
-            mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT, 10 * 1000);
+            mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT_MESSAGE, DISCOVERY_TIMEOUT_TIME);
         }
 
     }
@@ -203,7 +203,9 @@ public class NavPagerActivity extends AppCompatActivity
     private List<NavigationItemType> mNavigationItemMenu;
     private List<NavigationItemType> mNavigationItemLoggedInUser;
 
-    public static final int DISCOVERY_TIMEOUT = 0x1001;
+    public static final int DISCOVERY_TIMEOUT_MESSAGE = 0x1001;
+
+    public static final int DISCOVERY_TIMEOUT_TIME = 10 * 1000;
 
     private CustomHandler mCustomHandler;
 
@@ -218,7 +220,7 @@ public class NavPagerActivity extends AppCompatActivity
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case DISCOVERY_TIMEOUT:
+                case DISCOVERY_TIMEOUT_MESSAGE:
                     weakReference.get().stopDiscovery();
 
                     weakReference.get().mDialog.dismiss();
@@ -332,7 +334,7 @@ public class NavPagerActivity extends AppCompatActivity
                         mDialog.dismiss();
                         stopDiscovery();
 
-                        mCustomHandler.removeMessages(DISCOVERY_TIMEOUT);
+                        mCustomHandler.removeMessages(DISCOVERY_TIMEOUT_MESSAGE);
 
                         String hostAddress = bonjourService.getInet4Address().getHostAddress();
 
@@ -493,7 +495,6 @@ public class NavPagerActivity extends AppCompatActivity
             LoggedInUser loggedInUser = iterator.next();
             if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
                 iterator.remove();
-                break;
             }
         }
 
@@ -717,6 +718,7 @@ public class NavPagerActivity extends AppCompatActivity
             @Override
             protected Void doInBackground(Void... params) {
 
+                LocalCache.clearToken(mContext);
                 EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
 
                 ButlerService.stopTimingRetrieveMediaShare();

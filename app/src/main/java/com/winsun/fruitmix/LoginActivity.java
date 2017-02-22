@@ -148,6 +148,11 @@ public class LoginActivity extends Activity implements View.OnClickListener, Edi
 
                 if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
 
+                    DBUtils dbUtils = DBUtils.getInstance(this);
+                    LocalCache.LocalLoggedInUsers.addAll(dbUtils.getAllLoggedInUser());
+
+                    Log.i(TAG, "LocalLoggedInUsers size: " + LocalCache.LocalLoggedInUsers.size());
+
                     if (LocalCache.LocalLoggedInUsers.isEmpty()) {
 
                         LocalCache.setCurrentUploadDeviceID(mContext, LocalCache.DeviceID);
