@@ -166,6 +166,8 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
             @Override
             public void onLoadSucceed(OperationResult result, List<AbstractRemoteFile> files) {
 
+                remoteFileLoaded = true;
+
                 mView.dismissLoadingUI();
 
                 if (files.size() == 0) {
@@ -246,7 +248,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
 
     @Override
     public void handleBackEvent() {
-
+        onBackPressed();
     }
 
     @Override
@@ -351,7 +353,6 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
 
             mView.checkWriteExternalStoragePermission();
         }
-
 
     }
 

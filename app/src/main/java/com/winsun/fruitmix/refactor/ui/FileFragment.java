@@ -38,26 +38,24 @@ import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.refactor.common.BaseActivity;
+import com.winsun.fruitmix.refactor.common.Injection;
+import com.winsun.fruitmix.refactor.contract.FileFragmentContract;
+import com.winsun.fruitmix.refactor.contract.FileMainFragmentContract;
+import com.winsun.fruitmix.refactor.presenter.FileFragmentPresenterImpl;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link OnFileInteractionListener} interface
- * to handle interaction events.
- * Use the {@link FileFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class FileFragment extends Fragment implements OnViewSelectListener {
+public class FileFragment implements FileFragmentContract.FileFragmentView {
 
     public static final String TAG = FileFragment.class.getSimpleName();
 
@@ -72,246 +70,68 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
     private FileRecyclerViewAdapter fileRecyclerViewAdapter;
 
-    private List<AbstractRemoteFile> abstractRemoteFiles;
+    private BaseActivity baseActivity;
 
-    private boolean remoteFileLoaded = false;
+    private View view;
 
-    private String currentFolderUUID;
-    private String currentFolderName;
+    private FileFragmentContract.FileFragmentPresenter mPresenter;
 
-    private List<String> retrievedFolderUUIDList;
-    private List<String> retrievedFolderNameList;
+    public FileFragment(BaseActivity activity, FileMainFragmentContract.FileMainFragmentPresenter fileMainFragmentPresenter) {
+        baseActivity = activity;
 
-    private boolean selectMode = false;
-
-    private List<AbstractRemoteFile> selectedFiles;
-
-    private OnFileInteractionListener onFileInteractionListener;
-
-    private AbstractCommand showUnSelectModeViewCommand;
-
-    private AbstractCommand showSelectModeViewCommand;
-
-    private AbstractCommand macroCommand;
-
-    private AbstractCommand nullCommand;
-
-    public FileFragment() {
-        // Required empty public constructor
-    }
-
-    public void setOnFileInteractionListener(OnFileInteractionListener onFileInteractionListener) {
-        this.onFileInteractionListener = onFileInteractionListener;
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment FileFragment.
-     */
-    public static FileFragment newInstance(OnFileInteractionListener onFileInteractionListener) {
-        FileFragment fragment = new FileFragment();
-        fragment.setOnFileInteractionListener(onFileInteractionListener);
-
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        abstractRemoteFiles = new ArrayList<>();
-
-        retrievedFolderUUIDList = new ArrayList<>();
-        retrievedFolderNameList = new ArrayList<>();
-
-        selectedFiles = new ArrayList<>();
-
-        showUnSelectModeViewCommand = new ShowUnSelectModeViewCommand(this);
-
-        showSelectModeViewCommand = new ShowSelectModeViewCommand(this);
-
-        nullCommand = new NullCommand();
-
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_file, container, false);
+
+        view = LayoutInflater.from(baseActivity).inflate(R.layout.fragment_file, null);
 
         ButterKnife.bind(this, view);
 
         fileRecyclerViewAdapter = new FileRecyclerViewAdapter();
         fileRecyclerView.setAdapter(fileRecyclerViewAdapter);
-        fileRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        fileRecyclerView.setLayoutManager(new LinearLayoutManager(baseActivity));
 
         noContentImageView.setImageResource(R.drawable.no_file);
 
-        return view;
-    }
+        mPresenter = new FileFragmentPresenterImpl(fileMainFragmentPresenter, Injection.injectDataRepository());
+        mPresenter.attachView(this);
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (!remoteFileLoaded && !isHidden()) {
-
-            User user = LocalCache.getUser(getContext());
-
-            currentFolderUUID = user.getHome();
-
-            if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
-                retrievedFolderUUIDList.add(currentFolderUUID);
-                retrievedFolderNameList.add(getString(R.string.file));
-            }
-
-            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
-        }
-
+        mPresenter.onResume();
     }
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
 
-        remoteFileLoaded = false;
+        baseActivity = null;
+
+        mPresenter.onDestroyView();
+        mPresenter.detachView();
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public String getString(int resID) {
+        return baseActivity.getString(resID);
     }
 
-    public void handleTitle() {
-
-        if (handleBackPressedOrNot()) {
-
-            onFileInteractionListener.setToolbarTitle(currentFolderName);
-            onFileInteractionListener.setNavigationIcon(R.drawable.ic_back);
-            onFileInteractionListener.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onBackPressed();
-                }
-            });
-
-        } else {
-            onFileInteractionListener.setToolbarTitle(getString(R.string.file));
-            onFileInteractionListener.setNavigationIcon(R.drawable.menu);
-            onFileInteractionListener.setDefaultNavigationOnClickListener();
-        }
-
+    @Override
+    public boolean isShowingLoadingUI() {
+        return loadingLayout.getVisibility() == View.VISIBLE;
     }
 
-    public void handleOperationResult(OperationEvent operationEvent) {
-
-        String action = operationEvent.getAction();
-        if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
-
-            loadingLayout.setVisibility(View.GONE);
-
-            OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
-            switch (result) {
-                case SUCCEED:
-
-                    remoteFileLoaded = true;
-
-                    List<AbstractRemoteFile> abstractRemoteFileList = LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent) operationEvent).getFolderUUID()).listChildAbstractRemoteFileList();
-
-                    if (abstractRemoteFileList.size() == 0) {
-                        noContentLayout.setVisibility(View.VISIBLE);
-                        fileRecyclerView.setVisibility(View.GONE);
-                    } else {
-                        fileRecyclerView.setVisibility(View.VISIBLE);
-                        noContentLayout.setVisibility(View.GONE);
-
-                        abstractRemoteFiles.clear();
-                        abstractRemoteFiles.addAll(abstractRemoteFileList);
-                        fileRecyclerViewAdapter.notifyDataSetChanged();
-                    }
-
-                    break;
-                default:
-                    noContentLayout.setVisibility(View.VISIBLE);
-                    break;
-            }
-
-        }
-
+    @Override
+    public boolean isHidden() {
+        return false;
     }
 
-    public boolean handleBackPressedOrNot() {
-        return selectMode || notRootFolder();
-    }
+    @Override
+    public void showContents(List<AbstractRemoteFile> files, boolean selectMode) {
 
-    private boolean notRootFolder() {
-
-        User user = LocalCache.getUser(getContext());
-
-        String homeFolderUUID = user.getHome();
-
-        return !currentFolderUUID.equals(homeFolderUUID);
-    }
-
-    public void onBackPressed() {
-
-        if (notRootFolder()) {
-
-            if (loadingLayout.getVisibility() == View.VISIBLE)
-                return;
-
-            loadingLayout.setVisibility(View.VISIBLE);
-
-            retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
-
-            currentFolderUUID = retrievedFolderUUIDList.get(retrievedFolderUUIDList.size() - 1);
-
-            retrievedFolderNameList.remove(retrievedFolderNameList.size() - 1);
-            currentFolderName = retrievedFolderNameList.get(retrievedFolderUUIDList.size() - 1);
-
-            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
-
-        } else {
-            selectMode = false;
-            refreshSelectMode(selectMode, null);
-        }
-
-        handleTitle();
-
-    }
-
-    private void refreshSelectMode(boolean selectMode, AbstractRemoteFile selectFile) {
-
-        this.selectMode = selectMode;
-
-        selectedFiles.clear();
-        if (selectFile != null)
-            selectedFiles.add(selectFile);
-
+        fileRecyclerViewAdapter.setData(files,selectMode);
         fileRecyclerViewAdapter.notifyDataSetChanged();
 
     }
 
     @Override
-    public void selectMode() {
-        selectMode = true;
-        refreshSelectMode(selectMode, null);
-    }
-
-    @Override
-    public void unSelectMode() {
-        selectMode = false;
-        refreshSelectMode(selectMode, null);
-    }
-
     public Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
-
-        Dialog dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(getActivity());
+        Dialog dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(baseActivity);
 
         for (BottomMenuItem bottomMenuItem : bottomMenuItems) {
             bottomMenuItem.setDialog(dialog);
@@ -320,99 +140,102 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         return dialog;
     }
 
-    public List<BottomMenuItem> getMainMenuItem() {
+    @Override
+    public void showOpenFileFailToast() {
+        Toast.makeText(baseActivity, getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
+    }
 
-        List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
+    @Override
+    public void showNoWriteExternalStoragePermission() {
+        Toast.makeText(baseActivity, getString(R.string.android_no_write_external_storage_permission), Toast.LENGTH_SHORT).show();
 
-        if (selectMode) {
+    }
 
-            BottomMenuItem clearSelectItem = new BottomMenuItem(getString(R.string.clear_select_item), showUnSelectModeViewCommand);
+    @Override
+    public void checkWriteExternalStoragePermission() {
+        if (ContextCompat.checkSelfPermission(baseActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-            bottomMenuItems.add(clearSelectItem);
-
-            macroCommand = new MacroCommand();
-
-            addSelectFilesToMacroCommand();
-
-            macroCommand.addCommand(showUnSelectModeViewCommand);
-
-            macroCommand.addCommand(new ChangeToDownloadPageCommand(onFileInteractionListener));
-
-            BottomMenuItem downloadSelectItem = new BottomMenuItem(getString(R.string.download_select_item), macroCommand);
-
-            bottomMenuItems.add(downloadSelectItem);
+            ActivityCompat.requestPermissions(baseActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Util.WRITE_EXTERNAL_STORAGE_REQUEST_CODE);
 
         } else {
-
-            BottomMenuItem selectItem = new BottomMenuItem(getString(R.string.select_file), showSelectModeViewCommand);
-
-            bottomMenuItems.add(selectItem);
-        }
-
-        BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel), nullCommand);
-
-        bottomMenuItems.add(cancelMenuItem);
-
-        return bottomMenuItems;
-
-    }
-
-    private void addSelectFilesToMacroCommand() {
-        for (AbstractRemoteFile abstractRemoteFile : selectedFiles) {
-
-            AbstractCommand abstractCommand = new DownloadFileCommand(abstractRemoteFile);
-            macroCommand.addCommand(abstractCommand);
-
-        }
-    }
-
-    private void checkWriteExternalStoragePermission() {
-
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Util.WRITE_EXTERNAL_STORAGE_REQUEST_CODE);
-
-        } else {
-            downloadSelectedFiles();
+            mPresenter.downloadSelectedFiles();
         }
 
     }
 
-    private void downloadSelectedFiles() {
-        for (AbstractRemoteFile abstractRemoteFile : selectedFiles) {
-
-            abstractRemoteFile.downloadFile();
-        }
-
-        onFileInteractionListener.changeFilePageToFileDownloadFragment();
+    @Override
+    public View getView() {
+        return view;
     }
 
 
-    public void requestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-        switch (requestCode) {
-            case Util.WRITE_EXTERNAL_STORAGE_REQUEST_CODE:
-
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    downloadSelectedFiles();
-
-                } else {
-
-                    Toast.makeText(getActivity(), getString(R.string.android_no_write_external_storage_permission), Toast.LENGTH_SHORT).show();
-
-                }
-
-        }
-
-
+    @Override
+    public boolean isNetworkAlive() {
+        return baseActivity.isNetworkAlive();
     }
 
-    class FileRecyclerViewAdapter extends RecyclerView.Adapter<BaseRecyclerViewHolder> {
+    @Override
+    public void showNoNetwork() {
+        baseActivity.showNoNetwork();
+    }
+
+    @Override
+    public void showLoadingUI() {
+        loadingLayout.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissLoadingUI() {
+        loadingLayout.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showNoContentUI() {
+        noContentLayout.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissNoContentUI() {
+        noContentLayout.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showContentUI() {
+        fileRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissContentUI() {
+        fileRecyclerView.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showDialog() {
+        baseActivity.showDialog();
+    }
+
+    @Override
+    public void dismissDialog() {
+        baseActivity.dismissDialog();
+    }
+
+    @Override
+    public void hideSoftInput() {
+        baseActivity.hideSoftInput();
+    }
+
+    class FileRecyclerViewAdapter extends RecyclerView.Adapter<BaseFileRecyclerViewHolder> {
 
         private static final int VIEW_FILE = 0;
         private static final int VIEW_FOLDER = 1;
+
+        private List<AbstractRemoteFile> abstractRemoteFiles;
+        private boolean selectMode;
+
+        public void setData(List<AbstractRemoteFile> abstractRemoteFiles,boolean selectMode){
+            this.abstractRemoteFiles = abstractRemoteFiles;
+            this.selectMode = selectMode;
+        }
 
         @Override
         public int getItemCount() {
@@ -420,22 +243,22 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         }
 
         @Override
-        public BaseRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public BaseFileRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
             View view;
-            BaseRecyclerViewHolder viewHolder;
+            BaseFileRecyclerViewHolder viewHolder;
 
             switch (viewType) {
                 case VIEW_FILE:
-                    view = LayoutInflater.from(getActivity()).inflate(R.layout.remote_file_item_layout, parent, false);
+                    view = LayoutInflater.from(baseActivity).inflate(R.layout.remote_file_item_layout, parent, false);
                     viewHolder = new FileViewHolder(view);
                     break;
                 case VIEW_FOLDER:
-                    view = LayoutInflater.from(getActivity()).inflate(R.layout.remote_folder_item_layout, parent, false);
+                    view = LayoutInflater.from(baseActivity).inflate(R.layout.remote_folder_item_layout, parent, false);
                     viewHolder = new FolderViewHolder(view);
                     break;
                 default:
-                    view = LayoutInflater.from(getActivity()).inflate(R.layout.remote_file_item_layout, parent, false);
+                    view = LayoutInflater.from(baseActivity).inflate(R.layout.remote_file_item_layout, parent, false);
                     viewHolder = new FileViewHolder(view);
             }
 
@@ -444,8 +267,8 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         }
 
         @Override
-        public void onBindViewHolder(BaseRecyclerViewHolder holder, int position) {
-            holder.refreshView(position);
+        public void onBindViewHolder(BaseFileRecyclerViewHolder holder, int position) {
+            holder.refreshView(abstractRemoteFiles.get(position),position,selectMode);
         }
 
         @Override
@@ -457,7 +280,16 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
 
     }
 
-    class FolderViewHolder extends BaseRecyclerViewHolder {
+    private abstract class BaseFileRecyclerViewHolder extends RecyclerView.ViewHolder {
+
+        private BaseFileRecyclerViewHolder(View itemView) {
+            super(itemView);
+        }
+
+        public abstract void refreshView(AbstractRemoteFile file,int position,boolean selectMode);
+    }
+
+    class FolderViewHolder extends BaseFileRecyclerViewHolder {
 
         @BindView(R.id.file_name)
         TextView fileName;
@@ -475,17 +307,16 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         }
 
         @Override
-        public void refreshView(int position) {
+        public void refreshView(final AbstractRemoteFile abstractRemoteFile, int position, boolean selectMode) {
 
             if (position == 0) {
 
                 LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
-                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), Util.dip2px(getActivity(), 16), 0);
+                layoutParams.setMargins(0, Util.dip2px(baseActivity, 8), Util.dip2px(baseActivity, 16), 0);
                 contentLayout.setLayoutParams(layoutParams);
 
             }
 
-            final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
             fileName.setText(abstractRemoteFile.getName());
 
@@ -498,19 +329,9 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
             folderItemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    currentFolderUUID = abstractRemoteFile.getUuid();
 
-                    retrievedFolderUUIDList.add(currentFolderUUID);
+                    mPresenter.openAbstractRemoteFolder(abstractRemoteFile);
 
-                    currentFolderName = abstractRemoteFile.getName();
-
-                    retrievedFolderNameList.add(currentFolderName);
-
-                    loadingLayout.setVisibility(View.VISIBLE);
-
-                    abstractRemoteFile.openAbstractRemoteFile(getActivity());
-
-                    handleTitle();
                 }
             });
 
@@ -518,7 +339,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
     }
 
 
-    class FileViewHolder extends BaseRecyclerViewHolder {
+    class FileViewHolder extends BaseFileRecyclerViewHolder {
 
         @BindView(R.id.file_icon_bg)
         ImageView fileIconBg;
@@ -542,17 +363,16 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         }
 
         @Override
-        public void refreshView(int position) {
+        public void refreshView(final AbstractRemoteFile abstractRemoteFile,int position,boolean selectMode) {
 
             if (position == 0) {
 
                 LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
-                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), Util.dip2px(getActivity(), 16), 0);
+                layoutParams.setMargins(0, Util.dip2px(baseActivity, 8), Util.dip2px(baseActivity, 16), 0);
                 contentLayout.setLayoutParams(layoutParams);
 
             }
 
-            final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
             fileTime.setText(abstractRemoteFile.getTimeDateText());
             fileName.setText(abstractRemoteFile.getName());
@@ -568,7 +388,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
                     @Override
                     public void onClick(View v) {
 
-                        toggleFileInSelectedFile(abstractRemoteFile);
+                        mPresenter.toggleFileInSelectedFile(abstractRemoteFile);
                         toggleFileIconBgResource(abstractRemoteFile);
 
                     }
@@ -587,24 +407,8 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
                     @Override
                     public void onClick(View view) {
 
-                        List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
+                        mPresenter.itemMenuOnClick(baseActivity,abstractRemoteFile);
 
-                        BottomMenuItem menuItem;
-                        if (FileDownloadManager.INSTANCE.checkIsDownloaded(abstractRemoteFile.getUuid())) {
-                            menuItem = new BottomMenuItem(getString(R.string.open_the_item), new OpenFileCommand(getContext(), abstractRemoteFile.getName()));
-                        } else {
-                            AbstractCommand macroCommand = new MacroCommand();
-                            AbstractCommand downloadFileCommand = new DownloadFileCommand(abstractRemoteFile);
-                            macroCommand.addCommand(downloadFileCommand);
-                            macroCommand.addCommand(new ChangeToDownloadPageCommand(onFileInteractionListener));
-                            menuItem = new BottomMenuItem(getString(R.string.download_the_item), macroCommand);
-                        }
-                        bottomMenuItems.add(menuItem);
-
-                        BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel), nullCommand);
-                        bottomMenuItems.add(cancelMenuItem);
-
-                        getBottomSheetDialog(bottomMenuItems).show();
                     }
                 });
 
@@ -612,20 +416,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
                     @Override
                     public void onClick(View v) {
 
-                        FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
-                        if (fileDownloadManager.checkIsDownloaded(abstractRemoteFile.getUuid())) {
-
-                            if (!abstractRemoteFile.openAbstractRemoteFile(getActivity())) {
-                                Toast.makeText(getActivity(), getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
-                            }
-
-
-                        } else {
-                            selectedFiles.add(abstractRemoteFile);
-
-                            checkWriteExternalStoragePermission();
-                        }
-
+                        mPresenter.fileItemOnClick(baseActivity,abstractRemoteFile);
 
                     }
                 });
@@ -633,8 +424,9 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
                 remoteFileItemLayout.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        selectMode = true;
-                        refreshSelectMode(selectMode, abstractRemoteFile);
+
+                        mPresenter.addSelectedFiles(Collections.singletonList(abstractRemoteFile));
+                        mPresenter.refreshSelectMode(true);
 
                         return true;
                     }
@@ -645,7 +437,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
         }
 
         private void toggleFileIconBgResource(AbstractRemoteFile abstractRemoteFile) {
-            if (selectedFiles.contains(abstractRemoteFile)) {
+            if (mPresenter.checkIsInSelectedFiles(abstractRemoteFile)) {
                 fileIconBg.setBackgroundResource(R.drawable.check_circle_selected);
                 fileIcon.setVisibility(View.INVISIBLE);
             } else {
@@ -654,13 +446,6 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
             }
         }
 
-        private void toggleFileInSelectedFile(AbstractRemoteFile abstractRemoteFile) {
-            if (selectedFiles.contains(abstractRemoteFile)) {
-                selectedFiles.remove(abstractRemoteFile);
-            } else {
-                selectedFiles.add(abstractRemoteFile);
-            }
-        }
 
     }
 }

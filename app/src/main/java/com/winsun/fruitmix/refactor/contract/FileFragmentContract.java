@@ -3,6 +3,7 @@ package com.winsun.fruitmix.refactor.contract;
 import android.app.Dialog;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.view.View;
 
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
@@ -34,6 +35,10 @@ public interface FileFragmentContract {
         void showNoWriteExternalStoragePermission();
 
         void checkWriteExternalStoragePermission();
+
+        View getView();
+
+        void onDestroyView();
     }
 
     interface FileFragmentPresenter extends BasePresenter<FileFragmentView>{

@@ -33,6 +33,11 @@ import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
+import com.winsun.fruitmix.refactor.common.BaseActivity;
+import com.winsun.fruitmix.refactor.common.Injection;
+import com.winsun.fruitmix.refactor.contract.FileDownloadFragmentContract;
+import com.winsun.fruitmix.refactor.contract.FileMainFragmentContract;
+import com.winsun.fruitmix.refactor.presenter.FileDownloadFragmentPresenterImpl;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
@@ -48,15 +53,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link OnFileInteractionListener} interface
- * to handle interaction events.
- * Use the {@link FileDownloadFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class FileDownloadFragment extends Fragment implements OnViewSelectListener {
+public class FileDownloadFragment implements FileDownloadFragmentContract.FileDownloadFragmentView {
 
     public static final String TAG = FileDownloadFragment.class.getSimpleName();
 
@@ -68,265 +65,64 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
     private DownloadingFileAdapter downloadingFileAdapter;
     private DownloadedFileAdapter downloadedFileAdapter;
 
-    private List<FileDownloadItem> downloadingItems;
-    private List<FileDownloadItem> downloadedItems;
+    private View view;
 
-    private CustomHandler customHandler;
+    private FileDownloadFragmentContract.FileDownloadFragmentPresenter mPresenter;
 
-    public static final int DOWNLOAD_STATE_CHANGED = 0x0010;
+    private BaseActivity baseActivity;
 
-    public static final int DELAY_TIME_MILLISECOND = 0;
+    public FileDownloadFragment(BaseActivity activity, FileMainFragmentContract.FileMainFragmentPresenter fileMainFragmentPresenter) {
 
-    private boolean selectMode = false;
+        view = LayoutInflater.from(activity).inflate(R.layout.fragment_file_download, null);
 
-    private List<String> selectDownloadedItemUUID;
+        ButterKnife.bind(this, view);
 
-    private OnFileInteractionListener onFileInteractionListener;
-
-    private FileDownloadManager fileDownloadManager;
-
-    private AbstractCommand showUnSelectModeViewCommand;
-
-    private AbstractCommand showSelectModeViewCommand;
-
-    private AbstractCommand nullCommand;
-
-
-    public FileDownloadFragment() {
-        // Required empty public constructor
-    }
-
-    public void setOnFileInteractionListener(OnFileInteractionListener onFileInteractionListener) {
-        this.onFileInteractionListener = onFileInteractionListener;
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment FileDownloadFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FileDownloadFragment newInstance(OnFileInteractionListener onFileInteractionListener) {
-        FileDownloadFragment fragment = new FileDownloadFragment();
-        fragment.setOnFileInteractionListener(onFileInteractionListener);
-
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        baseActivity = activity;
 
         downloadingFileAdapter = new DownloadingFileAdapter();
         downloadedFileAdapter = new DownloadedFileAdapter();
 
-        downloadingItems = new ArrayList<>();
-        downloadedItems = new ArrayList<>();
-
-        customHandler = new CustomHandler(this);
-
-        selectDownloadedItemUUID = new ArrayList<>();
-
-        fileDownloadManager = FileDownloadManager.INSTANCE;
-
-        showUnSelectModeViewCommand = new ShowUnSelectModeViewCommand(this);
-
-        showSelectModeViewCommand = new ShowSelectModeViewCommand(this);
-
-        nullCommand = new NullCommand();
-
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_file_download, container, false);
-
-        ButterKnife.bind(this, view);
-
         fileDownloadingRecyclerView.setAdapter(downloadingFileAdapter);
-        fileDownloadingRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        fileDownloadingRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
 
         fileDownloadedRecyclerView.setAdapter(downloadedFileAdapter);
-        fileDownloadedRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        fileDownloadedRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
 
-        return view;
+        mPresenter = new FileDownloadFragmentPresenterImpl(Injection.injectDataRepository(), fileMainFragmentPresenter);
+        mPresenter.attachView(this);
+        mPresenter.loadDownloadedFile();
+
+        mPresenter.registerFileDownloadStateChangedListener();
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
-
-        FNAS.retrieveDownloadedFile();
-    }
-
-    public void handleTitle() {
-        onFileInteractionListener.setToolbarTitle(getString(R.string.file));
-        onFileInteractionListener.setNavigationIcon(R.drawable.menu);
-        onFileInteractionListener.setDefaultNavigationOnClickListener();
+    public String getString(int resID) {
+        return baseActivity.getString(resID);
     }
 
     @Override
-    public void onStop() {
-        EventBus.getDefault().unregister(this);
+    public void showDownloadingContent(List<FileDownloadItem> fileDownloadItems) {
 
-        super.onStop();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
-
-        Log.i(TAG, "handleEvent: downloadState:" + downloadStateChangedEvent.getDownloadState());
-
-        DownloadState downloadState = downloadStateChangedEvent.getDownloadState();
-
-        if (downloadState == DownloadState.FINISHED) {
-            customHandler.sendEmptyMessageDelayed(DOWNLOAD_STATE_CHANGED, DELAY_TIME_MILLISECOND);
-        } else if (downloadState == DownloadState.NO_ENOUGH_SPACE) {
-
-            Toast.makeText(getActivity(), getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
-
-        } else {
-            refreshView();
-        }
-
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(OperationEvent operationEvent) {
-
-        String action = operationEvent.getAction();
-
-        Log.i(TAG, "handleOperationEvent: action:" + action);
-
-        if (action.equals(Util.DOWNLOADED_FILE_DELETED) || action.equals(Util.DOWNLOADED_FILE_RETRIEVED)) {
-            refreshView();
-        }
-
-    }
-
-    private static class CustomHandler extends Handler {
-
-        WeakReference<FileDownloadFragment> weakReference = null;
-
-        CustomHandler(FileDownloadFragment fileDownloadFragment) {
-            weakReference = new WeakReference<>(fileDownloadFragment);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            weakReference.get().refreshView();
-        }
-    }
-
-    private void refreshView() {
-        refreshData();
-
+        downloadingFileAdapter.setData(fileDownloadItems);
         downloadingFileAdapter.notifyDataSetChanged();
-        downloadedFileAdapter.notifyDataSetChanged();
     }
 
-    private void refreshData() {
-        filterFileDownloadItems(fileDownloadManager.getFileDownloadItems());
-    }
+    @Override
+    public void showDownloadedContent(List<FileDownloadItem> fileDownloadItems, boolean selectMode) {
 
-    private void filterFileDownloadItems(List<FileDownloadItem> fileDownloadItems) {
-
-        downloadingItems.clear();
-        downloadedItems.clear();
-
-        for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
-
-            DownloadState downloadState = fileDownloadItem.getDownloadState();
-
-            if (downloadState.equals(DownloadState.FINISHED) || downloadState.equals(DownloadState.ERROR)) {
-                downloadedItems.add(fileDownloadItem);
-            } else {
-                downloadingItems.add(fileDownloadItem);
-            }
-
-        }
-
-    }
-
-    public void onBackPressed() {
-
-        if (selectMode) {
-            selectMode = false;
-            refreshSelectMode(selectMode);
-        }
-
-    }
-
-    public boolean handleBackPressedOrNot() {
-        return selectMode;
-    }
-
-    public List<BottomMenuItem> getMainMenuItem() {
-
-        List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
-
-        if (selectMode) {
-
-            BottomMenuItem clearSelectItem = new BottomMenuItem(getString(R.string.clear_select_item), showUnSelectModeViewCommand);
-
-            bottomMenuItems.add(clearSelectItem);
-
-            AbstractCommand macroCommand = new MacroCommand();
-            macroCommand.addCommand(new DeleteDownloadedFileCommand(selectDownloadedItemUUID));
-            macroCommand.addCommand(showUnSelectModeViewCommand);
-
-            BottomMenuItem deleteSelectItem = new BottomMenuItem(getString(R.string.delete_text), macroCommand);
-
-            bottomMenuItems.add(deleteSelectItem);
-
-        } else {
-
-            BottomMenuItem selectItem = new BottomMenuItem(getString(R.string.choose_text), showSelectModeViewCommand);
-
-            bottomMenuItems.add(selectItem);
-
-        }
-
-        BottomMenuItem cancelMenuItem = new BottomMenuItem(getString(R.string.cancel), nullCommand);
-
-        bottomMenuItems.add(cancelMenuItem);
-
-        return bottomMenuItems;
-    }
-
-    private void refreshSelectMode(boolean selectMode) {
-        this.selectMode = selectMode;
-
-        if (!selectMode) {
-            selectDownloadedItemUUID.clear();
-        }
-
-        downloadingFileAdapter.notifyDataSetChanged();
+        downloadedFileAdapter.setData(fileDownloadItems, selectMode);
         downloadedFileAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void selectMode() {
-        selectMode = true;
-        refreshSelectMode(selectMode);
-    }
+    public void showNoEnoughSpaceToast() {
+        Toast.makeText(baseActivity, getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
 
-    @Override
-    public void unSelectMode() {
-        selectMode = false;
-        refreshSelectMode(selectMode);
     }
 
     public Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
 
-        Dialog dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(getActivity());
+        Dialog dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(baseActivity);
 
         for (BottomMenuItem bottomMenuItem : bottomMenuItems) {
             bottomMenuItem.setDialog(dialog);
@@ -335,19 +131,39 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
         return dialog;
     }
 
-    class DownloadingFileAdapter extends RecyclerView.Adapter<DownloadingFileAdapterViewHolder> {
+    @Override
+    public View getView() {
+        return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+
+        baseActivity = null;
+
+        mPresenter.unregisterFileDownloadStateChangedListener();
+        mPresenter.detachView();
+    }
+
+    private class DownloadingFileAdapter extends RecyclerView.Adapter<DownloadingFileAdapterViewHolder> {
+
+        private List<FileDownloadItem> downloadingItems;
+
+        void setData(List<FileDownloadItem> downloadingItems) {
+            this.downloadingItems = downloadingItems;
+        }
 
         @Override
         public DownloadingFileAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-            View view = LayoutInflater.from(getActivity()).inflate(R.layout.downloading_file_item, parent, false);
+            View view = LayoutInflater.from(baseActivity).inflate(R.layout.downloading_file_item, parent, false);
 
             return new DownloadingFileAdapterViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(DownloadingFileAdapterViewHolder holder, int position) {
-            holder.refreshView(position);
+            holder.refreshView(downloadingItems.get(position));
         }
 
         @Override
@@ -372,9 +188,7 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
             downloadingProgressBar.setMax(100);
         }
 
-        void refreshView(int position) {
-
-            FileDownloadItem fileDownloadItem = downloadingItems.get(position);
+        void refreshView(FileDownloadItem fileDownloadItem) {
 
             fileName.setText(fileDownloadItem.getFileName());
 
@@ -390,19 +204,27 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
 
     }
 
-    class DownloadedFileAdapter extends RecyclerView.Adapter<DownloadedFileAdapterViewHolder> {
+    private class DownloadedFileAdapter extends RecyclerView.Adapter<DownloadedFileAdapterViewHolder> {
+
+        private List<FileDownloadItem> downloadedItems;
+        private boolean selectMode;
+
+        void setData(List<FileDownloadItem> downloadedItems, boolean selectMode) {
+            this.downloadedItems = downloadedItems;
+            this.selectMode = selectMode;
+        }
 
         @Override
         public DownloadedFileAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-            View view = LayoutInflater.from(getActivity()).inflate(R.layout.downloaded_file_item, parent, false);
+            View view = LayoutInflater.from(baseActivity).inflate(R.layout.downloaded_file_item, parent, false);
 
             return new DownloadedFileAdapterViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(DownloadedFileAdapterViewHolder holder, int position) {
-            holder.refreshView(position);
+            holder.refreshView(downloadedItems.get(position), selectMode);
         }
 
         @Override
@@ -430,9 +252,7 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
             ButterKnife.bind(this, itemView);
         }
 
-        void refreshView(int position) {
-
-            final FileDownloadItem fileDownloadItem = downloadedItems.get(position);
+        void refreshView(final FileDownloadItem fileDownloadItem, boolean selectMode) {
 
             final DownloadState downloadState = fileDownloadItem.getDownloadState();
 
@@ -452,7 +272,9 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
                 downloadedItemLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        toggleFileInSelectedFile(fileDownloadItem.getFileUUID());
+
+                        mPresenter.toggleFileInSelectedFile(fileDownloadItem.getFileUUID());
+
                         toggleFileIconBgResource(fileDownloadItem.getFileUUID());
                     }
                 });
@@ -464,10 +286,7 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
                     @Override
                     public void onClick(View view) {
 
-                        if (downloadState.equals(DownloadState.FINISHED)) {
-                            FileUtil.openAbstractRemoteFile(getActivity(), fileDownloadItem.getFileName());
-                        }
-
+                        mPresenter.openFileIfDownloaded(baseActivity, fileDownloadItem);
                     }
                 });
 
@@ -476,7 +295,7 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
         }
 
         private void toggleFileIconBgResource(String fileUUID) {
-            if (selectDownloadedItemUUID.contains(fileUUID)) {
+            if (mPresenter.checkIsInSelectedFiles(fileUUID)) {
                 fileIconBg.setBackgroundResource(R.drawable.check_circle_selected);
                 fileIcon.setVisibility(View.INVISIBLE);
             } else {
@@ -485,13 +304,6 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
             }
         }
 
-        private void toggleFileInSelectedFile(String fileUUID) {
-            if (selectDownloadedItemUUID.contains(fileUUID)) {
-                selectDownloadedItemUUID.remove(fileUUID);
-            } else {
-                selectDownloadedItemUUID.add(fileUUID);
-            }
-        }
     }
 
 }

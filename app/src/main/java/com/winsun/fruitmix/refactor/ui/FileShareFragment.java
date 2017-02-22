@@ -19,6 +19,11 @@ import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.refactor.common.BaseActivity;
+import com.winsun.fruitmix.refactor.common.Injection;
+import com.winsun.fruitmix.refactor.contract.FileMainFragmentContract;
+import com.winsun.fruitmix.refactor.contract.FileShareFragmentContract;
+import com.winsun.fruitmix.refactor.presenter.FileShareFragmentPresenterImpl;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -30,15 +35,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link OnFileInteractionListener} interface
- * to handle interaction events.
- * Use the {@link FileShareFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class FileShareFragment extends Fragment {
+
+public class FileShareFragment implements FileShareFragmentContract.FileShareFragmentView {
 
     public static final String TAG = FileShareFragment.class.getSimpleName();
 
@@ -51,244 +49,150 @@ public class FileShareFragment extends Fragment {
     @BindView(R.id.no_content_imageview)
     ImageView noContentImageView;
 
-    private List<AbstractRemoteFile> abstractRemoteFiles;
     private FileShareRecyclerAdapter fileShareRecyclerAdapter;
 
-    private boolean remoteFileShareLoaded = false;
+    private BaseActivity baseActivity;
 
-    private String currentFolderUUID;
-    private String currentFolderName;
+    private FileShareFragmentContract.FileShareFragmentPresenter mPresenter;
 
-    private List<String> retrievedFolderUUIDList;
-    private List<String> retrievedFolderNameList;
+    private View view;
 
-    private OnFileInteractionListener onFileInteractionListener;
+    public FileShareFragment(BaseActivity activity, FileMainFragmentContract.FileMainFragmentPresenter mainFragmentPresenter) {
 
-    public FileShareFragment() {
-        // Required empty public constructor
-    }
+        baseActivity = activity;
 
-    public void setOnFileInteractionListener(OnFileInteractionListener onFileInteractionListener) {
-        this.onFileInteractionListener = onFileInteractionListener;
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment FileShareFragment.
-     */
-    public static FileShareFragment newInstance(OnFileInteractionListener onFileInteractionListener) {
-        FileShareFragment fragment = new FileShareFragment();
-        fragment.setOnFileInteractionListener(onFileInteractionListener);
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        abstractRemoteFiles = new ArrayList<>();
-        fileShareRecyclerAdapter = new FileShareRecyclerAdapter();
-
-        retrievedFolderUUIDList = new ArrayList<>();
-        retrievedFolderNameList = new ArrayList<>();
-
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_file_share, container, false);
+        view = LayoutInflater.from(baseActivity).inflate(R.layout.fragment_file_share, null);
 
         ButterKnife.bind(this, view);
 
+        fileShareRecyclerAdapter = new FileShareRecyclerAdapter();
+
         fileShareRecyclerView.setAdapter(fileShareRecyclerAdapter);
-        fileShareRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        fileShareRecyclerView.setLayoutManager(new LinearLayoutManager(baseActivity));
 
         noContentImageView.setImageResource(R.drawable.no_file);
 
-        return view;
+        mPresenter = new FileShareFragmentPresenterImpl(mainFragmentPresenter, Injection.injectDataRepository());
+        mPresenter.attachView(this);
+        mPresenter.onResume();
+    }
+
+
+    @Override
+    public void onDestroyView() {
+
+        baseActivity = null;
+
+        mPresenter.onDestroyView();
+        mPresenter.detachView();
+
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
-        if (!remoteFileShareLoaded && !isHidden()) {
-
-            if (FNAS.userUUID == null)
-                currentFolderUUID = LocalCache.getUserUUID(getContext());
-            else
-                currentFolderUUID = FNAS.userUUID;
-
-            if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
-                retrievedFolderUUIDList.add(currentFolderUUID);
-                retrievedFolderNameList.add(getString(R.string.file));
-            }
-
-            FNAS.retrieveRemoteFileShare();
-        }
-
+    public String getString(int resID) {
+        return baseActivity.getString(resID);
     }
 
-    public void handleTitle() {
-        if (handleBackPressedOrNot()) {
-
-            onFileInteractionListener.setToolbarTitle(currentFolderName);
-            onFileInteractionListener.setNavigationIcon(R.drawable.ic_back);
-            onFileInteractionListener.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onBackPressed();
-                }
-            });
-
-        } else {
-            onFileInteractionListener.setToolbarTitle(getString(R.string.file));
-            onFileInteractionListener.setNavigationIcon(R.drawable.menu);
-            onFileInteractionListener.setDefaultNavigationOnClickListener();
-        }
+    @Override
+    public boolean isShowingLoadingUI() {
+        return loadingLayout.getVisibility() == View.VISIBLE;
     }
 
-    public void refreshUser() {
+    @Override
+    public void showContent(List<AbstractRemoteFile> files) {
 
+        fileShareRecyclerAdapter.setData(files);
         fileShareRecyclerAdapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        remoteFileShareLoaded = false;
+    public View getView() {
+        return view;
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public boolean isNetworkAlive() {
+        return baseActivity.isNetworkAlive();
     }
 
-    public void handleOperationEvent(OperationEvent operationEvent) {
-
-        String action = operationEvent.getAction();
-
-        OperationResultType operationResultType = operationEvent.getOperationResult().getOperationResultType();
-
-        loadingLayout.setVisibility(View.INVISIBLE);
-
-        if (action.equals(Util.REMOTE_FILE_SHARE_RETRIEVED)) {
-
-            switch (operationResultType) {
-                case SUCCEED:
-
-                    remoteFileShareLoaded = true;
-
-                    if (LocalCache.RemoteFileShareList.size() == 0) {
-                        noContentLayout.setVisibility(View.VISIBLE);
-                        fileShareRecyclerView.setVisibility(View.GONE);
-                    } else {
-                        fileShareRecyclerView.setVisibility(View.VISIBLE);
-                        noContentLayout.setVisibility(View.GONE);
-
-                        abstractRemoteFiles.clear();
-                        abstractRemoteFiles.addAll(LocalCache.RemoteFileShareList);
-                        fileShareRecyclerAdapter.notifyDataSetChanged();
-                    }
-
-                    break;
-                default:
-                    noContentLayout.setVisibility(View.VISIBLE);
-                    break;
-            }
-
-        } else if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
-
-            switch (operationResultType) {
-                case SUCCEED:
-
-                    List<AbstractRemoteFile> abstractRemoteFileList = LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent) operationEvent).getFolderUUID()).listChildAbstractRemoteFileList();
-
-                    if (abstractRemoteFileList.size() == 0) {
-                        noContentLayout.setVisibility(View.VISIBLE);
-                        fileShareRecyclerView.setVisibility(View.GONE);
-                    } else {
-                        fileShareRecyclerView.setVisibility(View.VISIBLE);
-                        noContentLayout.setVisibility(View.GONE);
-
-                        abstractRemoteFiles.clear();
-                        abstractRemoteFiles.addAll(LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent) operationEvent).getFolderUUID()).listChildAbstractRemoteFileList());
-                        fileShareRecyclerAdapter.notifyDataSetChanged();
-                    }
-
-                    break;
-                default:
-                    noContentLayout.setVisibility(View.VISIBLE);
-                    break;
-            }
-        }
-
+    @Override
+    public void showNoNetwork() {
+        baseActivity.showNoNetwork();
     }
 
-
-    public void onBackPressed() {
-
-        if (loadingLayout.getVisibility() == View.VISIBLE) {
-            return;
-        }
-
+    @Override
+    public void showLoadingUI() {
         loadingLayout.setVisibility(View.VISIBLE);
-
-        retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
-
-        currentFolderUUID = retrievedFolderUUIDList.get(retrievedFolderUUIDList.size() - 1);
-
-        retrievedFolderNameList.remove(retrievedFolderNameList.size() - 1);
-        currentFolderName = retrievedFolderNameList.get(retrievedFolderNameList.size() - 1);
-
-        if (currentFolderUUID.equals(FNAS.userUUID)) {
-            FNAS.retrieveRemoteFileShare();
-        } else {
-            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
-        }
-
-        handleTitle();
-
     }
 
-    public boolean handleBackPressedOrNot() {
-        return notRootFolder();
+    @Override
+    public void dismissLoadingUI() {
+        loadingLayout.setVisibility(View.INVISIBLE);
     }
 
-    private boolean notRootFolder() {
-
-        return !currentFolderUUID.equals(FNAS.userUUID);
+    @Override
+    public void showNoContentUI() {
+        noContentLayout.setVisibility(View.VISIBLE);
     }
 
-    class FileShareRecyclerAdapter extends RecyclerView.Adapter<BaseRecyclerViewHolder> {
+    @Override
+    public void dismissNoContentUI() {
+        noContentLayout.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showContentUI() {
+        fileShareRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissContentUI() {
+        fileShareRecyclerView.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showDialog() {
+        baseActivity.showDialog();
+    }
+
+    @Override
+    public void dismissDialog() {
+        baseActivity.dismissDialog();
+    }
+
+    @Override
+    public void hideSoftInput() {
+        baseActivity.hideSoftInput();
+    }
+
+    private class FileShareRecyclerAdapter extends RecyclerView.Adapter<BaseFileShareRecyclerViewHolder> {
 
         private static final int VIEW_FILE = 0;
         private static final int VIEW_FOLDER = 1;
 
+        private List<AbstractRemoteFile> abstractRemoteFiles;
+
+        public void setData(List<AbstractRemoteFile> files) {
+            abstractRemoteFiles = files;
+        }
+
         @Override
-        public BaseRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public BaseFileShareRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
             View view;
-            BaseRecyclerViewHolder viewHolder;
+            BaseFileShareRecyclerViewHolder viewHolder;
 
             switch (viewType) {
                 case VIEW_FILE:
-                    view = LayoutInflater.from(getActivity()).inflate(R.layout.remote_file_item_layout, parent, false);
+                    view = LayoutInflater.from(baseActivity).inflate(R.layout.remote_file_item_layout, parent, false);
                     viewHolder = new FileShareRecyclerAdapterViewHolder(view);
                     break;
                 case VIEW_FOLDER:
-                    view = LayoutInflater.from(getActivity()).inflate(R.layout.remote_folder_item_layout, parent, false);
+                    view = LayoutInflater.from(baseActivity).inflate(R.layout.remote_folder_item_layout, parent, false);
                     viewHolder = new FolderShareRecyclerAdapterViewHolder(view);
                     break;
                 default:
-                    view = LayoutInflater.from(getActivity()).inflate(R.layout.remote_file_item_layout, parent, false);
+                    view = LayoutInflater.from(baseActivity).inflate(R.layout.remote_file_item_layout, parent, false);
                     viewHolder = new FileShareRecyclerAdapterViewHolder(view);
             }
 
@@ -296,8 +200,8 @@ public class FileShareFragment extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(BaseRecyclerViewHolder holder, int position) {
-            holder.refreshView(position);
+        public void onBindViewHolder(BaseFileShareRecyclerViewHolder holder, int position) {
+            holder.refreshView(abstractRemoteFiles.get(position), position);
         }
 
         @Override
@@ -311,7 +215,16 @@ public class FileShareFragment extends Fragment {
         }
     }
 
-    class FolderShareRecyclerAdapterViewHolder extends BaseRecyclerViewHolder {
+    private abstract class BaseFileShareRecyclerViewHolder extends RecyclerView.ViewHolder {
+
+        private BaseFileShareRecyclerViewHolder(View itemView) {
+            super(itemView);
+        }
+
+        public abstract void refreshView(AbstractRemoteFile file, int position);
+    }
+
+    class FolderShareRecyclerAdapterViewHolder extends BaseFileShareRecyclerViewHolder {
 
         @BindView(R.id.file_name)
         TextView fileName;
@@ -329,16 +242,14 @@ public class FileShareFragment extends Fragment {
         }
 
         @Override
-        public void refreshView(int position) {
+        public void refreshView(final AbstractRemoteFile abstractRemoteFile, int position) {
 
             if (position == 0) {
 
                 LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
-                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), Util.dip2px(getActivity(), 16), 0);
+                layoutParams.setMargins(0, Util.dip2px(baseActivity, 8), Util.dip2px(baseActivity, 16), 0);
                 contentLayout.setLayoutParams(layoutParams);
             }
-
-            final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
             fileName.setText(abstractRemoteFile.getName());
 
@@ -347,18 +258,9 @@ public class FileShareFragment extends Fragment {
             remoteFolderItemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    currentFolderUUID = abstractRemoteFile.getUuid();
 
-                    retrievedFolderUUIDList.add(currentFolderUUID);
+                    mPresenter.openFolder(abstractRemoteFile);
 
-                    currentFolderName = abstractRemoteFile.getName();
-                    retrievedFolderNameList.add(currentFolderName);
-
-                    loadingLayout.setVisibility(View.VISIBLE);
-
-                    abstractRemoteFile.openAbstractRemoteFile(getActivity());
-
-                    handleTitle();
                 }
             });
 
@@ -366,16 +268,12 @@ public class FileShareFragment extends Fragment {
 
     }
 
-    class FileShareRecyclerAdapterViewHolder extends BaseRecyclerViewHolder {
+    class FileShareRecyclerAdapterViewHolder extends BaseFileShareRecyclerViewHolder {
 
-        @BindView(R.id.file_icon)
-        ImageView fileIcon;
         @BindView(R.id.file_name)
         TextView fileName;
         @BindView(R.id.file_time)
         TextView fileTime;
-        @BindView(R.id.remote_file_item_layout)
-        LinearLayout remoteFileItemLayout;
         @BindView(R.id.item_menu)
         ImageView itemMenu;
         @BindView(R.id.content_layout)
@@ -390,17 +288,15 @@ public class FileShareFragment extends Fragment {
         }
 
         @Override
-        public void refreshView(int position) {
+        public void refreshView(AbstractRemoteFile abstractRemoteFile, int position) {
 
             if (position == 0) {
 
                 LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
-                layoutParams.setMargins(0, Util.dip2px(getActivity(), 8), Util.dip2px(getActivity(), 16), 0);
+                layoutParams.setMargins(0, Util.dip2px(baseActivity, 8), Util.dip2px(baseActivity, 16), 0);
                 contentLayout.setLayoutParams(layoutParams);
 
             }
-
-            AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
 
             itemMenu.setVisibility(View.GONE);
 
@@ -414,16 +310,14 @@ public class FileShareFragment extends Fragment {
     }
 
     private void setOwner(AbstractRemoteFile abstractRemoteFile, TextView ownerTextView) {
-        List<String> owners = abstractRemoteFile.getOwners();
-        if (!owners.isEmpty()) {
-            String owner = owners.get(0);
 
-            if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(owner)) {
+        String name = mPresenter.getFileShareOwnerName(abstractRemoteFile);
+        if (name != null) {
 
-                ownerTextView.setVisibility(View.VISIBLE);
-                ownerTextView.setText(LocalCache.RemoteUserMapKeyIsUUID.get(owner).getUserName());
-            }
+            ownerTextView.setVisibility(View.VISIBLE);
+            ownerTextView.setText(name);
         }
+
     }
 
 }

@@ -16,7 +16,9 @@ import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.refactor.business.callback.FileDownloadOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.FileOperationCallback;
+import com.winsun.fruitmix.refactor.business.callback.FileShareOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.LoadEquipmentAliasCallback;
 import com.winsun.fruitmix.refactor.business.callback.LoadTokenOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.MediaOperationCallback;
@@ -393,7 +395,28 @@ public class DataRepository {
         loadMediaToGifTouchNetworkImageView(context,remoteUrl,media,view);
     }
 
+
+    public void loadRemoteFileShare(FileShareOperationCallback.LoadFileShareCallback callback){
+
+    }
+
     public void loadRemoteFolderContent(String folderUUID, FileOperationCallback.LoadFileOperationCallback callback){
+
+    }
+
+    public void loadDownloadedFiles(FileDownloadOperationCallback.LoadDownloadedFilesCallback callback){
+
+    }
+
+    public void registerFileDownloadedStateChanged(FileDownloadOperationCallback.FileDownloadStateChangedCallback callback){
+
+    }
+
+    public void unregisterFileDownloadedStateChanged(FileDownloadOperationCallback.FileDownloadStateChangedCallback callback){
+
+    }
+
+    public void deleteDownloadedFileRecords(List<String> fileUUIDs, FileDownloadOperationCallback.DeleteDownloadedFilesCallback callback){
 
     }
 
