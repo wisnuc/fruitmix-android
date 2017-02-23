@@ -25,9 +25,6 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.mediaModule.fragment.MediaShareList;
-import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
-import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.OperationResultType;
@@ -43,7 +40,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -101,9 +97,16 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
 
         mContext = getActivity();
 
-        initPage();
+        mPresenter = new MediaMainFragmentPresenterImpl(mMainPagePresenter);
 
-        mPresenter = new MediaMainFragmentPresenterImpl(mMainPagePresenter, null, null, null);
+        mMediaFragment = new MediaFragment(getActivity(), Collections.<String>emptyList(), mPresenter);
+        mMediaShareFragment = new MediaShareFragment(getActivity());
+        mAlbumFragment = new AlbumFragment(getActivity());
+
+        mPresenter.setmMediaFragmentPresenter(mMediaFragment.getPresenter());
+        mPresenter.setmMediaShareFragmentPresenter(mMediaShareFragment.getPresenter());
+        mPresenter.setmAlbumFragmentPresenter(mAlbumFragment.getPresenter());
+
         mPresenter.attachView(this);
         mMainPagePresenter = null;
 
@@ -252,14 +255,6 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
     @Override
     public void setSelectModeBtnVisibility(int visibility) {
         lbRight.setVisibility(visibility);
-    }
-
-    private void initPage() {
-
-        mMediaFragment = new MediaFragment(getActivity(), Collections.<String>emptyList(), mPresenter);
-        mMediaShareFragment = new MediaShareFragment(getActivity());
-        mAlbumFragment = new AlbumFragment(getActivity());
-
     }
 
     private void initViewPager() {

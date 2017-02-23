@@ -95,6 +95,10 @@ public class FileDownloadFragment implements FileDownloadFragmentContract.FileDo
         mPresenter.registerFileDownloadStateChangedListener();
     }
 
+    public FileDownloadFragmentContract.FileDownloadFragmentPresenter getPresenter() {
+        return mPresenter;
+    }
+
     @Override
     public String getString(int resID) {
         return baseActivity.getString(resID);

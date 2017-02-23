@@ -12,7 +12,7 @@ import com.winsun.fruitmix.refactor.common.BaseView;
 
 public interface FileMainFragmentContract {
 
-    interface FileMainFragmentView extends BaseView {
+    interface FileMainFragmentView {
 
         void resetBottomNavigationItemCheckState();
 
@@ -33,6 +33,12 @@ public interface FileMainFragmentContract {
     }
 
     interface FileMainFragmentPresenter extends BasePresenter<FileMainFragmentView> {
+
+        void setFileFragmentPresenter(FileFragmentContract.FileFragmentPresenter fileFragmentPresenter);
+
+        void setFileShareFragmentPresenter(FileShareFragmentContract.FileShareFragmentPresenter fileShareFragmentPresenter);
+
+        void setFileDownloadFragmentPresenter(FileDownloadFragmentContract.FileDownloadFragmentPresenter fileDownloadFragmentPresenter);
 
         void fileMainMenuOnClick();
 
@@ -55,6 +61,8 @@ public interface FileMainFragmentContract {
         void setDefaultNavigationOnClickListener();
 
         void setNavigationOnClickListener(View.OnClickListener listener);
+
+        void switchDrawerOpenState();
     }
 
 }

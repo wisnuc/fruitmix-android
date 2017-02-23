@@ -1,13 +1,11 @@
 package com.winsun.fruitmix.refactor.ui;
 
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -20,17 +18,10 @@ import android.widget.TextView;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.UnscrollableViewPager;
-import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.fileModule.fragment.FileDownloadFragment;
-import com.winsun.fruitmix.fileModule.fragment.FileFragment;
-import com.winsun.fruitmix.fileModule.fragment.FileShareFragment;
-import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
-import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
-import com.winsun.fruitmix.util.Util;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+import com.winsun.fruitmix.refactor.common.BaseActivity;
+import com.winsun.fruitmix.refactor.contract.FileMainFragmentContract;
+import com.winsun.fruitmix.refactor.contract.MainPageContract;
+import com.winsun.fruitmix.refactor.presenter.FileMainFragmentPresenterImpl;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,7 +31,7 @@ import butterknife.ButterKnife;
  * Use the {@link FileMainFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FileMainFragment extends Fragment implements OnFileInteractionListener {
+public class FileMainFragment extends Fragment implements FileMainFragmentContract.FileMainFragmentView {
 
     @BindView(R.id.title)
     TextView titleTextView;
@@ -53,15 +44,13 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
     @BindView(R.id.file_main_menu)
     ImageView fileMainMenu;
 
-    public static final int PAGE_FILE_SHARE = 0;
-    public static final int PAGE_FILE = 1;
-    public static final int PAGE_FILE_DOWNLOAD = 2;
-
     private FileFragment fileFragment;
     private FileShareFragment fileShareFragment;
     private FileDownloadFragment fileDownloadFragment;
 
-    private OnMainFragmentInteractionListener mListener;
+    private FileMainFragmentContract.FileMainFragmentPresenter mPresenter;
+
+    private MainPageContract.MainPagePresenter mainPagePresenter;
 
     public FileMainFragment() {
         // Required empty public constructor
@@ -74,8 +63,9 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
      * @return A new instance of fragment FileMainFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static FileMainFragment newInstance() {
+    public static FileMainFragment newInstance(MainPageContract.MainPagePresenter mainPagePresenter) {
         FileMainFragment fragment = new FileMainFragment();
+        fragment.mainPagePresenter = mainPagePresenter;
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -84,6 +74,22 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        BaseActivity activity = (BaseActivity) getActivity();
+
+        mPresenter = new FileMainFragmentPresenterImpl(mainPagePresenter);
+
+        fileFragment = new FileFragment(activity, mPresenter);
+        fileShareFragment = new FileShareFragment(activity, mPresenter);
+        fileDownloadFragment = new FileDownloadFragment(activity, mPresenter);
+
+        mPresenter.setFileDownloadFragmentPresenter(fileDownloadFragment.getPresenter());
+        mPresenter.setFileFragmentPresenter(fileFragment.getPresenter());
+        mPresenter.setFileShareFragmentPresenter(fileShareFragment.getPresenter());
+
+        mPresenter.attachView(this);
+        mainPagePresenter = null;
+
     }
 
     @Override
@@ -104,14 +110,12 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
             @Override
             public void onClick(View view) {
 
-                if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
-                    fileFragment.getBottomSheetDialog(fileFragment.getMainMenuItem()).show();
-                } else if (fileMainViewPager.getCurrentItem() == PAGE_FILE_DOWNLOAD) {
-                    fileDownloadFragment.getBottomSheetDialog(fileDownloadFragment.getMainMenuItem()).show();
-                }
+                mPresenter.fileMainMenuOnClick();
 
             }
         });
+
+        mPresenter.initView();
 
         return view;
     }
@@ -121,27 +125,16 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-                switch (item.getItemId()) {
-                    case R.id.share:
-                        fileMainViewPager.setCurrentItem(PAGE_FILE_SHARE);
-                        break;
-                    case R.id.file:
-                        fileMainViewPager.setCurrentItem(PAGE_FILE);
-                        break;
-                    case R.id.download:
-                        fileMainViewPager.setCurrentItem(PAGE_FILE_DOWNLOAD);
-                        break;
-                }
+                mPresenter.onNavigationItemSelected(item.getItemId());
 
                 return true;
             }
         });
 
-        resetBottomNavigationItemCheckState();
-
     }
 
-    private void resetBottomNavigationItemCheckState() {
+    @Override
+    public void resetBottomNavigationItemCheckState() {
 
         int size = bottomNavigationView.getMenu().size();
 
@@ -150,8 +143,24 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
         }
     }
 
+    @Override
+    public void setBottomNavigationItemChecked(int position) {
+
+        bottomNavigationView.getMenu().getItem(position).setChecked(false);
+    }
+
+    @Override
+    public void setViewPagerCurrentItem(int position) {
+        fileMainViewPager.setCurrentItem(position);
+    }
+
+    @Override
+    public void setTitleText(String titleText) {
+        titleTextView.setText(titleText);
+    }
+
     private void initViewPager() {
-        final FilePageAdapter filePageAdapter = new FilePageAdapter(getActivity().getSupportFragmentManager());
+        FilePageAdapter filePageAdapter = new FilePageAdapter();
 
         fileMainViewPager.setAdapter(filePageAdapter);
 
@@ -160,30 +169,11 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
 
-                resetBottomNavigationItemCheckState();
-                bottomNavigationView.getMenu().getItem(position).setChecked(true);
+                mPresenter.onPageSelected(position);
 
-                switch (position) {
-                    case PAGE_FILE:
-                        fileMainMenu.setVisibility(View.VISIBLE);
-                        if (fileFragment != null)
-                            fileFragment.handleTitle();
-                        break;
-                    case PAGE_FILE_DOWNLOAD:
-                        fileMainMenu.setVisibility(View.VISIBLE);
-                        if (fileDownloadFragment != null)
-                            fileDownloadFragment.handleTitle();
-                        break;
-                    case PAGE_FILE_SHARE:
-                        fileMainMenu.setVisibility(View.GONE);
-                        if (fileShareFragment != null)
-                            fileShareFragment.handleTitle();
-                        break;
-                }
             }
         });
 
-        fileMainViewPager.setCurrentItem(PAGE_FILE);
     }
 
     private void initToolbar() {
@@ -193,121 +183,11 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.switchDrawerOpenState();
+                mPresenter.switchDrawerOpenState();
             }
         });
     }
 
-    public void refreshUser() {
-
-        fileShareFragment.refreshUser();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    public void onStop() {
-        EventBus.getDefault().unregister(this);
-
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(OperationEvent operationEvent) {
-
-        String action = operationEvent.getAction();
-        if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
-
-            if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
-                fileFragment.handleOperationResult(operationEvent);
-            } else if (fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE) {
-                fileShareFragment.handleOperationEvent(operationEvent);
-            }
-        } else if (action.equals(Util.REMOTE_FILE_SHARE_RETRIEVED)) {
-            fileShareFragment.handleOperationEvent(operationEvent);
-        }
-
-    }
-
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnMainFragmentInteractionListener) {
-            mListener = (OnMainFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    public void requestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-        if (fileMainViewPager.getCurrentItem() == PAGE_FILE)
-            fileFragment.requestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public void handleBackPressed() {
-
-        if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
-            fileFragment.onBackPressed();
-        } else if (fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE) {
-            fileShareFragment.onBackPressed();
-        } else if (fileMainViewPager.getCurrentItem() == PAGE_FILE_DOWNLOAD) {
-            fileDownloadFragment.onBackPressed();
-        }
-
-    }
-
-    public boolean handleBackPressedOrNot() {
-
-        if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
-            return fileFragment.handleBackPressedOrNot();
-        }
-        if (fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE) {
-            return fileShareFragment.handleBackPressedOrNot();
-        }
-        if (fileMainViewPager.getCurrentItem() == PAGE_FILE_DOWNLOAD) {
-            return fileDownloadFragment.handleBackPressedOrNot();
-        }
-        return false;
-    }
-
-    @Override
-    public void changeFilePageToFileFragment() {
-        fileMainViewPager.setCurrentItem(PAGE_FILE);
-    }
-
-    @Override
-    public void changeFilePageToFileShareFragment() {
-        fileMainViewPager.setCurrentItem(PAGE_FILE_SHARE);
-    }
-
-    @Override
-    public void changeFilePageToFileDownloadFragment() {
-        fileMainViewPager.setCurrentItem(PAGE_FILE_DOWNLOAD);
-    }
-
-    @Override
-    public void setToolbarTitle(String title) {
-        titleTextView.setText(title);
-    }
 
     @Override
     public void setNavigationIcon(int id) {
@@ -315,13 +195,13 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
     }
 
     @Override
-    public void setDefaultNavigationOnClickListener() {
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.switchDrawerOpenState();
-            }
-        });
+    public void setFileMainMenuVisibility(int visibility) {
+        fileMainMenu.setVisibility(visibility);
+    }
+
+    @Override
+    public int getCurrentPage() {
+        return fileMainViewPager.getCurrentItem();
     }
 
     @Override
@@ -329,34 +209,49 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
         toolbar.setNavigationOnClickListener(onClickListener);
     }
 
-    private class FilePageAdapter extends FragmentPagerAdapter {
-
-        FilePageAdapter(FragmentManager manager) {
-            super(manager);
-        }
+    private class FilePageAdapter extends PagerAdapter {
 
         @Override
-        public Fragment getItem(int position) {
+        public Object instantiateItem(ViewGroup container, int position) {
+            View view = null;
 
             switch (position) {
-                case PAGE_FILE:
-                    fileFragment = FileFragment.newInstance(FileMainFragment.this);
-                    return fileFragment;
-                case PAGE_FILE_SHARE:
-                    fileShareFragment = FileShareFragment.newInstance(FileMainFragment.this);
-                    return fileShareFragment;
-                case PAGE_FILE_DOWNLOAD:
-                    fileDownloadFragment = FileDownloadFragment.newInstance(FileMainFragment.this);
-                    return fileDownloadFragment;
-                default:
-                    return null;
+                case 0:
+                    view = fileShareFragment.getView();
+                    break;
+                case 1:
+                    view = fileFragment.getView();
+                    break;
+                case 2:
+                    view = fileDownloadFragment.getView();
+                    break;
             }
 
+            container.addView(view);
+
+            return view;
         }
 
+        /**
+         * Return the number of views available.
+         */
         @Override
         public int getCount() {
             return 3;
+        }
+
+        /**
+         * Determines whether a page View is associated with a specific key object
+         * as returned by {@link #instantiateItem(ViewGroup, int)}. This method is
+         * required for a PagerAdapter to function properly.
+         *
+         * @param view   Page View to check for association with <code>object</code>
+         * @param object Object to check for association with <code>view</code>
+         * @return true if <code>view</code> is associated with the key object <code>object</code>
+         */
+        @Override
+        public boolean isViewFromObject(View view, Object object) {
+            return view == object;
         }
     }
 }

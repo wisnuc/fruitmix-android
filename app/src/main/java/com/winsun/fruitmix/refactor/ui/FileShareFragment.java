@@ -77,6 +77,9 @@ public class FileShareFragment implements FileShareFragmentContract.FileShareFra
         mPresenter.onResume();
     }
 
+    public FileShareFragmentContract.FileShareFragmentPresenter getPresenter() {
+        return mPresenter;
+    }
 
     @Override
     public void onDestroyView() {

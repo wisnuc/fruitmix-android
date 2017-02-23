@@ -104,6 +104,10 @@ public class AlbumFragment implements AlbumFragmentContract.AlbumFragmentView {
         mPresenter.attachView(this);
     }
 
+    public AlbumFragmentContract.AlbumFragmentPresenter getPresenter() {
+        return mPresenter;
+    }
+
     private void initImageLoader() {
 
         ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;

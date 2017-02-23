@@ -97,6 +97,10 @@ public class FileFragment implements FileFragmentContract.FileFragmentView {
         mPresenter.onResume();
     }
 
+    public FileFragmentContract.FileFragmentPresenter getPresenter() {
+        return mPresenter;
+    }
+
     @Override
     public void onDestroyView() {
 

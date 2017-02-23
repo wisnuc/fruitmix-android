@@ -150,6 +150,10 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
         ivBtShare.setOnClickListener(this);
     }
 
+    public MediaFragmentContract.MediaFragmentPresenter getPresenter() {
+        return mPresenter;
+    }
+
     @Override
     public void onClick(View v) {
 

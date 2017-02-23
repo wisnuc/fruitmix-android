@@ -47,6 +47,12 @@ public interface MediaMainFragmentContract {
 
     interface MediaMainFragmentPresenter extends BasePresenter<MediaMainFragmentView>{
 
+        void setmMediaFragmentPresenter(MediaFragmentContract.MediaFragmentPresenter mMediaFragmentPresenter);
+
+        void setmMediaShareFragmentPresenter(MediaShareFragmentContract.MediaShareFragmentPresenter mMediaShareFragmentPresenter);
+
+        void setmAlbumFragmentPresenter(AlbumFragmentContract.AlbumFragmentPresenter mAlbumFragmentPresenter);
+
         void onCreate();
 
         void onCreateView();

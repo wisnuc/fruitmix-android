@@ -27,7 +27,6 @@ import com.winsun.fruitmix.EquipmentSearchActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.UserManageActivity;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
-import com.winsun.fruitmix.fragment.FileMainFragment;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
 import com.winsun.fruitmix.refactor.common.Injection;
@@ -96,7 +95,7 @@ public class MainPageActivity extends BaseActivity
         mPresenter.attachView(this);
 
         mediaMainFragment = MediaMainFragment.newInstance(mPresenter);
-        fileMainFragment = FileMainFragment.newInstance();
+        fileMainFragment = FileMainFragment.newInstance(mPresenter);
 
         fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().add(R.id.frame_layout, mediaMainFragment).add(R.id.frame_layout, fileMainFragment).hide(fileMainFragment).commit();

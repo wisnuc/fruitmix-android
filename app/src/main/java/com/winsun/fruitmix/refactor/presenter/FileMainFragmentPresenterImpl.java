@@ -29,16 +29,26 @@ public class FileMainFragmentPresenterImpl implements FileMainFragmentContract.F
     private static final int PAGE_FILE = 1;
     static final int PAGE_FILE_DOWNLOAD = 2;
 
-    public FileMainFragmentPresenterImpl(MainPageContract.MainPagePresenter mainPagePresenter, FileFragmentContract.FileFragmentPresenter fileFragmentPresenter,
-                                         FileShareFragmentContract.FileShareFragmentPresenter fileShareFragmentPresenter,
-                                         FileDownloadFragmentContract.FileDownloadFragmentPresenter fileDownloadFragmentPresenter) {
-        this.fileFragmentPresenter = fileFragmentPresenter;
-        this.fileShareFragmentPresenter = fileShareFragmentPresenter;
-        this.fileDownloadFragmentPresenter = fileDownloadFragmentPresenter;
+    public FileMainFragmentPresenterImpl(MainPageContract.MainPagePresenter mainPagePresenter) {
 
         this.mainPagePresenter = mainPagePresenter;
 
         this.mainPagePresenter.setFileMainFragmentPresenter(this);
+    }
+
+    @Override
+    public void setFileFragmentPresenter(FileFragmentContract.FileFragmentPresenter fileFragmentPresenter) {
+        this.fileFragmentPresenter = fileFragmentPresenter;
+    }
+
+    @Override
+    public void setFileShareFragmentPresenter(FileShareFragmentContract.FileShareFragmentPresenter fileShareFragmentPresenter) {
+        this.fileShareFragmentPresenter = fileShareFragmentPresenter;
+    }
+
+    @Override
+    public void setFileDownloadFragmentPresenter(FileDownloadFragmentContract.FileDownloadFragmentPresenter fileDownloadFragmentPresenter) {
+        this.fileDownloadFragmentPresenter = fileDownloadFragmentPresenter;
     }
 
     @Override
@@ -52,7 +62,6 @@ public class FileMainFragmentPresenterImpl implements FileMainFragmentContract.F
             fileFragmentPresenter.fileMainMenuOnClick();
         } else if (mView.getCurrentPage() == PAGE_FILE_DOWNLOAD) {
             fileDownloadFragmentPresenter.fileMainMenuOnClick();
-//            fileDownloadFragment.getBottomSheetDialog(fileDownloadFragment.getMainMenuItem()).show();
         }
     }
 
@@ -151,6 +160,11 @@ public class FileMainFragmentPresenterImpl implements FileMainFragmentContract.F
     @Override
     public void setNavigationOnClickListener(View.OnClickListener listener) {
         mView.setNavigationOnClickListener(listener);
+    }
+
+    @Override
+    public void switchDrawerOpenState() {
+        mainPagePresenter.switchDrawerOpenState();
     }
 
     @Override

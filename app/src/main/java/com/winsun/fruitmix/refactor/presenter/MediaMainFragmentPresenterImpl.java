@@ -34,14 +34,22 @@ public class MediaMainFragmentPresenterImpl implements MediaMainFragmentContract
     private static final int PAGE_PHOTO = 1;
     private static final int PAGE_ALBUM = 2;
 
-    public MediaMainFragmentPresenterImpl(MainPageContract.MainPagePresenter mainPagePresenter, MediaFragmentContract.MediaFragmentPresenter mediaFragmentPresenter, MediaShareFragmentContract.MediaShareFragmentPresenter mediaShareFragmentPresenter, AlbumFragmentContract.AlbumFragmentPresenter albumFragmentPresenter) {
-
-        mMediaFragmentPresenter = mediaFragmentPresenter;
-        mMediaShareFragmentPresenter = mediaShareFragmentPresenter;
-        mAlbumFragmentPresenter = albumFragmentPresenter;
+    public MediaMainFragmentPresenterImpl(MainPageContract.MainPagePresenter mainPagePresenter) {
 
         mMainPagePresenter = mainPagePresenter;
         mainPagePresenter.setMediaMainFragmentPresenter(this);
+    }
+
+    public void setmMediaFragmentPresenter(MediaFragmentContract.MediaFragmentPresenter mMediaFragmentPresenter) {
+        this.mMediaFragmentPresenter = mMediaFragmentPresenter;
+    }
+
+    public void setmMediaShareFragmentPresenter(MediaShareFragmentContract.MediaShareFragmentPresenter mMediaShareFragmentPresenter) {
+        this.mMediaShareFragmentPresenter = mMediaShareFragmentPresenter;
+    }
+
+    public void setmAlbumFragmentPresenter(AlbumFragmentContract.AlbumFragmentPresenter mAlbumFragmentPresenter) {
+        this.mAlbumFragmentPresenter = mAlbumFragmentPresenter;
     }
 
     @Override

@@ -107,6 +107,10 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
         mPresenter.attachView(this);
     }
 
+    public MediaShareFragmentContract.MediaShareFragmentPresenter getPresenter() {
+        return mPresenter;
+    }
+
     private void initImageLoader() {
 
         ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
