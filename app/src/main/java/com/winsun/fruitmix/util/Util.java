@@ -145,6 +145,8 @@ public class Util {
 
     public static final String KEY_MANUAL_INPUT_IP = "key_manual_input_ip";
 
+    public static final String KEY_SHOULD_STOP_SERVICE = "key_should_stop_service";
+
     public static final int WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 1;
 
     public static boolean startTimingRetrieveMediaShare = false;

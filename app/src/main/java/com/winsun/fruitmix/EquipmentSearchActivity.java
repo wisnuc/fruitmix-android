@@ -141,6 +141,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                         FNAS.retrieveUser(mContext);
                         startActivity(new Intent(mContext, NavPagerActivity.class));
+                        setResult(RESULT_OK);
                         finish();
 
                         return true;
@@ -238,6 +239,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (requestCode == Util.KEY_LOGIN_REQUEST_CODE && resultCode == RESULT_OK) {
+            setResult(RESULT_OK);
             finish();
         } else if (requestCode == Util.KEY_MANUAL_INPUT_IP_REQUEST_CODE && resultCode == RESULT_OK) {
 
@@ -256,7 +258,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         switch (v.getId()) {
             case R.id.back:
 
-                ButlerService.stopButlerService(mContext);
+                if (getIntent().getBooleanExtra(Util.KEY_SHOULD_STOP_SERVICE, true))
+                    ButlerService.stopButlerService(mContext);
 
                 finish();
                 break;
@@ -272,7 +275,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     public void onBackPressed() {
         super.onBackPressed();
 
-        ButlerService.stopButlerService(mContext);
+        if (getIntent().getBooleanExtra(Util.KEY_SHOULD_STOP_SERVICE, true))
+            ButlerService.stopButlerService(mContext);
 
     }
 

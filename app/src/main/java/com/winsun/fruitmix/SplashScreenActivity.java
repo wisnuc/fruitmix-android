@@ -108,6 +108,7 @@ public class SplashScreenActivity extends Activity {
             intent.setClass(SplashScreenActivity.this, NavPagerActivity.class);
         } else {
             intent.setClass(SplashScreenActivity.this, EquipmentSearchActivity.class);
+            intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE,true);
         }
         startActivity(intent);
         finish();

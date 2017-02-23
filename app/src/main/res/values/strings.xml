@@ -79,6 +79,9 @@
 
     <string name="my_file">My File</string>
     <string name="my_photo">My Photo</string>
+
+    <string name="account_manage">Account Manage</string>
+
     <!-- login -->
 
     <string name="login">Login</string>

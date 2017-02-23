@@ -112,6 +112,12 @@ public class NavPagerActivity extends AppCompatActivity
 
     private int currentPage = 0;
 
+    public static final int START_ACCOUNT_MANAGE = 0x1001;
+
+    public static final int RESULT_REFRESH_LOGGED_IN_USER = 0x1002;
+    public static final int RESULT_FINISH_ACTIVITY = 0x1003;
+    public static final int RESULT_LOGOUT = 0x1004;
+
     private static final int TIME_INTERNAL = 2 * 1000;
     private long backPressedTimeMillis = 0;
 
@@ -127,6 +133,8 @@ public class NavPagerActivity extends AppCompatActivity
     private static final int NAVIGATION_ITEM_TYPE_MENU = 0;
     private static final int NAVIGATION_ITEM_TYPE_LOGGED_IN_USER = 1;
     private static final int NAVIGATION_ITEM_TYPE_DIVIDER = 2;
+    public static final int NAIGATION_ITEM_TYPE_ACCOUNT_MANAGE = 3;
+
 
     private interface NavigationItemType {
         int getType();
@@ -199,6 +207,25 @@ public class NavPagerActivity extends AppCompatActivity
             return NAVIGATION_ITEM_TYPE_DIVIDER;
         }
     }
+
+    private class NavigationAccountManageItem implements NavigationItemType {
+
+        int getItemTextResID() {
+            return R.string.account_manage;
+        }
+
+        @Override
+        public int getType() {
+            return NAIGATION_ITEM_TYPE_ACCOUNT_MANAGE;
+        }
+
+        public void onClick() {
+
+            startActivityForResult(new Intent(mContext, AccountManageActivity.class), START_ACCOUNT_MANAGE);
+        }
+
+    }
+
 
     private List<NavigationItemType> mNavigationItemMenu;
     private List<NavigationItemType> mNavigationItemLoggedInUser;
@@ -482,11 +509,11 @@ public class NavPagerActivity extends AppCompatActivity
 
         toggleUserManageNavigationItem(user);
 
-        initLoggedInUserNavigationItem();
+        refreshLoggedInUserNavigationItem();
 
     }
 
-    private void initLoggedInUserNavigationItem() {
+    private void refreshLoggedInUserNavigationItem() {
 
         List<LoggedInUser> loggedInUsers = new ArrayList<>(LocalCache.LocalLoggedInUsers);
 
@@ -521,6 +548,7 @@ public class NavPagerActivity extends AppCompatActivity
             for (LoggedInUser loggedInUser : loggedInUsers) {
                 mNavigationItemLoggedInUser.add(new NavigationLoggerInUserItem(loggedInUser));
             }
+            mNavigationItemLoggedInUser.add(new NavigationAccountManageItem());
 
             user0 = loggedInUsers.get(0).getUser();
 
@@ -700,8 +728,24 @@ public class NavPagerActivity extends AppCompatActivity
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
-        if (currentPage == PAGE_MEDIA)
-            mediaMainFragment.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == START_ACCOUNT_MANAGE) {
+
+            if (resultCode == RESULT_FINISH_ACTIVITY) {
+                finish();
+            } else if (resultCode == RESULT_REFRESH_LOGGED_IN_USER) {
+                refreshLoggedInUserNavigationItem();
+                mNavigationItemAdapter.notifyDataSetChanged();
+            } else if (resultCode == RESULT_LOGOUT) {
+                handleLogoutOnClick();
+            }
+
+        } else {
+
+            if (currentPage == PAGE_MEDIA)
+                mediaMainFragment.onActivityResult(requestCode, resultCode, intent);
+
+        }
+
     }
 
     private void handleLogoutOnClick() {
@@ -736,6 +780,7 @@ public class NavPagerActivity extends AppCompatActivity
                 mDialog.dismiss();
 
                 Intent intent = new Intent(NavPagerActivity.this, EquipmentSearchActivity.class);
+                intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE, true);
                 startActivity(intent);
                 finish();
 
@@ -803,6 +848,11 @@ public class NavPagerActivity extends AppCompatActivity
                 case NAVIGATION_ITEM_TYPE_MENU:
                     view = LayoutInflater.from(mContext).inflate(R.layout.navigation_menu_item, parent, false);
                     return new NavigationMenuViewHolder(view);
+
+                case NAIGATION_ITEM_TYPE_ACCOUNT_MANAGE:
+                    view = LayoutInflater.from(mContext).inflate(R.layout.navigation_logged_in_user_item, parent, false);
+
+                    return new NavigationAccountItemViewHolder(view);
             }
 
             return null;
@@ -919,6 +969,38 @@ public class NavPagerActivity extends AppCompatActivity
         @Override
         public void refreshView(NavigationItemType type) {
 
+        }
+    }
+
+    private class NavigationAccountItemViewHolder extends BaseNavigationViewHolder {
+
+        @BindView(R.id.item_title)
+        TextView itemTitle;
+        @BindView(R.id.item_sub_title)
+        TextView itemSubTitle;
+        @BindView(R.id.logged_in_user_item_layout)
+        ViewGroup itemLayout;
+
+        NavigationAccountItemViewHolder(View itemView) {
+            super(itemView);
+
+            ButterKnife.bind(this, itemView);
+        }
+
+        @Override
+        public void refreshView(NavigationItemType type) {
+
+            final NavigationAccountManageItem item = (NavigationAccountManageItem) type;
+
+            itemTitle.setText(item.getItemTextResID());
+            itemSubTitle.setVisibility(View.GONE);
+
+            itemLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    item.onClick();
+                }
+            });
         }
     }
 }

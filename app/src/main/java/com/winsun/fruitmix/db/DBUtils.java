@@ -720,6 +720,18 @@ public class DBUtils {
         return deleteAllShare(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
     }
 
+    public long deleteLoggerUserByUserUUID(String userUUID) {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.LOGGED_IN_USER_TABLE_NAME, DBHelper.USER_KEY_UUID + " = ?", new String[]{userUUID});
+
+        close();
+
+        return returnValue;
+
+    }
+
     public long deleteDownloadedFileByUUIDAndCreatorUUID(String fileUUID, String fileCreatorUUID) {
 
         openWritableDB();
