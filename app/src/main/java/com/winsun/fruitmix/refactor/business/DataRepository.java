@@ -15,6 +15,7 @@ import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.refactor.business.callback.FileDownloadOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.FileOperationCallback;
@@ -27,11 +28,13 @@ import com.winsun.fruitmix.refactor.business.callback.OperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.UserOperationCallback;
 import com.winsun.fruitmix.refactor.data.DataSource;
 import com.winsun.fruitmix.refactor.data.db.DBDataSource;
+import com.winsun.fruitmix.refactor.data.loadOperationResult.MediasLoadOperationResult;
 import com.winsun.fruitmix.refactor.data.loadOperationResult.TokenLoadOperationResult;
 import com.winsun.fruitmix.refactor.data.loadOperationResult.UsersLoadOperationResult;
 import com.winsun.fruitmix.refactor.data.memory.MemoryDataSource;
 import com.winsun.fruitmix.refactor.data.server.ServerDataSource;
 import com.winsun.fruitmix.refactor.model.EquipmentAlias;
+import com.winsun.fruitmix.refactor.model.MediaFragmentDataLoader;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -39,6 +42,7 @@ import com.winsun.fruitmix.util.Util;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -72,6 +76,7 @@ public class DataRepository {
 
         instance = ExecutorServiceInstance.SINGLE_INSTANCE;
 
+        imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
     }
 
     public static DataRepository getInstance(DataSource cacheDataSource, DataSource dbDataSource, DataSource serverDataSource) {
@@ -116,15 +121,15 @@ public class DataRepository {
             if (result.getOperationResult().getOperationResultType() == OperationResultType.SUCCEED) {
 
                 for (User user : result.getUsers()) {
-                    mDBDataSource.saveUser(user);
-                    mMemoryDataSource.saveUser(user);
+                    mDBDataSource.insertUser(user);
+                    mMemoryDataSource.insertUser(user);
                 }
 
             } else {
 
                 result = mDBDataSource.loadUsers();
                 for (User user : result.getUsers()) {
-                    mMemoryDataSource.saveUser(user);
+                    mMemoryDataSource.insertUser(user);
                 }
 
             }
@@ -136,10 +141,79 @@ public class DataRepository {
 
         }
 
+    }
+
+    public void loadLocalMediaInCamera(MediaOperationCallback.LoadMediasCallback callback) {
+
+        Collection<String> localMediaUUIDs = ((MemoryDataSource) mMemoryDataSource).loadLocalMediaUUIDsInDB();
+
+        //TODO:call in thread
+        MediasLoadOperationResult result = ((DBDataSource) mDBDataSource).loadLocalMediaInCamera(localMediaUUIDs);
+
+        List<Media> localMediaInCamera = result.getMedias();
+
+        mMemoryDataSource.insertLocalMedias(localMediaInCamera);
+
+        if (localMediaInCamera.size() > 0) {
+
+            List<Media> medias = mMemoryDataSource.loadAllRemoteMedias().getMedias();
+            medias.addAll(mMemoryDataSource.loadAllLocalMedias().getMedias());
+
+            //TODO:call in main thread
+            callback.onLoadSucceed(result.getOperationResult(), medias);
+
+            //TODO:call in thread
+            calcLocalMediaUUIDInCamera(localMediaInCamera);
+
+        }
 
     }
 
-    public void loadLoadMediaInCamera(MediaOperationCallback.LoadMediasCallback callback) {
+    private void calcLocalMediaUUIDInCamera(List<Media> medias) {
+
+        for (Media media : medias) {
+            if (media.getUuid().isEmpty()) {
+                String uuid = Util.CalcSHA256OfFile(media.getThumb());
+                media.setUuid(uuid);
+            }
+        }
+
+        mDBDataSource.insertLocalMedias(medias);
+    }
+
+
+    public void loadMedias(MediaOperationCallback.LoadMediasCallback callback) {
+
+        List<Media> remoteMedias;
+        List<Media> localMedias;
+        List<Media> allMedias = new ArrayList<>();
+
+        //TODO:call in thread
+        if (((MemoryDataSource) mMemoryDataSource).isLocalMediaLoaded()) {
+            localMedias = mMemoryDataSource.loadAllLocalMedias().getMedias();
+        } else {
+            localMedias = mDBDataSource.loadAllLocalMedias().getMedias();
+        }
+
+        if (((MemoryDataSource) mMemoryDataSource).isRemoteMediaLoaded()) {
+            remoteMedias = mMemoryDataSource.loadAllRemoteMedias().getMedias();
+        } else {
+
+            MediasLoadOperationResult result = mServerDataSource.loadAllRemoteMedias();
+
+            OperationResult operationResult = result.getOperationResult();
+            if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
+                remoteMedias = result.getMedias();
+            } else {
+                remoteMedias = mDBDataSource.loadAllRemoteMedias().getMedias();
+            }
+        }
+
+        allMedias.addAll(remoteMedias);
+        allMedias.addAll(localMedias);
+
+        if (callback != null)
+            callback.onLoadSucceed(new OperationSuccess(), allMedias);
 
     }
 
@@ -155,17 +229,30 @@ public class DataRepository {
         return ((MemoryDataSource) mMemoryDataSource).loadMediaShare(mediaShareUUID);
     }
 
-    public void loadMedias(MediaOperationCallback.LoadMediasCallback callback) {
-
-
-    }
-
     public void loadMediaInMediaShareFromMemory(MediaShare mediaShare, MediaOperationCallback.LoadMediasCallback callback) {
 
+        //TODO:call in thread
+        List<String> mediaKeys = mediaShare.getMediaKeyInMediaShareContents();
+        List<Media> medias = new ArrayList<>(mediaKeys.size());
+
+        for (String key : mediaKeys) {
+
+            Media media = ((MemoryDataSource) mMemoryDataSource).loadMedia(key);
+            if (media == null) {
+                media = new Media();
+            }
+            medias.add(media);
+        }
+
+        callback.onLoadSucceed(new OperationSuccess(), medias);
 
     }
 
     public void handleMediasForMediaFragment(List<Media> medias, MediaOperationCallback.HandleMediaForMediaFragmentCallback callback) {
+
+        MediaFragmentDataLoader loader = new MediaFragmentDataLoader();
+
+        //TODO: handle medias in thread
 
 
     }
@@ -267,7 +354,7 @@ public class DataRepository {
         Util.setRemoteMediaShareLoaded(false);
     }
 
-    public User loadCurrentLoginUserFromMemory(){
+    public User loadCurrentLoginUserFromMemory() {
         return mMemoryDataSource.loadCurrentLoginUser();
     }
 
@@ -355,7 +442,7 @@ public class DataRepository {
 
     }
 
-    private void loadMediaToGifTouchNetworkImageView(Context context,String remoteUrl,Media media,GifTouchNetworkImageView view){
+    private void loadMediaToGifTouchNetworkImageView(Context context, String remoteUrl, Media media, GifTouchNetworkImageView view) {
         view.setOrientationNumber(media.getOrientationNumber());
 
         view.setDefaultImageResId(R.drawable.placeholder_photo);
@@ -384,39 +471,38 @@ public class DataRepository {
         String remoteUrl = media.getImageOriginalUrl(context);
 
 
-
-        loadMediaToGifTouchNetworkImageView(context,remoteUrl,media,view);
+        loadMediaToGifTouchNetworkImageView(context, remoteUrl, media, view);
     }
 
-    public void loadThumbMediaToGifTouchNetworkImageView(Context context, Media media, GifTouchNetworkImageView view){
+    public void loadThumbMediaToGifTouchNetworkImageView(Context context, Media media, GifTouchNetworkImageView view) {
 
         String remoteUrl = media.getImageThumbUrl(context);
 
-        loadMediaToGifTouchNetworkImageView(context,remoteUrl,media,view);
+        loadMediaToGifTouchNetworkImageView(context, remoteUrl, media, view);
     }
 
 
-    public void loadRemoteFileShare(FileShareOperationCallback.LoadFileShareCallback callback){
+    public void loadRemoteFileShare(FileShareOperationCallback.LoadFileShareCallback callback) {
 
     }
 
-    public void loadRemoteFolderContent(String folderUUID, FileOperationCallback.LoadFileOperationCallback callback){
+    public void loadRemoteFolderContent(String folderUUID, FileOperationCallback.LoadFileOperationCallback callback) {
 
     }
 
-    public void loadDownloadedFiles(FileDownloadOperationCallback.LoadDownloadedFilesCallback callback){
+    public void loadDownloadedFiles(FileDownloadOperationCallback.LoadDownloadedFilesCallback callback) {
 
     }
 
-    public void registerFileDownloadedStateChanged(FileDownloadOperationCallback.FileDownloadStateChangedCallback callback){
+    public void registerFileDownloadedStateChanged(FileDownloadOperationCallback.FileDownloadStateChangedCallback callback) {
 
     }
 
-    public void unregisterFileDownloadedStateChanged(FileDownloadOperationCallback.FileDownloadStateChangedCallback callback){
+    public void unregisterFileDownloadedStateChanged(FileDownloadOperationCallback.FileDownloadStateChangedCallback callback) {
 
     }
 
-    public void deleteDownloadedFileRecords(List<String> fileUUIDs, FileDownloadOperationCallback.DeleteDownloadedFilesCallback callback){
+    public void deleteDownloadedFileRecords(List<String> fileUUIDs, FileDownloadOperationCallback.DeleteDownloadedFilesCallback callback) {
 
     }
 

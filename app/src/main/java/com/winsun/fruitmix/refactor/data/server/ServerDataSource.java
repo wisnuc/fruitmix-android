@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.refactor.data.server;
 
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -84,12 +85,22 @@ public class ServerDataSource implements DataSource{
     }
 
     @Override
-    public OperationResult saveUser(User user) {
+    public OperationResult insertUser(User user) {
         return null;
     }
 
     @Override
-    public OperationResult saveMediaShare(MediaShare mediaShare) {
+    public OperationResult insertMediaShare(MediaShare mediaShare) {
+        return null;
+    }
+
+    @Override
+    public OperationResult insertLocalMedias(List<Media> medias) {
+        return null;
+    }
+
+    @Override
+    public OperationResult insertRemoteMedias(List<Media> medias) {
         return null;
     }
 
@@ -119,7 +130,12 @@ public class ServerDataSource implements DataSource{
     }
 
     @Override
-    public MediasLoadOperationResult loadMedias() {
+    public MediasLoadOperationResult loadAllRemoteMedias() {
+        return null;
+    }
+
+    @Override
+    public MediasLoadOperationResult loadAllLocalMedias() {
         return null;
     }
 

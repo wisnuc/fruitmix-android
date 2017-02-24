@@ -17,12 +17,22 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/2/9.
  */
 
 public class MemoryDataSource implements DataSource {
+
+    public boolean isLocalMediaLoaded(){
+        return true;
+    }
+
+    public boolean isRemoteMediaLoaded(){
+        return true;
+    }
+
 
     public void logout() {
         Collection<Media> medias = LocalCache.LocalMediaMapKeyIsThumb.values();
@@ -33,12 +43,22 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult saveUser(User user) {
+    public OperationResult insertUser(User user) {
         return null;
     }
 
     @Override
-    public OperationResult saveMediaShare(MediaShare mediaShare) {
+    public OperationResult insertMediaShare(MediaShare mediaShare) {
+        return null;
+    }
+
+    @Override
+    public OperationResult insertLocalMedias(List<Media> medias) {
+        return null;
+    }
+
+    @Override
+    public OperationResult insertRemoteMedias(List<Media> medias) {
         return null;
     }
 
@@ -67,8 +87,19 @@ public class MemoryDataSource implements DataSource {
         return null;
     }
 
+    public Collection<String> loadLocalMediaUUIDsInDB(){
+
+        return LocalCache.LocalMediaMapKeyIsThumb.keySet();
+
+    }
+
     @Override
-    public MediasLoadOperationResult loadMedias() {
+    public MediasLoadOperationResult loadAllRemoteMedias() {
+        return null;
+    }
+
+    @Override
+    public MediasLoadOperationResult loadAllLocalMedias() {
         return null;
     }
 

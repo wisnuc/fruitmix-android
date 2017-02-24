@@ -23,9 +23,13 @@ import java.util.List;
 
 public interface DataSource {
 
-    OperationResult saveUser(User user);
+    OperationResult insertUser(User user);
 
-    OperationResult saveMediaShare(MediaShare mediaShare);
+    OperationResult insertMediaShare(MediaShare mediaShare);
+
+    OperationResult insertLocalMedias(List<Media> medias);
+
+    OperationResult insertRemoteMedias(List<Media> medias);
 
     OperationResult modifyMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare);
 
@@ -37,7 +41,9 @@ public interface DataSource {
 
     UsersLoadOperationResult loadUsers();
 
-    MediasLoadOperationResult loadMedias();
+    MediasLoadOperationResult loadAllRemoteMedias();
+
+    MediasLoadOperationResult loadAllLocalMedias();
 
     MediaSharesLoadOperationResult loadMediaShares();
 

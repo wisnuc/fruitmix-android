@@ -1,7 +1,10 @@
 package com.winsun.fruitmix.refactor.data.db;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.provider.MediaStore;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
@@ -23,6 +26,12 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,22 +42,33 @@ public class DBDataSource implements DataSource {
 
     private DBUtils mDBUtils;
     private SharedPreferences mSharedPreferences;
+    private ContentResolver mContentResolver;
 
-    public DBDataSource(Context context){
+    public DBDataSource(Context context) {
 
         mDBUtils = DBUtils.getInstance(context);
-        mSharedPreferences = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME,Context.MODE_PRIVATE);
+        mSharedPreferences = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+        mContentResolver = context.getContentResolver();
 
-        loadLocalMedias();
     }
 
     @Override
-    public OperationResult saveUser(User user) {
+    public OperationResult insertUser(User user) {
         return null;
     }
 
     @Override
-    public OperationResult saveMediaShare(MediaShare mediaShare) {
+    public OperationResult insertMediaShare(MediaShare mediaShare) {
+        return null;
+    }
+
+    @Override
+    public OperationResult insertLocalMedias(List<Media> medias) {
+        return null;
+    }
+
+    @Override
+    public OperationResult insertRemoteMedias(List<Media> medias) {
         return null;
     }
 
@@ -78,7 +98,12 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public MediasLoadOperationResult loadMedias() {
+    public MediasLoadOperationResult loadAllRemoteMedias() {
+        return null;
+    }
+
+    @Override
+    public MediasLoadOperationResult loadAllLocalMedias() {
         return null;
     }
 
@@ -100,7 +125,7 @@ public class DBDataSource implements DataSource {
     @Override
     public TokenLoadOperationResult loadToken(LoadTokenParam param) {
 
-        String token = mSharedPreferences.getString(Util.JWT,"");
+        String token = mSharedPreferences.getString(Util.JWT, "");
 
         TokenLoadOperationResult result = new TokenLoadOperationResult();
         result.setToken(token);
@@ -113,17 +138,96 @@ public class DBDataSource implements DataSource {
         return null;
     }
 
-    private void loadLocalMedias(){
+    public MediasLoadOperationResult loadLocalMediaInCamera(Collection<String> loadedMediaUUIDs) {
+
+        MediasLoadOperationResult result = new MediasLoadOperationResult();
+
+        String[] fields = {MediaStore.Images.Media.HEIGHT, MediaStore.Images.Media.WIDTH, MediaStore.Images.Media.DATA, MediaStore.Images.Media.ORIENTATION};
+        Cursor cursor;
+        List<Media> mediaList;
+        Media media;
+        File f;
+        SimpleDateFormat df;
+        Calendar date;
+
+//        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "='" + bucketName + "'", null, null);
+
+        cursor = mContentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, null, null, null);
+
+        if (cursor == null || !cursor.moveToFirst() || loadedMediaUUIDs == null) {
+            result.setMedias(Collections.<Media>emptyList());
+            return result;
+        }
+
+        mediaList = new ArrayList<>();
+        df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        date = Calendar.getInstance();
+
+        do {
+
+            String thumb = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+
+            if (loadedMediaUUIDs.contains(thumb)) {
+                continue;
+            }
+
+            media = new Media();
+            media.setThumb(thumb);
+            media.setWidth(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)));
+            media.setHeight(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)));
+
+            f = new File(thumb);
+            date.setTimeInMillis(f.lastModified());
+            media.setTime(df.format(date.getTime()));
+
+            media.setUploaded(false);
+            media.setSelected(false);
+            media.setLoaded(false);
+
+            int orientation = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.ORIENTATION));
+
+            switch (orientation) {
+                case 0:
+                    media.setOrientationNumber(1);
+                    break;
+                case 90:
+                    media.setOrientationNumber(6);
+                    break;
+                case 180:
+                    media.setOrientationNumber(4);
+                    break;
+                case 270:
+                    media.setOrientationNumber(3);
+                    break;
+                default:
+                    media.setOrientationNumber(1);
+            }
+
+            media.setLocal(true);
+            media.setSharing(true);
+            media.setUuid("");
+
+            mediaList.add(media);
+
+        }
+        while (cursor.moveToNext());
+
+        cursor.close();
+
+        result.setMedias(mediaList);
+
+        return result;
 
     }
 
-    public LoadTokenParam getLoadTokenParam(){
 
-        return new LoadTokenParam(mSharedPreferences.getString(Util.GATEWAY, null),mSharedPreferences.getString(Util.USER_UUID,""),mSharedPreferences.getString(Util.PASSWORD,""));
+    public LoadTokenParam getLoadTokenParam() {
+
+        return new LoadTokenParam(mSharedPreferences.getString(Util.GATEWAY, null), mSharedPreferences.getString(Util.USER_UUID, ""), mSharedPreferences.getString(Util.PASSWORD, ""));
 
     }
 
-    public void logout(){
+    public void logout() {
 
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString(Util.JWT, null);

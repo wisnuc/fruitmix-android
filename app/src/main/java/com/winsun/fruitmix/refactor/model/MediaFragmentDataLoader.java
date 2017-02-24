@@ -41,7 +41,7 @@ public class MediaFragmentDataLoader {
 
     private boolean needRefreshData = true;
 
-    MediaFragmentDataLoader() {
+    public MediaFragmentDataLoader() {
 
         mPhotoDateGroups = new ArrayList<>();
         mMapKeyIsDateValueIsPhotoList = new ArrayMap<>();

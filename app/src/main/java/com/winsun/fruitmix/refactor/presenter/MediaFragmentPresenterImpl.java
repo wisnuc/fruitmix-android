@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.refactor.presenter;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,7 +9,6 @@ import android.view.View;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.business.DataRepository;
 import com.winsun.fruitmix.refactor.business.callback.MediaOperationCallback;
@@ -18,13 +16,10 @@ import com.winsun.fruitmix.refactor.business.callback.MediaShareOperationCallbac
 import com.winsun.fruitmix.refactor.contract.MediaFragmentContract;
 import com.winsun.fruitmix.refactor.contract.MediaMainFragmentContract;
 import com.winsun.fruitmix.refactor.model.MediaFragmentDataLoader;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -324,7 +319,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     @Override
     public void onResume(){
         if (mPhotoListRefresh) {
-            mRepository.loadLoadMediaInCamera(new MediaOperationCallback.LoadMediasCallback() {
+            mRepository.loadLocalMediaInCamera(new MediaOperationCallback.LoadMediasCallback() {
                 @Override
                 public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
                     showMedias(medias);
