@@ -37,7 +37,7 @@ public enum OkHttpUtil {
     private List<Call> calls;
 
     OkHttpUtil() {
-        okHttpClient = new OkHttpClient.Builder().connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.SECONDS).readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.SECONDS).addInterceptor(createHttpInterceptor()).build();
+        okHttpClient = new OkHttpClient.Builder().connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).addInterceptor(createHttpInterceptor()).build();
 
         calls = new ArrayList<>();
     }

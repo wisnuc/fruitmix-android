@@ -73,10 +73,31 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
         mAdapter = new AccountExpandableListViewAdapter(mEquipmentNames, mUsers);
         mAccountExpandableListView.setAdapter(mAdapter);
 
+        mAccountExpandableListView.setGroupIndicator(null);
+
         for (int i = 0; i < mAdapter.getGroupCount(); i++) {
             mAccountExpandableListView.expandGroup(i);
         }
 
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        handleBack();
+
+        super.onBackPressed();
+
+    }
+
+    private void handleBack() {
+        if (mNewUserLoginSucceed) {
+            setResult(NavPagerActivity.RESULT_FINISH_ACTIVITY);
+        } else if (mDeleteCurrentUser) {
+            setResult(NavPagerActivity.RESULT_LOGOUT);
+        } else if (mDeleteOtherUser) {
+            setResult(NavPagerActivity.RESULT_REFRESH_LOGGED_IN_USER);
+        }
     }
 
     @Override
@@ -85,13 +106,6 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
 
         mContext = null;
 
-        if (mNewUserLoginSucceed) {
-            setResult(NavPagerActivity.RESULT_FINISH_ACTIVITY);
-        } else if (mDeleteCurrentUser) {
-            setResult(NavPagerActivity.RESULT_LOGOUT);
-        } else if (mDeleteOtherUser) {
-            setResult(NavPagerActivity.RESULT_REFRESH_LOGGED_IN_USER);
-        }
     }
 
     private void fillData() {
@@ -125,6 +139,7 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
 
         switch (v.getId()) {
             case R.id.back:
+                handleBack();
                 finish();
                 break;
             case R.id.add_account:
@@ -150,6 +165,7 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
             Util.setRemoteMediaShareLoaded(false);
 
             mNewUserLoginSucceed = true;
+            handleBack();
             finish();
         }
 
@@ -227,7 +243,7 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
         public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
             AccountChildHolder groupViewHolder;
             if (convertView == null) {
-                convertView = LayoutInflater.from(mContext).inflate(R.layout.user_manage_item, parent, false);
+                convertView = LayoutInflater.from(mContext).inflate(R.layout.account_child_item, parent, false);
 
                 groupViewHolder = new AccountChildHolder(convertView);
                 convertView.setTag(groupViewHolder);
@@ -266,8 +282,6 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
         TextView mAvatar;
         @BindView(R.id.user_name)
         TextView mUserName;
-        @BindView(R.id.user_email)
-        TextView mUserEmail;
         @BindView(R.id.del_user)
         ViewGroup mDelUserLayout;
 
@@ -279,9 +293,6 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
 
             final LoggedInUser loggedInUser = users.get(groupPosition).get(childPosition);
             final User user = loggedInUser.getUser();
-
-            mUserEmail.setVisibility(View.GONE);
-            mDelUserLayout.setVisibility(View.VISIBLE);
 
             mAvatar.setText(Util.getUserNameFirstLetter(user.getUserName()));
             mAvatar.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());

@@ -38,8 +38,8 @@ public enum RetrofitInstance {
         return new OkHttpClient.Builder()
                 .addInterceptor(createHeaderInterceptor())
                 .addInterceptor(createHttpInterceptor())
-                .connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(Util.HTTP_CONNECT_TIMEOUT,TimeUnit.SECONDS)
+                .connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
+                .readTimeout(Util.HTTP_CONNECT_TIMEOUT,TimeUnit.MILLISECONDS)
                 .build();
     }
 

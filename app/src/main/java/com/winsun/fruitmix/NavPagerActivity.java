@@ -531,19 +531,6 @@ public class NavPagerActivity extends AppCompatActivity
 
         if (loggedInUserListSize > 0) {
 
-            mNavigationHeaderArrow.setVisibility(View.VISIBLE);
-
-            mNavigationHeaderArrowExpanded = false;
-            refreshNavigationHeader();
-
-            mNavigationHeaderArrow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mNavigationHeaderArrowExpanded = !mNavigationHeaderArrowExpanded;
-                    refreshNavigationHeader();
-                }
-            });
-
             mNavigationItemLoggedInUser.clear();
             for (LoggedInUser loggedInUser : loggedInUsers) {
                 mNavigationItemLoggedInUser.add(new NavigationLoggerInUserItem(loggedInUser));
@@ -579,14 +566,28 @@ public class NavPagerActivity extends AppCompatActivity
                 });
 
             } else {
-                mLoggedInUser1Avatar.setVisibility(View.GONE);
+                mLoggedInUser1Avatar.setVisibility(View.INVISIBLE);
             }
 
         } else {
-            mNavigationHeaderArrow.setVisibility(View.GONE);
-            mLoggedInUser0Avatar.setVisibility(View.GONE);
-            mLoggedInUser1Avatar.setVisibility(View.GONE);
+
+            mLoggedInUser0Avatar.setVisibility(View.INVISIBLE);
+            mLoggedInUser1Avatar.setVisibility(View.INVISIBLE);
+
+            mNavigationItemLoggedInUser.clear();
+            mNavigationItemLoggedInUser.add(new NavigationAccountManageItem());
         }
+
+        mNavigationHeaderArrow.setVisibility(View.VISIBLE);
+
+        mNavigationHeaderArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mNavigationHeaderArrowExpanded = !mNavigationHeaderArrowExpanded;
+                refreshNavigationHeader();
+            }
+        });
+
     }
 
     private void refreshNavigationHeader() {
@@ -609,10 +610,12 @@ public class NavPagerActivity extends AppCompatActivity
 
             mNavigationHeaderArrow.setImageResource(R.drawable.navigation_header_arrow_up);
 
-            if (mLoggedInUser1Avatar.getVisibility() == View.INVISIBLE) {
+            int size = mNavigationItemLoggedInUser.size();
+
+            if (mLoggedInUser1Avatar.getVisibility() == View.INVISIBLE && size > 1) {
                 mLoggedInUser1Avatar.setVisibility(View.VISIBLE);
             }
-            if (mLoggedInUser0Avatar.getVisibility() == View.INVISIBLE) {
+            if (mLoggedInUser0Avatar.getVisibility() == View.INVISIBLE && size > 2) {
                 mLoggedInUser0Avatar.setVisibility(View.VISIBLE);
             }
 
@@ -729,6 +732,10 @@ public class NavPagerActivity extends AppCompatActivity
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
         if (requestCode == START_ACCOUNT_MANAGE) {
+
+            Log.i(TAG, "onActivityResult: requestCode == START_ACCOUNT_MANAGE");
+
+            Log.i(TAG, "onActivityResult: resultCode" + resultCode);
 
             if (resultCode == RESULT_FINISH_ACTIVITY) {
                 finish();
@@ -961,7 +968,6 @@ public class NavPagerActivity extends AppCompatActivity
 
     private class NavigationDividerViewHolder extends BaseNavigationViewHolder {
 
-
         NavigationDividerViewHolder(View itemView) {
             super(itemView);
         }
@@ -972,7 +978,7 @@ public class NavPagerActivity extends AppCompatActivity
         }
     }
 
-    private class NavigationAccountItemViewHolder extends BaseNavigationViewHolder {
+    class NavigationAccountItemViewHolder extends BaseNavigationViewHolder {
 
         @BindView(R.id.item_title)
         TextView itemTitle;

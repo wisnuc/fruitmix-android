@@ -573,10 +573,7 @@ public class GifTouchImageView extends GifImageView {
         // Fit content within view
         //
 
-        if (needFitImageToView)
-            fitImageToView();
-        else
-            needFitImageToView = true;
+        fitImageToView();
     }
 
     /**
