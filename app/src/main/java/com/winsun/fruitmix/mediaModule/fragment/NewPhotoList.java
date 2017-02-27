@@ -727,6 +727,8 @@ public class NewPhotoList implements Page {
                                 unSelectNumInList++;
                         }
 
+                        calcSelectedPhoto();
+
                         if (!selected && unSelectNumInList + mSelectCount > Util.MAX_PHOTO_SIZE) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
 
@@ -884,6 +886,8 @@ public class NewPhotoList implements Page {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
                             return;
                         }
+
+                        calcSelectedPhoto();
 
                         boolean selected = currentMedia.isSelected();
 
