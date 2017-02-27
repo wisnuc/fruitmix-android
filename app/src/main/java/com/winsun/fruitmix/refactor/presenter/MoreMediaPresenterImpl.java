@@ -9,6 +9,7 @@ import com.winsun.fruitmix.refactor.business.DataRepository;
 import com.winsun.fruitmix.refactor.business.callback.MediaOperationCallback;
 import com.winsun.fruitmix.refactor.contract.MoreMediaContract;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ public class MoreMediaPresenterImpl implements MoreMediaContract.MoreMediaPresen
     private DataRepository mRepository;
 
     private MediaShare mMediaShare;
-    private List<Media> mMedias;
+    private Collection<Media> mMedias;
 
     public MoreMediaPresenterImpl(DataRepository repository,String mediaShareUUID) {
         mRepository = repository;

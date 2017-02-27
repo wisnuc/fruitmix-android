@@ -1,10 +1,10 @@
-package com.winsun.fruitmix.refactor.data.loadOperationResult;
+package com.winsun.fruitmix.refactor.data.dataOperationResult;
 
 /**
  * Created by Administrator on 2017/2/8.
  */
 
-public class TokenLoadOperationResult extends LoadOperationResult {
+public class TokenLoadOperationResult extends DataOperationResult {
 
     private String token;
 

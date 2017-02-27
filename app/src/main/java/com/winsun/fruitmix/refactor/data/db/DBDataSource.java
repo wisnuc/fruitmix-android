@@ -7,23 +7,23 @@ import android.database.Cursor;
 import android.provider.MediaStore;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.refactor.business.LoadTokenParam;
 import com.winsun.fruitmix.refactor.data.DataSource;
-import com.winsun.fruitmix.refactor.data.loadOperationResult.DeviceIDLoadOperationResult;
-import com.winsun.fruitmix.refactor.data.loadOperationResult.FileSharesLoadOperationResult;
-import com.winsun.fruitmix.refactor.data.loadOperationResult.FilesLoadOperationResult;
-import com.winsun.fruitmix.refactor.data.loadOperationResult.MediaSharesLoadOperationResult;
-import com.winsun.fruitmix.refactor.data.loadOperationResult.MediasLoadOperationResult;
-import com.winsun.fruitmix.refactor.data.loadOperationResult.TokenLoadOperationResult;
-import com.winsun.fruitmix.refactor.data.loadOperationResult.UsersLoadOperationResult;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.refactor.data.dataOperationResult.DeviceIDLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.dataOperationResult.FileDownloadLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.dataOperationResult.FileSharesLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.dataOperationResult.FilesLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.dataOperationResult.MediaSharesLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.dataOperationResult.MediasLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.dataOperationResult.OperateMediaShareResult;
+import com.winsun.fruitmix.refactor.data.dataOperationResult.OperateUserResult;
+import com.winsun.fruitmix.refactor.data.dataOperationResult.TokenLoadOperationResult;
+import com.winsun.fruitmix.refactor.data.dataOperationResult.UsersLoadOperationResult;
+import com.winsun.fruitmix.refactor.model.EquipmentAlias;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.File;
@@ -53,12 +53,23 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult insertUser(User user) {
+    public OperateUserResult insertUser(String userName, String userPassword) {
         return null;
     }
 
     @Override
-    public OperationResult insertMediaShare(MediaShare mediaShare) {
+    public OperationResult insertUsers(List<User> users) {
+        return null;
+    }
+
+
+    @Override
+    public OperateMediaShareResult insertRemoteMediaShare(MediaShare mediaShare) {
+        return null;
+    }
+
+    @Override
+    public OperationResult insertRemoteMediaShares(Collection<MediaShare> mediaShares) {
         return null;
     }
 
@@ -73,17 +84,12 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult modifyMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
+    public OperationResult modifyRemoteMediaShare(String requestData, MediaShare modifiedMediaShare) {
         return null;
     }
 
     @Override
-    public OperationResult modifyMediaInMediaShare(MediaShare originalMediaShare, MediaShare modifiedMediaShare) {
-        return null;
-    }
-
-    @Override
-    public OperationResult deleteMediaShare(MediaShare mediaShare) {
+    public OperationResult deleteRemoteMediaShare(MediaShare mediaShare) {
         return null;
     }
 
@@ -98,6 +104,11 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
+    public User loadUser(String userUUID) {
+        return null;
+    }
+
+    @Override
     public MediasLoadOperationResult loadAllRemoteMedias() {
         return null;
     }
@@ -108,17 +119,32 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public MediaSharesLoadOperationResult loadMediaShares() {
+    public Collection<String> loadLocalMediaUUIDs() {
         return null;
     }
 
     @Override
-    public FilesLoadOperationResult loadFiles() {
+    public MediaSharesLoadOperationResult loadAllMediaShares() {
         return null;
     }
 
     @Override
-    public FileSharesLoadOperationResult loadFileShares() {
+    public FilesLoadOperationResult loadRemoteFiles(String folderUUID) {
+        return null;
+    }
+
+    @Override
+    public FileDownloadLoadOperationResult loadDownloadedFiles() {
+        return null;
+    }
+
+    @Override
+    public OperationResult deleteDownloadedFile(List<String> fileUUIDs) {
+        return null;
+    }
+
+    @Override
+    public FileSharesLoadOperationResult loadRemoteFileRootShares() {
         return null;
     }
 
@@ -138,6 +164,7 @@ public class DBDataSource implements DataSource {
         return null;
     }
 
+    @Override
     public MediasLoadOperationResult loadLocalMediaInCamera(Collection<String> loadedMediaUUIDs) {
 
         MediasLoadOperationResult result = new MediasLoadOperationResult();
@@ -220,27 +247,42 @@ public class DBDataSource implements DataSource {
 
     }
 
+    @Override
+    public Media loadMedia(String mediaKey) {
+        return null;
+    }
 
+    @Override
+    public void updateLocalMediasUploadedFalse() {
+        mDBUtils.updateLocalMediasUploadedFalse();
+    }
+
+    @Override
+    public MediaShare loadRemoteMediaShare(String mediaShareUUID) {
+        return null;
+    }
+
+    @Override
     public LoadTokenParam getLoadTokenParam() {
 
         return new LoadTokenParam(mSharedPreferences.getString(Util.GATEWAY, null), mSharedPreferences.getString(Util.USER_UUID, ""), mSharedPreferences.getString(Util.PASSWORD, ""));
 
     }
 
-    public void logout() {
-
+    @Override
+    public void deleteToken() {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString(Util.JWT, null);
         editor.apply();
-
-        mDBUtils.updateLocalMediasUploadedFalse();
     }
 
+    @Override
     public boolean getShowAlbumTipsValue() {
 
         return mSharedPreferences.getBoolean(Util.SHOW_ALBUM_TIPS, true);
     }
 
+    @Override
     public void saveShowAlbumTipsValue(boolean value) {
 
         SharedPreferences.Editor editor = mSharedPreferences.edit();
@@ -248,16 +290,28 @@ public class DBDataSource implements DataSource {
         editor.apply();
     }
 
+    @Override
     public boolean getShowPhotoReturnTipsValue() {
 
         return mSharedPreferences.getBoolean(Util.SHOW_PHOTO_RETURN_TIPS, true);
     }
 
-    public void setShowPhotoReturnTipsValue(boolean value) {
+    @Override
+    public void saveShowPhotoReturnTipsValue(boolean value) {
 
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putBoolean(Util.SHOW_PHOTO_RETURN_TIPS, value);
         editor.apply();
+    }
+
+    @Override
+    public List<EquipmentAlias> loadEquipmentAlias(String url) {
+        return null;
+    }
+
+    @Override
+    public List<User> loadUserByLoginApi(String url) {
+        return null;
     }
 
 }

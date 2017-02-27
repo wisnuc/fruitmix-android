@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.refactor.data.loadOperationResult;
+package com.winsun.fruitmix.refactor.data.dataOperationResult;
 
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 
@@ -6,7 +6,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
  * Created by Administrator on 2017/2/8.
  */
 
-public class LoadOperationResult {
+public class DataOperationResult {
 
     private OperationResult operationResult;
 

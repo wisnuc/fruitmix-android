@@ -3,6 +3,7 @@ package com.winsun.fruitmix.refactor.business.callback;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ public interface FileOperationCallback {
 
     interface LoadFileOperationCallback{
 
-        void onLoadSucceed(OperationResult result, List<AbstractRemoteFile> files);
+        void onLoadSucceed(OperationResult result, Collection<AbstractRemoteFile> files);
 
         void onLoadFail(OperationResult result);
 

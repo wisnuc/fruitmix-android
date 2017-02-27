@@ -12,6 +12,7 @@ import com.winsun.fruitmix.refactor.business.callback.MediaShareOperationCallbac
 import com.winsun.fruitmix.refactor.contract.AlbumFragmentContract;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -178,7 +179,7 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
     private void loadMediaShares() {
         mRepository.loadMediaShares(new MediaShareOperationCallback.LoadMediaSharesCallback() {
             @Override
-            public void onLoadSucceed(OperationResult operationResult, List<MediaShare> mediaShares) {
+            public void onLoadSucceed(OperationResult operationResult, Collection<MediaShare> mediaShares) {
 
                 mAlbumList.clear();
 

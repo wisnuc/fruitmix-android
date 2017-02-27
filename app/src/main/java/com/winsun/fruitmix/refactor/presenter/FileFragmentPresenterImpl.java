@@ -31,6 +31,7 @@ import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -164,7 +165,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
     private void loadCurrentFolder(String folderUUID) {
         mRepository.loadRemoteFolderContent(folderUUID, new FileOperationCallback.LoadFileOperationCallback() {
             @Override
-            public void onLoadSucceed(OperationResult result, List<AbstractRemoteFile> files) {
+            public void onLoadSucceed(OperationResult result, Collection<AbstractRemoteFile> files) {
 
                 remoteFileLoaded = true;
 

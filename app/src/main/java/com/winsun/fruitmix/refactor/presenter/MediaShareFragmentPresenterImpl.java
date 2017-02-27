@@ -14,6 +14,7 @@ import com.winsun.fruitmix.refactor.contract.MediaShareFragmentContract;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -151,13 +152,18 @@ public class MediaShareFragmentPresenterImpl implements MediaShareFragmentContra
     @Override
     public void loadMediaShares() {
 
+        String currentUserUUID = mRepository.loadCurrentLoginUserFromMemory().getUuid();
+
         mMediaShares.clear();
 
         mRepository.loadMediaShares(new MediaShareOperationCallback.LoadMediaSharesCallback() {
             @Override
-            public void onLoadSucceed(OperationResult operationResult, List<MediaShare> mediaShares) {
+            public void onLoadSucceed(OperationResult operationResult, Collection<MediaShare> mediaShares) {
 
                 for (MediaShare mediaShare : mediaShares) {
+
+
+
                     if (mRepository.isMediaSharePublic(mediaShare)) {
                         mMediaShares.add(mediaShare);
                     }

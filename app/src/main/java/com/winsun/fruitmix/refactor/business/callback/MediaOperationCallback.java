@@ -4,6 +4,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.model.MediaFragmentDataLoader;
 
+import java.util.Collection;
 import java.util.List;
 
 /**

@@ -9,6 +9,7 @@ import com.winsun.fruitmix.refactor.business.callback.UserOperationCallback;
 import com.winsun.fruitmix.refactor.contract.CreateUserContract;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**

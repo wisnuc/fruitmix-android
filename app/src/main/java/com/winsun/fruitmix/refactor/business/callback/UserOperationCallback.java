@@ -3,6 +3,7 @@ package com.winsun.fruitmix.refactor.business.callback;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 
+import java.util.Collection;
 import java.util.List;
 
 /**

@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.refactor.data.loadOperationResult;
+package com.winsun.fruitmix.refactor.data.dataOperationResult;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
 
@@ -8,7 +8,7 @@ import java.util.List;
  * Created by Administrator on 2017/2/8.
  */
 
-public class MediasLoadOperationResult extends LoadOperationResult {
+public class MediasLoadOperationResult extends DataOperationResult {
 
     private List<Media> medias;
 

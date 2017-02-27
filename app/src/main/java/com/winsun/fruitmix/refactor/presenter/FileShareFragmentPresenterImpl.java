@@ -14,6 +14,7 @@ import com.winsun.fruitmix.refactor.contract.FileMainFragmentContract;
 import com.winsun.fruitmix.refactor.contract.FileShareFragmentContract;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -92,7 +93,7 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
 
             mRepository.loadRemoteFileShare(new FileShareOperationCallback.LoadFileShareCallback() {
                 @Override
-                public void onLoadSucceed(OperationResult result, List<AbstractRemoteFile> files) {
+                public void onLoadSucceed(OperationResult result, Collection<AbstractRemoteFile> files) {
 
                     remoteFileShareLoaded = true;
 
@@ -133,7 +134,7 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
 
             mRepository.loadRemoteFileShare(new FileShareOperationCallback.LoadFileShareCallback() {
                 @Override
-                public void onLoadSucceed(OperationResult result, List<AbstractRemoteFile> files) {
+                public void onLoadSucceed(OperationResult result, Collection<AbstractRemoteFile> files) {
 
                     remoteFileShareLoaded = true;
 
@@ -151,7 +152,7 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
 
             mRepository.loadRemoteFolderContent(currentFolderUUID, new FileOperationCallback.LoadFileOperationCallback() {
                 @Override
-                public void onLoadSucceed(OperationResult result, List<AbstractRemoteFile> files) {
+                public void onLoadSucceed(OperationResult result, Collection<AbstractRemoteFile> files) {
                     handleLoadSucceed(files);
                 }
 
@@ -168,7 +169,7 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
 
     }
 
-    private void handleLoadSucceed(List<AbstractRemoteFile> files) {
+    private void handleLoadSucceed(Collection<AbstractRemoteFile> files) {
 
         mView.dismissLoadingUI();
 
@@ -237,7 +238,7 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
 
         mRepository.loadRemoteFolderContent(abstractRemoteFile.getUuid(), new FileOperationCallback.LoadFileOperationCallback() {
             @Override
-            public void onLoadSucceed(OperationResult result, List<AbstractRemoteFile> files) {
+            public void onLoadSucceed(OperationResult result, Collection<AbstractRemoteFile> files) {
 
                 handleLoadSucceed(files);
 

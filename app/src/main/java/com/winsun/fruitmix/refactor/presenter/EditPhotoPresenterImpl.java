@@ -12,6 +12,7 @@ import com.winsun.fruitmix.refactor.business.callback.MediaShareOperationCallbac
 import com.winsun.fruitmix.refactor.contract.EditPhotoContract;
 import com.winsun.fruitmix.util.Util;
 
+import java.util.Collection;
 import java.util.List;
 
 /**

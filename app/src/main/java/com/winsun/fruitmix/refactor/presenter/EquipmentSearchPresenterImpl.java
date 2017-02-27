@@ -19,6 +19,7 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import rx.Subscription;
@@ -194,7 +195,7 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
 
         mRepository.loadEquipmentAlias(url, new LoadEquipmentAliasCallback() {
             @Override
-            public void onLoadSucceed(OperationResult result, List<EquipmentAlias> equipmentAliases) {
+            public void onLoadSucceed(OperationResult result, Collection<EquipmentAlias> equipmentAliases) {
 
                 List<String> hosts = equipment.getHosts();
 

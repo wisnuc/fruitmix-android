@@ -1,10 +1,10 @@
-package com.winsun.fruitmix.refactor.data.loadOperationResult;
+package com.winsun.fruitmix.refactor.data.dataOperationResult;
 
 /**
  * Created by Administrator on 2017/2/8.
  */
 
-public class DeviceIDLoadOperationResult extends LoadOperationResult {
+public class DeviceIDLoadOperationResult extends DataOperationResult {
 
     private String deviceID;
 

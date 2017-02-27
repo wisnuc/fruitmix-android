@@ -3,6 +3,7 @@ package com.winsun.fruitmix.refactor.business.callback;
 import com.winsun.fruitmix.fileModule.download.DownloadState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ public interface FileDownloadOperationCallback {
 
     interface LoadDownloadedFilesCallback{
 
-        void onLoaded(List<FileDownloadItem> fileDownloadItems);
+        void onLoaded(Collection<FileDownloadItem> fileDownloadItems);
 
     }
 

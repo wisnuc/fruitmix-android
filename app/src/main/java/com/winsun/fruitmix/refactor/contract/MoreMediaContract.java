@@ -4,6 +4,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
 
+import java.util.Collection;
 import java.util.List;
 
 /**

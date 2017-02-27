@@ -80,39 +80,7 @@ public class MediaFragmentDataLoader {
         return mAdapterItemTotalCount;
     }
 
-    public interface OnPhotoListDataListener {
-        void onDataLoadFinished();
-    }
-
-    public void retrieveData(final OnPhotoListDataListener listener) {
-
-        if (!needRefreshData) {
-            listener.onDataLoadFinished();
-            return;
-        }
-
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-
-                reloadData();
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-
-                needRefreshData = false;
-
-                listener.onDataLoadFinished();
-            }
-        }.execute();
-
-    }
-
-    private void reloadData() {
+    public void reloadData(Collection<Media> medias) {
 
         String date;
         List<Media> mediaList;
@@ -123,15 +91,9 @@ public class MediaFragmentDataLoader {
         mMapKeyIsPhotoPositionValueIsPhotoDate.clear();
         mMapKeyIsPhotoPositionValueIsPhoto.clear();
 
-        Collection<Media> medias = LocalCache.LocalMediaMapKeyIsThumb.values();
-        Map<String, Media> remoteMediaMap = new HashMap<>(LocalCache.RemoteMediaMapKeyIsUUID);
-
         Log.d(TAG, "reloadData: before load local key is date value is photo list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         for (Media media : medias) {
-
-            String mediaUUID = media.getUuid();
-            remoteMediaMap.remove(mediaUUID);
 
             date = media.getTime().substring(0, 10);
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
@@ -143,31 +105,6 @@ public class MediaFragmentDataLoader {
             }
 
             media.setLocal(true);
-            media.setDate(date);
-            media.setSelected(false);
-
-            mediaList.add(media);
-
-        }
-
-        Log.d(TAG, "reloadData: after load local key is date value is photo list" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-
-        medias = remoteMediaMap.values();
-
-        Log.d(TAG, "reloadData: remote media length:" + medias.size());
-
-        for (Media media : medias) {
-
-            date = media.getTime().substring(0, 10);
-            if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
-                mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
-            } else {
-                mPhotoDateGroups.add(date);
-                mediaList = new ArrayList<>();
-                mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
-            }
-
-            media.setLocal(false);
             media.setDate(date);
             media.setSelected(false);
 
@@ -191,7 +128,7 @@ public class MediaFragmentDataLoader {
         Log.d(TAG, "reloadData: after calc photo position number" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
     }
 
-    public void calcPhotoPositionNumber() {
+    private void calcPhotoPositionNumber() {
 
         int titlePosition = 0;
         int photoListSize;

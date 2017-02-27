@@ -3,6 +3,7 @@ package com.winsun.fruitmix.refactor.business.callback;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ public interface MediaShareOperationCallback {
 
     interface LoadMediaSharesCallback{
 
-        void onLoadSucceed(OperationResult operationResult, List<MediaShare> mediaShares);
+        void onLoadSucceed(OperationResult operationResult, Collection<MediaShare> mediaShares);
 
         void onLoadFail(OperationResult operationResult);
 

@@ -23,6 +23,7 @@ import com.winsun.fruitmix.refactor.contract.FileMainFragmentContract;
 import com.winsun.fruitmix.util.FileUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -189,7 +190,7 @@ public class FileDownloadFragmentPresenterImpl implements FileDownloadFragmentCo
 
         mRepository.loadDownloadedFiles(new FileDownloadOperationCallback.LoadDownloadedFilesCallback() {
             @Override
-            public void onLoaded(List<FileDownloadItem> fileDownloadItems) {
+            public void onLoaded(Collection<FileDownloadItem> fileDownloadItems) {
 
                 filterFileDownloadItems(fileDownloadItems);
 
@@ -200,7 +201,7 @@ public class FileDownloadFragmentPresenterImpl implements FileDownloadFragmentCo
 
     }
 
-    private void filterFileDownloadItems(List<FileDownloadItem> fileDownloadItems) {
+    private void filterFileDownloadItems(Collection<FileDownloadItem> fileDownloadItems) {
 
         downloadingItems.clear();
         downloadedItems.clear();

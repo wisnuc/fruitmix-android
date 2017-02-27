@@ -20,6 +20,7 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -362,7 +363,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
         });
     }
 
-    private void showMedias(final List<Media> medias) {
+    private void showMedias(final Collection<Media> medias) {
         mRepository.handleMediasForMediaFragment(medias, new MediaOperationCallback.HandleMediaForMediaFragmentCallback() {
             @Override
             public void onOperateFinished(MediaFragmentDataLoader loader) {
