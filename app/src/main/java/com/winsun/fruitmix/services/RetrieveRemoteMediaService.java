@@ -107,7 +107,7 @@ public class RetrieveRemoteMediaService extends IntentService {
 
             Log.d(TAG, "handleActionRetrieveRemoteMedia: after delete all remote media" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-            long result = dbUtils.insertRemoteMedias(mediaConcurrentMap);
+            long result = dbUtils.insertRemoteMedias(mediaConcurrentMap.values());
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: insert all remote media result:" + result + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 

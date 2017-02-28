@@ -5,6 +5,7 @@ import android.content.Intent;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.business.DataRepository;
 import com.winsun.fruitmix.refactor.business.LoadTokenParam;
+import com.winsun.fruitmix.refactor.business.callback.LoadDeviceIdOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.LoadTokenOperationCallback;
 import com.winsun.fruitmix.refactor.contract.LoginContract;
 import com.winsun.fruitmix.util.Util;
@@ -50,9 +51,26 @@ public class LoginPresenterImpl implements LoginContract.LoginPresenter {
         mRepository.loadRemoteToken(param, new LoadTokenOperationCallback.LoadTokenCallback() {
             @Override
             public void onLoadSucceed(OperationResult result, String token) {
-                mView.dismissDialog();
 
-                mView.handleLoginSucceed();
+                mRepository.loadDeviceID(new LoadDeviceIdOperationCallback.LoadDeviceIDCallback() {
+                    @Override
+                    public void onLoadSucceed(OperationResult result, String deviceID) {
+
+                        loadData();
+
+                        mView.dismissDialog();
+
+                        mView.handleLoginSucceed();
+                    }
+
+                    @Override
+                    public void onLoadFail(OperationResult result) {
+                        mView.dismissDialog();
+
+                        mView.handleLoginFail(result);
+                    }
+                });
+
             }
 
             @Override
@@ -62,6 +80,12 @@ public class LoginPresenterImpl implements LoginContract.LoginPresenter {
                 mView.handleLoginFail(result);
             }
         });
+    }
+
+    private void loadData() {
+        mRepository.loadUsers(null);
+        mRepository.loadMedias(null);
+        mRepository.loadMediaShares(null);
     }
 
     @Override

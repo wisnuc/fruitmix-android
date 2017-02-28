@@ -67,7 +67,7 @@ public class RetrieveLocalMediaShareService extends IntentService {
         ConcurrentMap<String, MediaShare> mediaShareConcurrentMap;
         DBUtils dbUtils = DBUtils.getInstance(this);
 
-        mediaShares = dbUtils.getAllLocalShare();
+        mediaShares = dbUtils.getAllLocalMediaShare();
 
         mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
 

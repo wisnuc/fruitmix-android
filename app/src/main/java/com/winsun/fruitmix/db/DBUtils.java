@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
-import android.support.v4.util.ArrayMap;
 import android.util.Log;
 
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
@@ -28,7 +27,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -389,7 +387,7 @@ public class DBUtils {
 
         openWritableDB();
 
-        long returnValue = 0;
+        long returnValue;
 
         returnValue = database.insert(DBHelper.DOWNLOADED_FILE_TABLE_NAME, null, createDownloadedFileContentValues(fileDownloadItem));
 
@@ -473,9 +471,9 @@ public class DBUtils {
         return returnValue;
     }
 
-    public long insertRemoteMedias(ConcurrentMap<String, Media> medias) {
+    public long insertRemoteMedias(Collection<Media> medias) {
 
-        return insertMedias(DBHelper.REMOTE_MEDIA_TABLE_NAME, medias.values());
+        return insertMedias(DBHelper.REMOTE_MEDIA_TABLE_NAME, medias);
 
     }
 
@@ -583,7 +581,7 @@ public class DBUtils {
         sqLiteStatement.bindString(1, mediaShareContentUUID);
     }
 
-    private String createDeleteShareContentSql(String dbName) {
+    private String createDeleteMediaShareContentSql(String dbName) {
         return "delete from " + dbName + " where " +
                 DBHelper.SHARE_CONTENT_KEY_SHARE_UUID + " = ?";
     }
@@ -592,20 +590,20 @@ public class DBUtils {
         sqLiteStatement.bindString(1, mediaShareUUID);
     }
 
-    private String createDeleteShareSql(String dbName) {
+    private String createDeleteMediaShareSql(String dbName) {
         return "delete from " + dbName + " where " +
                 DBHelper.SHARE_KEY_UUID + " = ?";
     }
 
-    private long deleteShareByUUID(String shareDBName, String shareContentDBName, String[] shareUUIDs) {
+    private long deleteMediaShareByUUID(String shareDBName, String shareContentDBName, String[] shareUUIDs) {
 
         long returnValue = 0L;
 
         try {
             openWritableDB();
 
-            String deleteShareContentSql = createDeleteShareContentSql(shareContentDBName);
-            String deleteShareSql = createDeleteShareSql(shareDBName);
+            String deleteShareContentSql = createDeleteMediaShareContentSql(shareContentDBName);
+            String deleteShareSql = createDeleteMediaShareSql(shareDBName);
 
             SQLiteStatement deleteShareContentStatement = database.compileStatement(deleteShareContentSql);
             SQLiteStatement deleteShareStatement = database.compileStatement(deleteShareSql);
@@ -637,18 +635,18 @@ public class DBUtils {
         return returnValue;
     }
 
-    public long deleteLocalShareByUUIDs(String[] shareUUIDs) {
+    public long deleteLocalMediaShareByUUIDs(String[] shareUUIDs) {
 
-        return deleteShareByUUID(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, shareUUIDs);
+        return deleteMediaShareByUUID(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, shareUUIDs);
     }
 
-    public long deleteRemoteShareByUUIDs(String[] shareUUIDs) {
+    public long deleteRemoteMediaShareByUUIDs(String[] shareUUIDs) {
 
-        return deleteShareByUUID(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, shareUUIDs);
+        return deleteMediaShareByUUID(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, shareUUIDs);
 
     }
 
-    private long deleteAllShare(String shareDBName, String shareContentDBName) {
+    private long deleteAllMediaShare(String shareDBName, String shareContentDBName) {
 
 
         long returnValue = 0L;
@@ -675,14 +673,14 @@ public class DBUtils {
         return returnValue;
     }
 
-    public long deleteAllLocalShare() {
+    public long deleteAllLocalMediaShare() {
 
-        return deleteAllShare(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME);
+        return deleteAllMediaShare(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME);
     }
 
-    public long deleteAllRemoteShare() {
+    public long deleteAllRemoteMediaShare() {
 
-        return deleteAllShare(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
+        return deleteAllMediaShare(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
     }
 
     public long deleteDownloadedFileByUUID(String fileUUID) {
@@ -796,7 +794,7 @@ public class DBUtils {
         return getImageCommentByUUid(DBHelper.REMOTE_COMMENT_TABLE_NAME, uuid);
     }
 
-    private List<MediaShare> getAllShare(String shareDBName, String shareContentDBName) {
+    private List<MediaShare> getAllMediaShare(String shareDBName, String shareContentDBName) {
         openReadableDB();
 
         List<MediaShare> list = new ArrayList<>();
@@ -818,18 +816,18 @@ public class DBUtils {
         return list;
     }
 
-    public List<MediaShare> getAllLocalShare() {
+    public List<MediaShare> getAllLocalMediaShare() {
 
-        return getAllShare(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME);
+        return getAllMediaShare(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME);
     }
 
-    public List<MediaShare> getAllRemoteShare() {
+    public List<MediaShare> getAllRemoteMediaShare() {
 
-        return getAllShare(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
+        return getAllMediaShare(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
 
     }
 
-    private MediaShare getShareByUuid(String shareDBName, String shareContentDBName, String uuid) {
+    private MediaShare getMediaShareByUuid(String shareDBName, String shareContentDBName, String uuid) {
 
         openReadableDB();
 
@@ -848,15 +846,15 @@ public class DBUtils {
         return mediaShare;
     }
 
-    public MediaShare getLocalShareByUuid(String uuid) {
+    public MediaShare getLocalMediaShareByUuid(String uuid) {
 
-        return getShareByUuid(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, uuid);
+        return getMediaShareByUuid(DBHelper.LOCAL_SHARE_TABLE_NAME, DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, uuid);
 
     }
 
-    public MediaShare getRemoteShareByUuid(String uuid) {
+    public MediaShare getRemoteMediaShareByUuid(String uuid) {
 
-        return getShareByUuid(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, uuid);
+        return getMediaShareByUuid(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, uuid);
 
     }
 
@@ -1034,8 +1032,8 @@ public class DBUtils {
         try {
             openWritableDB();
 
-            String deleteShareContentSql = createDeleteShareContentSql(shareContentDBName);
-            String deleteShareSql = createDeleteShareSql(shareDBName);
+            String deleteShareContentSql = createDeleteMediaShareContentSql(shareContentDBName);
+            String deleteShareSql = createDeleteMediaShareSql(shareDBName);
             SQLiteStatement deleteShareContentStatement = database.compileStatement(deleteShareContentSql);
             SQLiteStatement deleteShareStatement = database.compileStatement(deleteShareSql);
 

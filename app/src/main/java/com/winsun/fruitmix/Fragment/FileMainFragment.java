@@ -114,7 +114,6 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
             }
         });
 
-
         return view;
     }
 

@@ -85,7 +85,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
         DBUtils dbUtils = DBUtils.getInstance(this);
 
         if (LocalCache.RemoteMediaShareMapKeyIsUUID.isEmpty()) {
-            remoteMediaSharesFromDB = dbUtils.getAllRemoteShare();
+            remoteMediaSharesFromDB = dbUtils.getAllRemoteMediaShare();
             mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(remoteMediaSharesFromDB);
 
             Log.i(TAG, "handleActionRetrieveRemoteMediaShare: retrieve remote media share from db");
@@ -233,7 +233,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
                 Util.refreshMediaShareDelayTime = Util.DEFAULT_REFRESH_MEDIA_SHARE_DELAY_TIME;
             }
 
-            dbUtils.deleteAllRemoteShare();
+            dbUtils.deleteAllRemoteMediaShare();
 
             Log.d(TAG, "handleActionRetrieveRemoteMediaShare: delete all remote share in db");
 
@@ -256,7 +256,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
             if (loadMediaShareInDBWhenExceptionOccur) {
 
-                mediaShares = dbUtils.getAllRemoteShare();
+                mediaShares = dbUtils.getAllRemoteMediaShare();
 
                 mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
 

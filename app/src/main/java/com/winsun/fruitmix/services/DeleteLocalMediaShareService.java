@@ -73,7 +73,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
             DBUtils dbUtils = DBUtils.getInstance(this);
 
-            long value = dbUtils.deleteLocalShareByUUIDs(new String[]{mediaShare.getUuid()});
+            long value = dbUtils.deleteLocalMediaShareByUUIDs(new String[]{mediaShare.getUuid()});
 
             if (value > 0) {
 

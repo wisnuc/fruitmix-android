@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.refactor.data;
 
+import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
@@ -27,22 +28,26 @@ import java.util.List;
 public interface DataSource {
 
     //media share
-    OperateMediaShareResult insertRemoteMediaShare(MediaShare mediaShare);
+    OperateMediaShareResult insertRemoteMediaShare(String url,String token,MediaShare mediaShare);
 
     OperationResult insertRemoteMediaShares(Collection<MediaShare> mediaShares);
 
-    OperationResult modifyRemoteMediaShare(String requestData, MediaShare modifiedMediaShare);
+    OperationResult modifyRemoteMediaShare(String url,String token,String requestData, MediaShare modifiedMediaShare);
 
-    OperationResult deleteRemoteMediaShare(MediaShare mediaShare);
+    OperationResult deleteRemoteMediaShare(String url,String token,MediaShare mediaShare);
+
+    OperationResult deleteAllRemoteMediaShare();
 
     MediaShare loadRemoteMediaShare(String mediaShareUUID);
 
-    MediaSharesLoadOperationResult loadAllMediaShares();
+    MediaSharesLoadOperationResult loadAllRemoteMediaShares();
 
     //media
     OperationResult insertLocalMedias(List<Media> medias);
 
     OperationResult insertRemoteMedias(List<Media> medias);
+
+    OperationResult deleteAllRemoteMedia();
 
     MediasLoadOperationResult loadAllRemoteMedias();
 
@@ -58,9 +63,13 @@ public interface DataSource {
 
     //user
 
-    OperateUserResult insertUser(String userName, String userPassword);
+    OperateUserResult insertUser(String url,String token,String userName, String userPassword);
 
     OperationResult insertUsers(List<User> users);
+
+    OperationResult insertCurrentLoginUser(User user);
+
+    OperationResult deleteAllRemoteUsers();
 
     UsersLoadOperationResult loadUsers();
 
@@ -68,7 +77,7 @@ public interface DataSource {
 
     User loadCurrentLoginUser();
 
-    List<User> loadUserByLoginApi(String url);
+    List<User> loadUserByLoginApi(String token,String url);
 
     //file
     FilesLoadOperationResult loadRemoteFiles(String folderUUID);
@@ -77,9 +86,11 @@ public interface DataSource {
     FileSharesLoadOperationResult loadRemoteFileRootShares();
 
     //file download
-    FileDownloadLoadOperationResult loadDownloadedFiles();
+    FileDownloadLoadOperationResult loadDownloadedFilesRecord();
 
-    OperationResult deleteDownloadedFile(List<String> fileUUIDs);
+    OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs);
+
+    OperationResult insertDownloadedFileRecord(FileDownloadItem fileDownloadItem);
 
     //token
     TokenLoadOperationResult loadToken(LoadTokenParam param);
@@ -88,8 +99,14 @@ public interface DataSource {
 
     void deleteToken();
 
+    OperationResult insertToken(String token);
+
     //device id
     DeviceIDLoadOperationResult loadDeviceID();
+
+    OperationResult insertDeviceID(String deviceID);
+
+    void deleteDeviceID();
 
     //others
     boolean getShowAlbumTipsValue();
@@ -100,6 +117,10 @@ public interface DataSource {
 
     void saveShowPhotoReturnTipsValue(boolean value);
 
-    List<EquipmentAlias> loadEquipmentAlias(String url);
+    List<EquipmentAlias> loadEquipmentAlias(String token,String url);
+
+    String loadGateway();
+
+    String loadPort();
 
 }

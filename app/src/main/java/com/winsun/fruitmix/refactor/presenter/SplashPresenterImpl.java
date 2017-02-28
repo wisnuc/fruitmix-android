@@ -6,6 +6,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.refactor.business.callback.LoadDeviceIdOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.LoadTokenOperationCallback;
 import com.winsun.fruitmix.refactor.contract.SplashContract;
 import com.winsun.fruitmix.refactor.business.DataRepository;
@@ -61,7 +62,7 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
 
         final String tokenInDB = mRepository.loadTokenInDB();
 
-        if (tokenInDB.isEmpty()) {
+        if (tokenInDB == null) {
             mView.emptyCacheToken();
         } else {
 
@@ -71,15 +72,44 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
             mRepository.loadRemoteToken(mRepository.getLoadTokenParamInDB(), new LoadTokenOperationCallback.LoadTokenCallback() {
                 @Override
                 public void onLoadSucceed(OperationResult result, String token) {
-                    loadData();
+
+                    mRepository.insertTokenToDBAndMemory(token);
+
+                    loadDeviceID();
                 }
 
                 @Override
                 public void onLoadFail(OperationResult result) {
+
+                    mRepository.insertTokenToDBAndMemory(tokenInDB);
+
                     loadData();
                 }
             });
         }
+
+    }
+
+    private void loadDeviceID() {
+
+        mRepository.loadDeviceID(new LoadDeviceIdOperationCallback.LoadDeviceIDCallback() {
+            @Override
+            public void onLoadSucceed(OperationResult result, String deviceID) {
+
+                loadData();
+
+            }
+
+            @Override
+            public void onLoadFail(OperationResult result) {
+
+                mRepository.insertDeviceIDToDBAndMemory(mRepository.loadDeviceIDInDB());
+
+                loadData();
+
+            }
+        });
+
 
     }
 

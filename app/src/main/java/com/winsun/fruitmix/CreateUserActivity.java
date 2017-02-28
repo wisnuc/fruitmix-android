@@ -14,6 +14,8 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.refactor.common.BaseActivity;
+import com.winsun.fruitmix.refactor.contract.CreateUserContract;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -29,7 +31,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class CreateUserActivity extends AppCompatActivity implements View.OnClickListener {
+public class CreateUserActivity extends BaseActivity implements View.OnClickListener,CreateUserContract.CreateUserView {
+
+    //TODO refactor app:using mvp
 
     @BindView(R.id.back)
     ImageView back;
@@ -190,4 +194,58 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
 
     }
 
+    @Override
+    public void showCorrectUserNameFormat() {
+        userNameInputLayout.setErrorEnabled(false);
+    }
+
+    @Override
+    public void showCorrectPasswordFormat() {
+        confirmPasswordLayout.setErrorEnabled(false);
+    }
+
+    @Override
+    public void showEmptyUserName() {
+        userNameInputLayout.setErrorEnabled(true);
+        userNameInputLayout.setError(getString(R.string.empty_username));
+    }
+
+    @Override
+    public void showNotUniqueUserName() {
+        userNameInputLayout.setErrorEnabled(true);
+        userNameInputLayout.setError(getString(R.string.username_not_unique));
+    }
+
+    @Override
+    public void showNotSamePassword() {
+        confirmPasswordLayout.setErrorEnabled(true);
+        confirmPasswordLayout.setError(getString(R.string.not_same_password));
+    }
+
+    @Override
+    public void handleCreateUserFail(OperationResult result) {
+        Toast.makeText(this, result.getResultMessage(this), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void handleCreateUserSucceed() {
+        setResult(RESULT_OK);
+
+        finish();
+    }
+
+    @Override
+    public void finishActivity() {
+        finish();
+    }
+
+    @Override
+    public void hideSoftInput() {
+        Util.hideSoftInput(this);
+    }
+
+    @Override
+    public boolean isNetworkAlive() {
+        return Util.getNetworkState(this);
+    }
 }

@@ -3,12 +3,16 @@ package com.winsun.fruitmix.refactor.business;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.fileModule.download.FileDownloadState;
+import com.winsun.fruitmix.fileModule.interfaces.FileDownloadUploadInterface;
 import com.winsun.fruitmix.gif.GifLoader;
+import com.winsun.fruitmix.http.retrofit.RetrofitInstance;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
@@ -20,6 +24,7 @@ import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.refactor.business.callback.FileDownloadOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.FileOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.FileShareOperationCallback;
+import com.winsun.fruitmix.refactor.business.callback.LoadDeviceIdOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.LoadEquipmentAliasCallback;
 import com.winsun.fruitmix.refactor.business.callback.LoadTokenOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.MediaOperationCallback;
@@ -27,6 +32,7 @@ import com.winsun.fruitmix.refactor.business.callback.MediaShareOperationCallbac
 import com.winsun.fruitmix.refactor.business.callback.OperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.UserOperationCallback;
 import com.winsun.fruitmix.refactor.data.DataSource;
+import com.winsun.fruitmix.refactor.data.dataOperationResult.DeviceIDLoadOperationResult;
 import com.winsun.fruitmix.refactor.data.dataOperationResult.FileDownloadLoadOperationResult;
 import com.winsun.fruitmix.refactor.data.dataOperationResult.FileSharesLoadOperationResult;
 import com.winsun.fruitmix.refactor.data.dataOperationResult.FilesLoadOperationResult;
@@ -40,9 +46,11 @@ import com.winsun.fruitmix.refactor.model.EquipmentAlias;
 import com.winsun.fruitmix.refactor.model.MediaFragmentDataLoader;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,6 +60,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+
 /**
  * Created by Administrator on 2017/2/6.
  */
@@ -59,6 +70,8 @@ import java.util.Set;
 public class DataRepository {
 
     private static DataRepository INSTANCE;
+
+    public static final String TAG = DataRepository.class.getSimpleName();
 
     private DataSource mMemoryDataSource;
     private DataSource mDBDataSource;
@@ -73,6 +86,7 @@ public class DataRepository {
     private boolean remoteMediaShareLoaded = false;
     private boolean remoteMediaLoaded = false;
     private boolean localMediaLoaded = false;
+    private boolean remoteUserLoaded = false;
 
     private UserOperationCallback.LoadCurrentUserCallback mLoadCurrentUserCallback;
 
@@ -102,20 +116,62 @@ public class DataRepository {
         instance = null;
     }
 
+    public void insertTokenToDBAndMemory(String token) {
+
+        mDBDataSource.insertToken(token);
+        mMemoryDataSource.insertToken(token);
+
+    }
+
+    public void insertDeviceIDToDBAndMemory(String deviceID) {
+        mDBDataSource.insertDeviceID(deviceID);
+        mMemoryDataSource.insertDeviceID(deviceID);
+    }
+
     public String loadTokenInDB() {
         return mDBDataSource.loadToken(null).getToken();
+    }
+
+    public String loadDeviceIDInDB() {
+        return mDBDataSource.loadDeviceID().getDeviceID();
     }
 
     public void loadRemoteToken(LoadTokenParam param, LoadTokenOperationCallback.LoadTokenCallback callback) {
 
         TokenLoadOperationResult result = mServerDataSource.loadToken(param);
+
         if (result.getOperationResult().getOperationResultType().equals(OperationResultType.SUCCEED)) {
-            callback.onLoadSucceed(result.getOperationResult(), result.getToken());
+
+            String token = result.getToken();
+
+            callback.onLoadSucceed(result.getOperationResult(), token);
         } else {
+
             callback.onLoadFail(result.getOperationResult());
         }
 
     }
+
+    public void loadDeviceID(LoadDeviceIdOperationCallback.LoadDeviceIDCallback callback) {
+
+        //TODO:load device id logic
+
+        DeviceIDLoadOperationResult result = mServerDataSource.loadDeviceID();
+
+        if (result.getOperationResult().getOperationResultType().equals(OperationResultType.SUCCEED)) {
+
+            String deviceID = result.getDeviceID();
+
+            callback.onLoadSucceed(result.getOperationResult(), deviceID);
+
+        } else {
+
+            callback.onLoadFail(result.getOperationResult());
+
+        }
+
+    }
+
 
     public void loadLocalMediaInCamera(MediaOperationCallback.LoadMediasCallback callback) {
 
@@ -250,11 +306,11 @@ public class DataRepository {
         //TODO: call in thread
         if (remoteMediaShareLoaded) {
 
-            remoteMediaShares = mMemoryDataSource.loadAllMediaShares().getMediaShares();
+            remoteMediaShares = mMemoryDataSource.loadAllRemoteMediaShares().getMediaShares();
 
         } else {
 
-            MediaSharesLoadOperationResult result = mServerDataSource.loadAllMediaShares();
+            MediaSharesLoadOperationResult result = mServerDataSource.loadAllRemoteMediaShares();
             if (result.getOperationResult().getOperationResultType() == OperationResultType.SUCCEED) {
 
                 remoteMediaShares = result.getMediaShares();
@@ -265,7 +321,7 @@ public class DataRepository {
 
             } else {
 
-                remoteMediaShares = mDBDataSource.loadAllMediaShares().getMediaShares();
+                remoteMediaShares = mDBDataSource.loadAllRemoteMediaShares().getMediaShares();
 
                 mMemoryDataSource.insertRemoteMediaShares(remoteMediaShares);
 
@@ -314,11 +370,13 @@ public class DataRepository {
 
     public void loadEquipmentAlias(final String url, final LoadEquipmentAliasCallback callback) {
 
+        final String token = mMemoryDataSource.loadToken(null).getToken();
+
         instance.doOneTaskInCachedThread(new Runnable() {
             @Override
             public void run() {
 
-                final List<EquipmentAlias> equipmentAliases = mServerDataSource.loadEquipmentAlias(url);
+                final List<EquipmentAlias> equipmentAliases = mServerDataSource.loadEquipmentAlias(token, url);
 
                 mHandler.post(new Runnable() {
                     @Override
@@ -338,11 +396,13 @@ public class DataRepository {
 
     public void loadUserByLoginApi(final String url, final UserOperationCallback.LoadUsersCallback callback) {
 
+        final String token = mMemoryDataSource.loadToken(null).getToken();
+
         instance.doOneTaskInCachedThread(new Runnable() {
             @Override
             public void run() {
 
-                final List<User> users = mServerDataSource.loadUserByLoginApi(url);
+                final List<User> users = mServerDataSource.loadUserByLoginApi(token, url);
 
                 mHandler.post(new Runnable() {
                     @Override
@@ -364,7 +424,18 @@ public class DataRepository {
 
         //TODO:call in thread
         mDBDataSource.deleteToken();
+        mDBDataSource.deleteDeviceID();
+        mDBDataSource.deleteAllRemoteMedia();
+        mDBDataSource.deleteAllRemoteMediaShare();
+        mDBDataSource.deleteAllRemoteUsers();
+
         mDBDataSource.updateLocalMediasUploadedFalse();
+
+        mMemoryDataSource.deleteToken();
+        mMemoryDataSource.deleteDeviceID();
+        mMemoryDataSource.deleteAllRemoteUsers();
+        mMemoryDataSource.deleteAllRemoteMedia();
+        mMemoryDataSource.deleteAllRemoteMediaShare();
 
         instance.shutdownFixedThreadPoolNow();
 
@@ -385,7 +456,7 @@ public class DataRepository {
 
         UsersLoadOperationResult result = mMemoryDataSource.loadUsers();
 
-        if (result != null) {
+        if (remoteUserLoaded) {
             callback.onLoadSucceed(result.getOperationResult(), result.getUsers());
         } else {
 
@@ -404,6 +475,8 @@ public class DataRepository {
                 mMemoryDataSource.insertUsers(result.getUsers());
 
             }
+
+            remoteUserLoaded = true;
 
             //TODO:need call in main thread
             if (callback != null)
@@ -435,10 +508,15 @@ public class DataRepository {
         mLoadCurrentUserCallback = callback;
     }
 
+    private String generateUrl(String req) {
+        return mMemoryDataSource.loadGateway() + ":" + mMemoryDataSource.loadPort() + req;
+    }
+
+
     public void createUser(String userName, String userPassword, UserOperationCallback.OperateUserCallback callback) {
 
         //TODO:call in thread
-        OperateUserResult operateUserResult = mServerDataSource.insertUser(userName, userPassword);
+        OperateUserResult operateUserResult = mServerDataSource.insertUser(generateUrl(Util.USER_PARAMETER), mMemoryDataSource.loadToken(null).getToken(), userName, userPassword);
 
         if (operateUserResult.getOperationResult().getOperationResultType() == OperationResultType.SUCCEED) {
 
@@ -458,14 +536,14 @@ public class DataRepository {
     public void createMediaShare(MediaShare mediaShare, MediaShareOperationCallback.OperateMediaShareCallback callback) {
 
         //TODO:call in thread
-        OperateMediaShareResult operateMediaShareResult = mServerDataSource.insertRemoteMediaShare(mediaShare);
+        OperateMediaShareResult operateMediaShareResult = mServerDataSource.insertRemoteMediaShare(generateUrl(Util.MEDIASHARE_PARAMETER), mMemoryDataSource.loadToken(null).getToken(), mediaShare);
 
         if (operateMediaShareResult.getOperationResult().getOperationResultType() == OperationResultType.SUCCEED) {
 
             MediaShare newMediaShare = operateMediaShareResult.getMediaShare();
 
-            mDBDataSource.insertRemoteMediaShare(newMediaShare);
-            mMemoryDataSource.insertRemoteMediaShare(newMediaShare);
+            mDBDataSource.insertRemoteMediaShare(null, null, newMediaShare);
+            mMemoryDataSource.insertRemoteMediaShare(null, null, newMediaShare);
 
             callback.onOperateSucceed(operateMediaShareResult.getOperationResult(), newMediaShare);
 
@@ -526,12 +604,12 @@ public class DataRepository {
 
     public void modifyMediaShare(String requestData, MediaShare modifiedMediaShare, MediaShareOperationCallback.OperateMediaShareCallback callback) {
 
-        OperationResult result = mServerDataSource.modifyRemoteMediaShare(requestData, modifiedMediaShare);
+        OperationResult result = mServerDataSource.modifyRemoteMediaShare(generateUrl(Util.MEDIASHARE_PARAMETER + "/" + modifiedMediaShare.getUuid() + "/update"), mMemoryDataSource.loadToken(null).getToken(), requestData, modifiedMediaShare);
 
         if (result.getOperationResultType() == OperationResultType.SUCCEED) {
 
-            mDBDataSource.modifyRemoteMediaShare(requestData, modifiedMediaShare);
-            mMemoryDataSource.modifyRemoteMediaShare(requestData, modifiedMediaShare);
+            mDBDataSource.modifyRemoteMediaShare(null, null, requestData, modifiedMediaShare);
+            mMemoryDataSource.modifyRemoteMediaShare(null, null, requestData, modifiedMediaShare);
 
             callback.onOperateSucceed(result, modifiedMediaShare);
 
@@ -543,12 +621,12 @@ public class DataRepository {
 
     public void deleteMediaShare(MediaShare mediaShare, MediaShareOperationCallback.OperateMediaShareCallback callback) {
 
-        OperationResult result = mServerDataSource.deleteRemoteMediaShare(mediaShare);
+        OperationResult result = mServerDataSource.deleteRemoteMediaShare(generateUrl(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid()), mMemoryDataSource.loadToken(null).getToken(), mediaShare);
 
         if (result.getOperationResultType() == OperationResultType.SUCCEED) {
 
-            mDBDataSource.deleteRemoteMediaShare(mediaShare);
-            mMemoryDataSource.deleteRemoteMediaShare(mediaShare);
+            mDBDataSource.deleteRemoteMediaShare(null, null, mediaShare);
+            mMemoryDataSource.deleteRemoteMediaShare(null, null, mediaShare);
 
             callback.onOperateSucceed(result, mediaShare);
 
@@ -628,7 +706,7 @@ public class DataRepository {
 
     public void loadDownloadedFiles(FileDownloadOperationCallback.LoadDownloadedFilesCallback callback) {
 
-        FileDownloadLoadOperationResult result = mDBDataSource.loadDownloadedFiles();
+        FileDownloadLoadOperationResult result = mDBDataSource.loadDownloadedFilesRecord();
 
         callback.onLoaded(result.getFileDownloadItems());
 
@@ -636,15 +714,44 @@ public class DataRepository {
 
     public void registerFileDownloadedStateChanged(FileDownloadOperationCallback.FileDownloadStateChangedCallback callback) {
 
+
     }
 
     public void unregisterFileDownloadedStateChanged(FileDownloadOperationCallback.FileDownloadStateChangedCallback callback) {
 
     }
 
+    public void downloadFile(FileDownloadState fileDownloadState) {
+
+
+        //TODO:call in thread
+
+        FileDownloadUploadInterface fileDownloadUploadInterface = RetrofitInstance.INSTANCE.getRetrofitInstance().create(FileDownloadUploadInterface.class);
+
+        Call<ResponseBody> call = fileDownloadUploadInterface.downloadFile(FNAS.Gateway + ":" + FNAS.PORT + Util.FILE_PARAMETER + "/" + fileDownloadState.getFileUUID());
+
+        Log.d(TAG, "call: fileDownloadInterface downloadFile");
+
+        boolean result = false;
+        try {
+            result = FileUtil.writeResponseBodyToFolder(call.execute().body(), fileDownloadState);
+
+            if (result) {
+                mDBDataSource.insertDownloadedFileRecord(fileDownloadState.getFileDownloadItem());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG, "call: download result:" + result);
+
+
+    }
+
     public void deleteDownloadedFileRecords(List<String> fileUUIDs, FileDownloadOperationCallback.DeleteDownloadedFilesCallback callback) {
 
-        mDBDataSource.deleteDownloadedFile(fileUUIDs);
+        mDBDataSource.deleteDownloadedFileRecord(fileUUIDs);
 
         callback.onFinished();
     }

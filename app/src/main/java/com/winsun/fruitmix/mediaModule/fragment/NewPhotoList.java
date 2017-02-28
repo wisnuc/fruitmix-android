@@ -1,9 +1,13 @@
 package com.winsun.fruitmix.mediaModule.fragment;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.ViewCompat;
@@ -79,6 +83,16 @@ public class NewPhotoList implements Page {
     LinearLayout mNoContentLayout;
     @BindView(R.id.no_content_imageview)
     ImageView noContentImageView;
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
+    @BindView(R.id.bt_album)
+    ImageView ivBtAlbum;
+    @BindView(R.id.bt_share)
+    ImageView ivBtShare;
+
+    private Animator mAnimator;
+
+    private boolean sMenuUnfolding = false;
 
     private int mSpanCount = 3;
 
@@ -93,8 +107,6 @@ public class NewPhotoList implements Page {
     private int mItemWidth;
 
     private Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
-
-    //TODO use SparseArray or ArrayMap to optimize memory use effect
 
     private SparseArray<String> mMapKeyIsPhotoPositionValueIsPhotoDate;
     private SparseArray<Media> mMapKeyIsPhotoPositionValueIsPhoto;
@@ -158,6 +170,63 @@ public class NewPhotoList implements Page {
         setupLayoutManager();
 
     }
+
+    private void refreshFabState() {
+        if (sMenuUnfolding) {
+            sMenuUnfolding = false;
+            collapseFab();
+        } else {
+            sMenuUnfolding = true;
+            extendFab();
+        }
+    }
+
+    private void collapseFab() {
+
+        mAnimator = AnimatorInflater.loadAnimator(containerActivity, R.animator.fab_restore);
+        mAnimator.setTarget(fab);
+        mAnimator.start();
+
+        mAnimator = AnimatorInflater.loadAnimator(containerActivity, R.animator.album_btn_restore);
+        mAnimator.setTarget(ivBtAlbum);
+        mAnimator.start();
+
+        mAnimator = AnimatorInflater.loadAnimator(containerActivity, R.animator.share_btn_restore);
+        mAnimator.setTarget(ivBtShare);
+        mAnimator.start();
+
+        mAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                ivBtAlbum.setVisibility(View.GONE);
+                ivBtShare.setVisibility(View.GONE);
+
+            }
+        });
+
+    }
+
+    private void extendFab() {
+
+        ivBtAlbum.setVisibility(View.VISIBLE);
+        ivBtShare.setVisibility(View.VISIBLE);
+
+        mAnimator = AnimatorInflater.loadAnimator(containerActivity, R.animator.fab_remote);
+        mAnimator.setTarget(fab);
+        mAnimator.start();
+
+        mAnimator = AnimatorInflater.loadAnimator(containerActivity, R.animator.album_btn_translation);
+        mAnimator.setTarget(ivBtAlbum);
+        mAnimator.start();
+
+        mAnimator = AnimatorInflater.loadAnimator(containerActivity, R.animator.share_btn_translation);
+        mAnimator.setTarget(ivBtShare);
+        mAnimator.start();
+
+    }
+
 
     private void initImageLoader() {
 

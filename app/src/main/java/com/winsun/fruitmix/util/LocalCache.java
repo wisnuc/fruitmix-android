@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -88,10 +87,10 @@ public class LocalCache {
             @Override
             public void run() {
                 DBUtils dbUtils = DBUtils.getInstance(context);
-                dbUtils.deleteAllLocalShare();
+                dbUtils.deleteAllLocalMediaShare();
                 dbUtils.deleteAllLocalComment();
                 dbUtils.deleteAllRemoteComment();
-                dbUtils.deleteAllRemoteShare();
+                dbUtils.deleteAllRemoteMediaShare();
                 dbUtils.deleteAllRemoteUser();
                 dbUtils.deleteAllRemoteMedia();
             }

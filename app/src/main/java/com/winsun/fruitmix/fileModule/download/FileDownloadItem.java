@@ -1,5 +1,10 @@
 package com.winsun.fruitmix.fileModule.download;
 
+import com.winsun.fruitmix.refactor.business.callback.FileDownloadOperationCallback;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Administrator on 2016/11/7.
  */
@@ -13,10 +18,14 @@ public class FileDownloadItem {
     private long fileCurrentDownloadSize;
     private FileDownloadState fileDownloadState;
 
+    private List<FileDownloadOperationCallback.FileDownloadStateChangedCallback> callbacks;
+
     public FileDownloadItem(String fileName, long fileSize, String fileUUID) {
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.fileUUID = fileUUID;
+
+        callbacks = new ArrayList<>();
     }
 
     public void setFileDownloadState(FileDownloadState fileDownloadState) {
@@ -65,5 +74,19 @@ public class FileDownloadItem {
 
     public long getFileTime() {
         return fileTime;
+    }
+
+    public void registerStateChangedCallback(FileDownloadOperationCallback.FileDownloadStateChangedCallback callback) {
+        callbacks.add(callback);
+    }
+
+    public void unregisterStateChangedCallback(FileDownloadOperationCallback.FileDownloadStateChangedCallback callback) {
+        callbacks.remove(callback);
+    }
+
+    public void notifyDownloadStateChanged(DownloadState downloadState) {
+        for (FileDownloadOperationCallback.FileDownloadStateChangedCallback callback : callbacks) {
+            callback.onStateChanged(downloadState);
+        }
     }
 }

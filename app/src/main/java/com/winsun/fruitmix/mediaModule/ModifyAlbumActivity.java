@@ -1,24 +1,22 @@
 package com.winsun.fruitmix.mediaModule;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.refactor.common.BaseActivity;
+import com.winsun.fruitmix.refactor.common.Injection;
+import com.winsun.fruitmix.refactor.contract.ModifyAlbumContract;
+import com.winsun.fruitmix.refactor.presenter.ModifyAlbumPresenterImpl;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
@@ -32,7 +30,7 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/4/28.
  */
-public class ModifyAlbumActivity extends AppCompatActivity {
+public class ModifyAlbumActivity extends BaseActivity implements ModifyAlbumContract.ModifyAlbumView {
 
     @BindView(R.id.title_textlayout)
     TextInputLayout mTitleLayout;
@@ -51,11 +49,9 @@ public class ModifyAlbumActivity extends AppCompatActivity {
     @BindView(R.id.back)
     ImageView ivBack;
 
-    private MediaShare mAlbumMap;
-
     private Context mContext;
 
-    private ProgressDialog mDialog;
+    private ModifyAlbumContract.ModifyAlbumPresenter mPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,14 +64,10 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         mContext = this;
 
         String mMediaShareUuid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
-        mAlbumMap = LocalCache.RemoteMediaShareMapKeyIsUUID.get(mMediaShareUuid).cloneMyself();
 
-        mTitleLayout.getEditText().setText(mAlbumMap.getTitle());
-        mDescLayout.getEditText().setText(mAlbumMap.getDesc());
-
-        ckPublic.setChecked(mAlbumMap.getViewersListSize() != 0);
-
-        ckSetMaintainer.setChecked(mAlbumMap.checkMaintainersListContainCurrentUserUUID());
+        mPresenter = new ModifyAlbumPresenterImpl(Injection.injectDataRepository(), mMediaShareUuid);
+        mPresenter.attachView(this);
+        mPresenter.initView();
 
         ckPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -94,37 +86,17 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         btOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Util.hideSoftInput(ModifyAlbumActivity.this);
 
-                if (!Util.getNetworkState(mContext)) {
-                    Toast.makeText(mContext, mContext.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-
-                    ModifyAlbumActivity.this.setResult(RESULT_CANCELED);
-                    finish();
-
-                    return;
-                }
-
-                final boolean sPublic, sSetMaintainer;
-                final String title, desc;
+                boolean sPublic, sSetMaintainer;
+                String title, desc;
 
                 sPublic = ckPublic.isChecked();
                 sSetMaintainer = ckSetMaintainer.isChecked();
                 title = mTitleLayout.getEditText().getText().toString();
                 desc = mDescLayout.getEditText().getText().toString();
 
-                String requestData = createRequestData(sPublic, sSetMaintainer, title, desc);
-                if (requestData == null) {
+                mPresenter.modifyAlbum(title, desc, sPublic, sSetMaintainer);
 
-                    ModifyAlbumActivity.this.setResult(RESULT_CANCELED);
-                    finish();
-
-                    return;
-                }
-
-                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
-
-                FNAS.modifyRemoteMediaShare(mContext, mAlbumMap, requestData);
 
             }
         });
@@ -132,84 +104,12 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                ModifyAlbumActivity.this.setResult(RESULT_CANCELED);
-                finish();
+                mPresenter.handleBackEvent();
             }
         });
 
     }
 
-    @Nullable
-    private String createRequestData(boolean sPublic, boolean sSetMaintainer, String title, String desc) {
-        String requestData;
-
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("[");
-
-        boolean isPublic = mAlbumMap.getViewersListSize() != 0;
-        if (sPublic != isPublic) {
-            if (sPublic) {
-
-                for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-                    mAlbumMap.addViewer(userUUID);
-                }
-
-                stringBuilder.append(mAlbumMap.createStringOperateViewersInMediaShare(Util.ADD));
-
-            } else {
-
-                stringBuilder.append(mAlbumMap.createStringOperateViewersInMediaShare(Util.DELETE));
-
-                mAlbumMap.clearViewers();
-            }
-
-            stringBuilder.append(",");
-        }
-
-        boolean isMaintained = mAlbumMap.checkMaintainersListContainCurrentUserUUID();
-
-        if (sSetMaintainer != isMaintained) {
-
-            if (sSetMaintainer) {
-
-                for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-                    mAlbumMap.addMaintainer(userUUID);
-                }
-
-                stringBuilder.append(mAlbumMap.createStringOperateMaintainersInMediaShare(Util.ADD));
-
-            } else {
-
-                stringBuilder.append(mAlbumMap.createStringOperateMaintainersInMediaShare(Util.DELETE));
-
-                mAlbumMap.clearMaintainers();
-            }
-
-            stringBuilder.append(",");
-
-        }
-
-        if (!mAlbumMap.getTitle().equals(title) || !mAlbumMap.getDesc().equals(desc)) {
-
-            mAlbumMap.setTitle(title);
-            mAlbumMap.setDesc(desc);
-
-            stringBuilder.append(mAlbumMap.createStringReplaceTitleTextAboutMediaShare());
-
-            stringBuilder.append(",");
-        }
-
-        requestData = stringBuilder.substring(0, stringBuilder.length() - 1);
-
-        requestData += "]";
-
-        if (requestData.length() <= 2) {
-            return null;
-        }
-
-        return requestData;
-    }
 
     @Override
     protected void onStart() {
@@ -231,6 +131,8 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         super.onDestroy();
 
         mContext = null;
+
+        mPresenter.detachView();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -239,9 +141,6 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         String action = operationEvent.getAction();
 
         if (action.equals(Util.LOCAL_SHARE_MODIFIED) || action.equals(Util.REMOTE_SHARE_MODIFIED)) {
-
-            if (mDialog != null && mDialog.isShowing())
-                mDialog.dismiss();
 
             OperationResultType operationResultType = operationEvent.getOperationResult().getOperationResultType();
 
@@ -262,4 +161,28 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void setAlbumTitle(String albumTitle) {
+        mTitleLayout.getEditText().setText(albumTitle);
+    }
+
+    @Override
+    public void setDescription(String description) {
+        mDescLayout.getEditText().setText(description);
+    }
+
+    @Override
+    public void setIsPublic(boolean isPublic) {
+        ckPublic.setChecked(isPublic);
+    }
+
+    @Override
+    public void setIsMaintained(boolean isMaintained) {
+        ckSetMaintainer.setChecked(isMaintained);
+    }
+
+    @Override
+    public void finishActivity() {
+        finish();
+    }
 }

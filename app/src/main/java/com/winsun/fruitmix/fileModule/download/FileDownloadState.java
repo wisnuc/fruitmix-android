@@ -52,7 +52,9 @@ public abstract class FileDownloadState {
 
     public void notifyDownloadStateChanged() {
 
-        EventBus.getDefault().post(new DownloadStateChangedEvent(getDownloadState()));
+//        EventBus.getDefault().post(new DownloadStateChangedEvent(getDownloadState()));
+
+        fileDownloadItem.notifyDownloadStateChanged(getDownloadState());
     }
 
 }
