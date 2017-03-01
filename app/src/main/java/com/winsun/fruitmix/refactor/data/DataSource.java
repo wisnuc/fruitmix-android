@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.refactor.data;
 
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
+import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
@@ -40,20 +41,24 @@ public interface DataSource {
 
     MediaShare loadRemoteMediaShare(String mediaShareUUID);
 
-    MediaSharesLoadOperationResult loadAllRemoteMediaShares();
+    MediaSharesLoadOperationResult loadAllRemoteMediaShares(String url,String token);
 
     //media
     OperationResult insertLocalMedias(List<Media> medias);
 
     OperationResult insertRemoteMedias(List<Media> medias);
 
+    OperationResult insertLocalMedia(String url,String token,Media media);
+
     OperationResult deleteAllRemoteMedia();
 
-    MediasLoadOperationResult loadAllRemoteMedias();
+    MediasLoadOperationResult loadAllRemoteMedias(String url,String token);
 
     MediasLoadOperationResult loadAllLocalMedias();
 
     Collection<String> loadLocalMediaUUIDs();
+
+    Collection<String> loadRemoteMediaUUIDs();
 
     MediasLoadOperationResult loadLocalMediaInCamera(Collection<String> loadedMediaUUIDs);
 
@@ -61,29 +66,39 @@ public interface DataSource {
 
     void updateLocalMediasUploadedFalse();
 
+    OperationResult updateLocalMedia(Media media);
+
     //user
 
     OperateUserResult insertUser(String url,String token,String userName, String userPassword);
 
     OperationResult insertUsers(List<User> users);
 
-    OperationResult insertCurrentLoginUser(User user);
-
     OperationResult deleteAllRemoteUsers();
 
-    UsersLoadOperationResult loadUsers();
+    UsersLoadOperationResult loadUsers(String loadUserUrl, String loadOtherUserUrl, String token);
 
     User loadUser(String userUUID);
 
-    User loadCurrentLoginUser();
+    Collection<String> loadAllUserUUID();
 
     List<User> loadUserByLoginApi(String token,String url);
 
     //file
-    FilesLoadOperationResult loadRemoteFiles(String folderUUID);
+    FilesLoadOperationResult loadRemoteFolder(String url, String token);
+
+    OperationResult loadRemoteFile(String url,String token);
+
+    OperationResult insertRemoteFiles(AbstractRemoteFile folder);
+
+    OperationResult deleteAllRemoteFiles();
 
     //file share
-    FileSharesLoadOperationResult loadRemoteFileRootShares();
+    FileSharesLoadOperationResult loadRemoteFileRootShares(String loadFileSharedWithMeUrl,String loadFileShareWithOthersUrl,String token);
+
+    OperationResult insertRemoteFileShare(List<AbstractRemoteFile> files);
+
+    OperationResult deleteAllRemoteFileShare();
 
     //file download
     FileDownloadLoadOperationResult loadDownloadedFilesRecord();
@@ -95,20 +110,27 @@ public interface DataSource {
     //token
     TokenLoadOperationResult loadToken(LoadTokenParam param);
 
-    LoadTokenParam getLoadTokenParam();
-
     void deleteToken();
 
     OperationResult insertToken(String token);
 
     //device id
-    DeviceIDLoadOperationResult loadDeviceID();
+    DeviceIDLoadOperationResult loadDeviceID(String url, String token);
 
     OperationResult insertDeviceID(String deviceID);
 
     void deleteDeviceID();
 
     //others
+
+    String loadGateway();
+
+    OperationResult insertGateway(String gateway);
+
+    OperationResult insertLoginUserUUID(String userUUID);
+
+    String loadLoginUserUUID();
+
     boolean getShowAlbumTipsValue();
 
     void saveShowAlbumTipsValue(boolean value);
@@ -118,9 +140,5 @@ public interface DataSource {
     void saveShowPhotoReturnTipsValue(boolean value);
 
     List<EquipmentAlias> loadEquipmentAlias(String token,String url);
-
-    String loadGateway();
-
-    String loadPort();
 
 }

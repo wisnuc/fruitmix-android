@@ -107,7 +107,8 @@ public enum OkHttpUtil {
 
     public void cancelAllNotFinishCall() {
         for (Call call : calls) {
-            call.cancel();
+            if (call != null)
+                call.cancel();
         }
     }
 

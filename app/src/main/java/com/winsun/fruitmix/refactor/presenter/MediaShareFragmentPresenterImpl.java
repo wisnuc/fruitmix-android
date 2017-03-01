@@ -152,8 +152,6 @@ public class MediaShareFragmentPresenterImpl implements MediaShareFragmentContra
     @Override
     public void loadMediaShares() {
 
-        String currentUserUUID = mRepository.loadCurrentLoginUserFromMemory().getUuid();
-
         mMediaShares.clear();
 
         mRepository.loadMediaShares(new MediaShareOperationCallback.LoadMediaSharesCallback() {
@@ -161,8 +159,6 @@ public class MediaShareFragmentPresenterImpl implements MediaShareFragmentContra
             public void onLoadSucceed(OperationResult operationResult, Collection<MediaShare> mediaShares) {
 
                 for (MediaShare mediaShare : mediaShares) {
-
-
 
                     if (mRepository.isMediaSharePublic(mediaShare)) {
                         mMediaShares.add(mediaShare);

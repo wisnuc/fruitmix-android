@@ -27,6 +27,8 @@ import java.util.UUID;
  */
 public class Util {
 
+    public static final String PORT = "3721";
+
     public static final String SHOW_ALBUM_TIPS = "show_album_tips";
     public static final String SHOW_PHOTO_RETURN_TIPS = "show_photo_return_tips";
     public static final String USER_GROUP_NAME = "user_group_name";

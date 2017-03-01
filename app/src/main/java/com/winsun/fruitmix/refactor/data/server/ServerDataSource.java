@@ -1,13 +1,11 @@
 package com.winsun.fruitmix.refactor.data.server;
 
 import android.support.annotation.NonNull;
+import android.util.Base64;
 import android.util.Log;
 
-import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
+import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.OkHttpUtil;
@@ -22,8 +20,14 @@ import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.parser.RemoteDataParser;
+import com.winsun.fruitmix.parser.RemoteFileFolderParser;
+import com.winsun.fruitmix.parser.RemoteFileShareParser;
+import com.winsun.fruitmix.parser.RemoteMediaParser;
 import com.winsun.fruitmix.parser.RemoteMediaShareJSONObjectParser;
+import com.winsun.fruitmix.parser.RemoteMediaShareParser;
 import com.winsun.fruitmix.parser.RemoteUserJSONObjectParser;
+import com.winsun.fruitmix.parser.RemoteUserParser;
 import com.winsun.fruitmix.refactor.business.LoadTokenParam;
 import com.winsun.fruitmix.refactor.data.DataSource;
 import com.winsun.fruitmix.refactor.data.dataOperationResult.DeviceIDLoadOperationResult;
@@ -37,20 +41,25 @@ import com.winsun.fruitmix.refactor.data.dataOperationResult.OperateUserResult;
 import com.winsun.fruitmix.refactor.data.dataOperationResult.TokenLoadOperationResult;
 import com.winsun.fruitmix.refactor.data.dataOperationResult.UsersLoadOperationResult;
 import com.winsun.fruitmix.refactor.model.EquipmentAlias;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -65,7 +74,7 @@ public class ServerDataSource implements DataSource {
 
     }
 
-    private HttpResponse remoteCallWithUrl(String token, String url) throws MalformedURLException, IOException, SocketTimeoutException {
+    private HttpResponse getRemoteCall(String url, String token) throws MalformedURLException, IOException, SocketTimeoutException {
 
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
@@ -101,7 +110,7 @@ public class ServerDataSource implements DataSource {
 
         try {
 
-            String str = remoteCallWithUrl(token, url).getResponseData();
+            String str = getRemoteCall(url, token).getResponseData();
 
             JSONArray json = new JSONArray(str);
 
@@ -128,18 +137,13 @@ public class ServerDataSource implements DataSource {
         return null;
     }
 
-    @Override
-    public String loadPort() {
-        return null;
-    }
-
     public List<User> loadUserByLoginApi(String token, String url) {
 
         List<User> users = new ArrayList<>();
 
         try {
 
-            String str = remoteCallWithUrl(token, url).getResponseData();
+            String str = getRemoteCall(url, token).getResponseData();
 
             JSONArray json = new JSONArray(str);
 
@@ -233,6 +237,21 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public OperationResult insertUsers(List<User> users) {
+        return null;
+    }
+
+    @Override
+    public Collection<String> loadAllUserUUID() {
+        return null;
+    }
+
+    @Override
+    public OperationResult insertLoginUserUUID(String userUUID) {
+        return null;
+    }
+
+    @Override
+    public String loadLoginUserUUID() {
         return null;
     }
 
@@ -398,6 +417,140 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
+    public OperationResult insertLocalMedia(String url, String token, Media media) {
+
+        boolean result = uploadFile(url, token, media);
+
+        if (result)
+            return new OperationSuccess();
+        else
+            return new OperationIOException();
+
+    }
+
+    @Override
+    public OperationResult updateLocalMedia(Media media) {
+        return null;
+    }
+
+    private boolean uploadFile(String url, String token, Media media) {
+
+        String hash, boundary;
+        BufferedOutputStream outStream;
+        StringBuilder sb;
+        InputStream is;
+        byte[] buffer;
+        int len, resCode;
+        HttpURLConnection conn = null;
+
+        try {
+
+            hash = media.getUuid();
+
+            String thumb = media.getThumb();
+
+            Log.d(TAG, "thumb:" + media.getThumb() + "hash:" + hash);
+
+            // head
+            Log.d(TAG, "Photo UP: " + url);
+            boundary = java.util.UUID.randomUUID().toString();
+            conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setDoInput(true);// 允许输入
+            conn.setDoOutput(true);// 允许输出
+            conn.setUseCaches(false);
+            conn.setRequestMethod(Util.HTTP_POST_METHOD); // Post方式
+            conn.setRequestProperty(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
+            conn.setRequestProperty("Connection", "keep-alive");
+            conn.setRequestProperty("Charsert", "UTF-8");
+            conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+            conn.setConnectTimeout(Util.HTTP_CONNECT_TIMEOUT);
+            conn.setReadTimeout(Util.HTTP_CONNECT_TIMEOUT);
+
+            outStream = new BufferedOutputStream(conn.getOutputStream());
+
+            sb = new StringBuilder();
+            sb.append("--").append(boundary).append("\r\n");
+            sb.append("Content-Disposition: form-data; name=\"file\"; filename=\"").append(thumb).append("\"\r\n");
+            sb.append("Content-Type: image/jpeg;\r\n");
+            sb.append("\r\n");
+            outStream.write(sb.toString().getBytes());
+
+            is = new FileInputStream(thumb);
+            buffer = new byte[15000];
+            len = 0;
+            while ((len = is.read(buffer)) != -1) {
+                outStream.write(buffer, 0, len);
+            }
+            is.close();
+            outStream.write("\r\n".getBytes());
+
+            sb = new StringBuilder();
+            sb.append("--");
+            sb.append(boundary);
+            sb.append("\r\n");
+            sb.append("Content-Disposition: form-data; name=\""
+                    + "sha256" + "\"");
+            sb.append("\r\n");
+            sb.append("\r\n");
+            sb.append(hash);
+            sb.append("\r\n");
+            byte[] data = sb.toString().getBytes();
+            outStream.write(data);
+
+            outStream.write(("--" + boundary + "--\r\n").getBytes());
+            outStream.flush();
+            outStream.close();
+
+            resCode = conn.getResponseCode();
+            Log.d(TAG, "UP END1: " + resCode);
+            if (resCode == 200) {
+
+                String result = ReadFull(conn.getInputStream());
+
+                Log.i(TAG, "UploadFile: result" + result);
+
+                return true;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+
+            if (conn != null)
+                conn.disconnect();
+        }
+
+        return false;
+    }
+
+    private String ReadFull(InputStream ins) throws IOException {
+        String result = "";
+        int length;
+        byte[] buffer = new byte[1024];
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        try {
+            while ((length = ins.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, length);
+            }
+            result = new String(outputStream.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+
+            try {
+                ins.close();
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        return result;
+    }
+
+    @Override
     public OperationResult insertRemoteMedias(List<Media> medias) {
         return null;
     }
@@ -496,14 +649,115 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public DeviceIDLoadOperationResult loadDeviceID() {
-        return null;
+    public DeviceIDLoadOperationResult loadDeviceID(String url, String token) {
+
+        DeviceIDLoadOperationResult result = new DeviceIDLoadOperationResult();
+
+        try {
+            HttpResponse httpResponse = postRemoteCall(url, token, "");
+
+            if (httpResponse.getResponseCode() == 200) {
+
+                String deviceID = new JSONObject(httpResponse.getResponseData()).getString("uuid");
+
+                result.setDeviceID(deviceID);
+
+                result.setOperationResult(new OperationSuccess());
+
+            } else {
+
+                result.setOperationResult(new OperationNetworkException(httpResponse.getResponseCode()));
+            }
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationMalformedUrlException());
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationSocketTimeoutException());
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationIOException());
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationJSONException());
+        }
+
+        return result;
     }
 
     @Override
-    public UsersLoadOperationResult loadUsers() {
-        return null;
+    public UsersLoadOperationResult loadUsers(String loadUserUrl, String loadOtherUserUrl, String token) {
+
+        return handleActionRetrieveRemoteUser(loadUserUrl, loadOtherUserUrl, token);
     }
+
+    /**
+     * Handle action Foo in the provided background thread with the provided
+     * parameters.
+     */
+    private UsersLoadOperationResult handleActionRetrieveRemoteUser(String loadUserUrl, String loadOtherUserUrl, String token) {
+
+        UsersLoadOperationResult result = new UsersLoadOperationResult();
+
+        List<User> users;
+
+        try {
+
+            HttpResponse httpResponse = getRemoteCall(loadUserUrl, token);
+
+            RemoteDataParser<User> parser = new RemoteUserParser();
+            users = parser.parse(httpResponse.getResponseData());
+
+            List<User> otherUsers = parser.parse(getRemoteCall(loadOtherUserUrl, token).getResponseData());
+
+            result.setUsers(addDifferentUsers(users, otherUsers));
+            result.setOperationResult(new OperationSuccess());
+
+            Log.i(TAG, "handleActionRetrieveRemoteUser: retrieve user from network");
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationMalformedUrlException());
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationSocketTimeoutException());
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationIOException());
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationJSONException());
+        }
+
+        return result;
+
+    }
+
+    private List<User> addDifferentUsers(List<User> users, List<User> otherUsers) {
+        for (User otherUser : otherUsers) {
+            int i;
+            for (i = 0; i < users.size(); i++) {
+                if (otherUser.getUuid().equals(users.get(i).getUuid())) {
+                    break;
+                }
+            }
+            if (i >= users.size()) {
+                users.add(otherUser);
+            }
+        }
+
+        return users;
+    }
+
 
     @Override
     public User loadUser(String userUUID) {
@@ -511,8 +765,57 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public MediasLoadOperationResult loadAllRemoteMedias() {
-        return null;
+    public MediasLoadOperationResult loadAllRemoteMedias(String url, String token) {
+
+        return handleActionRetrieveRemoteMedia(url, token);
+    }
+
+    /**
+     * Handle action Foo in the provided background thread with the provided
+     * parameters.
+     */
+    private MediasLoadOperationResult handleActionRetrieveRemoteMedia(String url, String token) {
+
+        MediasLoadOperationResult result = new MediasLoadOperationResult();
+
+        List<Media> medias;
+
+        try {
+
+            Log.d(TAG, "handleActionRetrieveRemoteMedia: before load" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
+            HttpResponse httpResponse = getRemoteCall(url, token);
+
+            Log.d(TAG, "handleActionRetrieveRemoteMedia: load media finish" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
+            RemoteDataParser<Media> parser = new RemoteMediaParser();
+            medias = parser.parse(httpResponse.getResponseData());
+
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: parse json finish");
+
+            result.setMedias(medias);
+            result.setOperationResult(new OperationSuccess());
+
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationMalformedUrlException());
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationSocketTimeoutException());
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationIOException());
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationJSONException());
+        }
+
+        return result;
     }
 
     @Override
@@ -522,6 +825,11 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public Collection<String> loadLocalMediaUUIDs() {
+        return null;
+    }
+
+    @Override
+    public Collection<String> loadRemoteMediaUUIDs() {
         return null;
     }
 
@@ -537,7 +845,6 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public void updateLocalMediasUploadedFalse() {
-
     }
 
     @Override
@@ -546,12 +853,100 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public MediaSharesLoadOperationResult loadAllRemoteMediaShares() {
+    public MediaSharesLoadOperationResult loadAllRemoteMediaShares(String url, String token) {
+
+        List<MediaShare> mediaShares;
+
+        MediaSharesLoadOperationResult result = new MediaSharesLoadOperationResult();
+
+        try {
+
+            HttpResponse httpResponse = getRemoteCall(url, token);
+
+            Log.d(TAG, "loadRemoteShare:" + httpResponse.getResponseData().equals(""));
+
+            RemoteDataParser<MediaShare> parser = new RemoteMediaShareParser();
+            mediaShares = parser.parse(httpResponse.getResponseData());
+
+            Log.d(TAG, "handleActionRetrieveRemoteMediaShare: parse remote media share");
+
+            result.setMediaShares(mediaShares);
+            result.setOperationResult(new OperationSuccess());
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationMalformedUrlException());
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationSocketTimeoutException());
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationIOException());
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationJSONException());
+        }
+
+        return result;
+    }
+
+    @Override
+    public FilesLoadOperationResult loadRemoteFolder(String url, String token) {
+
+        FilesLoadOperationResult result = new FilesLoadOperationResult();
+
+        try {
+            HttpResponse httpResponse = getRemoteCall(url, token);
+
+            if (httpResponse.getResponseCode() == 200) {
+
+                RemoteFileFolderParser parser = new RemoteFileFolderParser();
+                List<AbstractRemoteFile> abstractRemoteFiles = parser.parse(httpResponse.getResponseData());
+
+                result.setFiles(abstractRemoteFiles);
+                result.setOperationResult(new OperationSuccess());
+
+            } else {
+                result.setOperationResult(new OperationNetworkException(httpResponse.getResponseCode()));
+            }
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationMalformedUrlException());
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationSocketTimeoutException());
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationIOException());
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationJSONException());
+        }
+
+        return result;
+    }
+
+    @Override
+    public OperationResult loadRemoteFile(String url, String token) {
         return null;
     }
 
     @Override
-    public FilesLoadOperationResult loadRemoteFiles(String folderUUID) {
+    public OperationResult insertRemoteFiles(AbstractRemoteFile folder) {
+        return null;
+    }
+
+    @Override
+    public OperationResult deleteAllRemoteFiles() {
         return null;
     }
 
@@ -566,22 +961,123 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public FileSharesLoadOperationResult loadRemoteFileRootShares() {
+    public FileSharesLoadOperationResult loadRemoteFileRootShares(String loadFileSharedWithMeUrl, String loadFileShareWithOthersUrl, String token) {
+
+        FileSharesLoadOperationResult result = new FileSharesLoadOperationResult();
+
+        List<AbstractRemoteFile> files;
+
+        try {
+
+            HttpResponse remoteFileShareWithMeJSON = getRemoteCall(loadFileSharedWithMeUrl, token);
+
+            if (remoteFileShareWithMeJSON.getResponseCode() == 200) {
+                RemoteDataParser<AbstractRemoteFile> parser = new RemoteFileShareParser();
+
+                files = new ArrayList<>();
+
+                files.addAll(parser.parse(remoteFileShareWithMeJSON.getResponseData()));
+
+                HttpResponse remoteFileShareWithOthersJSON = getRemoteCall(loadFileShareWithOthersUrl, token);
+
+                if (remoteFileShareWithOthersJSON.getResponseCode() == 200) {
+
+                    files.addAll(parser.parse(remoteFileShareWithOthersJSON.getResponseData()));
+
+                    result.setFiles(files);
+                    result.setOperationResult(new OperationSuccess());
+
+                } else {
+                    result.setOperationResult(new OperationNetworkException(remoteFileShareWithOthersJSON.getResponseCode()));
+                }
+
+            } else {
+                result.setOperationResult(new OperationNetworkException(remoteFileShareWithMeJSON.getResponseCode()));
+            }
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationMalformedUrlException());
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationSocketTimeoutException());
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationIOException());
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationJSONException());
+        }
+
+
+        return result;
+
+    }
+
+    @Override
+    public OperationResult insertRemoteFileShare(List<AbstractRemoteFile> files) {
+        return null;
+    }
+
+    @Override
+    public OperationResult deleteAllRemoteFileShare() {
         return null;
     }
 
     @Override
     public TokenLoadOperationResult loadToken(LoadTokenParam param) {
-        return null;
+
+        TokenLoadOperationResult result = new TokenLoadOperationResult();
+
+        try {
+            String url = param.getGateway() + ":" + Util.PORT + Util.TOKEN_PARAMETER;
+
+            HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
+            httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((param.getUserUUID() + ":" + param.getUserPassword()).getBytes(), Base64.NO_WRAP));
+
+            HttpResponse httpResponse = OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
+
+            int responseCode = httpResponse.getResponseCode();
+
+            if (responseCode == 200) {
+
+                String token = new JSONObject(httpResponse.getResponseData()).getString("token");
+
+                result.setToken(token);
+                result.setOperationResult(new OperationSuccess());
+
+            } else {
+                result.setOperationResult(new OperationNetworkException(responseCode));
+            }
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationMalformedUrlException());
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationSocketTimeoutException());
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationIOException());
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            result.setOperationResult(new OperationJSONException());
+        }
+
+
+        return result;
     }
 
     @Override
-    public User loadCurrentLoginUser() {
-        return null;
-    }
-
-    @Override
-    public LoadTokenParam getLoadTokenParam() {
+    public OperationResult insertGateway(String gateway) {
         return null;
     }
 
@@ -640,8 +1136,4 @@ public class ServerDataSource implements DataSource {
 
     }
 
-    @Override
-    public OperationResult insertCurrentLoginUser(User user) {
-        return null;
-    }
 }

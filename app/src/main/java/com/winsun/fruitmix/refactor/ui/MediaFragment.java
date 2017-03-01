@@ -33,11 +33,9 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
-import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.MediaFragmentContract;
@@ -46,7 +44,6 @@ import com.winsun.fruitmix.refactor.model.MediaFragmentDataLoader;
 import com.winsun.fruitmix.refactor.presenter.MediaFragmentPresenterImpl;
 import com.winsun.fruitmix.util.Util;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -458,11 +455,11 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
         }
 
         void setData(MediaFragmentDataLoader loader) {
-            mMapKeyIsDateValueIsPhotoList = loader.getmMapKeyIsDateValueIsPhotoList();
-            mMapKeyIsPhotoPositionValueIsPhoto = loader.getmMapKeyIsPhotoPositionValueIsPhoto();
-            mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getmMapKeyIsPhotoPositionValueIsPhotoDate();
+            mMapKeyIsDateValueIsPhotoList = loader.getMapKeyIsDateValueIsPhotoList();
+            mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
+            mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getMapKeyIsPhotoPositionValueIsPhotoDate();
             mMedias = loader.getMedias();
-            mAdapterItemTotalCount = loader.getmAdapterItemTotalCount();
+            mAdapterItemTotalCount = loader.getAdapterItemTotalCount();
         }
 
         @Override

@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.refactor.ui;
 
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -10,32 +9,16 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.model.OperationResultType;
-import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.CreateUserContract;
 import com.winsun.fruitmix.refactor.presenter.CreateUserPresenterImpl;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.Util;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class CreateUserActivity extends BaseActivity implements View.OnClickListener, CreateUserContract.CreateUserView {
-
-    //TODO refactor app:using mvp
 
     @BindView(R.id.back)
     ImageView back;

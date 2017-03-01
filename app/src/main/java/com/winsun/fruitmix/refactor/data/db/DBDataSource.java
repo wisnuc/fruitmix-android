@@ -10,6 +10,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
@@ -75,16 +76,6 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public String loadGateway() {
-        return null;
-    }
-
-    @Override
-    public String loadPort() {
-        return null;
-    }
-
-    @Override
     public OperationResult insertUsers(List<User> users) {
 
         mDBUtils.insertRemoteUsers(users);
@@ -94,7 +85,7 @@ public class DBDataSource implements DataSource {
 
 
     @Override
-    public OperateMediaShareResult insertRemoteMediaShare(String url,String token,MediaShare mediaShare) {
+    public OperateMediaShareResult insertRemoteMediaShare(String url, String token, MediaShare mediaShare) {
 
         mDBUtils.insertRemoteMediaShare(mediaShare);
 
@@ -129,7 +120,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult modifyRemoteMediaShare(String url,String token,String requestData, MediaShare modifiedMediaShare) {
+    public OperationResult modifyRemoteMediaShare(String url, String token, String requestData, MediaShare modifiedMediaShare) {
 
         mDBUtils.updateRemoteMediaShare(modifiedMediaShare);
 
@@ -137,7 +128,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult deleteRemoteMediaShare(String url,String token,MediaShare mediaShare) {
+    public OperationResult deleteRemoteMediaShare(String url, String token, MediaShare mediaShare) {
 
         mDBUtils.deleteRemoteMediaShareByUUIDs(new String[]{mediaShare.getUuid()});
 
@@ -145,7 +136,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public DeviceIDLoadOperationResult loadDeviceID() {
+    public DeviceIDLoadOperationResult loadDeviceID(String url, String token) {
 
         DeviceIDLoadOperationResult result = new DeviceIDLoadOperationResult();
 
@@ -164,7 +155,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public UsersLoadOperationResult loadUsers() {
+    public UsersLoadOperationResult loadUsers(String loadUserUrl, String loadOtherUserUrl, String token) {
 
         List<User> users = mDBUtils.getAllRemoteUser();
 
@@ -179,11 +170,16 @@ public class DBDataSource implements DataSource {
     @Override
     public User loadUser(String userUUID) {
 
+        return mDBUtils.getRemoteUser(userUUID);
+    }
+
+    @Override
+    public Collection<String> loadAllUserUUID() {
         return null;
     }
 
     @Override
-    public MediasLoadOperationResult loadAllRemoteMedias() {
+    public MediasLoadOperationResult loadAllRemoteMedias(String url, String token) {
 
         MediasLoadOperationResult result = new MediasLoadOperationResult();
 
@@ -210,7 +206,24 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public MediaSharesLoadOperationResult loadAllRemoteMediaShares() {
+    public OperationResult insertLocalMedia(String url, String token, Media media) {
+        return null;
+    }
+
+    @Override
+    public OperationResult updateLocalMedia(Media media) {
+        mDBUtils.updateLocalMedia(media);
+
+        return new OperationSuccess();
+    }
+
+    @Override
+    public Collection<String> loadRemoteMediaUUIDs() {
+        return null;
+    }
+
+    @Override
+    public MediaSharesLoadOperationResult loadAllRemoteMediaShares(String url, String token) {
 
         MediaSharesLoadOperationResult result = new MediaSharesLoadOperationResult();
 
@@ -221,7 +234,37 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public FilesLoadOperationResult loadRemoteFiles(String folderUUID) {
+    public FilesLoadOperationResult loadRemoteFolder(String url, String token) {
+        return null;
+    }
+
+    @Override
+    public OperationResult insertRemoteFiles(AbstractRemoteFile folder) {
+        return null;
+    }
+
+    @Override
+    public OperationResult loadRemoteFile(String url, String token) {
+        return null;
+    }
+
+    @Override
+    public OperationResult deleteAllRemoteFiles() {
+        return null;
+    }
+
+    @Override
+    public FileSharesLoadOperationResult loadRemoteFileRootShares(String loadFileSharedWithMeUrl, String loadFileShareWithOthersUrl, String token) {
+        return null;
+    }
+
+    @Override
+    public OperationResult insertRemoteFileShare(List<AbstractRemoteFile> files) {
+        return null;
+    }
+
+    @Override
+    public OperationResult deleteAllRemoteFileShare() {
         return null;
     }
 
@@ -283,28 +326,12 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public FileSharesLoadOperationResult loadRemoteFileRootShares() {
-        return null;
-    }
-
-    @Override
     public TokenLoadOperationResult loadToken(LoadTokenParam param) {
 
         TokenLoadOperationResult result = new TokenLoadOperationResult();
         result.setToken(getGlobalData(Util.JWT));
 
         return result;
-    }
-
-    @Override
-    public User loadCurrentLoginUser() {
-        return getUser();
-    }
-
-    @Override
-    public OperationResult insertCurrentLoginUser(User user) {
-        saveUser(user.getUserName(), user.getDefaultAvatarBgColor(), user.isAdmin(), user.getHome(), user.getUuid());
-        return new OperationSuccess();
     }
 
     @Override
@@ -406,13 +433,6 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public LoadTokenParam getLoadTokenParam() {
-
-        return new LoadTokenParam(mSharedPreferences.getString(Util.GATEWAY, null), mSharedPreferences.getString(Util.USER_UUID, ""), mSharedPreferences.getString(Util.PASSWORD, ""));
-
-    }
-
-    @Override
     public void deleteToken() {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString(Util.JWT, null);
@@ -427,6 +447,33 @@ public class DBDataSource implements DataSource {
         saveGlobalData(Util.JWT, token);
 
         return new OperationSuccess();
+    }
+
+    @Override
+    public String loadGateway() {
+
+        return getGlobalData(Util.GATEWAY);
+    }
+
+    @Override
+    public OperationResult insertGateway(String gateway) {
+
+        saveGlobalData(Util.GATEWAY, gateway);
+
+        return new OperationSuccess();
+    }
+
+    @Override
+    public OperationResult insertLoginUserUUID(String userUUID) {
+
+        saveGlobalData(Util.USER_UUID, userUUID);
+
+        return null;
+    }
+
+    @Override
+    public String loadLoginUserUUID() {
+        return getGlobalData(Util.USER_UUID);
     }
 
     @Override

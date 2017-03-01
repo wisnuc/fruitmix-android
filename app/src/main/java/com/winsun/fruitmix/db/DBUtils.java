@@ -858,6 +858,28 @@ public class DBUtils {
 
     }
 
+    public User getRemoteUser(String userUUID) {
+        openReadableDB();
+
+        User user = new User();
+
+        LocalDataParser<User> parser = new LocalUserParser();
+
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.REMOTE_USER_TABLE_NAME + " where " + DBHelper.USER_KEY_UUID + " = ?", new String[]{userUUID});
+
+        while (cursor.moveToNext()) {
+
+            user = parser.parse(cursor);
+
+        }
+
+        cursor.close();
+
+        close();
+
+        return user;
+    }
+
     public List<User> getAllRemoteUser() {
         openReadableDB();
 

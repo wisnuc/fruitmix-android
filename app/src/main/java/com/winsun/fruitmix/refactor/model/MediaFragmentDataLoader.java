@@ -1,12 +1,10 @@
 package com.winsun.fruitmix.refactor.model;
 
-import android.os.AsyncTask;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.util.LocalCache;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,7 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,8 +20,6 @@ import java.util.Map;
  */
 
 public class MediaFragmentDataLoader {
-
-    //TODO: just java bean,handle data in data repository
 
     public static final String TAG = MediaFragmentDataLoader.class.getSimpleName();
 
@@ -39,8 +34,6 @@ public class MediaFragmentDataLoader {
 
     private int mAdapterItemTotalCount = 0;
 
-    private boolean needRefreshData = true;
-
     public MediaFragmentDataLoader() {
 
         mPhotoDateGroups = new ArrayList<>();
@@ -52,23 +45,19 @@ public class MediaFragmentDataLoader {
         medias = new ArrayList<>();
     }
 
-    public void setNeedRefreshData(boolean needRefreshData) {
-        this.needRefreshData = needRefreshData;
-    }
-
-    public List<String> getmPhotoDateGroups() {
+    public List<String> getPhotoDateGroups() {
         return mPhotoDateGroups;
     }
 
-    public Map<String, List<Media>> getmMapKeyIsDateValueIsPhotoList() {
+    public Map<String, List<Media>> getMapKeyIsDateValueIsPhotoList() {
         return mMapKeyIsDateValueIsPhotoList;
     }
 
-    public SparseArray<String> getmMapKeyIsPhotoPositionValueIsPhotoDate() {
+    public SparseArray<String> getMapKeyIsPhotoPositionValueIsPhotoDate() {
         return mMapKeyIsPhotoPositionValueIsPhotoDate;
     }
 
-    public SparseArray<Media> getmMapKeyIsPhotoPositionValueIsPhoto() {
+    public SparseArray<Media> getMapKeyIsPhotoPositionValueIsPhoto() {
         return mMapKeyIsPhotoPositionValueIsPhoto;
     }
 
@@ -76,7 +65,7 @@ public class MediaFragmentDataLoader {
         return medias;
     }
 
-    public int getmAdapterItemTotalCount() {
+    public int getAdapterItemTotalCount() {
         return mAdapterItemTotalCount;
     }
 

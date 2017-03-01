@@ -33,8 +33,6 @@ import butterknife.ButterKnife;
 
 public class CreateUserActivity extends BaseActivity implements View.OnClickListener,CreateUserContract.CreateUserView {
 
-    //TODO refactor app:using mvp
-
     @BindView(R.id.back)
     ImageView back;
     @BindView(R.id.user_name_layout)

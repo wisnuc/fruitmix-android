@@ -367,9 +367,9 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
         mRepository.handleMediasForMediaFragment(medias, new MediaOperationCallback.HandleMediaForMediaFragmentCallback() {
             @Override
             public void onOperateFinished(MediaFragmentDataLoader loader) {
-                mPhotoDateGroups = loader.getmPhotoDateGroups();
-                mMapKeyIsPhotoPositionValueIsPhoto = loader.getmMapKeyIsPhotoPositionValueIsPhoto();
-                mMapKeyIsDateValueIsPhotoList = loader.getmMapKeyIsDateValueIsPhotoList();
+                mPhotoDateGroups = loader.getPhotoDateGroups();
+                mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
+                mMapKeyIsDateValueIsPhotoList = loader.getMapKeyIsDateValueIsPhotoList();
 
                 clearSelectPhoto();
 

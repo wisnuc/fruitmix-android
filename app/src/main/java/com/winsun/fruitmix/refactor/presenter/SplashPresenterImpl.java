@@ -60,56 +60,22 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
     @Override
     public void loadToken() {
 
-        final String tokenInDB = mRepository.loadTokenInDB();
-
-        if (tokenInDB == null) {
-            mView.emptyCacheToken();
-        } else {
-
-            mHandler = new CustomHandler(this);
-            mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
-
-            mRepository.loadRemoteToken(mRepository.getLoadTokenParamInDB(), new LoadTokenOperationCallback.LoadTokenCallback() {
-                @Override
-                public void onLoadSucceed(OperationResult result, String token) {
-
-                    mRepository.insertTokenToDBAndMemory(token);
-
-                    loadDeviceID();
-                }
-
-                @Override
-                public void onLoadFail(OperationResult result) {
-
-                    mRepository.insertTokenToDBAndMemory(tokenInDB);
-
-                    loadData();
-                }
-            });
-        }
-
-    }
-
-    private void loadDeviceID() {
-
-        mRepository.loadDeviceID(new LoadDeviceIdOperationCallback.LoadDeviceIDCallback() {
+        mRepository.loadTokenDeviceIDAndGatewayInSplash(new LoadTokenOperationCallback.LoadTokenCallback() {
             @Override
-            public void onLoadSucceed(OperationResult result, String deviceID) {
+            public void onLoadSucceed(OperationResult result, String token) {
+
+                mHandler = new CustomHandler(SplashPresenterImpl.this);
+                mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
 
                 loadData();
-
             }
 
             @Override
             public void onLoadFail(OperationResult result) {
 
-                mRepository.insertDeviceIDToDBAndMemory(mRepository.loadDeviceIDInDB());
-
-                loadData();
-
+                mView.emptyCacheToken();
             }
         });
-
 
     }
 

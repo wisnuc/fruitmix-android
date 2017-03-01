@@ -34,7 +34,6 @@ import java.util.concurrent.ConcurrentMap;
 public class MemoryDataSource implements DataSource {
 
     private String mGateway = "http://192.168.5.98";
-    private String mPort = "3721";
 
     private String mToken = null;
     private String mDeviceID = null;
@@ -64,7 +63,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperateMediaShareResult insertRemoteMediaShare(String url,String token,MediaShare mediaShare) {
+    public OperateMediaShareResult insertRemoteMediaShare(String url, String token, MediaShare mediaShare) {
 
         remoteMediaShareMapKeyIsUUID.putIfAbsent(mediaShare.getUuid(), mediaShare);
 
@@ -107,7 +106,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult modifyRemoteMediaShare(String url,String token,String requestData, MediaShare modifiedMediaShare) {
+    public OperationResult modifyRemoteMediaShare(String url, String token, String requestData, MediaShare modifiedMediaShare) {
 
         MediaShare originalMediaShare = remoteMediaShareMapKeyIsUUID.get(modifiedMediaShare.getUuid());
 
@@ -122,7 +121,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult deleteRemoteMediaShare(String url,String token,MediaShare mediaShare) {
+    public OperationResult deleteRemoteMediaShare(String url, String token, MediaShare mediaShare) {
 
         remoteMediaShareMapKeyIsUUID.remove(mediaShare.getUuid());
 
@@ -130,12 +129,16 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public DeviceIDLoadOperationResult loadDeviceID() {
-        return null;
+    public DeviceIDLoadOperationResult loadDeviceID(String url, String token) {
+
+        DeviceIDLoadOperationResult result = new DeviceIDLoadOperationResult();
+        result.setDeviceID(mDeviceID);
+
+        return result;
     }
 
     @Override
-    public UsersLoadOperationResult loadUsers() {
+    public UsersLoadOperationResult loadUsers(String loadUserUrl, String loadOtherUserUrl, String token) {
 
         UsersLoadOperationResult result = new UsersLoadOperationResult();
 
@@ -152,12 +155,27 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
+    public OperationResult insertLocalMedia(String url, String token, Media media) {
+        return null;
+    }
+
+    @Override
+    public OperationResult updateLocalMedia(Media media) {
+        return null;
+    }
+
+    @Override
+    public Collection<String> loadRemoteMediaUUIDs() {
+        return remoteMediaMapKeyIsUUID.keySet();
+    }
+
+    @Override
     public MediasLoadOperationResult loadLocalMediaInCamera(Collection<String> loadedMediaUUIDs) {
         return null;
     }
 
     @Override
-    public MediasLoadOperationResult loadAllRemoteMedias() {
+    public MediasLoadOperationResult loadAllRemoteMedias(String url, String token) {
 
         MediasLoadOperationResult result = new MediasLoadOperationResult();
 
@@ -227,6 +245,10 @@ public class MemoryDataSource implements DataSource {
             return null;
     }
 
+    @Override
+    public Collection<String> loadAllUserUUID() {
+        return remoteUserMapKeyIsUUID.keySet();
+    }
 
     public MediaShare loadRemoteMediaShare(String mediaShareUUID) {
         return findMediaShareInLocalCacheMap(mediaShareUUID);
@@ -239,7 +261,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public MediaSharesLoadOperationResult loadAllRemoteMediaShares() {
+    public MediaSharesLoadOperationResult loadAllRemoteMediaShares(String url, String token) {
 
         MediaSharesLoadOperationResult result = new MediaSharesLoadOperationResult();
 
@@ -250,7 +272,33 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public FilesLoadOperationResult loadRemoteFiles(String folderUUID) {
+    public FilesLoadOperationResult loadRemoteFolder(String url, String token) {
+        return null;
+    }
+
+    @Override
+    public OperationResult insertRemoteFiles(AbstractRemoteFile folder) {
+
+        remoteFileMapKeyIsUUID.putIfAbsent(folder.getUuid(), folder);
+
+        return new OperationSuccess();
+    }
+
+    @Override
+    public OperationResult loadRemoteFile(String url, String token) {
+        return null;
+    }
+
+    @Override
+    public OperationResult deleteAllRemoteFiles() {
+
+        remoteFileMapKeyIsUUID.clear();
+
+        return new OperationSuccess();
+    }
+
+    @Override
+    public FileSharesLoadOperationResult loadRemoteFileRootShares(String loadFileSharedWithMeUrl, String loadFileShareWithOthersUrl, String token) {
         return null;
     }
 
@@ -265,8 +313,19 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public FileSharesLoadOperationResult loadRemoteFileRootShares() {
-        return null;
+    public OperationResult insertRemoteFileShare(List<AbstractRemoteFile> files) {
+
+        remoteFileShareList.addAll(files);
+
+        return new OperationSuccess();
+    }
+
+    @Override
+    public OperationResult deleteAllRemoteFileShare() {
+
+        remoteFileShareList.clear();
+
+        return new OperationSuccess();
     }
 
     @Override
@@ -275,21 +334,17 @@ public class MemoryDataSource implements DataSource {
         TokenLoadOperationResult result = new TokenLoadOperationResult();
 
         result.setToken(mToken);
-        result.setOperationResult(new OperationSuccess());
+        result.setOperationResult(null);
 
         return result;
     }
 
     @Override
-    public User loadCurrentLoginUser() {
+    public OperationResult insertGateway(String gateway) {
 
-        return remoteUserMapKeyIsUUID.get(mCurrentLoginUserUUID);
+        mGateway = gateway;
 
-    }
-
-    @Override
-    public LoadTokenParam getLoadTokenParam() {
-        return null;
+        return new OperationSuccess();
     }
 
     @Override
@@ -311,12 +366,12 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public List<EquipmentAlias> loadEquipmentAlias(String token,String url) {
+    public List<EquipmentAlias> loadEquipmentAlias(String token, String url) {
         return null;
     }
 
     @Override
-    public List<User> loadUserByLoginApi(String token,String url) {
+    public List<User> loadUserByLoginApi(String token, String url) {
         return null;
     }
 
@@ -371,20 +426,20 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult insertCurrentLoginUser(User user) {
-
-        mCurrentLoginUserUUID = user.getUuid();
-
-        return new OperationSuccess();
-    }
-
-    @Override
     public String loadGateway() {
         return mGateway;
     }
 
     @Override
-    public String loadPort() {
-        return mPort;
+    public OperationResult insertLoginUserUUID(String userUUID) {
+
+        mCurrentLoginUserUUID = userUUID;
+        return new OperationSuccess();
+    }
+
+    @Override
+    public String loadLoginUserUUID() {
+
+        return mCurrentLoginUserUUID;
     }
 }
