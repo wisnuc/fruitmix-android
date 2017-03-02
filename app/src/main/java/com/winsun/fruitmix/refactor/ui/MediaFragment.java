@@ -106,7 +106,7 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
 
     private ProgressDialog mDialog;
 
-    public MediaFragment(Activity activity, List<String> alreadySelectedImageKeyArrayList, MediaMainFragmentContract.MediaMainFragmentPresenter presenter) {
+    public MediaFragment(Activity activity, MediaFragmentContract.MediaFragmentPresenter presenter) {
         containerActivity = activity;
 
         view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(R.layout.new_photo_layout, null);
@@ -139,7 +139,7 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
         mRecyclerView.setAdapter(mPhotoRecycleAdapter);
         setupLayoutManager();
 
-        mPresenter = new MediaFragmentPresenterImpl(presenter, Injection.injectDataRepository(), alreadySelectedImageKeyArrayList);
+        mPresenter = presenter;
         mPresenter.attachView(this);
 
         fab.setOnClickListener(this);
@@ -894,13 +894,16 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
                 @Override
                 public boolean onLongClick(View v) {
 
-                    mPresenter.enterChooseMode();
+                    if(!mPresenter.isSelectState()){
+                        mPresenter.enterChooseMode();
 
-                    currentMedia.setSelected(true);
+                        currentMedia.setSelected(true);
 
-                    mPresenter.calcSelectedPhoto();
+                        mPresenter.calcSelectedPhoto();
 
-                    mPresenter.setSelectCountText(String.format(containerActivity.getString(R.string.select_count), mPresenter.getSelectCount()));
+                        mPresenter.setSelectCountText(String.format(containerActivity.getString(R.string.select_count), mPresenter.getSelectCount()));
+
+                    }
 
                     return true;
                 }

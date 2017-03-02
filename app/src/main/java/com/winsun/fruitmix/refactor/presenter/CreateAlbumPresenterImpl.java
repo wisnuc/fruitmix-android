@@ -29,9 +29,9 @@ public class CreateAlbumPresenterImpl implements CreateAlbumContract.CreateAlbum
 
     private boolean isOperated = false;
 
-    public CreateAlbumPresenterImpl(DataRepository repository, List<String> selectMediaKeys) {
+    public CreateAlbumPresenterImpl(DataRepository repository) {
         this.mRepository = repository;
-        mSelectMediaKeys = selectMediaKeys;
+        mSelectMediaKeys = mRepository.getMediaKeysInCreateAlbum();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class CreateAlbumPresenterImpl implements CreateAlbumContract.CreateAlbum
         mView.showDialog();
 
         MediaShare mediaShare = mRepository.createMediaShareInMemory(true, isPublic, isMaintained, title, desc, mSelectMediaKeys);
-        LocalCache.mediaKeysInCreateAlbum.clear();
+        mRepository.clearMediaKeysInCreateAlbum();
 
         mRepository.createMediaShare(mediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
             @Override

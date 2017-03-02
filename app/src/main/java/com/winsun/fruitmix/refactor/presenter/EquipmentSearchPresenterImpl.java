@@ -45,6 +45,8 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
     private static final String SYSTEM_PORT = "3000";
     private static final String IPALIASING = "/system/ipaliasing";
 
+    private static final String HTTP_CODE = "http://";
+
     private List<List<User>> mUserExpandableLists;
     private List<Equipment> mUserLoadedEquipments;
 
@@ -94,7 +96,7 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
 
         User user = mUserExpandableLists.get(groupPosition).get(childPosition);
 
-        String gateway = "http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0);
+        String gateway = HTTP_CODE + mUserLoadedEquipments.get(groupPosition).getHosts().get(0);
         String userGroupName = mUserLoadedEquipments.get(groupPosition).getServiceName();
 
         mView.login(gateway, userGroupName, user);
@@ -163,6 +165,9 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
 
     @Override
     public void handleBackEvent() {
+
+        mRepository.stopTimingRetrieveMediaShare();
+
         mView.finishActivity();
     }
 

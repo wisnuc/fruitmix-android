@@ -21,7 +21,6 @@ public class ModifyAlbumPresenterImpl implements ModifyAlbumContract.ModifyAlbum
 
     private DataRepository mRepository;
 
-    private String mMediaShareUUID;
     private MediaShare mMediaShare;
 
     private boolean isOperated = false;
@@ -29,9 +28,7 @@ public class ModifyAlbumPresenterImpl implements ModifyAlbumContract.ModifyAlbum
     public ModifyAlbumPresenterImpl(DataRepository repository, String mediaShareUUID) {
         this.mRepository = repository;
 
-        mMediaShareUUID = mediaShareUUID;
-
-        mMediaShare = mRepository.loadMediaShareFromMemory(mMediaShareUUID);
+        mMediaShare = mRepository.loadMediaShareFromMemory(mediaShareUUID);
     }
 
     @Override

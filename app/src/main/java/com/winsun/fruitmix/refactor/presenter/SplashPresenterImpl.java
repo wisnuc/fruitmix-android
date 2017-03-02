@@ -6,7 +6,6 @@ import android.os.Message;
 import android.util.Log;
 
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.refactor.business.callback.LoadDeviceIdOperationCallback;
 import com.winsun.fruitmix.refactor.business.callback.LoadTokenOperationCallback;
 import com.winsun.fruitmix.refactor.contract.SplashContract;
 import com.winsun.fruitmix.refactor.business.DataRepository;
@@ -24,9 +23,9 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
 
     private SplashContract.SplashView mView;
 
-    public static final int WELCOME = 0x0010;
+    private static final int WELCOME = 0x0010;
 
-    public static final int DELAY_TIME_MILLISECOND = 3 * 1000;
+    private static final int DELAY_TIME_MILLISECOND = 3 * 1000;
 
     private CustomHandler mHandler;
 
@@ -81,7 +80,7 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
 
     private void loadData() {
         mRepository.loadUsers(null);
-        mRepository.loadMedias(null);
+        mRepository.loadMediasInThread(null);
         mRepository.loadMediaShares(null);
     }
 

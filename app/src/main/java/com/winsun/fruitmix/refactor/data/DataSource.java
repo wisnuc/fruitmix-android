@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.refactor.data;
 
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
+import com.winsun.fruitmix.fileModule.download.FileDownloadState;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -87,7 +88,7 @@ public interface DataSource {
     //file
     FilesLoadOperationResult loadRemoteFolder(String url, String token);
 
-    OperationResult loadRemoteFile(String url,String token);
+    OperationResult loadRemoteFile(String baseUrl, String token, FileDownloadState fileDownloadState);
 
     OperationResult insertRemoteFiles(AbstractRemoteFile folder);
 
@@ -101,6 +102,9 @@ public interface DataSource {
     OperationResult deleteAllRemoteFileShare();
 
     //file download
+
+    FileDownloadItem loadDownloadFileRecord(String fileUUID);
+
     FileDownloadLoadOperationResult loadDownloadedFilesRecord();
 
     OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs);

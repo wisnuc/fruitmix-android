@@ -10,6 +10,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.fileModule.download.FileDownloadState;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -244,7 +245,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult loadRemoteFile(String url, String token) {
+    public OperationResult loadRemoteFile(String baseUrl, String token, FileDownloadState fileDownloadState) {
         return null;
     }
 
@@ -265,6 +266,18 @@ public class DBDataSource implements DataSource {
 
     @Override
     public OperationResult deleteAllRemoteFileShare() {
+        return null;
+    }
+
+    @Override
+    public FileDownloadItem loadDownloadFileRecord(String fileUUID) {
+        for (FileDownloadItem fileDownloadItem : FileDownloadManager.INSTANCE.getFileDownloadItems()) {
+
+            if (fileDownloadItem.getFileUUID().equals(fileUUID)) {
+                return fileDownloadItem;
+            }
+        }
+
         return null;
     }
 

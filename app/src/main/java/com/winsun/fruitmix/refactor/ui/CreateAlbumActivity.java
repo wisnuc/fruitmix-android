@@ -78,7 +78,7 @@ public class CreateAlbumActivity extends BaseActivity implements CreateAlbumCont
 
         ButterKnife.bind(this);
 
-        mPresenter = new CreateAlbumPresenterImpl(Injection.injectDataRepository(),LocalCache.mediaKeysInCreateAlbum);
+        mPresenter = new CreateAlbumPresenterImpl(Injection.injectDataRepository());
         mPresenter.attachView(this);
         mPresenter.initView();
 

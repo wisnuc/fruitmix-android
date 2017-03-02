@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.refactor.data.memory;
 
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
+import com.winsun.fruitmix.fileModule.download.FileDownloadState;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -20,12 +21,12 @@ import com.winsun.fruitmix.refactor.data.dataOperationResult.OperateUserResult;
 import com.winsun.fruitmix.refactor.data.dataOperationResult.TokenLoadOperationResult;
 import com.winsun.fruitmix.refactor.data.dataOperationResult.UsersLoadOperationResult;
 import com.winsun.fruitmix.refactor.model.EquipmentAlias;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 
 /**
  * Created by Administrator on 2017/2/9.
@@ -55,6 +56,7 @@ public class MemoryDataSource implements DataSource {
         localMediaMapKeyIsThumb = new ConcurrentHashMap<>();
         remoteFileMapKeyIsUUID = new ConcurrentHashMap<>();
         remoteFileShareList = new ArrayList<>();
+
     }
 
     @Override
@@ -285,7 +287,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult loadRemoteFile(String url, String token) {
+    public OperationResult loadRemoteFile(String baseUrl, String token, FileDownloadState fileDownloadState) {
         return null;
     }
 
@@ -299,6 +301,11 @@ public class MemoryDataSource implements DataSource {
 
     @Override
     public FileSharesLoadOperationResult loadRemoteFileRootShares(String loadFileSharedWithMeUrl, String loadFileShareWithOthersUrl, String token) {
+        return null;
+    }
+
+    @Override
+    public FileDownloadItem loadDownloadFileRecord(String fileUUID) {
         return null;
     }
 

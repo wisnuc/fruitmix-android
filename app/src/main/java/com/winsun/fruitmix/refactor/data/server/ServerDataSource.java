@@ -5,10 +5,13 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
+import com.winsun.fruitmix.fileModule.download.FileDownloadState;
+import com.winsun.fruitmix.fileModule.interfaces.FileDownloadUploadInterface;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.OkHttpUtil;
+import com.winsun.fruitmix.http.retrofit.RetrofitInstance;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
@@ -41,6 +44,7 @@ import com.winsun.fruitmix.refactor.data.dataOperationResult.OperateUserResult;
 import com.winsun.fruitmix.refactor.data.dataOperationResult.TokenLoadOperationResult;
 import com.winsun.fruitmix.refactor.data.dataOperationResult.UsersLoadOperationResult;
 import com.winsun.fruitmix.refactor.model.EquipmentAlias;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONArray;
@@ -61,6 +65,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
 
 /**
  * Created by Administrator on 2017/2/9.
@@ -936,8 +943,25 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult loadRemoteFile(String url, String token) {
-        return null;
+    public OperationResult loadRemoteFile(String baseUrl, String token, FileDownloadState fileDownloadState) {
+
+        FileDownloadUploadInterface fileDownloadUploadInterface = RetrofitInstance.INSTANCE.getRetrofitInstance(baseUrl, token).create(FileDownloadUploadInterface.class);
+
+        Call<ResponseBody> call = fileDownloadUploadInterface.downloadFile(baseUrl + Util.FILE_PARAMETER + "/" + fileDownloadState.getFileUUID());
+
+        boolean result = false;
+
+        try {
+            result = FileUtil.writeResponseBodyToFolder(call.execute().body(), fileDownloadState);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (result)
+            return new OperationSuccess();
+        else
+            return new OperationIOException();
     }
 
     @Override
@@ -947,6 +971,11 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public OperationResult deleteAllRemoteFiles() {
+        return null;
+    }
+
+    @Override
+    public FileDownloadItem loadDownloadFileRecord(String fileUUID) {
         return null;
     }
 

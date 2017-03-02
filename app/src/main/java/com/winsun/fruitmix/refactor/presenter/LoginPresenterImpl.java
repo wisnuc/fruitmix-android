@@ -48,11 +48,11 @@ public class LoginPresenterImpl implements LoginContract.LoginPresenter {
         mView.showDialog();
 
         LoadTokenParam param = new LoadTokenParam(mGateway, mUserUUid, userPassword);
-        mRepository.loadRemoteTokenWhenLogin(param, new LoadTokenOperationCallback.LoadTokenCallback() {
+        mRepository.loadRemoteTokenWhenLoginInThread(param, new LoadTokenOperationCallback.LoadTokenCallback() {
             @Override
             public void onLoadSucceed(OperationResult result, String token) {
 
-                mRepository.loadRemoteDeviceID(new LoadDeviceIdOperationCallback.LoadDeviceIDCallback() {
+                mRepository.loadRemoteDeviceIDInThread(new LoadDeviceIdOperationCallback.LoadDeviceIDCallback() {
                     @Override
                     public void onLoadSucceed(OperationResult result, String deviceID) {
 
@@ -84,7 +84,7 @@ public class LoginPresenterImpl implements LoginContract.LoginPresenter {
 
     private void loadData() {
         mRepository.loadUsers(null);
-        mRepository.loadMedias(null);
+        mRepository.loadMediasInThread(null);
         mRepository.loadMediaShares(null);
     }
 

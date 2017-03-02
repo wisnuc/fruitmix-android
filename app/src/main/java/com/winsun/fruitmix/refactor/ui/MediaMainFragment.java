@@ -29,8 +29,11 @@ import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.MainPageContract;
+import com.winsun.fruitmix.refactor.contract.MediaFragmentContract;
 import com.winsun.fruitmix.refactor.contract.MediaMainFragmentContract;
+import com.winsun.fruitmix.refactor.presenter.MediaFragmentPresenterImpl;
 import com.winsun.fruitmix.refactor.presenter.MediaMainFragmentPresenterImpl;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -99,7 +102,9 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
 
         mPresenter = new MediaMainFragmentPresenterImpl(mMainPagePresenter);
 
-        mMediaFragment = new MediaFragment(getActivity(), Collections.<String>emptyList(), mPresenter);
+        MediaFragmentContract.MediaFragmentPresenter presenter = new MediaFragmentPresenterImpl(mPresenter, Injection.injectDataRepository(), Collections.<String>emptyList());
+
+        mMediaFragment = new MediaFragment(getActivity(), presenter);
         mMediaShareFragment = new MediaShareFragment(getActivity());
         mAlbumFragment = new AlbumFragment(getActivity());
 
@@ -306,7 +311,6 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
             case Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED:
 
                 Log.i(TAG, "handleOperationEvent: new local media in camera retrieved succeed");
-
 
 
                 break;

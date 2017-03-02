@@ -89,6 +89,8 @@ public class MainPagePresenterImpl implements MainPageContract.MainPagePresenter
             mView.setFileItemMenuIcon(R.drawable.ic_photo);
             mView.hideMediaAndShowFileFragment();
 
+            mRepository.stopTimingRetrieveMediaShare();
+
         } else {
 
             currentPage = PAGE_MEDIA;
@@ -218,6 +220,9 @@ public class MainPagePresenterImpl implements MainPageContract.MainPagePresenter
     private void finishApp() {
 
         if (System.currentTimeMillis() - backPressedTimeMillis < TIME_INTERNAL) {
+
+            mRepository.stopTimingRetrieveMediaShare();
+
             mView.finishActivity();
         } else {
             mView.showFinishAppToast();

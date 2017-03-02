@@ -23,12 +23,13 @@ public enum RetrofitInstance {
 
     public static final String TAG = RetrofitInstance.class.getSimpleName();
 
-    private static final String BASE_URL = FNAS.Gateway + ":" + FNAS.PORT;
+    private String mToken;
     private Retrofit retrofitInstance;
 
-    public Retrofit getRetrofitInstance() {
+    public Retrofit getRetrofitInstance(String baseUrl,String token) {
         if (retrofitInstance == null) {
-            retrofitInstance = new Retrofit.Builder().baseUrl(BASE_URL).client(createOKHTTPClient()).build();
+            retrofitInstance = new Retrofit.Builder().baseUrl(baseUrl).client(createOKHTTPClient()).build();
+            mToken = token;
         }
         return retrofitInstance;
     }
@@ -49,7 +50,7 @@ public enum RetrofitInstance {
             public Response intercept(Chain chain) throws IOException {
                 Request original = chain.request();
 
-                Request request = original.newBuilder().header(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT).build();
+                Request request = original.newBuilder().header(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + mToken).build();
 
                 return chain.proceed(request);
             }

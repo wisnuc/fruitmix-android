@@ -34,6 +34,7 @@ public class MediaShareFragmentPresenterImpl implements MediaShareFragmentContra
 
     private Bundle reenterState;
 
+    private MediaShareOperationCallback.LoadMediaSharesCallback mCallback;
 
     public MediaShareFragmentPresenterImpl(DataRepository repository) {
         mRepository = repository;
@@ -51,7 +52,7 @@ public class MediaShareFragmentPresenterImpl implements MediaShareFragmentContra
         for (String aStArr : imageKeys) {
 
             picItem = mRepository.loadMediaFromMemory(aStArr);
-            if(picItem == null)
+            if (picItem == null)
                 picItem = new Media();
 
             picItem.setSelected(false);
@@ -124,7 +125,7 @@ public class MediaShareFragmentPresenterImpl implements MediaShareFragmentContra
 
     @Override
     public void refreshData() {
-
+        loadMediaShares();
     }
 
     @Override
@@ -149,14 +150,15 @@ public class MediaShareFragmentPresenterImpl implements MediaShareFragmentContra
         });
     }
 
-    @Override
-    public void loadMediaShares() {
+    private void loadMediaShares() {
 
-        mMediaShares.clear();
+        mView.showLoadingUI();
 
-        mRepository.loadMediaShares(new MediaShareOperationCallback.LoadMediaSharesCallback() {
+        mCallback = new MediaShareOperationCallback.LoadMediaSharesCallback() {
             @Override
             public void onLoadSucceed(OperationResult operationResult, Collection<MediaShare> mediaShares) {
+
+                mMediaShares.clear();
 
                 for (MediaShare mediaShare : mediaShares) {
 
@@ -183,8 +185,10 @@ public class MediaShareFragmentPresenterImpl implements MediaShareFragmentContra
             public void onLoadFail(OperationResult operationResult) {
 
             }
-        });
+        };
 
+        mRepository.loadMediaShares(mCallback);
+        mRepository.registerTimeRetrieveMediaShareCallback(mCallback);
     }
 
     @Override
@@ -205,6 +209,8 @@ public class MediaShareFragmentPresenterImpl implements MediaShareFragmentContra
     @Override
     public void detachView() {
         mView = null;
+
+        mRepository.unregisterTimeRetrieveMediaShareCallback(mCallback);
     }
 
     @Override

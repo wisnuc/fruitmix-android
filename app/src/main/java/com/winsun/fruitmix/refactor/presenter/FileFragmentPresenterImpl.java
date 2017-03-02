@@ -301,13 +301,22 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
     }
 
     @Override
-    public void itemMenuOnClick(Context context, AbstractRemoteFile file) {
+    public void itemMenuOnClick(final Context context, final AbstractRemoteFile file) {
 
         List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
 
         BottomMenuItem menuItem;
-        if (FileDownloadManager.INSTANCE.checkIsDownloaded(file.getUuid())) {
-            menuItem = new BottomMenuItem(mView.getString(R.string.open_the_item), new OpenFileCommand(context, file.getName()));
+        if (mRepository.checkIsDownloaded(file.getUuid())) {
+            menuItem = new BottomMenuItem(mView.getString(R.string.open_the_item), new AbstractCommand() {
+                @Override
+                public void execute() {
+                    FileUtil.openAbstractRemoteFile(context, file.getName());
+                }
+
+                @Override
+                public void unExecute() {
+                }
+            });
         } else {
             AbstractCommand macroCommand = new MacroCommand();
             AbstractCommand downloadFileCommand = new DownloadFileCommand(file);
@@ -341,8 +350,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
     @Override
     public void fileItemOnClick(Context context, AbstractRemoteFile abstractRemoteFile) {
 
-        FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
-        if (fileDownloadManager.checkIsDownloaded(abstractRemoteFile.getUuid())) {
+        if (mRepository.checkIsDownloaded(abstractRemoteFile.getUuid())) {
 
             if (!FileUtil.openAbstractRemoteFile(context, abstractRemoteFile.getName())) {
                 mView.showOpenFileFailToast();
@@ -411,6 +419,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
 
         }
     }
+
 
     @Override
     public void downloadSelectedFiles() {

@@ -93,7 +93,7 @@ public class AlbumFragment implements AlbumFragmentContract.AlbumFragmentView {
                 mPresenter.createAlbumBtnOnClick();
 
                 Intent intent = new Intent();
-                intent.setClass(containerActivity, NewAlbumPicChooseActivity.class);
+                intent.setClass(containerActivity, NewPhotoSelectActivity.class);
                 containerActivity.startActivityForResult(intent, Util.KEY_CHOOSE_PHOTO_REQUEST_CODE);
             }
         });

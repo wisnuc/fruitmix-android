@@ -16,7 +16,6 @@ import com.winsun.fruitmix.refactor.business.callback.MediaShareOperationCallbac
 import com.winsun.fruitmix.refactor.contract.MediaFragmentContract;
 import com.winsun.fruitmix.refactor.contract.MediaMainFragmentContract;
 import com.winsun.fruitmix.refactor.model.MediaFragmentDataLoader;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -237,7 +236,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
     private void createAlbum(List<String> selectMediaKeys) {
 
-        LocalCache.mediaKeysInCreateAlbum.addAll(selectMediaKeys);
+        mRepository.insertMediaKeysInCreateAlbum(selectMediaKeys);
         clearSelectPhoto();
 
         mView.startCreateAlbumActivity();
@@ -320,7 +319,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     @Override
     public void onResume(){
         if (mPhotoListRefresh) {
-            mRepository.loadLocalMediaInCamera(new MediaOperationCallback.LoadMediasCallback() {
+            mRepository.loadLocalMediaInCameraInThread(new MediaOperationCallback.LoadMediasCallback() {
                 @Override
                 public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
                     showMedias(medias);
@@ -347,7 +346,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     @Override
     public void onCreate() {
 
-        mRepository.loadMedias(new MediaOperationCallback.LoadMediasCallback() {
+        mRepository.loadMediasInThread(new MediaOperationCallback.LoadMediasCallback() {
             @Override
             public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
 

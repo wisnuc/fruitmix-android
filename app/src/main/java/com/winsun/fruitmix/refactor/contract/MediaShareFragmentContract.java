@@ -41,8 +41,6 @@ public interface MediaShareFragmentContract {
 
         void onPageSelected();
 
-        void loadMediaShares();
-
         User loadUser(String userUUID);
 
         Media loadMedia(String mediaKey);

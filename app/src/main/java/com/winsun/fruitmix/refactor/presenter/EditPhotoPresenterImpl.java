@@ -25,7 +25,6 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
 
     private DataRepository mRepository;
 
-    private String mMediaShareUUID;
     private MediaShare mMediaShare;
     private MediaShare mModifiedMediaShare;
     private List<Media> mMedias;
@@ -35,9 +34,7 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
     public EditPhotoPresenterImpl(DataRepository repository, String mediaShareUUID) {
         this.mRepository = repository;
 
-        mMediaShareUUID = mediaShareUUID;
-
-        mMediaShare = mRepository.loadMediaShareFromMemory(mMediaShareUUID);
+        mMediaShare = mRepository.loadMediaShareFromMemory(mediaShareUUID);
         mModifiedMediaShare = mMediaShare.cloneMyself();
 
     }
@@ -81,8 +78,6 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
             requestData += diffContentsModifiedMediaShare.createStringOperateContentsInMediaShare(Util.ADD);
         }
         requestData += "]";
-
-        //TODO: modify media share meta data or content use different function
 
         mRepository.modifyMediaShare(requestData, mModifiedMediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
             @Override

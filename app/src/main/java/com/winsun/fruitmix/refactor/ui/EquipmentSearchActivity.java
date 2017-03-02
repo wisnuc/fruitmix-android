@@ -161,9 +161,9 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
 
                 ButlerService.stopButlerService(mContext);
 
-                finish();
-
                 mPresenter.handleBackEvent();
+
+                finish();
 
                 break;
             case R.id.fab:

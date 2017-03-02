@@ -31,6 +31,8 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
 
     private boolean isDataRefreshed = false;
 
+    private MediaShareOperationCallback.LoadMediaSharesCallback mCallback;
+
     public AlbumFragmentPresenterImpl(DataRepository repository) {
         mRepository = repository;
 
@@ -66,7 +68,7 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
 
         mView.showDialog();
 
-        mRepository.modifyMediaShare(mediaShare.createToggleShareStateRequestData(),mediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
+        mRepository.modifyMediaShare(mediaShare.createToggleShareStateRequestData(), mediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
 
@@ -177,7 +179,7 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
     }
 
     private void loadMediaShares() {
-        mRepository.loadMediaShares(new MediaShareOperationCallback.LoadMediaSharesCallback() {
+        mCallback = new MediaShareOperationCallback.LoadMediaSharesCallback() {
             @Override
             public void onLoadSucceed(OperationResult operationResult, Collection<MediaShare> mediaShares) {
 
@@ -211,7 +213,10 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
             public void onLoadFail(OperationResult operationResult) {
 
             }
-        });
+        };
+
+        mRepository.loadMediaShares(mCallback);
+        mRepository.registerTimeRetrieveMediaShareCallback(mCallback);
     }
 
     @Override
@@ -222,6 +227,8 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
     @Override
     public void detachView() {
         mView = null;
+
+        mRepository.unregisterTimeRetrieveMediaShareCallback(mCallback);
     }
 
 
