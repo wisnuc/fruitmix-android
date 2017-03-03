@@ -29,19 +29,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
-import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
-import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.MediaFragmentContract;
-import com.winsun.fruitmix.refactor.contract.MediaMainFragmentContract;
 import com.winsun.fruitmix.refactor.model.MediaFragmentDataLoader;
-import com.winsun.fruitmix.refactor.presenter.MediaFragmentPresenterImpl;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;
@@ -95,8 +88,6 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
 
     private boolean mUseAnim = false;
 
-    private ImageLoader mImageLoader;
-
     private float mOldSpan = 0;
     private ScaleGestureDetector mPinchScaleDetector;
 
@@ -114,8 +105,6 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
         ButterKnife.bind(this, view);
 
         noContentImageView.setImageResource(R.drawable.no_photo);
-
-        initImageLoader();
 
         calcScreenWidth();
 
@@ -224,13 +213,6 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
 
         mPhotoRecycleAdapter.setData(loader);
         mPhotoRecycleAdapter.notifyDataSetChanged();
-
-    }
-
-    private void initImageLoader() {
-
-        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
-        mImageLoader = imageGifLoaderInstance.getImageLoader(containerActivity);
 
     }
 
@@ -378,7 +360,7 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
     }
 
     private String findPhotoTag(Media media) {
-        return media.getImageThumbUrl(containerActivity);
+        return mPresenter.loadImageThumbUrl(media);
     }
 
     @Override
@@ -768,21 +750,12 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
             if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getUuid()))
                 currentMedia.setSelected(true);
 
-            mImageLoader.setTag(position);
+//            mImageLoader.setTag(position);
 
             if (!mIsFling) {
-                String imageUrl = currentMedia.getImageThumbUrl(containerActivity);
-                mImageLoader.setShouldCache(!currentMedia.isLocal());
-
-                if (currentMedia.isLocal())
-                    mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
-
-                mPhotoIv.setTag(imageUrl);
-                mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
-                mPhotoIv.setImageUrl(imageUrl, mImageLoader);
+                mPresenter.loadMediaToView(containerActivity, currentMedia, mPhotoIv);
             } else {
-                mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
-                mPhotoIv.setImageUrl(null, mImageLoader);
+                mPresenter.cancelLoadMediaToView(mPhotoIv);
             }
 
             List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());
@@ -863,12 +836,12 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
 
                         }
 
-                        PhotoSliderActivity.setMediaList(mMedias);
+                        OriginalMediaActivity.setMediaList(mMedias);
 
                         Intent intent = new Intent();
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
-                        intent.setClass(containerActivity, PhotoSliderActivity.class);
+                        intent.setClass(containerActivity, OriginalMediaActivity.class);
 
                         if (mPhotoIv.isLoaded()) {
 
@@ -894,7 +867,7 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
                 @Override
                 public boolean onLongClick(View v) {
 
-                    if(!mPresenter.isSelectState()){
+                    if (!mPresenter.isSelectState()) {
                         mPresenter.enterChooseMode();
 
                         currentMedia.setSelected(true);

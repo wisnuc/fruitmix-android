@@ -1,10 +1,13 @@
 package com.winsun.fruitmix.refactor.presenter;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.SparseArray;
 import android.view.View;
 
+import com.android.volley.toolbox.NetworkImageView;
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.business.DataRepository;
@@ -187,6 +190,22 @@ public class MediaFragmentInNewPhotoSelectPresenterImpl implements MediaFragment
 
     @Override
     public void onResume() {
+    }
+
+    @Override
+    public void loadMediaToView(Context context, Media media, NetworkImageView view) {
+        mRepository.loadThumbMediaToNetworkImageView(context, media, view);
+    }
+
+    @Override
+    public void cancelLoadMediaToView(NetworkImageView view) {
+        view.setDefaultImageResId(R.drawable.placeholder_photo);
+        view.setImageUrl(null, null);
+    }
+
+    @Override
+    public String loadImageThumbUrl(Media media) {
+        return mRepository.loadImageThumbUrl(media);
     }
 
     private void showMedias(final Collection<Media> medias) {

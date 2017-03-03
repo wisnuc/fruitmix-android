@@ -100,13 +100,26 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
                 String imageTag;
 
                 boolean isThumb = media.isLoaded();
-                imageTag = mView.getImageUrl(isThumb, media);
+                imageTag = getImageUrl(isThumb, media);
 
                 sharedElements.put(imageKey, mView.findViewWithTag(imageTag));
 
                 Log.d(TAG, "onMapSharedElements: media key:" + imageKey + " imageTag:" + imageTag);
             }
         }
+    }
+
+
+    private String getImageUrl(boolean isThumb, Media media) {
+        String currentUrl;
+
+        if (isThumb) {
+            currentUrl = mRepository.loadImageThumbUrl(media);
+        } else {
+            currentUrl = mRepository.loadImageOriginalUrl(media);
+        }
+
+        return currentUrl;
     }
 
     @Override

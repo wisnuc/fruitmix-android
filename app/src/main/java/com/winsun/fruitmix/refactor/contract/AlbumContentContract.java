@@ -1,8 +1,10 @@
 package com.winsun.fruitmix.refactor.contract;
 
+import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.common.BasePresenter;
@@ -64,5 +66,7 @@ public interface AlbumContentContract {
         List<Media> getMedias();
 
         String getMediaShareUUID();
+
+        void loadMediaToView(Context context, Media media, NetworkImageView view);
     }
 }

@@ -1,8 +1,10 @@
 package com.winsun.fruitmix.refactor.presenter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -72,10 +74,14 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
 
         String requestData = "[";
         if (diffContentsOriginalMediaShare.getMediaContentsListSize() != 0) {
-            requestData += diffContentsOriginalMediaShare.createStringOperateContentsInMediaShare(Util.DELETE);
+
+            requestData += mRepository.createStringOperateContentsInMediaShare(diffContentsOriginalMediaShare,Util.DELETE);
+
         }
         if (diffContentsModifiedMediaShare.getMediaContentsListSize() != 0) {
-            requestData += diffContentsModifiedMediaShare.createStringOperateContentsInMediaShare(Util.ADD);
+
+            requestData += mRepository.createStringOperateContentsInMediaShare(diffContentsModifiedMediaShare,Util.ADD);
+
         }
         requestData += "]";
 
@@ -136,6 +142,11 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
         mModifiedMediaShare.removeMediaShareContent(position);
         mMedias.remove(position);
 
+    }
+
+    @Override
+    public void loadMediaToView(Context context, Media media, NetworkImageView view) {
+        mRepository.loadThumbMediaToNetworkImageView(context,media,view);
     }
 
     @Override

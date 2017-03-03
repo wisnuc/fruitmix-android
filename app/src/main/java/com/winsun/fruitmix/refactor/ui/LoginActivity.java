@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
@@ -61,7 +60,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         String gateway = intent.getStringExtra(Util.GATEWAY);
         int color = intent.getIntExtra(Util.USER_BG_COLOR, 0);
 
-        mPresenter = new LoginPresenterImpl(Injection.injectDataRepository(),equipmentGroupName,equipmentChildName,color,userUUid,gateway);
+        mPresenter = new LoginPresenterImpl(Injection.injectDataRepository(mContext),equipmentGroupName,equipmentChildName,color,gateway,userUUid);
         mPresenter.attachView(this);
         mPresenter.showEquipmentAndUser();
     }
@@ -132,7 +131,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
 
     @Override
     public void handleLoginSucceed() {
-        Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
+        Intent jumpIntent = new Intent(mContext, MainPageActivity.class);
         startActivity(jumpIntent);
         setResult(RESULT_OK);
         finish();

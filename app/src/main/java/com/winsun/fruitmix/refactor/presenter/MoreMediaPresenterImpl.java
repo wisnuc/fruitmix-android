@@ -1,7 +1,9 @@
 package com.winsun.fruitmix.refactor.presenter;
 
+import android.content.Context;
 import android.content.Intent;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -79,5 +81,10 @@ public class MoreMediaPresenterImpl implements MoreMediaContract.MoreMediaPresen
 
             }
         });
+    }
+
+    @Override
+    public void loadMediaToView(Context context, Media media, NetworkImageView view) {
+        mRepository.loadThumbMediaToNetworkImageView(context, media, view);
     }
 }

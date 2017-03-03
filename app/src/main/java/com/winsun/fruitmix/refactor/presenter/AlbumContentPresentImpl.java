@@ -1,10 +1,12 @@
 package com.winsun.fruitmix.refactor.presenter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -54,7 +56,7 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
 
         MediaShare cloneMediaShare = mMediaShare.cloneMyself();
 
-        mRepository.modifyMediaShare(cloneMediaShare.createToggleShareStateRequestData(), cloneMediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
+        mRepository.modifyMediaShare(cloneMediaShare.createToggleShareStateRequestData(mRepository.loadAllUserUUIDInMemory()), cloneMediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
                 mView.dismissDialog();
@@ -234,6 +236,13 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
     @Override
     public String getMediaShareUUID() {
         return mMediaShareUUID;
+    }
+
+    @Override
+    public void loadMediaToView(Context context, Media media, NetworkImageView view) {
+
+        mRepository.loadThumbMediaToNetworkImageView(context, media, view);
+
     }
 
     @Override

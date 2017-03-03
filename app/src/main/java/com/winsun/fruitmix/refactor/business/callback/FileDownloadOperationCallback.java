@@ -24,6 +24,12 @@ public interface FileDownloadOperationCallback {
 
     }
 
+    interface StartDownloadFileCallback{
+
+        void start();
+
+    }
+
     interface DeleteDownloadedFilesCallback{
 
         void onFinished();

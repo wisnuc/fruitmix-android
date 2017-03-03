@@ -20,6 +20,8 @@ public class FileDownloadItem {
 
     private List<FileDownloadOperationCallback.FileDownloadStateChangedCallback> callbacks;
 
+    private FileDownloadOperationCallback.StartDownloadFileCallback startDownloadFileCallback;
+
     public FileDownloadItem(String fileName, long fileSize, String fileUUID) {
         this.fileName = fileName;
         this.fileSize = fileSize;
@@ -64,6 +66,10 @@ public class FileDownloadItem {
         return fileDownloadState.getDownloadState();
     }
 
+    public FileDownloadState getFileDownloadState() {
+        return fileDownloadState;
+    }
+
     public String getFileUUID() {
         return fileUUID;
     }
@@ -82,6 +88,14 @@ public class FileDownloadItem {
 
     public void unregisterStateChangedCallback(FileDownloadOperationCallback.FileDownloadStateChangedCallback callback) {
         callbacks.remove(callback);
+    }
+
+    public void startDownload() {
+        startDownloadFileCallback.start();
+    }
+
+    public void registerStartDownloadFileCallback(FileDownloadOperationCallback.StartDownloadFileCallback startDownloadFileCallback) {
+        this.startDownloadFileCallback = startDownloadFileCallback;
     }
 
     public void notifyDownloadStateChanged(DownloadState downloadState) {

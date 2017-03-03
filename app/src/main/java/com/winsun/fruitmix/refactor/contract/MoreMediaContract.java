@@ -1,5 +1,8 @@
 package com.winsun.fruitmix.refactor.contract;
 
+import android.content.Context;
+
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
@@ -24,6 +27,8 @@ public interface MoreMediaContract {
     interface MoreMediaPresenter extends BasePresenter<MoreMediaView> {
 
         void loadMediaInMediaShare();
+
+        void loadMediaToView(Context context, Media media, NetworkImageView view);
 
     }
 

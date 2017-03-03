@@ -25,24 +25,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.IImageLoadListener;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.EditTextPreIme;
-import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.model.RequestQueueInstance;
-import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.CustomTransitionListener;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
@@ -55,9 +44,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -96,8 +83,6 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
     private ProgressDialog mDialog;
 
-    private ImageLoader mImageLoader;
-
     private boolean showSoftInputWhenEnter = false;
 
     private GestureDetectorCompat gestureDetectorCompat;
@@ -119,8 +104,6 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         mContext = this;
 
         ButterKnife.bind(this);
-
-        initImageLoader();
 
         LinearLayoutManager manager = new LinearLayoutManager(mContext);
         lvComment.setLayoutManager(manager);
@@ -208,7 +191,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
                 mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
 
-                FNAS.createLocalMediaComment(mContext, media.getUuid(), createComment(media.getBelongingMediaShareUUID(), mComment));
+//                FNAS.createLocalMediaComment(mContext, media.getUuid(), createComment(media.getBelongingMediaShareUUID(), mComment));
             }
         });
 
@@ -217,30 +200,24 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
     }
 
-    private void initImageLoader() {
-
-        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
-        mImageLoader = imageGifLoaderInstance.getImageLoader(mContext);
-    }
-
     private void loadMedia() {
         ivMain.registerImageLoadListener(this);
         ivMain.setTransitionName(media.getUuid());
 
-        mImageLoader.setShouldCache(!media.isLocal());
-
-        if (media.isLocal())
-            ivMain.setOrientationNumber(media.getOrientationNumber());
-
-        String url = media.getImageOriginalUrl(this);
-        ivMain.setTag(url);
-        ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
-        ivMain.setOrientationNumber(media.getOrientationNumber());
-        ivMain.setImageUrl(url, mImageLoader);
+//        mImageLoader.setShouldCache(!media.isLocal());
+//
+//        if (media.isLocal())
+//            ivMain.setOrientationNumber(media.getOrientationNumber());
+//
+//        String url = media.getImageOriginalUrl(this);
+//        ivMain.setTag(url);
+//        ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
+//        ivMain.setOrientationNumber(media.getOrientationNumber());
+//        ivMain.setImageUrl(url, mImageLoader);
     }
 
     private void retrieveMediaByImageKey() {
-        Media imageRaw;
+/*        Media imageRaw;
 
         String imageKey = getIntent().getStringExtra(Util.IMAGE_KEY);
 
@@ -272,7 +249,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                 media.setBelongingMediaShareUUID(shareRaw.getUuid());
                 break;
             }
-        }
+        }*/
     }
 
     @Override
@@ -306,7 +283,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+ /*   @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
         String action = operationEvent.getAction();
@@ -334,7 +311,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                         Comment comment = ((MediaShareCommentOperationEvent) operationEvent).getComment();
                         String imageUUID = ((MediaShareCommentOperationEvent) operationEvent).getImageUUID();
 
-                        FNAS.deleteLocalMediaComment(mContext, imageUUID, comment);
+//                        FNAS.deleteLocalMediaComment(mContext, imageUUID, comment);
 
                         break;
                     case MALFORMED_URL_EXCEPTION:
@@ -363,7 +340,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
                             String imageUUID = ((MediaShareCommentOperationEvent) operationEvent).getImageUUID();
 
-                            FNAS.createRemoteMediaComment(mContext, imageUUID, comment);
+//                            FNAS.createRemoteMediaComment(mContext, imageUUID, comment);
                         }
 
                         tfContent.setText("");
@@ -388,7 +365,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         }
 
 
-    }
+    }*/
 
     private void finishActivity() {
         ActivityCompat.finishAfterTransition(this);
@@ -458,7 +435,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
     private Comment createComment(String shareId, String commentText) {
 
         Comment commentItem = new Comment();
-        commentItem.setCreator(FNAS.userUUID);
+//        commentItem.setCreator(FNAS.userUUID);
         commentItem.setTime(String.valueOf(System.currentTimeMillis()));
         commentItem.setFormatTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
         commentItem.setShareId(shareId);
@@ -482,7 +459,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
     }
 
     private void fillCommentData() {
-        for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
+/*        for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
             if (entry.getKey().equals(media.getUuid())) {
                 commentData.addAll(entry.getValue());
             }
@@ -492,7 +469,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
             if (entry.getKey().equals(media.getUuid())) {
                 commentData.addAll(entry.getValue());
             }
-        }
+        }*/
     }
 
     private void sortCommentData() {
@@ -563,11 +540,11 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
             refreshViewVisibility(currentItem);
 
-            if (currentItem != null) {
-                User map = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreator());
-                ivAvatar.setText(map.getDefaultAvatar());
-                ivAvatar.setBackgroundResource(map.getDefaultAvatarBgColorResourceId());
-            }
+//            if (currentItem != null) {
+//                User map = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreator());
+//                ivAvatar.setText(map.getDefaultAvatar());
+//                ivAvatar.setBackgroundResource(map.getDefaultAvatarBgColorResourceId());
+//            }
         }
 
         private void refreshViewVisibility(Comment currentItem) {

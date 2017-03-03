@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.fileModule.download;
 
-import com.winsun.fruitmix.eventbus.DownloadFileEvent;
 import com.winsun.fruitmix.util.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -25,7 +24,7 @@ public class FileDownloadingState extends FileDownloadState {
         if (!FileUtil.checkExternalDirectoryForDownloadAvailableSizeEnough()) {
             getFileDownloadItem().setFileDownloadState(new FileDownloadNoEnoughSpaceState(getFileDownloadItem()));
         } else {
-            EventBus.getDefault().post(new DownloadFileEvent(this));
+            getFileDownloadItem().startDownload();
         }
 
     }

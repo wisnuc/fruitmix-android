@@ -49,17 +49,27 @@ import java.util.List;
 
 public class DBDataSource implements DataSource {
 
+    private static DBDataSource INSTANCE;
+
     private DBUtils mDBUtils;
     private SharedPreferences mSharedPreferences;
     private ContentResolver mContentResolver;
 
-    public DBDataSource(Context context) {
+    private DBDataSource(Context context) {
 
         mDBUtils = DBUtils.getInstance(context);
         mSharedPreferences = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         mContentResolver = context.getContentResolver();
 
     }
+
+    public static DBDataSource getInstance(Context context){
+        if (INSTANCE == null)
+            INSTANCE = new DBDataSource(context);
+
+        return INSTANCE;
+    }
+
 
     @Override
     public OperateUserResult insertUser(String url, String token, String userName, String userPassword) {
@@ -224,6 +234,11 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
+    public Media loadLocalMediaByThumb(String thumb) {
+        return null;
+    }
+
+    @Override
     public MediaSharesLoadOperationResult loadAllRemoteMediaShares(String url, String token) {
 
         MediaSharesLoadOperationResult result = new MediaSharesLoadOperationResult();
@@ -345,6 +360,11 @@ public class DBDataSource implements DataSource {
         result.setToken(getGlobalData(Util.JWT));
 
         return result;
+    }
+
+    @Override
+    public String loadToken() {
+        return getGlobalData(Util.JWT);
     }
 
     @Override

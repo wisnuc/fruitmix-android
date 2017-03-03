@@ -9,7 +9,6 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.business.DataRepository;
 import com.winsun.fruitmix.refactor.business.callback.MediaShareOperationCallback;
 import com.winsun.fruitmix.refactor.contract.CreateAlbumContract;
-import com.winsun.fruitmix.util.LocalCache;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -43,8 +43,6 @@ public interface OriginalMediaContract {
 
         void startPostponedEnterTransition();
 
-        String getImageUrl(boolean isThumb, Media media);
-
         void setResult(int result, Intent intent);
 
         void hideSystemUI();

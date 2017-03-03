@@ -84,7 +84,7 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
 
         if (!remoteFileShareLoaded) {
 
-            currentUserUUID = mRepository.loadCurrentLoginUserFromMemory().getUuid();
+            currentUserUUID = mRepository.loadCurrentLoginUserUUIDInMemory();
 
             if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
                 retrievedFolderUUIDList.add(currentFolderUUID);

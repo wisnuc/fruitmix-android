@@ -9,7 +9,6 @@ import android.util.Log;
 import com.github.druk.rxdnssd.RxDnssd;
 import com.github.druk.rxdnssd.RxDnssdBindable;
 import com.github.druk.rxdnssd.RxDnssdEmbedded;
-import com.winsun.fruitmix.services.ButlerService;
 import com.wisnun.fruitmix.MyEventBusIndex;
 
 import org.greenrobot.eventbus.EventBus;

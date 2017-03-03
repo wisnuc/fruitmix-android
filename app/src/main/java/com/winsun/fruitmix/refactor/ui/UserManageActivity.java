@@ -1,9 +1,8 @@
-package com.winsun.fruitmix;
+package com.winsun.fruitmix.refactor.ui;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.app.Activity;
 import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,40 +13,36 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.model.User;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.refactor.common.BaseActivity;
+import com.winsun.fruitmix.refactor.common.Injection;
+import com.winsun.fruitmix.refactor.contract.UserManageContract;
+import com.winsun.fruitmix.refactor.presenter.UserManagePresenterImpl;
 import com.winsun.fruitmix.util.Util;
 
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class UserManageActivity extends Activity implements View.OnClickListener {
+public class UserManageActivity extends BaseActivity implements UserManageContract.UserManageView, View.OnClickListener {
 
     @BindView(R.id.back)
     ImageView mBack;
-
     @BindView(R.id.user_list)
     ListView mUserListView;
-
     @BindView(R.id.user_list_empty)
     TextView mUserListEmpty;
-
     @BindView(R.id.add_user)
     FloatingActionButton mAddUserBtn;
-
-    private List<User> mUserList;
 
     private Context mContext;
 
     private UserListAdapter mUserListAdapter;
+
+    private UserManageContract.UserManagePresenter mPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +56,12 @@ public class UserManageActivity extends Activity implements View.OnClickListener
         mBack.setOnClickListener(this);
         mAddUserBtn.setOnClickListener(this);
 
-        refreshView();
+        mUserListAdapter = new UserListAdapter();
+        mUserListView.setAdapter(mUserListAdapter);
+
+        mPresenter = new UserManagePresenterImpl(Injection.injectDataRepository(mContext));
+        mPresenter.attachView(this);
+        mPresenter.initView();
     }
 
     @Override
@@ -71,57 +71,43 @@ public class UserManageActivity extends Activity implements View.OnClickListener
         mContext = null;
     }
 
-    private void refreshView() {
+    @Override
+    public void showContentUI() {
+        super.showContentUI();
 
-        if (LocalCache.RemoteUserMapKeyIsUUID != null && !LocalCache.RemoteUserMapKeyIsUUID.isEmpty()) {
-
-            mUserListEmpty.setVisibility(View.GONE);
-            mUserListView.setVisibility(View.VISIBLE);
-
-            refreshUserList();
-
-            if (mUserListAdapter == null) {
-                mUserListAdapter = new UserListAdapter();
-                mUserListView.setAdapter(mUserListAdapter);
-            } else {
-                mUserListAdapter.notifyDataSetChanged();
-            }
-
-        } else {
-            mUserListView.setVisibility(View.GONE);
-            mUserListEmpty.setVisibility(View.VISIBLE);
-        }
-
+        mUserListView.setVisibility(View.VISIBLE);
     }
 
-    private void refreshUserList() {
+    @Override
+    public void dismissContentUI() {
+        super.dismissContentUI();
 
-        if (mUserList == null)
-            mUserList = new ArrayList<>();
-        else
-            mUserList.clear();
+        mUserListView.setVisibility(View.GONE);
+    }
 
-        Collection<User> collection = LocalCache.RemoteUserMapKeyIsUUID.values();
-        for (User user : collection) {
-            mUserList.add(user);
-        }
+    @Override
+    public void showNoContentUI() {
+        super.showNoContentUI();
 
-        Collections.sort(mUserList, new Comparator<User>() {
-            @Override
-            public int compare(User lhs, User rhs) {
-                return Collator.getInstance(Locale.CHINESE).compare(lhs.getUserName(), (rhs.getUserName()));
-            }
-        });
+        mUserListEmpty.setVisibility(View.VISIBLE);
+    }
 
+    @Override
+    public void dismissNoContentUI() {
+        super.dismissNoContentUI();
+
+        mUserListEmpty.setVisibility(View.GONE);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.back:
-                finish();
+                mPresenter.handleBackEvent();
                 break;
             case R.id.add_user:
+
+                mPresenter.addUserBtnClick();
 
                 Intent intent = new Intent(mContext, CreateUserActivity.class);
                 startActivityForResult(intent, Util.KEY_CREATE_USER_REQUEST_CODE);
@@ -135,12 +121,33 @@ public class UserManageActivity extends Activity implements View.OnClickListener
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == Util.KEY_CREATE_USER_REQUEST_CODE && resultCode == RESULT_OK) {
-            refreshView();
-        }
+        mPresenter.handleOnActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void showUsers(List<User> users) {
+
+        mUserListAdapter.setUserList(users);
+        mUserListAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void finishActivity() {
+        finish();
     }
 
     private class UserListAdapter extends BaseAdapter {
+
+        private List<User> mUserList;
+
+        UserListAdapter() {
+            mUserList = new ArrayList<>();
+        }
+
+        void setUserList(List<User> mUserList) {
+            this.mUserList = mUserList;
+        }
+
         @Override
         public int getCount() {
             return mUserList == null ? 0 : mUserList.size();

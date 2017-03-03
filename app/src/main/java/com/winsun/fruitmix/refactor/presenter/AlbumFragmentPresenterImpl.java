@@ -1,8 +1,10 @@
 package com.winsun.fruitmix.refactor.presenter;
 
+import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
@@ -68,7 +70,7 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
 
         mView.showDialog();
 
-        mRepository.modifyMediaShare(mediaShare.createToggleShareStateRequestData(), mediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
+        mRepository.modifyMediaShare(mediaShare.createToggleShareStateRequestData(mRepository.loadAllUserUUIDInMemory()), mediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
 
@@ -176,6 +178,13 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
     @Override
     public User loadUser(String userUUID) {
         return mRepository.loadUserFromMemory(userUUID);
+    }
+
+    @Override
+    public void loadMediaToView(Context context, Media media, NetworkImageView view) {
+
+        mRepository.loadThumbMediaToNetworkImageView(context,media,view);
+
     }
 
     private void loadMediaShares() {

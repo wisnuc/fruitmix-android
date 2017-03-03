@@ -49,7 +49,7 @@ public class CreateUserActivity extends BaseActivity implements View.OnClickList
         back.setOnClickListener(this);
         createUserBtn.setOnClickListener(this);
 
-        mPresenter = new CreateUserPresenterImpl(Injection.injectDataRepository());
+        mPresenter = new CreateUserPresenterImpl(Injection.injectDataRepository(this));
         mPresenter.attachView(this);
 
         mPresenter.loadUserNames();

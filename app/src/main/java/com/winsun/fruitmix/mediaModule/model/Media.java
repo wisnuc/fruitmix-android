@@ -1,15 +1,7 @@
 package com.winsun.fruitmix.mediaModule.model;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
-
-import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.Util;
 
 /**
  * Created by Administrator on 2016/7/28.
@@ -210,62 +202,6 @@ public class Media implements Parcelable {
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public synchronized boolean uploadIfNotDone(Context context) {
-
-        DBUtils dbUtils = DBUtils.getInstance(context);
-
-        if (LocalCache.RemoteMediaMapKeyIsUUID.containsKey(getUuid())) {
-
-            Log.d(TAG, "upload file is already uploaded");
-
-            uploaded = true;
-
-            dbUtils.updateLocalMedia(this);
-        }
-
-        if (!uploaded) {
-            uploaded = FNAS.UploadFile(thumb);
-
-            if (uploaded) {
-
-                dbUtils.updateLocalMedia(this);
-            }
-
-        }
-
-        return uploaded;
-    }
-
-    public String getImageThumbUrl(Context context) {
-
-        String imageUrl;
-        if (isLocal()) {
-            imageUrl = getThumb();
-        } else {
-
-            int width = Integer.parseInt(getWidth());
-            int height = Integer.parseInt(getHeight());
-
-            int[] result = Util.formatPhotoWidthHeight(width, height);
-
-            imageUrl = String.format(context.getString(R.string.android_thumb_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid(),
-                    String.valueOf(result[0]), String.valueOf(result[1]));
-
-        }
-        return imageUrl;
-    }
-
-    public String getImageOriginalUrl(Context context) {
-
-        String imageUrl;
-        if (isLocal()) {
-            imageUrl = getThumb();
-        } else {
-            imageUrl = String.format(context.getString(R.string.android_original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid());
-        }
-        return imageUrl;
     }
 
     public Media cloneSelf() {

@@ -1,10 +1,6 @@
 package com.winsun.fruitmix.refactor.ui;
 
 import android.app.Dialog;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -18,35 +14,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.command.AbstractCommand;
-import com.winsun.fruitmix.command.DeleteDownloadedFileCommand;
-import com.winsun.fruitmix.command.MacroCommand;
-import com.winsun.fruitmix.command.NullCommand;
-import com.winsun.fruitmix.command.ShowSelectModeViewCommand;
-import com.winsun.fruitmix.command.ShowUnSelectModeViewCommand;
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
-import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.download.DownloadState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
-import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
-import com.winsun.fruitmix.interfaces.OnViewSelectListener;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.FileDownloadFragmentContract;
 import com.winsun.fruitmix.refactor.contract.FileMainFragmentContract;
 import com.winsun.fruitmix.refactor.presenter.FileDownloadFragmentPresenterImpl;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.util.Util;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -87,7 +65,7 @@ public class FileDownloadFragment implements FileDownloadFragmentContract.FileDo
         fileDownloadedRecyclerView.setAdapter(downloadedFileAdapter);
         fileDownloadedRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
 
-        mPresenter = new FileDownloadFragmentPresenterImpl(Injection.injectDataRepository(), fileMainFragmentPresenter);
+        mPresenter = new FileDownloadFragmentPresenterImpl(Injection.injectDataRepository(baseActivity), fileMainFragmentPresenter);
         mPresenter.attachView(this);
         mPresenter.loadDownloadedFile();
 

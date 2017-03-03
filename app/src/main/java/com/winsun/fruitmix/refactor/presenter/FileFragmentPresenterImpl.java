@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.refactor.presenter;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,15 +8,12 @@ import android.view.View;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
-import com.winsun.fruitmix.command.ChangeToDownloadPageCommand;
+import com.winsun.fruitmix.command.ChangeToFileDownloadPageCommand;
 import com.winsun.fruitmix.command.DownloadFileCommand;
 import com.winsun.fruitmix.command.MacroCommand;
 import com.winsun.fruitmix.command.NullCommand;
-import com.winsun.fruitmix.command.OpenFileCommand;
 import com.winsun.fruitmix.command.ShowSelectModeViewCommand;
 import com.winsun.fruitmix.command.ShowUnSelectModeViewCommand;
-import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
-import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
@@ -95,7 +91,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
 
         if (!remoteFileLoaded && !mView.isHidden()) {
 
-            User user = mRepository.loadCurrentLoginUserFromMemory();
+            User user = mRepository.loadCurrentLoginUserInMemory();
 
             currentFolderUUID = user.getHome();
 
@@ -194,7 +190,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
 
     private boolean notRootFolder() {
 
-        User user = mRepository.loadCurrentLoginUserFromMemory();
+        User user = mRepository.loadCurrentLoginUserInMemory();
 
         String homeFolderUUID = user.getHome();
 
@@ -319,18 +315,11 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
             });
         } else {
             AbstractCommand macroCommand = new MacroCommand();
-            AbstractCommand downloadFileCommand = new DownloadFileCommand(file);
-            macroCommand.addCommand(downloadFileCommand);
-            macroCommand.addCommand(new AbstractCommand() {
-                @Override
-                public void execute() {
-                    fileMainFragmentPresenter.setBottomNavigationItemChecked(FileMainFragmentPresenterImpl.PAGE_FILE_DOWNLOAD);
-                }
 
-                @Override
-                public void unExecute() {
-                }
-            });
+            macroCommand.addCommand(new DownloadFileCommand(mRepository,file));
+
+            macroCommand.addCommand(new ChangeToFileDownloadPageCommand(fileMainFragmentPresenter));
+
             menuItem = new BottomMenuItem(mView.getString(R.string.download_the_item), macroCommand);
         }
         bottomMenuItems.add(menuItem);
@@ -381,16 +370,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
 
             macroCommand.addCommand(showUnSelectModeViewCommand);
 
-            macroCommand.addCommand(new AbstractCommand() {
-                @Override
-                public void execute() {
-                    fileMainFragmentPresenter.setBottomNavigationItemChecked(FileMainFragmentPresenterImpl.PAGE_FILE_DOWNLOAD);
-                }
-
-                @Override
-                public void unExecute() {
-                }
-            });
+            macroCommand.addCommand(new ChangeToFileDownloadPageCommand(fileMainFragmentPresenter));
 
             BottomMenuItem downloadSelectItem = new BottomMenuItem(mView.getString(R.string.download_select_item), macroCommand);
 
@@ -412,10 +392,9 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
     }
 
     private void addSelectFilesToMacroCommand() {
-        for (AbstractRemoteFile abstractRemoteFile : selectedFiles) {
+        for (final AbstractRemoteFile abstractRemoteFile : selectedFiles) {
 
-            AbstractCommand abstractCommand = new DownloadFileCommand(abstractRemoteFile);
-            macroCommand.addCommand(abstractCommand);
+            macroCommand.addCommand(new DownloadFileCommand(mRepository,abstractRemoteFile));
 
         }
     }
@@ -425,7 +404,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
     public void downloadSelectedFiles() {
         for (AbstractRemoteFile abstractRemoteFile : selectedFiles) {
 
-            abstractRemoteFile.downloadFile();
+            mRepository.downloadFile(abstractRemoteFile);
         }
 
         fileMainFragmentPresenter.setBottomNavigationItemChecked(FileMainFragmentPresenterImpl.PAGE_FILE_DOWNLOAD);

@@ -1,12 +1,10 @@
 package com.winsun.fruitmix.refactor.ui;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -23,18 +21,12 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.winsun.fruitmix.EquipmentSearchActivity;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.UserManageActivity;
-import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.MainPageContract;
 import com.winsun.fruitmix.refactor.presenter.MainPagePresenterImpl;
-import com.winsun.fruitmix.services.ButlerService;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;
@@ -91,7 +83,7 @@ public class MainPageActivity extends BaseActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        mPresenter = new MainPagePresenterImpl(Injection.injectDataRepository());
+        mPresenter = new MainPagePresenterImpl(Injection.injectDataRepository(mContext));
         mPresenter.attachView(this);
 
         mediaMainFragment = MediaMainFragment.newInstance(mPresenter);

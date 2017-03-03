@@ -75,10 +75,20 @@ import retrofit2.Call;
 
 public class ServerDataSource implements DataSource {
 
+    private static ServerDataSource INSTANCE;
+
     public static final String TAG = ServerDataSource.class.getSimpleName();
 
-    public ServerDataSource() {
+    private ServerDataSource() {
 
+    }
+
+    public static ServerDataSource getInstance() {
+
+        if (INSTANCE == null)
+            INSTANCE = new ServerDataSource();
+
+        return INSTANCE;
     }
 
     private HttpResponse getRemoteCall(String url, String token) throws MalformedURLException, IOException, SocketTimeoutException {
@@ -841,6 +851,11 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
+    public Media loadLocalMediaByThumb(String thumb) {
+        return null;
+    }
+
+    @Override
     public MediasLoadOperationResult loadLocalMediaInCamera(Collection<String> loadedMediaUUIDs) {
         return null;
     }
@@ -1103,6 +1118,11 @@ public class ServerDataSource implements DataSource {
 
 
         return result;
+    }
+
+    @Override
+    public String loadToken() {
+        return null;
     }
 
     @Override

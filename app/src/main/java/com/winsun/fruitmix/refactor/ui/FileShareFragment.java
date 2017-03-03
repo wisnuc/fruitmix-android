@@ -1,8 +1,6 @@
 package com.winsun.fruitmix.refactor.ui;
 
 
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,22 +12,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
-import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
-import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.FileMainFragmentContract;
 import com.winsun.fruitmix.refactor.contract.FileShareFragmentContract;
 import com.winsun.fruitmix.refactor.presenter.FileShareFragmentPresenterImpl;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -72,7 +62,7 @@ public class FileShareFragment implements FileShareFragmentContract.FileShareFra
 
         noContentImageView.setImageResource(R.drawable.no_file);
 
-        mPresenter = new FileShareFragmentPresenterImpl(mainFragmentPresenter, Injection.injectDataRepository());
+        mPresenter = new FileShareFragmentPresenterImpl(mainFragmentPresenter, Injection.injectDataRepository(baseActivity));
         mPresenter.attachView(this);
         mPresenter.onResume();
     }

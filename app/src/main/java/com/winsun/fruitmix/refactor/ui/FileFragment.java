@@ -3,10 +3,7 @@ package com.winsun.fruitmix.refactor.ui;
 import android.Manifest;
 import android.app.Dialog;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,34 +17,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.command.AbstractCommand;
-import com.winsun.fruitmix.command.ChangeToDownloadPageCommand;
-import com.winsun.fruitmix.command.DownloadFileCommand;
-import com.winsun.fruitmix.command.MacroCommand;
-import com.winsun.fruitmix.command.NullCommand;
-import com.winsun.fruitmix.command.OpenFileCommand;
-import com.winsun.fruitmix.command.ShowSelectModeViewCommand;
-import com.winsun.fruitmix.command.ShowUnSelectModeViewCommand;
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
-import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
-import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
-import com.winsun.fruitmix.interfaces.OnViewSelectListener;
-import com.winsun.fruitmix.model.OperationResultType;
-import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.FileFragmentContract;
 import com.winsun.fruitmix.refactor.contract.FileMainFragmentContract;
 import com.winsun.fruitmix.refactor.presenter.FileFragmentPresenterImpl;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -90,7 +69,7 @@ public class FileFragment implements FileFragmentContract.FileFragmentView {
 
         noContentImageView.setImageResource(R.drawable.no_file);
 
-        mPresenter = new FileFragmentPresenterImpl(fileMainFragmentPresenter, Injection.injectDataRepository());
+        mPresenter = new FileFragmentPresenterImpl(fileMainFragmentPresenter, Injection.injectDataRepository(baseActivity));
         mPresenter.attachView(this);
 
         mPresenter.onResume();

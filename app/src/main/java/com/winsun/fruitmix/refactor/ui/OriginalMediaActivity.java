@@ -114,7 +114,7 @@ public class OriginalMediaActivity extends BaseActivity implements IImageLoadLis
             }
         });
 
-        mPresenter = new OriginalMediaPresenterImpl(mediaList, Injection.injectDataRepository(), initialPhotoPosition, needTransition, transitionMediaNeedShowThumb,
+        mPresenter = new OriginalMediaPresenterImpl(mediaList, Injection.injectDataRepository(this), initialPhotoPosition, needTransition, transitionMediaNeedShowThumb,
                 getIntent().getStringExtra(Util.CURRENT_MEDIASHARE_TIME));
 
         mPresenter.attachView(this);
@@ -281,19 +281,6 @@ public class OriginalMediaActivity extends BaseActivity implements IImageLoadLis
     @Override
     public View findViewWithTag(String tag) {
         return mViewPager.findViewWithTag(tag);
-    }
-
-    @Override
-    public String getImageUrl(boolean isThumb, Media media) {
-        String currentUrl;
-
-        if (isThumb) {
-            currentUrl = media.getImageThumbUrl(mContext);
-        } else {
-            currentUrl = media.getImageOriginalUrl(mContext);
-        }
-
-        return currentUrl;
     }
 
     @Override

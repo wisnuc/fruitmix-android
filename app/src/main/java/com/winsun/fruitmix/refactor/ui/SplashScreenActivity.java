@@ -3,24 +3,18 @@ package com.winsun.fruitmix.refactor.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.widget.Toast;
 
-import com.winsun.fruitmix.EquipmentSearchActivity;
-import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.SplashContract;
 import com.winsun.fruitmix.refactor.presenter.SplashPresenterImpl;
-import com.winsun.fruitmix.util.LocalCache;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 
 /**
  * Created by Administrator on 2016/5/9.
@@ -41,9 +35,9 @@ public class SplashScreenActivity extends BaseActivity implements SplashContract
 
         mContext = this;
 
-        LocalCache.Init();
+//        LocalCache.Init();
 
-        mSplashPresenter = new SplashPresenterImpl(Injection.injectDataRepository());
+        mSplashPresenter = new SplashPresenterImpl(Injection.injectDataRepository(mContext));
 
         mSplashPresenter.attachView(this);
 
@@ -69,7 +63,7 @@ public class SplashScreenActivity extends BaseActivity implements SplashContract
     public void welcome() {
 
         Intent intent = new Intent();
-        intent.setClass(SplashScreenActivity.this, NavPagerActivity.class);
+        intent.setClass(SplashScreenActivity.this, MainPageActivity.class);
         startActivity(intent);
         finish();
     }

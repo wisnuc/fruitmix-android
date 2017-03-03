@@ -25,21 +25,6 @@ public class RemoteFile extends AbstractRemoteFile {
     }
 
     @Override
-    public boolean openAbstractRemoteFile(Context context) {
-
-        return FileUtil.openAbstractRemoteFile(context, getName());
-
-    }
-
-    @Override
-    public void downloadFile() {
-
-        FileDownloadItem fileDownloadItem = new FileDownloadItem(getName(), Long.parseLong(getSize()), getUuid());
-
-        FileDownloadManager.INSTANCE.addFileDownloadItem(fileDownloadItem);
-    }
-
-    @Override
     public List<AbstractRemoteFile> listChildAbstractRemoteFileList() {
         throw new UnsupportedOperationException("File can not call this operation");
     }

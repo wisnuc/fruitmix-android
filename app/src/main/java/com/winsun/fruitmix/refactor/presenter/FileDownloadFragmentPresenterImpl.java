@@ -5,7 +5,7 @@ import android.content.Intent;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
-import com.winsun.fruitmix.command.DeleteDownloadedFileCommand;
+
 import com.winsun.fruitmix.command.MacroCommand;
 import com.winsun.fruitmix.command.NullCommand;
 import com.winsun.fruitmix.command.ShowSelectModeViewCommand;

@@ -1,12 +1,9 @@
 package com.winsun.fruitmix.refactor.ui;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -15,27 +12,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
-import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.CreateAlbumContract;
 import com.winsun.fruitmix.refactor.presenter.CreateAlbumPresenterImpl;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -78,7 +65,7 @@ public class CreateAlbumActivity extends BaseActivity implements CreateAlbumCont
 
         ButterKnife.bind(this);
 
-        mPresenter = new CreateAlbumPresenterImpl(Injection.injectDataRepository());
+        mPresenter = new CreateAlbumPresenterImpl(Injection.injectDataRepository(mContext));
         mPresenter.attachView(this);
         mPresenter.initView();
 
@@ -124,21 +111,6 @@ public class CreateAlbumActivity extends BaseActivity implements CreateAlbumCont
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
-
-    }
-
-    @Override
-    protected void onStop() {
-        EventBus.getDefault().unregister(this);
-
-        super.onStop();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -147,34 +119,6 @@ public class CreateAlbumActivity extends BaseActivity implements CreateAlbumCont
         mPresenter.detachView();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(MediaShareOperationEvent operationEvent) {
-
-        String action = operationEvent.getAction();
-
-        OperationResult operationResult = operationEvent.getOperationResult();
-
-        OperationResultType operationResultType = operationResult.getOperationResultType();
-
-        switch (action) {
-            case Util.REMOTE_SHARE_CREATED:
-
-                dismissDialog();
-
-                Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-
-                boolean mCreateAlbumSucceed = operationResultType.equals(OperationResultType.SUCCEED);
-                if (mCreateAlbumSucceed)
-                    CreateAlbumActivity.this.setResult(RESULT_OK);
-                else
-                    CreateAlbumActivity.this.setResult(RESULT_CANCELED);
-
-                finish();
-
-                break;
-        }
-
-    }
 
     @Override
     public void setLayoutTitle(String title) {

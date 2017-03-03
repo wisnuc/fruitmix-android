@@ -3,7 +3,6 @@ package com.winsun.fruitmix.refactor.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Paint;
-import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
@@ -26,30 +25,19 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.mediaModule.AlbumPicContentActivity;
 import com.winsun.fruitmix.mediaModule.MediaShareCommentActivity;
-import com.winsun.fruitmix.mediaModule.MoreMediaActivity;
-import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
-import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
-import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.MediaShareFragmentContract;
 import com.winsun.fruitmix.refactor.presenter.MediaShareFragmentPresenterImpl;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +70,6 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
     private Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
     private ShareRecyclerViewAdapter mAdapter;
 
-    private ImageLoader mImageLoader;
-
     private MediaShareFragmentContract.MediaShareFragmentPresenter mPresenter;
 
     public MediaShareFragment(Activity activity_) {
@@ -101,21 +87,12 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
 
         mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
 
-        initImageLoader();
-
-        mPresenter = new MediaShareFragmentPresenterImpl(Injection.injectDataRepository());
+        mPresenter = new MediaShareFragmentPresenterImpl(Injection.injectDataRepository(containerActivity));
         mPresenter.attachView(this);
     }
 
     public MediaShareFragmentContract.MediaShareFragmentPresenter getPresenter() {
         return mPresenter;
-    }
-
-    private void initImageLoader() {
-
-        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
-        mImageLoader = imageGifLoaderInstance.getImageLoader(containerActivity);
-
     }
 
     public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -150,7 +127,7 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
         if (media == null)
             currentMediaTag = "";
         else
-            currentMediaTag = media.getImageThumbUrl(containerActivity);
+            currentMediaTag = mPresenter.loadImageThumbUrl(media);
 
         return mainRecyclerView.findViewWithTag(currentMediaTag);
     }
@@ -408,25 +385,13 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
 
             coverImg = mPresenter.loadMedia(currentItem.getCoverImageKey());
 
-            if (coverImg != null) {
-
-                String imageUrl = coverImg.getImageOriginalUrl(containerActivity);
-                mImageLoader.setShouldCache(!coverImg.isLocal());
-                ivCover.setTag(imageUrl);
-                ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                ivCover.setOrientationNumber(coverImg.getOrientationNumber());
-                ivCover.setImageUrl(imageUrl, mImageLoader);
-
-            } else {
-                ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                ivCover.setImageUrl(null, mImageLoader);
-            }
+            mPresenter.loadOriginalMediaToView(containerActivity, coverImg, ivCover);
 
             ivCover.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent();
-                    intent.setClass(containerActivity, AlbumPicContentActivity.class);
+                    intent.setClass(containerActivity, AlbumContentActivity.class);
                     intent.putExtra(Util.KEY_MEDIA_SHARE_UUID, currentItem.getUuid());
                     intent.putExtra(Util.NEED_SHOW_MENU, false);
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
@@ -478,14 +443,9 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
 
             itemImg = mPresenter.loadMedia(imageKeys.get(0));
 
-            if (itemImg != null) {
+            mPresenter.loadOriginalMediaToView(containerActivity, itemImg, ivCover);
 
-                String imageUrl = itemImg.getImageOriginalUrl(containerActivity);
-                mImageLoader.setShouldCache(!itemImg.isLocal());
-                ivCover.setTag(imageUrl);
-                ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                ivCover.setOrientationNumber(itemImg.getOrientationNumber());
-                ivCover.setImageUrl(imageUrl, mImageLoader);
+            if (itemImg != null) {
 
                 String uuid = itemImg.getUuid();
                 if (commentMap.containsKey(uuid)) {
@@ -524,9 +484,6 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
                     }
                 });
 
-            } else {
-                ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                ivCover.setImageUrl(null, mImageLoader);
             }
 
             ivCover.setOnClickListener(new View.OnClickListener() {
@@ -541,7 +498,7 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                     intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
                     intent.putExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, false);
-                    intent.setClass(containerActivity, PhotoSliderActivity.class);
+                    intent.setClass(containerActivity, OriginalMediaActivity.class);
 
                     if (ivCover.isLoaded()) {
 
@@ -706,22 +663,7 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
 
                 itemImg = mPresenter.loadMedia(imageKeys.get(i));
 
-                if (itemImg != null) {
-
-                    String imageUrl = itemImg.getImageThumbUrl(containerActivity);
-                    mImageLoader.setShouldCache(!itemImg.isLocal());
-
-                    if (itemImg.isLocal())
-                        ivItems[i].setOrientationNumber(itemImg.getOrientationNumber());
-
-                    ivItems[i].setTag(imageUrl);
-                    ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
-                    ivItems[i].setImageUrl(imageUrl, mImageLoader);
-
-                } else {
-                    ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
-                    ivItems[i].setImageUrl(null, mImageLoader);
-                }
+                mPresenter.loadThumbMediaToView(containerActivity, itemImg, ivItems[i]);
 
                 final int mItemPosition = i;
 
@@ -737,7 +679,7 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, mItemPosition);
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                         intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
-                        intent.setClass(containerActivity, PhotoSliderActivity.class);
+                        intent.setClass(containerActivity, OriginalMediaActivity.class);
 
                         View transitionView = ivItems[mItemPosition];
 
@@ -763,18 +705,18 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
     }
 
     private void fillLocalCachePhotoData(List<Media> imageList) {
-        PhotoSliderActivity.setMediaList(imageList);
+        OriginalMediaActivity.setMediaList(imageList);
     }
 
     public void refreshRemoteComment() {
 
-        refreshComment(LocalCache.RemoteMediaCommentMapKeyIsImageUUID);
+//        refreshComment(LocalCache.RemoteMediaCommentMapKeyIsImageUUID);
 
     }
 
     public void refreshLocalComment() {
 
-        refreshComment(LocalCache.LocalMediaCommentMapKeyIsImageUUID);
+//        refreshComment(LocalCache.LocalMediaCommentMapKeyIsImageUUID);
 
     }
 

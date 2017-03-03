@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
@@ -60,7 +59,7 @@ public class ModifyAlbumActivity extends BaseActivity implements ModifyAlbumCont
 
         String mMediaShareUuid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
 
-        mPresenter = new ModifyAlbumPresenterImpl(Injection.injectDataRepository(), mMediaShareUuid);
+        mPresenter = new ModifyAlbumPresenterImpl(Injection.injectDataRepository(this), mMediaShareUuid);
         mPresenter.attachView(this);
         mPresenter.initView();
 
@@ -105,53 +104,11 @@ public class ModifyAlbumActivity extends BaseActivity implements ModifyAlbumCont
 
     }
 
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
-
-    }
-
-    @Override
-    protected void onStop() {
-        EventBus.getDefault().unregister(this);
-
-        super.onStop();
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
         mPresenter.detachView();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(MediaShareOperationEvent operationEvent) {
-
-        String action = operationEvent.getAction();
-
-        if (action.equals(Util.LOCAL_SHARE_MODIFIED) || action.equals(Util.REMOTE_SHARE_MODIFIED)) {
-
-            OperationResultType operationResultType = operationEvent.getOperationResult().getOperationResultType();
-
-            switch (operationResultType) {
-                case SUCCEED:
-                    MediaShare mediaShare = operationEvent.getMediaShare();
-                    getIntent().putExtra(Util.UPDATED_ALBUM_TITLE, mediaShare.getTitle());
-                    ModifyAlbumActivity.this.setResult(RESULT_OK, getIntent());
-                    finish();
-                    break;
-                default:
-                    ModifyAlbumActivity.this.setResult(RESULT_CANCELED);
-                    finish();
-                    break;
-            }
-
-        }
-
     }
 
     @Override

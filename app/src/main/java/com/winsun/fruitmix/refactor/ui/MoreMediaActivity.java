@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,19 +13,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.MediaInMediaShareLoader;
-import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.MoreMediaContract;
 import com.winsun.fruitmix.refactor.presenter.MoreMediaPresenterImpl;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;
@@ -48,7 +41,6 @@ public class MoreMediaActivity extends BaseActivity implements MoreMediaContract
 
     private int mSpanCount = 3;
     private Context mContext;
-    private ImageLoader mImageLoader;
     private MorePhotoAdapter mAdapter;
 
     private MoreMediaContract.MoreMediaPresenter mPresenter;
@@ -59,8 +51,6 @@ public class MoreMediaActivity extends BaseActivity implements MoreMediaContract
         setContentView(R.layout.activity_more_photo);
 
         ButterKnife.bind(this);
-
-        initImageLoader();
 
         mBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,7 +70,7 @@ public class MoreMediaActivity extends BaseActivity implements MoreMediaContract
         mAdapter = new MorePhotoAdapter();
         mMorePhotoRecyclerView.setAdapter(mAdapter);
 
-        mPresenter = new MoreMediaPresenterImpl(Injection.injectDataRepository(), mediaShareUUID);
+        mPresenter = new MoreMediaPresenterImpl(Injection.injectDataRepository(this), mediaShareUUID);
         mPresenter.attachView(this);
         mPresenter.loadMediaInMediaShare();
     }
@@ -141,12 +131,6 @@ public class MoreMediaActivity extends BaseActivity implements MoreMediaContract
         super.onConfigurationChanged(newConfig);
     }
 
-    private void initImageLoader() {
-
-        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
-        mImageLoader = imageGifLoaderInstance.getImageLoader(mContext);
-    }
-
     @Override
     public void showMedias(List<Media> medias) {
         mAdapter.setPhotos(medias);
@@ -175,26 +159,18 @@ public class MoreMediaActivity extends BaseActivity implements MoreMediaContract
         public void refreshView(final List<Media> mPhotos, int position) {
             media = mPhotos.get(position);
 
-            String imageUrl = media.getImageThumbUrl(mContext);
-            mImageLoader.setShouldCache(!media.isLocal());
-
-            if (media.isLocal())
-                mPhotoItem.setOrientationNumber(media.getOrientationNumber());
-
-            mPhotoItem.setTag(imageUrl);
-            mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
-            mPhotoItem.setImageUrl(imageUrl, mImageLoader);
+            mPresenter.loadMediaToView(mContext,media,mPhotoItem);
 
             mMorelPhotoItemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    PhotoSliderActivity.setMediaList(mPhotos);
+                    OriginalMediaActivity.setMediaList(mPhotos);
 
                     Intent intent = new Intent();
                     intent.putExtra(Util.INITIAL_PHOTO_POSITION, getAdapterPosition());
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
-                    intent.setClass(mContext, PhotoSliderActivity.class);
+                    intent.setClass(mContext, OriginalMediaActivity.class);
                     startActivity(intent);
                 }
             });

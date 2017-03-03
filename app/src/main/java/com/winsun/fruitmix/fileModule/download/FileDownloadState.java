@@ -1,7 +1,5 @@
 package com.winsun.fruitmix.fileModule.download;
 
-import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
-
 import org.greenrobot.eventbus.EventBus;
 
 /**

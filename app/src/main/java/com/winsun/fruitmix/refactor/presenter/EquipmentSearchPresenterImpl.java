@@ -15,7 +15,6 @@ import com.winsun.fruitmix.refactor.business.callback.LoadEquipmentAliasCallback
 import com.winsun.fruitmix.refactor.business.callback.UserOperationCallback;
 import com.winsun.fruitmix.refactor.contract.EquipmentSearchContract;
 import com.winsun.fruitmix.refactor.model.EquipmentAlias;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -213,7 +212,7 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
 
                 }
 
-                String url = Util.HTTP + equipment.getHosts().get(0) + ":" + FNAS.PORT + Util.LOGIN_PARAMETER;
+                String url = Util.HTTP + equipment.getHosts().get(0) + ":" + Util.PORT + Util.LOGIN_PARAMETER;
 
                 Log.d(TAG, "login url:" + url);
 

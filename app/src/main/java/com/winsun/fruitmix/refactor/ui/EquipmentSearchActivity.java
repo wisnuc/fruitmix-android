@@ -5,10 +5,6 @@ import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.LruCache;
@@ -20,14 +16,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
 import com.winsun.fruitmix.CreateNewEquipmentActivity;
 import com.winsun.fruitmix.CustomApplication;
-import com.winsun.fruitmix.LoginActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
-import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.User;
@@ -35,24 +28,14 @@ import com.winsun.fruitmix.refactor.common.BaseActivity;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.EquipmentSearchContract;
 import com.winsun.fruitmix.refactor.presenter.EquipmentSearchPresenterImpl;
-import com.winsun.fruitmix.services.ButlerService;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 public class EquipmentSearchActivity extends BaseActivity implements View.OnClickListener, EquipmentSearchContract.EquipmentSearchView {
 
@@ -121,7 +104,7 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
 
         mRxDnssd = CustomApplication.getRxDnssd(mContext);
 
-        mPresenter = new EquipmentSearchPresenterImpl(Injection.injectDataRepository());
+        mPresenter = new EquipmentSearchPresenterImpl(Injection.injectDataRepository(mContext));
         mPresenter.attachView(this);
     }
 
@@ -159,11 +142,7 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
         switch (v.getId()) {
             case R.id.back:
 
-                ButlerService.stopButlerService(mContext);
-
                 mPresenter.handleBackEvent();
-
-                finish();
 
                 break;
             case R.id.fab:
@@ -177,8 +156,6 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-
-        ButlerService.stopButlerService(mContext);
 
         mPresenter.handleBackEvent();
     }

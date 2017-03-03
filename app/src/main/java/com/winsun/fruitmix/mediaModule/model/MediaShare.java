@@ -1,16 +1,12 @@
 package com.winsun.fruitmix.mediaModule.model;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.widget.Toast;
 
-import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -63,7 +59,7 @@ public class MediaShare implements Parcelable {
         isSticky = in.readByte() != 0;
     }
 
-    public String createToggleShareStateRequestData() {
+    public String createToggleShareStateRequestData(Collection<String> userUUIDs) {
         String requestData;
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -71,7 +67,7 @@ public class MediaShare implements Parcelable {
 
         if (getViewersListSize() == 0) {
 
-            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+            for (String userUUID : userUUIDs) {
                 addViewer(userUUID);
             }
 
@@ -133,45 +129,6 @@ public class MediaShare implements Parcelable {
         }
 
         if (maintainers.size() > 0) {
-            returnValue = stringBuilder.substring(0, stringBuilder.length() - 1);
-        } else {
-            returnValue = stringBuilder.toString();
-        }
-
-        returnValue += "]}";
-
-        return returnValue;
-    }
-
-    public String createStringOperateContentsInMediaShare(String op) {
-
-        String returnValue;
-
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("{\"op\":\"");
-        stringBuilder.append(op);
-        stringBuilder.append("\",\"path\":\"");
-        stringBuilder.append("contents");
-        stringBuilder.append("\",\"value\":[");
-        for (MediaShareContent value : mediaShareContents) {
-            stringBuilder.append("\"");
-
-            String key = value.getKey();
-            if (key.contains("/")) {
-
-                Media media = LocalCache.LocalMediaMapKeyIsThumb.get(key);
-                key = media.getUuid();
-                if (key.isEmpty()) {
-                    key = Util.CalcSHA256OfFile(key);
-                }
-
-            }
-
-            stringBuilder.append(key);
-            stringBuilder.append("\",");
-        }
-
-        if (mediaShareContents.size() > 0) {
             returnValue = stringBuilder.substring(0, stringBuilder.length() - 1);
         } else {
             returnValue = stringBuilder.toString();
@@ -357,8 +314,8 @@ public class MediaShare implements Parcelable {
         return viewers.size();
     }
 
-    public boolean checkMaintainersListContainCurrentUserUUID() {
-        return maintainers.contains(FNAS.userUUID);
+    public boolean checkMaintainersListContainUserUUID(String userUUID) {
+        return maintainers.contains(userUUID);
     }
 
     public int getMediaContentsListSize() {
@@ -451,10 +408,6 @@ public class MediaShare implements Parcelable {
         mediaShareContents.removeAll(originalMediaShare.getMediaShareContents());
 
         return mediaShareContents;
-    }
-
-    public boolean checkPermissionToOperate() {
-        return checkMaintainersListContainCurrentUserUUID() || getCreatorUUID().equals(FNAS.userUUID);
     }
 
 }

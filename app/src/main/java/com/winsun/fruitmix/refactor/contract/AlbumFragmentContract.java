@@ -1,7 +1,9 @@
 package com.winsun.fruitmix.refactor.contract;
 
+import android.content.Context;
 import android.view.View;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
@@ -51,6 +53,8 @@ public interface AlbumFragmentContract {
         Media loadMedia(String mediaKey);
 
         User loadUser(String userUUID);
+
+        void loadMediaToView(Context context, Media media, NetworkImageView view);
     }
 
 }

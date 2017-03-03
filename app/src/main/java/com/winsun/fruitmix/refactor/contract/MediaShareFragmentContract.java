@@ -1,8 +1,10 @@
 package com.winsun.fruitmix.refactor.contract;
 
+import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
@@ -44,6 +46,12 @@ public interface MediaShareFragmentContract {
         User loadUser(String userUUID);
 
         Media loadMedia(String mediaKey);
+
+        void loadThumbMediaToView(Context context, Media media, NetworkImageView view);
+
+        void loadOriginalMediaToView(Context context, Media media, NetworkImageView view);
+
+        String loadImageThumbUrl(Media media);
 
     }
 

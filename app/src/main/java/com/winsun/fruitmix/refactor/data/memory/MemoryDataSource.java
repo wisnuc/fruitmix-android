@@ -34,6 +34,8 @@ import java.util.concurrent.ConcurrentMap;
 
 public class MemoryDataSource implements DataSource {
 
+    private static MemoryDataSource INSTANCE;
+
     private String mGateway = "http://192.168.5.98";
 
     private String mToken = null;
@@ -48,7 +50,7 @@ public class MemoryDataSource implements DataSource {
     private ConcurrentMap<String, AbstractRemoteFile> remoteFileMapKeyIsUUID = null;
     private List<AbstractRemoteFile> remoteFileShareList = null;
 
-    public MemoryDataSource() {
+    private MemoryDataSource() {
 
         remoteMediaShareMapKeyIsUUID = new ConcurrentHashMap<>();
         remoteUserMapKeyIsUUID = new ConcurrentHashMap<>();
@@ -57,6 +59,13 @@ public class MemoryDataSource implements DataSource {
         remoteFileMapKeyIsUUID = new ConcurrentHashMap<>();
         remoteFileShareList = new ArrayList<>();
 
+    }
+
+    public static MemoryDataSource getInstance(){
+        if(INSTANCE == null)
+            INSTANCE = new MemoryDataSource();
+
+        return INSTANCE;
     }
 
     @Override
@@ -169,6 +178,11 @@ public class MemoryDataSource implements DataSource {
     @Override
     public Collection<String> loadRemoteMediaUUIDs() {
         return remoteMediaMapKeyIsUUID.keySet();
+    }
+
+    @Override
+    public Media loadLocalMediaByThumb(String thumb) {
+        return localMediaMapKeyIsThumb.get(thumb);
     }
 
     @Override
@@ -344,6 +358,11 @@ public class MemoryDataSource implements DataSource {
         result.setOperationResult(null);
 
         return result;
+    }
+
+    @Override
+    public String loadToken() {
+        return mToken;
     }
 
     @Override

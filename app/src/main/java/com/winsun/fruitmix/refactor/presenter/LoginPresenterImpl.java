@@ -25,14 +25,14 @@ public class LoginPresenterImpl implements LoginContract.LoginPresenter {
     private String mUserUUid;
     private String mGateway;
 
-    public LoginPresenterImpl(DataRepository repository, String equipmentGroupName, String equipmentChildName, int userDefaultBgColor, String gateway, String uesrUUID) {
+    public LoginPresenterImpl(DataRepository repository, String equipmentGroupName, String equipmentChildName, int userDefaultBgColor, String gateway, String userUUID) {
         mRepository = repository;
 
         mEquipmentGroupName = equipmentGroupName;
         mEquipmentChildName = equipmentChildName;
         mUserDefaultBgColor = userDefaultBgColor;
         mGateway = gateway;
-        mUserUUid = uesrUUID;
+        mUserUUid = userUUID;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class LoginPresenterImpl implements LoginContract.LoginPresenter {
     }
 
     private void loadData() {
-        mRepository.loadUsers(null);
+        mRepository.loadUsersInThread(null);
         mRepository.loadMediasInThread(null);
         mRepository.loadMediaShares(null);
     }

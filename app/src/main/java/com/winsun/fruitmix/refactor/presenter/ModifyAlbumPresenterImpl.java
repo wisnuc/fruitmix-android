@@ -8,8 +8,9 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.business.DataRepository;
 import com.winsun.fruitmix.refactor.business.callback.MediaShareOperationCallback;
 import com.winsun.fruitmix.refactor.contract.ModifyAlbumContract;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
+
+import java.util.Collection;
 
 /**
  * Created by Administrator on 2017/2/16.
@@ -71,11 +72,13 @@ public class ModifyAlbumPresenterImpl implements ModifyAlbumContract.ModifyAlbum
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("[");
 
+        Collection<String> userUUIDs = mRepository.loadAllUserUUIDInMemory();
+
         boolean currentIsPublic = mediaShare.getViewersListSize() != 0;
         if (currentIsPublic != isPublic) {
             if (currentIsPublic) {
 
-                for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+                for (String userUUID : userUUIDs) {
                     mediaShare.addViewer(userUUID);
                 }
 
@@ -91,13 +94,13 @@ public class ModifyAlbumPresenterImpl implements ModifyAlbumContract.ModifyAlbum
             stringBuilder.append(",");
         }
 
-        boolean currentIsMaintained = mediaShare.checkMaintainersListContainCurrentUserUUID();
+        boolean currentIsMaintained = mediaShare.checkMaintainersListContainUserUUID(mRepository.loadCurrentLoginUserUUIDInMemory());
 
         if (isMaintained != currentIsMaintained) {
 
             if (isMaintained) {
 
-                for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+                for (String userUUID : userUUIDs) {
                     mediaShare.addMaintainer(userUUID);
                 }
 
@@ -141,7 +144,8 @@ public class ModifyAlbumPresenterImpl implements ModifyAlbumContract.ModifyAlbum
         mView.setAlbumTitle(mMediaShare.getTitle());
         mView.setDescription(mMediaShare.getDesc());
         mView.setIsPublic(mMediaShare.getViewersListSize() != 0);
-        mView.setIsMaintained(mMediaShare.checkMaintainersListContainCurrentUserUUID());
+
+        mView.setIsMaintained(mMediaShare.checkMaintainersListContainUserUUID(mRepository.loadCurrentLoginUserUUIDInMemory()));
     }
 
     @Override

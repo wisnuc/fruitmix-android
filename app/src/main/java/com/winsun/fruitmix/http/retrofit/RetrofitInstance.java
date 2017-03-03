@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.http.retrofit;
 
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.IOException;

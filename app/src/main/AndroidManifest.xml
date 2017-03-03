@@ -16,20 +16,6 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/CustomAppTheme">
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".NavPagerActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait" />
         <!-- android:theme="@style/Theme.AppCompat.Light.NoActionBar" -->
         <!-- This meta-data tag is required to use Google Play Services. -->
         <meta-data
@@ -40,151 +26,87 @@
             android:name="com.google.android.gms.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:theme="@android:style/Theme.Translucent" />
+
         <activity
-            android:name=".mediaModule.PhotoSliderActivity"
-            android:configChanges="orientation|screenSize" />
+            android:name=".refactor.ui.SplashScreenActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
         <activity
-            android:name=".mediaModule.CreateAlbumActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".mediaModule.ModifyAlbumActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".mediaModule.AlbumPicContentActivity"
+            android:name=".refactor.ui.AlbumContentActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait" />
+
         <activity
-            android:name=".SplashScreenActivity"
+            android:name=".refactor.ui.CreateAlbumActivity"
             android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".refactor.ui.CreateUserActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".refactor.ui.EditPhotoActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".refactor.ui.EquipmentSearchActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".refactor.ui.LoginActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateVisible|adjustPan" />
+
+        <activity
+            android:name=".refactor.ui.MainPageActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".refactor.ui.ModifyAlbumActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".refactor.ui.MoreMediaActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".refactor.ui.OriginalMediaActivity"
+            android:configChanges="orientation|screenSize" />
+
+        <activity
+            android:name=".refactor.ui.UserManageActivity"
+            android:screenOrientation="portrait" />
+
         <activity
             android:name=".mediaModule.MediaShareCommentActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".mediaModule.NewAlbumPicChooseActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".PersonInfoActivity"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".UserManageActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".EquipmentSearchActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".LoginActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateVisible|adjustPan" />
+
         <activity android:name=".GalleryTestActivity" />
-        <activity
-            android:name=".mediaModule.EditPhotoActivity"
-            android:screenOrientation="portrait" />
-
-        <service
-            android:name=".services.CreateRemoteMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.CreateRemoteCommentService"
-            android:exported="false" />
-
-        <activity
-            android:name=".mediaModule.MoreMediaActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait" />
-
-        <service
-            android:name=".services.CreateLocalMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.ModifyRemoteMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.DeleteRemoteMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.CreateLocalCommentService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveRemoteMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.ButlerService"
-            android:enabled="true"
-            android:exported="false" />
-        <service
-            android:name=".services.ModifyMediaInRemoteMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveNewLocalMediaInCameraService"
-            android:exported="false" />
-        <service
-            android:name=".services.DeleteLocalMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.ModifyLocalMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveLocalMediaCommentService"
-            android:exported="false" />
-        <service
-            android:name=".services.DeleteLocalCommentService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveLocalMediaService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveLocalMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveRemoteMediaService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveRemoteMediaCommentService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveRemoteUserService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveTokenService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveDeviceIdService"
-            android:exported="false" />
-        <service
-            android:name=".services.ModifyMediaInLocalMediaShareService"
-            android:exported="false" />
 
         <activity
             android:name=".fileModule.LocalFileActivity"
             android:screenOrientation="portrait" />
 
-        <service
-            android:name=".services.RetrieveRemoteFileService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveRemoteFileShareService"
-            android:exported="false" />
-
         <activity
             android:name=".CreateNewEquipmentActivity"
             android:screenOrientation="portrait" />
 
-        <service
-            android:name=".services.RetrieveDownloadedFileService"
-            android:exported="false" />
-        <service
-            android:name=".services.CalcNewLocalMediaDigestService"
-            android:exported="false" />
-
         <activity
-            android:name=".CreateUserActivity"
+            android:name=".refactor.ui.NewPhotoSelectActivity"
             android:screenOrientation="portrait" />
 
-        <service
-            android:name=".services.CreateRemoteUserService"
-            android:exported="false" />
-
-        <activity android:name=".refactor.ui.NewPhotoSelectActivity" />
     </application>
 
 </manifest>

@@ -27,7 +27,7 @@ public class FileMainFragmentPresenterImpl implements FileMainFragmentContract.F
 
     private static final int PAGE_FILE_SHARE = 0;
     private static final int PAGE_FILE = 1;
-    static final int PAGE_FILE_DOWNLOAD = 2;
+    public static final int PAGE_FILE_DOWNLOAD = 2;
 
     public FileMainFragmentPresenterImpl(MainPageContract.MainPagePresenter mainPagePresenter) {
 

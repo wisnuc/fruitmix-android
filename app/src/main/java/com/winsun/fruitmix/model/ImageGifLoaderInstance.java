@@ -9,7 +9,6 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.gif.GifLruCache;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.Map;
@@ -30,7 +29,7 @@ public enum ImageGifLoaderInstance {
 
     private Map<String, String> headers;
 
-    public ImageLoader getImageLoader(Context context) {
+    public ImageLoader getImageLoader(Context context,String token) {
 
         if (mImageLoader == null) {
 
@@ -39,8 +38,8 @@ public enum ImageGifLoaderInstance {
 
             if (headers == null) {
                 headers = new ArrayMap<>();
-                headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-                Log.i(TAG, "FNAS JWT: " + FNAS.JWT);
+                headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
+                Log.i(TAG, "token: " + token);
             }
 
             mImageLoader.setHeaders(headers);
@@ -50,7 +49,7 @@ public enum ImageGifLoaderInstance {
 
     }
 
-    public GifLoader getGifLoader(Context context) {
+    public GifLoader getGifLoader(Context context,String token) {
 
         if (mGifLoader == null) {
 
@@ -59,8 +58,8 @@ public enum ImageGifLoaderInstance {
 
             if (headers == null) {
                 headers = new ArrayMap<>();
-                headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-                Log.i(TAG, "FNAS JWT: " + FNAS.JWT);
+                headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
+                Log.i(TAG, "token: " + token);
             }
 
             mImageLoader.setHeaders(headers);

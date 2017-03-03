@@ -61,6 +61,8 @@ public interface DataSource {
 
     Collection<String> loadRemoteMediaUUIDs();
 
+    Media loadLocalMediaByThumb(String thumb);
+
     MediasLoadOperationResult loadLocalMediaInCamera(Collection<String> loadedMediaUUIDs);
 
     Media loadMedia(String mediaKey);
@@ -113,6 +115,8 @@ public interface DataSource {
 
     //token
     TokenLoadOperationResult loadToken(LoadTokenParam param);
+
+    String loadToken();
 
     void deleteToken();
 

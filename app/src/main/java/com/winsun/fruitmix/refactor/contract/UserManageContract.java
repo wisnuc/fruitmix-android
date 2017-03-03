@@ -16,12 +16,15 @@ public interface UserManageContract {
 
         void showUsers(List<User> users);
 
+        void finishActivity();
+
     }
 
     interface UserManagePresenter extends BasePresenter<UserManageView>{
 
         void addUserBtnClick();
 
+        void initView();
     }
 
 }

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.util.SparseArray;
 import android.view.View;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.refactor.common.BasePresenter;
 import com.winsun.fruitmix.refactor.common.BaseView;
@@ -73,6 +74,12 @@ public interface MediaFragmentContract {
         void onCreate();
 
         void onResume();
+
+        void loadMediaToView(Context context, Media media, NetworkImageView view);
+
+        void cancelLoadMediaToView(NetworkImageView view);
+
+        String loadImageThumbUrl(Media media);
     }
 
 

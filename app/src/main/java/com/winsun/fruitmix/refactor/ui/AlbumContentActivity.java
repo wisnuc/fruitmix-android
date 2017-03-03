@@ -1,20 +1,15 @@
 package com.winsun.fruitmix.refactor.ui;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,28 +25,16 @@ import android.widget.Toast;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
-import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.mediaModule.EditPhotoActivity;
-import com.winsun.fruitmix.mediaModule.ModifyAlbumActivity;
-import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.MediaInMediaShareLoader;
-import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.refactor.common.BaseActivity;
 import com.winsun.fruitmix.refactor.common.Injection;
 import com.winsun.fruitmix.refactor.contract.AlbumContentContract;
 import com.winsun.fruitmix.refactor.presenter.AlbumContentPresentImpl;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,8 +73,6 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
 
     private boolean mShowMenu;
 
-    private ImageLoader mImageLoader;
-
     private boolean mShowCommentBtn = false;
 
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
@@ -111,8 +92,6 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
         mContext = this;
 
         setExitSharedElementCallback(sharedElementCallback);
-
-        initImageLoader();
 
         String mediaShareUUID = getIntent().getStringExtra(Util.KEY_MEDIA_SHARE_UUID);
 
@@ -136,18 +115,11 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        mPresenter = new AlbumContentPresentImpl(Injection.injectDataRepository(), mediaShareUUID);
+        mPresenter = new AlbumContentPresentImpl(Injection.injectDataRepository(mContext), mediaShareUUID);
         mPresenter.attachView(this);
         mPresenter.setMediaShareTitle();
 
         mPresenter.loadMediaInMediaShare();
-    }
-
-    private void initImageLoader() {
-
-        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
-        mImageLoader = imageGifLoaderInstance.getImageLoader(mContext);
-
     }
 
     @Override
@@ -239,12 +211,12 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
 
     private void showPhotoSlider(int position, View sharedElement, String sharedElementName) {
 
-        PhotoSliderActivity.setMediaList(mPresenter.getMedias());
+        OriginalMediaActivity.setMediaList(mPresenter.getMedias());
 
         Intent intent = new Intent();
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, mShowCommentBtn);
-        intent.setClass(this, PhotoSliderActivity.class);
+        intent.setClass(this, OriginalMediaActivity.class);
 
         ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, sharedElement, sharedElementName);
         startActivity(intent, optionsCompat.toBundle());
@@ -301,7 +273,7 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
 
         private List<Media> medias;
 
-        public PicGridViewAdapter() {
+        PicGridViewAdapter() {
             medias = new ArrayList<>();
         }
 
@@ -330,15 +302,7 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
 
             ivMain = (NetworkImageView) view.findViewById(R.id.mainPic);
 
-            String imageUrl = currentItem.getImageThumbUrl(mContext);
-            mImageLoader.setShouldCache(!currentItem.isLocal());
-
-            if (currentItem.isLocal())
-                ivMain.setOrientationNumber(currentItem.getOrientationNumber());
-
-            ivMain.setTag(imageUrl);
-            ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
-            ivMain.setImageUrl(imageUrl, mImageLoader);
+            mPresenter.loadMediaToView(mContext, currentItem, ivMain);
 
             ivMain.setOnClickListener(new View.OnClickListener() {
                 @Override

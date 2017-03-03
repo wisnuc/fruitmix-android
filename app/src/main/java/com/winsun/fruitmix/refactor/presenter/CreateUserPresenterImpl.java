@@ -9,7 +9,6 @@ import com.winsun.fruitmix.refactor.business.callback.UserOperationCallback;
 import com.winsun.fruitmix.refactor.contract.CreateUserContract;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -93,7 +92,7 @@ public class CreateUserPresenterImpl implements CreateUserContract.CreateUserPre
     @Override
     public void loadUserNames() {
 
-        mRepository.loadUsers(new UserOperationCallback.LoadUsersCallback() {
+        mRepository.loadUsersInThread(new UserOperationCallback.LoadUsersCallback() {
             @Override
             public void onLoadSucceed(OperationResult operationResult, List<User> users) {
 

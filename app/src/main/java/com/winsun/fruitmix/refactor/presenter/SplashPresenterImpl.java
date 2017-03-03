@@ -79,7 +79,7 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
     }
 
     private void loadData() {
-        mRepository.loadUsers(null);
+        mRepository.loadUsersInThread(null);
         mRepository.loadMediasInThread(null);
         mRepository.loadMediaShares(null);
     }

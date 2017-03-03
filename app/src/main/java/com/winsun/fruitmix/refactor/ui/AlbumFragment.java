@@ -22,8 +22,6 @@ import com.daimajia.swipe.SimpleSwipeListener;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.BaseSwipeAdapter;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.mediaModule.AlbumPicContentActivity;
-import com.winsun.fruitmix.mediaModule.NewAlbumPicChooseActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
@@ -63,8 +61,6 @@ public class AlbumFragment implements AlbumFragmentContract.AlbumFragmentView {
     @BindView(R.id.album_balloon)
     ImageView mAlbumBalloon;
 
-    private ImageLoader mImageLoader;
-
     private SwipeLayout lastSwipeLayout;
 
     private AlbumListAdapter mAdapter;
@@ -98,21 +94,12 @@ public class AlbumFragment implements AlbumFragmentContract.AlbumFragmentView {
             }
         });
 
-        initImageLoader();
-
-        mPresenter = new AlbumFragmentPresenterImpl(Injection.injectDataRepository());
+        mPresenter = new AlbumFragmentPresenterImpl(Injection.injectDataRepository(containerActivity));
         mPresenter.attachView(this);
     }
 
     public AlbumFragmentContract.AlbumFragmentPresenter getPresenter() {
         return mPresenter;
-    }
-
-    private void initImageLoader() {
-
-        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
-        mImageLoader = imageGifLoaderInstance.getImageLoader(containerActivity);
-
     }
 
     public View getView() {
@@ -351,22 +338,7 @@ public class AlbumFragment implements AlbumFragmentContract.AlbumFragmentView {
 
             coverImg = mPresenter.loadMedia(currentItem.getCoverImageKey());
 
-            if (coverImg != null) {
-
-                String imageUrl = coverImg.getImageThumbUrl(containerActivity);
-                mImageLoader.setShouldCache(!coverImg.isLocal());
-
-                if (coverImg.isLocal())
-                    ivMainPic.setOrientationNumber(coverImg.getOrientationNumber());
-
-                ivMainPic.setTag(imageUrl);
-                ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
-                ivMainPic.setImageUrl(imageUrl, mImageLoader);
-
-            } else {
-                ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
-                ivMainPic.setImageUrl(null, mImageLoader);
-            }
+            mPresenter.loadMediaToView(containerActivity,coverImg,ivMainPic);
 
             if (currentItem.getViewersListSize() == 0) {
                 ivLock.setVisibility(View.GONE);
@@ -443,7 +415,7 @@ public class AlbumFragment implements AlbumFragmentContract.AlbumFragmentView {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent();
-                    intent.setClass(containerActivity, AlbumPicContentActivity.class);
+                    intent.setClass(containerActivity, AlbumContentActivity.class);
                     intent.putExtra(Util.KEY_MEDIA_SHARE_UUID, currentItem.getUuid());
                     containerActivity.startActivityForResult(intent, Util.KEY_ALBUM_CONTENT_REQUEST_CODE);
                 }

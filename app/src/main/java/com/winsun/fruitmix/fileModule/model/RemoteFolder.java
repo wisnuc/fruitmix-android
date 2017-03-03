@@ -1,10 +1,5 @@
 package com.winsun.fruitmix.fileModule.model;
 
-import android.content.Context;
-
-import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.util.FNAS;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,18 +22,6 @@ public class RemoteFolder extends AbstractRemoteFile {
     @Override
     public boolean isFolder() {
         return true;
-    }
-
-    @Override
-    public boolean openAbstractRemoteFile(Context context) {
-
-        FNAS.retrieveRemoteFile(context, getUuid());
-        return true;
-    }
-
-    @Override
-    public void downloadFile() {
-        throw new UnsupportedOperationException("folder can not do this operation");
     }
 
     @Override
