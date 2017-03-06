@@ -9,9 +9,6 @@ import android.util.Log;
 import com.github.druk.rxdnssd.RxDnssd;
 import com.github.druk.rxdnssd.RxDnssdBindable;
 import com.github.druk.rxdnssd.RxDnssdEmbedded;
-import com.wisnun.fruitmix.MyEventBusIndex;
-
-import org.greenrobot.eventbus.EventBus;
 
 /**
  * Created by Administrator on 2016/7/26.
@@ -25,8 +22,6 @@ public class CustomApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        EventBus.builder().addIndex(new MyEventBusIndex()).installDefaultEventBus();
 
         mRxDnssd = createDnssd();
     }

@@ -1,7 +1,7 @@
 package com.winsun.fruitmix.command;
 
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
-import com.winsun.fruitmix.refactor.business.DataRepository;
+import com.winsun.fruitmix.business.DataRepository;
 
 /**
  * Created by Administrator on 2017/3/3.

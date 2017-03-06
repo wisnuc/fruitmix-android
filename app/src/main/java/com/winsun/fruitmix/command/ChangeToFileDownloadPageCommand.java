@@ -1,7 +1,7 @@
 package com.winsun.fruitmix.command;
 
-import com.winsun.fruitmix.refactor.contract.FileMainFragmentContract;
-import com.winsun.fruitmix.refactor.presenter.FileMainFragmentPresenterImpl;
+import com.winsun.fruitmix.contract.FileMainFragmentContract;
+import com.winsun.fruitmix.presenter.FileMainFragmentPresenterImpl;
 
 /**
  * Created by Administrator on 2017/3/3.

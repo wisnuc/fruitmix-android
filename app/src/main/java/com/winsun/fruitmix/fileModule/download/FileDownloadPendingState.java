@@ -2,8 +2,6 @@ package com.winsun.fruitmix.fileModule.download;
 
 import android.util.Log;
 
-import org.greenrobot.eventbus.EventBus;
-
 /**
  * Created by Administrator on 2016/11/7.
  */

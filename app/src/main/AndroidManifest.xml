@@ -28,7 +28,7 @@
             android:theme="@android:style/Theme.Translucent" />
 
         <activity
-            android:name=".refactor.ui.SplashScreenActivity"
+            android:name=".ui.SplashScreenActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
 
@@ -40,50 +40,50 @@
         </activity>
 
         <activity
-            android:name=".refactor.ui.AlbumContentActivity"
+            android:name=".ui.AlbumContentActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".refactor.ui.CreateAlbumActivity"
+            android:name=".ui.CreateAlbumActivity"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".refactor.ui.CreateUserActivity"
+            android:name=".ui.CreateUserActivity"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".refactor.ui.EditPhotoActivity"
+            android:name=".ui.EditPhotoActivity"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".refactor.ui.EquipmentSearchActivity"
+            android:name=".ui.EquipmentSearchActivity"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".refactor.ui.LoginActivity"
+            android:name=".ui.LoginActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateVisible|adjustPan" />
 
         <activity
-            android:name=".refactor.ui.MainPageActivity"
+            android:name=".ui.MainPageActivity"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".refactor.ui.ModifyAlbumActivity"
+            android:name=".ui.ModifyAlbumActivity"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".refactor.ui.MoreMediaActivity"
+            android:name=".ui.MoreMediaActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".refactor.ui.OriginalMediaActivity"
+            android:name=".ui.OriginalMediaActivity"
             android:configChanges="orientation|screenSize" />
 
         <activity
-            android:name=".refactor.ui.UserManageActivity"
+            android:name=".ui.UserManageActivity"
             android:screenOrientation="portrait" />
 
         <activity
@@ -104,7 +104,7 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".refactor.ui.NewPhotoSelectActivity"
+            android:name=".ui.NewPhotoSelectActivity"
             android:screenOrientation="portrait" />
 
     </application>

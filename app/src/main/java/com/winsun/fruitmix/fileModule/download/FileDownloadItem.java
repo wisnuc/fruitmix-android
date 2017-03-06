@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.fileModule.download;
 
-import com.winsun.fruitmix.refactor.business.callback.FileDownloadOperationCallback;
+import com.winsun.fruitmix.business.callback.FileDownloadOperationCallback;
 
 import java.util.ArrayList;
 import java.util.List;

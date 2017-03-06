@@ -2,8 +2,6 @@ package com.winsun.fruitmix.fileModule.download;
 
 import com.winsun.fruitmix.util.FileUtil;
 
-import org.greenrobot.eventbus.EventBus;
-
 /**
  * Created by Administrator on 2016/11/7.
  */

@@ -32,12 +32,8 @@
 
     <!-- android end -->
 
-    <!-- iOS begin -->
-
-    <!-- iOS end -->
-
     <!-- commmon-->
-    <string name="app_name">WISNUC</string>
+    <string name="app_name">WISNUC Refactor</string>
 
     <string name="finish_text">完成</string>
     <string name="choose_text">选择</string>
