@@ -266,8 +266,8 @@ public class NetworkImageView extends ImageView {
                                 bitmap = response.getBitmap();
                             }
 
-                            setBackgroundResource(0);
                             setImageBitmap(bitmap);
+                            setBackgroundResource(0);
 
                             setLoaded(true);
 

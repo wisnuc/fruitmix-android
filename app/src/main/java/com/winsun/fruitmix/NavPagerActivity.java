@@ -65,7 +65,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class NavPagerActivity extends AppCompatActivity
+public class NavPagerActivity extends BaseActivity
         implements OnMainFragmentInteractionListener {
 
     public static final String TAG = NavPagerActivity.class.getSimpleName();

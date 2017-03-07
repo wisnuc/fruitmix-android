@@ -2,11 +2,14 @@ package com.android.volley.toolbox;
 
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
+import android.util.Log;
 
 /**
  * Created by Administrator on 2016/8/3.
  */
 public class ImageLruCache implements ImageLoader.ImageCache {
+
+    public static final String TAG = ImageLruCache.class.getSimpleName();
 
     private static LruCache<String, Bitmap> mMemoryCache;
 
@@ -15,7 +18,8 @@ public class ImageLruCache implements ImageLoader.ImageCache {
     private ImageLruCache(){
         // Get the Max available memory
         int maxMemory = (int) Runtime.getRuntime().maxMemory();
-        int cacheSize = maxMemory / 8;
+
+        int cacheSize = maxMemory / 4;
         mMemoryCache = new LruCache<String, Bitmap>(cacheSize){
             @Override
             protected int sizeOf(String key, Bitmap bitmap){

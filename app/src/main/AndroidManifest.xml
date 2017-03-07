@@ -2,11 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.winsun.fruitmix">
 
-    <!-- Include required permissions for Google Mobile Ads to run. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:name=".CustomApplication"
@@ -16,6 +17,14 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/CustomAppTheme">
+
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="58be61e8c62dca355a000ae1" />
+        <meta-data
+            android:name="UMENG_CHANNEL"
+            android:value="Official Website" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -187,7 +196,10 @@
         <activity
             android:name=".SettingActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".AccountManageActivity" />
+        <activity
+            android:name=".AccountManageActivity"
+            android:screenOrientation="portrait" />
+
     </application>
 
 </manifest>

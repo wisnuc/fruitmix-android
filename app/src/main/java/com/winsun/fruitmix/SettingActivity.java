@@ -25,7 +25,7 @@ import org.greenrobot.eventbus.EventBus;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class SettingActivity extends AppCompatActivity implements View.OnClickListener {
+public class SettingActivity extends BaseActivity implements View.OnClickListener {
 
     @BindView(R.id.back)
     ImageView mBackImageView;

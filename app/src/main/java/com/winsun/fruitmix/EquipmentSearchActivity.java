@@ -54,7 +54,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class EquipmentSearchActivity extends AppCompatActivity implements View.OnClickListener {
+public class EquipmentSearchActivity extends BaseActivity implements View.OnClickListener {
 
     public static final String TAG = EquipmentSearchActivity.class.getSimpleName();
 

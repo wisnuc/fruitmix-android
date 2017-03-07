@@ -31,7 +31,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class AccountManageActivity extends AppCompatActivity implements View.OnClickListener {
+public class AccountManageActivity extends BaseActivity implements View.OnClickListener {
 
     @BindView(R.id.back)
     ImageView mBackImageView;

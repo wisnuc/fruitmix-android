@@ -843,6 +843,8 @@ public class NewPhotoList implements Page {
                 if (currentMedia.isLocal())
                     mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
 
+                mPhotoIv.setBackgroundResource(R.drawable.placeholder_photo);
+
                 mPhotoIv.setTag(imageUrl);
                 mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
                 mPhotoIv.setImageUrl(imageUrl, mImageLoader);
@@ -1020,7 +1022,7 @@ public class NewPhotoList implements Page {
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
 
-            if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
+/*            if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
 
                 mIsFling = true;
 
@@ -1033,7 +1035,7 @@ public class NewPhotoList implements Page {
                     mPhotoRecycleAdapter.notifyDataSetChanged();
                 }
 
-            }
+            }*/
         }
 
     }

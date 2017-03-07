@@ -29,7 +29,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class CreateUserActivity extends AppCompatActivity implements View.OnClickListener {
+public class CreateUserActivity extends BaseActivity implements View.OnClickListener {
 
     @BindView(R.id.back)
     ImageView back;

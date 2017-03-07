@@ -133,3 +133,17 @@
 }
 
 -keep class com.apple.dnssd.** { *; }
+
+#umeng
+-keepclassmembers class * {
+   public <init> (org.json.JSONObject);
+}
+
+-keep public class [com.winsun.fruitmix].R$*{
+public static final int *;
+}
+
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}

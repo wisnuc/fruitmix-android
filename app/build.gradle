@@ -59,7 +59,7 @@ dependencies {
     apt 'org.greenrobot:eventbus-annotation-processor:3.0.1'
     compile 'com.daimajia.swipelayout:library:1.2.0@aar'
     compile "com.github.andriydruk:rxdnssd:0.8.3"
-
+    compile 'com.umeng.analytics:analytics:latest.integration'
 }
 
 apt {

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -25,7 +26,7 @@ import java.lang.ref.WeakReference;
 /**
  * Created by Administrator on 2016/5/9.
  */
-public class SplashScreenActivity extends Activity {
+public class SplashScreenActivity extends BaseActivity {
 
     public static final String TAG = SplashScreenActivity.class.getSimpleName();
 
