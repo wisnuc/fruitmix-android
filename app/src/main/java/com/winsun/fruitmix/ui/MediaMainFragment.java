@@ -77,8 +77,6 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //TODO:fix ui bug
-
         mPresenter = new MediaMainFragmentPresenterImpl(mMainPagePresenter);
 
         MediaFragmentContract.MediaFragmentPresenter presenter = new MediaFragmentPresenterImpl(mPresenter, Injection.injectDataRepository(getContext()), Collections.<String>emptyList());
@@ -236,6 +234,9 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
     @Override
     public void showBottomNavAnim() {
 
+        if (bottomNavigationView.getVisibility() == View.VISIBLE)
+            return;
+
         bottomNavigationView.setVisibility(View.VISIBLE);
 
         Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.show_bottom_item_anim);
@@ -307,13 +308,13 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
 
             switch (position) {
                 case 0:
-                    view = mAlbumFragment.getView();
+                    view = mMediaShareFragment.getView();
                     break;
                 case 1:
                     view = mMediaFragment.getView();
                     break;
                 case 2:
-                    view = mMediaShareFragment.getView();
+                    view = mAlbumFragment.getView();
                     break;
             }
 
