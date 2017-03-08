@@ -259,6 +259,7 @@ public class RequestQueue {
                 // Insert 'null' queue for this cacheKey, indicating there is now a request in
                 // flight.
                 mWaitingRequests.put(cacheKey, null);
+
                 mCacheQueue.add(request);
             }
             return request;

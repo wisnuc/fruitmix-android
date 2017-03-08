@@ -26,14 +26,17 @@ import android.widget.ImageView.ScaleType;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.orientation.OrientationOperation;
 import com.android.volley.orientation.OrientationOperationFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -588,8 +591,42 @@ public class ImageLoader {
      * @param scaleType The scaleType of the imageView.
      */
     private static String getCacheKey(String url, int maxWidth, int maxHeight, ScaleType scaleType) {
-        return new StringBuilder(url.length() + 12).append("#W").append(maxWidth)
-                .append("#H").append(maxHeight).append("#S").append(scaleType.ordinal()).append(url)
-                .toString();
+
+        if (url.startsWith("/")) {
+            return "#W" + maxWidth + "#H" + maxHeight + "#S" + scaleType.ordinal() + url;
+        } else {
+            return url;
+        }
+
     }
+
+    private List<ImageRequest> imageRequests = new ArrayList<>();
+
+    public void preLoadMedia(final String url, final int width, final int height, final ScaleType scaleType) {
+
+        ImageRequest request = new ImageRequest(url, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap response) {
+                mCache.putBitmap(getCacheKey(url, width, height, scaleType), response);
+            }
+        }, width, height, ImageView.ScaleType.CENTER_CROP, Bitmap.Config.RGB_565, null) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                return mHeaders;
+            }
+        };
+
+        request.setPriority(Request.Priority.LOW);
+        mRequestQueue.add(request);
+
+        imageRequests.add(request);
+    }
+
+    public void cancelAllPreLoadMedia() {
+        for (ImageRequest request : imageRequests) {
+            if (request != null)
+                request.cancel();
+        }
+    }
+
 }

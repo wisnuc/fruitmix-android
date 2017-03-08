@@ -17,6 +17,7 @@
 package com.android.volley.toolbox;
 
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.android.volley.Cache;
 import com.android.volley.VolleyLog;
@@ -42,6 +43,8 @@ import java.util.Map;
  * directory. The default disk usage size is 5MB, but is configurable.
  */
 public class DiskBasedCache implements Cache {
+
+    public static final String TAG = DiskBasedCache.class.getSimpleName();
 
     /**
      * Map of the Key, CacheHeader pairs
@@ -121,6 +124,7 @@ public class DiskBasedCache implements Cache {
      */
     @Override
     public synchronized Entry get(String key) {
+
         CacheHeader entry = mEntries.get(key);
         // if the entry does not exist, return.
         if (entry == null) {
@@ -212,6 +216,7 @@ public class DiskBasedCache implements Cache {
      */
     @Override
     public synchronized void put(String key, Entry entry) {
+
         pruneIfNeeded(entry.data.length);
         File file = getFileForKey(key);
         try {

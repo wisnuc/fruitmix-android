@@ -39,6 +39,7 @@ import com.winsun.fruitmix.fragment.FileMainFragment;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.OperationType;
@@ -433,6 +434,8 @@ public class NavPagerActivity extends BaseActivity
         super.onDestroy();
 
         ExecutorServiceInstance.SINGLE_INSTANCE.shutdownFixedThreadPoolNow();
+
+        ImageGifLoaderInstance.INSTANCE.getImageLoader(mContext).cancelAllPreLoadMedia();
 
         mContext = null;
 

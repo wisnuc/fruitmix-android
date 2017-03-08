@@ -15,21 +15,24 @@ public class ImageLruCache implements ImageLoader.ImageCache {
 
     private static ImageLruCache lruImageCache;
 
-    private ImageLruCache(){
+    private ImageLruCache() {
         // Get the Max available memory
         int maxMemory = (int) Runtime.getRuntime().maxMemory();
 
-        int cacheSize = maxMemory / 4;
-        mMemoryCache = new LruCache<String, Bitmap>(cacheSize){
+        int cacheSize = maxMemory / 3;
+
+        Log.i(TAG, "ImageLruCache: cacheSize =" + cacheSize);
+
+        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
             @Override
-            protected int sizeOf(String key, Bitmap bitmap){
+            protected int sizeOf(String key, Bitmap bitmap) {
                 return bitmap.getRowBytes() * bitmap.getHeight();
             }
         };
     }
 
-    public static ImageLruCache instance(){
-        if(lruImageCache == null){
+    public static ImageLruCache instance() {
+        if (lruImageCache == null) {
             lruImageCache = new ImageLruCache();
         }
         return lruImageCache;
@@ -37,13 +40,18 @@ public class ImageLruCache implements ImageLoader.ImageCache {
 
     @Override
     public Bitmap getBitmap(String arg0) {
+
+        Log.i(TAG, "getBitmap key:" + arg0);
+
         return mMemoryCache.get(arg0);
     }
 
     @Override
     public void putBitmap(String arg0, Bitmap arg1) {
-        if(getBitmap(arg0) == null){
+        if (getBitmap(arg0) == null && arg1.getByteCount() <= 1024 * 1024) {
             mMemoryCache.put(arg0, arg1);
+
+            Log.i(TAG, "putBitmap: bitmap key:" + arg0 + "size:" + arg1.getByteCount());
         }
     }
 }

@@ -2,10 +2,12 @@ package com.winsun.fruitmix.mediaModule.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.ArrayMap;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -26,7 +28,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
 import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
@@ -39,6 +45,7 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
+import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -116,6 +123,8 @@ public class NewPhotoList implements Page {
     private Bundle reenterState;
 
     private List<String> alreadySelectedImageKeyArrayList;
+
+    private boolean mPreLoadPhoto = false;
 
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
@@ -230,9 +239,42 @@ public class NewPhotoList implements Page {
 
             for (IPhotoListListener listener : mPhotoListListeners)
                 listener.onNoPhotoItem(false);
+
+            if (!mPreLoadPhoto) {
+                mPreLoadPhoto = true;
+                preLoadPhoto(medias);
+            }
+
         }
 
         clearSelectedPhoto();
+
+    }
+
+    private void preLoadPhoto(final List<Media> medias) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                int preLoadPosition = medias.size() / 200;
+
+                Log.i(TAG, "media size: " + medias.size());
+
+                for (int i = 0; i < preLoadPosition - 1; i++) {
+
+                    int j = 200 * i + 30;
+
+                    int count = j + 20;
+
+                    for (; j < count; j++) {
+                        mImageLoader.preLoadMedia(medias.get(j).getImageThumbUrl(containerActivity), mItemWidth, mItemWidth, ImageView.ScaleType.CENTER_CROP);
+                    }
+
+                }
+
+            }
+        }).start();
 
     }
 
@@ -838,6 +880,7 @@ public class NewPhotoList implements Page {
 
             if (!mIsFling) {
                 String imageUrl = currentMedia.getImageThumbUrl(containerActivity);
+
                 mImageLoader.setShouldCache(!currentMedia.isLocal());
 
                 if (currentMedia.isLocal())
@@ -1022,7 +1065,7 @@ public class NewPhotoList implements Page {
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
 
-/*            if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
+            if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
 
                 mIsFling = true;
 
@@ -1035,7 +1078,7 @@ public class NewPhotoList implements Page {
                     mPhotoRecycleAdapter.notifyDataSetChanged();
                 }
 
-            }*/
+            }
         }
 
     }
