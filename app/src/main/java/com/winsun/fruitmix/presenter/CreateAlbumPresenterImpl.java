@@ -37,7 +37,7 @@ public class CreateAlbumPresenterImpl implements CreateAlbumContract.CreateAlbum
     public void createAlbum(String title, String desc, boolean isPublic, boolean isMaintained) {
         mView.hideSoftInput();
 
-        if (mView.isNetworkAlive()) {
+        if (!mView.isNetworkAlive()) {
             mView.showNoNetwork();
 
             handleBackEvent();

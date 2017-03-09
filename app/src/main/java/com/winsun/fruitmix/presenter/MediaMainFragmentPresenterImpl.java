@@ -249,4 +249,9 @@ public class MediaMainFragmentPresenterImpl implements MediaMainFragmentContract
         }
 
     }
+
+    @Override
+    public void refreshShareFragment() {
+        mMediaShareFragmentPresenter.refreshData();
+    }
 }

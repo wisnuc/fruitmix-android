@@ -62,8 +62,8 @@ public class MemoryDataSource implements DataSource {
 
     }
 
-    public static MemoryDataSource getInstance(){
-        if(INSTANCE == null)
+    public static MemoryDataSource getInstance() {
+        if (INSTANCE == null)
             INSTANCE = new MemoryDataSource();
 
         return INSTANCE;
@@ -214,6 +214,10 @@ public class MemoryDataSource implements DataSource {
     }
 
     public Media loadMedia(String mediaKey) {
+
+        if (mediaKey == null)
+            return null;
+
         Media media;
 
         media = findMediaInLocalMediaMap(mediaKey);

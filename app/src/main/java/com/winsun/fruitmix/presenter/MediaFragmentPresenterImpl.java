@@ -178,8 +178,10 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     @Override
     public void albumBtnOnClick() {
 
-        if (!mView.isNetworkAlive())
+        if (!mView.isNetworkAlive()) {
             mView.showNoNetwork();
+            return;
+        }
 
         List<String> selectMediaKeys = getSelectedImageKeys();
         if (selectMediaKeys.size() == 0) {
@@ -194,8 +196,10 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     @Override
     public void shareBtnOnClick() {
 
-        if (!mView.isNetworkAlive())
+        if (!mView.isNetworkAlive()) {
             mView.showNoNetwork();
+            return;
+        }
 
         List<String> selectMediaKeys = getSelectedImageKeys();
         if (selectMediaKeys.size() == 0) {
@@ -222,13 +226,14 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     }
 
     private void createMediaShare(List<String> selectMediaKeys) {
-        mRepository.createMediaShare(mRepository.createMediaShareInMemory(false,true,false,"","",selectMediaKeys), new MediaShareOperationCallback.OperateMediaShareCallback() {
+        mRepository.createMediaShare(mRepository.createMediaShareInMemory(false, true, false, "", "", selectMediaKeys), new MediaShareOperationCallback.OperateMediaShareCallback() {
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
 
                 mView.dismissDialog();
 
                 mMediaMainFragmentPresenter.setViewPageCurrentItem(MediaMainFragmentPresenterImpl.PAGE_SHARE);
+                mMediaMainFragmentPresenter.refreshShareFragment();
             }
 
             @Override
@@ -322,7 +327,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         if (mPhotoListRefresh) {
             mRepository.loadLocalMediaInCameraInThread(new MediaOperationCallback.LoadMediasCallback() {
                 @Override
@@ -340,7 +345,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
     @Override
     public void loadMediaToView(Context context, Media media, NetworkImageView view) {
-        mRepository.loadThumbMediaToNetworkImageView(context,media,view);
+        mRepository.loadThumbMediaToNetworkImageView(context, media, view);
     }
 
     @Override
@@ -396,13 +401,13 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
                 clearSelectPhoto();
 
                 mView.dismissLoadingUI();
-                if(mPhotoDateGroups.size() != 0){
+                if (mPhotoDateGroups.size() != 0) {
                     mView.dismissNoContentUI();
                     mView.showContentUI();
                     mView.showMedias(loader);
 
                     mMediaMainFragmentPresenter.setSelectModeBtnVisibility(View.VISIBLE);
-                }else {
+                } else {
                     mView.showNoContentUI();
                     mView.dismissContentUI();
 

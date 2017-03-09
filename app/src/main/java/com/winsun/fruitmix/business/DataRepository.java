@@ -157,7 +157,7 @@ public class DataRepository {
     public void shutdownFixedThreadPoolNow() {
 
         instance.shutdownFixedThreadPoolNow();
-        instance = null;
+
     }
 
     public void registerTimeRetrieveMediaShareCallback(MediaShareOperationCallback.LoadMediaSharesCallback callback) {
@@ -241,6 +241,9 @@ public class DataRepository {
             String url = generateUrl(Util.MEDIASHARE_PARAMETER);
 
             MediaSharesLoadOperationResult result = mServerDataSource.loadAllRemoteMediaShares(url, token);
+
+            if (result.getOperationResult().getOperationResultType() != OperationResultType.SUCCEED)
+                return;
 
             mediaShares = result.getMediaShares();
 
@@ -733,6 +736,7 @@ public class DataRepository {
     public void handleMediasForMediaFragment(final Collection<Media> medias, final MediaOperationCallback.HandleMediaForMediaFragmentCallback callback) {
 
         if (mMediaFragmentDataLoader != null) {
+
             callback.onOperateFinished(mMediaFragmentDataLoader);
             return;
         }
@@ -1296,6 +1300,8 @@ public class DataRepository {
         return mediaShare;
 
     }
+
+    //TODO: modify media in media share:handle media content
 
     public void modifyMediaShare(final String requestData, final MediaShare modifiedMediaShare, final MediaShareOperationCallback.OperateMediaShareCallback callback) {
 

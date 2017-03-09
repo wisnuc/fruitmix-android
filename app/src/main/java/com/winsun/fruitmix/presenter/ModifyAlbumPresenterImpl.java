@@ -37,7 +37,7 @@ public class ModifyAlbumPresenterImpl implements ModifyAlbumContract.ModifyAlbum
 
         mView.hideSoftInput();
 
-        if (mView.isNetworkAlive()) {
+        if (!mView.isNetworkAlive()) {
             mView.showNoNetwork();
 
             handleBackEvent();

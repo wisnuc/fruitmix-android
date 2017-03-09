@@ -3,6 +3,7 @@ package com.winsun.fruitmix.presenter;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 
@@ -27,6 +28,8 @@ import java.util.Map;
  */
 
 public class MediaFragmentInNewPhotoSelectPresenterImpl implements MediaFragmentContract.MediaFragmentPresenter {
+
+    public static final String TAG = MediaFragmentInNewPhotoSelectPresenterImpl.class.getSimpleName();
 
     private NewPhotoSelectContract.NewPhotoSelectPresenter newPhotoSelectPresenter;
 
@@ -120,8 +123,10 @@ public class MediaFragmentInNewPhotoSelectPresenterImpl implements MediaFragment
     @Override
     public void albumBtnOnClick() {
 
-        if (!mView.isNetworkAlive())
+        if (!mView.isNetworkAlive()){
             mView.showNoNetwork();
+            return;
+        }
 
         List<String> selectMediaKeys = getSelectedImageKeys();
         if (selectMediaKeys.size() == 0) {
@@ -178,6 +183,8 @@ public class MediaFragmentInNewPhotoSelectPresenterImpl implements MediaFragment
             @Override
             public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
 
+                Log.i(TAG, "onLoadSucceed: media size:" + medias.size());
+
                 showMedias(medias);
             }
 
@@ -219,7 +226,7 @@ public class MediaFragmentInNewPhotoSelectPresenterImpl implements MediaFragment
                 clearSelectPhoto();
 
                 mView.dismissLoadingUI();
-                if (mPhotoDateGroups.size() == 0) {
+                if (mPhotoDateGroups.size() != 0) {
                     mView.dismissNoContentUI();
                     mView.showContentUI();
                     mView.showMedias(loader);

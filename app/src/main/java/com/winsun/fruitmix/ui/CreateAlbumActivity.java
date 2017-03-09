@@ -89,6 +89,13 @@ public class CreateAlbumActivity extends BaseActivity implements CreateAlbumCont
                 sSetMaintainer = ckSetMaintainer.isChecked();
 
                 title = tfTitle.getText().toString();
+
+                if (title.equals("")) {
+                    title = tfTitle.getHint().toString();
+                } else {
+                    title = tfTitle.getText().toString();
+                }
+
                 desc = tfDesc.getText().toString();
 
                 mPresenter.createAlbum(title,desc,sPublic,sSetMaintainer);

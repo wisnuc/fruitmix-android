@@ -180,46 +180,51 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
     }
 
     private void loadMediaShares() {
-        mCallback = new MediaShareOperationCallback.LoadMediaSharesCallback() {
-            @Override
-            public void onLoadSucceed(OperationResult operationResult, Collection<MediaShare> mediaShares) {
 
-                Log.i(TAG, "onLoadSucceed: ");
+        if(mCallback == null){
 
-                mAlbumList.clear();
+            mCallback = new MediaShareOperationCallback.LoadMediaSharesCallback() {
+                @Override
+                public void onLoadSucceed(OperationResult operationResult, Collection<MediaShare> mediaShares) {
 
-                for (MediaShare mediaShare : mediaShares) {
-                    if (mediaShare.isAlbum() && !mediaShare.isArchived()) {
-                        mAlbumList.add(mediaShare);
+                    Log.i(TAG, "onLoadSucceed: ");
+
+                    mAlbumList.clear();
+
+                    for (MediaShare mediaShare : mediaShares) {
+                        if (mediaShare.isAlbum() && !mediaShare.isArchived()) {
+                            mAlbumList.add(mediaShare);
+                        }
                     }
+
+                    sortMediaShareList(mAlbumList);
+
+                    if (mView != null) {
+                        mView.dismissLoadingUI();
+                        mView.setAddAlbumBtnVisibility(View.VISIBLE);
+                        showTips();
+                        if (mAlbumList.size() == 0) {
+                            mView.showNoContentUI();
+                            mView.dismissContentUI();
+                        } else {
+                            mView.dismissNoContentUI();
+                            mView.showContentUI();
+                            mView.showAlbums(mAlbumList);
+                        }
+                    }
+
                 }
 
-                sortMediaShareList(mAlbumList);
+                @Override
+                public void onLoadFail(OperationResult operationResult) {
 
-                if (mView != null) {
-                    mView.dismissLoadingUI();
-                    mView.setAddAlbumBtnVisibility(View.VISIBLE);
-                    showTips();
-                    if (mAlbumList.size() == 0) {
-                        mView.showNoContentUI();
-                        mView.dismissContentUI();
-                    } else {
-                        mView.dismissNoContentUI();
-                        mView.showContentUI();
-                        mView.showAlbums(mAlbumList);
-                    }
                 }
-
-            }
-
-            @Override
-            public void onLoadFail(OperationResult operationResult) {
-
-            }
-        };
+            };
+            mRepository.registerTimeRetrieveMediaShareCallback(mCallback);
+        }
 
         mRepository.loadMediaSharesInThread(mCallback);
-        mRepository.registerTimeRetrieveMediaShareCallback(mCallback);
+
     }
 
     @Override

@@ -189,6 +189,8 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
 
         mView.showLoadingUI();
 
+        mMediaShare = mRepository.loadMediaShareFromMemory(mMediaShareUUID);
+
         mRepository.loadMediaInMediaShareFromMemory(mMediaShare, new MediaOperationCallback.LoadMediasCallback() {
             @Override
             public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {

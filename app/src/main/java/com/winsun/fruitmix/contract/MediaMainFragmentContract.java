@@ -60,6 +60,8 @@ public interface MediaMainFragmentContract {
 
         void setViewPageCurrentItem(int position);
 
+        void refreshShareFragment();
+
         void selectModeBtnClick();
 
         void switchDrawerOpenState();

@@ -192,6 +192,9 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
 
         User user = mRepository.loadCurrentLoginUserInMemory();
 
+        if (user == null)
+            return false;
+
         String homeFolderUUID = user.getHome();
 
         return !currentFolderUUID.equals(homeFolderUUID);
@@ -316,7 +319,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
         } else {
             AbstractCommand macroCommand = new MacroCommand();
 
-            macroCommand.addCommand(new DownloadFileCommand(mRepository,file));
+            macroCommand.addCommand(new DownloadFileCommand(mRepository, file));
 
             macroCommand.addCommand(new ChangeToFileDownloadPageCommand(fileMainFragmentPresenter));
 
@@ -394,7 +397,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
     private void addSelectFilesToMacroCommand() {
         for (final AbstractRemoteFile abstractRemoteFile : selectedFiles) {
 
-            macroCommand.addCommand(new DownloadFileCommand(mRepository,abstractRemoteFile));
+            macroCommand.addCommand(new DownloadFileCommand(mRepository, abstractRemoteFile));
 
         }
     }

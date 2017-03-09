@@ -234,7 +234,7 @@ public class MediaShare implements Parcelable {
     }
 
     public String getCoverImageKey() {
-        return coverImageKey;
+        return coverImageKey.isEmpty() ? null : coverImageKey;
     }
 
     public void setCoverImageKey(String coverImageKey) {
