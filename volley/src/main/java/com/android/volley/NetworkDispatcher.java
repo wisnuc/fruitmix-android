@@ -137,8 +137,8 @@ public class NetworkDispatcher extends Thread {
                 Response<?> response = request.parseNetworkResponse(networkResponse);
                 request.addMarker("network-parse-complete");
 
-                Log.i(TAG, "request shouldCache: " + request.shouldCache() + "cache key: " + request.getCacheKey());
-                Log.i(TAG, "response cacheEntry != null: " + (response.cacheEntry != null ? "true" : "false"));
+                Log.d(TAG, "request shouldCache: " + request.shouldCache() + "cache key: " + request.getCacheKey());
+                Log.d(TAG, "response cacheEntry != null: " + (response.cacheEntry != null ? "true" : "false"));
 
                 // Write to cache if applicable.
                 // TODO: Only update cache metadata instead of entire record for 304s.

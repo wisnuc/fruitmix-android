@@ -177,7 +177,7 @@ public class Media implements Parcelable {
     }
 
     public String getUploadedDeviceIDs() {
-        return uploadedDeviceIDs == null?"":uploadedDeviceIDs;
+        return uploadedDeviceIDs == null ? "" : uploadedDeviceIDs;
     }
 
     public void setUploadedDeviceIDs(String uploadedDeviceIDs) {
@@ -235,23 +235,33 @@ public class Media implements Parcelable {
         return true;
     }
 
-    public String getImageThumbUrl(Context context) {
+    private String getImageThumbUrl(Context context, int width, int height) {
 
         String imageUrl;
         if (isLocal()) {
             imageUrl = getThumb();
         } else {
 
-            int width = Integer.parseInt(getWidth());
-            int height = Integer.parseInt(getHeight());
-
-            int[] result = Util.formatPhotoWidthHeight(width, height);
+//            int[] result = Util.formatPhotoWidthHeight(width, height);
 
             imageUrl = String.format(context.getString(R.string.android_thumb_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid(),
-                    String.valueOf(result[0]), String.valueOf(result[1]));
+                    String.valueOf(width), String.valueOf(height));
 
         }
         return imageUrl;
+
+    }
+
+    public String getImageSmallThumbUrl(Context context) {
+
+        return getImageThumbUrl(context, 32, 32);
+
+    }
+
+    public String getImageThumbUrl(Context context) {
+
+        return getImageThumbUrl(context, 200, 200);
+
     }
 
     public String getImageOriginalUrl(Context context) {

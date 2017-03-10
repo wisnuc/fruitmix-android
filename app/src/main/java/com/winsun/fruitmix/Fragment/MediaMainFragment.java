@@ -346,7 +346,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     }
 
-    public void refreshAllViews(){
+    public void refreshAllViews() {
         shareList.refreshView();
         albumList.refreshView();
         photoList.refreshView();
@@ -363,6 +363,14 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 resetBottomNavigationItemCheckState();
                 bottomNavigationView.getMenu().getItem(position).setChecked(true);
+
+                if (position == PAGE_ALBUM) {
+
+                    albumList.showPhoto();
+                } else if (position == PAGE_SHARE) {
+
+                    shareList.showPhoto();
+                }
             }
         });
     }

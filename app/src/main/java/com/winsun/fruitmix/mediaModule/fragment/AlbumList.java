@@ -64,13 +64,11 @@ public class AlbumList implements Page {
 
     private List<MediaShare> mediaShareList;
 
-    private long mDownTime = 0;
-    private double mDiffTimeMilliSecond = 200;
-
     private ImageLoader mImageLoader;
 
     private SwipeLayout lastSwipeLayout;
 
+    private boolean mShowPhoto = false;
 
     public AlbumList(Activity activity_, OnMediaFragmentInteractionListener listener) {
 
@@ -144,6 +142,16 @@ public class AlbumList implements Page {
             if (mediaShare.isAlbum() && !mediaShare.isArchived()) {
                 mediaShareList.add(mediaShare);
             }
+        }
+    }
+
+    public void showPhoto() {
+
+        if (!mShowPhoto) {
+            mShowPhoto = true;
+
+            if (mainListView.getVisibility() == View.VISIBLE)
+                ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
         }
     }
 
@@ -326,7 +334,7 @@ public class AlbumList implements Page {
                 }
             }
 
-            if (coverImg != null) {
+            if (coverImg != null && mShowPhoto) {
 
                 String imageUrl = coverImg.getImageThumbUrl(containerActivity);
                 mImageLoader.setShouldCache(!coverImg.isLocal());

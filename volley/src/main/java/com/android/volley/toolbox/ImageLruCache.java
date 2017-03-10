@@ -19,7 +19,7 @@ public class ImageLruCache implements ImageLoader.ImageCache {
         // Get the Max available memory
         int maxMemory = (int) Runtime.getRuntime().maxMemory();
 
-        int cacheSize = maxMemory / 3;
+        int cacheSize = maxMemory / 2;
 
         Log.i(TAG, "ImageLruCache: cacheSize =" + cacheSize);
 
@@ -41,8 +41,6 @@ public class ImageLruCache implements ImageLoader.ImageCache {
     @Override
     public Bitmap getBitmap(String arg0) {
 
-        Log.i(TAG, "getBitmap key:" + arg0);
-
         return mMemoryCache.get(arg0);
     }
 
@@ -50,8 +48,6 @@ public class ImageLruCache implements ImageLoader.ImageCache {
     public void putBitmap(String arg0, Bitmap arg1) {
         if (getBitmap(arg0) == null && arg1.getByteCount() <= 1024 * 1024) {
             mMemoryCache.put(arg0, arg1);
-
-            Log.i(TAG, "putBitmap: bitmap key:" + arg0 + "size:" + arg1.getByteCount());
         }
     }
 }

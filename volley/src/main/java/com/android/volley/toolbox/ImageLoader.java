@@ -18,6 +18,7 @@ package com.android.volley.toolbox;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
@@ -623,10 +624,69 @@ public class ImageLoader {
     }
 
     public void cancelAllPreLoadMedia() {
+
+        cancelRetry = true;
+
         for (ImageRequest request : imageRequests) {
             if (request != null)
                 request.cancel();
         }
+    }
+
+    private Handler handler;
+    private boolean cancelRetry = false;
+
+    public void preLoadMediaSmallThumb(final String url, final int width, final int height) {
+
+        if (handler == null) {
+
+            HandlerThread handlerThread = new HandlerThread("handler_thread");
+            handlerThread.start();
+
+            handler = new Handler(handlerThread.getLooper());
+
+        }
+
+        ImageRequest request = new ImageRequest(url, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap response) {
+
+                mCache.putBitmap(url, response);
+
+            }
+        }, width, height, ImageView.ScaleType.CENTER_CROP, Bitmap.Config.RGB_565, new ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                if (error.networkResponse != null && error.networkResponse.statusCode == 500 && !cancelRetry) {
+
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            Log.i(TAG, "error response url: " + url);
+
+                            preLoadMediaSmallThumb(url, width, height);
+
+                        }
+                    }, 3 * 1000);
+
+                }
+
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                return mHeaders;
+            }
+        };
+
+        request.setPriority(Request.Priority.LOW);
+        mRequestQueue.add(request);
+
+        imageRequests.add(request);
+
     }
 
 }

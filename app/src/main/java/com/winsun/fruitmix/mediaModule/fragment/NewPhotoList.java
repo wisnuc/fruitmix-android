@@ -2,12 +2,10 @@ package com.winsun.fruitmix.mediaModule.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.ArrayMap;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -28,11 +26,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
+import com.android.volley.toolbox.IImageLoadListener;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
 import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
@@ -45,13 +40,13 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -125,6 +120,8 @@ public class NewPhotoList implements Page {
     private List<String> alreadySelectedImageKeyArrayList;
 
     private boolean mPreLoadPhoto = false;
+
+    private boolean mShowPhoto = false;
 
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
@@ -242,7 +239,8 @@ public class NewPhotoList implements Page {
 
             if (!mPreLoadPhoto) {
                 mPreLoadPhoto = true;
-                preLoadPhoto(medias);
+//                preLoadPhoto(medias);
+                loadSmallThumbnail(medias);
             }
 
         }
@@ -257,15 +255,20 @@ public class NewPhotoList implements Page {
             @Override
             public void run() {
 
-                int preLoadPosition = medias.size() / 200;
+                int preLoadPosition = medias.size() / 300;
 
                 Log.i(TAG, "media size: " + medias.size());
 
+                if (preLoadPosition > 10)
+                    preLoadPosition = 10;
+
+                int j, count;
+
                 for (int i = 0; i < preLoadPosition - 1; i++) {
 
-                    int j = 200 * i + 30;
+                    j = 300 * i + 30;
 
-                    int count = j + 20;
+                    count = j + 20;
 
                     for (; j < count; j++) {
                         mImageLoader.preLoadMedia(medias.get(j).getImageThumbUrl(containerActivity), mItemWidth, mItemWidth, ImageView.ScaleType.CENTER_CROP);
@@ -277,6 +280,47 @@ public class NewPhotoList implements Page {
         }).start();
 
     }
+
+
+    private void loadSmallThumbnail(final List<Media> medias) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                String url;
+
+                List<Media> remoteMedias = new ArrayList<>(medias);
+                Media media;
+                Iterator<Media> iterator = remoteMedias.iterator();
+                while (iterator.hasNext()) {
+                    media = iterator.next();
+                    if (media.isLocal())
+                        iterator.remove();
+                }
+
+                Log.i(TAG, "remote media size: " + remoteMedias.size());
+
+                for (int i = 0; i < remoteMedias.size(); i++) {
+
+                    media = remoteMedias.get(i);
+                    if (!media.isLocal()) {
+
+                        url = media.getImageSmallThumbUrl(containerActivity);
+
+                        Log.i(TAG, "url:" + url);
+
+                        mImageLoader.preLoadMediaSmallThumb(url, mItemWidth, mItemWidth);
+
+                    }
+
+                }
+
+            }
+        }).start();
+
+    }
+
 
     private void setupFastJumper() {
         mLinearScrollCalculator = new LinearScrollCalculator(mRecyclerView) {
@@ -568,7 +612,12 @@ public class NewPhotoList implements Page {
     }
 
     private String findPhotoTag(Media media) {
-        return media.getImageThumbUrl(containerActivity);
+
+        if (media.isLocal())
+            return media.getThumb();
+        else
+            return media.getUuid();
+
     }
 
     private class PhotoRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -878,23 +927,36 @@ public class NewPhotoList implements Page {
 
             mImageLoader.setTag(position);
 
+            String imageUrl;
+
+            mImageLoader.setShouldCache(!currentMedia.isLocal());
+
+            if (currentMedia.isLocal())
+                mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
+
+            mPhotoIv.setBackgroundResource(R.drawable.placeholder_photo);
+
+            mPhotoIv.setTag(findPhotoTag(currentMedia));
+            mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
+
             if (!mIsFling) {
-                String imageUrl = currentMedia.getImageThumbUrl(containerActivity);
 
-                mImageLoader.setShouldCache(!currentMedia.isLocal());
+                if (currentMedia.isLocal()) {
+                    imageUrl = currentMedia.getImageThumbUrl(containerActivity);
+                } else {
+                    imageUrl = currentMedia.getImageSmallThumbUrl(containerActivity);
+                    mPhotoIv.registerImageLoadListener(new IImageLoadListener() {
+                        @Override
+                        public void onImageLoadFinish(String url, View view) {
+                            mPhotoIv.setImageUrl(currentMedia.getImageThumbUrl(containerActivity), mImageLoader);
+                        }
+                    });
+                }
 
-                if (currentMedia.isLocal())
-                    mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
-
-                mPhotoIv.setBackgroundResource(R.drawable.placeholder_photo);
-
-                mPhotoIv.setTag(imageUrl);
-                mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
-                mPhotoIv.setImageUrl(imageUrl, mImageLoader);
             } else {
-                mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
-                mPhotoIv.setImageUrl(null, mImageLoader);
+                imageUrl = null;
             }
+            mPhotoIv.setImageUrl(imageUrl, mImageLoader);
 
             List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());
             int mediaInListPosition = getPosition(mediaList, currentMedia);

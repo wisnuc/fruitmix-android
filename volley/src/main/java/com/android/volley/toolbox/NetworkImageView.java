@@ -191,7 +191,9 @@ public class NetworkImageView extends ImageView {
             } else {
                 // if there is a pre-existing request, cancel it if it's fetching a different URL.
                 mImageContainer.cancelRequest();
-                setDefaultImageOrNull();
+
+                //small thumbnail is showed and then show thumbnail cause flash
+//                setDefaultImageOrNull();
             }
         }
 
@@ -255,7 +257,7 @@ public class NetworkImageView extends ImageView {
                             return;
                         }
 
-                        if (response.getBitmap() != null && getTag().equals(mUrl)) {
+                        if (response.getBitmap() != null && mUrl.contains((String) getTag())) {
 
                             Bitmap bitmap;
 

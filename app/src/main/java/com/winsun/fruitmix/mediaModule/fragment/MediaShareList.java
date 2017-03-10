@@ -85,6 +85,8 @@ public class MediaShareList implements Page {
     private ImageLoader mImageLoader;
     private Bundle reenterState;
 
+    private boolean mShowPhoto;
+
     public MediaShareList(Activity activity_, OnMediaFragmentInteractionListener listener) {
         containerActivity = activity_;
 
@@ -157,6 +159,15 @@ public class MediaShareList implements Page {
         return (LocalCache.RemoteUserMapKeyIsUUID.size() == 1 && FNAS.userUUID != null && mediaShare.getCreatorUUID().equals(FNAS.userUUID)) || (mediaShare.getViewersListSize() != 0 && LocalCache.RemoteUserMapKeyIsUUID.containsKey(mediaShare.getCreatorUUID()));
     }
 
+    public void showPhoto() {
+
+        if (!mShowPhoto) {
+            mShowPhoto = true;
+
+            if (mainRecyclerView.getVisibility() == View.VISIBLE)
+                mAdapter.notifyDataSetChanged();
+        }
+    }
 
     public void refreshView() {
 
@@ -458,7 +469,7 @@ public class MediaShareList implements Page {
                 }
             }
 
-            if (coverImg != null) {
+            if (coverImg != null && mShowPhoto) {
 
                 String imageUrl = coverImg.getImageOriginalUrl(containerActivity);
                 mImageLoader.setShouldCache(!coverImg.isLocal());
@@ -533,12 +544,14 @@ public class MediaShareList implements Page {
 
             if (itemImg != null) {
 
-                String imageUrl = itemImg.getImageOriginalUrl(containerActivity);
-                mImageLoader.setShouldCache(!itemImg.isLocal());
-                ivCover.setTag(imageUrl);
-                ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
-                ivCover.setOrientationNumber(itemImg.getOrientationNumber());
-                ivCover.setImageUrl(imageUrl, mImageLoader);
+                if(mShowPhoto){
+                    String imageUrl = itemImg.getImageOriginalUrl(containerActivity);
+                    mImageLoader.setShouldCache(!itemImg.isLocal());
+                    ivCover.setTag(imageUrl);
+                    ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                    ivCover.setOrientationNumber(itemImg.getOrientationNumber());
+                    ivCover.setImageUrl(imageUrl, mImageLoader);
+                }
 
                 String uuid = itemImg.getUuid();
                 if (commentMap.containsKey(uuid)) {
@@ -761,7 +774,7 @@ public class MediaShareList implements Page {
                 if (itemImg == null)
                     itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(i));
 
-                if (itemImg != null) {
+                if (itemImg != null && mShowPhoto) {
 
                     String imageUrl = itemImg.getImageThumbUrl(containerActivity);
                     mImageLoader.setShouldCache(!itemImg.isLocal());
