@@ -90,9 +90,6 @@ public class OriginalMediaActivity extends BaseActivity implements IImageLoadLis
             }
         });
 
-        initViewPager();
-        mViewPager.setCurrentItem(initialPhotoPosition);
-
         View decorView = getWindow().getDecorView();
         decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
             @Override
@@ -106,6 +103,10 @@ public class OriginalMediaActivity extends BaseActivity implements IImageLoadLis
 
         mPresenter.attachView(this);
         mPresenter.initView();
+
+        initViewPager();
+        mViewPager.setCurrentItem(initialPhotoPosition);
+
     }
 
     @Override

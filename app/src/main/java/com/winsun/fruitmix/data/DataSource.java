@@ -36,6 +36,8 @@ public interface DataSource {
 
     OperationResult modifyRemoteMediaShare(String url, String token, String requestData, MediaShare modifiedMediaShare);
 
+    OperationResult modifyMediaInRemoteMediaShare(String url, String token,String requestData,MediaShare diffContentsOriginalMediaShare,MediaShare diffContentsModifiedMediaShare,MediaShare modifiedMediaShare);
+
     OperationResult deleteRemoteMediaShare(String url, String token, MediaShare mediaShare);
 
     OperationResult deleteAllRemoteMediaShare();

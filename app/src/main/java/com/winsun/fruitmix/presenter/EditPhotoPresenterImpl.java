@@ -71,20 +71,7 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
 
         mView.showDialog();
 
-        String requestData = "[";
-        if (diffContentsOriginalMediaShare.getMediaContentsListSize() != 0) {
-
-            requestData += mRepository.createStringOperateContentsInMediaShare(diffContentsOriginalMediaShare,Util.DELETE);
-
-        }
-        if (diffContentsModifiedMediaShare.getMediaContentsListSize() != 0) {
-
-            requestData += mRepository.createStringOperateContentsInMediaShare(diffContentsModifiedMediaShare,Util.ADD);
-
-        }
-        requestData += "]";
-
-        mRepository.modifyMediaShare(requestData, mModifiedMediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
+        mRepository.modifyMediaInMediaShare(diffContentsOriginalMediaShare,diffContentsModifiedMediaShare, mModifiedMediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
                 mView.dismissDialog();

@@ -341,7 +341,7 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
 
                 view.setNeedFitImageToView(true);
                 if (!view.isZoomed())
-                    mView.finishActivity();
+                    handleBackEvent();
             } else {
 
                 view.setNeedFitImageToView(true);

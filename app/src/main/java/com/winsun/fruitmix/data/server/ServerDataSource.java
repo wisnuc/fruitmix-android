@@ -578,6 +578,12 @@ public class ServerDataSource implements DataSource {
         return handleActionModifyRemoteShare(url, token, modifiedMediaShare, requestData);
     }
 
+    @Override
+    public OperationResult modifyMediaInRemoteMediaShare(String url, String token,String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
+
+        return handleActionModifyRemoteShare(url, token, modifiedMediaShare, requestData);
+    }
+
     /**
      * Handle action Foo in the provided background thread with the provided
      * parameters.

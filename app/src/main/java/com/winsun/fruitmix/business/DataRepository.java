@@ -1207,47 +1207,6 @@ public class DataRepository {
         return mMemoryDataSource.loadAllUserUUID();
     }
 
-    public String createStringOperateContentsInMediaShare(MediaShare mediaShare, String op) {
-
-        String returnValue;
-
-        List<MediaShareContent> mediaShareContents = mediaShare.getMediaShareContents();
-
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("{\"op\":\"");
-        stringBuilder.append(op);
-        stringBuilder.append("\",\"path\":\"");
-        stringBuilder.append("contents");
-        stringBuilder.append("\",\"value\":[");
-        for (MediaShareContent value : mediaShareContents) {
-            stringBuilder.append("\"");
-
-            String key = value.getKey();
-            if (key.contains("/")) {
-
-                Media media = mMemoryDataSource.loadLocalMediaByThumb(key);
-                key = media.getUuid();
-                if (key.isEmpty()) {
-                    key = Util.CalcSHA256OfFile(key);
-                }
-
-            }
-
-            stringBuilder.append(key);
-            stringBuilder.append("\",");
-        }
-
-        if (mediaShareContents.size() > 0) {
-            returnValue = stringBuilder.substring(0, stringBuilder.length() - 1);
-        } else {
-            returnValue = stringBuilder.toString();
-        }
-
-        returnValue += "]}";
-
-        return returnValue;
-    }
-
     public MediaShare createMediaShareInMemory(boolean isAlbum, boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaKeys) {
 
         String currentUserUUID = mMemoryDataSource.loadLoginUserUUID();
@@ -1301,7 +1260,100 @@ public class DataRepository {
 
     }
 
-    //TODO: modify media in media share:handle media content
+    private String createStringOperateContentsInMediaShare(MediaShare mediaShare, String op) {
+
+        String returnValue;
+
+        List<MediaShareContent> mediaShareContents = mediaShare.getMediaShareContents();
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{\"op\":\"");
+        stringBuilder.append(op);
+        stringBuilder.append("\",\"path\":\"");
+        stringBuilder.append("contents");
+        stringBuilder.append("\",\"value\":[");
+        for (MediaShareContent value : mediaShareContents) {
+            stringBuilder.append("\"");
+
+            String key = value.getKey();
+            if (key.contains("/")) {
+
+                Media media = mMemoryDataSource.loadLocalMediaByThumb(key);
+                key = media.getUuid();
+                if (key.isEmpty()) {
+                    key = Util.CalcSHA256OfFile(key);
+                }
+
+            }
+
+            stringBuilder.append(key);
+            stringBuilder.append("\",");
+        }
+
+        if (mediaShareContents.size() > 0) {
+            returnValue = stringBuilder.substring(0, stringBuilder.length() - 1);
+        } else {
+            returnValue = stringBuilder.toString();
+        }
+
+        returnValue += "]}";
+
+        return returnValue;
+    }
+
+    public void modifyMediaInMediaShare(final MediaShare diffContentsOriginalMediaShare, final MediaShare diffContentsModifiedMediaShare, final MediaShare modifiedMediaShare,
+                                        final MediaShareOperationCallback.OperateMediaShareCallback callback) {
+
+        String requestData = "[";
+        if (diffContentsOriginalMediaShare.getMediaContentsListSize() != 0) {
+            requestData += createStringOperateContentsInMediaShare(diffContentsOriginalMediaShare, Util.DELETE);
+        }
+        if (diffContentsModifiedMediaShare.getMediaContentsListSize() != 0) {
+            requestData += createStringOperateContentsInMediaShare(diffContentsModifiedMediaShare, Util.ADD);
+        }
+        requestData += "]";
+
+        final String request = requestData;
+
+        instance.doOneTaskInCachedThread(new Runnable() {
+            @Override
+            public void run() {
+
+                //TODO:call in thread
+                final OperationResult result = mServerDataSource.modifyMediaInRemoteMediaShare(generateUrl(Util.MEDIASHARE_PARAMETER + "/" + modifiedMediaShare.getUuid() + "/update"),
+                        mMemoryDataSource.loadToken(), request, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare,modifiedMediaShare);
+
+                if (result.getOperationResultType() == OperationResultType.SUCCEED) {
+
+                    mDBDataSource.modifyMediaInRemoteMediaShare(null, null, request, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
+                    mMemoryDataSource.modifyMediaInRemoteMediaShare(null, null, request, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (callback != null)
+                                callback.onOperateSucceed(result, modifiedMediaShare);
+                        }
+                    });
+
+                } else {
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (callback != null)
+                                callback.onOperateFail(result);
+                        }
+                    });
+
+                }
+
+            }
+        });
+
+
+    }
+
 
     public void modifyMediaShare(final String requestData, final MediaShare modifiedMediaShare, final MediaShareOperationCallback.OperateMediaShareCallback callback) {
 

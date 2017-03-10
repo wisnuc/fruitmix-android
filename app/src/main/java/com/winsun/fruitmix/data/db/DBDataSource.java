@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import com.winsun.fruitmix.business.LoadTokenParam;
 import com.winsun.fruitmix.data.DataSource;
@@ -25,8 +26,10 @@ import com.winsun.fruitmix.fileModule.download.FileDownloadState;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.model.EquipmentAlias;
 import com.winsun.fruitmix.util.FileUtil;
@@ -50,6 +53,8 @@ public class DBDataSource implements DataSource {
 
     private static DBDataSource INSTANCE;
 
+    public static final String TAG = DBDataSource.class.getSimpleName();
+
     private DBUtils mDBUtils;
     private SharedPreferences mSharedPreferences;
     private ContentResolver mContentResolver;
@@ -62,7 +67,7 @@ public class DBDataSource implements DataSource {
 
     }
 
-    public static DBDataSource getInstance(Context context){
+    public static DBDataSource getInstance(Context context) {
         if (INSTANCE == null)
             INSTANCE = new DBDataSource(context);
 
@@ -135,6 +140,29 @@ public class DBDataSource implements DataSource {
         mDBUtils.updateRemoteMediaShare(modifiedMediaShare);
 
         return new OperationSuccess();
+    }
+
+    @Override
+    public OperationResult modifyMediaInRemoteMediaShare(String url, String token,String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
+
+        long dbResult = 0;
+
+        for (MediaShareContent mediaShareContent : diffContentsOriginalMediaShare.getMediaShareContents()) {
+            dbResult = mDBUtils.deleteRemoteMediaShareContentByID(mediaShareContent.getId());
+        }
+
+        for (MediaShareContent mediaShareContent : diffContentsModifiedMediaShare.getMediaShareContents()) {
+            dbResult = mDBUtils.insertRemoteMediaShareContent(mediaShareContent, diffContentsModifiedMediaShare.getUuid());
+        }
+
+        Log.i(TAG, "modify media in remote mediashare which source is network result:" + dbResult);
+
+        if (dbResult > 0) {
+            return new OperationSuccess();
+        } else {
+            return new OperationSQLException();
+        }
+
     }
 
     @Override

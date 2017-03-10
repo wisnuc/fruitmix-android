@@ -17,6 +17,7 @@ import com.winsun.fruitmix.fileModule.download.FileDownloadState;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -133,6 +134,14 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
+    public OperationResult modifyMediaInRemoteMediaShare(String url, String token, String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
+
+        remoteMediaShareMapKeyIsUUID.put(diffContentsModifiedMediaShare.getUuid(), modifiedMediaShare);
+
+        return new OperationSuccess();
+    }
+
+    @Override
     public OperationResult deleteRemoteMediaShare(String url, String token, MediaShare mediaShare) {
 
         remoteMediaShareMapKeyIsUUID.remove(mediaShare.getUuid());
@@ -215,7 +224,7 @@ public class MemoryDataSource implements DataSource {
 
     public Media loadMedia(String mediaKey) {
 
-        if (mediaKey == null)
+        if (mediaKey.isEmpty())
             return null;
 
         Media media;
