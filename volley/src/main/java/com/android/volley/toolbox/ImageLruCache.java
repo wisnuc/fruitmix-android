@@ -41,12 +41,19 @@ public class ImageLruCache implements ImageLoader.ImageCache {
     @Override
     public Bitmap getBitmap(String arg0) {
 
+        if (mMemoryCache.get(arg0) != null)
+            Log.i(TAG, "getBitmap: arg0: " + arg0);
+
         return mMemoryCache.get(arg0);
     }
 
     @Override
     public void putBitmap(String arg0, Bitmap arg1) {
+
         if (getBitmap(arg0) == null && arg1.getByteCount() <= 1024 * 1024) {
+
+            Log.i(TAG, "putBitmap: arg0:" + arg0 + " size: " + arg1.getByteCount());
+
             mMemoryCache.put(arg0, arg1);
         }
     }

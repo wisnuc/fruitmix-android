@@ -20,6 +20,7 @@ import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Process;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -638,20 +639,11 @@ public class ImageLoader {
 
     public void preLoadMediaSmallThumb(final String url, final int width, final int height) {
 
-        if (handler == null) {
-
-            HandlerThread handlerThread = new HandlerThread("handler_thread");
-            handlerThread.start();
-
-            handler = new Handler(handlerThread.getLooper());
-
-        }
-
         ImageRequest request = new ImageRequest(url, new Response.Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap response) {
 
-                mCache.putBitmap(url, response);
+//                mCache.putBitmap(url, response);
 
             }
         }, width, height, ImageView.ScaleType.CENTER_CROP, Bitmap.Config.RGB_565, new ErrorListener() {
@@ -660,6 +652,16 @@ public class ImageLoader {
             public void onErrorResponse(VolleyError error) {
 
                 if (error.networkResponse != null && error.networkResponse.statusCode == 500 && !cancelRetry) {
+
+                    if (handler == null) {
+
+                        HandlerThread handlerThread = new HandlerThread("handler_thread");
+                        handlerThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                        handlerThread.start();
+
+                        handler = new Handler(handlerThread.getLooper());
+
+                    }
 
                     handler.postDelayed(new Runnable() {
                         @Override

@@ -3,6 +3,7 @@ package com.winsun.fruitmix.mediaModule.fragment;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -121,8 +122,6 @@ public class NewPhotoList implements Page {
 
     private boolean mPreLoadPhoto = false;
 
-    private boolean mShowPhoto = false;
-
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
@@ -240,7 +239,7 @@ public class NewPhotoList implements Page {
             if (!mPreLoadPhoto) {
                 mPreLoadPhoto = true;
 //                preLoadPhoto(medias);
-                loadSmallThumbnail(medias);
+//                loadSmallThumbnail(medias);
             }
 
         }
@@ -287,6 +286,7 @@ public class NewPhotoList implements Page {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
                 String url;
 
@@ -304,15 +304,10 @@ public class NewPhotoList implements Page {
                 for (int i = 0; i < remoteMedias.size(); i++) {
 
                     media = remoteMedias.get(i);
-                    if (!media.isLocal()) {
 
-                        url = media.getImageSmallThumbUrl(containerActivity);
+                    url = media.getImageSmallThumbUrl(containerActivity);
 
-                        Log.i(TAG, "url:" + url);
-
-                        mImageLoader.preLoadMediaSmallThumb(url, mItemWidth, mItemWidth);
-
-                    }
+                    mImageLoader.preLoadMediaSmallThumb(url, mItemWidth, mItemWidth);
 
                 }
 
@@ -358,6 +353,25 @@ public class NewPhotoList implements Page {
             }
         };
         mFastJumper = new FastJumper(mJumperCallback);
+
+        mFastJumper.addListener(new FastJumper.Listener() {
+
+            @Override
+            public void onStateChange(int state) {
+                super.onStateChange(state);
+
+                if (state == FastJumper.STATE_DRAGGING) {
+                    mIsFling = true;
+                } else if (state == FastJumper.STATE_GONE) {
+                    if (mIsFling) {
+
+                        mIsFling = false;
+
+                        mPhotoRecycleAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        });
 
     }
 
@@ -651,6 +665,7 @@ public class NewPhotoList implements Page {
             switch (viewType) {
                 case VIEW_TYPE_HEAD: {
                     View view = LayoutInflater.from(containerActivity).inflate(R.layout.new_photo_title_item, parent, false);
+
                     return new PhotoGroupHolder(view);
                 }
                 case VIEW_TYPE_CONTENT: {
@@ -929,32 +944,25 @@ public class NewPhotoList implements Page {
 
             String imageUrl;
 
-            mImageLoader.setShouldCache(!currentMedia.isLocal());
+//            mImageLoader.setShouldCache(!currentMedia.isLocal());
+            mImageLoader.setShouldCache(true);
 
             if (currentMedia.isLocal())
                 mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
-
-            mPhotoIv.setBackgroundResource(R.drawable.placeholder_photo);
 
             mPhotoIv.setTag(findPhotoTag(currentMedia));
             mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
 
             if (!mIsFling) {
 
+                imageUrl = currentMedia.getImageThumbUrl(containerActivity);
+
+            } else {
                 if (currentMedia.isLocal()) {
                     imageUrl = currentMedia.getImageThumbUrl(containerActivity);
                 } else {
                     imageUrl = currentMedia.getImageSmallThumbUrl(containerActivity);
-                    mPhotoIv.registerImageLoadListener(new IImageLoadListener() {
-                        @Override
-                        public void onImageLoadFinish(String url, View view) {
-                            mPhotoIv.setImageUrl(currentMedia.getImageThumbUrl(containerActivity), mImageLoader);
-                        }
-                    });
                 }
-
-            } else {
-                imageUrl = null;
             }
             mPhotoIv.setImageUrl(imageUrl, mImageLoader);
 
