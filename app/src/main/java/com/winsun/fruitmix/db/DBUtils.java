@@ -80,7 +80,7 @@ public class DBUtils {
         }
     }
 
-    private boolean isOpen() {
+    public boolean isOpen() {
         return database.isOpen();
     }
 
@@ -443,6 +443,7 @@ public class DBUtils {
         contentValues.put(DBHelper.MEDIA_KEY_SHARING, media.isSharing() ? 1 : 0);
         contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER, media.getOrientationNumber());
         contentValues.put(DBHelper.MEDIA_KEY_TYPE, media.getType());
+        contentValues.put(DBHelper.MEDIA_KEY_MINI_THUMB, media.getMiniThumb());
 
         return contentValues;
     }
@@ -458,6 +459,7 @@ public class DBUtils {
         sqLiteStatement.bindLong(8, media.isSharing() ? 1 : 0);
         sqLiteStatement.bindLong(9, media.getOrientationNumber());
         sqLiteStatement.bindString(10, media.getType());
+        sqLiteStatement.bindString(11, media.getMiniThumb());
     }
 
     @NonNull
@@ -472,8 +474,9 @@ public class DBUtils {
                 DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID + "," +
                 DBHelper.MEDIA_KEY_SHARING + "," +
                 DBHelper.MEDIA_KEY_ORIENTATION_NUMBER + "," +
-                DBHelper.MEDIA_KEY_TYPE + ")" +
-                "values(?,?,?,?,?,?,?,?,?,?)";
+                DBHelper.MEDIA_KEY_TYPE + "," +
+                DBHelper.MEDIA_KEY_MINI_THUMB + ")" +
+                "values(?,?,?,?,?,?,?,?,?,?,?)";
     }
 
     private long insertMedias(String dbName, Collection<Media> medias) {

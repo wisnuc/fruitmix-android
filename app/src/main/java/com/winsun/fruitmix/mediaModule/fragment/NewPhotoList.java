@@ -238,8 +238,7 @@ public class NewPhotoList implements Page {
 
             if (!mPreLoadPhoto) {
                 mPreLoadPhoto = true;
-//                preLoadPhoto(medias);
-//                loadSmallThumbnail(medias);
+                loadSmallThumbnail(medias);
             }
 
         }
@@ -247,39 +246,6 @@ public class NewPhotoList implements Page {
         clearSelectedPhoto();
 
     }
-
-    private void preLoadPhoto(final List<Media> medias) {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                int preLoadPosition = medias.size() / 300;
-
-                Log.i(TAG, "media size: " + medias.size());
-
-                if (preLoadPosition > 10)
-                    preLoadPosition = 10;
-
-                int j, count;
-
-                for (int i = 0; i < preLoadPosition - 1; i++) {
-
-                    j = 300 * i + 30;
-
-                    count = j + 20;
-
-                    for (; j < count; j++) {
-                        mImageLoader.preLoadMedia(medias.get(j).getImageThumbUrl(containerActivity), mItemWidth, mItemWidth, ImageView.ScaleType.CENTER_CROP);
-                    }
-
-                }
-
-            }
-        }).start();
-
-    }
-
 
     private void loadSmallThumbnail(final List<Media> medias) {
 
@@ -290,20 +256,20 @@ public class NewPhotoList implements Page {
 
                 String url;
 
-                List<Media> remoteMedias = new ArrayList<>(medias);
+                List<Media> preLoadMediaMiniThumbs = new ArrayList<>(medias);
                 Media media;
-                Iterator<Media> iterator = remoteMedias.iterator();
+                Iterator<Media> iterator = preLoadMediaMiniThumbs.iterator();
                 while (iterator.hasNext()) {
                     media = iterator.next();
-                    if (media.isLocal())
+                    if (media.isLocal() && media.getMiniThumb().isEmpty())
                         iterator.remove();
                 }
 
-                Log.i(TAG, "remote media size: " + remoteMedias.size());
+                Log.i(TAG, "remote media size: " + preLoadMediaMiniThumbs.size());
 
-                for (int i = 0; i < remoteMedias.size(); i++) {
+                for (int i = 0; i < preLoadMediaMiniThumbs.size(); i++) {
 
-                    media = remoteMedias.get(i);
+                    media = preLoadMediaMiniThumbs.get(i);
 
                     url = media.getImageSmallThumbUrl(containerActivity);
 
@@ -627,9 +593,14 @@ public class NewPhotoList implements Page {
 
     private String findPhotoTag(Media media) {
 
-        if (media.isLocal())
-            return media.getThumb();
-        else
+        if (media.isLocal()) {
+            String thumb = media.getThumb();
+
+            int start = thumb.lastIndexOf("/");
+            int end = thumb.length();
+
+            return thumb.substring(start, end);
+        } else
             return media.getUuid();
 
     }
@@ -950,6 +921,8 @@ public class NewPhotoList implements Page {
             if (currentMedia.isLocal())
                 mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
 
+            mPhotoIv.setBackgroundResource(R.drawable.placeholder_photo);
+
             mPhotoIv.setTag(findPhotoTag(currentMedia));
             mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
 
@@ -958,12 +931,12 @@ public class NewPhotoList implements Page {
                 imageUrl = currentMedia.getImageThumbUrl(containerActivity);
 
             } else {
-                if (currentMedia.isLocal()) {
-                    imageUrl = currentMedia.getImageThumbUrl(containerActivity);
-                } else {
-                    imageUrl = currentMedia.getImageSmallThumbUrl(containerActivity);
-                }
+
+                imageUrl = currentMedia.getImageSmallThumbUrl(containerActivity);
+
             }
+
+
             mPhotoIv.setImageUrl(imageUrl, mImageLoader);
 
             List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());

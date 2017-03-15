@@ -3,13 +3,17 @@ package com.winsun.fruitmix.services;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.db.DBHelper;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
@@ -28,6 +32,7 @@ import com.winsun.fruitmix.eventbus.UserRequestEvent;
 import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.DownloadFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.executor.GenerateLocalMediaMiniThumbTask;
 import com.winsun.fruitmix.executor.UploadMediaTask;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Comment;
@@ -38,6 +43,7 @@ import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
@@ -170,6 +176,9 @@ public class ButlerService extends Service {
 
         switch (action) {
             case Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED:
+
+                startGenerateLocalPhotoThumbnail();
+
                 mCalcNewLocalMediaDigestFinished = true;
                 startUpload();
                 break;
@@ -246,6 +255,23 @@ public class ButlerService extends Service {
                 }
 
         }
+    }
+
+    private void startGenerateLocalPhotoThumbnail() {
+
+        DBUtils dbUtils = DBUtils.getInstance(this);
+        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+
+        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+
+            if (media.getMiniThumb().isEmpty()) {
+
+                GenerateLocalMediaMiniThumbTask task = new GenerateLocalMediaMiniThumbTask(media, dbUtils);
+                instance.doOnTaskInFixedThreadPool(task);
+            }
+
+        }
+
     }
 
     private void startUpload() {

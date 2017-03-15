@@ -82,6 +82,9 @@
 
     <string name="account_manage">Account Manage</string>
 
+    <string name="already_upload_media_percent_text">Already upload %1$s</string>
+    <string name="already_upload_finished">Already upload finished</string>
+
     <!-- login -->
 
     <string name="login">Login</string>
@@ -156,6 +159,8 @@
     <string name="photo_auto_upload_setting_text">Auto upload photos</string>
     <string name="mobile_network_upload">Mobile network upload</string>
     <string name="clear_cache">Clear cache</string>
+    <string name="already_upload_media_count_hint">Already upload media count</string>
+    <string name="already_upload_media_count_text">%1$d(Totally%2$d)</string>
 
     <!-- create user -->
     <string name="user_name">User Name</string>

@@ -63,6 +63,37 @@
             android:background="@color/light_gray" />
 
         <RelativeLayout
+            android:id="@+id/already_upload_media_count_layout"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="@string/already_upload_media_count_hint" />
+
+            <TextView
+                android:id="@+id/already_upload_media_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:text="100"
+                android:visibility="gone"/>
+
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/already_upload_media_count_divide"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/light_gray"
+            android:visibility="visible"/>
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:visibility="gone">

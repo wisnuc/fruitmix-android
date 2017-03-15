@@ -32,6 +32,7 @@ public class Media implements Parcelable {
     private boolean sharing;
     private int orientationNumber;
     private String type;
+    private String miniThumb;
 
     public Media() {
         uuid = "";
@@ -44,6 +45,7 @@ public class Media implements Parcelable {
         date = "";
         belongingMediaShareUUID = "";
         local = false;
+        miniThumb = "";
     }
 
     protected Media(Parcel in) {
@@ -60,6 +62,7 @@ public class Media implements Parcelable {
         uploadedDeviceIDs = in.readString();
         orientationNumber = in.readInt();
         type = in.readString();
+        miniThumb = in.readString();
     }
 
     @Override
@@ -77,6 +80,7 @@ public class Media implements Parcelable {
         dest.writeString(uploadedDeviceIDs);
         dest.writeInt(orientationNumber);
         dest.writeString(type);
+        dest.writeString(miniThumb);
     }
 
     @Override
@@ -208,6 +212,14 @@ public class Media implements Parcelable {
         this.type = type;
     }
 
+    public String getMiniThumb() {
+        return miniThumb == null ? "" : miniThumb;
+    }
+
+    public void setMiniThumb(String miniThumb) {
+        this.miniThumb = miniThumb;
+    }
+
     public synchronized boolean uploadIfNotDone(Context context) {
 
         DBUtils dbUtils = DBUtils.getInstance(context);
@@ -235,7 +247,28 @@ public class Media implements Parcelable {
         return true;
     }
 
-    private String getImageThumbUrl(Context context, int width, int height) {
+    public String getImageSmallThumbUrl(Context context) {
+
+        String imageUrl;
+        if (isLocal()) {
+            imageUrl = getMiniThumb();
+
+            if (imageUrl.isEmpty())
+                imageUrl = getThumb();
+
+        } else {
+
+//            int[] result = Util.formatPhotoWidthHeight(width, height);
+
+            imageUrl = String.format(context.getString(R.string.android_thumb_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid(),
+                    String.valueOf(32), String.valueOf(32));
+
+        }
+        return imageUrl;
+
+    }
+
+    public String getImageThumbUrl(Context context) {
 
         String imageUrl;
         if (isLocal()) {
@@ -245,22 +278,10 @@ public class Media implements Parcelable {
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
             imageUrl = String.format(context.getString(R.string.android_thumb_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid(),
-                    String.valueOf(width), String.valueOf(height));
+                    String.valueOf(200), String.valueOf(200));
 
         }
         return imageUrl;
-
-    }
-
-    public String getImageSmallThumbUrl(Context context) {
-
-        return getImageThumbUrl(context, 32, 32);
-
-    }
-
-    public String getImageThumbUrl(Context context) {
-
-        return getImageThumbUrl(context, 200, 200);
 
     }
 

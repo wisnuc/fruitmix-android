@@ -223,7 +223,7 @@ public class NetworkImageView extends ImageView {
                                 e.printStackTrace();
                             }
 
-                            Log.i(TAG, "onErrorResponse: status:" + status);
+                            Log.d(TAG, "onErrorResponse: status:" + status);
 
                             if (status.equals("pending")) {
 
@@ -271,6 +271,8 @@ public class NetworkImageView extends ImageView {
                             setImageBitmap(bitmap);
                             setBackgroundResource(0);
 
+                            Log.d(TAG, "onResponse: url:" + mUrl);
+
                             setLoaded(true);
 
                             post(new Runnable() {
@@ -314,6 +316,8 @@ public class NetworkImageView extends ImageView {
             // also clear out the container so we can reload the image if necessary.
             mImageContainer = null;
             cancelRequest = true;
+
+            Log.d(TAG, "onDetachedFromWindow: ");
         }
         super.onDetachedFromWindow();
     }

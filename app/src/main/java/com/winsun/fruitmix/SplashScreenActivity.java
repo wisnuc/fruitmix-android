@@ -59,6 +59,12 @@ public class SplashScreenActivity extends BaseActivity {
             Log.i(TAG, "onCreate: Create download file store folder failed");
         }
 
+        result = FileUtil.createLocalPhotoThumbnailFolder();
+
+        if (!result) {
+            Log.i(TAG, "onCreate: Create local photo thumbnail folder failed");
+        }
+
         FNAS.retrieveLocalMedia(mContext);
 
         DBUtils dbUtils = DBUtils.getInstance(this);

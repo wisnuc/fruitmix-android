@@ -254,6 +254,7 @@ public class ImageLoader {
         if (cachedBitmap != null) {
             // Return the cached bitmap.
             ImageContainer container = new ImageContainer(cachedBitmap, requestUrl, null, null);
+
             imageListener.onResponse(container, true);
             return container;
         }
@@ -642,6 +643,9 @@ public class ImageLoader {
         ImageRequest request = new ImageRequest(url, new Response.Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap response) {
+
+                if(!url.startsWith("http"))
+                    Log.d(TAG, "onResponse: url" + url + " size: " + response.getByteCount());
 
 //                mCache.putBitmap(url, response);
 

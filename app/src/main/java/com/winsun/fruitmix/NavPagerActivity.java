@@ -39,6 +39,7 @@ import com.winsun.fruitmix.fragment.FileMainFragment;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
@@ -79,6 +80,8 @@ public class NavPagerActivity extends BaseActivity
     TextView versionName;
     @BindView(R.id.avatar)
     TextView mUserAvatar;
+    @BindView(R.id.upload_percent)
+    TextView mUploadMediaPercentTextView;
     @BindView(R.id.user_name_textview)
     TextView mUserNameTextView;
     @BindView(R.id.logged_in_user0_avatar)
@@ -263,6 +266,9 @@ public class NavPagerActivity extends BaseActivity
         }
     }
 
+    private int mAlreadyUploadMediaCount = -1;
+    private int mTotalLocalMediaCount = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -288,6 +294,15 @@ public class NavPagerActivity extends BaseActivity
 
         refreshUserInNavigationView();
 
+        mDrawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+
+                calcAlreadyUploadMediaCount();
+            }
+        });
+
         mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemMenu);
         mNavigationItemAdapter.notifyDataSetChanged();
 
@@ -305,6 +320,54 @@ public class NavPagerActivity extends BaseActivity
 
         Log.d(TAG, "onCreate: ");
     }
+
+    private void calcAlreadyUploadMediaCount() {
+
+        if (LocalCache.LocalMediaMapKeyIsThumb == null)
+            return;
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+
+                int alreadyUploadMediaCount = 0;
+                int totalUploadMediaCount = 0;
+
+                for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+
+                    if (media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
+                        alreadyUploadMediaCount++;
+                    }
+
+                    totalUploadMediaCount++;
+                }
+
+                mAlreadyUploadMediaCount = alreadyUploadMediaCount;
+                mTotalLocalMediaCount = totalUploadMediaCount;
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+
+                if (mAlreadyUploadMediaCount == mTotalLocalMediaCount) {
+                    mUploadMediaPercentTextView.setText(getString(R.string.already_upload_finished));
+                } else {
+
+                    float percent = mAlreadyUploadMediaCount / mTotalLocalMediaCount * 100;
+
+                    String percentText = (int) percent + "%";
+
+                    mUploadMediaPercentTextView.setText(String.format(getString(R.string.already_upload_media_percent_text), percentText));
+                }
+
+            }
+        }.execute();
+
+    }
+
 
     private void initNavigationMenuRecyclerView() {
         mNavigationItemAdapter = new NavigationItemAdapter();
@@ -517,6 +580,8 @@ public class NavPagerActivity extends BaseActivity
     }
 
     private void refreshLoggedInUserNavigationItem() {
+
+        if (LocalCache.LocalLoggedInUsers == null) return;
 
         List<LoggedInUser> loggedInUsers = new ArrayList<>(LocalCache.LocalLoggedInUsers);
 

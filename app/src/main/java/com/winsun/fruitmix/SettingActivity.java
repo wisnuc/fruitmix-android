@@ -1,8 +1,8 @@
 package com.winsun.fruitmix;
 
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SwitchCompat;
 import android.view.View;
@@ -11,14 +11,11 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationType;
-import com.winsun.fruitmix.services.ButlerService;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -26,6 +23,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class SettingActivity extends BaseActivity implements View.OnClickListener {
+
+    public static final String TAG = SettingActivity.class.getSimpleName();
 
     @BindView(R.id.back)
     ImageView mBackImageView;
@@ -37,8 +36,13 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     TextView mCacheSize;
     @BindView(R.id.clear_cache_layout)
     ViewGroup mClearCacheLayout;
+    @BindView(R.id.already_upload_media_count)
+    TextView mAlreadyUploadMediaCountTextView;
 
     private boolean mAutoUploadOrNot = false;
+
+    private int mAlreadyUploadMediaCount = -1;
+    private int mTotalLocalMediaCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +57,47 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         mCacheSize.setText(FileUtil.formatFileSize(FileUtil.getTotalCacheSize(this)));
 
         mAutoUploadOrNot = LocalCache.getAutoUploadOrNot(this);
-        if (mAutoUploadOrNot) {
-            mAutoUploadPhotosSwitch.setChecked(true);
-        } else {
-            mAutoUploadPhotosSwitch.setChecked(false);
-        }
+        mAutoUploadPhotosSwitch.setChecked(mAutoUploadOrNot);
+
+        calcAlreadyUploadMediaCount();
+
+    }
+
+
+    private void calcAlreadyUploadMediaCount() {
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+
+                int alreadyUploadMediaCount = 0;
+                int totalUploadMediaCount = 0;
+
+                for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+
+                    if (media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
+                        alreadyUploadMediaCount++;
+                    }
+
+                    totalUploadMediaCount++;
+                }
+
+                mAlreadyUploadMediaCount = alreadyUploadMediaCount;
+                mTotalLocalMediaCount = totalUploadMediaCount;
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+
+                mAlreadyUploadMediaCountTextView.setVisibility(View.VISIBLE);
+                mAlreadyUploadMediaCountTextView.setText(String.format(getString(R.string.already_upload_media_count_text), mAlreadyUploadMediaCount, mTotalLocalMediaCount));
+
+            }
+        }.execute();
+
     }
 
     @Override

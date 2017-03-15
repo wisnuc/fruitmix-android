@@ -101,6 +101,7 @@ public class CalcNewLocalMediaDigestService extends IntentService {
         }
 
         EventBus.getDefault().post(operationEvent);
+
     }
 
 }

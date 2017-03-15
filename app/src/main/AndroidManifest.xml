@@ -17,7 +17,6 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/CustomAppTheme">
-
         <meta-data
             android:name="UMENG_APPKEY"
             android:value="58be61e8c62dca355a000ae1" />
@@ -198,6 +197,10 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".AccountManageActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".TestPhotoListActivity"
             android:screenOrientation="portrait" />
 
     </application>
