@@ -1,5 +1,6 @@
 package com.winsun.fruitmix;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
@@ -7,7 +8,6 @@ import android.os.Bundle;
 import android.support.v7.widget.SwitchCompat;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -44,6 +44,8 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
     private int mAlreadyUploadMediaCount = -1;
     private int mTotalLocalMediaCount = 0;
 
+    private long mTotalCacheSize = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,17 +56,15 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
         mBackImageView.setOnClickListener(this);
         mClearCacheLayout.setOnClickListener(this);
 
-        mCacheSize.setText(FileUtil.formatFileSize(FileUtil.getTotalCacheSize(this)));
-
         mAutoUploadOrNot = LocalCache.getAutoUploadOrNot(this);
         mAutoUploadPhotosSwitch.setChecked(mAutoUploadOrNot);
 
-        calcAlreadyUploadMediaCount();
+        calcAlreadyUploadMediaCountAndTotalCacheSize();
 
     }
 
 
-    private void calcAlreadyUploadMediaCount() {
+    private void calcAlreadyUploadMediaCountAndTotalCacheSize() {
 
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -85,6 +85,8 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
                 mAlreadyUploadMediaCount = alreadyUploadMediaCount;
                 mTotalLocalMediaCount = totalUploadMediaCount;
 
+                mTotalCacheSize = FileUtil.getTotalCacheSize(SettingActivity.this);
+
                 return null;
             }
 
@@ -94,6 +96,8 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
 
                 mAlreadyUploadMediaCountTextView.setVisibility(View.VISIBLE);
                 mAlreadyUploadMediaCountTextView.setText(String.format(getString(R.string.already_upload_media_count_text), mAlreadyUploadMediaCount, mTotalLocalMediaCount));
+
+                mCacheSize.setText(FileUtil.formatFileSize(mTotalCacheSize));
 
             }
         }.execute();
