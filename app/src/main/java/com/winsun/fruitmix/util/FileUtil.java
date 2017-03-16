@@ -93,7 +93,7 @@ public class FileUtil {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator;
     }
 
-    private static String getLocalPhotoThumbnailFolderPath() {
+    public static String getLocalPhotoThumbnailFolderPath() {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
     }
 
@@ -104,10 +104,7 @@ public class FileUtil {
 
         String thumb = media.getThumb();
 
-        int start = thumb.lastIndexOf("/");
-        int end = thumb.length();
-
-        String miniThumbName = thumb.substring(start, end);
+        String miniThumbName = media.getUuid() + ".jpg";
 
         File file = new File(getLocalPhotoThumbnailFolderPath(), miniThumbName);
 

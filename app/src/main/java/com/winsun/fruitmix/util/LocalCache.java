@@ -499,6 +499,10 @@ public class LocalCache {
                 continue;
             }
 
+            if(thumb.contains(FileUtil.getLocalPhotoThumbnailFolderPath())){
+                continue;
+            }
+
             media = new Media();
             media.setThumb(thumb);
             media.setWidth(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)));

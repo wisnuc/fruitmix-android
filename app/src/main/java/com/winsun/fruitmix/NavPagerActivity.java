@@ -356,7 +356,7 @@ public class NavPagerActivity extends BaseActivity
                     mUploadMediaPercentTextView.setText(getString(R.string.already_upload_finished));
                 } else {
 
-                    float percent = mAlreadyUploadMediaCount / mTotalLocalMediaCount * 100;
+                    float percent = mAlreadyUploadMediaCount * 100 / mTotalLocalMediaCount;
 
                     String percentText = (int) percent + "%";
 

@@ -364,21 +364,6 @@ public class TestPhotoListActivity extends AppCompatActivity {
         }
     }
 
-    private String findPhotoTag(Media media) {
-
-        if (media.isLocal()) {
-            String thumb = media.getThumb();
-
-            int start = thumb.lastIndexOf("/");
-            int end = thumb.length();
-
-            return thumb.substring(start, end);
-        } else
-            return media.getUuid();
-
-    }
-
-
     class PhotoHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.photo_iv)
@@ -410,7 +395,6 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
             mPhotoIv.setBackgroundResource(R.drawable.placeholder_photo);
 
-            mPhotoIv.setTag(findPhotoTag(currentMedia));
             mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
 
             if (!mIsFling) {
@@ -422,6 +406,8 @@ public class TestPhotoListActivity extends AppCompatActivity {
                 imageUrl = currentMedia.getImageSmallThumbUrl(mContext);
 
             }
+
+            mPhotoIv.setTag(imageUrl);
 
             mPhotoIv.setImageUrl(imageUrl, mImageLoader);
 

@@ -194,6 +194,7 @@ public class NetworkImageView extends ImageView {
 
                 //small thumbnail is showed and then show thumbnail cause flash
 //                setDefaultImageOrNull();
+
             }
         }
 

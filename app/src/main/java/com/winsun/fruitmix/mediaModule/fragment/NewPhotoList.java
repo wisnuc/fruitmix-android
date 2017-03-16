@@ -539,7 +539,11 @@ public class NewPhotoList implements Page {
 
                 if (currentMedia == null) return;
 
-                View newSharedElement = mRecyclerView.findViewWithTag(findPhotoTag(currentMedia));
+                View newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageThumbUrl(containerActivity));
+
+                if(newSharedElement == null)
+                    newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageSmallThumbUrl(containerActivity));
+
                 String sharedElementName = currentMedia.getKey();
 
                 names.add(sharedElementName);
@@ -588,20 +592,6 @@ public class NewPhotoList implements Page {
                 }
             });
         }
-
-    }
-
-    private String findPhotoTag(Media media) {
-
-        if (media.isLocal()) {
-            String thumb = media.getThumb();
-
-            int start = thumb.lastIndexOf("/");
-            int end = thumb.length();
-
-            return thumb.substring(start, end);
-        } else
-            return media.getUuid();
 
     }
 
@@ -923,7 +913,6 @@ public class NewPhotoList implements Page {
 
             mPhotoIv.setBackgroundResource(R.drawable.placeholder_photo);
 
-            mPhotoIv.setTag(findPhotoTag(currentMedia));
             mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
 
             if (!mIsFling) {
@@ -936,6 +925,7 @@ public class NewPhotoList implements Page {
 
             }
 
+            mPhotoIv.setTag(imageUrl);
 
             mPhotoIv.setImageUrl(imageUrl, mImageLoader);
 
