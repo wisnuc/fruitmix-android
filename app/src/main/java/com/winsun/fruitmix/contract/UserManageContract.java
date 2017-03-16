@@ -22,8 +22,6 @@ public interface UserManageContract {
 
     interface UserManagePresenter extends BasePresenter<UserManageView> {
 
-        void addUserBtnClick();
-
         void initView();
     }
 

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.business.DataRepository;
 import com.winsun.fruitmix.common.BaseActivity;
 import com.winsun.fruitmix.common.Injection;
 import com.winsun.fruitmix.contract.SplashContract;
@@ -35,9 +36,11 @@ public class SplashScreenActivity extends BaseActivity implements SplashContract
 
         mContext = this;
 
-//        LocalCache.Init();
+        DataRepository dataRepository = Injection.injectDataRepository(mContext);
 
-        mSplashPresenter = new SplashPresenterImpl(Injection.injectDataRepository(mContext));
+        dataRepository.init();
+
+        mSplashPresenter = new SplashPresenterImpl(dataRepository);
 
         mSplashPresenter.attachView(this);
 

@@ -31,19 +31,14 @@ public class UserManagePresenterImpl implements UserManageContract.UserManagePre
     }
 
     @Override
-    public void addUserBtnClick() {
-
-    }
-
-    @Override
     public void initView() {
 
         List<User> users = new ArrayList<>(repository.loadUsersInMemory());
 
-        if(users.size() == 0){
+        if (users.size() == 0) {
             mView.showNoContentUI();
             mView.dismissContentUI();
-        }else {
+        } else {
 
             mView.dismissNoContentUI();
             mView.showContentUI();

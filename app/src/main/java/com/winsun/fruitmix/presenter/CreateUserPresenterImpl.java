@@ -62,12 +62,16 @@ public class CreateUserPresenterImpl implements CreateUserContract.CreateUserPre
             @Override
             public void onOperateSucceed(OperationResult operationResult, User user) {
 
+                if (mView == null) return;
+
                 mView.dismissDialog();
                 mView.handleCreateUserSucceed();
             }
 
             @Override
             public void onOperateFail(OperationResult operationResult) {
+
+                if (mView == null) return;
 
                 mView.dismissDialog();
                 mView.handleCreateUserFail(operationResult);

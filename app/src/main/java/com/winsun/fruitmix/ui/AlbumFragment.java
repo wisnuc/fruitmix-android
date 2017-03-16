@@ -84,8 +84,6 @@ public class AlbumFragment implements AlbumFragmentContract.AlbumFragmentView {
             @Override
             public void onClick(View v) {
 
-                mPresenter.createAlbumBtnOnClick();
-
                 Intent intent = new Intent();
                 intent.setClass(containerActivity, NewPhotoSelectActivity.class);
                 containerActivity.startActivityForResult(intent, Util.KEY_CHOOSE_PHOTO_REQUEST_CODE);

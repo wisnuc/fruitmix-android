@@ -34,20 +34,12 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
 
     private List<MediaShare> mAlbumList;
 
-    private boolean isDataRefreshed = false;
-
     private MediaShareOperationCallback.LoadMediaSharesCallback mCallback;
 
     public AlbumFragmentPresenterImpl(DataRepository repository) {
         mRepository = repository;
 
         mAlbumList = new ArrayList<>();
-    }
-
-    @Override
-    public void createAlbumBtnOnClick() {
-
-
     }
 
     private boolean preTreatOperateMediaShare(MediaShare mediaShare) {
@@ -77,10 +69,11 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
 
+                if (mView == null) return;
+
                 mView.dismissDialog();
 
-                if (mView != null)
-                    mView.showOperationResultToast(operationResult);
+                mView.showOperationResultToast(operationResult);
 
                 mRepository.loadMediaSharesInThread(null);
             }
@@ -88,10 +81,11 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
             @Override
             public void onOperateFail(OperationResult operationResult) {
 
+                if (mView == null) return;
+
                 mView.dismissDialog();
 
-                if (mView != null)
-                    mView.showOperationResultToast(operationResult);
+                mView.showOperationResultToast(operationResult);
             }
         });
     }
@@ -107,10 +101,11 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
 
+                if (mView == null) return;
+
                 mView.dismissDialog();
 
-                if (mView != null)
-                    mView.showOperationResultToast(operationResult);
+                mView.showOperationResultToast(operationResult);
 
                 mRepository.loadMediaSharesInThread(null);
             }
@@ -118,10 +113,11 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
             @Override
             public void onOperateFail(OperationResult operationResult) {
 
+                if (mView == null) return;
+
                 mView.dismissDialog();
 
-                if (mView != null)
-                    mView.showOperationResultToast(operationResult);
+                mView.showOperationResultToast(operationResult);
             }
         });
     }
@@ -129,7 +125,6 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
     @Override
     public void refreshData() {
 
-        isDataRefreshed = true;
         loadMediaShares();
     }
 
@@ -175,19 +170,19 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
     @Override
     public void loadMediaToView(Context context, Media media, NetworkImageView view) {
 
-        mRepository.loadThumbMediaToNetworkImageView(context,media,view);
+        mRepository.loadThumbMediaToNetworkImageView(context, media, view);
 
     }
 
     private void loadMediaShares() {
 
-        if(mCallback == null){
+        if (mCallback == null) {
 
             mCallback = new MediaShareOperationCallback.LoadMediaSharesCallback() {
                 @Override
                 public void onLoadSucceed(OperationResult operationResult, Collection<MediaShare> mediaShares) {
 
-                    Log.i(TAG, "onLoadSucceed: ");
+                    if (mView == null) return;
 
                     mAlbumList.clear();
 

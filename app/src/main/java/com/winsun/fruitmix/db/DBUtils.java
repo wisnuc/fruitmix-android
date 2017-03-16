@@ -983,28 +983,31 @@ public class DBUtils {
 
     }
 
-    private long updateMedia(String dbName, Media media) {
+    private long updateMedias(String dbName, Collection<Media> medias) {
         openWritableDB();
 
-        ContentValues contentValues = createMediaContentValues(media);
+        long returnValue = 0;
 
-        long returnValue = database.update(dbName, contentValues, DBHelper.MEDIA_KEY_UUID + " = ?", new String[]{media.getUuid()});
+        for (Media media:medias){
 
-        Log.d(TAG, "update media uuid:" + media.getUuid());
+            ContentValues contentValues = createMediaContentValues(media);
+
+            returnValue = database.update(dbName, contentValues, DBHelper.MEDIA_KEY_THUMB + " = ?", new String[]{media.getThumb()});
+
+            Log.d(TAG, "update media uuid:" + media.getUuid());
+        }
 
         close();
 
         return returnValue;
     }
 
-    public long updateRemoteMedia(Media media) {
-
-        return updateMedia(DBHelper.REMOTE_MEDIA_TABLE_NAME, media);
-
+    public long updateLocalMedia(Media media) {
+        return updateMedias(DBHelper.LOCAL_MEDIA_TABLE_NAME, Collections.singletonList(media));
     }
 
-    public long updateLocalMedia(Media media) {
-        return updateMedia(DBHelper.LOCAL_MEDIA_TABLE_NAME, media);
+    public long updateLocalMedias(Collection<Media> medias){
+        return updateMedias(DBHelper.LOCAL_MEDIA_TABLE_NAME,medias);
     }
 
     @NonNull

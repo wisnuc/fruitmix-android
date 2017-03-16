@@ -52,6 +52,8 @@ public class ModifyAlbumPresenterImpl implements ModifyAlbumContract.ModifyAlbum
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
 
+                if (mView == null) return;
+
                 mView.dismissDialog();
                 isOperated = true;
                 handleBackEvent();
@@ -59,6 +61,8 @@ public class ModifyAlbumPresenterImpl implements ModifyAlbumContract.ModifyAlbum
 
             @Override
             public void onOperateFail(OperationResult operationResult) {
+
+                if (mView == null) return;
 
                 mView.dismissDialog();
                 handleBackEvent();

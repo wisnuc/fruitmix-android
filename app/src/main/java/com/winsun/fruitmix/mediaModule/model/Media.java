@@ -232,20 +232,4 @@ public class Media implements Parcelable {
             return getUuid();
     }
 
-    @Override
-    public int hashCode() {
-        return getUuid().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if(this == o)
-            return true;
-
-        if(o instanceof Media){
-            return ((Media) o).getUuid().equals(this.getUuid());
-        }
-
-        return super.equals(o);
-    }
 }

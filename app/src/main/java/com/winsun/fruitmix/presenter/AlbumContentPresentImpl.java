@@ -58,6 +58,9 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
         mRepository.modifyMediaShare(cloneMediaShare.createToggleShareStateRequestData(mRepository.loadAllUserUUIDInMemory()), cloneMediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
+
+                if (mView == null) return;
+
                 mView.dismissDialog();
 
                 isOperated = true;
@@ -71,6 +74,9 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
 
             @Override
             public void onOperateFail(OperationResult operationResult) {
+
+                if (mView == null) return;
+
                 mView.dismissDialog();
 
                 mView.showOperationResultToast(operationResult);
@@ -87,6 +93,9 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
         mRepository.deleteMediaShare(mMediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
+
+                if (mView == null) return;
+
                 mView.dismissDialog();
 
                 isOperated = true;
@@ -95,6 +104,9 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
 
             @Override
             public void onOperateFail(OperationResult operationResult) {
+
+                if (mView == null) return;
+
                 mView.dismissDialog();
 
                 mView.showOperationResultToast(operationResult);
@@ -194,6 +206,8 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
         mRepository.loadMediaInMediaShareFromMemory(mMediaShare, new MediaOperationCallback.LoadMediasCallback() {
             @Override
             public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
+
+                if (mView == null) return;
 
                 mMedias = medias;
                 mView.dismissLoadingUI();

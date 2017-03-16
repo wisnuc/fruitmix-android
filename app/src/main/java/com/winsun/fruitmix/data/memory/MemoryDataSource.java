@@ -71,6 +71,22 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
+    public void init() {
+
+        mToken = null;
+        mDeviceID = null;
+        mCurrentLoginUserUUID = null;
+
+        remoteMediaShareMapKeyIsUUID.clear();
+        remoteUserMapKeyIsUUID.clear();
+        remoteMediaMapKeyIsUUID.clear();
+        localMediaMapKeyIsThumb.clear();
+        remoteFileMapKeyIsUUID.clear();
+        remoteFileShareList.clear();
+
+    }
+
+    @Override
     public void deleteToken() {
         mToken = null;
     }
@@ -183,6 +199,16 @@ public class MemoryDataSource implements DataSource {
     @Override
     public OperationResult updateLocalMedia(Media media) {
         return null;
+    }
+
+    @Override
+    public OperationResult updateLocalMedias(Collection<Media> medias) {
+
+        for (Media media : medias) {
+            localMediaMapKeyIsThumb.put(media.getThumb(), media);
+        }
+
+        return new OperationSuccess();
     }
 
     @Override

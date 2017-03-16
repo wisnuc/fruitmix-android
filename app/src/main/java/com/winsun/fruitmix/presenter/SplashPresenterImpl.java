@@ -72,6 +72,8 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
             @Override
             public void onLoadFail(OperationResult result) {
 
+                if (mView == null) return;
+
                 mView.emptyCacheToken();
             }
         });

@@ -189,6 +189,8 @@ public class FileDownloadFragmentPresenterImpl implements FileDownloadFragmentCo
             @Override
             public void onLoaded(Collection<FileDownloadItem> fileDownloadItems) {
 
+                if (mView == null) return;
+
                 filterFileDownloadItems(fileDownloadItems);
 
                 mView.showDownloadingContent(downloadingItems);

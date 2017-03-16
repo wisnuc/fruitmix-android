@@ -74,6 +74,9 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
         mRepository.modifyMediaInMediaShare(diffContentsOriginalMediaShare,diffContentsModifiedMediaShare, mModifiedMediaShare, new MediaShareOperationCallback.OperateMediaShareCallback() {
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
+
+                if (mView == null) return;
+
                 mView.dismissDialog();
                 mView.showOperationResultToast(operationResult);
 
@@ -83,6 +86,9 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
 
             @Override
             public void onOperateFail(OperationResult operationResult) {
+
+                if (mView == null) return;
+
                 mView.dismissDialog();
                 mView.showOperationResultToast(operationResult);
 
@@ -100,6 +106,8 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
         mRepository.loadMediaInMediaShareFromMemory(mMediaShare, new MediaOperationCallback.LoadMediasCallback() {
             @Override
             public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
+
+                if (mView == null) return;
 
                 mMedias = medias;
                 mView.dismissLoadingUI();

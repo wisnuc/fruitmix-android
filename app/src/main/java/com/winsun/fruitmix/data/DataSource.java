@@ -29,6 +29,8 @@ import java.util.List;
 
 public interface DataSource {
 
+    void init();
+
     //media share
     OperateMediaShareResult insertRemoteMediaShare(String url, String token, MediaShare mediaShare);
 
@@ -65,13 +67,15 @@ public interface DataSource {
 
     Media loadLocalMediaByThumb(String thumb);
 
-    MediasLoadOperationResult loadLocalMediaInCamera(Collection<String> loadedMediaUUIDs);
+    MediasLoadOperationResult loadLocalMediaInCamera(Collection<String> loadedMediaThumbs);
 
     Media loadMedia(String mediaKey);
 
     void updateLocalMediasUploadedFalse();
 
     OperationResult updateLocalMedia(Media media);
+
+    OperationResult updateLocalMedias(Collection<Media> medias);
 
     //user
 

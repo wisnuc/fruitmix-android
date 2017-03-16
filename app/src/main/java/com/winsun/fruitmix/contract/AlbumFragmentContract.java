@@ -38,8 +38,6 @@ public interface AlbumFragmentContract {
 
     interface AlbumFragmentPresenter extends BasePresenter<AlbumFragmentView> {
 
-        void createAlbumBtnOnClick();
-
         void modifyMediaShare(MediaShare mediaShare);
 
         void deleteMediaShare(MediaShare mediaShare);

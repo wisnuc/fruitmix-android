@@ -74,6 +74,10 @@ public class DBDataSource implements DataSource {
         return INSTANCE;
     }
 
+    @Override
+    public void init() {
+
+    }
 
     @Override
     public OperateUserResult insertUser(String url, String token, String userName, String userPassword) {
@@ -251,6 +255,14 @@ public class DBDataSource implements DataSource {
     @Override
     public OperationResult updateLocalMedia(Media media) {
         mDBUtils.updateLocalMedia(media);
+
+        return new OperationSuccess();
+    }
+
+    @Override
+    public OperationResult updateLocalMedias(Collection<Media> medias) {
+
+        mDBUtils.updateLocalMedias(medias);
 
         return new OperationSuccess();
     }

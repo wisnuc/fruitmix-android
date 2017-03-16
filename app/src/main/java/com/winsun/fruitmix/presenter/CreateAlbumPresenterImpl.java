@@ -53,6 +53,8 @@ public class CreateAlbumPresenterImpl implements CreateAlbumContract.CreateAlbum
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
 
+                if (mView == null) return;
+
                 mView.dismissDialog();
 
                 mView.showOperationResultToast(operationResult);
@@ -63,6 +65,8 @@ public class CreateAlbumPresenterImpl implements CreateAlbumContract.CreateAlbum
 
             @Override
             public void onOperateFail(OperationResult operationResult) {
+
+                if (mView == null) return;
 
                 mView.dismissDialog();
 

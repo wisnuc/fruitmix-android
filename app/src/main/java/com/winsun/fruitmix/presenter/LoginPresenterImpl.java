@@ -56,6 +56,8 @@ public class LoginPresenterImpl implements LoginContract.LoginPresenter {
                     @Override
                     public void onLoadSucceed(OperationResult result, String deviceID) {
 
+                        if (mView == null) return;
+
                         loadData();
 
                         mView.dismissDialog();
@@ -65,6 +67,9 @@ public class LoginPresenterImpl implements LoginContract.LoginPresenter {
 
                     @Override
                     public void onLoadFail(OperationResult result) {
+
+                        if (mView == null) return;
+
                         mView.dismissDialog();
 
                         mView.handleLoginFail(result);
@@ -75,6 +80,9 @@ public class LoginPresenterImpl implements LoginContract.LoginPresenter {
 
             @Override
             public void onLoadFail(OperationResult result) {
+
+                if (mView == null) return;
+
                 mView.dismissDialog();
 
                 mView.handleLoginFail(result);

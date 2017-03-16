@@ -62,6 +62,8 @@ public class MoreMediaPresenterImpl implements MoreMediaContract.MoreMediaPresen
             @Override
             public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
 
+                if (mView == null) return;
+
                 mMedias = medias;
                 mView.dismissLoadingUI();
 

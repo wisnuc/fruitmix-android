@@ -163,6 +163,8 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
             @Override
             public void onLoadSucceed(OperationResult result, Collection<AbstractRemoteFile> files) {
 
+                if (mView == null) return;
+
                 remoteFileLoaded = true;
 
                 mView.dismissLoadingUI();
@@ -182,6 +184,9 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
 
             @Override
             public void onLoadFail(OperationResult result) {
+
+                if (mView == null) return;
+
                 mView.showNoContentUI();
                 mView.dismissContentUI();
             }

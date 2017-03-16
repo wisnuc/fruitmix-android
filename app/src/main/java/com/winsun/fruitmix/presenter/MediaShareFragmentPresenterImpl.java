@@ -155,6 +155,8 @@ public class MediaShareFragmentPresenterImpl implements MediaShareFragmentContra
             @Override
             public void onLoadSucceed(OperationResult operationResult, Collection<MediaShare> mediaShares) {
 
+                if (mView == null) return;
+
                 mMediaShares.clear();
 
                 for (MediaShare mediaShare : mediaShares) {

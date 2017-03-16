@@ -183,6 +183,8 @@ public class MediaFragmentInNewPhotoSelectPresenterImpl implements MediaFragment
             @Override
             public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
 
+                if (mView == null) return;
+
                 Log.i(TAG, "onLoadSucceed: media size:" + medias.size());
 
                 showMedias(medias);
@@ -219,6 +221,9 @@ public class MediaFragmentInNewPhotoSelectPresenterImpl implements MediaFragment
         mRepository.handleMediasForMediaFragment(medias, new MediaOperationCallback.HandleMediaForMediaFragmentCallback() {
             @Override
             public void onOperateFinished(MediaFragmentDataLoader loader) {
+
+                if (mView == null) return;
+
                 mPhotoDateGroups = loader.getPhotoDateGroups();
                 mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
                 mMapKeyIsDateValueIsPhotoList = loader.getMapKeyIsDateValueIsPhotoList();

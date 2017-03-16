@@ -91,6 +91,11 @@ public class ServerDataSource implements DataSource {
         return INSTANCE;
     }
 
+    @Override
+    public void init() {
+
+    }
+
     private HttpResponse getRemoteCall(String url, String token) throws MalformedURLException, IOException, SocketTimeoutException {
 
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
@@ -447,6 +452,11 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public OperationResult updateLocalMedia(Media media) {
+        return null;
+    }
+
+    @Override
+    public OperationResult updateLocalMedias(Collection<Media> medias) {
         return null;
     }
 

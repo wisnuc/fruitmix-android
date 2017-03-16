@@ -95,6 +95,8 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
                 @Override
                 public void onLoadSucceed(OperationResult result, Collection<AbstractRemoteFile> files) {
 
+                    if (mView == null) return;
+
                     remoteFileShareLoaded = true;
 
                     handleLoadSucceed(files);
@@ -102,6 +104,9 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
 
                 @Override
                 public void onLoadFail(OperationResult result) {
+
+                    if (mView == null) return;
+
                     mView.dismissLoadingUI();
                     mView.showNoContentUI();
                 }
@@ -136,6 +141,8 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
                 @Override
                 public void onLoadSucceed(OperationResult result, Collection<AbstractRemoteFile> files) {
 
+                    if (mView == null) return;
+
                     remoteFileShareLoaded = true;
 
                     handleLoadSucceed(files);
@@ -143,6 +150,9 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
 
                 @Override
                 public void onLoadFail(OperationResult result) {
+
+                    if (mView == null) return;
+
                     mView.dismissLoadingUI();
                     mView.showNoContentUI();
                 }
@@ -153,11 +163,17 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
             mRepository.loadRemoteFolderContent(currentFolderUUID, new FileOperationCallback.LoadFileOperationCallback() {
                 @Override
                 public void onLoadSucceed(OperationResult result, Collection<AbstractRemoteFile> files) {
+
+                    if (mView == null) return;
+
                     handleLoadSucceed(files);
                 }
 
                 @Override
                 public void onLoadFail(OperationResult result) {
+
+                    if (mView == null) return;
+
                     mView.dismissLoadingUI();
                     mView.showNoContentUI();
                 }
@@ -240,12 +256,16 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
             @Override
             public void onLoadSucceed(OperationResult result, Collection<AbstractRemoteFile> files) {
 
+                if (mView == null) return;
+
                 handleLoadSucceed(files);
 
             }
 
             @Override
             public void onLoadFail(OperationResult result) {
+
+                if (mView == null) return;
 
                 mView.dismissLoadingUI();
                 mView.showNoContentUI();

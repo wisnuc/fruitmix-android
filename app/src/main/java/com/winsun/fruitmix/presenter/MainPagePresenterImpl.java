@@ -89,7 +89,7 @@ public class MainPagePresenterImpl implements MainPageContract.MainPagePresenter
             mView.setFileItemMenuIcon(R.drawable.ic_photo);
             mView.hideMediaAndShowFileFragment();
 
-            mRepository.stopTimingRetrieveMediaShare();
+            mRepository.pauseTimingRetrieveMediaShare();
 
         } else {
 
@@ -98,6 +98,7 @@ public class MainPagePresenterImpl implements MainPageContract.MainPagePresenter
             mView.setFileItemMenuIcon(R.drawable.ic_folder);
             mView.showMediaAndHideFileFragment();
 
+            mRepository.resumeTimingRetrieveMediaShare();
         }
 
     }
@@ -185,6 +186,9 @@ public class MainPagePresenterImpl implements MainPageContract.MainPagePresenter
         mRepository.loadCurrentLoginUser(new UserOperationCallback.LoadCurrentUserCallback() {
             @Override
             public void onLoadSucceed(OperationResult operationResult, User user) {
+
+                if (mView == null) return;
+
                 mView.refreshUserInNavigationView(user);
             }
 

@@ -230,6 +230,8 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
             @Override
             public void onOperateSucceed(OperationResult operationResult, MediaShare mediaShare) {
 
+                if (mView == null) return;
+
                 mView.dismissDialog();
 
                 mMediaMainFragmentPresenter.setViewPageCurrentItem(MediaMainFragmentPresenterImpl.PAGE_SHARE);
@@ -238,6 +240,8 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
             @Override
             public void onOperateFail(OperationResult operationResult) {
+
+                if (mView == null) return;
 
                 mView.dismissDialog();
             }
@@ -332,6 +336,9 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
             mRepository.loadLocalMediaInCameraInThread(new MediaOperationCallback.LoadMediasCallback() {
                 @Override
                 public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
+
+                    if (mView == null) return;
+
                     showMedias(medias);
                 }
 
@@ -376,6 +383,8 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
             @Override
             public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
 
+                if (mView == null) return;
+
                 Log.i(TAG, "onLoadSucceed: ");
 
                 mPhotoListRefresh = true;
@@ -394,11 +403,17 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
         mRepository.handleMediasForMediaFragment(medias, new MediaOperationCallback.HandleMediaForMediaFragmentCallback() {
             @Override
             public void onOperateFinished(MediaFragmentDataLoader loader) {
+
+                if (mView == null) return;
+
                 mPhotoDateGroups = loader.getPhotoDateGroups();
                 mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
                 mMapKeyIsDateValueIsPhotoList = loader.getMapKeyIsDateValueIsPhotoList();
 
                 clearSelectPhoto();
+
+                if (mView == null)
+                    return;
 
                 mView.dismissLoadingUI();
                 if (mPhotoDateGroups.size() != 0) {

@@ -107,8 +107,6 @@ public class UserManageActivity extends BaseActivity implements UserManageContra
                 break;
             case R.id.add_user:
 
-                mPresenter.addUserBtnClick();
-
                 Intent intent = new Intent(mContext, CreateUserActivity.class);
                 startActivityForResult(intent, Util.KEY_CREATE_USER_REQUEST_CODE);
 
