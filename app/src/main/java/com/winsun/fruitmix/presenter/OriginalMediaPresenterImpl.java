@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v4.app.SharedElementCallback;
 import android.transition.Transition;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -76,7 +77,7 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
             Log.d(TAG, "image:" + mMedias.get(position));
 
             String title = mMedias.get(position).getTime();
-            if (title == null || title.contains("1916-01-01")) {
+            if (title == null || title.contains(Util.DEFAULT_DATE)) {
                 mView.setDate(mView.getString(R.string.unknown_time));
             } else {
                 mView.setDate(title);
@@ -213,7 +214,7 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
                 mRepository.loadOriginalMediaToGifTouchNetworkImageView(context, media, view);
             }
 
-            mView.addOnTouchListener(view,new View.OnTouchListener() {
+            view.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
 
@@ -222,6 +223,49 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
                     return false;
                 }
             });
+
+            view.setOnDoubleTapListener(new CustomTapListener(view));
+        }
+    }
+
+    private class CustomTapListener implements GestureDetector.OnDoubleTapListener {
+
+        private GifTouchNetworkImageView mView;
+
+        CustomTapListener(GifTouchNetworkImageView view) {
+            mView = view;
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            mView.setNeedFitImageToView(false);
+            convertEditState();
+            toggleFullScreenState();
+
+            return true;
+        }
+
+        /**
+         * Notified when a double-tap occurs.
+         *
+         * @param e The down motion event of the first tap of the double-tap.
+         * @return true if the event is consumed, else false
+         */
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            return false;
+        }
+
+        /**
+         * Notified when an event within a double-tap gesture occurs, including
+         * the down, move, and up events.
+         *
+         * @param e The motion event that occurred during the double-tap gesture.
+         * @return true if the event is consumed, else false
+         */
+        @Override
+        public boolean onDoubleTapEvent(MotionEvent e) {
+            return false;
         }
     }
 
@@ -331,6 +375,19 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
             }
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
 
+            //TODO:use double tap listener for on click event
+
+            if (lastY - y > Util.dip2px(context, 30)) {
+
+                if (!view.isZoomed())
+                    handleBackEvent();
+            } else {
+
+                if (!view.isZoomed())
+                    view.setTranslationY(0);
+            }
+
+
             if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
 
                 view.setNeedFitImageToView(false);
@@ -350,10 +407,7 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
             }
 
         }
-
     }
-
-
 
     private void toggleFullScreenState() {
 

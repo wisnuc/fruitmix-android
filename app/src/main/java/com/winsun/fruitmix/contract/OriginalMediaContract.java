@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.SharedElementCallback;
 import android.transition.Transition;
+import android.view.GestureDetector;
 import android.view.View;
 
 import com.winsun.fruitmix.common.BasePresenter;
@@ -52,8 +53,6 @@ public interface OriginalMediaContract {
         boolean isCurrentViewPage(int viewPosition);
 
         void addTransitionListener(Transition.TransitionListener listener);
-
-        void addOnTouchListener(GifTouchNetworkImageView view, View.OnTouchListener listener);
 
         void setTransitionName(View view, String transitionName);
     }

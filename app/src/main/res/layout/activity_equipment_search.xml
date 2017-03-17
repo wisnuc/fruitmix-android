@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#DEDEDE"
-    android:orientation="vertical"
-    tools:context="com.winsun.fruitmix.EquipmentSearchActivity">
+    android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -56,8 +55,20 @@
             android:fadingEdge="none"
             android:visibility="gone" />
 
-        <include layout="@layout/loading_layout"/>
+        <include layout="@layout/loading_layout" />
 
     </FrameLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+        android:src="@drawable/ic_add_white_24dp"
+        android:visibility="visible"
+        app:borderWidth="0dp"
+        app:fabSize="normal" />
 
 </android.support.design.widget.CoordinatorLayout>

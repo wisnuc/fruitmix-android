@@ -9,6 +9,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +33,8 @@ import butterknife.ButterKnife;
  * create an instance of this fragment.
  */
 public class FileMainFragment extends Fragment implements FileMainFragmentContract.FileMainFragmentView {
+
+    public static final String TAG = FileMainFragment.class.getSimpleName();
 
     @BindView(R.id.title)
     TextView titleTextView;
@@ -121,11 +124,14 @@ public class FileMainFragment extends Fragment implements FileMainFragmentContra
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onDestroyView() {
+        super.onDestroyView();
 
-        fileFragment.onResume();
-        fileShareFragment.onResume();
+        mPresenter.detachView();
+
+        fileFragment.onDestroyView();
+        fileShareFragment.onDestroyView();
+        fileDownloadFragment.onDestroyView();
     }
 
     private void initNavigationView() {
@@ -154,7 +160,7 @@ public class FileMainFragment extends Fragment implements FileMainFragmentContra
     @Override
     public void setBottomNavigationItemChecked(int position) {
 
-        bottomNavigationView.getMenu().getItem(position).setChecked(false);
+        bottomNavigationView.getMenu().getItem(position).setChecked(true);
     }
 
     @Override
@@ -260,6 +266,11 @@ public class FileMainFragment extends Fragment implements FileMainFragmentContra
         @Override
         public boolean isViewFromObject(View view, Object object) {
             return view == object;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            container.removeView((View) object);
         }
     }
 }

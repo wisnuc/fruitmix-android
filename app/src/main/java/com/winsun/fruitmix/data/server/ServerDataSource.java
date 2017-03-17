@@ -93,7 +93,6 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public void init() {
-
     }
 
     private HttpResponse getRemoteCall(String url, String token) throws MalformedURLException, IOException, SocketTimeoutException {
@@ -156,7 +155,7 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public String loadGateway() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     public List<User> loadUserByLoginApi(String token, String url) {
@@ -189,6 +188,7 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public void deleteToken() {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -259,22 +259,22 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public OperationResult insertUsers(List<User> users) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public Collection<String> loadAllUserUUID() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult insertLoginUserUUID(String userUUID) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public String loadLoginUserUUID() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -283,10 +283,6 @@ public class ServerDataSource implements DataSource {
         return handleActionCreateRemoteMediaShareTask(url, token, mediaShare);
     }
 
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
     private OperateMediaShareResult handleActionCreateRemoteMediaShareTask(String url, String token, MediaShare mediaShare) {
 
         String data = generateCreateMediaShareData(mediaShare);
@@ -300,7 +296,7 @@ public class ServerDataSource implements DataSource {
 
             if (httpResponse.getResponseCode() == 200) {
 
-                Log.i(TAG, "insert remote mediashare which source is network succeed");
+                Log.i(TAG, "insert remote media share which source is network succeed");
 
                 RemoteMediaShareJSONObjectParser parser = new RemoteMediaShareJSONObjectParser();
 
@@ -312,7 +308,7 @@ public class ServerDataSource implements DataSource {
             } else {
                 result.setOperationResult(new OperationNetworkException(httpResponse.getResponseCode()));
 
-                Log.i(TAG, "insert remote mediashare fail");
+                Log.i(TAG, "insert remote media share fail");
             }
 
         } catch (MalformedURLException ex) {
@@ -320,26 +316,26 @@ public class ServerDataSource implements DataSource {
 
             result.setOperationResult(new OperationMalformedUrlException());
 
-            Log.i(TAG, "insert remote mediashare fail");
+            Log.i(TAG, "insert remote media share fail");
 
         } catch (SocketTimeoutException ex) {
             ex.printStackTrace();
 
             result.setOperationResult(new OperationSocketTimeoutException());
 
-            Log.i(TAG, "insert remote mediashare fail");
+            Log.i(TAG, "insert remote media share fail");
         } catch (IOException ex) {
             ex.printStackTrace();
 
             result.setOperationResult(new OperationIOException());
 
-            Log.i(TAG, "insert remote mediashare fail");
+            Log.i(TAG, "insert remote media share fail");
         } catch (JSONException ex) {
             ex.printStackTrace();
 
             result.setOperationResult(new OperationJSONException());
 
-            Log.i(TAG, "insert remote mediashare fail");
+            Log.i(TAG, "insert remote media share fail");
         }
 
         return result;
@@ -430,12 +426,12 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public OperationResult insertRemoteMediaShares(Collection<MediaShare> mediaShares) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult insertLocalMedias(List<Media> medias) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -452,12 +448,12 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public OperationResult updateLocalMedia(Media media) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult updateLocalMedias(Collection<Media> medias) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     private boolean uploadFile(String url, String token, Media media) {
@@ -579,7 +575,7 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public OperationResult insertRemoteMedias(List<Media> medias) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -589,15 +585,11 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult modifyMediaInRemoteMediaShare(String url, String token,String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
+    public OperationResult modifyMediaInRemoteMediaShare(String url, String token, String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
 
         return handleActionModifyRemoteShare(url, token, modifiedMediaShare, requestData);
     }
 
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
     private OperationResult handleActionModifyRemoteShare(String url, String token, MediaShare mediaShare, String requestData) {
 
         if (mediaShare.isLocal()) {
@@ -657,24 +649,24 @@ public class ServerDataSource implements DataSource {
             try {
                 deleteRemoteCall(url, token, "");
 
-                Log.i(TAG, "delete remote mediashare which source is network succeed");
+                Log.i(TAG, "delete remote media share which source is network succeed");
 
                 return new OperationSuccess();
 
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
-                Log.i(TAG, "delete remote mediashare fail");
+                Log.i(TAG, "delete remote media share fail");
                 return new OperationMalformedUrlException();
 
             } catch (SocketTimeoutException e) {
                 e.printStackTrace();
-                Log.i(TAG, "delete remote mediashare fail");
+                Log.i(TAG, "delete remote media share fail");
                 return new OperationSocketTimeoutException();
 
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.i(TAG, "delete remote mediashare fail");
+                Log.i(TAG, "delete remote media share fail");
                 return new OperationIOException();
 
             }
@@ -729,10 +721,6 @@ public class ServerDataSource implements DataSource {
         return handleActionRetrieveRemoteUser(loadUserUrl, loadOtherUserUrl, token);
     }
 
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
     private UsersLoadOperationResult handleActionRetrieveRemoteUser(String loadUserUrl, String loadOtherUserUrl, String token) {
 
         UsersLoadOperationResult result = new UsersLoadOperationResult();
@@ -794,7 +782,7 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public User loadUser(String userUUID) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -803,10 +791,6 @@ public class ServerDataSource implements DataSource {
         return handleActionRetrieveRemoteMedia(url, token);
     }
 
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
     private MediasLoadOperationResult handleActionRetrieveRemoteMedia(String url, String token) {
 
         MediasLoadOperationResult result = new MediasLoadOperationResult();
@@ -853,41 +837,42 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public MediasLoadOperationResult loadAllLocalMedias() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public Collection<String> loadLocalMediaThumbs() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public Collection<String> loadRemoteMediaUUIDs() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public Media loadLocalMediaByThumb(String thumb) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public MediasLoadOperationResult loadLocalMediaInCamera(Collection<String> loadedMediaUUIDs) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public Media loadMedia(String mediaKey) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public void updateLocalMediasUploadedFalse() {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public MediaShare loadRemoteMediaShare(String mediaShareUUID) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -997,27 +982,27 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public OperationResult insertRemoteFiles(AbstractRemoteFile folder) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult deleteAllRemoteFiles() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public FileDownloadItem loadDownloadFileRecord(String fileUUID) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public FileDownloadLoadOperationResult loadDownloadedFilesRecord() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -1080,12 +1065,12 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public OperationResult insertRemoteFileShare(List<AbstractRemoteFile> files) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult deleteAllRemoteFileShare() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -1138,67 +1123,67 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public String loadToken() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult insertGateway(String gateway) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public boolean getShowAlbumTipsValue() {
-        return false;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public void saveShowAlbumTipsValue(boolean value) {
-
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public boolean getShowPhotoReturnTipsValue() {
-        return false;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public void saveShowPhotoReturnTipsValue(boolean value) {
-
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult deleteAllRemoteMediaShare() {
-        return null;
+    public boolean deleteAllRemoteMediaShare() {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult deleteAllRemoteMedia() {
-        return null;
+    public boolean deleteAllRemoteMedia() {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult deleteAllRemoteUsers() {
-        return null;
+    public boolean deleteAllRemoteUsers() {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult insertDownloadedFileRecord(FileDownloadItem fileDownloadItem) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult insertToken(String token) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult insertDeviceID(String deviceID) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public void deleteDeviceID() {
-
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
 }

@@ -5,6 +5,7 @@ import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.LruCache;
@@ -49,6 +50,8 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
     AnimatedExpandableListView mEquipmentExpandableListView;
     @BindView(R.id.loading_layout)
     LinearLayout mLoadingLayout;
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
 
     private Context mContext;
 
@@ -97,6 +100,8 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
                 return true;
             }
         });
+
+        fab.setOnClickListener(this);
 
         mBack.setOnClickListener(this);
         setSupportActionBar(mToolBar);

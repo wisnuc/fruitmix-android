@@ -375,9 +375,8 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
     private void setDefaultImageOrNull() {
         if (mDefaultImageId != 0) {
             setImageResource(mDefaultImageId);
-        } else {
-            setImageBitmap(null);
         }
+        setImageBitmap(null);
     }
 
     @Override

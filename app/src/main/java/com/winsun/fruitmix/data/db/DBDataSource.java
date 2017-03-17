@@ -81,17 +81,17 @@ public class DBDataSource implements DataSource {
 
     @Override
     public OperateUserResult insertUser(String url, String token, String userName, String userPassword) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public List<User> loadUserByLoginApi(String token, String url) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public List<EquipmentAlias> loadEquipmentAlias(String token, String url) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -147,7 +147,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult modifyMediaInRemoteMediaShare(String url, String token,String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
+    public OperationResult modifyMediaInRemoteMediaShare(String url, String token, String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
 
         long dbResult = 0;
 
@@ -244,12 +244,12 @@ public class DBDataSource implements DataSource {
 
     @Override
     public Collection<String> loadLocalMediaThumbs() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult insertLocalMedia(String url, String token, Media media) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -269,12 +269,12 @@ public class DBDataSource implements DataSource {
 
     @Override
     public Collection<String> loadRemoteMediaUUIDs() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public Media loadLocalMediaByThumb(String thumb) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -290,37 +290,37 @@ public class DBDataSource implements DataSource {
 
     @Override
     public FilesLoadOperationResult loadRemoteFolder(String url, String token) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult insertRemoteFiles(AbstractRemoteFile folder) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult loadRemoteFile(String baseUrl, String token, FileDownloadState fileDownloadState) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult deleteAllRemoteFiles() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public FileSharesLoadOperationResult loadRemoteFileRootShares(String loadFileSharedWithMeUrl, String loadFileShareWithOthersUrl, String token) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult insertRemoteFileShare(List<AbstractRemoteFile> files) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult deleteAllRemoteFileShare() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -440,6 +440,10 @@ public class DBDataSource implements DataSource {
                 continue;
             }
 
+            if (thumb.contains(FileUtil.getLocalPhotoThumbnailFolderPath())) {
+                continue;
+            }
+
             media = new Media();
             media.setThumb(thumb);
             media.setWidth(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)));
@@ -491,7 +495,7 @@ public class DBDataSource implements DataSource {
 
     @Override
     public Media loadMedia(String mediaKey) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -501,7 +505,7 @@ public class DBDataSource implements DataSource {
 
     @Override
     public MediaShare loadRemoteMediaShare(String mediaShareUUID) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -584,27 +588,27 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult deleteAllRemoteMediaShare() {
+    public boolean deleteAllRemoteMediaShare() {
 
         mDBUtils.deleteAllRemoteMediaShare();
 
-        return new OperationSuccess();
+        return true;
     }
 
     @Override
-    public OperationResult deleteAllRemoteMedia() {
+    public boolean deleteAllRemoteMedia() {
 
         mDBUtils.deleteAllRemoteMedia();
 
-        return new OperationSuccess();
+        return true;
     }
 
     @Override
-    public OperationResult deleteAllRemoteUsers() {
+    public boolean deleteAllRemoteUsers() {
 
         mDBUtils.deleteAllRemoteUser();
 
-        return new OperationSuccess();
+        return true;
     }
 
     private User getUser() {

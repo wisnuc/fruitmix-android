@@ -292,9 +292,8 @@ public class NetworkImageView extends ImageView {
     private void setDefaultImageOrNull() {
         if (mDefaultImageId != 0) {
             setBackgroundResource(mDefaultImageId);
-        } else {
-            setImageBitmap(null);
         }
+        setImageBitmap(null);
     }
 
     @Override

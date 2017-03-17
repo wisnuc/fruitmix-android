@@ -159,45 +159,9 @@ public class Util {
 
     public static LoginType loginType = LoginType.LOGIN;
 
-    private static boolean localMediaInCameraLoaded = false;
+    public static final String UNSUPPORT_OPERATION = "un support operation";
 
-    private static boolean localMediaInDBLoaded = false;
-
-    private static boolean remoteMediaLoaded = false;
-
-    private static boolean remoteMediaShareLoaded = false;
-
-    public static boolean isRemoteMediaLoaded() {
-        return remoteMediaLoaded;
-    }
-
-    public static void setRemoteMediaLoaded(boolean remoteMediaLoaded) {
-        Util.remoteMediaLoaded = remoteMediaLoaded;
-    }
-
-    public static boolean isLocalMediaInCameraLoaded() {
-        return localMediaInCameraLoaded;
-    }
-
-    public static void setLocalMediaInCameraLoaded(boolean localMediaInCameraLoaded) {
-        Util.localMediaInCameraLoaded = localMediaInCameraLoaded;
-    }
-
-    public static boolean isLocalMediaInDBLoaded() {
-        return localMediaInDBLoaded;
-    }
-
-    public static void setLocalMediaInDBLoaded(boolean localMediaInDBLoaded) {
-        Util.localMediaInDBLoaded = localMediaInDBLoaded;
-    }
-
-    public static boolean isRemoteMediaShareLoaded() {
-        return remoteMediaShareLoaded;
-    }
-
-    public static void setRemoteMediaShareLoaded(boolean remoteMediaShareLoaded) {
-        Util.remoteMediaShareLoaded = remoteMediaShareLoaded;
-    }
+    public static final String DEFAULT_DATE = "1916-01-01";
 
     /**
      * 将dp转化为px

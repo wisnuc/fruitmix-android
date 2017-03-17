@@ -9,6 +9,9 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,9 +19,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +35,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.presenter.AlbumContentPresentImpl;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +51,8 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
 
     public static final String TAG = AlbumContentActivity.class.getSimpleName();
 
-    @BindView(R.id.mainGrid)
-    GridView mainGridView;
+    @BindView(R.id.album_content_recycler_view)
+    RecyclerView albumContentRecyclerView;
     @BindView(R.id.back)
     ImageView ivBack;
     @BindView(R.id.title)
@@ -70,6 +75,8 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
     private boolean mShowMenu;
 
     private boolean mShowCommentBtn = false;
+
+    public static final int SPAN_COUNT = 2;
 
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
@@ -106,7 +113,10 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
         });
 
         mPicGridViewAdapter = new PicGridViewAdapter();
-        mainGridView.setAdapter(mPicGridViewAdapter);
+
+        albumContentRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        albumContentRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(SPAN_COUNT,StaggeredGridLayoutManager.VERTICAL));
+        albumContentRecyclerView.setAdapter(mPicGridViewAdapter);
 
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -181,14 +191,14 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
     public void showContentUI() {
         super.showContentUI();
 
-        mainGridView.setVisibility(View.VISIBLE);
+        albumContentRecyclerView.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void dismissContentUI() {
         super.dismissContentUI();
 
-        mainGridView.setVisibility(View.INVISIBLE);
+        albumContentRecyclerView.setVisibility(View.INVISIBLE);
     }
 
     private void showPhotoSlider(int position, View sharedElement, String sharedElementName) {
@@ -223,12 +233,12 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
 
     @Override
     public View findViewWithTag(String tag) {
-        return mainGridView.findViewWithTag(tag);
+        return albumContentRecyclerView.findViewWithTag(tag);
     }
 
     @Override
     public void smoothScrollToPosition(int position) {
-        mainGridView.smoothScrollToPosition(position);
+        albumContentRecyclerView.smoothScrollToPosition(position);
     }
 
     @Override
@@ -251,7 +261,7 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
         mPrivatePublicMenu.setTitle(getString(titleResID));
     }
 
-    class PicGridViewAdapter extends BaseAdapter {
+    class PicGridViewAdapter extends RecyclerView.Adapter<AlbumContentViewHolder> {
 
         private List<Media> medias;
 
@@ -259,44 +269,22 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
             medias = new ArrayList<>();
         }
 
+        @Override
+        public AlbumContentViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            View view = LayoutInflater.from(mContext).inflate(R.layout.photo_list_cell, parent, false);
+
+            return new AlbumContentViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(AlbumContentViewHolder holder, int position) {
+            holder.refreshView(position, medias.get(position));
+        }
+
         public void setMedias(List<Media> medias) {
             this.medias.clear();
             this.medias.addAll(medias);
-        }
-
-        @Override
-        public int getCount() {
-            if (medias == null) return 0;
-            return medias.size();
-        }
-
-        @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            View view;
-            final Media currentItem;
-            final NetworkImageView ivMain;
-
-            if (convertView == null)
-                view = LayoutInflater.from(mContext).inflate(R.layout.photo_list_cell, parent, false);
-            else view = convertView;
-
-            currentItem = (Media) this.getItem(position);
-
-            ivMain = (NetworkImageView) view.findViewById(R.id.mainPic);
-
-            mPresenter.loadMediaToView(mContext, currentItem, ivMain);
-
-            ivMain.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    String sharedElementName = currentItem.getKey();
-                    ViewCompat.setTransitionName(ivMain, sharedElementName);
-                    showPhotoSlider(position, ivMain, currentItem.getKey());
-                }
-            });
-
-            return view;
         }
 
         @Override
@@ -306,8 +294,39 @@ public class AlbumContentActivity extends BaseActivity implements AlbumContentCo
         }
 
         @Override
-        public Object getItem(int position) {
-            return medias.get(position);
+        public int getItemCount() {
+            if (medias == null) return 0;
+            return medias.size();
+        }
+
+    }
+
+
+    class AlbumContentViewHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.mainPic)
+        NetworkImageView networkImageView;
+
+        public AlbumContentViewHolder(View itemView) {
+            super(itemView);
+
+            ButterKnife.bind(this, itemView);
+        }
+
+        public void refreshView(final int position, final Media media) {
+
+            mPresenter.loadMediaToView(mContext, media, networkImageView);
+
+            networkImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    String sharedElementName = media.getKey();
+                    ViewCompat.setTransitionName(networkImageView, sharedElementName);
+                    showPhotoSlider(position, networkImageView, media.getKey());
+                }
+            });
+
         }
     }
 

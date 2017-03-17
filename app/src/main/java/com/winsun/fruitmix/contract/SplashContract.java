@@ -15,6 +15,7 @@ public interface SplashContract {
 
         void welcome();
 
+        void finishActivity();
 
     }
 

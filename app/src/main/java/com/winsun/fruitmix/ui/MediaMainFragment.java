@@ -152,16 +152,6 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
         Log.d(TAG, "onDestroyView: ");
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        mPresenter.detachView();
-
-        Log.d(TAG, "onDestroy: ");
-    }
-
-
     private void initNavigationView() {
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -294,7 +284,6 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
     }
 
     private class MyAdapter extends PagerAdapter {
-
 
         @Override
         public CharSequence getPageTitle(int position) {

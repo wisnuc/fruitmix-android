@@ -3,6 +3,7 @@ package com.winsun.fruitmix.presenter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.FrameLayout;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.business.DataRepository;
@@ -12,6 +13,7 @@ import com.winsun.fruitmix.contract.EditPhotoContract;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.ui.EditPhotoActivity;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;
@@ -64,9 +66,9 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
         }
 
         if (mModifiedMediaShare.getMediaContentsListSize() != 0) {
-            mModifiedMediaShare.setCoverImageKey(mModifiedMediaShare.getFirstMediaDigestInMediaContentsList());
+            mModifiedMediaShare.setCoverImageUUID(mModifiedMediaShare.getFirstMediaDigestInMediaContentsList());
         } else {
-            mModifiedMediaShare.setCoverImageKey("");
+            mModifiedMediaShare.setCoverImageUUID("");
         }
 
         mView.showDialog();
@@ -140,7 +142,29 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
 
     @Override
     public void loadMediaToView(Context context, Media media, NetworkImageView view) {
+
+        setMainPicScreenHeight(context,view,media);
+
         mRepository.loadThumbMediaToNetworkImageView(context,media,view);
+    }
+
+    private void setMainPicScreenHeight(Context context,NetworkImageView mainPic, Media media) {
+
+        if (media.isLocal())
+            return;
+
+        int mediaWidth = Integer.parseInt(media.getWidth());
+        int mediaHeight = Integer.parseInt(media.getHeight());
+        int actualWidth;
+        int actualHeight;
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) mainPic.getLayoutParams();
+
+        actualWidth = Util.calcScreenWidth((Activity) context) / EditPhotoActivity.SPAN_COUNT;
+        actualHeight = mediaHeight * actualWidth / mediaWidth;
+
+        layoutParams.height = actualHeight;
+
+        mainPic.setLayoutParams(layoutParams);
     }
 
     @Override

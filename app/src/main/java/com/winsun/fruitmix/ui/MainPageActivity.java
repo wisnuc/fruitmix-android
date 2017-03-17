@@ -239,15 +239,6 @@ public class MainPageActivity extends BaseActivity
         mPresenter.onActivityReenter(resultCode, data);
     }
 
-    public void onBackPress() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
     @Override
     public void onBackPressed() {
         mPresenter.handleBackEvent();

@@ -72,6 +72,11 @@ public class SplashScreenActivity extends BaseActivity implements SplashContract
     }
 
     @Override
+    public void finishActivity() {
+        finish();
+    }
+
+    @Override
     public void emptyCacheToken() {
 
         Intent intent = new Intent();

@@ -29,10 +29,11 @@ public interface FileMainFragmentContract {
 
         void setNavigationOnClickListener(View.OnClickListener listener);
 
-        boolean isHidden();
     }
 
     interface FileMainFragmentPresenter extends BasePresenter<FileMainFragmentView> {
+
+        void onResume();
 
         void setFileFragmentPresenter(FileFragmentContract.FileFragmentPresenter fileFragmentPresenter);
 
@@ -43,6 +44,8 @@ public interface FileMainFragmentContract {
         void fileMainMenuOnClick();
 
         void setBottomNavigationItemChecked(int position);
+
+        void setViewPagerCurrentItem(int position);
 
         void onNavigationItemSelected(int itemID);
 

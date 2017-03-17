@@ -32,22 +32,18 @@ public enum ExecutorServiceInstance {
 
     public <V> Future<V> doOneTaskInFixedThreadPool(Callable<V> callable) {
 
-        if (fixedThreadPool == null || fixedThreadPool.isShutdown())
-            startFixedThreadPool();
-
         return fixedThreadPool.submit(callable);
     }
 
     public void doOnTaskInFixedThreadPool(Runnable runnable) {
 
-        if (fixedThreadPool == null || fixedThreadPool.isShutdown())
-            startFixedThreadPool();
-
         fixedThreadPool.execute(runnable);
     }
 
-    private void startFixedThreadPool() {
-        fixedThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
+    public void startFixedThreadPool() {
+
+        if (fixedThreadPool == null || fixedThreadPool.isShutdown())
+            fixedThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
     }
 
     public void shutdownFixedThreadPool() {

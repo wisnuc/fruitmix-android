@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +49,7 @@ public class EditPhotoActivity extends BaseActivity implements View.OnClickListe
     @BindView(R.id.no_content_layout)
     LinearLayout noContentLayout;
 
-    private int mSpanCount = 3;
+    public static final int SPAN_COUNT = 2;
 
     private Context mContext;
     private EditPhotoAdapter mAdapter;
@@ -72,8 +73,12 @@ public class EditPhotoActivity extends BaseActivity implements View.OnClickListe
         mPresenter = new EditPhotoPresenterImpl(Injection.injectDataRepository(mContext), mediaShareUUID);
         mPresenter.attachView(this);
 
-        GridLayoutManager mManager = new GridLayoutManager(mContext, mSpanCount);
-        mEditPhotoRecyclerView.setLayoutManager(mManager);
+//        GridLayoutManager mManager = new GridLayoutManager(mContext, mSpanCount);
+//        mEditPhotoRecyclerView.setLayoutManager(mManager);
+
+        StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(SPAN_COUNT, StaggeredGridLayoutManager.VERTICAL);
+        mEditPhotoRecyclerView.setLayoutManager(manager);
+
         mEditPhotoRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         mAdapter = new EditPhotoAdapter();
@@ -192,7 +197,7 @@ public class EditPhotoActivity extends BaseActivity implements View.OnClickListe
 
         public void refreshView(Media media) {
 
-            mPresenter.loadMediaToView(mContext,media,mPhotoItem);
+            mPresenter.loadMediaToView(mContext, media, mPhotoItem);
 
             mDelPhotoLayout.setOnClickListener(new View.OnClickListener() {
                 @Override

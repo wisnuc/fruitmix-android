@@ -64,7 +64,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     }
 
     private void clearSelectPhoto() {
-        if (mMapKeyIsPhotoPositionValueIsPhoto == null) return;
+        if (mMapKeyIsPhotoPositionValueIsPhoto == null || mMapKeyIsPhotoPositionValueIsPhoto.size() == 0) return;
 
         for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Media media : mediaList) {

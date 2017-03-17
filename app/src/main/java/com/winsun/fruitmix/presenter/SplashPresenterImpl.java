@@ -89,6 +89,7 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
     @Override
     public void handleBackEvent() {
         mHandler.removeMessages(WELCOME);
+        mView.finishActivity();
     }
 
     @Override

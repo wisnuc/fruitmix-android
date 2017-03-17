@@ -440,13 +440,13 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
     private void fillCommentData() {
 /*        for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
-            if (entry.getKey().equals(media.getUuid())) {
+            if (entry.getMediaUUID().equals(media.getUuid())) {
                 commentData.addAll(entry.getValue());
             }
         }
 
         for (Map.Entry<String, List<Comment>> entry : LocalCache.RemoteMediaCommentMapKeyIsImageUUID.entrySet()) {
-            if (entry.getKey().equals(media.getUuid())) {
+            if (entry.getMediaUUID().equals(media.getUuid())) {
                 commentData.addAll(entry.getValue());
             }
         }*/

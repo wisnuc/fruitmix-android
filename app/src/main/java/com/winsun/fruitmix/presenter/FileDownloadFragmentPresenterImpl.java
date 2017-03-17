@@ -2,6 +2,7 @@ package com.winsun.fruitmix.presenter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.business.DataRepository;
@@ -28,6 +29,8 @@ import java.util.List;
  */
 
 public class FileDownloadFragmentPresenterImpl implements FileDownloadFragmentContract.FileDownloadFragmentPresenter, OnViewSelectListener {
+
+    public static final String TAG = FileDownloadFragmentPresenterImpl.class.getSimpleName();
 
     private FileDownloadFragmentContract.FileDownloadFragmentView mView;
 
@@ -99,6 +102,7 @@ public class FileDownloadFragmentPresenterImpl implements FileDownloadFragmentCo
             macroCommand.addCommand(new AbstractCommand() {
                 @Override
                 public void execute() {
+
                     mRepository.deleteDownloadedFileRecords(selectDownloadedItemUUID, new FileDownloadOperationCallback.DeleteDownloadedFilesCallback() {
                         @Override
                         public void onFinished() {

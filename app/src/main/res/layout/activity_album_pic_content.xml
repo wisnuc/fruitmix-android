@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="com.winsun.fruitmix.MainActivity">
+    android:fitsSystemWindows="true">
 
     <!--<android.support.design.widget.AppBarLayout-->
     <!--android:layout_width="match_parent"-->
@@ -77,11 +76,10 @@
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize">
 
-        <GridView
-            android:id="@+id/mainGrid"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/album_content_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:numColumns="3"
             android:visibility="gone" />
 
         <include layout="@layout/loading_layout" />

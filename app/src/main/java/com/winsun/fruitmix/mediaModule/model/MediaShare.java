@@ -27,7 +27,7 @@ public class MediaShare implements Parcelable {
     private boolean isAlbum;
     private boolean isArchived;
     private String date;
-    private String coverImageKey;
+    private String coverImageUUID;
     private boolean isLocal;
     private String shareDigest;
     private boolean isSticky;
@@ -53,7 +53,7 @@ public class MediaShare implements Parcelable {
         isAlbum = in.readByte() != 0;
         isArchived = in.readByte() != 0;
         date = in.readString();
-        coverImageKey = in.readString();
+        coverImageUUID = in.readString();
         isLocal = in.readByte() != 0;
         shareDigest = in.readString();
         isSticky = in.readByte() != 0;
@@ -162,7 +162,7 @@ public class MediaShare implements Parcelable {
         dest.writeByte((byte) (isAlbum ? 1 : 0));
         dest.writeByte((byte) (isArchived ? 1 : 0));
         dest.writeString(date);
-        dest.writeString(coverImageKey);
+        dest.writeString(coverImageUUID);
         dest.writeByte((byte) (isLocal ? 1 : 0));
         dest.writeString(shareDigest);
         dest.writeByte((byte) (isSticky ? 1 : 0));
@@ -233,12 +233,12 @@ public class MediaShare implements Parcelable {
         this.desc = desc;
     }
 
-    public String getCoverImageKey() {
-        return coverImageKey;
+    public String getCoverImageUUID() {
+        return coverImageUUID;
     }
 
-    public void setCoverImageKey(String coverImageKey) {
-        this.coverImageKey = coverImageKey;
+    public void setCoverImageUUID(String coverImageUUID) {
+        this.coverImageUUID = coverImageUUID;
     }
 
     public boolean isLocal() {
@@ -302,7 +302,7 @@ public class MediaShare implements Parcelable {
         cloneMediaShare.setAlbum(isAlbum());
         cloneMediaShare.setArchived(isArchived());
         cloneMediaShare.setDate(getDate());
-        cloneMediaShare.setCoverImageKey(getCoverImageKey());
+        cloneMediaShare.setCoverImageUUID(getCoverImageUUID());
         cloneMediaShare.setLocal(isLocal());
         cloneMediaShare.setShareDigest(getShareDigest());
         cloneMediaShare.setSticky(isSticky());
@@ -323,7 +323,7 @@ public class MediaShare implements Parcelable {
     }
 
     public String getFirstMediaDigestInMediaContentsList() {
-        return mediaShareContents.get(0).getKey();
+        return mediaShareContents.get(0).getMediaUUID();
     }
 
     public List<String> getViewers() {
@@ -341,7 +341,7 @@ public class MediaShare implements Parcelable {
     public List<String> getMediaKeyInMediaShareContents() {
         List<String> mediaKeys = new ArrayList<>(getMediaContentsListSize());
         for (MediaShareContent mediaShareContent : mediaShareContents) {
-            mediaKeys.add(mediaShareContent.getKey());
+            mediaKeys.add(mediaShareContent.getMediaUUID());
         }
 
         return mediaKeys;

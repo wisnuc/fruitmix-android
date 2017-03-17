@@ -29,11 +29,23 @@ public class FileMainFragmentPresenterImpl implements FileMainFragmentContract.F
     private static final int PAGE_FILE = 1;
     public static final int PAGE_FILE_DOWNLOAD = 2;
 
+    private boolean mIsHidden = true;
+
     public FileMainFragmentPresenterImpl(MainPageContract.MainPagePresenter mainPagePresenter) {
 
         this.mainPagePresenter = mainPagePresenter;
 
         this.mainPagePresenter.setFileMainFragmentPresenter(this);
+    }
+
+    @Override
+    public void onResume() {
+
+        mIsHidden = false;
+
+        fileFragmentPresenter.onResume();
+        fileShareFragmentPresenter.onResume();
+
     }
 
     @Override
@@ -54,6 +66,11 @@ public class FileMainFragmentPresenterImpl implements FileMainFragmentContract.F
     @Override
     public void setBottomNavigationItemChecked(int position) {
         mView.setBottomNavigationItemChecked(position);
+    }
+
+    @Override
+    public void setViewPagerCurrentItem(int position) {
+        mView.setViewPagerCurrentItem(position);
     }
 
     @Override
@@ -169,7 +186,7 @@ public class FileMainFragmentPresenterImpl implements FileMainFragmentContract.F
 
     @Override
     public boolean isHidden() {
-        return mView.isHidden();
+        return mIsHidden;
     }
 
     @Override
@@ -180,6 +197,8 @@ public class FileMainFragmentPresenterImpl implements FileMainFragmentContract.F
     @Override
     public void detachView() {
         mView = null;
+
+        mIsHidden = true;
     }
 
     @Override

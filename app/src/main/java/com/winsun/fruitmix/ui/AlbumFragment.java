@@ -118,6 +118,8 @@ public class AlbumFragment implements AlbumFragmentContract.AlbumFragmentView {
     public void showAlbums(List<MediaShare> mediaShares) {
         mAdapter.setAlbumList(mediaShares);
         mAdapter.notifyDataSetChanged();
+
+        mainListView.smoothScrollToPosition(0);
     }
 
     @Override
@@ -334,9 +336,9 @@ public class AlbumFragment implements AlbumFragmentContract.AlbumFragmentView {
             currentItem = mediaShare;
             restoreSwipeLayoutState();
 
-            coverImg = mPresenter.loadMedia(currentItem.getCoverImageKey());
+            coverImg = mPresenter.loadMedia(currentItem.getCoverImageUUID());
 
-            mPresenter.loadMediaToView(containerActivity,coverImg,ivMainPic);
+            mPresenter.loadMediaToView(containerActivity, coverImg, ivMainPic);
 
             if (currentItem.getViewersListSize() == 0) {
                 ivLock.setVisibility(View.GONE);

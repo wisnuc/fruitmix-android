@@ -38,7 +38,6 @@ public interface FileFragmentContract {
 
         void onDestroyView();
 
-        void onResume();
     }
 
     interface FileFragmentPresenter extends BasePresenter<FileFragmentView> {

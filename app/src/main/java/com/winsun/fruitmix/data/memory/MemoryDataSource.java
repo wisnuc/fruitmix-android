@@ -22,6 +22,7 @@ import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.model.EquipmentAlias;
+import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -193,12 +194,12 @@ public class MemoryDataSource implements DataSource {
 
     @Override
     public OperationResult insertLocalMedia(String url, String token, Media media) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult updateLocalMedia(Media media) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -277,11 +278,12 @@ public class MemoryDataSource implements DataSource {
 
     @Override
     public void updateLocalMediasUploadedFalse() {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperateUserResult insertUser(String url, String token, String userName, String userPassword) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -329,7 +331,7 @@ public class MemoryDataSource implements DataSource {
 
     @Override
     public FilesLoadOperationResult loadRemoteFolder(String url, String token) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -342,7 +344,7 @@ public class MemoryDataSource implements DataSource {
 
     @Override
     public OperationResult loadRemoteFile(String baseUrl, String token, FileDownloadState fileDownloadState) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -355,22 +357,22 @@ public class MemoryDataSource implements DataSource {
 
     @Override
     public FileSharesLoadOperationResult loadRemoteFileRootShares(String loadFileSharedWithMeUrl, String loadFileShareWithOthersUrl, String token) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public FileDownloadItem loadDownloadFileRecord(String fileUUID) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public FileDownloadLoadOperationResult loadDownloadedFilesRecord() {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -415,59 +417,61 @@ public class MemoryDataSource implements DataSource {
 
     @Override
     public boolean getShowAlbumTipsValue() {
-        return false;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public void saveShowAlbumTipsValue(boolean value) {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public boolean getShowPhotoReturnTipsValue() {
-        return false;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public void saveShowPhotoReturnTipsValue(boolean value) {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public List<EquipmentAlias> loadEquipmentAlias(String token, String url) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
     public List<User> loadUserByLoginApi(String token, String url) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult deleteAllRemoteMediaShare() {
+    public boolean deleteAllRemoteMediaShare() {
 
         remoteMediaShareMapKeyIsUUID.clear();
 
-        return new OperationSuccess();
+        return true;
     }
 
     @Override
-    public OperationResult deleteAllRemoteMedia() {
+    public boolean deleteAllRemoteMedia() {
 
         remoteMediaMapKeyIsUUID.clear();
 
-        return new OperationSuccess();
+        return true;
     }
 
     @Override
-    public OperationResult deleteAllRemoteUsers() {
+    public boolean deleteAllRemoteUsers() {
 
         remoteUserMapKeyIsUUID.clear();
 
-        return null;
+        return true;
     }
 
     @Override
     public OperationResult insertDownloadedFileRecord(FileDownloadItem fileDownloadItem) {
-        return null;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override

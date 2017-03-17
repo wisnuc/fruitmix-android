@@ -119,6 +119,8 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
         mAdapter.setMediaShares(mediaShares);
         mAdapter.notifyDataSetChanged();
 
+        mainRecyclerView.smoothScrollToPosition(0);
+
     }
 
     @Override
@@ -385,7 +387,7 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
 
             lbAlbumTitle.setText(title);
 
-            coverImg = mPresenter.loadMedia(currentItem.getCoverImageKey());
+            coverImg = mPresenter.loadMedia(currentItem.getCoverImageUUID());
 
             mPresenter.loadOriginalMediaToView(containerActivity, coverImg, ivCover);
 

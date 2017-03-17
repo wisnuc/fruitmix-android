@@ -74,12 +74,6 @@ public class FileFragment implements FileFragmentContract.FileFragmentView {
 
     }
 
-    @Override
-    public void onResume() {
-
-            mPresenter.onResume();
-    }
-
     public FileFragmentContract.FileFragmentPresenter getPresenter() {
         return mPresenter;
     }
@@ -333,8 +327,8 @@ public class FileFragment implements FileFragmentContract.FileFragmentView {
         TextView fileTime;
         @BindView(R.id.remote_file_item_layout)
         LinearLayout remoteFileItemLayout;
-        @BindView(R.id.item_menu)
-        ImageView itemMenu;
+        @BindView(R.id.item_menu_layout)
+        ViewGroup itemMenuLayout;
         @BindView(R.id.content_layout)
         RelativeLayout contentLayout;
 
@@ -361,7 +355,7 @@ public class FileFragment implements FileFragmentContract.FileFragmentView {
 
             if (selectMode) {
 
-                itemMenu.setVisibility(View.GONE);
+                itemMenuLayout.setVisibility(View.GONE);
                 fileIconBg.setVisibility(View.VISIBLE);
 
                 toggleFileIconBgResource(abstractRemoteFile);
@@ -381,11 +375,11 @@ public class FileFragment implements FileFragmentContract.FileFragmentView {
             } else {
 
 
-                itemMenu.setVisibility(View.VISIBLE);
+                itemMenuLayout.setVisibility(View.VISIBLE);
                 fileIconBg.setVisibility(View.INVISIBLE);
                 fileIcon.setVisibility(View.VISIBLE);
 
-                itemMenu.setOnClickListener(new View.OnClickListener() {
+                itemMenuLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 

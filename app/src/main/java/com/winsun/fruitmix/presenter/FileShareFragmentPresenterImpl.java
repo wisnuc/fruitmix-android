@@ -30,7 +30,7 @@ public class FileShareFragmentPresenterImpl implements FileShareFragmentContract
     private List<AbstractRemoteFile> abstractRemoteFiles;
     private boolean remoteFileShareLoaded = false;
 
-    private String currentFolderUUID;
+    private String currentFolderUUID = "";
     private String currentFolderName;
 
     private List<String> retrievedFolderUUIDList;

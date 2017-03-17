@@ -1,9 +1,11 @@
 package com.winsun.fruitmix.presenter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.RelativeLayout;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
@@ -14,6 +16,7 @@ import com.winsun.fruitmix.contract.AlbumContentContract;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.ui.AlbumContentActivity;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;
@@ -256,8 +259,29 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
     @Override
     public void loadMediaToView(Context context, Media media, NetworkImageView view) {
 
+        setMainPicScreenHeight(context,view,media);
+
         mRepository.loadThumbMediaToNetworkImageView(context, media, view);
 
+    }
+
+    private void setMainPicScreenHeight(Context context,NetworkImageView mainPic, Media media) {
+
+        if (media.isLocal())
+            return;
+
+        int mediaWidth = Integer.parseInt(media.getWidth());
+        int mediaHeight = Integer.parseInt(media.getHeight());
+        int actualWidth;
+        int actualHeight;
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mainPic.getLayoutParams();
+
+        actualWidth = Util.calcScreenWidth((Activity) context) / AlbumContentActivity.SPAN_COUNT;
+        actualHeight = mediaHeight * actualWidth / mediaWidth;
+
+        layoutParams.height = actualHeight;
+
+        mainPic.setLayoutParams(layoutParams);
     }
 
     @Override

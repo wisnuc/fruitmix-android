@@ -60,10 +60,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Administrator on 2017/2/6.
@@ -148,6 +146,8 @@ public class DataRepository {
 
     public void init() {
 
+        instance.startFixedThreadPool();
+
         mDBDataSource.init();
         mMemoryDataSource.init();
         mServerDataSource.init();
@@ -214,7 +214,7 @@ public class DataRepository {
             task = null;
         }
 
-        if (mHandlerThread != null){
+        if (mHandlerThread != null) {
             mHandlerThread.quit();
             mHandlerThread = null;
         }
@@ -939,7 +939,7 @@ public class DataRepository {
         String loginUserUUID = mMemoryDataSource.loadLoginUserUUID();
         Collection<String> userUUIDs = mMemoryDataSource.loadAllUserUUID();
 
-        return userUUIDs.size() == 1 || (loginUserUUID != null && mediaShare.getCreatorUUID().equals(loginUserUUID))
+        return (userUUIDs.size() == 1 && loginUserUUID != null && mediaShare.getCreatorUUID().equals(loginUserUUID))
                 || (mediaShare.getViewersListSize() != 0 && userUUIDs.contains(mediaShare.getCreatorUUID()));
     }
 
@@ -953,7 +953,8 @@ public class DataRepository {
     public boolean checkIsDownloaded(String fileUUID) {
         FileDownloadItem fileDownloadItem = mDBDataSource.loadDownloadFileRecord(fileUUID);
 
-        return fileDownloadItem.getDownloadState() == DownloadState.FINISHED;
+        return fileDownloadItem != null && fileDownloadItem.getDownloadState() == DownloadState.FINISHED;
+
     }
 
     public boolean getShowAlbumTipsValue() {
@@ -1287,7 +1288,7 @@ public class DataRepository {
 
         for (String mediaKey : mediaKeys) {
             MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setKey(mediaKey);
+            mediaShareContent.setMediaUUID(mediaKey);
             mediaShareContent.setAuthor(currentUserUUID);
             mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
             mediaShareContents.add(mediaShareContent);
@@ -1296,7 +1297,7 @@ public class DataRepository {
 
         mediaShare.initMediaShareContents(mediaShareContents);
 
-        mediaShare.setCoverImageKey(mediaKeys.get(0));
+        mediaShare.setCoverImageUUID(mediaKeys.get(0));
 
         mediaShare.setTitle(title);
         mediaShare.setDesc(desc);
@@ -1344,7 +1345,7 @@ public class DataRepository {
         for (MediaShareContent value : mediaShareContents) {
             stringBuilder.append("\"");
 
-            String key = value.getKey();
+            String key = value.getMediaUUID();
             if (key.contains("/")) {
 
                 Media media = mMemoryDataSource.loadLocalMediaByThumb(key);
@@ -1687,11 +1688,13 @@ public class DataRepository {
 
     public void deleteDownloadedFileRecords(final List<String> fileUUIDs, final FileDownloadOperationCallback.DeleteDownloadedFilesCallback callback) {
 
+        final List<String> mFileUUIDs = new ArrayList<>(fileUUIDs);
+
         instance.doOneTaskInCachedThread(new Runnable() {
             @Override
             public void run() {
 
-                mDBDataSource.deleteDownloadedFileRecord(fileUUIDs);
+                mDBDataSource.deleteDownloadedFileRecord(mFileUUIDs);
 
                 mHandler.post(new Runnable() {
                     @Override

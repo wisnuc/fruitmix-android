@@ -26,8 +26,6 @@ public interface FileShareFragmentContract {
 
         void onDestroyView();
 
-        void onResume();
-
     }
 
     interface FileShareFragmentPresenter extends BasePresenter<FileShareFragmentView> {

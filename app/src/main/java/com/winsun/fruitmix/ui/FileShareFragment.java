@@ -20,6 +20,7 @@ import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.presenter.FileShareFragmentPresenterImpl;
 import com.winsun.fruitmix.util.Util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -69,12 +70,6 @@ public class FileShareFragment implements FileShareFragmentContract.FileShareFra
 
     public FileShareFragmentContract.FileShareFragmentPresenter getPresenter() {
         return mPresenter;
-    }
-
-    @Override
-    public void onResume() {
-
-        mPresenter.onResume();
     }
 
     @Override
@@ -169,10 +164,11 @@ public class FileShareFragment implements FileShareFragmentContract.FileShareFra
         private static final int VIEW_FILE = 0;
         private static final int VIEW_FOLDER = 1;
 
-        private List<AbstractRemoteFile> abstractRemoteFiles;
+        private List<AbstractRemoteFile> abstractRemoteFiles = new ArrayList<>();
 
         public void setData(List<AbstractRemoteFile> files) {
-            abstractRemoteFiles = files;
+            abstractRemoteFiles.clear();
+            abstractRemoteFiles.addAll(files);
         }
 
         @Override

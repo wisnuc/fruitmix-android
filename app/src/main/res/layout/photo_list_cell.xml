@@ -6,9 +6,9 @@
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/mainPic"
         android:layout_width="match_parent"
-        android:layout_height="114dp"
+        android:layout_height="wrap_content"
         android:layout_margin="1dp"
-        android:background="@drawable/default_img"
+        android:background="@drawable/placeholder_photo"
         android:scaleType="centerCrop" />
 
     <ImageView

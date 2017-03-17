@@ -416,6 +416,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
         }
 
         fileMainFragmentPresenter.setBottomNavigationItemChecked(FileMainFragmentPresenterImpl.PAGE_FILE_DOWNLOAD);
+        fileMainFragmentPresenter.setViewPagerCurrentItem(FileMainFragmentPresenterImpl.PAGE_FILE_DOWNLOAD);
     }
 
 }

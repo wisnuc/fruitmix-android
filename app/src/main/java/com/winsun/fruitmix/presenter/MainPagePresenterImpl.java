@@ -91,6 +91,8 @@ public class MainPagePresenterImpl implements MainPageContract.MainPagePresenter
 
             mRepository.pauseTimingRetrieveMediaShare();
 
+            mFileMainFragmentPresenter.onResume();
+
         } else {
 
             currentPage = PAGE_MEDIA;

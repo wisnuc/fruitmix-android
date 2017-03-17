@@ -36,6 +36,8 @@ public class FileUtil {
 
     private static final String DOWNLOAD_FOLDER_NAME = "winsuc";
 
+    private static final String LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME = "thumbnail";
+
     public static boolean checkExternalStorageState() {
         String state = Environment.getExternalStorageState();
         return state.equals(Environment.MEDIA_MOUNTED);
@@ -66,6 +68,10 @@ public class FileUtil {
 
     private static String getExternalDirectoryPathForDownload() {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+    }
+
+    public static String getLocalPhotoThumbnailFolderPath() {
+        return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
     }
 
     public static boolean createDownloadFileStoreFolder() {

@@ -42,7 +42,7 @@ public interface DataSource {
 
     OperationResult deleteRemoteMediaShare(String url, String token, MediaShare mediaShare);
 
-    OperationResult deleteAllRemoteMediaShare();
+    boolean deleteAllRemoteMediaShare();
 
     MediaShare loadRemoteMediaShare(String mediaShareUUID);
 
@@ -55,7 +55,7 @@ public interface DataSource {
 
     OperationResult insertLocalMedia(String url, String token, Media media);
 
-    OperationResult deleteAllRemoteMedia();
+    boolean deleteAllRemoteMedia();
 
     MediasLoadOperationResult loadAllRemoteMedias(String url, String token);
 
@@ -83,7 +83,7 @@ public interface DataSource {
 
     OperationResult insertUsers(List<User> users);
 
-    OperationResult deleteAllRemoteUsers();
+    boolean deleteAllRemoteUsers();
 
     UsersLoadOperationResult loadUsers(String loadUserUrl, String loadOtherUserUrl, String token);
 

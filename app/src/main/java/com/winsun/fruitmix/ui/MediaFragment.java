@@ -537,7 +537,7 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
                 title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDate();
             }
 
-            if (title.contains("1916-01-01")) {
+            if (title.contains(Util.DEFAULT_DATE)) {
                 return containerActivity.getString(R.string.unknown_time);
             } else {
                 String[] titleSplit = title.split("-");
@@ -589,7 +589,7 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
                 mSpacingSecondLayout.setVisibility(View.VISIBLE);
             }
 
-            if (date.equals("1916-01-01")) {
+            if (date.equals(Util.DEFAULT_DATE)) {
                 mPhotoTitle.setText(containerActivity.getString(R.string.unknown_time));
             } else {
                 mPhotoTitle.setText(date);
@@ -640,6 +640,8 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
                             if (!media.isSelected())
                                 unSelectNumInList++;
                         }
+
+                        mPresenter.calcSelectedPhoto();
 
                         if (!selected && unSelectNumInList + selectCount > Util.MAX_PHOTO_SIZE) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
@@ -795,6 +797,8 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
                             return;
                         }
+
+                        mPresenter.calcSelectedPhoto();
 
                         boolean selected = currentMedia.isSelected();
 

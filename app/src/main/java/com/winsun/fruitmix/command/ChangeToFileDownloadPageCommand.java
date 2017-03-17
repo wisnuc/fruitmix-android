@@ -18,6 +18,7 @@ public class ChangeToFileDownloadPageCommand extends AbstractCommand {
     @Override
     public void execute() {
         fileMainFragmentPresenter.setBottomNavigationItemChecked(FileMainFragmentPresenterImpl.PAGE_FILE_DOWNLOAD);
+        fileMainFragmentPresenter.setViewPagerCurrentItem(FileMainFragmentPresenterImpl.PAGE_FILE_DOWNLOAD);
     }
 
     @Override

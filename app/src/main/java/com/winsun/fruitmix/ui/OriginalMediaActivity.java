@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -229,11 +230,6 @@ public class OriginalMediaActivity extends BaseActivity implements IImageLoadLis
     @Override
     public void addTransitionListener(Transition.TransitionListener listener) {
         getWindow().getSharedElementEnterTransition().addListener(listener);
-    }
-
-    @Override
-    public void addOnTouchListener(GifTouchNetworkImageView view, View.OnTouchListener listener) {
-        view.setOnTouchListener(listener);
     }
 
     @Override
