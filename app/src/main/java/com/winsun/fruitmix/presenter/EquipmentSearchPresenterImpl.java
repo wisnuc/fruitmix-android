@@ -8,10 +8,14 @@ import android.widget.ExpandableListView;
 import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
 import com.winsun.fruitmix.business.DataRepository;
+import com.winsun.fruitmix.business.callback.EquipmentDiscoveryCallback;
 import com.winsun.fruitmix.business.callback.LoadEquipmentAliasCallback;
+import com.winsun.fruitmix.business.callback.OperationCallback;
 import com.winsun.fruitmix.business.callback.UserOperationCallback;
 import com.winsun.fruitmix.contract.EquipmentSearchContract;
 import com.winsun.fruitmix.model.Equipment;
+import com.winsun.fruitmix.model.LoggedInUser;
+import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.EquipmentAlias;
@@ -38,9 +42,6 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
 
     private EquipmentSearchContract.EquipmentSearchView mView;
 
-    private static final String SERVICE_PORT = "_http._tcp";
-    private static final String DEMAIN = "local.";
-
     private static final String SYSTEM_PORT = "3000";
     private static final String IPALIASING = "/system/ipaliasing";
 
@@ -51,17 +52,19 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
 
     private List<Equipment> mFoundedEquipments;
 
-    private Subscription mSubscription;
-
     private DataRepository mRepository;
 
-    public EquipmentSearchPresenterImpl(DataRepository repository) {
+    private boolean mShouldCallLogout;
+
+    public EquipmentSearchPresenterImpl(DataRepository repository, boolean shouldCallLogout) {
 
         mRepository = repository;
 
         mUserExpandableLists = new ArrayList<>();
         mUserLoadedEquipments = new ArrayList<>();
         mFoundedEquipments = new ArrayList<>();
+
+        mShouldCallLogout = shouldCallLogout;
     }
 
     @Override
@@ -91,9 +94,36 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
     }
 
     @Override
-    public boolean onEquipmentListViewChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+    public boolean onEquipmentListViewChildClick(ExpandableListView parent, View v, final int groupPosition, final int childPosition, long id) {
 
         User user = mUserExpandableLists.get(groupPosition).get(childPosition);
+
+        List<LoggedInUser> loggedInUsers = mRepository.loadLoggedInUserInMemory();
+
+        for (final LoggedInUser loggedInUser : loggedInUsers) {
+
+            if (loggedInUser.getUser().getUuid().equals(user.getUuid())) {
+
+                Util.loginType = LoginType.SPLASH_SCREEN;
+
+                if (mShouldCallLogout) {
+
+                    mRepository.logout(new OperationCallback() {
+                        @Override
+                        public void onOperationSucceed(OperationResult result) {
+
+                            login(groupPosition, loggedInUser);
+                        }
+                    });
+
+                } else {
+                    login(groupPosition, loggedInUser);
+                }
+
+                return true;
+            }
+
+        }
 
         String gateway = HTTP_CODE + mUserLoadedEquipments.get(groupPosition).getHosts().get(0);
         String userGroupName = mUserLoadedEquipments.get(groupPosition).getServiceName();
@@ -103,53 +133,66 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
         return false;
     }
 
+    private void login(int groupPosition, LoggedInUser loggedInUser) {
+        mRepository.insertGatewayToMemory("http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0));
+        mRepository.insertLoginUserUUIDToMemory(loggedInUser.getUser().getUuid());
+        mRepository.insertTokenToMemory(loggedInUser.getToken());
+        mRepository.insertDeviceIDToMemory(loggedInUser.getDeviceID());
+
+        mRepository.insertDeviceIDToDB(loggedInUser.getDeviceID());
+        mRepository.insertTokenToDB(loggedInUser.getToken());
+        mRepository.insertLoginUserUUIDToDB(loggedInUser.getUser().getUuid());
+        mRepository.insertGatewayToDB("http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0));
+
+        mRepository.checkAutoUpload();
+
+        mRepository.loadUsersInThread(null);
+        mRepository.loadMediasInThread(null);
+        mRepository.loadMediaSharesInThread(null);
+
+        mView.startMainPageActivity();
+
+        mView.finishActivity();
+    }
+
     @Override
     public void startDiscovery(RxDnssd rxDnssd) {
-        mSubscription = rxDnssd.browse(SERVICE_PORT, DEMAIN)
-                .compose(rxDnssd.resolve())
-                .compose(rxDnssd.queryRecords())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<BonjourService>() {
-                    @Override
-                    public void call(BonjourService bonjourService) {
 
-                        if (bonjourService.isLost()) return;
+        mRepository.startDiscovery(rxDnssd, new EquipmentDiscoveryCallback() {
+            @Override
+            public void onEquipmentDiscovery(BonjourService bonjourService) {
+                String serviceName = bonjourService.getServiceName();
+                if (!serviceName.toLowerCase().contains("wisnuc")) return;
 
-                        String serviceName = bonjourService.getServiceName();
-                        if (!serviceName.toLowerCase().contains("wisnuc")) return;
+                if (bonjourService.getInet4Address() == null) return;
+                String hostAddress = bonjourService.getInet4Address().getHostAddress();
 
-                        if (bonjourService.getInet4Address() == null) return;
-                        String hostAddress = bonjourService.getInet4Address().getHostAddress();
-
-                        for (Equipment equipment : mFoundedEquipments) {
-                            if (equipment == null || serviceName.equals(equipment.getServiceName()) || equipment.getHosts().contains(hostAddress)) {
-                                return;
-                            }
-                        }
-
-                        Equipment equipment = new Equipment();
-                        equipment.setServiceName(serviceName);
-                        Log.d(TAG, "host address:" + hostAddress);
-
-                        List<String> hosts = new ArrayList<>();
-                        hosts.add(hostAddress);
-
-                        equipment.setHosts(hosts);
-                        equipment.setPort(bonjourService.getPort());
-
-                        mFoundedEquipments.add(equipment);
-                        loadUsersAboutEquipment(equipment);
+                for (Equipment equipment : mFoundedEquipments) {
+                    if (equipment == null || serviceName.equals(equipment.getServiceName()) || equipment.getHosts().contains(hostAddress)) {
+                        return;
                     }
-                });
+                }
+
+                Equipment equipment = new Equipment();
+                equipment.setServiceName(serviceName);
+                Log.d(TAG, "host address:" + hostAddress);
+
+                List<String> hosts = new ArrayList<>();
+                hosts.add(hostAddress);
+
+                equipment.setHosts(hosts);
+                equipment.setPort(bonjourService.getPort());
+
+                mFoundedEquipments.add(equipment);
+                loadUsersAboutEquipment(equipment);
+            }
+        });
 
     }
 
     @Override
     public void stopDiscovery() {
-        if (mSubscription != null) {
-            mSubscription.unsubscribe();
-        }
+        mRepository.stopDiscovery();
     }
 
     @Override

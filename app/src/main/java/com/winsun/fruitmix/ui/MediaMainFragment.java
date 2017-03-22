@@ -1,16 +1,14 @@
 package com.winsun.fruitmix.ui;
 
-import android.os.Bundle;
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +31,7 @@ import java.util.Collections;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MediaMainFragment extends Fragment implements MediaMainFragmentContract.MediaMainFragmentView {
+public class MediaMainFragment implements MediaMainFragmentContract.MediaMainFragmentView {
 
     public static final String TAG = MediaMainFragment.class.getSimpleName();
 
@@ -53,60 +51,23 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
     private MediaShareFragment mMediaShareFragment;
 
     private MediaMainFragmentContract.MediaMainFragmentPresenter mPresenter;
-    private MainPageContract.MainPagePresenter mMainPagePresenter;
 
-    public MediaMainFragment() {
+    private View mView;
+    private Activity mActivity;
+
+    public MediaMainFragment(MainPageContract.MainPagePresenter mainPagePresenter, Activity activity) {
         // Required empty public constructor
-    }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment MediaMainFragment.
-     */
-    public static MediaMainFragment newInstance(MainPageContract.MainPagePresenter mainPagePresenter) {
-        MediaMainFragment fragment = new MediaMainFragment();
-        fragment.mMainPagePresenter = mainPagePresenter;
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+        mPresenter = new MediaMainFragmentPresenterImpl(mainPagePresenter);
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        mActivity = activity;
 
-        mPresenter = new MediaMainFragmentPresenterImpl(mMainPagePresenter);
+        mView = View.inflate(mActivity, R.layout.media_main_fragment, null);
 
-        MediaFragmentContract.MediaFragmentPresenter presenter = new MediaFragmentPresenterImpl(mPresenter, Injection.injectDataRepository(getContext()), Collections.<String>emptyList());
-
-        mMediaFragment = new MediaFragment(getActivity(), presenter);
-        mMediaShareFragment = new MediaShareFragment(getActivity());
-        mAlbumFragment = new AlbumFragment(getActivity());
-
-        mPresenter.setmMediaFragmentPresenter(mMediaFragment.getPresenter());
-        mPresenter.setmMediaShareFragmentPresenter(mMediaShareFragment.getPresenter());
-        mPresenter.setmAlbumFragmentPresenter(mAlbumFragment.getPresenter());
-
-        mPresenter.attachView(this);
-        mMainPagePresenter = null;
-
-        mPresenter.onCreate();
-
-        Log.d(TAG, "onCreate: ");
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        View view = inflater.inflate(R.layout.media_main_fragment, container, false);
-
-        ButterKnife.bind(this, view);
+        ButterKnife.bind(this, mView);
 
         toolbar.setTitle("");
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) mActivity).setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,6 +79,9 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
 
         initViewPager();
 
+        initPresenter();
+
+        mPresenter.onCreate(activity);
         mPresenter.onCreateView();
 
         lbRight.setOnClickListener(new View.OnClickListener() {
@@ -126,22 +90,35 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
                 mPresenter.selectModeBtnClick();
             }
         });
+    }
 
-        Log.d(TAG, "onCreateView: ");
 
-        return view;
+    private void initPresenter() {
+
+        MediaFragmentContract.MediaFragmentPresenter presenter = new MediaFragmentPresenterImpl(mPresenter, Injection.injectDataRepository(mActivity), Collections.<String>emptyList());
+
+        mMediaFragment = new MediaFragment(mActivity, presenter);
+        mMediaShareFragment = new MediaShareFragment(mActivity);
+        mAlbumFragment = new AlbumFragment(mActivity);
+
+        mPresenter.setmMediaFragmentPresenter(mMediaFragment.getPresenter());
+        mPresenter.setmMediaShareFragmentPresenter(mMediaShareFragment.getPresenter());
+        mPresenter.setmAlbumFragmentPresenter(mAlbumFragment.getPresenter());
+
+        mPresenter.attachView(this);
+
     }
 
     @Override
     public void onResume() {
-        super.onResume();
 
         mPresenter.onResume();
     }
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
+
+        Log.d(TAG, "onDestroyView: ");
 
         mPresenter.detachView();
 
@@ -149,7 +126,6 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
         mAlbumFragment.onDestroyView();
         mMediaShareFragment.onDestroyView();
 
-        Log.d(TAG, "onDestroyView: ");
     }
 
     private void initNavigationView() {
@@ -190,7 +166,7 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
 
     @Override
     public void setTitleText(int resID) {
-        title.setText(getString(resID));
+        title.setText(mActivity.getString(resID));
     }
 
     @Override
@@ -229,14 +205,14 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
 
         bottomNavigationView.setVisibility(View.VISIBLE);
 
-        Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.show_bottom_item_anim);
+        Animation animation = AnimationUtils.loadAnimation(mActivity, R.anim.show_bottom_item_anim);
         animation.setAnimationListener(new BaseAnimationListener() {
             @Override
             public void onAnimationEnd(Animation animation) {
                 super.onAnimationEnd(animation);
 
                 CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
-                lp.bottomMargin = Util.dip2px(getActivity(), 56.0f);
+                lp.bottomMargin = Util.dip2px(mActivity, 56.0f);
                 //if(LocalCache.ScreenWidth==540) lp.bottomMargin=76;
                 //else if(LocalCache.ScreenWidth==1080) lp.bottomMargin=140;
                 viewPager.setLayoutParams(lp);
@@ -250,7 +226,7 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
     @Override
     public void dismissBottomNavAnim() {
 
-        Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.dismiss_bottom_item_anim);
+        Animation animation = AnimationUtils.loadAnimation(mActivity, R.anim.dismiss_bottom_item_anim);
         animation.setAnimationListener(new BaseAnimationListener() {
 
             @Override
@@ -281,6 +257,11 @@ public class MediaMainFragment extends Fragment implements MediaMainFragmentCont
     @Override
     public int getCurrentViewPageItem() {
         return viewPager.getCurrentItem();
+    }
+
+    @Override
+    public View getView() {
+        return mView;
     }
 
     private class MyAdapter extends PagerAdapter {

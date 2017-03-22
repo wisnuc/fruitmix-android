@@ -54,7 +54,7 @@ public class NewPhotoSelectActivity extends BaseActivity implements NewPhotoSele
 
         ((MediaFragmentInNewPhotoSelectPresenterImpl) presenter).setNewPhotoSelectPresenter(mNewPhotoSelectPresenter, Injection.injectDataRepository(this), Collections.<String>emptyList());
 
-        mNewPhotoSelectPresenter.initView();
+        mNewPhotoSelectPresenter.initView(this);
     }
 
     @Override

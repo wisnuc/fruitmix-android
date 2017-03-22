@@ -18,7 +18,9 @@ package com.android.volley.toolbox;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Process;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -26,14 +28,17 @@ import android.widget.ImageView.ScaleType;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.orientation.OrientationOperation;
 import com.android.volley.orientation.OrientationOperationFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -592,4 +597,97 @@ public class ImageLoader {
                 .append("#H").append(maxHeight).append("#S").append(scaleType.ordinal()).append(url)
                 .toString();
     }
+
+    private List<ImageRequest> imageRequests = new ArrayList<>();
+
+    public void preLoadMedia(final String url, final int width, final int height, final ScaleType scaleType) {
+
+        ImageRequest request = new ImageRequest(url, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap response) {
+                mCache.putBitmap(getCacheKey(url, width, height, scaleType), response);
+            }
+        }, width, height, ImageView.ScaleType.CENTER_CROP, Bitmap.Config.RGB_565, null) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                return mHeaders;
+            }
+        };
+
+        request.setPriority(Request.Priority.LOW);
+        mRequestQueue.add(request);
+
+        imageRequests.add(request);
+    }
+
+    public void cancelAllPreLoadMedia() {
+
+        cancelRetry = true;
+
+        for (ImageRequest request : imageRequests) {
+            if (request != null)
+                request.cancel();
+        }
+    }
+
+    private Handler handler;
+    private boolean cancelRetry = false;
+
+    public void preLoadMediaSmallThumb(final String url, final int width, final int height) {
+
+        ImageRequest request = new ImageRequest(url, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap response) {
+
+//                if(!url.startsWith("http"))
+//                    Log.d(TAG, "onResponse: url" + url + " size: " + response.getByteCount());
+//                mCache.putBitmap(url, response);
+
+            }
+        }, width, height, ImageView.ScaleType.CENTER_CROP, Bitmap.Config.RGB_565, new ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                if (error.networkResponse != null && error.networkResponse.statusCode == 500 && !cancelRetry) {
+
+                    if (handler == null) {
+
+                        HandlerThread handlerThread = new HandlerThread("handler_thread");
+                        handlerThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                        handlerThread.start();
+
+                        handler = new Handler(handlerThread.getLooper());
+
+                    }
+
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            Log.i(TAG, "error response url: " + url);
+
+                            preLoadMediaSmallThumb(url, width, height);
+
+                        }
+                    }, 3 * 1000);
+
+                }
+
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                return mHeaders;
+            }
+        };
+
+        request.setPriority(Request.Priority.LOW);
+        mRequestQueue.add(request);
+
+        imageRequests.add(request);
+
+    }
+
+
 }

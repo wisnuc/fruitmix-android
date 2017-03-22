@@ -1,20 +1,30 @@
 package com.winsun.fruitmix.presenter;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.business.DataRepository;
 import com.winsun.fruitmix.business.LoadTokenParam;
 import com.winsun.fruitmix.business.callback.LoadDeviceIdOperationCallback;
 import com.winsun.fruitmix.business.callback.LoadTokenOperationCallback;
+import com.winsun.fruitmix.business.callback.UserOperationCallback;
 import com.winsun.fruitmix.contract.LoginContract;
+import com.winsun.fruitmix.model.LoggedInUser;
+import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.Util;
+
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/2/9.
  */
 
 public class LoginPresenterImpl implements LoginContract.LoginPresenter {
+
+    public static final String TAG = LoginPresenterImpl.class.getSimpleName();
 
     private LoginContract.LoginView mView;
     private DataRepository mRepository;
@@ -56,13 +66,23 @@ public class LoginPresenterImpl implements LoginContract.LoginPresenter {
                     @Override
                     public void onLoadSucceed(OperationResult result, String deviceID) {
 
-                        if (mView == null) return;
+                        mRepository.loadUsersInThread(new UserOperationCallback.LoadUsersCallback() {
+                            @Override
+                            public void onLoadSucceed(OperationResult operationResult, List<User> users) {
+                                handleLoginSucceed();
+                            }
 
-                        loadData();
+                            @Override
+                            public void onLoadFail(OperationResult operationResult) {
+                                if (mView == null) return;
 
-                        mView.dismissDialog();
+                                mView.dismissDialog();
 
-                        mView.handleLoginSucceed();
+                                mView.handleLoginFail(operationResult);
+                            }
+
+                        });
+
                     }
 
                     @Override
@@ -90,8 +110,59 @@ public class LoginPresenterImpl implements LoginContract.LoginPresenter {
         });
     }
 
+    private void handleLoginSucceed() {
+        if (mView == null) return;
+
+        mView.dismissDialog();
+
+        List<LoggedInUser> loggedInUsers = mRepository.loadLoggedInUserInMemory();
+
+        Log.i(TAG, "LocalLoggedInUsers size: " + loggedInUsers.size());
+
+        if (loggedInUsers.isEmpty()) {
+
+            mRepository.saveCurrentUploadDeviceID();
+
+            mRepository.saveAutoUploadOrNot(true);
+
+            mRepository.saveLoggedInUser(mEquipmentGroupName);
+
+            loadData();
+
+            mView.handleLoginSucceed();
+
+        } else {
+
+            mRepository.saveLoggedInUser(mEquipmentGroupName);
+
+            mView.showAlertDialog(R.string.need_auto_upload, R.string.ok, R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                    mRepository.saveCurrentUploadDeviceID();
+
+                    mRepository.saveAutoUploadOrNot(true);
+
+                    loadData();
+
+                    mView.handleLoginSucceed();
+                }
+            }, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    mRepository.saveAutoUploadOrNot(false);
+
+                    loadData();
+
+                    mView.handleLoginSucceed();
+                }
+            });
+
+        }
+    }
+
+
     private void loadData() {
-        mRepository.loadUsersInThread(null);
         mRepository.loadMediasInThread(null);
         mRepository.loadMediaSharesInThread(null);
     }

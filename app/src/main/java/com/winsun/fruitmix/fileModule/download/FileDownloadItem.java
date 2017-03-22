@@ -16,6 +16,7 @@ public class FileDownloadItem {
     private long fileSize;
     private long fileTime;
     private long fileCurrentDownloadSize;
+    private String fileCreatorUUID;
     private FileDownloadState fileDownloadState;
 
     private List<FileDownloadOperationCallback.FileDownloadStateChangedCallback> callbacks;
@@ -102,5 +103,13 @@ public class FileDownloadItem {
         for (FileDownloadOperationCallback.FileDownloadStateChangedCallback callback : callbacks) {
             callback.onStateChanged(downloadState);
         }
+    }
+
+    public String getFileCreatorUUID() {
+        return fileCreatorUUID;
+    }
+
+    public void setFileCreatorUUID(String fileCreatorUUID) {
+        this.fileCreatorUUID = fileCreatorUUID;
     }
 }

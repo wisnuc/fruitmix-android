@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.contract;
 
+import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 
@@ -38,10 +39,11 @@ public interface MediaMainFragmentContract {
 
         int getCurrentViewPageItem();
 
-        boolean isResumed();
+        View getView();
 
-        boolean isHidden();
+        void onResume();
 
+        void onDestroyView();
     }
 
     interface MediaMainFragmentPresenter extends BasePresenter<MediaMainFragmentView> {
@@ -52,7 +54,7 @@ public interface MediaMainFragmentContract {
 
         void setmAlbumFragmentPresenter(AlbumFragmentContract.AlbumFragmentPresenter mAlbumFragmentPresenter);
 
-        void onCreate();
+        void onCreate(Context context);
 
         void onCreateView();
 
@@ -95,6 +97,8 @@ public interface MediaMainFragmentContract {
         boolean isResumed();
 
         void onMapSharedElements(List<String> names, Map<String, View> sharedElements);
+
+        void setHidden(boolean hidden);
     }
 
 }

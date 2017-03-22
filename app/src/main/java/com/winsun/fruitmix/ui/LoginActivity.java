@@ -1,8 +1,10 @@
 package com.winsun.fruitmix.ui;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,7 +23,7 @@ import com.winsun.fruitmix.util.Util;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class LoginActivity extends BaseActivity implements View.OnClickListener, EditText.OnFocusChangeListener,LoginContract.LoginView {
+public class LoginActivity extends BaseActivity implements View.OnClickListener, EditText.OnFocusChangeListener, LoginContract.LoginView {
 
     @BindView(R.id.back)
     ImageView mBack;
@@ -60,7 +62,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         String gateway = intent.getStringExtra(Util.GATEWAY);
         int color = intent.getIntExtra(Util.USER_BG_COLOR, 0);
 
-        mPresenter = new LoginPresenterImpl(Injection.injectDataRepository(mContext),equipmentGroupName,equipmentChildName,color,gateway,userUUid);
+        mPresenter = new LoginPresenterImpl(Injection.injectDataRepository(mContext), equipmentGroupName, equipmentChildName, color, gateway, userUUid);
         mPresenter.attachView(this);
         mPresenter.showEquipmentAndUser();
     }
@@ -155,5 +157,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     @Override
     public void showPwdEditHint() {
         mPwdEdit.setHint(getString(R.string.password_text));
+    }
+
+    @Override
+    public void showAlertDialog(int messageResID, int positiveBtnResID, int negativeBtnResID, DialogInterface.OnClickListener positiveBtnOnClickListener, DialogInterface.OnClickListener negativeBtnOnClickListener) {
+
+        new AlertDialog.Builder(mContext).setMessage(getString(messageResID)).setPositiveButton(getString(positiveBtnResID), positiveBtnOnClickListener)
+                .setNegativeButton(getString(negativeBtnResID), negativeBtnOnClickListener).setCancelable(false).create().show();
     }
 }

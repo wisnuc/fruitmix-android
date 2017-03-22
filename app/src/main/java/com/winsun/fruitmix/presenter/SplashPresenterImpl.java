@@ -38,6 +38,20 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
     }
 
     @Override
+    public void initLoggedInUser() {
+        mRepository.insertLoggedInUserToMemory(mRepository.loadLoggedInUserInDB());
+    }
+
+    @Override
+    public void createLocalPhotoThumbnailFolder() {
+        boolean result = FileUtil.createLocalPhotoThumbnailFolder();
+
+        if (!result) {
+            Log.i(TAG, "onCreate: Create local photo thumbnail folder failed");
+        }
+    }
+
+    @Override
     public void createDownloadFileStoreFolder() {
         boolean result = FileUtil.createDownloadFileStoreFolder();
 

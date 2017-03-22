@@ -2,6 +2,8 @@ package com.winsun.fruitmix.util;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -14,6 +16,7 @@ import com.winsun.fruitmix.fileModule.download.FileDownloadErrorState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadFinishedState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadState;
+import com.winsun.fruitmix.mediaModule.model.Media;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -70,18 +73,26 @@ public class FileUtil {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
     }
 
-    public static String getLocalPhotoThumbnailFolderPath() {
-        return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
+    public static boolean createDownloadFileStoreFolder() {
+        return createFolder(getDownloadFileStoreFolderPath());
     }
 
-    public static boolean createDownloadFileStoreFolder() {
+    public static boolean createLocalPhotoThumbnailFolder() {
+        return createFolder(getLocalPhotoThumbnailFolderPath());
+    }
+
+    private static boolean createFolder(String path) {
         if (!checkExternalStorageState()) {
-            Log.i(TAG, "createDownloadFileStoreFolder: External storage not mounted");
+            Log.i(TAG, "create folder: External storage not mounted");
             return false;
         }
-        File downloadFileStoreFolder = new File(getDownloadFileStoreFolderPath());
+        File folder = new File(path);
 
-        return downloadFileStoreFolder.mkdirs() || downloadFileStoreFolder.isDirectory();
+        return folder.mkdirs() || folder.isDirectory();
+    }
+
+    public static String getLocalPhotoThumbnailFolderPath() {
+        return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
     }
 
     public static String getDownloadFileStoreFolderPath() {
@@ -313,6 +324,137 @@ public class FileUtil {
         }
 
         return formatFileSize;
+    }
+
+
+    public static long getTotalCacheSize(Context context) {
+        long cacheSize = getFolderSize(context.getCacheDir());
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            cacheSize += getFolderSize(context.getExternalCacheDir());
+        }
+        return cacheSize;
+    }
+
+    private static long getFolderSize(File file) {
+        long size = 0;
+
+        File[] fileList = file.listFiles();
+        int fileListLength;
+        if (fileList != null) {
+            fileListLength = fileList.length;
+            for (int i = 0; i < fileListLength; i++) {
+                if (fileList[i].isDirectory()) {
+                    size = size + getFolderSize(fileList[i]);
+                } else {
+                    size = size + fileList[i].length();
+                }
+            }
+        }
+
+        return size;
+    }
+
+    public static void clearAllCache(Context context) {
+        deleteDir(context.getCacheDir());
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            deleteDir(context.getExternalCacheDir());
+        }
+    }
+
+    private static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            int length;
+            if (children != null) {
+                length = children.length;
+                for (int i = 0; i < length; i++) {
+                    boolean success = deleteDir(new File(dir, children[i]));
+                    if (!success) {
+                        return false;
+                    }
+                }
+            }
+
+        }
+        return dir == null || dir.delete();
+    }
+
+    public static boolean writeBitmapToLocalPhotoThumbnailFolder(Media media) {
+
+        if (!media.getMiniThumb().isEmpty())
+            return false;
+
+        String thumb = media.getThumb();
+
+        String miniThumbName = media.getUuid() + ".jpg";
+
+        File file = new File(getLocalPhotoThumbnailFolderPath(), miniThumbName);
+
+        if (file.exists()) {
+            media.setMiniThumb(file.getAbsolutePath());
+            return true;
+        }
+
+        BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
+
+        decodeOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(thumb, decodeOptions);
+
+        int actualWidth = decodeOptions.outWidth;
+        int actualHeight = decodeOptions.outHeight;
+
+        decodeOptions.inJustDecodeBounds = false;
+        decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, 32, 32);
+        Bitmap bitmap = BitmapFactory.decodeFile(thumb, decodeOptions);
+
+        FileOutputStream outputStream = null;
+
+        try {
+            outputStream = new FileOutputStream(file);
+
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            outputStream.flush();
+
+            media.setMiniThumb(file.getAbsolutePath());
+
+            Log.d(TAG, "writeBitmapToLocalPhotoThumbnailFolder: media mini thumb:" + media.getMiniThumb());
+
+            return true;
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+
+            bitmap = null;
+
+            try {
+                if (outputStream != null)
+                    outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        return false;
+
+    }
+
+    private static int findBestSampleSize(
+            int actualWidth, int actualHeight, int desiredWidth, int desiredHeight) {
+        double wr = (double) actualWidth / desiredWidth;
+        double hr = (double) actualHeight / desiredHeight;
+        double ratio = Math.min(wr, hr);
+        float n = 1.0f;
+        while ((n * 2) <= ratio) {
+            n *= 2;
+        }
+
+        return (int) n;
     }
 
 }

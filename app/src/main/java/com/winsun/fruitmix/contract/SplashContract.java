@@ -21,9 +21,13 @@ public interface SplashContract {
 
     interface SplashPresenter extends BasePresenter<SplashView> {
 
+        void createLocalPhotoThumbnailFolder();
+
         void createDownloadFileStoreFolder();
 
         void loadToken();
+
+        void initLoggedInUser();
 
     }
 

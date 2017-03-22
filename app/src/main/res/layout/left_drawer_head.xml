@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
-    android:background="@drawable/left_drawer_head_bg"
+    android:background="@drawable/navigation_header_bg"
     android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
 
     <TextView
         android:id="@+id/avatar"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/share_portrait_bg"
         android:gravity="center"
@@ -22,12 +22,59 @@
         android:id="@+id/user_name_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
+        android:layout_below="@id/avatar"
         android:layout_marginTop="@dimen/nav_header_vertical_spacing"
         android:gravity="center"
         android:text="@string/user_default_name"
         android:textColor="@color/white"
         android:textSize="14dp" />
 
+    <TextView
+        android:id="@+id/upload_percent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/user_name_textview"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@id/avatar"
+        android:textColor="@color/white"
+        android:textSize="14dp" />
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/logged_in_user0_avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/share_portrait_bg"
+        android:gravity="center"
+        android:text="@string/user_name_abbreviations"
+        android:textColor="@color/white"
+        android:textSize="18dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/logged_in_user1_avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_toLeftOf="@id/logged_in_user0_avatar"
+        android:background="@drawable/share_portrait_bg"
+        android:gravity="center"
+        android:text="@string/user_name_abbreviations"
+        android:textColor="@color/white"
+        android:textSize="18dp"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/navigation_header_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/avatar"
+        android:layout_marginTop="@dimen/nav_header_vertical_spacing"
+        android:src="@drawable/navigation_header_arrow_up"
+        android:visibility="gone" />
+
+
+</RelativeLayout>

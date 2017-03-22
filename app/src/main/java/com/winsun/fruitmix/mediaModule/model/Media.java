@@ -20,10 +20,12 @@ public class Media implements Parcelable {
     private String date;
     private boolean loaded;
     private String belongingMediaShareUUID;
-    private boolean uploaded;
+    private String uploadedDeviceIDs;
     private boolean sharing;
     private int orientationNumber;
     private String type;
+    private String miniThumb;
+
 
     public Media() {
         uuid = "";
@@ -36,6 +38,7 @@ public class Media implements Parcelable {
         date = "";
         belongingMediaShareUUID = "";
         local = false;
+        miniThumb = "";
     }
 
     protected Media(Parcel in) {
@@ -49,9 +52,10 @@ public class Media implements Parcelable {
         date = in.readString();
         loaded = in.readByte() != 0;
         belongingMediaShareUUID = in.readString();
-        uploaded = in.readByte() != 0;
+        uploadedDeviceIDs = in.readString();
         orientationNumber = in.readInt();
         type = in.readString();
+        miniThumb = in.readString();
     }
 
     @Override
@@ -66,9 +70,10 @@ public class Media implements Parcelable {
         dest.writeString(date);
         dest.writeByte((byte) (loaded ? 1 : 0));
         dest.writeString(belongingMediaShareUUID);
-        dest.writeByte((byte) (uploaded ? 1 : 0));
+        dest.writeString(uploadedDeviceIDs);
         dest.writeInt(orientationNumber);
         dest.writeString(type);
+        dest.writeString(miniThumb);
     }
 
     @Override
@@ -168,16 +173,12 @@ public class Media implements Parcelable {
         this.belongingMediaShareUUID = belongingMediaShareUUID;
     }
 
-    public void restoreUploadState() {
-        uploaded = false;
+    public String getUploadedDeviceIDs() {
+        return uploadedDeviceIDs == null ? "" : uploadedDeviceIDs;
     }
 
-    public boolean isUploaded() {
-        return uploaded;
-    }
-
-    public void setUploaded(boolean uploaded) {
-        this.uploaded = uploaded;
+    public void setUploadedDeviceIDs(String uploadedDeviceIDs) {
+        this.uploadedDeviceIDs = uploadedDeviceIDs;
     }
 
     public boolean isSharing() {
@@ -204,25 +205,12 @@ public class Media implements Parcelable {
         this.type = type;
     }
 
-    public Media cloneSelf() {
+    public String getMiniThumb() {
+        return miniThumb == null ? "" : miniThumb;
+    }
 
-        Media media = new Media();
-        media.setUuid(getUuid());
-        media.setThumb(getThumb());
-        media.setTime(getTime());
-        media.setWidth(getWidth());
-        media.setHeight(getHeight());
-        media.setSelected(isSelected());
-        media.setLocal(isLocal());
-        media.setDate(getDate());
-        media.setLoaded(isLoaded());
-        media.setBelongingMediaShareUUID(getBelongingMediaShareUUID());
-        media.setUploaded(isUploaded());
-        media.setSharing(isSharing());
-        media.setOrientationNumber(getOrientationNumber());
-        media.setType(getType());
-
-        return media;
+    public void setMiniThumb(String miniThumb) {
+        this.miniThumb = miniThumb;
     }
 
     public String getKey() {

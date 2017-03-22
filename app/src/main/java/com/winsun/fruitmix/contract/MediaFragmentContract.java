@@ -37,7 +37,7 @@ public interface MediaFragmentContract {
 
         void startPostponedEnterTransition();
 
-        View findViewByMedia(Media media);
+        View findViewWithTag(String tag);
 
         void startCreateAlbumActivity();
 
@@ -47,6 +47,8 @@ public interface MediaFragmentContract {
     }
 
     interface MediaFragmentPresenter extends BasePresenter<MediaFragmentView> {
+
+        void setItemWidth(int itemWidth);
 
         void setSelectCountText(String selectCountText);
 
@@ -70,15 +72,16 @@ public interface MediaFragmentContract {
 
         void onMapSharedElements(List<String> names, Map<String, View> sharedElements);
 
-        void onCreate();
+        void onCreate(Context context);
 
         void onResume();
 
-        void loadMediaToView(Context context, Media media, NetworkImageView view);
+        void loadThumbMediaToView(Context context, Media media, NetworkImageView view);
+
+        void loadSmallThumbMediaToView(Context context, Media media, NetworkImageView view);
 
         void cancelLoadMediaToView(NetworkImageView view);
 
-        String loadImageThumbUrl(Media media);
     }
 
 

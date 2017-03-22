@@ -33,6 +33,8 @@ public interface EquipmentSearchContract {
 
         void finishActivity();
 
+        void startMainPageActivity();
+
     }
 
     interface EquipmentSearchPresenter extends BasePresenter<EquipmentSearchView> {

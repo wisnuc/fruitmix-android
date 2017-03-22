@@ -56,6 +56,10 @@ public class MediaFragmentInNewPhotoSelectPresenterImpl implements MediaFragment
     }
 
     @Override
+    public void setItemWidth(int itemWidth) {
+    }
+
+    @Override
     public void setSelectCountText(String selectCountText) {
 
         newPhotoSelectPresenter.setTitle(selectCountText);
@@ -178,7 +182,7 @@ public class MediaFragmentInNewPhotoSelectPresenterImpl implements MediaFragment
     }
 
     @Override
-    public void onCreate() {
+    public void onCreate(Context context) {
         mRepository.loadMediasInThread(new MediaOperationCallback.LoadMediasCallback() {
             @Override
             public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
@@ -202,19 +206,19 @@ public class MediaFragmentInNewPhotoSelectPresenterImpl implements MediaFragment
     }
 
     @Override
-    public void loadMediaToView(Context context, Media media, NetworkImageView view) {
+    public void loadThumbMediaToView(Context context, Media media, NetworkImageView view) {
         mRepository.loadThumbMediaToNetworkImageView(context, media, view);
+    }
+
+    @Override
+    public void loadSmallThumbMediaToView(Context context, Media media, NetworkImageView view) {
+
     }
 
     @Override
     public void cancelLoadMediaToView(NetworkImageView view) {
         view.setDefaultImageResId(R.drawable.placeholder_photo);
         view.setImageUrl(null, null);
-    }
-
-    @Override
-    public String loadImageThumbUrl(Media media) {
-        return mRepository.loadImageThumbUrl(media);
     }
 
     private void showMedias(final Collection<Media> medias) {

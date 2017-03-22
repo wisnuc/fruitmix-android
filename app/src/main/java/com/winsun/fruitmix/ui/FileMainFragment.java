@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.ui;
 
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -27,12 +28,7 @@ import com.winsun.fruitmix.presenter.FileMainFragmentPresenterImpl;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link FileMainFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class FileMainFragment extends Fragment implements FileMainFragmentContract.FileMainFragmentView {
+public class FileMainFragment implements FileMainFragmentContract.FileMainFragmentView {
 
     public static final String TAG = FileMainFragment.class.getSimpleName();
 
@@ -53,55 +49,20 @@ public class FileMainFragment extends Fragment implements FileMainFragmentContra
 
     private FileMainFragmentContract.FileMainFragmentPresenter mPresenter;
 
-    private MainPageContract.MainPagePresenter mainPagePresenter;
+    private Activity mActivity;
 
-    public FileMainFragment() {
+    private View mView;
+
+    public FileMainFragment(MainPageContract.MainPagePresenter mainPagePresenter, Activity activity) {
         // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment FileMainFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FileMainFragment newInstance(MainPageContract.MainPagePresenter mainPagePresenter) {
-        FileMainFragment fragment = new FileMainFragment();
-        fragment.mainPagePresenter = mainPagePresenter;
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        BaseActivity activity = (BaseActivity) getActivity();
 
         mPresenter = new FileMainFragmentPresenterImpl(mainPagePresenter);
 
-        fileFragment = new FileFragment(activity, mPresenter);
-        fileShareFragment = new FileShareFragment(activity, mPresenter);
-        fileDownloadFragment = new FileDownloadFragment(activity, mPresenter);
+        mActivity = activity;
 
-        mPresenter.setFileDownloadFragmentPresenter(fileDownloadFragment.getPresenter());
-        mPresenter.setFileFragmentPresenter(fileFragment.getPresenter());
-        mPresenter.setFileShareFragmentPresenter(fileShareFragment.getPresenter());
+        mView = View.inflate(mActivity, R.layout.file_main_layout, null);
 
-        mPresenter.attachView(this);
-        mainPagePresenter = null;
-
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        View view = inflater.inflate(R.layout.file_main_layout, container, false);
-
-        ButterKnife.bind(this, view);
+        ButterKnife.bind(this, mView);
 
         initToolbar();
 
@@ -118,15 +79,30 @@ public class FileMainFragment extends Fragment implements FileMainFragmentContra
             }
         });
 
-        mPresenter.initView();
+        initPresenter();
 
-        return view;
+        mPresenter.initView();
+    }
+
+    private void initPresenter() {
+        BaseActivity activity = (BaseActivity) mActivity;
+
+        fileFragment = new FileFragment(activity, mPresenter);
+        fileShareFragment = new FileShareFragment(activity, mPresenter);
+        fileDownloadFragment = new FileDownloadFragment(activity, mPresenter);
+
+        mPresenter.setFileDownloadFragmentPresenter(fileDownloadFragment.getPresenter());
+        mPresenter.setFileFragmentPresenter(fileFragment.getPresenter());
+        mPresenter.setFileShareFragmentPresenter(fileShareFragment.getPresenter());
+
+        mPresenter.attachView(this);
     }
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
 
+        Log.d(TAG, "onDestroyView: ");
+        
         mPresenter.detachView();
 
         fileFragment.onDestroyView();
@@ -192,7 +168,7 @@ public class FileMainFragment extends Fragment implements FileMainFragmentContra
 
     private void initToolbar() {
         toolbar.setTitle("");
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) mActivity).setSupportActionBar(toolbar);
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -221,6 +197,11 @@ public class FileMainFragment extends Fragment implements FileMainFragmentContra
     @Override
     public void setNavigationOnClickListener(View.OnClickListener onClickListener) {
         toolbar.setNavigationOnClickListener(onClickListener);
+    }
+
+    @Override
+    public View getView() {
+        return mView;
     }
 
     private class FilePageAdapter extends PagerAdapter {
@@ -260,8 +241,8 @@ public class FileMainFragment extends Fragment implements FileMainFragmentContra
          * required for a PagerAdapter to function properly.
          *
          * @param view   Page View to check for association with <code>object</code>
-         * @param object Object to check for association with <code>view</code>
-         * @return true if <code>view</code> is associated with the key object <code>object</code>
+         * @param object Object to check for association with <code>mView</code>
+         * @return true if <code>mView</code> is associated with the key object <code>object</code>
          */
         @Override
         public boolean isViewFromObject(View view, Object object) {

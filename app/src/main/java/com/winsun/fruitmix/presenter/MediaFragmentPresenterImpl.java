@@ -3,6 +3,7 @@ package com.winsun.fruitmix.presenter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Process;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.SparseArray;
@@ -23,6 +24,7 @@ import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +59,10 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
     private boolean mFabExpand = false;
 
+    private boolean mPreLoadPhoto = false;
+
+    private int mItemWidth;
+
     public MediaFragmentPresenterImpl(MediaMainFragmentContract.MediaMainFragmentPresenter mediaMainFragmentPresenter, DataRepository repository, List<String> alreadySelectedImageKeyArrayList) {
         mMediaMainFragmentPresenter = mediaMainFragmentPresenter;
         mRepository = repository;
@@ -64,7 +70,8 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     }
 
     private void clearSelectPhoto() {
-        if (mMapKeyIsPhotoPositionValueIsPhoto == null || mMapKeyIsPhotoPositionValueIsPhoto.size() == 0) return;
+        if (mMapKeyIsPhotoPositionValueIsPhoto == null || mMapKeyIsPhotoPositionValueIsPhoto.size() == 0)
+            return;
 
         for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Media media : mediaList) {
@@ -318,7 +325,11 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
                 if (currentMedia == null) return;
 
-                View newSharedElement = mView.findViewByMedia(currentMedia);
+                View newSharedElement = mView.findViewWithTag(mRepository.loadImageThumbUrl(currentMedia));
+
+                if (newSharedElement == null)
+                    newSharedElement = mView.findViewWithTag(mRepository.loadImageSmallThumbUrl(currentMedia));
+
                 String sharedElementName = currentMedia.getKey();
 
                 names.add(sharedElementName);
@@ -339,7 +350,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
                     if (mView == null) return;
 
-                    showMedias(medias);
+                    showMedias(medias, null);
                 }
 
                 @Override
@@ -351,19 +362,19 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     }
 
     @Override
-    public void loadMediaToView(Context context, Media media, NetworkImageView view) {
+    public void loadThumbMediaToView(Context context, Media media, NetworkImageView view) {
         mRepository.loadThumbMediaToNetworkImageView(context, media, view);
+    }
+
+    @Override
+    public void loadSmallThumbMediaToView(Context context, Media media, NetworkImageView view) {
+        mRepository.loadSmallThumbMediaToNetworkImageView(context, media, view);
     }
 
     @Override
     public void cancelLoadMediaToView(NetworkImageView view) {
         view.setDefaultImageResId(R.drawable.placeholder_photo);
         view.setImageUrl(null, null);
-    }
-
-    @Override
-    public String loadImageThumbUrl(Media media) {
-        return mRepository.loadImageThumbUrl(media);
     }
 
     @Override
@@ -376,8 +387,10 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
         mView = null;
     }
 
+    //TODO: refactor onCreate user context,hold image loader in data repository
+
     @Override
-    public void onCreate() {
+    public void onCreate(final Context context) {
 
         mRepository.loadMediasInThread(new MediaOperationCallback.LoadMediasCallback() {
             @Override
@@ -389,7 +402,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
                 mPhotoListRefresh = true;
 
-                showMedias(medias);
+                showMedias(medias, context);
             }
 
             @Override
@@ -399,7 +412,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
         });
     }
 
-    private void showMedias(final Collection<Media> medias) {
+    private void showMedias(final Collection<Media> medias, final Context context) {
         mRepository.handleMediasForMediaFragment(medias, new MediaOperationCallback.HandleMediaForMediaFragmentCallback() {
             @Override
             public void onOperateFinished(MediaFragmentDataLoader loader) {
@@ -422,6 +435,12 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
                     mView.showMedias(loader);
 
                     mMediaMainFragmentPresenter.setSelectModeBtnVisibility(View.VISIBLE);
+
+                    if (!mPreLoadPhoto) {
+                        mPreLoadPhoto = true;
+                        loadSmallThumbnail(medias, context);
+                    }
+
                 } else {
                     mView.showNoContentUI();
                     mView.dismissContentUI();
@@ -431,6 +450,46 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
             }
         });
+    }
+
+    private void loadSmallThumbnail(final Collection<Media> medias, final Context context) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
+                String url;
+
+                List<Media> preLoadMediaMiniThumbs = new ArrayList<>(medias);
+                Media media;
+                Iterator<Media> iterator = preLoadMediaMiniThumbs.iterator();
+                while (iterator.hasNext()) {
+                    media = iterator.next();
+                    if (media.isLocal() && media.getMiniThumb().isEmpty())
+                        iterator.remove();
+                }
+
+                Log.i(TAG, "remote media size: " + preLoadMediaMiniThumbs.size());
+
+                for (int i = 0; i < preLoadMediaMiniThumbs.size(); i++) {
+
+                    media = preLoadMediaMiniThumbs.get(i);
+
+                    url = mRepository.loadImageSmallThumbUrl(media);
+
+                    mRepository.preLoadMediaSmallThumb(context, url, mItemWidth, mItemWidth);
+
+                }
+
+            }
+        }).start();
+
+    }
+
+    @Override
+    public void setItemWidth(int itemWidth) {
+        mItemWidth = itemWidth;
     }
 
     @Override

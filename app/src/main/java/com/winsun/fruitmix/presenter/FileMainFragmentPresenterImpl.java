@@ -41,8 +41,6 @@ public class FileMainFragmentPresenterImpl implements FileMainFragmentContract.F
     @Override
     public void onResume() {
 
-        mIsHidden = false;
-
         fileFragmentPresenter.onResume();
         fileShareFragmentPresenter.onResume();
 
@@ -187,6 +185,11 @@ public class FileMainFragmentPresenterImpl implements FileMainFragmentContract.F
     @Override
     public boolean isHidden() {
         return mIsHidden;
+    }
+
+    @Override
+    public void setHidden(boolean hidden) {
+        mIsHidden = hidden;
     }
 
     @Override

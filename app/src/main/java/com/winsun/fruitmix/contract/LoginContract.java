@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.contract;
 
+import android.content.DialogInterface;
+
 import com.winsun.fruitmix.common.BasePresenter;
 import com.winsun.fruitmix.common.BaseView;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -29,6 +31,8 @@ public interface LoginContract {
         void hidePwdEditHint();
 
         void showPwdEditHint();
+
+        void showAlertDialog(int messageResID, int positiveBtnResID, int negativeBtnResID, DialogInterface.OnClickListener positiveBtnOnClickListener,DialogInterface.OnClickListener negativeBtnOnClickListener);
     }
 
     interface LoginPresenter extends BasePresenter<LoginView> {

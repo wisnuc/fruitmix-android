@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.data.memory;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.business.LoadTokenParam;
 import com.winsun.fruitmix.data.DataSource;
 import com.winsun.fruitmix.data.dataOperationResult.DeviceIDLoadOperationResult;
@@ -17,7 +19,7 @@ import com.winsun.fruitmix.fileModule.download.FileDownloadState;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -39,6 +41,8 @@ public class MemoryDataSource implements DataSource {
 
     private static MemoryDataSource INSTANCE;
 
+    public static final String TAG = MemoryDataSource.class.getSimpleName();
+
     private String mGateway = "http://192.168.5.98";
 
     private String mToken = null;
@@ -52,6 +56,7 @@ public class MemoryDataSource implements DataSource {
     private ConcurrentMap<String, Media> localMediaMapKeyIsThumb = null;
     private ConcurrentMap<String, AbstractRemoteFile> remoteFileMapKeyIsUUID = null;
     private List<AbstractRemoteFile> remoteFileShareList = null;
+    private List<LoggedInUser> mLoggedInUsers = null;
 
     private MemoryDataSource() {
 
@@ -61,7 +66,7 @@ public class MemoryDataSource implements DataSource {
         localMediaMapKeyIsThumb = new ConcurrentHashMap<>();
         remoteFileMapKeyIsUUID = new ConcurrentHashMap<>();
         remoteFileShareList = new ArrayList<>();
-
+        mLoggedInUsers = new ArrayList<>();
     }
 
     public static MemoryDataSource getInstance() {
@@ -81,9 +86,9 @@ public class MemoryDataSource implements DataSource {
         remoteMediaShareMapKeyIsUUID.clear();
         remoteUserMapKeyIsUUID.clear();
         remoteMediaMapKeyIsUUID.clear();
-        localMediaMapKeyIsThumb.clear();
         remoteFileMapKeyIsUUID.clear();
         remoteFileShareList.clear();
+        mLoggedInUsers.clear();
 
     }
 
@@ -277,11 +282,6 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public void updateLocalMediasUploadedFalse() {
-        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
-    }
-
-    @Override
     public OperateUserResult insertUser(String url, String token, String userName, String userPassword) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
@@ -366,12 +366,12 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public FileDownloadLoadOperationResult loadDownloadedFilesRecord() {
+    public FileDownloadLoadOperationResult loadDownloadedFilesRecord(String userUUID) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs) {
+    public OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs, String userUUID) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
@@ -496,6 +496,22 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
+    public List<LoggedInUser> loadLoggedInUser() {
+
+        return new ArrayList<>(mLoggedInUsers);
+    }
+
+    @Override
+    public void insertLoggedInUser(List<LoggedInUser> loggedInUsers) {
+        mLoggedInUsers.addAll(loggedInUsers);
+    }
+
+    @Override
+    public void deleteLoggedInUser(LoggedInUser loggedInUser) {
+        mLoggedInUsers.remove(loggedInUser);
+    }
+
+    @Override
     public String loadGateway() {
         return mGateway;
     }
@@ -511,5 +527,25 @@ public class MemoryDataSource implements DataSource {
     public String loadLoginUserUUID() {
 
         return mCurrentLoginUserUUID;
+    }
+
+    @Override
+    public boolean getAutoUploadOrNot() {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+    }
+
+    @Override
+    public void saveAutoUploadOrNot(boolean autoUploadOrNot) {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+    }
+
+    @Override
+    public void saveCurrentUploadDeviceID(String currentUploadDeviceID) {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+    }
+
+    @Override
+    public String getCurrentUploadDeviceID() {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 }

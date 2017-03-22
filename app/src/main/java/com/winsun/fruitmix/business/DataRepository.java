@@ -10,7 +10,10 @@ import android.util.Log;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rxdnssd.RxDnssd;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.business.callback.EquipmentDiscoveryCallback;
 import com.winsun.fruitmix.business.callback.FileDownloadOperationCallback;
 import com.winsun.fruitmix.business.callback.FileOperationCallback;
 import com.winsun.fruitmix.business.callback.FileShareOperationCallback;
@@ -45,12 +48,14 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.model.EquipmentAlias;
 import com.winsun.fruitmix.model.MediaFragmentDataLoader;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.lang.ref.WeakReference;
@@ -62,6 +67,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by Administrator on 2017/2/6.
@@ -101,6 +111,8 @@ public class DataRepository {
 
     private boolean startTimingRetrieveMediaShare = false;
 
+    private boolean mStopUpload = false;
+
     private UserOperationCallback.LoadCurrentUserCallback mLoadCurrentUserCallback;
 
     private List<MediaOperationCallback.LoadMediasCallback> mLoadMediasCallbacks;
@@ -117,6 +129,11 @@ public class DataRepository {
     public static final String HANDLER_THREAD_NAME = "timing_retrieve_media_share_thread";
 
     private HandlerThread mHandlerThread;
+
+    private Subscription mSubscription;
+
+    private static final String SERVICE_PORT = "_http._tcp";
+    private static final String DEMAIN = "local.";
 
     private DataRepository(DataSource memoryDataSource, DataSource dbDataSource, DataSource serverDataSource) {
 
@@ -188,12 +205,6 @@ public class DataRepository {
         mediaKeysInCreateAlbum.clear();
     }
 
-    public void shutdownFixedThreadPoolNow() {
-
-        instance.shutdownFixedThreadPoolNow();
-
-    }
-
     public void registerTimeRetrieveMediaShareCallback(MediaShareOperationCallback.LoadMediaSharesCallback callback) {
         RetrieveMediaShareTimelyCallback.add(callback);
     }
@@ -204,7 +215,7 @@ public class DataRepository {
 
     public void stopTimingRetrieveMediaShare() {
 
-        Log.i(TAG, "stopTimingRetrieveMediaShare: ");
+        Log.d(TAG, "stopTimingRetrieveMediaShare: ");
 
         if (startTimingRetrieveMediaShare)
             startTimingRetrieveMediaShare = false;
@@ -529,7 +540,7 @@ public class DataRepository {
 
         if (localMediaInCamera.size() > 0) {
 
-            mDBDataSource.insertLocalMedias(localMediaInCamera);
+
             mMemoryDataSource.insertLocalMedias(localMediaInCamera);
 
             resetMediaFragmentDataLoader();
@@ -549,7 +560,12 @@ public class DataRepository {
 
             calcLocalMediaUUIDInCamera(localMediaInCamera);
 
+        } else {
+            mCalcNewLocalMediaDigestFinished = true;
         }
+
+        startGenerateLocalPhotoThumbnail();
+        startUploadMediaInThread();
 
     }
 
@@ -559,6 +575,8 @@ public class DataRepository {
 
     private void calcLocalMediaUUIDInCamera(List<Media> medias) {
 
+        Log.d(TAG, "calcLocalMediaUUIDInCamera: ");
+        
         for (Media media : medias) {
             if (media.getUuid().isEmpty()) {
                 String uuid = Util.CalcSHA256OfFile(media.getThumb());
@@ -566,16 +584,48 @@ public class DataRepository {
             }
         }
 
-        mDBDataSource.updateLocalMedias(medias);
-        mMemoryDataSource.updateLocalMedias(medias);
+        mDBDataSource.insertLocalMedias(medias);
 
         mCalcNewLocalMediaDigestFinished = true;
-        startUploadMediaInThread();
+
     }
 
-    private void startUploadMediaInThread() {
+    private void startGenerateLocalPhotoThumbnail() {
 
-        if (mCalcNewLocalMediaDigestFinished && remoteMediaLoaded) {
+        Log.d(TAG, "startGenerateLocalPhotoThumbnail: ");
+
+        List<Media> medias = mMemoryDataSource.loadAllLocalMedias().getMedias();
+
+        for (final Media media : medias) {
+
+            if (media.getMiniThumb().isEmpty()) {
+
+                instance.doOnTaskInFixedThreadPool(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        boolean result = FileUtil.writeBitmapToLocalPhotoThumbnailFolder(media);
+
+                        if (result) {
+
+                            mDBDataSource.updateLocalMedia(media);
+
+                        }
+                    }
+                });
+            }
+
+        }
+
+    }
+
+    public void startUploadMediaInThread() {
+
+        Log.d(TAG, "startUploadMediaInThread: calc :" + mCalcNewLocalMediaDigestFinished + " remote media loaded: "+ remoteMediaLoaded + " getAutoUploadOrNot: " + getAutoUploadOrNot());
+
+        if (mCalcNewLocalMediaDigestFinished && remoteMediaLoaded && getAutoUploadOrNot()) {
+
+            mStopUpload = false;
 
             instance.doOnTaskInFixedThreadPool(new Runnable() {
                 @Override
@@ -589,40 +639,61 @@ public class DataRepository {
     }
 
     private void startUploadMedia() {
+
+        Log.d(TAG, "startUploadMedia: ");
+        
         List<Media> localMedias = mMemoryDataSource.loadAllLocalMedias().getMedias();
 
         Collection<String> remoteMediaUUIDs = mMemoryDataSource.loadRemoteMediaUUIDs();
 
+        String deviceID = mMemoryDataSource.loadDeviceID(null, null).getDeviceID();
+
         for (Media media : localMedias) {
 
-            if (!media.isUploaded()) {
+            if (mStopUpload) return;
+
+            boolean uploaded = false;
+
+            if (!media.getUploadedDeviceIDs().contains(deviceID)) {
 
                 if (remoteMediaUUIDs.contains(media.getUuid())) {
-                    media.setUploaded(true);
 
-                    mDBDataSource.updateLocalMedia(media);
+                    uploaded = true;
+
                 } else {
 
                     String token = mMemoryDataSource.loadToken();
-                    String url = generateUrl(Util.DEVICE_ID_PARAMETER + "/" + mMemoryDataSource.loadDeviceID(null, null));
+                    String url = generateUrl(Util.DEVICE_ID_PARAMETER + "/" + mMemoryDataSource.loadDeviceID(null, null).getDeviceID());
 
                     OperationResult result = mServerDataSource.insertLocalMedia(url, token, media);
 
                     if (result.getOperationResultType() == OperationResultType.SUCCEED) {
 
-                        media.setUploaded(true);
-
-                        mDBDataSource.updateLocalMedia(media);
+                        uploaded = true;
 
                     }
 
                 }
 
+                if (!uploaded) continue;
+
+                if (media.getUploadedDeviceIDs().isEmpty()) {
+                    media.setUploadedDeviceIDs(deviceID);
+                } else {
+                    media.setUploadedDeviceIDs(media.getUploadedDeviceIDs() + "," + deviceID);
+                }
+                mDBDataSource.updateLocalMedia(media);
             }
 
         }
     }
 
+    public void stopUpload() {
+
+        mStopUpload = true;
+
+        instance.shutdownFixedThreadPoolNow();
+    }
 
     public void loadMediasInThread(final MediaOperationCallback.LoadMediasCallback callback) {
 
@@ -673,7 +744,6 @@ public class DataRepository {
             localMediaInCamera = result.getMedias();
             if (localMediaInCamera.size() > 0) {
 
-                mDBDataSource.insertLocalMedias(localMediaInCamera);
                 mMemoryDataSource.insertLocalMedias(localMediaInCamera);
 
                 localMedias.addAll(localMediaInCamera);
@@ -761,7 +831,13 @@ public class DataRepository {
 
         if (localMediaInCamera != null && localMediaInCamera.size() > 0) {
             calcLocalMediaUUIDInCamera(localMediaInCamera);
+        } else {
+            mCalcNewLocalMediaDigestFinished = true;
         }
+
+        startGenerateLocalPhotoThumbnail();
+        startUploadMediaInThread();
+
     }
 
 
@@ -1042,17 +1118,19 @@ public class DataRepository {
                 mDBDataSource.deleteAllRemoteMediaShare();
                 mDBDataSource.deleteAllRemoteUsers();
 
-                mDBDataSource.updateLocalMediasUploadedFalse();
-
                 mMemoryDataSource.deleteToken();
                 mMemoryDataSource.deleteDeviceID();
                 mMemoryDataSource.deleteAllRemoteUsers();
                 mMemoryDataSource.deleteAllRemoteMedia();
                 mMemoryDataSource.deleteAllRemoteMediaShare();
 
-                instance.shutdownFixedThreadPoolNow();
+                stopUpload();
 
                 stopTimingRetrieveMediaShare();
+
+                init();
+
+                insertLoggedInUserToMemory(loadLoggedInUserInDB());
 
                 mHandler.post(new Runnable() {
                     @Override
@@ -1171,9 +1249,11 @@ public class DataRepository {
             callback.onLoadSucceed(new OperationSuccess(), user);
         } else {
             user = mDBDataSource.loadUser(userUUID);
-            callback.onLoadSucceed(new OperationSuccess(), user);
 
-            addCallbackWhenLoadUsersFinished(callback);
+            if (user == null)
+                addCallbackWhenLoadUsersFinished(callback);
+            else
+                callback.onLoadSucceed(new OperationSuccess(), user);
 
         }
 
@@ -1601,7 +1681,9 @@ public class DataRepository {
             @Override
             public void run() {
 
-                final FileDownloadLoadOperationResult result = mDBDataSource.loadDownloadedFilesRecord();
+                String currentUserUUID = mMemoryDataSource.loadLoginUserUUID();
+
+                final FileDownloadLoadOperationResult result = mDBDataSource.loadDownloadedFilesRecord(currentUserUUID);
 
                 mHandler.post(new Runnable() {
                     @Override
@@ -1690,11 +1772,13 @@ public class DataRepository {
 
         final List<String> mFileUUIDs = new ArrayList<>(fileUUIDs);
 
+        final String userUUID = mMemoryDataSource.loadLoginUserUUID();
+
         instance.doOneTaskInCachedThread(new Runnable() {
             @Override
             public void run() {
 
-                mDBDataSource.deleteDownloadedFileRecord(mFileUUIDs);
+                mDBDataSource.deleteDownloadedFileRecord(mFileUUIDs, userUUID);
 
                 mHandler.post(new Runnable() {
                     @Override
@@ -1803,6 +1887,42 @@ public class DataRepository {
         loadMediaToNetworkImageView(needSetOrientationNumber, context, remoteUrl, media, view);
     }
 
+    public void loadSmallThumbMediaToNetworkImageView(Context context, Media media, NetworkImageView view) {
+
+        if (media == null) {
+            view.setImageUrl(null, null);
+            return;
+        }
+
+        String remoteUrl = loadImageSmallThumbUrl(media);
+
+        boolean needSetOrientationNumber = media.isLocal();
+
+        loadMediaToNetworkImageView(needSetOrientationNumber, context, remoteUrl, media, view);
+    }
+
+
+    public String loadImageSmallThumbUrl(Media media) {
+
+        String imageUrl;
+        if (media.isLocal()) {
+            imageUrl = media.getMiniThumb();
+
+            if (imageUrl.isEmpty())
+                imageUrl = media.getThumb();
+
+        } else {
+
+//            int[] result = Util.formatPhotoWidthHeight(width, height);
+
+            imageUrl = mMemoryDataSource.loadGateway() + ":" + Util.PORT + Util.MEDIA_PARAMETER + "/" + media.getUuid() + "/thumbnail?width=32&height=32&autoOrient=true&modifier=caret";
+
+
+        }
+        return imageUrl;
+
+    }
+
     public String loadImageThumbUrl(Media media) {
 
         String imageUrl;
@@ -1832,6 +1952,167 @@ public class DataRepository {
             imageUrl = mMemoryDataSource.loadGateway() + ":" + Util.PORT + Util.MEDIA_PARAMETER + "/" + media.getUuid() + "/download";
         }
         return imageUrl;
+    }
+
+    public List<LoggedInUser> loadLoggedInUserInDB() {
+        return mDBDataSource.loadLoggedInUser();
+    }
+
+    public List<LoggedInUser> loadLoggedInUserInMemory() {
+        return mMemoryDataSource.loadLoggedInUser();
+    }
+
+    public void insertLoggedInUserToDB(List<LoggedInUser> loggedInUsers) {
+        mDBDataSource.insertLoggedInUser(loggedInUsers);
+    }
+
+    public void insertLoggedInUserToMemory(List<LoggedInUser> loggedInUsers) {
+        mMemoryDataSource.insertLoggedInUser(loggedInUsers);
+    }
+
+    public void startDiscovery(RxDnssd rxDnssd, final EquipmentDiscoveryCallback callback) {
+        mSubscription = rxDnssd.browse(SERVICE_PORT, DEMAIN)
+                .compose(rxDnssd.resolve())
+                .compose(rxDnssd.queryRecords())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<BonjourService>() {
+                    @Override
+                    public void call(BonjourService bonjourService) {
+
+                        if (bonjourService.isLost()) return;
+
+                        callback.onEquipmentDiscovery(bonjourService);
+                    }
+                });
+    }
+
+    public void stopDiscovery() {
+        if (mSubscription != null) {
+            mSubscription.unsubscribe();
+        }
+    }
+
+    public void insertTokenToMemory(String token) {
+        mMemoryDataSource.insertToken(token);
+    }
+
+    public void insertDeviceIDToMemory(String deviceID) {
+        mMemoryDataSource.insertDeviceID(deviceID);
+    }
+
+    public void insertGatewayToMemory(String gateway) {
+        mMemoryDataSource.insertGateway(gateway);
+    }
+
+    public void insertLoginUserUUIDToMemory(String userUUID) {
+        mMemoryDataSource.insertLoginUserUUID(userUUID);
+    }
+
+    public void insertTokenToDB(String token) {
+        mDBDataSource.insertToken(token);
+    }
+
+    public void insertDeviceIDToDB(String deviceID) {
+        mDBDataSource.insertDeviceID(deviceID);
+    }
+
+    public void insertGatewayToDB(String gateway) {
+        mDBDataSource.insertGateway(gateway);
+    }
+
+    public void insertLoginUserUUIDToDB(String userUUID) {
+        mDBDataSource.insertLoginUserUUID(userUUID);
+    }
+
+    public boolean checkAutoUpload() {
+
+        List<LoggedInUser> loggedInUsers = loadLoggedInUserInMemory();
+        String userUUID = loadCurrentLoginUserUUIDInMemory();
+
+        String deviceId = mMemoryDataSource.loadDeviceID(null, null).getDeviceID();
+
+        for (LoggedInUser loggedInUser : loggedInUsers) {
+
+            if (loggedInUser.getUser().getUuid().equals(userUUID)) {
+                if (!mDBDataSource.getCurrentUploadDeviceID().equals(deviceId)) {
+                    mDBDataSource.saveAutoUploadOrNot(false);
+
+                    return false;
+
+                } else {
+                    mDBDataSource.saveAutoUploadOrNot(true);
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public void saveLoggedInUser(String equipmentGroupName) {
+        User currentUser = loadCurrentLoginUserInMemory();
+
+        String deviceID = mMemoryDataSource.loadDeviceID(null, null).getDeviceID();
+        String token = mMemoryDataSource.loadToken();
+        String gateway = mMemoryDataSource.loadGateway();
+
+        LoggedInUser loggedInUser = new LoggedInUser(deviceID, token, gateway, equipmentGroupName, currentUser);
+
+        insertLoggedInUserToDB(Collections.singletonList(loggedInUser));
+        insertLoggedInUserToMemory(Collections.singletonList(loggedInUser));
+
+    }
+
+    public void deleteLoggedInUser(LoggedInUser loggedInUser) {
+
+        mDBDataSource.deleteLoggedInUser(loggedInUser);
+        mMemoryDataSource.deleteLoggedInUser(loggedInUser);
+    }
+
+
+    public void saveAutoUploadOrNot(boolean autoUploadOrNot) {
+        mDBDataSource.saveAutoUploadOrNot(autoUploadOrNot);
+    }
+
+    public boolean getAutoUploadOrNot() {
+        return mDBDataSource.getAutoUploadOrNot();
+    }
+
+    public void saveCurrentUploadDeviceID() {
+        mDBDataSource.saveCurrentUploadDeviceID(mMemoryDataSource.loadDeviceID(null, null).getDeviceID());
+    }
+
+    public int getAlreadyUploadMediaCount() {
+
+        List<Media> medias = mMemoryDataSource.loadAllLocalMedias().getMedias();
+
+        String deviceID = mMemoryDataSource.loadDeviceID(null, null).getDeviceID();
+
+        int alreadyUploadMediaCount = 0;
+
+        for (Media media : medias) {
+
+            if (media.getUploadedDeviceIDs().contains(deviceID)) {
+                alreadyUploadMediaCount++;
+            }
+
+        }
+
+        return alreadyUploadMediaCount;
+
+    }
+
+    public int getTotalMediaCount() {
+        return mMemoryDataSource.loadAllLocalMedias().getMedias().size();
+    }
+
+    public void preLoadMediaSmallThumb(Context context, String url, int width, int height) {
+
+        ImageLoader imageLoader = ImageGifLoaderInstance.INSTANCE.getImageLoader(context, mMemoryDataSource.loadToken());
+        imageLoader.preLoadMediaSmallThumb(url, width, height);
+
     }
 
 

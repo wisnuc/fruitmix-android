@@ -25,6 +25,7 @@ import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
 import com.winsun.fruitmix.presenter.FileDownloadFragmentPresenterImpl;
 import com.winsun.fruitmix.util.FileUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -128,10 +129,11 @@ public class FileDownloadFragment implements FileDownloadFragmentContract.FileDo
 
     private class DownloadingFileAdapter extends RecyclerView.Adapter<DownloadingFileAdapterViewHolder> {
 
-        private List<FileDownloadItem> downloadingItems;
+        private List<FileDownloadItem> mDownloadingItems = new ArrayList<>();
 
         void setData(List<FileDownloadItem> downloadingItems) {
-            this.downloadingItems = downloadingItems;
+            mDownloadingItems.clear();
+            mDownloadingItems.addAll(downloadingItems);
         }
 
         @Override
@@ -144,12 +146,12 @@ public class FileDownloadFragment implements FileDownloadFragmentContract.FileDo
 
         @Override
         public void onBindViewHolder(DownloadingFileAdapterViewHolder holder, int position) {
-            holder.refreshView(downloadingItems.get(position));
+            holder.refreshView(mDownloadingItems.get(position));
         }
 
         @Override
         public int getItemCount() {
-            return downloadingItems.size();
+            return mDownloadingItems.size();
         }
     }
 
@@ -187,11 +189,12 @@ public class FileDownloadFragment implements FileDownloadFragmentContract.FileDo
 
     private class DownloadedFileAdapter extends RecyclerView.Adapter<DownloadedFileAdapterViewHolder> {
 
-        private List<FileDownloadItem> downloadedItems;
+        private List<FileDownloadItem> mDownloadedItems = new ArrayList<>();
         private boolean selectMode;
 
         void setData(List<FileDownloadItem> downloadedItems, boolean selectMode) {
-            this.downloadedItems = downloadedItems;
+            mDownloadedItems.clear();
+            mDownloadedItems.addAll(downloadedItems);
             this.selectMode = selectMode;
         }
 
@@ -205,12 +208,12 @@ public class FileDownloadFragment implements FileDownloadFragmentContract.FileDo
 
         @Override
         public void onBindViewHolder(DownloadedFileAdapterViewHolder holder, int position) {
-            holder.refreshView(downloadedItems.get(position), selectMode);
+            holder.refreshView(mDownloadedItems.get(position), selectMode);
         }
 
         @Override
         public int getItemCount() {
-            return downloadedItems.size();
+            return mDownloadedItems.size();
         }
     }
 

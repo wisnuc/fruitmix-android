@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.contract;
 
+import android.content.Context;
+
 import com.winsun.fruitmix.common.BasePresenter;
 import com.winsun.fruitmix.common.BaseView;
 
@@ -23,7 +25,7 @@ public interface NewPhotoSelectContract {
 
         void handleSelectFinished();
 
-        void initView();
+        void initView(Context context);
 
         void setTitle(String title);
 

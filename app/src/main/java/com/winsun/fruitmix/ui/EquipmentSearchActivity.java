@@ -109,7 +109,7 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
 
         mRxDnssd = CustomApplication.getRxDnssd(mContext);
 
-        mPresenter = new EquipmentSearchPresenterImpl(Injection.injectDataRepository(mContext));
+        mPresenter = new EquipmentSearchPresenterImpl(Injection.injectDataRepository(mContext),getIntent().getBooleanExtra(Util.KEY_SHOULD_CALL_LOGOUT,false));
         mPresenter.attachView(this);
     }
 
@@ -134,6 +134,11 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
         mPresenter.detachView();
 
         mContext = null;
+    }
+
+    @Override
+    public void startMainPageActivity() {
+        startActivity(new Intent(mContext, MainPageActivity.class));
     }
 
     @Override

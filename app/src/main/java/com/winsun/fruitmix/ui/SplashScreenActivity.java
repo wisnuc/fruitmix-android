@@ -11,6 +11,7 @@ import com.winsun.fruitmix.common.BaseActivity;
 import com.winsun.fruitmix.common.Injection;
 import com.winsun.fruitmix.contract.SplashContract;
 import com.winsun.fruitmix.presenter.SplashPresenterImpl;
+import com.winsun.fruitmix.util.Util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -45,6 +46,8 @@ public class SplashScreenActivity extends BaseActivity implements SplashContract
         mSplashPresenter.attachView(this);
 
         mSplashPresenter.createDownloadFileStoreFolder();
+        mSplashPresenter.createLocalPhotoThumbnailFolder();
+        mSplashPresenter.initLoggedInUser();
         mSplashPresenter.loadToken();
     }
 

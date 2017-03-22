@@ -13,6 +13,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.parser.LocalDataParser;
 import com.winsun.fruitmix.parser.LocalMediaCommentParser;
@@ -77,7 +78,7 @@ public class DBUtils {
         }
     }
 
-    private boolean isOpen() {
+    public boolean isOpen() {
         return database.isOpen();
     }
 
@@ -372,6 +373,39 @@ public class DBUtils {
 
     }
 
+    private ContentValues createLoggedInUserContentValues(LoggedInUser loggedInUser) {
+
+        ContentValues contentValues = createUserContentValues(loggedInUser.getUser());
+        contentValues.put(DBHelper.LOGGED_IN_USER_GATEWAY, loggedInUser.getGateway());
+        contentValues.put(DBHelper.LOGGED_IN_USER_EQUIPMENT_NAME, loggedInUser.getEquipmentName());
+        contentValues.put(DBHelper.LOGGED_IN_USER_TOKEN, loggedInUser.getToken());
+        contentValues.put(DBHelper.LOGGED_IN_USER_DEVICE_ID, loggedInUser.getDeviceID());
+
+        return contentValues;
+    }
+
+    public long insertLoggedInUserInDB(List<LoggedInUser> loggedInUsers) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues;
+
+        for (LoggedInUser loggedInUser : loggedInUsers) {
+
+            contentValues = createLoggedInUserContentValues(loggedInUser);
+
+            returnValue = database.insert(DBHelper.LOGGED_IN_USER_TABLE_NAME, null, contentValues);
+        }
+
+        close();
+
+        return returnValue;
+
+    }
+
+
     private ContentValues createDownloadedFileContentValues(FileDownloadItem fileDownloadItem) {
 
         ContentValues contentValues = new ContentValues();
@@ -379,6 +413,7 @@ public class DBUtils {
         contentValues.put(DBHelper.FILE_KEY_SIZE, fileDownloadItem.getFileSize());
         contentValues.put(DBHelper.FILE_KEY_UUID, fileDownloadItem.getFileUUID());
         contentValues.put(DBHelper.FILE_KEY_TIME, fileDownloadItem.getFileTime());
+        contentValues.put(DBHelper.FILE_KEY_CREATOR_UUID, fileDownloadItem.getFileCreatorUUID());
 
         return contentValues;
     }
@@ -387,7 +422,7 @@ public class DBUtils {
 
         openWritableDB();
 
-        long returnValue;
+        long returnValue = 0;
 
         returnValue = database.insert(DBHelper.DOWNLOADED_FILE_TABLE_NAME, null, createDownloadedFileContentValues(fileDownloadItem));
 
@@ -402,10 +437,11 @@ public class DBUtils {
         contentValues.put(DBHelper.MEDIA_KEY_HEIGHT, media.getHeight());
         contentValues.put(DBHelper.MEDIA_KEY_THUMB, media.getThumb());
         contentValues.put(DBHelper.MEDIA_KEY_LOCAL, media.isLocal() ? 1 : 0);
-        contentValues.put(DBHelper.MEDIA_KEY_UPLOADED, media.isUploaded() ? 1 : 0);
+        contentValues.put(DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID, media.getUploadedDeviceIDs());
         contentValues.put(DBHelper.MEDIA_KEY_SHARING, media.isSharing() ? 1 : 0);
         contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER, media.getOrientationNumber());
         contentValues.put(DBHelper.MEDIA_KEY_TYPE, media.getType());
+        contentValues.put(DBHelper.MEDIA_KEY_MINI_THUMB, media.getMiniThumb());
 
         return contentValues;
     }
@@ -417,10 +453,11 @@ public class DBUtils {
         sqLiteStatement.bindString(4, media.getHeight());
         sqLiteStatement.bindString(5, media.getThumb());
         sqLiteStatement.bindLong(6, media.isLocal() ? 1 : 0);
-        sqLiteStatement.bindLong(7, media.isUploaded() ? 1 : 0);
+        sqLiteStatement.bindString(7, media.getUploadedDeviceIDs());
         sqLiteStatement.bindLong(8, media.isSharing() ? 1 : 0);
         sqLiteStatement.bindLong(9, media.getOrientationNumber());
         sqLiteStatement.bindString(10, media.getType());
+        sqLiteStatement.bindString(11, media.getMiniThumb());
     }
 
     @NonNull
@@ -432,11 +469,12 @@ public class DBUtils {
                 DBHelper.MEDIA_KEY_HEIGHT + "," +
                 DBHelper.MEDIA_KEY_THUMB + "," +
                 DBHelper.MEDIA_KEY_LOCAL + "," +
-                DBHelper.MEDIA_KEY_UPLOADED + "," +
+                DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID + "," +
                 DBHelper.MEDIA_KEY_SHARING + "," +
                 DBHelper.MEDIA_KEY_ORIENTATION_NUMBER + "," +
-                DBHelper.MEDIA_KEY_TYPE + ")" +
-                "values(?,?,?,?,?,?,?,?,?,?)";
+                DBHelper.MEDIA_KEY_TYPE + "," +
+                DBHelper.MEDIA_KEY_MINI_THUMB + ")" +
+                "values(?,?,?,?,?,?,?,?,?,?,?)";
     }
 
     private long insertMedias(String dbName, Collection<Media> medias) {
@@ -682,6 +720,29 @@ public class DBUtils {
 
         return deleteAllMediaShare(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
     }
+	
+	    public long deleteLoggerUserByUserUUID(String userUUID) {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.LOGGED_IN_USER_TABLE_NAME, DBHelper.USER_KEY_UUID + " = ?", new String[]{userUUID});
+
+        close();
+
+        return returnValue;
+
+    }
+
+    public long deleteDownloadedFileByUUIDAndCreatorUUID(String fileUUID, String fileCreatorUUID) {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.DOWNLOADED_FILE_TABLE_NAME, DBHelper.FILE_KEY_UUID + " = ? and " + DBHelper.FILE_KEY_CREATOR_UUID + " = ?", new String[]{fileUUID, fileCreatorUUID});
+
+        close();
+
+        return returnValue;
+    }
 
     public long deleteDownloadedFileByUUID(String fileUUID) {
 
@@ -903,13 +964,46 @@ public class DBUtils {
         return users;
     }
 
-    public List<FileDownloadItem> getAllDownloadedFile() {
+    public List<LoggedInUser> getAllLoggedInUser() {
+        openReadableDB();
+
+        List<LoggedInUser> loggedInUsers = new ArrayList<>();
+
+        User user;
+        String gateway;
+        String equipmentName;
+        String token;
+        String deviceID;
+        LocalDataParser<User> parser = new LocalUserParser();
+
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOGGED_IN_USER_TABLE_NAME, null);
+
+        while (cursor.moveToNext()) {
+            user = parser.parse(cursor);
+
+            gateway = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_GATEWAY));
+            equipmentName = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_EQUIPMENT_NAME));
+            token = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_TOKEN));
+            deviceID = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_DEVICE_ID));
+
+            loggedInUsers.add(new LoggedInUser(deviceID, token, gateway, equipmentName, user));
+        }
+
+        cursor.close();
+
+        close();
+
+        return loggedInUsers;
+    }
+
+
+    public List<FileDownloadItem> getAllCurrentLoginUserDownloadedFile(String userUUID) {
 
         openReadableDB();
 
         List<FileDownloadItem> fileDownloadItems = new ArrayList<>();
 
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.DOWNLOADED_FILE_TABLE_NAME, null);
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.DOWNLOADED_FILE_TABLE_NAME + " where " + DBHelper.FILE_KEY_CREATOR_UUID + " = ?", new String[]{userUUID});
         while (cursor.moveToNext()) {
 
             String fileName = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_NAME));
@@ -917,8 +1011,16 @@ public class DBUtils {
             long fileSize = cursor.getLong(cursor.getColumnIndex(DBHelper.FILE_KEY_SIZE));
             long fileTime = cursor.getLong(cursor.getColumnIndex(DBHelper.FILE_KEY_TIME));
 
+            String fileCreatorUUID;
+            if (cursor.isNull(cursor.getColumnIndex(DBHelper.FILE_KEY_CREATOR_UUID))) {
+                fileCreatorUUID = userUUID;
+            } else {
+                fileCreatorUUID = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_CREATOR_UUID));
+            }
+
             FileDownloadItem fileDownloadItem = new FileDownloadItem(fileName, fileSize, fileUUID);
             fileDownloadItem.setFileTime(fileTime);
+            fileDownloadItem.setFileCreatorUUID(fileCreatorUUID);
 
             fileDownloadItems.add(fileDownloadItem);
         }
@@ -1008,40 +1110,6 @@ public class DBUtils {
 
     public long updateLocalMedias(Collection<Media> medias){
         return updateMedias(DBHelper.LOCAL_MEDIA_TABLE_NAME,medias);
-    }
-
-    @NonNull
-    private String createUpdateMediaSql(String dbName) {
-        return "update " + dbName + " set " +
-                DBHelper.MEDIA_KEY_UPLOADED + " = 0";
-    }
-
-    public long updateLocalMediasUploadedFalse() {
-
-        long returnValue = 0;
-
-        try {
-            openWritableDB();
-
-            String sql = createUpdateMediaSql(DBHelper.LOCAL_MEDIA_TABLE_NAME);
-
-            SQLiteStatement sqLiteStatement = database.compileStatement(sql);
-            database.beginTransaction();
-
-            returnValue = sqLiteStatement.executeUpdateDelete();
-
-            database.setTransactionSuccessful();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-
-            database.endTransaction();
-
-            close();
-        }
-
-        return returnValue;
-
     }
 
     public long deleteOldAndInsertNewRemoteMediaShare(Collection<MediaShare> oldMediaShares, Collection<MediaShare> newMediaShares) {

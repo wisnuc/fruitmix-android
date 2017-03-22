@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.presenter;
 
+import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 
@@ -33,6 +34,8 @@ public class MediaMainFragmentPresenterImpl implements MediaMainFragmentContract
     static final int PAGE_SHARE = 0;
     private static final int PAGE_PHOTO = 1;
     private static final int PAGE_ALBUM = 2;
+
+    private boolean isHidden = false;
 
     public MediaMainFragmentPresenterImpl(MainPageContract.MainPagePresenter mainPagePresenter) {
 
@@ -179,7 +182,12 @@ public class MediaMainFragmentPresenterImpl implements MediaMainFragmentContract
 
     @Override
     public boolean isResumed() {
-        return mView.isResumed();
+        return mView != null && !isHidden;
+    }
+
+    @Override
+    public void setHidden(boolean hidden) {
+        isHidden = hidden;
     }
 
     @Override
@@ -204,11 +212,11 @@ public class MediaMainFragmentPresenterImpl implements MediaMainFragmentContract
     }
 
     @Override
-    public void onCreate() {
-        if (mView.isHidden())
+    public void onCreate(Context context) {
+        if (isHidden)
             return;
 
-        mMediaFragmentPresenter.onCreate();
+        mMediaFragmentPresenter.onCreate(context);
     }
 
     @Override
@@ -218,7 +226,7 @@ public class MediaMainFragmentPresenterImpl implements MediaMainFragmentContract
 
     @Override
     public void onResume() {
-        if (mView.isHidden())
+        if (isHidden)
             return;
 
         mMediaFragmentPresenter.onResume();

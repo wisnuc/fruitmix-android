@@ -29,6 +29,10 @@ public interface FileMainFragmentContract {
 
         void setNavigationOnClickListener(View.OnClickListener listener);
 
+        View getView();
+
+        void onDestroyView();
+
     }
 
     interface FileMainFragmentPresenter extends BasePresenter<FileMainFragmentView> {
@@ -68,6 +72,8 @@ public interface FileMainFragmentContract {
         void switchDrawerOpenState();
 
         boolean isHidden();
+
+        void setHidden(boolean hidden);
     }
 
 }

@@ -16,6 +16,7 @@ import com.winsun.fruitmix.fileModule.download.FileDownloadState;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.EquipmentAlias;
@@ -71,8 +72,6 @@ public interface DataSource {
 
     Media loadMedia(String mediaKey);
 
-    void updateLocalMediasUploadedFalse();
-
     OperationResult updateLocalMedia(Media media);
 
     OperationResult updateLocalMedias(Collection<Media> medias);
@@ -113,9 +112,9 @@ public interface DataSource {
 
     FileDownloadItem loadDownloadFileRecord(String fileUUID);
 
-    FileDownloadLoadOperationResult loadDownloadedFilesRecord();
+    FileDownloadLoadOperationResult loadDownloadedFilesRecord(String userUUID);
 
-    OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs);
+    OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs,String userUUID);
 
     OperationResult insertDownloadedFileRecord(FileDownloadItem fileDownloadItem);
 
@@ -137,6 +136,12 @@ public interface DataSource {
 
     //others
 
+    void insertLoggedInUser(List<LoggedInUser> loggedInUsers);
+
+    List<LoggedInUser> loadLoggedInUser();
+
+    void deleteLoggedInUser(LoggedInUser loggedInUser);
+
     String loadGateway();
 
     OperationResult insertGateway(String gateway);
@@ -154,5 +159,13 @@ public interface DataSource {
     void saveShowPhotoReturnTipsValue(boolean value);
 
     List<EquipmentAlias> loadEquipmentAlias(String token, String url);
+
+    boolean getAutoUploadOrNot();
+
+    void saveAutoUploadOrNot(boolean autoUploadOrNot);
+
+    String getCurrentUploadDeviceID();
+
+    void saveCurrentUploadDeviceID(String currentUploadDeviceID);
 
 }

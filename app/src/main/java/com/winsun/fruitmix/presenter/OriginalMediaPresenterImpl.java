@@ -375,33 +375,12 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
             }
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
 
-            //TODO:use double tap listener for on click event
-
             if (lastY - y > Util.dip2px(context, 30)) {
 
                 if (!view.isZoomed())
                     handleBackEvent();
             } else {
 
-                if (!view.isZoomed())
-                    view.setTranslationY(0);
-            }
-
-
-            if (Math.abs(lastY - y) + Math.abs(lastX - x) < 10) {
-
-                view.setNeedFitImageToView(false);
-                convertEditState();
-                toggleFullScreenState();
-
-            } else if (lastY - y > Util.dip2px(context, 30)) {
-
-                view.setNeedFitImageToView(true);
-                if (!view.isZoomed())
-                    handleBackEvent();
-            } else {
-
-                view.setNeedFitImageToView(true);
                 if (!view.isZoomed())
                     view.setTranslationY(0);
             }

@@ -133,6 +133,8 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
         mPresenter = presenter;
         mPresenter.attachView(this);
 
+        mPresenter.setItemWidth(mItemWidth);
+
         fab.setOnClickListener(this);
         ivBtAlbum.setOnClickListener(this);
         ivBtShare.setOnClickListener(this);
@@ -327,8 +329,8 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
     }
 
     @Override
-    public View findViewByMedia(Media media) {
-        return mRecyclerView.findViewWithTag(findPhotoTag(media));
+    public View findViewWithTag(String tag) {
+        return mRecyclerView.findViewWithTag(tag);
     }
 
     @Override
@@ -359,10 +361,6 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
 
         mPresenter.onActivityReenter(resultCode, data);
 
-    }
-
-    private String findPhotoTag(Media media) {
-        return mPresenter.loadImageThumbUrl(media);
     }
 
     @Override
@@ -756,10 +754,12 @@ public class MediaFragment implements MediaFragmentContract.MediaFragmentView, V
 
 //            mImageLoader.setTag(position);
 
+            mPhotoIv.setBackgroundResource(R.drawable.placeholder_photo);
+
             if (!mIsFling) {
-                mPresenter.loadMediaToView(containerActivity, currentMedia, mPhotoIv);
+                mPresenter.loadThumbMediaToView(containerActivity, currentMedia, mPhotoIv);
             } else {
-                mPresenter.cancelLoadMediaToView(mPhotoIv);
+                mPresenter.loadSmallThumbMediaToView(containerActivity,currentMedia,mPhotoIv);
             }
 
             List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());

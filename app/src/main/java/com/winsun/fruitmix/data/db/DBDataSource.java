@@ -27,6 +27,7 @@ import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
@@ -182,8 +183,14 @@ public class DBDataSource implements DataSource {
 
         DeviceIDLoadOperationResult result = new DeviceIDLoadOperationResult();
 
-        result.setDeviceID(getGlobalData(Util.DEVICE_ID_MAP_NAME));
-        result.setOperationResult(new OperationSuccess());
+        String deviceID = getGlobalData(Util.DEVICE_ID_MAP_NAME);
+
+        result.setDeviceID(deviceID);
+
+        if (deviceID != null)
+            result.setOperationResult(new OperationSuccess());
+        else
+            result.setOperationResult(new OperationSQLException());
 
         return result;
     }
@@ -254,9 +261,11 @@ public class DBDataSource implements DataSource {
 
     @Override
     public OperationResult updateLocalMedia(Media media) {
-        mDBUtils.updateLocalMedia(media);
 
-        return new OperationSuccess();
+        if (mDBUtils != null)
+            mDBUtils.updateLocalMedia(media);
+
+        return null;
     }
 
     @Override
@@ -336,13 +345,13 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public FileDownloadLoadOperationResult loadDownloadedFilesRecord() {
+    public FileDownloadLoadOperationResult loadDownloadedFilesRecord(String userUUID) {
 
         FileDownloadLoadOperationResult result = new FileDownloadLoadOperationResult();
 
         FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
 
-        List<FileDownloadItem> fileDownloadItems = mDBUtils.getAllDownloadedFile();
+        List<FileDownloadItem> fileDownloadItems = mDBUtils.getAllCurrentLoginUserDownloadedFile(userUUID);
 
         String[] fileNames = new File(FileUtil.getDownloadFileStoreFolderPath()).list();
 
@@ -373,10 +382,10 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs) {
+    public OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs, String userUUID) {
 
         for (String fileUUID : fileUUIDs) {
-            mDBUtils.deleteDownloadedFileByUUID(fileUUID);
+            mDBUtils.deleteDownloadedFileByUUIDAndCreatorUUID(fileUUID, userUUID);
         }
 
         FileDownloadManager.INSTANCE.deleteFileDownloadItem(fileUUIDs);
@@ -453,7 +462,6 @@ public class DBDataSource implements DataSource {
             date.setTimeInMillis(f.lastModified());
             media.setTime(df.format(date.getTime()));
 
-            media.setUploaded(false);
             media.setSelected(false);
             media.setLoaded(false);
 
@@ -496,11 +504,6 @@ public class DBDataSource implements DataSource {
     @Override
     public Media loadMedia(String mediaKey) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
-    }
-
-    @Override
-    public void updateLocalMediasUploadedFalse() {
-        mDBUtils.updateLocalMediasUploadedFalse();
     }
 
     @Override
@@ -550,6 +553,11 @@ public class DBDataSource implements DataSource {
     @Override
     public String loadLoginUserUUID() {
         return getGlobalData(Util.USER_UUID);
+    }
+
+    @Override
+    public void deleteLoggedInUser(LoggedInUser loggedInUser) {
+        mDBUtils.deleteLoggerUserByUserUUID(loggedInUser.getUser().getUuid());
     }
 
     @Override
@@ -650,5 +658,39 @@ public class DBDataSource implements DataSource {
         SharedPreferences.Editor mEditor = mSharedPreferences.edit();
         mEditor.putString(name, null);
         mEditor.apply();
+    }
+
+    @Override
+    public List<LoggedInUser> loadLoggedInUser() {
+        return mDBUtils.getAllLoggedInUser();
+    }
+
+    @Override
+    public void insertLoggedInUser(List<LoggedInUser> loggedInUsers) {
+        mDBUtils.insertLoggedInUserInDB(loggedInUsers);
+    }
+
+    @Override
+    public boolean getAutoUploadOrNot() {
+        return mSharedPreferences.getBoolean(Util.AUTO_UPLOAD_OR_NOT, true);
+    }
+
+    @Override
+    public void saveAutoUploadOrNot(boolean autoUploadOrNot) {
+        SharedPreferences.Editor mEditor = mSharedPreferences.edit();
+        mEditor.putBoolean(Util.AUTO_UPLOAD_OR_NOT, autoUploadOrNot);
+        mEditor.apply();
+    }
+
+    @Override
+    public void saveCurrentUploadDeviceID(String currentUploadDeviceID) {
+        SharedPreferences.Editor mEditor = mSharedPreferences.edit();
+        mEditor.putString(Util.CURRENT_UPLOAD_DEVICE_ID, currentUploadDeviceID);
+        mEditor.apply();
+    }
+
+    @Override
+    public String getCurrentUploadDeviceID() {
+        return mSharedPreferences.getString(Util.CURRENT_UPLOAD_DEVICE_ID, "");
     }
 }

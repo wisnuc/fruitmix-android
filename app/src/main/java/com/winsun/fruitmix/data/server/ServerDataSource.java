@@ -26,6 +26,7 @@ import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.http.retrofit.RetrofitInstance;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationJSONException;
@@ -866,11 +867,6 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public void updateLocalMediasUploadedFalse() {
-        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
-    }
-
-    @Override
     public MediaShare loadRemoteMediaShare(String mediaShareUUID) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
@@ -996,12 +992,12 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public FileDownloadLoadOperationResult loadDownloadedFilesRecord() {
+    public FileDownloadLoadOperationResult loadDownloadedFilesRecord(String userUUID) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs) {
+    public OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs,String userUUID) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
@@ -1186,4 +1182,38 @@ public class ServerDataSource implements DataSource {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
+    @Override
+    public List<LoggedInUser> loadLoggedInUser() {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+    }
+
+    @Override
+    public void insertLoggedInUser(List<LoggedInUser> loggedInUsers) {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+    }
+
+    @Override
+    public void deleteLoggedInUser(LoggedInUser loggedInUser) {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+    }
+
+    @Override
+    public boolean getAutoUploadOrNot() {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+    }
+
+    @Override
+    public void saveAutoUploadOrNot(boolean autoUploadOrNot) {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+    }
+
+    @Override
+    public void saveCurrentUploadDeviceID(String currentUploadDeviceID) {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+    }
+
+    @Override
+    public String getCurrentUploadDeviceID() {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+    }
 }

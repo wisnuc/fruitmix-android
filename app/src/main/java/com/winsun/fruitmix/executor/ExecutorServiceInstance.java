@@ -1,5 +1,8 @@
 package com.winsun.fruitmix.executor;
 
+import android.util.Log;
+
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,6 +14,8 @@ import java.util.concurrent.Future;
 public enum ExecutorServiceInstance {
 
     SINGLE_INSTANCE;
+
+    public static final String TAG = ExecutorServiceInstance.class.getSimpleName();
 
     private ExecutorService executorService;
 
@@ -37,7 +42,8 @@ public enum ExecutorServiceInstance {
 
     public void doOnTaskInFixedThreadPool(Runnable runnable) {
 
-        fixedThreadPool.execute(runnable);
+        if (fixedThreadPool != null && !fixedThreadPool.isShutdown())
+            fixedThreadPool.execute(runnable);
     }
 
     public void startFixedThreadPool() {

@@ -145,9 +145,9 @@ public class Util {
 
     public static final String KEY_MANUAL_INPUT_IP = "key_manual_input_ip";
 
-    public static final int WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 1;
+    public static final String KEY_SHOULD_CALL_LOGOUT = "key_should_call_logout";
 
-    public static boolean startTimingRetrieveMediaShare = false;
+    public static final int WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 1;
 
     public static final long DEFAULT_REFRESH_MEDIA_SHARE_DELAY_TIME = 20 * 1000;
 
@@ -162,6 +162,9 @@ public class Util {
     public static final String UNSUPPORT_OPERATION = "un support operation";
 
     public static final String DEFAULT_DATE = "1916-01-01";
+
+    public static final String AUTO_UPLOAD_OR_NOT = "auto_upload_or_not";
+    public static final String CURRENT_UPLOAD_DEVICE_ID = "current_upload_device_id";
 
     /**
      * 将dp转化为px

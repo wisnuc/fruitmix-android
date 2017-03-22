@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.presenter;
 
+import android.content.Context;
 import android.content.Intent;
 
 import com.winsun.fruitmix.contract.MediaFragmentContract;
@@ -49,11 +50,11 @@ public class NewPhotoSelectPresenterImpl implements NewPhotoSelectContract.NewPh
     }
 
     @Override
-    public void initView() {
+    public void initView(Context context) {
 
         mediaFragmentPresenter.enterChooseMode();
 
-        mediaFragmentPresenter.onCreate();
+        mediaFragmentPresenter.onCreate(context);
     }
 
     @Override
