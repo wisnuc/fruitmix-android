@@ -16,6 +16,8 @@ import android.widget.LinearLayout;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaInMediaShareLoader;
@@ -30,7 +32,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MoreMediaActivity extends AppCompatActivity {
-    public static final String TAG = MoreMediaActivity.class.getSimpleName();
+
+    public static final String TAG = "MoreMediaActivity";
 
     @BindView(R.id.back)
     ImageView mBack;
@@ -97,6 +100,22 @@ public class MoreMediaActivity extends AppCompatActivity {
 
             }
         },true,true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
     }
 
     @Override

@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,7 +25,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.fragment.FileMainFragment;
@@ -67,7 +68,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class NavPagerActivity extends BaseActivity
+public class NavPagerActivity extends AppCompatActivity
         implements OnMainFragmentInteractionListener {
 
     public static final String TAG = NavPagerActivity.class.getSimpleName();
@@ -137,7 +138,7 @@ public class NavPagerActivity extends BaseActivity
     private static final int NAVIGATION_ITEM_TYPE_MENU = 0;
     private static final int NAVIGATION_ITEM_TYPE_LOGGED_IN_USER = 1;
     private static final int NAVIGATION_ITEM_TYPE_DIVIDER = 2;
-    public static final int NAIGATION_ITEM_TYPE_ACCOUNT_MANAGE = 3;
+    public static final int NAVIGATION_ITEM_TYPE_ACCOUNT_MANAGE = 3;
 
 
     private interface NavigationItemType {
@@ -220,7 +221,7 @@ public class NavPagerActivity extends BaseActivity
 
         @Override
         public int getType() {
-            return NAIGATION_ITEM_TYPE_ACCOUNT_MANAGE;
+            return NAVIGATION_ITEM_TYPE_ACCOUNT_MANAGE;
         }
 
         public void onClick() {
@@ -268,6 +269,8 @@ public class NavPagerActivity extends BaseActivity
 
     private int mAlreadyUploadMediaCount = -1;
     private int mTotalLocalMediaCount = 0;
+
+    private boolean mOnResume = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -483,6 +486,25 @@ public class NavPagerActivity extends BaseActivity
         super.onStart();
 
         EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        MobclickAgent.onResume(this);
+
+        if (!mOnResume) {
+            mOnResume = true;
+            mediaMainFragment.show();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        MobclickAgent.onPause(this);
     }
 
     @Override
@@ -877,6 +899,9 @@ public class NavPagerActivity extends BaseActivity
 
             fragmentManager.beginTransaction().hide(mediaMainFragment).show(fileMainFragment).commit();
 
+            mediaMainFragment.hide();
+            fileMainFragment.show();
+
             ButlerService.stopTimingRetrieveMediaShare();
 
         } else {
@@ -887,6 +912,9 @@ public class NavPagerActivity extends BaseActivity
             item.setMenuIconResID(R.drawable.ic_folder);
 
             fragmentManager.beginTransaction().hide(fileMainFragment).show(mediaMainFragment).commit();
+
+            fileMainFragment.hide();
+            mediaMainFragment.show();
 
         }
         mNavigationItemAdapter.notifyItemChanged(0);
@@ -924,7 +952,7 @@ public class NavPagerActivity extends BaseActivity
                     view = LayoutInflater.from(mContext).inflate(R.layout.navigation_menu_item, parent, false);
                     return new NavigationMenuViewHolder(view);
 
-                case NAIGATION_ITEM_TYPE_ACCOUNT_MANAGE:
+                case NAVIGATION_ITEM_TYPE_ACCOUNT_MANAGE:
                     view = LayoutInflater.from(mContext).inflate(R.layout.navigation_logged_in_user_item, parent, false);
 
                     return new NavigationAccountItemViewHolder(view);

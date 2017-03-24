@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.UnscrollableViewPager;
@@ -26,6 +28,7 @@ import com.winsun.fruitmix.fileModule.fragment.FileDownloadFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileShareFragment;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
+import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.util.Util;
 
@@ -42,6 +45,8 @@ import butterknife.ButterKnife;
  * create an instance of this fragment.
  */
 public class FileMainFragment extends Fragment implements OnFileInteractionListener {
+
+    public static final String TAG = "FileMainFragment";
 
     @BindView(R.id.title)
     TextView titleTextView;
@@ -64,6 +69,10 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
 
     private OnMainFragmentInteractionListener mListener;
 
+    private IShowHideFragmentListener mCurrentFragment;
+
+    private boolean mIsResume = false;
+
     public FileMainFragment() {
         // Required empty public constructor
     }
@@ -85,6 +94,10 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        fileFragment = FileFragment.newInstance(FileMainFragment.this);
+        fileShareFragment = FileShareFragment.newInstance(FileMainFragment.this);
+        fileDownloadFragment = FileDownloadFragment.newInstance(FileMainFragment.this);
     }
 
     @Override
@@ -167,18 +180,27 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
 
                 switch (position) {
                     case PAGE_FILE:
+
+                        setCurrentItem(fileFragment);
+
                         fileMainMenu.setVisibility(View.VISIBLE);
-                        if (fileFragment != null)
+                        if (fileFragment != null && isResumed())
                             fileFragment.handleTitle();
                         break;
                     case PAGE_FILE_DOWNLOAD:
+
+                        setCurrentItem(fileDownloadFragment);
+
                         fileMainMenu.setVisibility(View.VISIBLE);
-                        if (fileDownloadFragment != null)
+                        if (fileDownloadFragment != null && isResumed())
                             fileDownloadFragment.handleTitle();
                         break;
                     case PAGE_FILE_SHARE:
+
+                        setCurrentItem(fileShareFragment);
+
                         fileMainMenu.setVisibility(View.GONE);
-                        if (fileShareFragment != null)
+                        if (fileShareFragment != null && isResumed())
                             fileShareFragment.handleTitle();
                         break;
                 }
@@ -186,6 +208,16 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
         });
 
         fileMainViewPager.setCurrentItem(PAGE_FILE);
+    }
+
+    private void setCurrentItem(IShowHideFragmentListener currentItem) {
+        if (mCurrentFragment != null)
+            mCurrentFragment.hide();
+
+        mCurrentFragment = currentItem;
+
+        if (mIsResume)
+            mCurrentFragment.show();
     }
 
     private void initToolbar() {
@@ -210,6 +242,45 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
         super.onStart();
 
         EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        Log.d(TAG, "onResume: isHidden: " + isHidden());
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        Log.d(TAG, "onPause: ");
+
+    }
+
+    public void show() {
+        if (!mIsResume) {
+            mIsResume = true;
+
+            MobclickAgent.onPageStart(TAG);
+
+//            if (mCurrentFragment == null)
+//                mCurrentFragment = fileFragment;
+//
+//            mCurrentFragment.show();
+        }
+    }
+
+    public void hide() {
+        if (mIsResume) {
+            mIsResume = false;
+
+            MobclickAgent.onPageEnd(TAG);
+
+//            mCurrentFragment.hide();
+        }
     }
 
     @Override
@@ -342,13 +413,13 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
 
             switch (position) {
                 case PAGE_FILE:
-                    fileFragment = FileFragment.newInstance(FileMainFragment.this);
+
                     return fileFragment;
                 case PAGE_FILE_SHARE:
-                    fileShareFragment = FileShareFragment.newInstance(FileMainFragment.this);
+
                     return fileShareFragment;
                 case PAGE_FILE_DOWNLOAD:
-                    fileDownloadFragment = FileDownloadFragment.newInstance(FileMainFragment.this);
+
                     return fileDownloadFragment;
                 default:
                     return null;

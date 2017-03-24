@@ -5,12 +5,14 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationType;
@@ -22,9 +24,9 @@ import org.greenrobot.eventbus.EventBus;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class SettingActivity extends BaseActivity implements View.OnClickListener {
+public class SettingActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public static final String TAG = SettingActivity.class.getSimpleName();
+    public static final String TAG = "SettingActivity";
 
     @BindView(R.id.back)
     ImageView mBackImageView;
@@ -61,6 +63,22 @@ public class SettingActivity extends BaseActivity implements View.OnClickListene
 
         calcAlreadyUploadMediaCountAndTotalCacheSize();
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
     }
 
 

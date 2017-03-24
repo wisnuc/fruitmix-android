@@ -32,6 +32,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.IImageLoadListener;
+import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
 import com.winsun.fruitmix.gif.GifLoader;
@@ -54,7 +56,7 @@ import butterknife.ButterKnife;
 
 public class PhotoSliderActivity extends AppCompatActivity implements IImageLoadListener {
 
-    public static final String TAG = PhotoSliderActivity.class.getSimpleName();
+    public static final String TAG = "PhotoSliderActivity";
 
     @BindView(R.id.date)
     TextView lbDate;
@@ -195,6 +197,22 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 }
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
     }
 
     @Override
@@ -642,8 +660,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                         view.setTranslationY(lastY - y);
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-
-                    //TODO:use double tap listener for on click event
 
                     if (lastY - y > Util.dip2px(mContext, 30)) {
 

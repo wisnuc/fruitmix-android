@@ -13,6 +13,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.model.LoggedInUser;
@@ -31,7 +32,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class AccountManageActivity extends BaseActivity implements View.OnClickListener {
+public class AccountManageActivity extends AppCompatActivity implements View.OnClickListener {
+
+    public static final String TAG = "AccountManageActivity";
 
     @BindView(R.id.back)
     ImageView mBackImageView;
@@ -79,6 +82,22 @@ public class AccountManageActivity extends BaseActivity implements View.OnClickL
             mAccountExpandableListView.expandGroup(i);
         }
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
     }
 
     @Override

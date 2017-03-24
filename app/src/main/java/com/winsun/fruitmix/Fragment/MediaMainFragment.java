@@ -30,11 +30,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.eventbus.RetrieveSharedPhotoThumbRequestEvent;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
+import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.fragment.AlbumList;
 import com.winsun.fruitmix.mediaModule.fragment.MediaShareList;
@@ -42,7 +45,10 @@ import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Comment;
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.OperationTargetType;
+import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -54,6 +60,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -64,7 +71,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class MediaMainFragment extends Fragment implements OnMediaFragmentInteractionListener, View.OnClickListener, IPhotoListListener {
 
-    public static final String TAG = MediaMainFragment.class.getSimpleName();
+    public static final String TAG = "MediaMainFragment";
 
     @BindView(R.id.title)
     TextView title;
@@ -114,6 +121,14 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private boolean mPhotoListRefresh = false;
     private boolean mShareAlbumListRefresh = false;
+
+    private IShowHideFragmentListener mCurrentFragment;
+
+    private boolean mIsResume = false;
+
+    private List<Media> mSelectMedias;
+
+    private List<String> mSelectMediaThumbs;
 
     public MediaMainFragment() {
         // Required empty public constructor
@@ -193,6 +208,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void onResume() {
         super.onResume();
 
+        Log.d(TAG, "onResume: isHidden: " + isHidden());
+
         if (isHidden()) return;
 
         if (!onResume) {
@@ -214,7 +231,14 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             mShareAlbumListRefresh = true;
         }
 
-        Log.d(TAG, "onResume: ");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        Log.d(TAG, "onPause: ");
+
     }
 
     @Override
@@ -239,11 +263,50 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void onDestroy() {
         super.onDestroy();
 
+        mDialog = null;
+
         photoList.removePhotoListListener(this);
 
         mContext = null;
 
         Log.d(TAG, "onDestroy: ");
+    }
+
+    private void setCurrentItem(IShowHideFragmentListener currentItem) {
+        if (mCurrentFragment != null)
+            mCurrentFragment.hide();
+
+        mCurrentFragment = currentItem;
+
+        if (mIsResume)
+            mCurrentFragment.show();
+    }
+
+    public void show() {
+
+        if (!mIsResume) {
+            mIsResume = true;
+
+            MobclickAgent.onPageStart(TAG);
+
+//            if (mCurrentFragment == null)
+//                mCurrentFragment = photoList;
+//
+//            mCurrentFragment.show();
+        }
+
+    }
+
+    public void hide() {
+
+        if (mIsResume) {
+            mIsResume = false;
+
+            MobclickAgent.onPageEnd(TAG);
+
+//            mCurrentFragment.hide();
+        }
+
     }
 
     @Override
@@ -365,7 +428,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 bottomNavigationView.getMenu().getItem(position).setChecked(true);
 
                 if (position == PAGE_ALBUM) {
-
                     albumList.showPhoto();
                 } else if (position == PAGE_SHARE) {
 
@@ -447,6 +509,26 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 albumList.refreshView();
                 shareList.refreshView();
+
+                break;
+
+            case Util.SHARED_PHOTO_THUMB_RETRIEVED:
+
+                dismissDialog();
+
+                String thumb;
+                for (Media media : mSelectMedias) {
+                    thumb = media.getThumb();
+
+                    if (!thumb.isEmpty())
+                        mSelectMediaThumbs.add(media.getThumb());
+                }
+
+                if (mSelectMediaThumbs.isEmpty()) {
+                    Toast.makeText(mContext, getString(R.string.no_shared_photo_thumb), Toast.LENGTH_SHORT).show();
+                } else {
+                    sendShare(mSelectMediaThumbs);
+                }
 
                 break;
 
@@ -728,24 +810,32 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                     return;
                 }
 
-                List<String> selectMediaThumbs = photoList.getSelectedImageThumbs();
-                if (showNothingSelectToast(selectMediaThumbs)) return;
-
-                ArrayList<Uri> uris = new ArrayList<>();
-
-                for (String thumb : selectMediaThumbs) {
-                    Uri uri = Uri.parse(thumb);
-                    uris.add(uri);
-                }
-
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_SEND_MULTIPLE);
-                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-                intent.setType("image/*");
-                startActivity(Intent.createChooser(intent, getString(R.string.share_text)));
-
                 hideChooseHeader();
                 showBottomNavAnim();
+
+                mSelectMedias = photoList.getSelectedMedias();
+
+                mSelectMediaThumbs = new ArrayList<>(mSelectMedias.size());
+
+                Iterator<Media> iterator = mSelectMedias.iterator();
+                while (iterator.hasNext()) {
+                    Media media = iterator.next();
+                    String thumb = media.getThumb();
+
+                    if (thumb.length() != 0) {
+                        mSelectMediaThumbs.add(thumb);
+                        iterator.remove();
+                    }
+                }
+
+                if (mSelectMedias.size() == 0) {
+                    sendShare(mSelectMediaThumbs);
+                } else {
+
+                    mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, true);
+
+                    EventBus.getDefault().post(new RetrieveSharedPhotoThumbRequestEvent(OperationType.GET, OperationTargetType.SHARED_PHOTO_THUMB, mSelectMedias));
+                }
 
                 break;
             case R.id.bt_album:
@@ -783,6 +873,22 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         }
     }
 
+    private void sendShare(List<String> selectMediaThumbs) {
+        ArrayList<Uri> uris = new ArrayList<>();
+
+        for (String thumb : selectMediaThumbs) {
+            Uri uri = Uri.parse(thumb);
+            uris.add(uri);
+        }
+
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND_MULTIPLE);
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+        intent.setType("image/*");
+        startActivity(Intent.createChooser(intent, getString(R.string.share_text)));
+
+    }
+
     private boolean showNothingSelectToast(List<String> selectUUIDs) {
         if (selectUUIDs.size() == 0) {
             Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
@@ -815,9 +921,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mAnimator.setTarget(ivBtShare);
         mAnimator.start();
 
-//        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.system_share_btn_restore);
-//        mAnimator.setTarget(mSystemShareBtn);
-//        mAnimator.start();
+        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.system_share_btn_restore);
+        mAnimator.setTarget(mSystemShareBtn);
+        mAnimator.start();
 
         mAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -826,7 +932,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 ivBtAlbum.setVisibility(View.GONE);
                 ivBtShare.setVisibility(View.GONE);
-//                mSystemShareBtn.setVisibility(View.GONE);
+                mSystemShareBtn.setVisibility(View.GONE);
 
             }
         });
@@ -837,7 +943,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         ivBtAlbum.setVisibility(View.VISIBLE);
         ivBtShare.setVisibility(View.VISIBLE);
-//        mSystemShareBtn.setVisibility(View.VISIBLE);
+        mSystemShareBtn.setVisibility(View.VISIBLE);
 
         mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.fab_remote);
         mAnimator.setTarget(fab);
@@ -851,9 +957,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mAnimator.setTarget(ivBtShare);
         mAnimator.start();
 
-//        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.system_share_btn_translation);
-//        mAnimator.setTarget(mSystemShareBtn);
-//        mAnimator.start();
+        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.system_share_btn_translation);
+        mAnimator.setTarget(mSystemShareBtn);
+        mAnimator.start();
     }
 
     @Override
@@ -907,6 +1013,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         switch (position) {
             case PAGE_SHARE:
+
+                setCurrentItem(shareList);
+
                 title.setText(getString(R.string.share_text));
                 fab.setVisibility(View.GONE);
                 ivBtAlbum.setVisibility(View.GONE);
@@ -914,11 +1023,17 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 lbRight.setVisibility(View.GONE);
                 break;
             case PAGE_PHOTO:
+
+                setCurrentItem(photoList);
+
                 title.setText(getString(R.string.photo));
                 lbRight.setVisibility(View.VISIBLE);
                 fab.setVisibility(View.GONE);
                 break;
             case PAGE_ALBUM:
+
+                setCurrentItem(albumList);
+
                 title.setText(getString(R.string.album));
                 fab.setVisibility(View.GONE);
                 ivBtAlbum.setVisibility(View.GONE);

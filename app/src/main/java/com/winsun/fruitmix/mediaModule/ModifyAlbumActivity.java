@@ -14,6 +14,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -33,6 +35,8 @@ import butterknife.ButterKnife;
  * Created by Administrator on 2016/4/28.
  */
 public class ModifyAlbumActivity extends AppCompatActivity {
+
+    public static final String TAG = "ModifyAlbumActivity";
 
     @BindView(R.id.title_textlayout)
     TextInputLayout mTitleLayout;
@@ -217,6 +221,22 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
         EventBus.getDefault().register(this);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
     }
 
     @Override

@@ -28,6 +28,8 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.mediaModule.AlbumPicContentActivity;
 import com.winsun.fruitmix.mediaModule.MediaShareCommentActivity;
 import com.winsun.fruitmix.mediaModule.MoreMediaActivity;
@@ -58,7 +60,7 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/4/19.
  */
-public class MediaShareList implements Page {
+public class MediaShareList implements Page,IShowHideFragmentListener {
 
     public static final String TAG = MediaShareList.class.getSimpleName();
 
@@ -105,6 +107,16 @@ public class MediaShareList implements Page {
         mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
 
         mediaShareList = new ArrayList<>();
+    }
+
+    @Override
+    public void show(){
+        MobclickAgent.onPageStart("MediaShareFragment");
+    }
+
+    @Override
+    public void hide(){
+        MobclickAgent.onPageEnd("MediaShareFragment");
     }
 
     private void initImageLoader() {

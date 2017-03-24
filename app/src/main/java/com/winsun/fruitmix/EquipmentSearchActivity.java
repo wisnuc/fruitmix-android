@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
@@ -54,9 +55,9 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class EquipmentSearchActivity extends BaseActivity implements View.OnClickListener {
+public class EquipmentSearchActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public static final String TAG = EquipmentSearchActivity.class.getSimpleName();
+    public static final String TAG = "EquipmentSearchActivity";
 
     @BindView(R.id.back)
     ImageView mBack;
@@ -205,6 +206,9 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
         super.onResume();
 
         startDiscovery();
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
     }
 
     @Override
@@ -212,6 +216,9 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
         super.onPause();
 
         stopDiscovery();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
     }
 
     @Override

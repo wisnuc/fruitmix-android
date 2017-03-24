@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.LoggedInUserRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
@@ -40,9 +41,9 @@ import java.util.Collections;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class LoginActivity extends BaseActivity implements View.OnClickListener, EditText.OnFocusChangeListener {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener, EditText.OnFocusChangeListener {
 
-    public static final String TAG = LoginActivity.class.getSimpleName();
+    public static final String TAG = "LoginActivity";
 
     @BindView(R.id.back)
     ImageView mBack;
@@ -115,6 +116,22 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         super.onStart();
 
         EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
     }
 
     @Override

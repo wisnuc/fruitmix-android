@@ -38,6 +38,8 @@ public class FileUtil {
 
     private static final String LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME = "thumbnail";
 
+    private static final String SHARED_PHOTO_FOLDER_NAME = "SharePhoto";
+
     public static boolean checkExternalStorageState() {
         String state = Environment.getExternalStorageState();
         return state.equals(Environment.MEDIA_MOUNTED);
@@ -78,6 +80,10 @@ public class FileUtil {
         return createFolder(getLocalPhotoThumbnailFolderPath());
     }
 
+    public static boolean createSharedPhotoFolder() {
+        return createFolder(getSharedPhotoFolderPath());
+    }
+
     private static boolean createFolder(String path) {
         if (!checkExternalStorageState()) {
             Log.i(TAG, "create folder: External storage not mounted");
@@ -88,13 +94,16 @@ public class FileUtil {
         return folder.mkdirs() || folder.isDirectory();
     }
 
-
     public static String getDownloadFileStoreFolderPath() {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator;
     }
 
-    public static String getLocalPhotoThumbnailFolderPath() {
+    static String getLocalPhotoThumbnailFolderPath() {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
+    }
+
+    static String getSharedPhotoFolderPath() {
+        return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + SHARED_PHOTO_FOLDER_NAME;
     }
 
     public static boolean writeBitmapToLocalPhotoThumbnailFolder(Media media) {
@@ -172,6 +181,65 @@ public class FileUtil {
 
         return (int) n;
     }
+
+    public static boolean downloadMediaToSharedPhotoFolder(ResponseBody responseBody, Media media) {
+
+        File file = new File(getSharedPhotoFolderPath(), media.getUuid() + ".jpg");
+
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+
+        byte[] fileBuffer = new byte[4096];
+
+        try {
+            if (file.createNewFile() || file.isFile()) {
+
+                inputStream = responseBody.byteStream();
+
+                outputStream = new FileOutputStream(file);
+
+                while (true) {
+                    int read = inputStream.read(fileBuffer);
+
+                    if (read == -1) {
+                        break;
+                    }
+
+                    outputStream.write(fileBuffer, 0, read);
+
+                }
+
+                outputStream.flush();
+
+                media.setThumb(file.getAbsolutePath());
+
+                Log.d(TAG, "downloadMediaToSharedPhotoFolder: thumb: " + media.getThumb());
+
+                return true;
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+        }
+
+        return false;
+
+    }
+
 
     public static boolean writeResponseBodyToFolder(ResponseBody responseBody, FileDownloadState fileDownloadState) {
 

@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.util.FNAS;
@@ -26,9 +27,9 @@ import java.lang.ref.WeakReference;
 /**
  * Created by Administrator on 2016/5/9.
  */
-public class SplashScreenActivity extends BaseActivity {
+public class SplashScreenActivity extends AppCompatActivity {
 
-    public static final String TAG = SplashScreenActivity.class.getSimpleName();
+    public static final String TAG = "SplashScreenActivity";
 
     private String mUuid;
     private String mGateway;
@@ -65,6 +66,12 @@ public class SplashScreenActivity extends BaseActivity {
             Log.i(TAG, "onCreate: Create local photo thumbnail folder failed");
         }
 
+        result = FileUtil.createSharedPhotoFolder();
+
+        if (!result) {
+            Log.i(TAG, "onCreate: Create shared photo folder failed");
+        }
+
         FNAS.retrieveLocalMedia(mContext);
 
         DBUtils dbUtils = DBUtils.getInstance(this);
@@ -95,6 +102,22 @@ public class SplashScreenActivity extends BaseActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -115,7 +138,7 @@ public class SplashScreenActivity extends BaseActivity {
             intent.setClass(SplashScreenActivity.this, NavPagerActivity.class);
         } else {
             intent.setClass(SplashScreenActivity.this, EquipmentSearchActivity.class);
-            intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE,true);
+            intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE, true);
         }
         startActivity(intent);
         finish();

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,6 +24,8 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -46,9 +49,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class EditPhotoActivity extends Activity implements View.OnClickListener {
+public class EditPhotoActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public static final String TAG = EditPhotoActivity.class.getSimpleName();
+    public static final String TAG = "EditPhotoActivity";
 
     @BindView(R.id.back)
     ImageView mBack;
@@ -99,7 +102,7 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         mediaShare = LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID);
         modifiedMediaShare = mediaShare.cloneMyself();
 
-        GridLayoutManager mManager = new GridLayoutManager(mContext, mSpanCount);
+//        GridLayoutManager mManager = new GridLayoutManager(mContext, mSpanCount);
 
         StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(SPAN_COUNT, StaggeredGridLayoutManager.VERTICAL);
 
@@ -151,6 +154,22 @@ public class EditPhotoActivity extends Activity implements View.OnClickListener 
         super.onStart();
 
         EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
     }
 
     @Override

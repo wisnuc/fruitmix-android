@@ -20,6 +20,8 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.daimajia.swipe.SimpleSwipeListener;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.BaseSwipeAdapter;
+import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.mediaModule.AlbumPicContentActivity;
 import com.winsun.fruitmix.mediaModule.NewAlbumPicChooseActivity;
 import com.winsun.fruitmix.R;
@@ -42,7 +44,7 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/4/19.
  */
-public class AlbumList implements Page {
+public class AlbumList implements Page,IShowHideFragmentListener {
 
     public static final String TAG = AlbumList.class.getSimpleName();
 
@@ -94,6 +96,16 @@ public class AlbumList implements Page {
         });
 
         mediaShareList = new ArrayList<>();
+    }
+
+    @Override
+    public void show(){
+        MobclickAgent.onPageStart("AlbumFragment");
+    }
+
+    @Override
+    public void hide(){
+        MobclickAgent.onPageEnd("AlbumFragment");
     }
 
     private void initImageLoader() {

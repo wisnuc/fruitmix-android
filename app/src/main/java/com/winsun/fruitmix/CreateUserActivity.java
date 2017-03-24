@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
@@ -29,7 +30,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class CreateUserActivity extends BaseActivity implements View.OnClickListener {
+public class CreateUserActivity extends AppCompatActivity implements View.OnClickListener {
+
+    public static final String TAG = "CreateUserActivity";
 
     @BindView(R.id.back)
     ImageView back;
@@ -77,6 +80,22 @@ public class CreateUserActivity extends BaseActivity implements View.OnClickList
         super.onStart();
 
         EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
     }
 
     @Override

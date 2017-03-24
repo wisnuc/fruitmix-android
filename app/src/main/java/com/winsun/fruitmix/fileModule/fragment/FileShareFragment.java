@@ -13,11 +13,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
+import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
@@ -39,7 +41,7 @@ import butterknife.ButterKnife;
  * Use the {@link FileShareFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FileShareFragment extends Fragment {
+public class FileShareFragment extends Fragment implements IShowHideFragmentListener {
 
     public static final String TAG = FileShareFragment.class.getSimpleName();
 
@@ -170,6 +172,16 @@ public class FileShareFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public void show(){
+        MobclickAgent.onPageStart("FileShareFragment");
+    }
+
+    @Override
+    public void hide(){
+        MobclickAgent.onPageEnd("FileShareFragment");
     }
 
     public void handleOperationEvent(OperationEvent operationEvent) {

@@ -2,6 +2,7 @@ package com.winsun.fruitmix.executor;
 
 import android.content.Context;
 
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.mediaModule.model.Media;
 
 import java.util.concurrent.Callable;
@@ -12,17 +13,17 @@ import java.util.concurrent.Callable;
 public class UploadMediaTask implements Callable<Boolean> {
 
     private Media media;
-    private Context context;
+    private DBUtils dbUtils;
 
-    public UploadMediaTask(Context context, Media media) {
+    public UploadMediaTask(DBUtils dbUtils, Media media) {
         this.media = media;
-        this.context = context;
+        this.dbUtils = dbUtils;
     }
 
     @Override
     public Boolean call() throws Exception {
 
-        media.uploadIfNotDone(context);
+        media.uploadIfNotDone(dbUtils);
 
         return true;
     }

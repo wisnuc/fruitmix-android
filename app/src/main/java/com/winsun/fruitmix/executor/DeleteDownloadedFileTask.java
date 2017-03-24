@@ -23,10 +23,10 @@ import java.util.concurrent.Callable;
 public class DeleteDownloadedFileTask implements Callable<Boolean> {
 
     private List<String> fileUUIDs;
-    private Context context;
+    private DBUtils dbUtils;
 
-    public DeleteDownloadedFileTask(Context context, List<String> downloadedFileUUIDs) {
-        this.context = context;
+    public DeleteDownloadedFileTask(DBUtils dbUtils, List<String> downloadedFileUUIDs) {
+        this.dbUtils = dbUtils;
         fileUUIDs = new ArrayList<>(downloadedFileUUIDs.size());
         fileUUIDs.addAll(downloadedFileUUIDs);
     }
@@ -38,8 +38,6 @@ public class DeleteDownloadedFileTask implements Callable<Boolean> {
      */
     @Override
     public Boolean call() {
-
-        DBUtils dbUtils = DBUtils.getInstance(context);
 
         for (String fileUUID : fileUUIDs) {
             dbUtils.deleteDownloadedFileByUUIDAndCreatorUUID(fileUUID, FNAS.userUUID);

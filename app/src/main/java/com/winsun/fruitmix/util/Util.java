@@ -64,6 +64,8 @@ public class Util {
 
     public static final String DOWNLOADED_FILE_DELETED = "downloaded_file_deleted";
 
+    public static final String SHARED_PHOTO_THUMB_RETRIEVED = "shared_photo_thumb_retrieved";
+
     public static final String LOCAL_COMMENT_CREATED = "local_comment_created";
     public static final String REMOTE_COMMENT_CREATED = "remote_comment_created";
     public static final String LOCAL_COMMENT_DELETED = "local_comment_deleted";

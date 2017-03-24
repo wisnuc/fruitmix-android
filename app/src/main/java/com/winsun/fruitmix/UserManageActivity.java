@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -30,7 +31,9 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class UserManageActivity extends BaseActivity implements View.OnClickListener {
+public class UserManageActivity extends AppCompatActivity implements View.OnClickListener {
+
+    public static final String TAG = "UserManageActivity";
 
     @BindView(R.id.back)
     ImageView mBack;
@@ -63,6 +66,22 @@ public class UserManageActivity extends BaseActivity implements View.OnClickList
         mAddUserBtn.setOnClickListener(this);
 
         refreshView();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
     }
 
     @Override

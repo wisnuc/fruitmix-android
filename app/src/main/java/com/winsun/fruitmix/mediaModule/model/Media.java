@@ -220,9 +220,7 @@ public class Media implements Parcelable {
         this.miniThumb = miniThumb;
     }
 
-    public synchronized boolean uploadIfNotDone(Context context) {
-
-        DBUtils dbUtils = DBUtils.getInstance(context);
+    public synchronized boolean uploadIfNotDone(DBUtils dbUtils) {
 
         boolean uploaded;
 

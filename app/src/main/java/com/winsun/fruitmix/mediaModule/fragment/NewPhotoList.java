@@ -30,7 +30,9 @@ import android.widget.Toast;
 import com.android.volley.toolbox.IImageLoadListener;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
+import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
@@ -60,7 +62,7 @@ import io.github.sin3hz.fastjumper.callback.SpannableCallback;
 /**
  * Created by Administrator on 2016/7/28.
  */
-public class NewPhotoList implements Page {
+public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     public static final String TAG = NewPhotoList.class.getSimpleName();
 
@@ -155,6 +157,16 @@ public class NewPhotoList implements Page {
         mRecyclerView.setAdapter(mPhotoRecycleAdapter);
         setupLayoutManager();
 
+    }
+
+    @Override
+    public void show() {
+        MobclickAgent.onPageStart("PhotoFragment");
+    }
+
+    @Override
+    public void hide() {
+        MobclickAgent.onPageEnd("PhotoFragment");
     }
 
     private void initImageLoader() {
@@ -378,23 +390,19 @@ public class NewPhotoList implements Page {
         return view;
     }
 
-    public List<String> getSelectedImageThumbs() {
+    public List<Media> getSelectedMedias() {
 
-        List<String> selectedImageThumbs = new ArrayList<>();
+        List<Media> selectedMedias = new ArrayList<>();
 
         for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Media media : mediaList) {
                 if (media.isSelected()) {
-
-                    String mediaThumb = media.getThumb();
-
-                    if (mediaThumb.length() != 0)
-                        selectedImageThumbs.add(mediaThumb);
+                    selectedMedias.add(media);
                 }
             }
         }
 
-        return selectedImageThumbs;
+        return selectedMedias;
     }
 
     @NonNull
@@ -541,7 +549,7 @@ public class NewPhotoList implements Page {
 
                 View newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageThumbUrl(containerActivity));
 
-                if(newSharedElement == null)
+                if (newSharedElement == null)
                     newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageSmallThumbUrl(containerActivity));
 
                 String sharedElementName = currentMedia.getKey();

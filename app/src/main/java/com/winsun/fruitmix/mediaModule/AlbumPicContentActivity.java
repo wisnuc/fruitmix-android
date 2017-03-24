@@ -34,6 +34,8 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
@@ -63,7 +65,7 @@ import butterknife.ButterKnife;
  */
 public class AlbumPicContentActivity extends AppCompatActivity {
 
-    public static final String TAG = AlbumPicContentActivity.class.getSimpleName();
+    public static final String TAG = "AlbumPicContentActivity";
 
     @BindView(R.id.album_content_recycler_view)
     RecyclerView albumContentRecyclerView;
@@ -212,6 +214,22 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         super.onStart();
 
         EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
     }
 
     @Override
@@ -399,7 +417,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         @Override
         public void refreshView(final int position) {
-
 
             final Media currentItem = mediaList.get(position);
 

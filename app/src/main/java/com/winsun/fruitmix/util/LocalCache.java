@@ -499,9 +499,12 @@ public class LocalCache {
                 continue;
             }
 
-            if(thumb.contains(FileUtil.getLocalPhotoThumbnailFolderPath())){
+            if (thumb.contains(FileUtil.getLocalPhotoThumbnailFolderPath())) {
                 continue;
             }
+
+            if (thumb.contains(FileUtil.getSharedPhotoFolderPath()))
+                continue;
 
             media = new Media();
             media.setThumb(thumb);

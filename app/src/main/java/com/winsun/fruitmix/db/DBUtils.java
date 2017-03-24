@@ -1090,40 +1090,6 @@ public class DBUtils {
         return updateMedia(DBHelper.LOCAL_MEDIA_TABLE_NAME, media);
     }
 
-    @NonNull
-    private String createUpdateMediaSql(String dbName) {
-        return "update " + dbName + " set " +
-                DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID + " = 0";
-    }
-
-    public long updateLocalMediasUploadedFalse() {
-
-        long returnValue = 0;
-
-        try {
-            openWritableDB();
-
-            String sql = createUpdateMediaSql(DBHelper.LOCAL_MEDIA_TABLE_NAME);
-
-            SQLiteStatement sqLiteStatement = database.compileStatement(sql);
-            database.beginTransaction();
-
-            returnValue = sqLiteStatement.executeUpdateDelete();
-
-            database.setTransactionSuccessful();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-
-            database.endTransaction();
-
-            close();
-        }
-
-        return returnValue;
-
-    }
-
     public long deleteOldAndInsertNewRemoteMediaShare(Collection<MediaShare> oldMediaShares, Collection<MediaShare> newMediaShares) {
 
         return deleteOldAndInsertNewMediaShare(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, DBHelper.REMOTE_SHARE_TABLE_NAME, oldMediaShares, newMediaShares);

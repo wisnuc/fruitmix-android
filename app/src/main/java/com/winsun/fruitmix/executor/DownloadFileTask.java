@@ -27,11 +27,11 @@ public class DownloadFileTask implements Callable<Boolean> {
 
     private FileDownloadState fileDownloadState;
 
-    private Context context;
+    private DBUtils dbUtils;
 
-    public DownloadFileTask(FileDownloadState fileDownloadState, Context context) {
+    public DownloadFileTask(FileDownloadState fileDownloadState, DBUtils dbUtils) {
         this.fileDownloadState = fileDownloadState;
-        this.context = context;
+        this.dbUtils = dbUtils;
     }
 
     @Override
@@ -50,7 +50,6 @@ public class DownloadFileTask implements Callable<Boolean> {
         Log.d(TAG, "call: download result:" + result);
 
         if (result) {
-            DBUtils dbUtils = DBUtils.getInstance(context);
 
             FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
 

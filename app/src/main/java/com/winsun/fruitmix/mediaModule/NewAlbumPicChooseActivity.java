@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.util.LocalCache;
@@ -23,7 +26,9 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/5/9.
  */
-public class NewAlbumPicChooseActivity extends Activity {
+public class NewAlbumPicChooseActivity extends AppCompatActivity {
+
+    public static final String TAG = "NewAlbumPicChooseActivity";
 
     @BindView(R.id.back)
     ImageView ivBack;
@@ -101,6 +106,17 @@ public class NewAlbumPicChooseActivity extends Activity {
             mNewPhotoList.refreshView();
             onResume = true;
         }
+
+//        MobclickAgent.onPageStart(TAG);
+//        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        MobclickAgent.onPageEnd(TAG);
+//        MobclickAgent.onPause(this);
     }
 
     @Override

@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.IImageLoadListener;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.EditTextPreIme;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;

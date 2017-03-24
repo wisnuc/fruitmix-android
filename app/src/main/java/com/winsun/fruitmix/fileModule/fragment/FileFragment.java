@@ -19,6 +19,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.command.ChangeToDownloadPageCommand;
@@ -39,6 +40,7 @@ import com.winsun.fruitmix.fileModule.download.FileDownloadingState;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
+import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
@@ -61,7 +63,7 @@ import butterknife.ButterKnife;
  * Use the {@link FileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FileFragment extends Fragment implements OnViewSelectListener {
+public class FileFragment extends Fragment implements OnViewSelectListener,IShowHideFragmentListener {
 
     public static final String TAG = FileFragment.class.getSimpleName();
 
@@ -189,6 +191,16 @@ public class FileFragment extends Fragment implements OnViewSelectListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public void show(){
+        MobclickAgent.onPageStart("FileFragment");
+    }
+
+    @Override
+    public void hide(){
+        MobclickAgent.onPageEnd("FileFragment");
     }
 
     public void handleTitle() {
