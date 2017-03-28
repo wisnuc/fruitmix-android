@@ -1,9 +1,6 @@
 package com.winsun.fruitmix;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -14,17 +11,10 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
-import com.winsun.fruitmix.interfaces.IPhotoListListener;
-import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
-import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
@@ -421,7 +411,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
 
-                    Log.i(TAG, "onClick: media thumb: " + currentMedia.getThumb() + " mini thumb: " + currentMedia.getMiniThumb());
+                    Log.i(TAG, "onClick: media thumb: " + currentMedia.getThumb() + " mini thumb: " + currentMedia.getMiniThumbPath());
 
                 }
             });

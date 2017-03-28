@@ -443,7 +443,8 @@ public class DBUtils {
         contentValues.put(DBHelper.MEDIA_KEY_SHARING, media.isSharing() ? 1 : 0);
         contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER, media.getOrientationNumber());
         contentValues.put(DBHelper.MEDIA_KEY_TYPE, media.getType());
-        contentValues.put(DBHelper.MEDIA_KEY_MINI_THUMB, media.getMiniThumb());
+        contentValues.put(DBHelper.MEDIA_KEY_MINI_THUMB, media.getMiniThumbPath());
+        contentValues.put(DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH,media.getOriginalPhotoPath());
 
         return contentValues;
     }
@@ -459,7 +460,8 @@ public class DBUtils {
         sqLiteStatement.bindLong(8, media.isSharing() ? 1 : 0);
         sqLiteStatement.bindLong(9, media.getOrientationNumber());
         sqLiteStatement.bindString(10, media.getType());
-        sqLiteStatement.bindString(11, media.getMiniThumb());
+        sqLiteStatement.bindString(11, media.getMiniThumbPath());
+        sqLiteStatement.bindString(12,media.getOriginalPhotoPath());
     }
 
     @NonNull
@@ -475,8 +477,9 @@ public class DBUtils {
                 DBHelper.MEDIA_KEY_SHARING + "," +
                 DBHelper.MEDIA_KEY_ORIENTATION_NUMBER + "," +
                 DBHelper.MEDIA_KEY_TYPE + "," +
-                DBHelper.MEDIA_KEY_MINI_THUMB + ")" +
-                "values(?,?,?,?,?,?,?,?,?,?,?)";
+                DBHelper.MEDIA_KEY_MINI_THUMB + "," +
+                DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH + ")" +
+                "values(?,?,?,?,?,?,?,?,?,?,?,?)";
     }
 
     private long insertMedias(String dbName, Collection<Media> medias) {

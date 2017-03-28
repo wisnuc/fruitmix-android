@@ -59,6 +59,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -128,7 +129,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private List<Media> mSelectMedias;
 
-    private List<String> mSelectMediaThumbs;
+    private List<String> mSelectMediaOriginalPhotoPaths;
 
     public MediaMainFragment() {
         // Required empty public constructor
@@ -265,6 +266,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         mDialog = null;
 
+        photoList.cancelPreLoadMediaMiniThumb();
+
         photoList.removePhotoListListener(this);
 
         mContext = null;
@@ -284,10 +287,15 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     public void show() {
 
+        Log.d(TAG, "show: mIsResume: " + mIsResume);
+
         if (!mIsResume) {
             mIsResume = true;
 
+            Log.d(TAG, "show: onPageStart");
+
             MobclickAgent.onPageStart(TAG);
+            MobclickAgent.onResume(mContext);
 
 //            if (mCurrentFragment == null)
 //                mCurrentFragment = photoList;
@@ -299,10 +307,15 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     public void hide() {
 
+        Log.d(TAG, "hide: mIsResume: " + mIsResume);
+
         if (mIsResume) {
             mIsResume = false;
 
+            Log.d(TAG, "hide: onPageEnd");
+
             MobclickAgent.onPageEnd(TAG);
+            MobclickAgent.onPause(mContext);
 
 //            mCurrentFragment.hide();
         }
@@ -514,20 +527,24 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             case Util.SHARED_PHOTO_THUMB_RETRIEVED:
 
-                dismissDialog();
-
-                String thumb;
-                for (Media media : mSelectMedias) {
-                    thumb = media.getThumb();
-
-                    if (!thumb.isEmpty())
-                        mSelectMediaThumbs.add(media.getThumb());
+                if (mDialog == null || !mDialog.isShowing()) {
+                    return;
                 }
 
-                if (mSelectMediaThumbs.isEmpty()) {
-                    Toast.makeText(mContext, getString(R.string.no_shared_photo_thumb), Toast.LENGTH_SHORT).show();
+                dismissDialog();
+
+                String path;
+                for (Media media : mSelectMedias) {
+                    path = media.getOriginalPhotoPath();
+
+                    if (!path.isEmpty())
+                        mSelectMediaOriginalPhotoPaths.add(path);
+                }
+
+                if (mSelectMediaOriginalPhotoPaths.isEmpty()) {
+                    Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
                 } else {
-                    sendShare(mSelectMediaThumbs);
+                    sendShare(mSelectMediaOriginalPhotoPaths);
                 }
 
                 break;
@@ -810,29 +827,32 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                     return;
                 }
 
+                mSelectMedias = photoList.getSelectedMedias();
+
+                if (showNothingSelectToast(mSelectMedias)) return;
+
                 hideChooseHeader();
                 showBottomNavAnim();
 
-                mSelectMedias = photoList.getSelectedMedias();
-
-                mSelectMediaThumbs = new ArrayList<>(mSelectMedias.size());
+                mSelectMediaOriginalPhotoPaths = new ArrayList<>(mSelectMedias.size());
 
                 Iterator<Media> iterator = mSelectMedias.iterator();
                 while (iterator.hasNext()) {
                     Media media = iterator.next();
-                    String thumb = media.getThumb();
+                    String thumb = media.getOriginalPhotoPath();
 
                     if (thumb.length() != 0) {
-                        mSelectMediaThumbs.add(thumb);
+                        mSelectMediaOriginalPhotoPaths.add(thumb);
                         iterator.remove();
                     }
                 }
 
                 if (mSelectMedias.size() == 0) {
-                    sendShare(mSelectMediaThumbs);
+                    sendShare(mSelectMediaOriginalPhotoPaths);
                 } else {
 
                     mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, true);
+                    mDialog.setCanceledOnTouchOutside(false);
 
                     EventBus.getDefault().post(new RetrieveSharedPhotoThumbRequestEvent(OperationType.GET, OperationTargetType.SHARED_PHOTO_THUMB, mSelectMedias));
                 }
@@ -877,7 +897,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         ArrayList<Uri> uris = new ArrayList<>();
 
         for (String thumb : selectMediaThumbs) {
-            Uri uri = Uri.parse(thumb);
+            Uri uri = Uri.fromFile(new File(thumb));
             uris.add(uri);
         }
 
@@ -889,8 +909,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     }
 
-    private boolean showNothingSelectToast(List<String> selectUUIDs) {
-        if (selectUUIDs.size() == 0) {
+    private boolean showNothingSelectToast(List list) {
+        if (list.size() == 0) {
             Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
             return true;
         }

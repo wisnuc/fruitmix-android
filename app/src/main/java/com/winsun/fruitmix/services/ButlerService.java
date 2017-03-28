@@ -30,7 +30,7 @@ import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.DownloadFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.GenerateLocalMediaMiniThumbTask;
-import com.winsun.fruitmix.executor.RetrieveSharedPhotoThumbTask;
+import com.winsun.fruitmix.executor.RetrieveOriginalPhotoTask;
 import com.winsun.fruitmix.executor.UploadMediaTask;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Comment;
@@ -64,6 +64,8 @@ public class ButlerService extends Service {
 
     private boolean mCalcNewLocalMediaDigestFinished = false;
     private boolean mRetrieveRemoteMediaFinished = false;
+
+    private boolean mStopUpload = false;
 
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
@@ -261,7 +263,7 @@ public class ButlerService extends Service {
 
         for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
 
-            if (media.getMiniThumb().isEmpty()) {
+            if (media.getMiniThumbPath().isEmpty()) {
 
                 GenerateLocalMediaMiniThumbTask task = new GenerateLocalMediaMiniThumbTask(media, dbUtils);
                 instance.doOnTaskInFixedThreadPool(task);
@@ -283,11 +285,17 @@ public class ButlerService extends Service {
     }
 
     private void stopUpload() {
+
+        mStopUpload = true;
+
         ExecutorServiceInstance.SINGLE_INSTANCE.shutdownFixedThreadPoolNow();
     }
 
     private void startUploadAllLocalPhoto() {
         for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+
+            if (mStopUpload) return;
+
             if (!media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
                 FNAS.createRemoteMedia(this, media);
             }
@@ -548,9 +556,9 @@ public class ButlerService extends Service {
                 break;
             case SHARED_PHOTO_THUMB:
 
-                List<Media> medias = ((RetrieveSharedPhotoThumbRequestEvent)requestEvent).getMedias();
+                List<Media> medias = ((RetrieveSharedPhotoThumbRequestEvent) requestEvent).getMedias();
                 ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-                RetrieveSharedPhotoThumbTask downloadFileTask = new RetrieveSharedPhotoThumbTask(medias, DBUtils.getInstance(this));
+                RetrieveOriginalPhotoTask downloadFileTask = new RetrieveOriginalPhotoTask(medias, DBUtils.getInstance(this));
                 instance.doOneTaskInCachedThreadUsingCallable(downloadFileTask);
 
                 break;

@@ -64,7 +64,7 @@
     <!-- 未选择内容提示-->
     <string name="select_nothing">请选择照片</string>
 
-    <string name="no_shared_photo_thumb">获取照片文件失败</string>
+    <string name="download_original_photo_fail">下载照片原图失败</string>
 
     <!-- 侧边栏 -->
     <string name="person_data">个人信息</string>

@@ -32,7 +32,8 @@ public class Media implements Parcelable {
     private boolean sharing;
     private int orientationNumber;
     private String type;
-    private String miniThumb;
+    private String miniThumbPath;
+    private String originalPhotoPath;
 
     public Media() {
         uuid = "";
@@ -45,7 +46,8 @@ public class Media implements Parcelable {
         date = "";
         belongingMediaShareUUID = "";
         local = false;
-        miniThumb = "";
+        miniThumbPath = "";
+        originalPhotoPath = "";
     }
 
     protected Media(Parcel in) {
@@ -62,7 +64,7 @@ public class Media implements Parcelable {
         uploadedDeviceIDs = in.readString();
         orientationNumber = in.readInt();
         type = in.readString();
-        miniThumb = in.readString();
+        miniThumbPath = in.readString();
     }
 
     @Override
@@ -80,7 +82,7 @@ public class Media implements Parcelable {
         dest.writeString(uploadedDeviceIDs);
         dest.writeInt(orientationNumber);
         dest.writeString(type);
-        dest.writeString(miniThumb);
+        dest.writeString(miniThumbPath);
     }
 
     @Override
@@ -212,12 +214,28 @@ public class Media implements Parcelable {
         this.type = type;
     }
 
-    public String getMiniThumb() {
-        return miniThumb == null ? "" : miniThumb;
+    public String getMiniThumbPath() {
+        return miniThumbPath == null ? "" : miniThumbPath;
     }
 
-    public void setMiniThumb(String miniThumb) {
-        this.miniThumb = miniThumb;
+    public void setMiniThumbPath(String miniThumbPath) {
+        this.miniThumbPath = miniThumbPath;
+    }
+
+    public String getOriginalPhotoPath() {
+
+        if (originalPhotoPath.isEmpty() && isLocal())
+            originalPhotoPath = getThumb();
+
+        return originalPhotoPath == null ? "" : originalPhotoPath;
+
+    }
+
+    public void setOriginalPhotoPath(String originalPhotoPath) {
+        if (originalPhotoPath == null)
+            this.originalPhotoPath = "";
+        else
+            this.originalPhotoPath = originalPhotoPath;
     }
 
     public synchronized boolean uploadIfNotDone(DBUtils dbUtils) {
@@ -249,7 +267,7 @@ public class Media implements Parcelable {
 
         String imageUrl;
         if (isLocal()) {
-            imageUrl = getMiniThumb();
+            imageUrl = getMiniThumbPath();
 
             if (imageUrl.isEmpty())
                 imageUrl = getThumb();

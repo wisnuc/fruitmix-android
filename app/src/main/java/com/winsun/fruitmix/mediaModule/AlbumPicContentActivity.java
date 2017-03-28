@@ -220,16 +220,16 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-//        MobclickAgent.onPageStart(TAG);
-//        MobclickAgent.onResume(this);
+        MobclickAgent.onPageStart(TAG);
+        MobclickAgent.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
-//        MobclickAgent.onPageEnd(TAG);
-//        MobclickAgent.onPause(this);
+        MobclickAgent.onPageEnd(TAG);
+        MobclickAgent.onPause(this);
     }
 
     @Override

@@ -265,6 +265,7 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
             mIsResume = true;
 
             MobclickAgent.onPageStart(TAG);
+            MobclickAgent.onResume(getContext());
 
 //            if (mCurrentFragment == null)
 //                mCurrentFragment = fileFragment;
@@ -278,6 +279,7 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
             mIsResume = false;
 
             MobclickAgent.onPageEnd(TAG);
+            MobclickAgent.onPause(getContext());
 
 //            mCurrentFragment.hide();
         }

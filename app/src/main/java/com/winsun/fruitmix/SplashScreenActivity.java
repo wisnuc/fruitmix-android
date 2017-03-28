@@ -1,6 +1,5 @@
 package com.winsun.fruitmix;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -34,7 +33,6 @@ public class SplashScreenActivity extends AppCompatActivity {
     private String mUuid;
     private String mGateway;
     private String mToken;
-    private String mDeviceID;
 
     private Context mContext;
 
@@ -66,7 +64,7 @@ public class SplashScreenActivity extends AppCompatActivity {
             Log.i(TAG, "onCreate: Create local photo thumbnail folder failed");
         }
 
-        result = FileUtil.createSharedPhotoFolder();
+        result = FileUtil.createOriginalPhotoFolder();
 
         if (!result) {
             Log.i(TAG, "onCreate: Create shared photo folder failed");
@@ -82,7 +80,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         mGateway = LocalCache.getGateway(mContext);
         mUuid = LocalCache.getUserUUID(mContext);
         mToken = LocalCache.getToken(mContext);
-        mDeviceID = LocalCache.GetGlobalData(mContext, Util.DEVICE_ID_MAP_NAME);
+        String mDeviceID = LocalCache.GetGlobalData(mContext, Util.DEVICE_ID_MAP_NAME);
 
         if (!mUuid.isEmpty() && mGateway != null && mToken != null) {
 
@@ -105,16 +103,16 @@ public class SplashScreenActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-//        MobclickAgent.onPageStart(TAG);
-//        MobclickAgent.onResume(this);
+        MobclickAgent.onPageStart(TAG);
+        MobclickAgent.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
-//        MobclickAgent.onPageEnd(TAG);
-//        MobclickAgent.onPause(this);
+        MobclickAgent.onPageEnd(TAG);
+        MobclickAgent.onPause(this);
     }
 
     @Override

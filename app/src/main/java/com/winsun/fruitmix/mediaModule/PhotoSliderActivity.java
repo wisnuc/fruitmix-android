@@ -203,16 +203,16 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     protected void onResume() {
         super.onResume();
 
-//        MobclickAgent.onPageStart(TAG);
-//        MobclickAgent.onResume(this);
+        MobclickAgent.onPageStart(TAG);
+        MobclickAgent.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
-//        MobclickAgent.onPageEnd(TAG);
-//        MobclickAgent.onPause(this);
+        MobclickAgent.onPageEnd(TAG);
+        MobclickAgent.onPause(this);
     }
 
     @Override
@@ -222,7 +222,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         ivBack.setImageResource(R.drawable.ic_back);
         commentImg.setImageResource(R.drawable.comment);
         mReturnResize.setImageResource(R.drawable.return_resize);
-
 
     }
 
@@ -376,7 +375,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         currentPhotoPosition = position;
 
         if (mediaList.size() > position && position > -1) {
-            Log.d(TAG, "image:" + mediaList.get(position));
 
             String title = mediaList.get(position).getTime();
             if (title == null || title.contains("1916-01-01")) {

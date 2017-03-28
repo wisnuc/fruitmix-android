@@ -25,31 +25,34 @@ import retrofit2.Call;
  * Created by Administrator on 2017/3/24.
  */
 
-public class RetrieveSharedPhotoThumbTask implements Callable<Boolean> {
+public class RetrieveOriginalPhotoTask implements Callable<Boolean> {
 
-    public static final String TAG = RetrieveSharedPhotoThumbTask.class.getSimpleName();
+    public static final String TAG = RetrieveOriginalPhotoTask.class.getSimpleName();
 
     private List<Media> medias;
     private DBUtils dbUtils;
 
-    public RetrieveSharedPhotoThumbTask(List<Media> medias, DBUtils dbUtils) {
+    public RetrieveOriginalPhotoTask(List<Media> medias, DBUtils dbUtils) {
         this.medias = medias;
         this.dbUtils = dbUtils;
     }
 
     @Override
-    public Boolean call(){
+    public Boolean call() {
 
-        Log.d(TAG, "call: begin retrieve shared photo thumb task");
+        Log.d(TAG, "call: begin retrieve original photo task");
 
         FileDownloadUploadInterface fileDownloadUploadInterface = RetrofitInstance.INSTANCE.getRetrofitInstance().create(FileDownloadUploadInterface.class);
 
         for (Media media : medias) {
+
+            Log.d(TAG, "call: media uuid:" + media.getUuid());
+
             Call<ResponseBody> call = fileDownloadUploadInterface.downloadFile(FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + media.getUuid() + "/download");
 
             boolean result = false;
             try {
-                result = FileUtil.downloadMediaToSharedPhotoFolder(call.execute().body(), media);
+                result = FileUtil.downloadMediaToOriginalPhotoFolder(call.execute().body(), media);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -58,9 +61,9 @@ public class RetrieveSharedPhotoThumbTask implements Callable<Boolean> {
                 dbUtils.updateRemoteMedia(media);
         }
 
-        Log.d(TAG, "call: finish retrieve shared photo thumb task");
+        Log.d(TAG, "call: finish retrieve original photo task");
 
-        EventBus.getDefault().post(new OperationEvent(Util.SHARED_PHOTO_THUMB_RETRIEVED, new OperationSuccess()));
+        EventBus.getDefault().post(new OperationEvent(Util.SHARED_PHOTO_THUMB_RETRIEVED, null));
 
         return null;
     }

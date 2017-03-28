@@ -270,8 +270,6 @@ public class NavPagerActivity extends AppCompatActivity
     private int mAlreadyUploadMediaCount = -1;
     private int mTotalLocalMediaCount = 0;
 
-    private boolean mOnResume = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -492,11 +490,10 @@ public class NavPagerActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
 
-        MobclickAgent.onResume(this);
-
-        if (!mOnResume) {
-            mOnResume = true;
+        if(currentPage == PAGE_MEDIA){
             mediaMainFragment.show();
+        }else {
+            fileMainFragment.show();
         }
     }
 
@@ -504,7 +501,11 @@ public class NavPagerActivity extends AppCompatActivity
     protected void onPause() {
         super.onPause();
 
-        MobclickAgent.onPause(this);
+        if(currentPage == PAGE_MEDIA){
+            mediaMainFragment.hide();
+        }else {
+            fileMainFragment.hide();
+        }
     }
 
     @Override
@@ -685,9 +686,6 @@ public class NavPagerActivity extends AppCompatActivity
 
             mNavigationHeaderArrow.setImageResource(R.drawable.navigation_header_arrow_down);
 
-            if (mLoggedInUser1Avatar.getVisibility() == View.VISIBLE) {
-                mLoggedInUser1Avatar.setVisibility(View.INVISIBLE);
-            }
             if (mLoggedInUser0Avatar.getVisibility() == View.VISIBLE) {
                 mLoggedInUser0Avatar.setVisibility(View.INVISIBLE);
             }
@@ -702,11 +700,11 @@ public class NavPagerActivity extends AppCompatActivity
 
             int size = mNavigationItemLoggedInUser.size();
 
-            if (mLoggedInUser1Avatar.getVisibility() == View.INVISIBLE && size > 1) {
-                mLoggedInUser1Avatar.setVisibility(View.VISIBLE);
-            }
-            if (mLoggedInUser0Avatar.getVisibility() == View.INVISIBLE && size > 2) {
+            if (mLoggedInUser0Avatar.getVisibility() == View.INVISIBLE && size > 1) {
                 mLoggedInUser0Avatar.setVisibility(View.VISIBLE);
+            }
+            if (mLoggedInUser1Avatar.getVisibility() == View.INVISIBLE && size > 2) {
+                mLoggedInUser1Avatar.setVisibility(View.VISIBLE);
             }
 
             mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemMenu);

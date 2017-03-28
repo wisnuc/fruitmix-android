@@ -317,8 +317,6 @@ public class NetworkImageView extends ImageView {
             // also clear out the container so we can reload the image if necessary.
             mImageContainer = null;
             cancelRequest = true;
-
-            Log.d(TAG, "onDetachedFromWindow: ");
         }
         super.onDetachedFromWindow();
     }

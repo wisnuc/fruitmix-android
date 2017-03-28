@@ -91,24 +91,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         String mEquipmentChildName = intent.getStringExtra(Util.USER_NAME);
         mUserUUid = intent.getStringExtra(Util.USER_UUID);
         mGateway = intent.getStringExtra(Util.GATEWAY);
+        int color = intent.getIntExtra(Util.USER_BG_COLOR, 0);
 
         mEquipmentGroupNameTextView.setText(mEquipmentGroupName);
         mEquipmentChildNameTextView.setText(mEquipmentChildName);
 
         mUserDefaultPortrait.setText(Util.getUserNameFirstLetter(mEquipmentChildName));
-        int color = intent.getIntExtra(Util.USER_BG_COLOR, 0);
-        switch (color) {
-            case 1:
-                mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_blue);
-                break;
-            case 2:
-                mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_green);
-                break;
-            case 3:
-                mUserDefaultPortrait.setBackgroundResource(R.drawable.user_portrait_bg_yellow);
-                break;
-        }
 
+        User user = new User();
+        user.setDefaultAvatarBgColor(color);
+
+        mUserDefaultPortrait.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
     }
 
     @Override

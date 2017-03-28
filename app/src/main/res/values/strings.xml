@@ -69,7 +69,7 @@
 
     <string name="select_nothing">Select nothing,please select</string>
 
-    <string name="no_shared_photo_thumb">No shared photo thumb</string>
+    <string name="download_original_photo_fail">Download original photo failed</string>
 
     <!-- slide menu -->
 

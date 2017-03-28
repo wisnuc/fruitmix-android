@@ -66,6 +66,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String MEDIA_KEY_ORIENTATION_NUMBER = "media_key_orientation_number";
     public static final String MEDIA_KEY_TYPE = "media_key_type";
     public static final String MEDIA_KEY_MINI_THUMB = "media_key_mini_thumb";
+    public static final String MEDIA_KEY_ORIGINAL_PHOTO_PATH = "media_key_original_photo_path";
 
     public static final String SHARE_CONTENT_KEY_ID = "id";
     public static final String SHARE_CONTENT_KEY_SHARE_UUID = "share_uuid";
@@ -99,7 +100,7 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String DOWNLOADED_FILE_TABLE_NAME = "downloaded_file";
     static final String LOGGED_IN_USER_TABLE_NAME = "logged_in_user";
 
-    private static final int DB_VERSION = 23;
+    private static final int DB_VERSION = 24;
 
     private static final String CREATE_TABLE = "create table ";
 
@@ -133,7 +134,8 @@ public class DBHelper extends SQLiteOpenHelper {
             + MEDIA_KEY_UUID + " text not null," + MEDIA_KEY_TIME + " text not null," + MEDIA_KEY_WIDTH + " text not null,"
             + MEDIA_KEY_HEIGHT + " text not null," + MEDIA_KEY_THUMB + " text," + MEDIA_KEY_LOCAL + " integer not null,"
             + MEDIA_KEY_UPLOADED_DEVICE_ID + " text," + MEDIA_KEY_SHARING + " integer not null,"
-            + MEDIA_KEY_ORIENTATION_NUMBER + " integer," + MEDIA_KEY_TYPE + " text," + MEDIA_KEY_MINI_THUMB + " text)";
+            + MEDIA_KEY_ORIENTATION_NUMBER + " integer," + MEDIA_KEY_TYPE + " text,"
+            + MEDIA_KEY_MINI_THUMB + " text," + MEDIA_KEY_ORIGINAL_PHOTO_PATH + " text)";
 
     private static final String DATABASE_REMOTE_MEDIA_CREATE = CREATE_TABLE + REMOTE_MEDIA_TABLE_NAME + DATABASE_MEDIA_CREATE;
 

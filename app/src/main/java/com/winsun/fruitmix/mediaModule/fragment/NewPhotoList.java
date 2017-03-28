@@ -27,7 +27,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.toolbox.IImageLoadListener;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.umeng.analytics.MobclickAgent;
@@ -123,6 +122,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     private List<String> alreadySelectedImageKeyArrayList;
 
     private boolean mPreLoadPhoto = false;
+
+    private boolean mCancelPreLoadPhoto = false;
+
 
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
@@ -273,13 +275,16 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 Iterator<Media> iterator = preLoadMediaMiniThumbs.iterator();
                 while (iterator.hasNext()) {
                     media = iterator.next();
-                    if (media.isLocal() && media.getMiniThumb().isEmpty())
+                    if (media.isLocal() && media.getMiniThumbPath().isEmpty())
                         iterator.remove();
                 }
 
                 Log.i(TAG, "remote media size: " + preLoadMediaMiniThumbs.size());
 
                 for (int i = 0; i < preLoadMediaMiniThumbs.size(); i++) {
+
+                    if(mCancelPreLoadPhoto)
+                        break;
 
                     media = preLoadMediaMiniThumbs.get(i);
 
@@ -294,6 +299,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
+    public void cancelPreLoadMediaMiniThumb(){
+        mCancelPreLoadPhoto = true;
+    }
 
     private void setupFastJumper() {
         mLinearScrollCalculator = new LinearScrollCalculator(mRecyclerView) {

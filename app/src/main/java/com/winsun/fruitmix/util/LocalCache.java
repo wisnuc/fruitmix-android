@@ -503,7 +503,7 @@ public class LocalCache {
                 continue;
             }
 
-            if (thumb.contains(FileUtil.getSharedPhotoFolderPath()))
+            if (thumb.contains(FileUtil.getOriginalPhotoFolderPath()))
                 continue;
 
             media = new Media();

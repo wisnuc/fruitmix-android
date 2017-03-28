@@ -644,8 +644,8 @@ public class ImageLoader {
             @Override
             public void onResponse(Bitmap response) {
 
-                if(!url.startsWith("http"))
-                    Log.d(TAG, "onResponse: url" + url + " size: " + response.getByteCount());
+//                if(!url.startsWith("http"))
+//                    Log.d(TAG, "onResponse: url" + url + " size: " + response.getByteCount());
 
 //                mCache.putBitmap(url, response);
 

@@ -28,7 +28,8 @@ public class LocalMediaParser implements LocalDataParser<Media> {
         media.setOrientationNumber(cursor.getInt(cursor.getColumnIndex(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER)));
         media.setSharing(cursor.getInt(cursor.getColumnIndex(DBHelper.MEDIA_KEY_SHARING)) == 1);
         media.setType(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_TYPE)));
-        media.setMiniThumb(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_MINI_THUMB)));
+        media.setMiniThumbPath(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_MINI_THUMB)));
+        media.setOriginalPhotoPath(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH)));
 
         return media;
     }
