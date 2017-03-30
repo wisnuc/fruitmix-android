@@ -15,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
-import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -193,16 +192,20 @@ public class CreateAlbumActivity extends AppCompatActivity {
         OperationResultType operationResultType = operationResult.getOperationResultType();
 
         switch (action) {
-            case Util.REMOTE_SHARE_CREATED:
+            case Util.REMOTE_MEDIA_SHARE_CREATED:
 
                 dismissDialog();
 
                 Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
 
                 boolean mCreateAlbumSucceed = operationResultType.equals(OperationResultType.SUCCEED);
-                if (mCreateAlbumSucceed)
+                if (mCreateAlbumSucceed) {
+
+                    MobclickAgent.onEvent(mContext,Util.CRETAE_ALUBM_UMENG_EVENT_ID);
+                    MobclickAgent.onEvent(mContext,Util.CREATE_MEDIA_SHARE_UMENG_EVENT_ID);
+
                     CreateAlbumActivity.this.setResult(RESULT_OK);
-                else
+                } else
                     CreateAlbumActivity.this.setResult(RESULT_CANCELED);
 
                 finish();

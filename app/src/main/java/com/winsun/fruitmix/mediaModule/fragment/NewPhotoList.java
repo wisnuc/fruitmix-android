@@ -245,6 +245,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         } else {
             mNoContentLayout.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
+
             mPhotoRecycleAdapter.notifyDataSetChanged();
 
             for (IPhotoListListener listener : mPhotoListListeners)
@@ -283,7 +284,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 for (int i = 0; i < preLoadMediaMiniThumbs.size(); i++) {
 
-                    if(mCancelPreLoadPhoto)
+                    if (mCancelPreLoadPhoto)
                         break;
 
                     media = preLoadMediaMiniThumbs.get(i);
@@ -299,7 +300,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
-    public void cancelPreLoadMediaMiniThumb(){
+    public void cancelPreLoadMediaMiniThumb() {
         mCancelPreLoadPhoto = true;
     }
 
@@ -405,6 +406,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Media media : mediaList) {
                 if (media.isSelected()) {
+
+                    String mediaUUID = media.getUuid();
+                    if (mediaUUID.isEmpty()) {
+                        mediaUUID = Util.CalcSHA256OfFile(media.getThumb());
+                        media.setUuid(mediaUUID);
+                    }
+
                     selectedMedias.add(media);
                 }
             }
@@ -913,7 +921,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (currentMedia == null) return;
 
-            // because alreadySelectedImageKeyArrayList is media share content,it must be uuid about media now
             if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getUuid()))
                 currentMedia.setSelected(true);
 

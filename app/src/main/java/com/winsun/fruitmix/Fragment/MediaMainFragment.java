@@ -33,9 +33,12 @@ import android.widget.Toast;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.BaseAnimationListener;
+import com.winsun.fruitmix.command.AbstractCommand;
+import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
+import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.eventbus.RetrieveSharedPhotoThumbRequestEvent;
+import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
@@ -94,8 +97,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     ImageView mAlbumBalloon;
     @BindView(R.id.bottom_navigation_view)
     BottomNavigationView bottomNavigationView;
-    @BindView(R.id.system_share)
-    ImageView mSystemShareBtn;
 
     private List<Page> pageList;
     private AlbumList albumList;
@@ -187,7 +188,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         ivBtShare.setOnClickListener(this);
         fab.setOnClickListener(this);
         lbRight.setOnClickListener(this);
-        mSystemShareBtn.setOnClickListener(this);
 
         photoList.addPhotoListListener(this);
 
@@ -375,17 +375,30 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
+                String eventId = "";
+
                 switch (item.getItemId()) {
                     case R.id.share:
+
+                        eventId = Util.SWITCH_MEDIA_SHARE_MODULE_UMENG_EVENT_ID;
+
                         viewPager.setCurrentItem(PAGE_SHARE);
                         break;
                     case R.id.photo:
+
+                        eventId = Util.SWITCH_MEDIA_MODULE_UMENG_EVENT_ID;
+
                         viewPager.setCurrentItem(PAGE_PHOTO);
                         break;
                     case R.id.album:
+
+                        eventId = Util.SWITCH_ALBUM_MODULE_UMENG_EVENT_ID;
+
                         viewPager.setCurrentItem(PAGE_ALBUM);
                         break;
                 }
+
+                MobclickAgent.onEvent(getActivity(), eventId);
 
                 return true;
             }
@@ -458,12 +471,20 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         Log.i(TAG, "handleOperationEvent: action:" + action);
 
         switch (action) {
-            case Util.REMOTE_SHARE_CREATED:
-                handleRemoteShareCreated(operationEvent);
+            case Util.REMOTE_MEDIA_SHARE_CREATED:
+                if (handleRemoteShareOperated(operationEvent)) {
+                    handleRemoteShareCreated(operationEvent);
+                }
                 break;
-            case Util.REMOTE_SHARE_MODIFIED:
-            case Util.REMOTE_SHARE_DELETED:
-                handleRemoteShareModifiedDeleted(operationEvent);
+            case Util.REMOTE_MEDIA_SHARE_MODIFIED:
+                if (handleRemoteShareOperated(operationEvent)) {
+                    handleRemoteShareModified(operationEvent);
+                }
+                break;
+            case Util.REMOTE_MEDIA_SHARE_DELETED:
+                if (handleRemoteShareOperated(operationEvent)) {
+                    handleRemoteShareDeleted(operationEvent);
+                }
                 break;
             case Util.REMOTE_COMMENT_CREATED:
                 handleRemoteCommentCreated(operationEvent);
@@ -488,6 +509,15 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             case Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED:
 
                 Log.i(TAG, "handleOperationEvent: new local media in camera retrieved succeed");
+
+                setPhotoListRefresh();
+
+                photoList.refreshView();
+
+                break;
+            case Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED:
+
+                Log.i(TAG, "handleOperationEvent: calc new local media digest finished");
 
                 setPhotoListRefresh();
 
@@ -597,38 +627,45 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         }
     }
 
-    private void handleRemoteShareModifiedDeleted(OperationEvent operationEvent) {
-        dismissDialog();
+    private void handleRemoteShareModified(OperationEvent operationEvent) {
 
-        OperationResult operationResult = operationEvent.getOperationResult();
-
-        OperationResultType operationResultType = operationResult.getOperationResultType();
-
-        switch (operationResultType) {
-            case SUCCEED:
-                Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-                albumList.refreshView();
-                shareList.refreshView();
-                break;
-            default:
-                Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+        MediaShare mediaShare = ((MediaShareOperationEvent) operationEvent).getMediaShare();
+        if (mediaShare.getViewersListSize() == 0) {
+            MobclickAgent.onEvent(mContext, Util.ALBUM_SWITCH_UN_SHARE_STATE_UMENG_EVENT_ID);
+        } else {
+            MobclickAgent.onEvent(mContext, Util.ALBUM_SWITCH_SHARE_STATE_UMENG_EVENT_ID);
         }
+        albumList.refreshView();
+        shareList.refreshView();
+    }
+
+    private void handleRemoteShareDeleted(OperationEvent operationEvent) {
+
+        Log.d(TAG, "handleRemoteShareDeleted: ");
+
+        MobclickAgent.onEvent(mContext, Util.DELETE_ALBUM_UMENG_EVENT_ID);
+
+        albumList.refreshView();
+        shareList.refreshView();
+
     }
 
     private void handleRemoteShareCreated(OperationEvent operationEvent) {
-        Log.i(TAG, "remote share created");
+        MobclickAgent.onEvent(mContext, Util.CREATE_MEDIA_SHARE_UMENG_EVENT_ID);
 
+        viewPager.setCurrentItem(PAGE_SHARE);
+        onDidAppear(PAGE_SHARE);
+        pageList.get(PAGE_SHARE).onDidAppear();
+    }
+
+    private boolean handleRemoteShareOperated(OperationEvent operationEvent) {
         OperationResult operationResult = operationEvent.getOperationResult();
 
         dismissDialog();
 
-        if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
-            viewPager.setCurrentItem(PAGE_SHARE);
-            onDidAppear(PAGE_SHARE);
-            pageList.get(PAGE_SHARE).onDidAppear();
-        }
-
         Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+
+        return operationResult.getOperationResultType() == OperationResultType.SUCCEED;
 
     }
 
@@ -820,7 +857,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void onClick(View v) {
         List<String> selectMediaUUIDs;
         switch (v.getId()) {
-            case R.id.system_share:
+            case R.id.bt_share:
 
                 if (!Util.getNetworkState(mContext)) {
                     Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
@@ -831,33 +868,38 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 if (showNothingSelectToast(mSelectMedias)) return;
 
-                hideChooseHeader();
-                showBottomNavAnim();
+                AbstractCommand shareInAppCommand = new AbstractCommand() {
+                    @Override
+                    public void execute() {
+                        handleShareInApp();
 
-                mSelectMediaOriginalPhotoPaths = new ArrayList<>(mSelectMedias.size());
-
-                Iterator<Media> iterator = mSelectMedias.iterator();
-                while (iterator.hasNext()) {
-                    Media media = iterator.next();
-                    String thumb = media.getOriginalPhotoPath();
-
-                    if (thumb.length() != 0) {
-                        mSelectMediaOriginalPhotoPaths.add(thumb);
-                        iterator.remove();
+                        hideChooseHeader();
+                        showBottomNavAnim();
                     }
-                }
 
-                if (mSelectMedias.size() == 0) {
-                    sendShare(mSelectMediaOriginalPhotoPaths);
-                } else {
+                    @Override
+                    public void unExecute() {
+                    }
+                };
 
-                    mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, true);
-                    mDialog.setCanceledOnTouchOutside(false);
+                AbstractCommand shareToOtherAppCommand = new AbstractCommand() {
+                    @Override
+                    public void execute() {
+                        handleShareToOtherApp();
 
-                    EventBus.getDefault().post(new RetrieveSharedPhotoThumbRequestEvent(OperationType.GET, OperationTargetType.SHARED_PHOTO_THUMB, mSelectMedias));
-                }
+                        hideChooseHeader();
+                        showBottomNavAnim();
+                    }
+
+                    @Override
+                    public void unExecute() {
+                    }
+                };
+
+                new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(mContext).show();
 
                 break;
+
             case R.id.bt_album:
                 selectMediaUUIDs = photoList.getSelectedImageUUIDs();
                 if (showNothingSelectToast(selectMediaUUIDs)) return;
@@ -866,22 +908,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 hideChooseHeader();
                 showBottomNavAnim();
                 break;
-            case R.id.bt_share:
 
-                if (!Util.getNetworkState(mContext)) {
-                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                selectMediaUUIDs = photoList.getSelectedImageUUIDs();
-                if (showNothingSelectToast(selectMediaUUIDs)) return;
-
-                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
-
-                photoList.createShare(selectMediaUUIDs);
-                hideChooseHeader();
-                showBottomNavAnim();
-                break;
             case R.id.fab:
                 refreshFabState();
                 break;
@@ -893,11 +920,50 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         }
     }
 
-    private void sendShare(List<String> selectMediaThumbs) {
+    private void handleShareToOtherApp() {
+
+        mSelectMediaOriginalPhotoPaths = new ArrayList<>(mSelectMedias.size());
+
+        Iterator<Media> iterator = mSelectMedias.iterator();
+        while (iterator.hasNext()) {
+            Media media = iterator.next();
+            String originalPhotoPath = media.getOriginalPhotoPath();
+
+            if (originalPhotoPath.length() != 0) {
+                mSelectMediaOriginalPhotoPaths.add(originalPhotoPath);
+                iterator.remove();
+            }
+        }
+
+        if (mSelectMedias.size() == 0) {
+            sendShare(mSelectMediaOriginalPhotoPaths);
+        } else {
+
+            mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, true);
+            mDialog.setCanceledOnTouchOutside(false);
+
+            EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, mSelectMedias));
+        }
+    }
+
+    private void handleShareInApp() {
+        List<String> selectMediaUUIDs = new ArrayList<>(mSelectMedias.size());
+
+        for (Media media : mSelectMedias) {
+            selectMediaUUIDs.add(media.getUuid());
+        }
+
+        mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+
+        photoList.createShare(selectMediaUUIDs);
+
+    }
+
+    private void sendShare(List<String> selectMediaOriginalPhotoPaths) {
         ArrayList<Uri> uris = new ArrayList<>();
 
-        for (String thumb : selectMediaThumbs) {
-            Uri uri = Uri.fromFile(new File(thumb));
+        for (String originalPhotoPath : selectMediaOriginalPhotoPaths) {
+            Uri uri = Uri.fromFile(new File(originalPhotoPath));
             uris.add(uri);
         }
 
@@ -941,10 +1007,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mAnimator.setTarget(ivBtShare);
         mAnimator.start();
 
-        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.system_share_btn_restore);
-        mAnimator.setTarget(mSystemShareBtn);
-        mAnimator.start();
-
         mAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -952,7 +1014,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 ivBtAlbum.setVisibility(View.GONE);
                 ivBtShare.setVisibility(View.GONE);
-                mSystemShareBtn.setVisibility(View.GONE);
 
             }
         });
@@ -963,7 +1024,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         ivBtAlbum.setVisibility(View.VISIBLE);
         ivBtShare.setVisibility(View.VISIBLE);
-        mSystemShareBtn.setVisibility(View.VISIBLE);
 
         mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.fab_remote);
         mAnimator.setTarget(fab);
@@ -977,9 +1037,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mAnimator.setTarget(ivBtShare);
         mAnimator.start();
 
-        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.system_share_btn_translation);
-        mAnimator.setTarget(mSystemShareBtn);
-        mAnimator.start();
     }
 
     @Override
@@ -1034,8 +1091,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         switch (position) {
             case PAGE_SHARE:
 
-                setCurrentItem(shareList);
-
                 title.setText(getString(R.string.share_text));
                 fab.setVisibility(View.GONE);
                 ivBtAlbum.setVisibility(View.GONE);
@@ -1044,15 +1099,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 break;
             case PAGE_PHOTO:
 
-                setCurrentItem(photoList);
-
                 title.setText(getString(R.string.photo));
                 lbRight.setVisibility(View.VISIBLE);
                 fab.setVisibility(View.GONE);
                 break;
             case PAGE_ALBUM:
-
-                setCurrentItem(albumList);
 
                 title.setText(getString(R.string.album));
                 fab.setVisibility(View.GONE);

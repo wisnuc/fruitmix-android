@@ -9,7 +9,6 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
-import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationLocalMediaShareUploading;
@@ -84,7 +83,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
         if (mediaShare.isLocal()) {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, new OperationLocalMediaShareUploading(), mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_MODIFIED, new OperationLocalMediaShareUploading(), mediaShare);
 
         } else {
 
@@ -93,7 +92,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
                 if (httpResponse.getResponseCode() == 200) {
 
-                    mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, new OperationSuccess(), mediaShare);
+                    mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_MODIFIED, new OperationSuccess(), mediaShare);
 
                     Log.i(TAG, "modify remote share succeed");
 
@@ -105,28 +104,28 @@ public class ModifyRemoteMediaShareService extends IntentService {
                     updateMediaShareInLocalCacheMap(mediaShare);
 
                 } else {
-                    mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, new OperationNetworkException(httpResponse.getResponseCode()), mediaShare);
+                    mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_MODIFIED, new OperationNetworkException(httpResponse.getResponseCode()), mediaShare);
                 }
 
             } catch (MalformedURLException e) {
 
                 e.printStackTrace();
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, new OperationMalformedUrlException(), mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_MODIFIED, new OperationMalformedUrlException(), mediaShare);
 
                 Log.i(TAG, "modify remote share fail");
             } catch (SocketTimeoutException e) {
 
                 e.printStackTrace();
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, new OperationSocketTimeoutException(), mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_MODIFIED, new OperationSocketTimeoutException(), mediaShare);
 
                 Log.i(TAG, "modify remote share fail");
             } catch (IOException e) {
 
                 e.printStackTrace();
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_MODIFIED, new OperationIOException(), mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_MODIFIED, new OperationIOException(), mediaShare);
 
                 Log.i(TAG, "modify remote share fail");
             }

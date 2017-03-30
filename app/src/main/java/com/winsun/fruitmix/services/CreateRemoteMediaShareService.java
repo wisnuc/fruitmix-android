@@ -171,7 +171,7 @@ public class CreateRemoteMediaShareService extends IntentService {
 
                 Log.i(TAG, "insert remote mediashare which source is network succeed");
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationSuccess(), mediaShare.cloneMyself());
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_CREATED, new OperationSuccess(), mediaShare.cloneMyself());
 
                 RemoteMediaShareJSONObjectParser parser = new RemoteMediaShareJSONObjectParser();
 
@@ -187,7 +187,7 @@ public class CreateRemoteMediaShareService extends IntentService {
                 Log.i(TAG, "insert remote mediashare to map result:" + (mapResult != null ? "true" : "false"));
 
             } else {
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationNetworkException(httpResponse.getResponseCode()), mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_CREATED, new OperationNetworkException(httpResponse.getResponseCode()), mediaShare);
 
                 Log.i(TAG, "insert remote mediashare fail");
             }
@@ -195,26 +195,26 @@ public class CreateRemoteMediaShareService extends IntentService {
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationMalformedUrlException(), mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_CREATED, new OperationMalformedUrlException(), mediaShare);
 
             Log.i(TAG, "insert remote mediashare fail");
 
         } catch (SocketTimeoutException ex) {
             ex.printStackTrace();
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationSocketTimeoutException(), mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_CREATED, new OperationSocketTimeoutException(), mediaShare);
 
             Log.i(TAG, "insert remote mediashare fail");
         } catch (IOException ex) {
             ex.printStackTrace();
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationIOException(), mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_CREATED, new OperationIOException(), mediaShare);
 
             Log.i(TAG, "insert remote mediashare fail");
         } catch (JSONException ex) {
             ex.printStackTrace();
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_SHARE_CREATED, new OperationJSONException(), mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_CREATED, new OperationJSONException(), mediaShare);
 
             Log.i(TAG, "insert remote mediashare fail");
         }

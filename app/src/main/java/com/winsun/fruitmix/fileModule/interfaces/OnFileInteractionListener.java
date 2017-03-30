@@ -1,11 +1,6 @@
 package com.winsun.fruitmix.fileModule.interfaces;
 
-import android.app.Dialog;
 import android.view.View;
-
-import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
-
-import java.util.List;
 
 /**
  * Created by Administrator on 2016/10/27.

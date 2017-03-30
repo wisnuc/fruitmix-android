@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.fileModule.model;
+package com.winsun.fruitmix.model;
 
 import android.app.Dialog;
 

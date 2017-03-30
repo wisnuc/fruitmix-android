@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +45,7 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/4/19.
  */
-public class AlbumList implements Page,IShowHideFragmentListener {
+public class AlbumList implements Page, IShowHideFragmentListener {
 
     public static final String TAG = AlbumList.class.getSimpleName();
 
@@ -99,12 +100,12 @@ public class AlbumList implements Page,IShowHideFragmentListener {
     }
 
     @Override
-    public void show(){
+    public void show() {
         MobclickAgent.onPageStart("AlbumFragment");
     }
 
     @Override
-    public void hide(){
+    public void hide() {
         MobclickAgent.onPageEnd("AlbumFragment");
     }
 
@@ -349,6 +350,7 @@ public class AlbumList implements Page,IShowHideFragmentListener {
             if (coverImg != null && mShowPhoto) {
 
                 String imageUrl = coverImg.getImageThumbUrl(containerActivity);
+
                 mImageLoader.setShouldCache(!coverImg.isLocal());
 
                 if (coverImg.isLocal())
@@ -360,8 +362,8 @@ public class AlbumList implements Page,IShowHideFragmentListener {
 
             } else {
                 ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
-                ivMainPic.setBackgroundResource(R.drawable.placeholder_photo);
-                ivMainPic.setImageResource(R.drawable.placeholder_photo);
+                ivMainPic.setImageUrl(null, mImageLoader);
+
             }
 
             if (currentItem.getViewersListSize() == 0) {

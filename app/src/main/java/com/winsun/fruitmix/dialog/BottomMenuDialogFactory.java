@@ -13,7 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
+import com.winsun.fruitmix.model.BottomMenuItem;
 
 import java.util.ArrayList;
 import java.util.List;

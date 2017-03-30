@@ -15,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
-import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -61,6 +60,8 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
     private ProgressDialog mDialog;
 
+    private boolean mPreIsPrivateValue;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +74,8 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
         String mMediaShareUuid = getIntent().getStringExtra(Util.MEDIASHARE_UUID);
         mAlbumMap = LocalCache.RemoteMediaShareMapKeyIsUUID.get(mMediaShareUuid).cloneMyself();
+
+        mPreIsPrivateValue = mAlbumMap.getViewersListSize() == 0;
 
         mTitleLayout.getEditText().setText(mAlbumMap.getTitle());
         mDescLayout.getEditText().setText(mAlbumMap.getDesc());
@@ -258,7 +261,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
         String action = operationEvent.getAction();
 
-        if (action.equals(Util.LOCAL_SHARE_MODIFIED) || action.equals(Util.REMOTE_SHARE_MODIFIED)) {
+        if (action.equals(Util.LOCAL_MEDIA_SHARE_MODIFIED) || action.equals(Util.REMOTE_MEDIA_SHARE_MODIFIED)) {
 
             if (mDialog != null && mDialog.isShowing())
                 mDialog.dismiss();
@@ -268,6 +271,15 @@ public class ModifyAlbumActivity extends AppCompatActivity {
             switch (operationResultType) {
                 case SUCCEED:
                     MediaShare mediaShare = operationEvent.getMediaShare();
+
+                    boolean mIsPrivateValue = mediaShare.getViewersListSize() == 0;
+                    if (mPreIsPrivateValue != mIsPrivateValue) {
+                        if (mIsPrivateValue)
+                            MobclickAgent.onEvent(mContext, Util.ALBUM_SWITCH_UN_SHARE_STATE_UMENG_EVENT_ID);
+                        else
+                            MobclickAgent.onEvent(mContext, Util.ALBUM_SWITCH_SHARE_STATE_UMENG_EVENT_ID);
+                    }
+
                     getIntent().putExtra(Util.UPDATED_ALBUM_TITLE, mediaShare.getTitle());
                     ModifyAlbumActivity.this.setResult(RESULT_OK, getIntent());
                     finish();

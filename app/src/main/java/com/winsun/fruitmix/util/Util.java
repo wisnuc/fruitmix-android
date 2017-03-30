@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.util;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -8,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -17,12 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.model.LoginType;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -54,13 +47,13 @@ public class Util {
 
     public static final String REMOTE_USER_CREATED = "remote_user_created";
 
-    public static final String LOCAL_SHARE_CREATED = "local_share_created";
-    public static final String LOCAL_SHARE_MODIFIED = "local_share_modified";
-    public static final String LOCAL_SHARE_DELETED = "local_share_deleted";
+    public static final String LOCAL_MEDIA_SHARE_CREATED = "local_share_created";
+    public static final String LOCAL_MEDIA_SHARE_MODIFIED = "local_share_modified";
+    public static final String LOCAL_MEDIA_SHARE_DELETED = "local_share_deleted";
 
-    public static final String REMOTE_SHARE_CREATED = "remote_share_created";
-    public static final String REMOTE_SHARE_MODIFIED = "remote_share_modified";
-    public static final String REMOTE_SHARE_DELETED = "remote_share_deleted";
+    public static final String REMOTE_MEDIA_SHARE_CREATED = "remote_share_created";
+    public static final String REMOTE_MEDIA_SHARE_MODIFIED = "remote_share_modified";
+    public static final String REMOTE_MEDIA_SHARE_DELETED = "remote_share_deleted";
 
     public static final String DOWNLOADED_FILE_DELETED = "downloaded_file_deleted";
 
@@ -141,6 +134,16 @@ public class Util {
     public static final String CURRENT_PHOTO_POSITION = "current_photo_position";
     public static final String CURRENT_MEDIA_KEY = "current_media_key";
     public static final String CURRENT_MEDIASHARE_TIME = "current_mediashare_time";
+
+    public static final String ALBUM_SWITCH_SHARE_STATE_UMENG_EVENT_ID = "album_switch_share_state";
+    public static final String ALBUM_SWITCH_UN_SHARE_STATE_UMENG_EVENT_ID = "album_switch_un_share_state";
+    public static final String CRETAE_ALUBM_UMENG_EVENT_ID = "create_album";
+    public static final String CREATE_MEDIA_SHARE_UMENG_EVENT_ID = "create_media_share";
+    public static final String DELETE_ALBUM_UMENG_EVENT_ID = "delete_album";
+    public static final String SWITCH_ALBUM_MODULE_UMENG_EVENT_ID = "switch_album_module";
+    public static final String SWITCH_MEDIA_SHARE_MODULE_UMENG_EVENT_ID = "switch_media_share_module";
+    public static final String SWITCH_MEDIA_MODULE_UMENG_EVENT_ID = "switch_media_module";
+    public static final String SWITCH_ORIGINAL_MEDIA_UMENG_EVENT_ID = "switch_original_media";
 
     public static final String KEY_MEDIA_SHARE_UUID = "key_media_share_uuid";
 
@@ -413,86 +416,5 @@ public class Util {
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
     }
-
-
-    private static boolean checkPermission(Context context, String permission) {
-        boolean result = false;
-        if (Build.VERSION.SDK_INT >= 23) {
-            try {
-                Class<?> clazz = Class.forName("android.content.Context");
-                Method method = clazz.getMethod("checkSelfPermission", String.class);
-                int rest = (Integer) method.invoke(context, permission);
-                if (rest == PackageManager.PERMISSION_GRANTED) {
-                    result = true;
-                } else {
-                    result = false;
-                }
-            } catch (Exception e) {
-                result = false;
-            }
-        } else {
-            PackageManager pm = context.getPackageManager();
-            if (pm.checkPermission(permission, context.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
-                result = true;
-            }
-        }
-        return result;
-    }
-    public static String getDeviceInfo(Context context) {
-        try {
-            org.json.JSONObject json = new org.json.JSONObject();
-            android.telephony.TelephonyManager tm = (android.telephony.TelephonyManager) context
-                    .getSystemService(Context.TELEPHONY_SERVICE);
-            String device_id = null;
-            if (checkPermission(context, Manifest.permission.READ_PHONE_STATE)) {
-                device_id = tm.getDeviceId();
-            }
-            String mac = null;
-            FileReader fstream = null;
-            try {
-                fstream = new FileReader("/sys/class/net/wlan0/address");
-            } catch (FileNotFoundException e) {
-                fstream = new FileReader("/sys/class/net/eth0/address");
-            }
-            BufferedReader in = null;
-            if (fstream != null) {
-                try {
-                    in = new BufferedReader(fstream, 1024);
-                    mac = in.readLine();
-                } catch (IOException e) {
-                } finally {
-                    if (fstream != null) {
-                        try {
-                            fstream.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    if (in != null) {
-                        try {
-                            in.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-            json.put("mac", mac);
-            if (TextUtils.isEmpty(device_id)) {
-                device_id = mac;
-            }
-            if (TextUtils.isEmpty(device_id)) {
-                device_id = android.provider.Settings.Secure.getString(context.getContentResolver(),
-                        android.provider.Settings.Secure.ANDROID_ID);
-            }
-            json.put("device_id", device_id);
-            return json.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
 
 }

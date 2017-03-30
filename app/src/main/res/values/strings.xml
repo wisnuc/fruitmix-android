@@ -87,6 +87,10 @@
     <string name="already_upload_media_percent_text">Already upload %1$s</string>
     <string name="already_upload_finished">Already upload finished</string>
 
+    <!-- share bottom menu -->
+    <string name="all_people">All people</string>
+    <string name="other_app">Other app</string>
+
     <!-- login -->
 
     <string name="login">Login</string>
@@ -124,7 +128,6 @@
 
     <!-- create、modify album -->
 
-    <string name="modify_album">Modify Album</string>
     <string name="create_album">New Album</string>
 
     <string name="set_maintainer">Set Maintainer</string>

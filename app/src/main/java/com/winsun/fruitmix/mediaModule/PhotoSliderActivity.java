@@ -257,6 +257,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             public void onPageSelected(int position) {
                 Log.d(TAG, "onPageSelected:" + position);
                 setPosition(position);
+
+                MobclickAgent.onEvent(mContext, Util.SWITCH_ORIGINAL_MEDIA_UMENG_EVENT_ID);
             }
 
         });
@@ -724,7 +726,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         @Override
         public int getCount() {
-            if (mediaList.size() == 0) {
+            if (mediaList == null || mediaList.size() == 0) {
                 return 0;
             } else {
                 return mediaList.size();

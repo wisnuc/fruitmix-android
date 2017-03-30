@@ -67,7 +67,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
         if (!mediaShare.isLocal()) {
 
-            operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED, new OperationNoNetworkException());
+            operationEvent = new OperationEvent(Util.LOCAL_MEDIA_SHARE_DELETED, new OperationNoNetworkException());
 
         } else {
 
@@ -77,7 +77,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
             if (value > 0) {
 
-                operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED, new OperationSuccess());
+                operationEvent = new OperationEvent(Util.LOCAL_MEDIA_SHARE_DELETED, new OperationSuccess());
 
                 Log.i(TAG, "delete local mediashare succeed");
 
@@ -87,7 +87,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
             } else {
 
-                operationEvent = new OperationEvent(Util.LOCAL_SHARE_DELETED, new OperationSQLException());
+                operationEvent = new OperationEvent(Util.LOCAL_MEDIA_SHARE_DELETED, new OperationSQLException());
 
                 Log.i(TAG, "delete local mediashare fail");
             }

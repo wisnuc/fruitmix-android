@@ -73,7 +73,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
 
         if (mediaShare.isLocal()) {
 
-            operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, new OperationLocalMediaShareUploading());
+            operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_DELETED, new OperationLocalMediaShareUploading());
 
         } else {
 
@@ -82,7 +82,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
             try {
                 FNAS.DeleteRemoteCall(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid(), "");
 
-                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, new OperationSuccess());
+                operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_DELETED, new OperationSuccess());
 
                 Log.i(TAG, "delete remote mediashare which source is network succeed");
 
@@ -99,19 +99,19 @@ public class DeleteRemoteMediaShareService extends IntentService {
             } catch (MalformedURLException e) {
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, new OperationMalformedUrlException());
+                operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_DELETED, new OperationMalformedUrlException());
 
                 Log.i(TAG, "delete remote mediashare fail");
             } catch (SocketTimeoutException e) {
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, new OperationSocketTimeoutException());
+                operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_DELETED, new OperationSocketTimeoutException());
 
                 Log.i(TAG, "delete remote mediashare fail");
             } catch (IOException e) {
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.REMOTE_SHARE_DELETED, new OperationIOException());
+                operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_DELETED, new OperationIOException());
 
                 Log.i(TAG, "delete remote mediashare fail");
             }

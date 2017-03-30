@@ -23,11 +23,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,7 +32,6 @@ import android.widget.Toast;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.umeng.analytics.MobclickAgent;
-import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
@@ -256,7 +252,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         String action = operationEvent.getAction();
 
-        if (action.equals(Util.LOCAL_SHARE_DELETED) || action.equals(Util.REMOTE_SHARE_DELETED)) {
+        if (action.equals(Util.LOCAL_MEDIA_SHARE_DELETED) || action.equals(Util.REMOTE_MEDIA_SHARE_DELETED)) {
 
             if (mDialog != null && mDialog.isShowing())
                 mDialog.dismiss();
@@ -267,6 +263,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             switch (operationResultType) {
                 case SUCCEED:
+
+                    if (action.equals(Util.REMOTE_MEDIA_SHARE_DELETED)) {
+                        MobclickAgent.onEvent(mContext, Util.DELETE_ALBUM_UMENG_EVENT_ID);
+                    }
+
                     ((Activity) mContext).setResult(RESULT_OK);
                     break;
                 case LOCAL_MEDIA_SHARE_UPLOADING:
@@ -277,7 +278,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             finish();
 
-        } else if (action.equals(Util.LOCAL_SHARE_MODIFIED) || action.equals(Util.REMOTE_SHARE_MODIFIED)) {
+        } else if (action.equals(Util.LOCAL_MEDIA_SHARE_MODIFIED) || action.equals(Util.REMOTE_MEDIA_SHARE_MODIFIED)) {
 
             if (mDialog != null && mDialog.isShowing())
                 mDialog.dismiss();
@@ -288,15 +289,26 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             switch (operationResultType) {
                 case SUCCEED:
+
                     Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
 
                     mediaShare = ((MediaShareOperationEvent) operationEvent).getMediaShare();
 
+                    String eventId;
+
                     if (mediaShare.getViewersListSize() == 0) {
+
+                        eventId = Util.ALBUM_SWITCH_UN_SHARE_STATE_UMENG_EVENT_ID;
+
                         mPrivatePublicMenu.setTitle(getString(R.string.set_public));
                     } else {
+
+                        eventId = Util.ALBUM_SWITCH_SHARE_STATE_UMENG_EVENT_ID;
+
                         mPrivatePublicMenu.setTitle(getString(R.string.set_private));
                     }
+
+                    MobclickAgent.onEvent(mContext, eventId);
 
                     isOperated = true;
 

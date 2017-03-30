@@ -51,7 +51,7 @@
                     android:layout_marginLeft="32dp"
                     android:layout_toLeftOf="@id/ok"
                     android:layout_toRightOf="@+id/back"
-                    android:text="@string/modify_album"
+                    android:text="@string/set_album"
                     android:textColor="@color/white"
                     android:textSize="18dp" />
 

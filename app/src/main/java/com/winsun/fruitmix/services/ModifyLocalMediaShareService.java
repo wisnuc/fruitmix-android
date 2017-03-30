@@ -11,7 +11,6 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationNoNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -69,7 +68,7 @@ public class ModifyLocalMediaShareService extends IntentService {
 
         if (!mediaShare.isLocal()) {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, new OperationNoNetworkException(), mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_MEDIA_SHARE_MODIFIED, new OperationNoNetworkException(), mediaShare);
 
         } else {
 
@@ -79,13 +78,13 @@ public class ModifyLocalMediaShareService extends IntentService {
 
             if (returnValue > 0) {
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, new OperationSuccess(), mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_MEDIA_SHARE_MODIFIED, new OperationSuccess(), mediaShare);
 
                 Log.i(TAG, "modify local share succeed");
 
             } else {
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_MODIFIED, new OperationSQLException(), mediaShare);
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_MEDIA_SHARE_MODIFIED, new OperationSQLException(), mediaShare);
 
                 Log.i(TAG, "modify local share fail");
             }

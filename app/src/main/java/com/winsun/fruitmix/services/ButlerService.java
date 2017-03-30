@@ -23,7 +23,7 @@ import com.winsun.fruitmix.eventbus.ModifyMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaShareRequestEvent;
-import com.winsun.fruitmix.eventbus.RetrieveSharedPhotoThumbRequestEvent;
+import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.eventbus.UserRequestEvent;
 import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
@@ -554,9 +554,9 @@ public class ButlerService extends Service {
                 DBUtils dbUtils = DBUtils.getInstance(this);
                 LocalCache.LocalLoggedInUsers.addAll(dbUtils.getAllLoggedInUser());
                 break;
-            case SHARED_PHOTO_THUMB:
+            case MEDIA_ORIGINAL_PHOTO:
 
-                List<Media> medias = ((RetrieveSharedPhotoThumbRequestEvent) requestEvent).getMedias();
+                List<Media> medias = ((RetrieveMediaOriginalPhotoRequestEvent) requestEvent).getMedias();
                 ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
                 RetrieveOriginalPhotoTask downloadFileTask = new RetrieveOriginalPhotoTask(medias, DBUtils.getInstance(this));
                 instance.doOneTaskInCachedThreadUsingCallable(downloadFileTask);

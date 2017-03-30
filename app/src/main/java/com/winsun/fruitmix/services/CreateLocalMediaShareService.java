@@ -73,7 +73,7 @@ public class CreateLocalMediaShareService extends IntentService {
 
         if (returnValue > 0) {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_CREATED, new OperationSuccess(), mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_MEDIA_SHARE_CREATED, new OperationSuccess(), mediaShare);
 
             Log.i(TAG, "insert local mediashare succeed");
 
@@ -83,7 +83,7 @@ public class CreateLocalMediaShareService extends IntentService {
 
         } else {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_SHARE_CREATED, new OperationSQLException(), mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_MEDIA_SHARE_CREATED, new OperationSQLException(), mediaShare);
 
             Log.i(TAG, "insert local mediashare fail");
         }
