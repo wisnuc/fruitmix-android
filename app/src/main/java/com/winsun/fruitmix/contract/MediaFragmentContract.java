@@ -72,7 +72,7 @@ public interface MediaFragmentContract {
 
         void onMapSharedElements(List<String> names, Map<String, View> sharedElements);
 
-        void onCreate(Context context);
+        void onCreate();
 
         void onResume();
 

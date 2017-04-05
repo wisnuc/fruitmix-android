@@ -58,14 +58,14 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
         diffContentsModifiedMediaShare.clearMediaShareContents();
         diffContentsModifiedMediaShare.initMediaShareContents(mModifiedMediaShare.getDifferentMediaShareContentInCurrentMediaShare(mMediaShare));
 
-        int diffOriginalMediaShareContentSize = diffContentsOriginalMediaShare.getMediaContentsListSize();
-        int diffModifiedMediaShareContentSize = diffContentsModifiedMediaShare.getMediaContentsListSize();
+        int diffOriginalMediaShareContentSize = diffContentsOriginalMediaShare.getMediaShareContentsListSize();
+        int diffModifiedMediaShareContentSize = diffContentsModifiedMediaShare.getMediaShareContentsListSize();
         if (diffOriginalMediaShareContentSize == 0 && diffModifiedMediaShareContentSize == 0) {
 
             mView.finishActivity();
         }
 
-        if (mModifiedMediaShare.getMediaContentsListSize() != 0) {
+        if (mModifiedMediaShare.getMediaShareContentsListSize() != 0) {
             mModifiedMediaShare.setCoverImageUUID(mModifiedMediaShare.getFirstMediaDigestInMediaContentsList());
         } else {
             mModifiedMediaShare.setCoverImageUUID("");
@@ -145,13 +145,10 @@ public class EditPhotoPresenterImpl implements EditPhotoContract.EditPhotoPresen
 
         setMainPicScreenHeight(context,view,media);
 
-        mRepository.loadThumbMediaToNetworkImageView(context,media,view);
+        mRepository.loadThumbMediaToNetworkImageView(media,view);
     }
 
     private void setMainPicScreenHeight(Context context,NetworkImageView mainPic, Media media) {
-
-        if (media.isLocal())
-            return;
 
         int mediaWidth = Integer.parseInt(media.getWidth());
         int mediaHeight = Integer.parseInt(media.getHeight());

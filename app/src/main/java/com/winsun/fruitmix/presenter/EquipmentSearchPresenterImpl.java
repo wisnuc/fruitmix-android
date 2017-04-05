@@ -134,7 +134,10 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
     }
 
     private void login(int groupPosition, LoggedInUser loggedInUser) {
-        mRepository.insertGatewayToMemory("http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0));
+
+        String gateway = "http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0);
+
+        mRepository.insertGatewayToMemory(gateway);
         mRepository.insertLoginUserUUIDToMemory(loggedInUser.getUser().getUuid());
         mRepository.insertTokenToMemory(loggedInUser.getToken());
         mRepository.insertDeviceIDToMemory(loggedInUser.getDeviceID());
@@ -142,7 +145,11 @@ public class EquipmentSearchPresenterImpl implements EquipmentSearchContract.Equ
         mRepository.insertDeviceIDToDB(loggedInUser.getDeviceID());
         mRepository.insertTokenToDB(loggedInUser.getToken());
         mRepository.insertLoginUserUUIDToDB(loggedInUser.getUser().getUuid());
-        mRepository.insertGatewayToDB("http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0));
+        mRepository.insertGatewayToDB(gateway);
+
+        mRepository.insertGatewayToServer(gateway);
+        mRepository.insertTokenToServer(loggedInUser.getToken());
+        mRepository.insertDeviceIdToServer(loggedInUser.getDeviceID());
 
         mRepository.checkAutoUpload();
 

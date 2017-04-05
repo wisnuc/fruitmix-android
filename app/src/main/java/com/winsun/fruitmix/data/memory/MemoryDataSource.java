@@ -98,7 +98,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperateMediaShareResult insertRemoteMediaShare(String url, String token, MediaShare mediaShare) {
+    public OperateMediaShareResult insertRemoteMediaShare(MediaShare mediaShare) {
 
         remoteMediaShareMapKeyIsUUID.putIfAbsent(mediaShare.getUuid(), mediaShare);
 
@@ -141,7 +141,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult modifyRemoteMediaShare(String url, String token, String requestData, MediaShare modifiedMediaShare) {
+    public OperationResult modifyRemoteMediaShare(String requestData, MediaShare modifiedMediaShare) {
 
         MediaShare originalMediaShare = remoteMediaShareMapKeyIsUUID.get(modifiedMediaShare.getUuid());
 
@@ -156,7 +156,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult modifyMediaInRemoteMediaShare(String url, String token, String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
+    public OperationResult modifyMediaInRemoteMediaShare(String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
 
         remoteMediaShareMapKeyIsUUID.put(diffContentsModifiedMediaShare.getUuid(), modifiedMediaShare);
 
@@ -164,7 +164,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult deleteRemoteMediaShare(String url, String token, MediaShare mediaShare) {
+    public OperationResult deleteRemoteMediaShare(MediaShare mediaShare) {
 
         remoteMediaShareMapKeyIsUUID.remove(mediaShare.getUuid());
 
@@ -172,7 +172,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public DeviceIDLoadOperationResult loadDeviceID(String url, String token) {
+    public DeviceIDLoadOperationResult loadDeviceID() {
 
         DeviceIDLoadOperationResult result = new DeviceIDLoadOperationResult();
         result.setDeviceID(mDeviceID);
@@ -181,7 +181,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public UsersLoadOperationResult loadUsers(String loadUserUrl, String loadOtherUserUrl, String token) {
+    public UsersLoadOperationResult loadRemoteUsers() {
 
         UsersLoadOperationResult result = new UsersLoadOperationResult();
 
@@ -198,23 +198,18 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult insertLocalMedia(String url, String token, Media media) {
+    public OperationResult insertLocalMedia(Media media) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult updateLocalMedia(Media media) {
+    public OperationResult updateLocalMediaMiniThumb(Media media) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult updateLocalMedias(Collection<Media> medias) {
-
-        for (Media media : medias) {
-            localMediaMapKeyIsThumb.put(media.getThumb(), media);
-        }
-
-        return new OperationSuccess();
+    public OperationResult updateLocalMediaUploadedDeviceID(Media media) {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -233,7 +228,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public MediasLoadOperationResult loadAllRemoteMedias(String url, String token) {
+    public MediasLoadOperationResult loadAllRemoteMedias() {
 
         MediasLoadOperationResult result = new MediasLoadOperationResult();
 
@@ -282,12 +277,12 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperateUserResult insertUser(String url, String token, String userName, String userPassword) {
+    public OperateUserResult insertRemoteUser(String userName, String userPassword) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult insertUsers(List<User> users) {
+    public OperationResult insertRemoteUsers(List<User> users) {
 
         for (User user : users) {
             remoteUserMapKeyIsUUID.putIfAbsent(user.getUuid(), user);
@@ -296,7 +291,7 @@ public class MemoryDataSource implements DataSource {
         return new OperationSuccess();
     }
 
-    public User loadUser(String userUUID) {
+    public User loadRemoteUser(String userUUID) {
         if (remoteUserMapKeyIsUUID.containsKey(userUUID)) {
             return remoteUserMapKeyIsUUID.get(userUUID);
         } else
@@ -304,7 +299,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public Collection<String> loadAllUserUUID() {
+    public Collection<String> loadAllRemoteUserUUID() {
         return remoteUserMapKeyIsUUID.keySet();
     }
 
@@ -319,7 +314,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public MediaSharesLoadOperationResult loadAllRemoteMediaShares(String url, String token) {
+    public MediaSharesLoadOperationResult loadAllRemoteMediaShares() {
 
         MediaSharesLoadOperationResult result = new MediaSharesLoadOperationResult();
 
@@ -330,7 +325,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public FilesLoadOperationResult loadRemoteFolder(String url, String token) {
+    public FilesLoadOperationResult loadRemoteFolder(String folderUUID) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
@@ -343,7 +338,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult loadRemoteFile(String baseUrl, String token, FileDownloadState fileDownloadState) {
+    public OperationResult downloadRemoteFile(FileDownloadState fileDownloadState) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
@@ -356,12 +351,7 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public FileSharesLoadOperationResult loadRemoteFileRootShares(String loadFileSharedWithMeUrl, String loadFileShareWithOthersUrl, String token) {
-        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
-    }
-
-    @Override
-    public FileDownloadItem loadDownloadFileRecord(String fileUUID) {
+    public FileSharesLoadOperationResult loadRemoteFileRootShares() {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
@@ -436,12 +426,12 @@ public class MemoryDataSource implements DataSource {
     }
 
     @Override
-    public List<EquipmentAlias> loadEquipmentAlias(String token, String url) {
+    public List<EquipmentAlias> loadEquipmentAlias(String url) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public List<User> loadUserByLoginApi(String token, String url) {
+    public List<User> loadRemoteUserByLoginApi(String url) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 

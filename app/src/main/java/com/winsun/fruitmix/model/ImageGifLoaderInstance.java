@@ -23,17 +23,24 @@ public enum ImageGifLoaderInstance {
 
     public static final String TAG = ImageGifLoaderInstance.class.getSimpleName();
 
+    private RequestQueue mRequestQueue;
+
     private ImageLoader mImageLoader;
 
     private GifLoader mGifLoader;
 
     private Map<String, String> headers;
 
-    public ImageLoader getImageLoader(Context context,String token) {
+    public void initRequestQueue(Context context){
+
+        mRequestQueue = RequestQueueInstance.getInstance(context).getRequestQueue();
+
+    }
+
+    public ImageLoader getImageLoader(String token) {
 
         if (mImageLoader == null) {
 
-            RequestQueue mRequestQueue = RequestQueueInstance.getInstance(context).getRequestQueue();
             mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
 
             if (headers == null) {
@@ -49,11 +56,10 @@ public enum ImageGifLoaderInstance {
 
     }
 
-    public GifLoader getGifLoader(Context context,String token) {
+    public GifLoader getGifLoader(String token) {
 
         if (mGifLoader == null) {
 
-            RequestQueue mRequestQueue = RequestQueueInstance.getInstance(context).getRequestQueue();
             mGifLoader = new GifLoader(mRequestQueue, GifLruCache.instance());
 
             if (headers == null) {

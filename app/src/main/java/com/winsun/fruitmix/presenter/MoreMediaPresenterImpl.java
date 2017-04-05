@@ -87,6 +87,6 @@ public class MoreMediaPresenterImpl implements MoreMediaContract.MoreMediaPresen
 
     @Override
     public void loadMediaToView(Context context, Media media, NetworkImageView view) {
-        mRepository.loadThumbMediaToNetworkImageView(context, media, view);
+        mRepository.loadThumbMediaToNetworkImageView( media, view);
     }
 }

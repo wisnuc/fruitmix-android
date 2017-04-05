@@ -202,12 +202,12 @@ public class MediaShareFragmentPresenterImpl implements MediaShareFragmentContra
 
     @Override
     public void loadThumbMediaToView(Context context, Media media, NetworkImageView view) {
-        mRepository.loadThumbMediaToNetworkImageView(context, media, view);
+        mRepository.loadThumbMediaToNetworkImageView(media, view);
     }
 
     @Override
     public void loadOriginalMediaToView(Context context, Media media, NetworkImageView view) {
-        mRepository.loadOriginalMediaToNetworkImageView(context, media, view);
+        mRepository.loadOriginalMediaToNetworkImageView( media, view);
     }
 
     @Override

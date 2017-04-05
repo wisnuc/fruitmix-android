@@ -170,7 +170,7 @@ public class AlbumFragmentPresenterImpl implements AlbumFragmentContract.AlbumFr
     @Override
     public void loadMediaToView(Context context, Media media, NetworkImageView view) {
 
-        mRepository.loadThumbMediaToNetworkImageView(context, media, view);
+        mRepository.loadThumbMediaToNetworkImageView(media, view);
 
     }
 

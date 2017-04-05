@@ -261,14 +261,11 @@ public class AlbumContentPresentImpl implements AlbumContentContract.AlbumConten
 
         setMainPicScreenHeight(context,view,media);
 
-        mRepository.loadThumbMediaToNetworkImageView(context, media, view);
+        mRepository.loadThumbMediaToNetworkImageView(media, view);
 
     }
 
     private void setMainPicScreenHeight(Context context,NetworkImageView mainPic, Media media) {
-
-        if (media.isLocal())
-            return;
 
         int mediaWidth = Integer.parseInt(media.getWidth());
         int mediaHeight = Integer.parseInt(media.getHeight());

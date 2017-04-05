@@ -192,7 +192,7 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
         if (media.isLocal()) {
             handleLocalMediaLoaded(media);
         } else {
-            handleRemoteMediaLoaded(context, mediaUrl, view, media);
+            handleRemoteMediaLoaded(mediaUrl, view, media);
         }
     }
 
@@ -209,9 +209,9 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
                 mView.setTransitionName(view, media.getKey());
 
             if (transitionMediaNeedShowThumb && !media.isLocal()) {
-                mRepository.loadThumbMediaToGifTouchNetworkImageView(context, media, view);
+                mRepository.loadThumbMediaToGifTouchNetworkImageView( media, view);
             } else {
-                mRepository.loadOriginalMediaToGifTouchNetworkImageView(context, media, view);
+                mRepository.loadOriginalMediaToGifTouchNetworkImageView( media, view);
             }
 
             view.setOnTouchListener(new View.OnTouchListener() {
@@ -290,10 +290,10 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
         }
     }
 
-    private void handleRemoteMediaLoaded(Context context, String url, View view, Media media) {
+    private void handleRemoteMediaLoaded( String url, View view, Media media) {
         if (isImageThumb(url)) {
 
-            handleThumbLoaded(context, view, media);
+            handleThumbLoaded(view, media);
 
         } else {
 
@@ -320,20 +320,20 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
 
     }
 
-    private void handleThumbLoaded(Context context, View view, Media media) {
+    private void handleThumbLoaded( View view, Media media) {
         if (mView.isCurrentViewPage(initialPhotoPosition) && needTransition) {
             mView.startPostponedEnterTransition();
 
-            startLoadCurrentImageAfterTransition(context, view, media);
+            startLoadCurrentImageAfterTransition(view, media);
 
         } else {
 
-            startLoadingOriginalPhoto(context, view, media);
+            startLoadingOriginalPhoto(view, media);
         }
 
     }
 
-    private void startLoadCurrentImageAfterTransition(final Context context, final View view, final Media media) {
+    private void startLoadCurrentImageAfterTransition( final View view, final Media media) {
         if (Util.checkRunningOnLollipopOrHigher()) {
 
             mView.addTransitionListener(new CustomTransitionListener() {
@@ -341,19 +341,19 @@ public class OriginalMediaPresenterImpl implements OriginalMediaContract.Origina
                 public void onTransitionEnd(Transition transition) {
                     super.onTransitionEnd(transition);
 
-                    startLoadingOriginalPhoto(context, view, media);
+                    startLoadingOriginalPhoto(view, media);
 
                 }
             });
 
         } else {
-            startLoadingOriginalPhoto(context, view, media);
+            startLoadingOriginalPhoto(view, media);
         }
     }
 
-    private void startLoadingOriginalPhoto(Context context, View view, Media media) {
+    private void startLoadingOriginalPhoto( View view, Media media) {
 
-        mRepository.loadOriginalMediaToGifTouchNetworkImageView(context, media, (GifTouchNetworkImageView) view);
+        mRepository.loadOriginalMediaToGifTouchNetworkImageView( media, (GifTouchNetworkImageView) view);
 
     }
 

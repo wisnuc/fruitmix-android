@@ -350,7 +350,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
                     if (mView == null) return;
 
-                    showMedias(medias, null);
+                    showMedias(medias);
                 }
 
                 @Override
@@ -363,12 +363,12 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
     @Override
     public void loadThumbMediaToView(Context context, Media media, NetworkImageView view) {
-        mRepository.loadThumbMediaToNetworkImageView(context, media, view);
+        mRepository.loadThumbMediaToNetworkImageView(media, view);
     }
 
     @Override
     public void loadSmallThumbMediaToView(Context context, Media media, NetworkImageView view) {
-        mRepository.loadSmallThumbMediaToNetworkImageView(context, media, view);
+        mRepository.loadSmallThumbMediaToNetworkImageView(media, view);
     }
 
     @Override
@@ -385,12 +385,12 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
     @Override
     public void detachView() {
         mView = null;
+
+        mRepository.cancelPreLoadMediaSmallThumb();
     }
 
-    //TODO: refactor onCreate user context,hold image loader in data repository
-
     @Override
-    public void onCreate(final Context context) {
+    public void onCreate() {
 
         mRepository.loadMediasInThread(new MediaOperationCallback.LoadMediasCallback() {
             @Override
@@ -402,7 +402,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
                 mPhotoListRefresh = true;
 
-                showMedias(medias, context);
+                showMedias(medias);
             }
 
             @Override
@@ -412,7 +412,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
         });
     }
 
-    private void showMedias(final Collection<Media> medias, final Context context) {
+    private void showMedias(final Collection<Media> medias) {
         mRepository.handleMediasForMediaFragment(medias, new MediaOperationCallback.HandleMediaForMediaFragmentCallback() {
             @Override
             public void onOperateFinished(MediaFragmentDataLoader loader) {
@@ -438,7 +438,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
                     if (!mPreLoadPhoto) {
                         mPreLoadPhoto = true;
-                        loadSmallThumbnail(medias, context);
+                        loadSmallThumbnail(medias);
                     }
 
                 } else {
@@ -452,7 +452,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
         });
     }
 
-    private void loadSmallThumbnail(final Collection<Media> medias, final Context context) {
+    private void loadSmallThumbnail(final Collection<Media> medias) {
 
         new Thread(new Runnable() {
             @Override
@@ -478,7 +478,7 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
 
                     url = mRepository.loadImageSmallThumbUrl(media);
 
-                    mRepository.preLoadMediaSmallThumb(context, url, mItemWidth, mItemWidth);
+                    mRepository.preLoadMediaSmallThumb(url, mItemWidth, mItemWidth);
 
                 }
 

@@ -113,6 +113,8 @@ public class DataRepository {
 
     private boolean mStopUpload = false;
 
+    private boolean mStopGenerateMiniThumb = false;
+
     private UserOperationCallback.LoadCurrentUserCallback mLoadCurrentUserCallback;
 
     private List<MediaOperationCallback.LoadMediasCallback> mLoadMediasCallbacks;
@@ -135,7 +137,7 @@ public class DataRepository {
     private static final String SERVICE_PORT = "_http._tcp";
     private static final String DEMAIN = "local.";
 
-    private DataRepository(DataSource memoryDataSource, DataSource dbDataSource, DataSource serverDataSource) {
+    private DataRepository(Context context, DataSource memoryDataSource, DataSource dbDataSource, DataSource serverDataSource) {
 
         mMemoryDataSource = memoryDataSource;
         mDBDataSource = dbDataSource;
@@ -147,6 +149,8 @@ public class DataRepository {
 
         imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
 
+        imageGifLoaderInstance.initRequestQueue(context);
+
         RetrieveMediaShareTimelyCallback = new ArrayList<>();
         mediaKeysInCreateAlbum = new ArrayList<>();
         mLoadMediasCallbacks = new ArrayList<>();
@@ -154,16 +158,17 @@ public class DataRepository {
 
     }
 
-    public static DataRepository getInstance(DataSource cacheDataSource, DataSource dbDataSource, DataSource serverDataSource) {
+    public static DataRepository getInstance(Context context, DataSource cacheDataSource, DataSource dbDataSource, DataSource serverDataSource) {
         if (INSTANCE == null) {
-            INSTANCE = new DataRepository(cacheDataSource, dbDataSource, serverDataSource);
+            INSTANCE = new DataRepository(context, cacheDataSource, dbDataSource, serverDataSource);
         }
         return INSTANCE;
     }
 
     public void init() {
 
-        instance.startFixedThreadPool();
+        instance.startUploadThreadPool();
+        instance.startGenerateMiniThumbThreadPool();
 
         mDBDataSource.init();
         mMemoryDataSource.init();
@@ -305,10 +310,7 @@ public class DataRepository {
 
         try {
 
-            String token = mMemoryDataSource.loadToken();
-            String url = generateUrl(Util.MEDIASHARE_PARAMETER);
-
-            MediaSharesLoadOperationResult result = mServerDataSource.loadAllRemoteMediaShares(url, token);
+            MediaSharesLoadOperationResult result = mServerDataSource.loadAllRemoteMediaShares();
 
             if (result.getOperationResult().getOperationResultType() != OperationResultType.SUCCEED)
                 return;
@@ -322,7 +324,7 @@ public class DataRepository {
                 newMediaSharesDigests.add(mediaShare.getShareDigest());
             }
 
-            List<MediaShare> oldMediaShare = mDBDataSource.loadAllRemoteMediaShares(null, null).getMediaShares();
+            List<MediaShare> oldMediaShare = mDBDataSource.loadAllRemoteMediaShares().getMediaShares();
 
             oldMediaSharesDigests = new ArrayList<>(oldMediaShare.size());
             for (MediaShare mediaShare : oldMediaShare) {
@@ -376,12 +378,16 @@ public class DataRepository {
 
         String token = mDBDataSource.loadToken();
         String gateway = mDBDataSource.loadGateway();
-        String deviceID = mDBDataSource.loadDeviceID(null, null).getDeviceID();
+        String deviceID = mDBDataSource.loadDeviceID().getDeviceID();
         String loginUserUUID = mDBDataSource.loadLoginUserUUID();
 
         if (token == null) {
             callback.onLoadFail(null);
         } else {
+
+            mServerDataSource.insertToken(token);
+            mServerDataSource.insertGateway(gateway);
+            mServerDataSource.insertDeviceID(deviceID);
 
             mMemoryDataSource.insertToken(token);
             mMemoryDataSource.insertGateway(gateway);
@@ -459,13 +465,15 @@ public class DataRepository {
 
     private void loadRemoteDeviceID(final LoadDeviceIdOperationCallback.LoadDeviceIDCallback callback) {
 
-        final DeviceIDLoadOperationResult result = mDBDataSource.loadDeviceID(null, null);
+        final DeviceIDLoadOperationResult result = mDBDataSource.loadDeviceID();
 
         if (result.getOperationResult().getOperationResultType() == OperationResultType.SUCCEED) {
 
             final String deviceID = result.getDeviceID();
 
             mMemoryDataSource.insertDeviceID(deviceID);
+
+            mServerDataSource.insertDeviceID(deviceID);
 
             mHandler.post(new Runnable() {
                 @Override
@@ -478,11 +486,7 @@ public class DataRepository {
 
         } else {
 
-            String token = mMemoryDataSource.loadToken();
-
-            String url = generateUrl(Util.DEVICE_ID_PARAMETER);
-
-            final DeviceIDLoadOperationResult serverResult = mServerDataSource.loadDeviceID(url, token);
+            final DeviceIDLoadOperationResult serverResult = mServerDataSource.loadDeviceID();
 
             if (serverResult.getOperationResult().getOperationResultType().equals(OperationResultType.SUCCEED)) {
 
@@ -545,7 +549,7 @@ public class DataRepository {
 
             resetMediaFragmentDataLoader();
 
-            final List<Media> medias = mMemoryDataSource.loadAllRemoteMedias(null, null).getMedias();
+            final List<Media> medias = mMemoryDataSource.loadAllRemoteMedias().getMedias();
             medias.addAll(mMemoryDataSource.loadAllLocalMedias().getMedias());
 
             mHandler.post(new Runnable() {
@@ -576,7 +580,7 @@ public class DataRepository {
     private void calcLocalMediaUUIDInCamera(List<Media> medias) {
 
         Log.d(TAG, "calcLocalMediaUUIDInCamera: ");
-        
+
         for (Media media : medias) {
             if (media.getUuid().isEmpty()) {
                 String uuid = Util.CalcSHA256OfFile(media.getThumb());
@@ -600,15 +604,17 @@ public class DataRepository {
 
             if (media.getMiniThumb().isEmpty()) {
 
-                instance.doOnTaskInFixedThreadPool(new Runnable() {
+                instance.doOnTaskInGenerateMiniThumbThreadPool(new Runnable() {
                     @Override
                     public void run() {
+
+                        if (mStopGenerateMiniThumb) return;
 
                         boolean result = FileUtil.writeBitmapToLocalPhotoThumbnailFolder(media);
 
                         if (result) {
 
-                            mDBDataSource.updateLocalMedia(media);
+                            mDBDataSource.updateLocalMediaMiniThumb(media);
 
                         }
                     }
@@ -621,78 +627,86 @@ public class DataRepository {
 
     public void startUploadMediaInThread() {
 
-        Log.d(TAG, "startUploadMediaInThread: calc :" + mCalcNewLocalMediaDigestFinished + " remote media loaded: "+ remoteMediaLoaded + " getAutoUploadOrNot: " + getAutoUploadOrNot());
+        Log.d(TAG, "startUploadMediaInThread: calc :" + mCalcNewLocalMediaDigestFinished + " remote media loaded: " + remoteMediaLoaded + " getAutoUploadOrNot: " + getAutoUploadOrNot());
 
         if (mCalcNewLocalMediaDigestFinished && remoteMediaLoaded && getAutoUploadOrNot()) {
 
             mStopUpload = false;
 
-            instance.doOnTaskInFixedThreadPool(new Runnable() {
-                @Override
-                public void run() {
-                    startUploadMedia();
-                }
-            });
+            List<Media> localMedias = mMemoryDataSource.loadAllLocalMedias().getMedias();
+
+            final Collection<String> remoteMediaUUIDs = mMemoryDataSource.loadRemoteMediaUUIDs();
+
+            final String deviceID = mMemoryDataSource.loadDeviceID().getDeviceID();
+
+            for (final Media media : localMedias) {
+
+                instance.doOnTaskInUploadThreadPool(new Runnable() {
+                    @Override
+                    public void run() {
+                        startUploadMedia(media, remoteMediaUUIDs, deviceID);
+                    }
+                });
+
+
+            }
 
         }
 
     }
 
-    private void startUploadMedia() {
+    private void startUploadMedia(Media media, Collection<String> remoteMediaUUIDs, String deviceID) {
 
         Log.d(TAG, "startUploadMedia: ");
-        
-        List<Media> localMedias = mMemoryDataSource.loadAllLocalMedias().getMedias();
 
-        Collection<String> remoteMediaUUIDs = mMemoryDataSource.loadRemoteMediaUUIDs();
+        if (mStopUpload) return;
 
-        String deviceID = mMemoryDataSource.loadDeviceID(null, null).getDeviceID();
+        boolean uploaded = false;
 
-        for (Media media : localMedias) {
+        if (!media.getUploadedDeviceIDs().contains(deviceID)) {
 
-            if (mStopUpload) return;
+            if (remoteMediaUUIDs.contains(media.getUuid())) {
 
-            boolean uploaded = false;
+                uploaded = true;
 
-            if (!media.getUploadedDeviceIDs().contains(deviceID)) {
+            } else {
 
-                if (remoteMediaUUIDs.contains(media.getUuid())) {
+                OperationResult result = mServerDataSource.insertLocalMedia(media);
+
+                if (result.getOperationResultType() == OperationResultType.SUCCEED) {
 
                     uploaded = true;
 
-                } else {
-
-                    String token = mMemoryDataSource.loadToken();
-                    String url = generateUrl(Util.DEVICE_ID_PARAMETER + "/" + mMemoryDataSource.loadDeviceID(null, null).getDeviceID());
-
-                    OperationResult result = mServerDataSource.insertLocalMedia(url, token, media);
-
-                    if (result.getOperationResultType() == OperationResultType.SUCCEED) {
-
-                        uploaded = true;
-
-                    }
-
                 }
 
-                if (!uploaded) continue;
-
-                if (media.getUploadedDeviceIDs().isEmpty()) {
-                    media.setUploadedDeviceIDs(deviceID);
-                } else {
-                    media.setUploadedDeviceIDs(media.getUploadedDeviceIDs() + "," + deviceID);
-                }
-                mDBDataSource.updateLocalMedia(media);
             }
 
+            if (!uploaded) return;
+
+            if (media.getUploadedDeviceIDs().isEmpty()) {
+                media.setUploadedDeviceIDs(deviceID);
+            } else {
+                media.setUploadedDeviceIDs(media.getUploadedDeviceIDs() + "," + deviceID);
+            }
+            mDBDataSource.updateLocalMediaUploadedDeviceID(media);
         }
+
+
     }
 
     public void stopUpload() {
 
         mStopUpload = true;
 
-        instance.shutdownFixedThreadPoolNow();
+        instance.shutdownUploadMediaThreadPoolNow();
+    }
+
+    public void stopGenerateMiniThumb() {
+
+        mStopGenerateMiniThumb = true;
+
+        instance.shutdownGenerateMiniThumbThreadPoolNow();
+
     }
 
     public void loadMediasInThread(final MediaOperationCallback.LoadMediasCallback callback) {
@@ -755,13 +769,10 @@ public class DataRepository {
         Log.d(TAG, "loadMedias: finish load local medias");
 
         if (remoteMediaLoaded) {
-            remoteMedias = mMemoryDataSource.loadAllRemoteMedias(null, null).getMedias();
+            remoteMedias = mMemoryDataSource.loadAllRemoteMedias().getMedias();
         } else {
 
-            String token = mMemoryDataSource.loadToken();
-            String url = generateUrl(Util.MEDIA_PARAMETER);
-
-            MediasLoadOperationResult result = mServerDataSource.loadAllRemoteMedias(url, token);
+            MediasLoadOperationResult result = mServerDataSource.loadAllRemoteMedias();
 
             OperationResult operationResult = result.getOperationResult();
             if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
@@ -774,7 +785,7 @@ public class DataRepository {
                 mMemoryDataSource.insertRemoteMedias(remoteMedias);
 
             } else {
-                remoteMedias = mDBDataSource.loadAllRemoteMedias(null, null).getMedias();
+                remoteMedias = mDBDataSource.loadAllRemoteMedias().getMedias();
 
                 mMemoryDataSource.deleteAllRemoteMedia();
                 mMemoryDataSource.insertRemoteMedias(remoteMedias);
@@ -846,7 +857,7 @@ public class DataRepository {
     }
 
     public User loadUserFromMemory(String userUUID) {
-        return mMemoryDataSource.loadUser(userUUID);
+        return mMemoryDataSource.loadRemoteUser(userUUID);
     }
 
     public MediaShare loadMediaShareFromMemory(String mediaShareUUID) {
@@ -951,14 +962,11 @@ public class DataRepository {
 
         if (remoteMediaShareLoaded) {
 
-            remoteMediaShares = mMemoryDataSource.loadAllRemoteMediaShares(null, null).getMediaShares();
+            remoteMediaShares = mMemoryDataSource.loadAllRemoteMediaShares().getMediaShares();
 
         } else {
 
-            String token = mMemoryDataSource.loadToken();
-            String url = generateUrl(Util.MEDIASHARE_PARAMETER);
-
-            MediaSharesLoadOperationResult result = mServerDataSource.loadAllRemoteMediaShares(url, token);
+            MediaSharesLoadOperationResult result = mServerDataSource.loadAllRemoteMediaShares();
             if (result.getOperationResult().getOperationResultType() == OperationResultType.SUCCEED) {
 
                 remoteMediaShares = result.getMediaShares();
@@ -971,7 +979,7 @@ public class DataRepository {
 
             } else {
 
-                remoteMediaShares = mDBDataSource.loadAllRemoteMediaShares(null, null).getMediaShares();
+                remoteMediaShares = mDBDataSource.loadAllRemoteMediaShares().getMediaShares();
 
                 mMemoryDataSource.deleteAllRemoteMediaShare();
 
@@ -1013,7 +1021,7 @@ public class DataRepository {
     public boolean isMediaSharePublic(MediaShare mediaShare) {
 
         String loginUserUUID = mMemoryDataSource.loadLoginUserUUID();
-        Collection<String> userUUIDs = mMemoryDataSource.loadAllUserUUID();
+        Collection<String> userUUIDs = mMemoryDataSource.loadAllRemoteUserUUID();
 
         return (userUUIDs.size() == 1 && loginUserUUID != null && mediaShare.getCreatorUUID().equals(loginUserUUID))
                 || (mediaShare.getViewersListSize() != 0 && userUUIDs.contains(mediaShare.getCreatorUUID()));
@@ -1027,10 +1035,8 @@ public class DataRepository {
     }
 
     public boolean checkIsDownloaded(String fileUUID) {
-        FileDownloadItem fileDownloadItem = mDBDataSource.loadDownloadFileRecord(fileUUID);
 
-        return fileDownloadItem != null && fileDownloadItem.getDownloadState() == DownloadState.FINISHED;
-
+        return FileDownloadManager.INSTANCE.checkIsDownloaded(fileUUID);
     }
 
     public boolean getShowAlbumTipsValue() {
@@ -1053,13 +1059,11 @@ public class DataRepository {
 
     public void loadEquipmentAlias(final String url, final LoadEquipmentAliasCallback callback) {
 
-        final String token = mMemoryDataSource.loadToken();
-
         instance.doOneTaskInCachedThread(new Runnable() {
             @Override
             public void run() {
 
-                final List<EquipmentAlias> equipmentAliases = mServerDataSource.loadEquipmentAlias(token, url);
+                final List<EquipmentAlias> equipmentAliases = mServerDataSource.loadEquipmentAlias(url);
 
                 mHandler.post(new Runnable() {
                     @Override
@@ -1078,13 +1082,11 @@ public class DataRepository {
 
     public void loadUserByLoginApi(final String url, final UserOperationCallback.LoadUsersCallback callback) {
 
-        final String token = mMemoryDataSource.loadToken();
-
         instance.doOneTaskInCachedThread(new Runnable() {
             @Override
             public void run() {
 
-                final List<User> users = mServerDataSource.loadUserByLoginApi(token, url);
+                final List<User> users = mServerDataSource.loadRemoteUserByLoginApi(url);
 
                 mHandler.post(new Runnable() {
                     @Override
@@ -1154,19 +1156,19 @@ public class DataRepository {
 
         String userUUID = mMemoryDataSource.loadLoginUserUUID();
 
-        return mMemoryDataSource.loadUser(userUUID);
+        return mMemoryDataSource.loadRemoteUser(userUUID);
     }
 
     public Collection<User> loadUsersInMemory() {
 
-        return mMemoryDataSource.loadUsers("", "", "").getUsers();
+        return mMemoryDataSource.loadRemoteUsers().getUsers();
 
     }
 
 
     public void loadUsersInThread(final UserOperationCallback.LoadUsersCallback callback) {
 
-        UsersLoadOperationResult result = mMemoryDataSource.loadUsers("", "", "");
+        UsersLoadOperationResult result = mMemoryDataSource.loadRemoteUsers();
 
         if (remoteUserLoaded) {
 
@@ -1190,11 +1192,7 @@ public class DataRepository {
 
     private void loadUsers(final UserOperationCallback.LoadUsersCallback callback) {
 
-        String loadUserUrl = generateUrl(Util.USER_PARAMETER);
-        String loadOtherUserUrl = generateUrl(Util.LOGIN_PARAMETER);
-        String token = mMemoryDataSource.loadToken();
-
-        UsersLoadOperationResult serverResult = mServerDataSource.loadUsers(loadUserUrl, loadOtherUserUrl, token);
+        UsersLoadOperationResult serverResult = mServerDataSource.loadRemoteUsers();
 
         final List<User> users;
         final OperationResult operationResult = serverResult.getOperationResult();
@@ -1206,19 +1204,19 @@ public class DataRepository {
             mDBDataSource.deleteAllRemoteUsers();
             mMemoryDataSource.deleteAllRemoteUsers();
 
-            mDBDataSource.insertUsers(users);
-            mMemoryDataSource.insertUsers(users);
+            mDBDataSource.insertRemoteUsers(users);
+            mMemoryDataSource.insertRemoteUsers(users);
 
 
         } else {
 
-            serverResult = mDBDataSource.loadUsers("", "", "");
+            serverResult = mDBDataSource.loadRemoteUsers();
 
             users = serverResult.getUsers();
 
             mMemoryDataSource.deleteAllRemoteUsers();
 
-            mMemoryDataSource.insertUsers(users);
+            mMemoryDataSource.insertRemoteUsers(users);
 
 
         }
@@ -1244,11 +1242,11 @@ public class DataRepository {
 
         String userUUID = mMemoryDataSource.loadLoginUserUUID();
 
-        User user = mMemoryDataSource.loadUser(userUUID);
+        User user = mMemoryDataSource.loadRemoteUser(userUUID);
         if (user != null) {
             callback.onLoadSucceed(new OperationSuccess(), user);
         } else {
-            user = mDBDataSource.loadUser(userUUID);
+            user = mDBDataSource.loadRemoteUser(userUUID);
 
             if (user == null)
                 addCallbackWhenLoadUsersFinished(callback);
@@ -1263,10 +1261,6 @@ public class DataRepository {
         mLoadCurrentUserCallback = callback;
     }
 
-    private String generateUrl(String req) {
-        return mMemoryDataSource.loadGateway() + ":" + Util.PORT + req;
-    }
-
 
     public void createUser(final String userName, final String userPassword, final UserOperationCallback.OperateUserCallback callback) {
 
@@ -1274,15 +1268,14 @@ public class DataRepository {
             @Override
             public void run() {
 
-                final OperateUserResult operateUserResult = mServerDataSource.insertUser(generateUrl(Util.USER_PARAMETER),
-                        mMemoryDataSource.loadToken(), userName, userPassword);
+                final OperateUserResult operateUserResult = mServerDataSource.insertRemoteUser(userName, userPassword);
 
                 if (operateUserResult.getOperationResult().getOperationResultType() == OperationResultType.SUCCEED) {
 
                     final User user = operateUserResult.getUser();
 
-                    mDBDataSource.insertUsers(Collections.singletonList(user));
-                    mMemoryDataSource.insertUsers(Collections.singletonList(user));
+                    mDBDataSource.insertRemoteUsers(Collections.singletonList(user));
+                    mMemoryDataSource.insertRemoteUsers(Collections.singletonList(user));
 
                     mHandler.post(new Runnable() {
                         @Override
@@ -1316,15 +1309,14 @@ public class DataRepository {
             @Override
             public void run() {
 
-                final OperateMediaShareResult operateMediaShareResult = mServerDataSource.insertRemoteMediaShare(generateUrl(Util.MEDIASHARE_PARAMETER),
-                        mMemoryDataSource.loadToken(), mediaShare);
+                final OperateMediaShareResult operateMediaShareResult = mServerDataSource.insertRemoteMediaShare(mediaShare);
 
                 if (operateMediaShareResult.getOperationResult().getOperationResultType() == OperationResultType.SUCCEED) {
 
                     final MediaShare newMediaShare = operateMediaShareResult.getMediaShare();
 
-                    mDBDataSource.insertRemoteMediaShare(null, null, newMediaShare);
-                    mMemoryDataSource.insertRemoteMediaShare(null, null, newMediaShare);
+                    mDBDataSource.insertRemoteMediaShare(newMediaShare);
+                    mMemoryDataSource.insertRemoteMediaShare(newMediaShare);
 
                     mHandler.post(new Runnable() {
                         @Override
@@ -1354,7 +1346,7 @@ public class DataRepository {
     }
 
     public Collection<String> loadAllUserUUIDInMemory() {
-        return mMemoryDataSource.loadAllUserUUID();
+        return mMemoryDataSource.loadAllRemoteUserUUID();
     }
 
     public MediaShare createMediaShareInMemory(boolean isAlbum, boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaKeys) {
@@ -1382,7 +1374,7 @@ public class DataRepository {
         mediaShare.setTitle(title);
         mediaShare.setDesc(desc);
 
-        Collection<String> userUUIDs = mMemoryDataSource.loadAllUserUUID();
+        Collection<String> userUUIDs = mMemoryDataSource.loadAllRemoteUserUUID();
 
         if (isPublic) {
             for (String userUUID : userUUIDs) {
@@ -1455,10 +1447,10 @@ public class DataRepository {
                                         final MediaShareOperationCallback.OperateMediaShareCallback callback) {
 
         String requestData = "[";
-        if (diffContentsOriginalMediaShare.getMediaContentsListSize() != 0) {
+        if (diffContentsOriginalMediaShare.getMediaShareContentsListSize() != 0) {
             requestData += createStringOperateContentsInMediaShare(diffContentsOriginalMediaShare, Util.DELETE);
         }
-        if (diffContentsModifiedMediaShare.getMediaContentsListSize() != 0) {
+        if (diffContentsModifiedMediaShare.getMediaShareContentsListSize() != 0) {
             requestData += createStringOperateContentsInMediaShare(diffContentsModifiedMediaShare, Util.ADD);
         }
         requestData += "]";
@@ -1469,13 +1461,12 @@ public class DataRepository {
             @Override
             public void run() {
 
-                final OperationResult result = mServerDataSource.modifyMediaInRemoteMediaShare(generateUrl(Util.MEDIASHARE_PARAMETER + "/" + modifiedMediaShare.getUuid() + "/update"),
-                        mMemoryDataSource.loadToken(), request, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
+                final OperationResult result = mServerDataSource.modifyMediaInRemoteMediaShare(request, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
 
                 if (result.getOperationResultType() == OperationResultType.SUCCEED) {
 
-                    mDBDataSource.modifyMediaInRemoteMediaShare(null, null, request, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
-                    mMemoryDataSource.modifyMediaInRemoteMediaShare(null, null, request, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
+                    mDBDataSource.modifyMediaInRemoteMediaShare(request, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
+                    mMemoryDataSource.modifyMediaInRemoteMediaShare(request, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
 
                     mHandler.post(new Runnable() {
                         @Override
@@ -1510,13 +1501,12 @@ public class DataRepository {
             @Override
             public void run() {
 
-                final OperationResult result = mServerDataSource.modifyRemoteMediaShare(generateUrl(Util.MEDIASHARE_PARAMETER + "/" + modifiedMediaShare.getUuid() + "/update"),
-                        mMemoryDataSource.loadToken(), requestData, modifiedMediaShare);
+                final OperationResult result = mServerDataSource.modifyRemoteMediaShare(requestData, modifiedMediaShare);
 
                 if (result.getOperationResultType() == OperationResultType.SUCCEED) {
 
-                    mDBDataSource.modifyRemoteMediaShare(null, null, requestData, modifiedMediaShare);
-                    mMemoryDataSource.modifyRemoteMediaShare(null, null, requestData, modifiedMediaShare);
+                    mDBDataSource.modifyRemoteMediaShare(requestData, modifiedMediaShare);
+                    mMemoryDataSource.modifyRemoteMediaShare(requestData, modifiedMediaShare);
 
                     mHandler.post(new Runnable() {
                         @Override
@@ -1550,13 +1540,12 @@ public class DataRepository {
             @Override
             public void run() {
 
-                final OperationResult result = mServerDataSource.deleteRemoteMediaShare(generateUrl(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid()),
-                        mMemoryDataSource.loadToken(), mediaShare);
+                final OperationResult result = mServerDataSource.deleteRemoteMediaShare(mediaShare);
 
                 if (result.getOperationResultType() == OperationResultType.SUCCEED) {
 
-                    mDBDataSource.deleteRemoteMediaShare(null, null, mediaShare);
-                    mMemoryDataSource.deleteRemoteMediaShare(null, null, mediaShare);
+                    mDBDataSource.deleteRemoteMediaShare(mediaShare);
+                    mMemoryDataSource.deleteRemoteMediaShare(mediaShare);
 
                     mHandler.post(new Runnable() {
                         @Override
@@ -1590,11 +1579,7 @@ public class DataRepository {
             @Override
             public void run() {
 
-                String token = mMemoryDataSource.loadToken();
-                String loadFileSharedWithMeUrl = generateUrl(Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_ME_PARAMETER);
-                String loadFileShareWithOthersUrl = generateUrl(Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_OTHERS_PARAMETER);
-
-                final FileSharesLoadOperationResult result = mServerDataSource.loadRemoteFileRootShares(loadFileSharedWithMeUrl, loadFileShareWithOthersUrl, token);
+                final FileSharesLoadOperationResult result = mServerDataSource.loadRemoteFileRootShares();
 
                 if (result.getOperationResult().getOperationResultType() == OperationResultType.SUCCEED) {
 
@@ -1636,10 +1621,7 @@ public class DataRepository {
             @Override
             public void run() {
 
-                String token = mMemoryDataSource.loadToken();
-                String url = generateUrl(Util.FILE_PARAMETER + "/" + folderUUID);
-
-                final FilesLoadOperationResult result = mServerDataSource.loadRemoteFolder(url, token);
+                final FilesLoadOperationResult result = mServerDataSource.loadRemoteFolder(folderUUID);
 
                 if (result.getOperationResult().getOperationResultType() == OperationResultType.SUCCEED) {
 
@@ -1709,8 +1691,6 @@ public class DataRepository {
 
     }
 
-    //TODO:refactor download file logic
-
     public void downloadFile(AbstractRemoteFile file) {
 
         final FileDownloadItem fileDownloadItem = new FileDownloadItem(file.getName(), Long.parseLong(file.getSize()), file.getUuid());
@@ -1748,12 +1728,9 @@ public class DataRepository {
             @Override
             public void run() {
 
-                String baseUrl = mMemoryDataSource.loadGateway() + ":" + Util.PORT;
-                String token = mMemoryDataSource.loadToken();
-
                 FileDownloadState fileDownloadState = fileDownloadItem.getFileDownloadState();
 
-                OperationResult result = mServerDataSource.loadRemoteFile(baseUrl, token, fileDownloadState);
+                OperationResult result = mServerDataSource.downloadRemoteFile(fileDownloadState);
 
                 if (result.getOperationResultType() == OperationResultType.SUCCEED) {
 
@@ -1795,7 +1772,7 @@ public class DataRepository {
 
     }
 
-    private void loadMediaToGifTouchNetworkImageView(Context context, String remoteUrl, Media media, GifTouchNetworkImageView view) {
+    private void loadMediaToGifTouchNetworkImageView(String remoteUrl, Media media, GifTouchNetworkImageView view) {
         view.setOrientationNumber(media.getOrientationNumber());
 
         view.setDefaultImageResId(R.drawable.placeholder_photo);
@@ -1808,37 +1785,37 @@ public class DataRepository {
 
         if (media.getType().equalsIgnoreCase("gif")) {
 
-            GifLoader loader = imageGifLoaderInstance.getGifLoader(context, token);
+            GifLoader loader = imageGifLoaderInstance.getGifLoader(token);
             loader.setShouldCache(!media.isLocal());
 
             view.setGifUrl(remoteUrl, loader);
         } else {
 
-            ImageLoader loader = imageGifLoaderInstance.getImageLoader(context, token);
+            ImageLoader loader = imageGifLoaderInstance.getImageLoader(token);
             loader.setShouldCache(!media.isLocal());
 
             view.setImageUrl(remoteUrl, loader);
         }
     }
 
-    public void loadOriginalMediaToGifTouchNetworkImageView(Context context, Media media, GifTouchNetworkImageView view) {
+    public void loadOriginalMediaToGifTouchNetworkImageView(Media media, GifTouchNetworkImageView view) {
 
         String remoteUrl = loadImageOriginalUrl(media);
 
-        loadMediaToGifTouchNetworkImageView(context, remoteUrl, media, view);
+        loadMediaToGifTouchNetworkImageView(remoteUrl, media, view);
     }
 
-    public void loadThumbMediaToGifTouchNetworkImageView(Context context, Media media, GifTouchNetworkImageView view) {
+    public void loadThumbMediaToGifTouchNetworkImageView(Media media, GifTouchNetworkImageView view) {
 
         String remoteUrl = loadImageThumbUrl(media);
 
-        loadMediaToGifTouchNetworkImageView(context, remoteUrl, media, view);
+        loadMediaToGifTouchNetworkImageView(remoteUrl, media, view);
     }
 
-    private void loadMediaToNetworkImageView(boolean needSetOrientationNumber, Context context, String remoteUrl, Media media, NetworkImageView view) {
+    private void loadMediaToNetworkImageView(boolean needSetOrientationNumber, String remoteUrl, Media media, NetworkImageView view) {
 
         String token = mMemoryDataSource.loadToken();
-        ImageLoader loader = imageGifLoaderInstance.getImageLoader(context, token);
+        ImageLoader loader = imageGifLoaderInstance.getImageLoader(token);
 
         if (media != null) {
 
@@ -1860,7 +1837,7 @@ public class DataRepository {
 
     }
 
-    public void loadOriginalMediaToNetworkImageView(Context context, Media media, NetworkImageView view) {
+    public void loadOriginalMediaToNetworkImageView(Media media, NetworkImageView view) {
 
         if (media == null) {
             view.setImageUrl(null, null);
@@ -1869,11 +1846,11 @@ public class DataRepository {
 
         String remoteUrl = loadImageOriginalUrl(media);
 
-        loadMediaToNetworkImageView(true, context, remoteUrl, media, view);
+        loadMediaToNetworkImageView(true, remoteUrl, media, view);
 
     }
 
-    public void loadThumbMediaToNetworkImageView(Context context, Media media, NetworkImageView view) {
+    public void loadThumbMediaToNetworkImageView(Media media, NetworkImageView view) {
 
         if (media == null) {
             view.setImageUrl(null, null);
@@ -1884,10 +1861,10 @@ public class DataRepository {
 
         boolean needSetOrientationNumber = media.isLocal();
 
-        loadMediaToNetworkImageView(needSetOrientationNumber, context, remoteUrl, media, view);
+        loadMediaToNetworkImageView(needSetOrientationNumber, remoteUrl, media, view);
     }
 
-    public void loadSmallThumbMediaToNetworkImageView(Context context, Media media, NetworkImageView view) {
+    public void loadSmallThumbMediaToNetworkImageView(Media media, NetworkImageView view) {
 
         if (media == null) {
             view.setImageUrl(null, null);
@@ -1898,7 +1875,7 @@ public class DataRepository {
 
         boolean needSetOrientationNumber = media.isLocal();
 
-        loadMediaToNetworkImageView(needSetOrientationNumber, context, remoteUrl, media, view);
+        loadMediaToNetworkImageView(needSetOrientationNumber, remoteUrl, media, view);
     }
 
 
@@ -2025,12 +2002,24 @@ public class DataRepository {
         mDBDataSource.insertLoginUserUUID(userUUID);
     }
 
+    public void insertGatewayToServer(String gateway) {
+        mServerDataSource.insertGateway(gateway);
+    }
+
+    public void insertTokenToServer(String token) {
+        mServerDataSource.insertToken(token);
+    }
+
+    public void insertDeviceIdToServer(String deviceId) {
+        mServerDataSource.insertDeviceID(deviceId);
+    }
+
     public boolean checkAutoUpload() {
 
         List<LoggedInUser> loggedInUsers = loadLoggedInUserInMemory();
         String userUUID = loadCurrentLoginUserUUIDInMemory();
 
-        String deviceId = mMemoryDataSource.loadDeviceID(null, null).getDeviceID();
+        String deviceId = mMemoryDataSource.loadDeviceID().getDeviceID();
 
         for (LoggedInUser loggedInUser : loggedInUsers) {
 
@@ -2054,7 +2043,7 @@ public class DataRepository {
     public void saveLoggedInUser(String equipmentGroupName) {
         User currentUser = loadCurrentLoginUserInMemory();
 
-        String deviceID = mMemoryDataSource.loadDeviceID(null, null).getDeviceID();
+        String deviceID = mMemoryDataSource.loadDeviceID().getDeviceID();
         String token = mMemoryDataSource.loadToken();
         String gateway = mMemoryDataSource.loadGateway();
 
@@ -2081,14 +2070,14 @@ public class DataRepository {
     }
 
     public void saveCurrentUploadDeviceID() {
-        mDBDataSource.saveCurrentUploadDeviceID(mMemoryDataSource.loadDeviceID(null, null).getDeviceID());
+        mDBDataSource.saveCurrentUploadDeviceID(mMemoryDataSource.loadDeviceID().getDeviceID());
     }
 
     public int getAlreadyUploadMediaCount() {
 
         List<Media> medias = mMemoryDataSource.loadAllLocalMedias().getMedias();
 
-        String deviceID = mMemoryDataSource.loadDeviceID(null, null).getDeviceID();
+        String deviceID = mMemoryDataSource.loadDeviceID().getDeviceID();
 
         int alreadyUploadMediaCount = 0;
 
@@ -2108,10 +2097,16 @@ public class DataRepository {
         return mMemoryDataSource.loadAllLocalMedias().getMedias().size();
     }
 
-    public void preLoadMediaSmallThumb(Context context, String url, int width, int height) {
+    public void preLoadMediaSmallThumb(String url, int width, int height) {
 
-        ImageLoader imageLoader = ImageGifLoaderInstance.INSTANCE.getImageLoader(context, mMemoryDataSource.loadToken());
+        ImageLoader imageLoader = imageGifLoaderInstance.getImageLoader(mMemoryDataSource.loadToken());
         imageLoader.preLoadMediaSmallThumb(url, width, height);
+
+    }
+
+    public void cancelPreLoadMediaSmallThumb(){
+
+        imageGifLoaderInstance.getImageLoader(mMemoryDataSource.loadToken()).cancelAllPreLoadMedia();
 
     }
 

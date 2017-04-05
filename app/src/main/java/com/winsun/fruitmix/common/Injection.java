@@ -15,7 +15,7 @@ public class Injection {
 
     public static DataRepository injectDataRepository(Context context) {
 
-        return DataRepository.getInstance(MemoryDataSource.getInstance(), DBDataSource.getInstance(context), ServerDataSource.getInstance());
+        return DataRepository.getInstance(context,MemoryDataSource.getInstance(), DBDataSource.getInstance(context), ServerDataSource.getInstance());
 
     }
 

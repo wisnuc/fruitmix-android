@@ -216,7 +216,7 @@ public class MediaMainFragmentPresenterImpl implements MediaMainFragmentContract
         if (isHidden)
             return;
 
-        mMediaFragmentPresenter.onCreate(context);
+        mMediaFragmentPresenter.onCreate();
     }
 
     @Override

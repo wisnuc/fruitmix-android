@@ -276,7 +276,7 @@ public class MediaShareFragment implements MediaShareFragmentContract.MediaShare
             MediaShare mediaShare = mMediaShares.get(position);
             if (mediaShare.isAlbum()) {
                 return VIEW_ALBUM_CARD_ITEM;
-            } else if (mediaShare.getMediaContentsListSize() == 1) {
+            } else if (mediaShare.getMediaShareContentsListSize() == 1) {
                 return VIEW_ONE_MEDIA_SHARE_CARD_ITEM;
             } else {
                 return VIEW_ONE_MORE_MEDIA_SHARE_CARD_ITEM;

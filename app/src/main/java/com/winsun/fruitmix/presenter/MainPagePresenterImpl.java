@@ -437,6 +437,8 @@ public class MainPagePresenterImpl implements MainPageContract.MainPagePresenter
 
         mRepository.stopUpload();
 
+        mRepository.stopGenerateMiniThumb();
+
         mView = null;
     }
 
@@ -602,11 +604,11 @@ public class MainPagePresenterImpl implements MainPageContract.MainPagePresenter
 
             mView.setNavigationHeaderArrowImageResource(R.drawable.navigation_header_arrow_down);
 
-            if (mView.getLoggedInUser1AvatarVisibility() == View.VISIBLE) {
-                mView.setLoggedInUser1AvatarVisibility(View.INVISIBLE);
-            }
             if (mView.getLoggedInUser0AvatarVisibility() == View.VISIBLE) {
                 mView.setLoggedInUser0AvatarVisibility(View.INVISIBLE);
+            }
+            if (mView.getLoggedInUser1AvatarVisibility() == View.VISIBLE) {
+                mView.setLoggedInUser1AvatarVisibility(View.INVISIBLE);
             }
 
             mCurrentNavigationItems = mNavigationItemLoggedInUser;

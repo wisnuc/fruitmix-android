@@ -81,22 +81,22 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperateUserResult insertUser(String url, String token, String userName, String userPassword) {
+    public OperateUserResult insertRemoteUser(String userName, String userPassword) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public List<User> loadUserByLoginApi(String token, String url) {
+    public List<User> loadRemoteUserByLoginApi(String url) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public List<EquipmentAlias> loadEquipmentAlias(String token, String url) {
+    public List<EquipmentAlias> loadEquipmentAlias(String url) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult insertUsers(List<User> users) {
+    public OperationResult insertRemoteUsers(List<User> users) {
 
         mDBUtils.insertRemoteUsers(users);
 
@@ -105,7 +105,7 @@ public class DBDataSource implements DataSource {
 
 
     @Override
-    public OperateMediaShareResult insertRemoteMediaShare(String url, String token, MediaShare mediaShare) {
+    public OperateMediaShareResult insertRemoteMediaShare(MediaShare mediaShare) {
 
         mDBUtils.insertRemoteMediaShare(mediaShare);
 
@@ -140,7 +140,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult modifyRemoteMediaShare(String url, String token, String requestData, MediaShare modifiedMediaShare) {
+    public OperationResult modifyRemoteMediaShare(String requestData, MediaShare modifiedMediaShare) {
 
         mDBUtils.updateRemoteMediaShare(modifiedMediaShare);
 
@@ -148,12 +148,12 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult modifyMediaInRemoteMediaShare(String url, String token, String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
+    public OperationResult modifyMediaInRemoteMediaShare(String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
 
         long dbResult = 0;
 
         for (MediaShareContent mediaShareContent : diffContentsOriginalMediaShare.getMediaShareContents()) {
-            dbResult = mDBUtils.deleteRemoteMediaShareContentByID(mediaShareContent.getId());
+            dbResult = mDBUtils.deleteRemoteMediaShareContent(mediaShareContent.getMediaUUID(), diffContentsOriginalMediaShare.getUuid());
         }
 
         for (MediaShareContent mediaShareContent : diffContentsModifiedMediaShare.getMediaShareContents()) {
@@ -171,7 +171,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult deleteRemoteMediaShare(String url, String token, MediaShare mediaShare) {
+    public OperationResult deleteRemoteMediaShare(MediaShare mediaShare) {
 
         mDBUtils.deleteRemoteMediaShareByUUIDs(new String[]{mediaShare.getUuid()});
 
@@ -179,7 +179,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public DeviceIDLoadOperationResult loadDeviceID(String url, String token) {
+    public DeviceIDLoadOperationResult loadDeviceID() {
 
         DeviceIDLoadOperationResult result = new DeviceIDLoadOperationResult();
 
@@ -204,7 +204,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public UsersLoadOperationResult loadUsers(String loadUserUrl, String loadOtherUserUrl, String token) {
+    public UsersLoadOperationResult loadRemoteUsers() {
 
         List<User> users = mDBUtils.getAllRemoteUser();
 
@@ -217,18 +217,18 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public User loadUser(String userUUID) {
+    public User loadRemoteUser(String userUUID) {
 
         return mDBUtils.getRemoteUser(userUUID);
     }
 
     @Override
-    public Collection<String> loadAllUserUUID() {
-        return null;
+    public Collection<String> loadAllRemoteUserUUID() {
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public MediasLoadOperationResult loadAllRemoteMedias(String url, String token) {
+    public MediasLoadOperationResult loadAllRemoteMedias() {
 
         MediasLoadOperationResult result = new MediasLoadOperationResult();
 
@@ -255,25 +255,25 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult insertLocalMedia(String url, String token, Media media) {
+    public OperationResult insertLocalMedia(Media media) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult updateLocalMedia(Media media) {
+    public OperationResult updateLocalMediaMiniThumb(Media media) {
 
         if (mDBUtils != null)
-            mDBUtils.updateLocalMedia(media);
+            mDBUtils.updateLocalMediaMiniThumb(media);
 
         return null;
     }
 
     @Override
-    public OperationResult updateLocalMedias(Collection<Media> medias) {
+    public OperationResult updateLocalMediaUploadedDeviceID(Media media) {
+        if (mDBUtils != null)
+            mDBUtils.updateLocalMediaUploadedDeviceID(media);
 
-        mDBUtils.updateLocalMedias(medias);
-
-        return new OperationSuccess();
+        return null;
     }
 
     @Override
@@ -287,7 +287,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public MediaSharesLoadOperationResult loadAllRemoteMediaShares(String url, String token) {
+    public MediaSharesLoadOperationResult loadAllRemoteMediaShares() {
 
         MediaSharesLoadOperationResult result = new MediaSharesLoadOperationResult();
 
@@ -298,7 +298,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public FilesLoadOperationResult loadRemoteFolder(String url, String token) {
+    public FilesLoadOperationResult loadRemoteFolder(String folderUUID) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
@@ -308,7 +308,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult loadRemoteFile(String baseUrl, String token, FileDownloadState fileDownloadState) {
+    public OperationResult downloadRemoteFile(FileDownloadState fileDownloadState) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
@@ -318,7 +318,7 @@ public class DBDataSource implements DataSource {
     }
 
     @Override
-    public FileSharesLoadOperationResult loadRemoteFileRootShares(String loadFileSharedWithMeUrl, String loadFileShareWithOthersUrl, String token) {
+    public FileSharesLoadOperationResult loadRemoteFileRootShares() {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
@@ -330,18 +330,6 @@ public class DBDataSource implements DataSource {
     @Override
     public OperationResult deleteAllRemoteFileShare() {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
-    }
-
-    @Override
-    public FileDownloadItem loadDownloadFileRecord(String fileUUID) {
-        for (FileDownloadItem fileDownloadItem : FileDownloadManager.INSTANCE.getFileDownloadItems()) {
-
-            if (fileDownloadItem.getFileUUID().equals(fileUUID)) {
-                return fileDownloadItem;
-            }
-        }
-
-        return null;
     }
 
     @Override
@@ -404,10 +392,7 @@ public class DBDataSource implements DataSource {
     @Override
     public TokenLoadOperationResult loadToken(LoadTokenParam param) {
 
-        TokenLoadOperationResult result = new TokenLoadOperationResult();
-        result.setToken(getGlobalData(Util.JWT));
-
-        return result;
+        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
@@ -508,14 +493,13 @@ public class DBDataSource implements DataSource {
 
     @Override
     public MediaShare loadRemoteMediaShare(String mediaShareUUID) {
-        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+
+        return mDBUtils.getRemoteMediaShareByUuid(mediaShareUUID);
+
     }
 
     @Override
     public void deleteToken() {
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString(Util.JWT, null);
-        editor.apply();
 
         clearGlobalData(Util.JWT);
     }
@@ -553,11 +537,6 @@ public class DBDataSource implements DataSource {
     @Override
     public String loadLoginUserUUID() {
         return getGlobalData(Util.USER_UUID);
-    }
-
-    @Override
-    public void deleteLoggedInUser(LoggedInUser loggedInUser) {
-        mDBUtils.deleteLoggerUserByUserUUID(loggedInUser.getUser().getUuid());
     }
 
     @Override
@@ -611,6 +590,14 @@ public class DBDataSource implements DataSource {
         return true;
     }
 
+    public boolean deleteAllLocalMedia() {
+
+        mDBUtils.deleteAllLocalMedia();
+
+        return true;
+
+    }
+
     @Override
     public boolean deleteAllRemoteUsers() {
 
@@ -655,9 +642,12 @@ public class DBDataSource implements DataSource {
     }
 
     private void clearGlobalData(String name) {
-        SharedPreferences.Editor mEditor = mSharedPreferences.edit();
-        mEditor.putString(name, null);
-        mEditor.apply();
+        saveGlobalData(name, null);
+    }
+
+    @Override
+    public void deleteLoggedInUser(LoggedInUser loggedInUser) {
+        mDBUtils.deleteLoggerUserByUserUUID(loggedInUser.getUser().getUuid());
     }
 
     @Override

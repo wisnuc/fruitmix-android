@@ -318,7 +318,7 @@ public class MediaShare implements Parcelable {
         return maintainers.contains(userUUID);
     }
 
-    public int getMediaContentsListSize() {
+    public int getMediaShareContentsListSize() {
         return mediaShareContents.size();
     }
 
@@ -339,7 +339,7 @@ public class MediaShare implements Parcelable {
     }
 
     public List<String> getMediaKeyInMediaShareContents() {
-        List<String> mediaKeys = new ArrayList<>(getMediaContentsListSize());
+        List<String> mediaKeys = new ArrayList<>(getMediaShareContentsListSize());
         for (MediaShareContent mediaShareContent : mediaShareContents) {
             mediaKeys.add(mediaShareContent.getMediaUUID());
         }
@@ -401,7 +401,7 @@ public class MediaShare implements Parcelable {
 
     public List<MediaShareContent> getDifferentMediaShareContentInCurrentMediaShare(MediaShare originalMediaShare) {
 
-        List<MediaShareContent> mediaShareContents = new ArrayList<>(getMediaContentsListSize());
+        List<MediaShareContent> mediaShareContents = new ArrayList<>(getMediaShareContentsListSize());
 
         mediaShareContents.addAll(getMediaShareContents());
 

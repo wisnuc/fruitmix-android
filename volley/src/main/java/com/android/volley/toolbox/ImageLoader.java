@@ -600,6 +600,9 @@ public class ImageLoader {
 
     private List<ImageRequest> imageRequests = new ArrayList<>();
 
+    private Handler handler;
+    private boolean cancelRetry = false;
+
     public void preLoadMedia(final String url, final int width, final int height, final ScaleType scaleType) {
 
         ImageRequest request = new ImageRequest(url, new Response.Listener<Bitmap>() {
@@ -629,9 +632,6 @@ public class ImageLoader {
                 request.cancel();
         }
     }
-
-    private Handler handler;
-    private boolean cancelRetry = false;
 
     public void preLoadMediaSmallThumb(final String url, final int width, final int height) {
 

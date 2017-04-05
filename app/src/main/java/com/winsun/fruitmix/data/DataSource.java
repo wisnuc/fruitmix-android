@@ -33,32 +33,32 @@ public interface DataSource {
     void init();
 
     //media share
-    OperateMediaShareResult insertRemoteMediaShare(String url, String token, MediaShare mediaShare);
+    OperateMediaShareResult insertRemoteMediaShare( MediaShare mediaShare);
 
     OperationResult insertRemoteMediaShares(Collection<MediaShare> mediaShares);
 
-    OperationResult modifyRemoteMediaShare(String url, String token, String requestData, MediaShare modifiedMediaShare);
+    OperationResult modifyRemoteMediaShare(String requestData, MediaShare modifiedMediaShare);
 
-    OperationResult modifyMediaInRemoteMediaShare(String url, String token,String requestData,MediaShare diffContentsOriginalMediaShare,MediaShare diffContentsModifiedMediaShare,MediaShare modifiedMediaShare);
+    OperationResult modifyMediaInRemoteMediaShare(String requestData,MediaShare diffContentsOriginalMediaShare,MediaShare diffContentsModifiedMediaShare,MediaShare modifiedMediaShare);
 
-    OperationResult deleteRemoteMediaShare(String url, String token, MediaShare mediaShare);
+    OperationResult deleteRemoteMediaShare( MediaShare mediaShare);
 
     boolean deleteAllRemoteMediaShare();
 
     MediaShare loadRemoteMediaShare(String mediaShareUUID);
 
-    MediaSharesLoadOperationResult loadAllRemoteMediaShares(String url, String token);
+    MediaSharesLoadOperationResult loadAllRemoteMediaShares();
 
     //media
     OperationResult insertLocalMedias(List<Media> medias);
 
     OperationResult insertRemoteMedias(List<Media> medias);
 
-    OperationResult insertLocalMedia(String url, String token, Media media);
+    OperationResult insertLocalMedia(Media media);
 
     boolean deleteAllRemoteMedia();
 
-    MediasLoadOperationResult loadAllRemoteMedias(String url, String token);
+    MediasLoadOperationResult loadAllRemoteMedias();
 
     MediasLoadOperationResult loadAllLocalMedias();
 
@@ -72,45 +72,43 @@ public interface DataSource {
 
     Media loadMedia(String mediaKey);
 
-    OperationResult updateLocalMedia(Media media);
+    OperationResult updateLocalMediaMiniThumb(Media media);
 
-    OperationResult updateLocalMedias(Collection<Media> medias);
+    OperationResult updateLocalMediaUploadedDeviceID(Media media);
 
     //user
 
-    OperateUserResult insertUser(String url, String token, String userName, String userPassword);
+    OperateUserResult insertRemoteUser(String userName, String userPassword);
 
-    OperationResult insertUsers(List<User> users);
+    OperationResult insertRemoteUsers(List<User> users);
 
     boolean deleteAllRemoteUsers();
 
-    UsersLoadOperationResult loadUsers(String loadUserUrl, String loadOtherUserUrl, String token);
+    UsersLoadOperationResult loadRemoteUsers();
 
-    User loadUser(String userUUID);
+    User loadRemoteUser(String userUUID);
 
-    Collection<String> loadAllUserUUID();
+    Collection<String> loadAllRemoteUserUUID();
 
-    List<User> loadUserByLoginApi(String token, String url);
+    List<User> loadRemoteUserByLoginApi(String url);
 
     //file
-    FilesLoadOperationResult loadRemoteFolder(String url, String token);
+    FilesLoadOperationResult loadRemoteFolder(String folderUUID);
 
-    OperationResult loadRemoteFile(String baseUrl, String token, FileDownloadState fileDownloadState);
+    OperationResult downloadRemoteFile(FileDownloadState fileDownloadState);
 
     OperationResult insertRemoteFiles(AbstractRemoteFile folder);
 
     OperationResult deleteAllRemoteFiles();
 
     //file share
-    FileSharesLoadOperationResult loadRemoteFileRootShares(String loadFileSharedWithMeUrl, String loadFileShareWithOthersUrl, String token);
+    FileSharesLoadOperationResult loadRemoteFileRootShares();
 
     OperationResult insertRemoteFileShare(List<AbstractRemoteFile> files);
 
     OperationResult deleteAllRemoteFileShare();
 
     //file download
-
-    FileDownloadItem loadDownloadFileRecord(String fileUUID);
 
     FileDownloadLoadOperationResult loadDownloadedFilesRecord(String userUUID);
 
@@ -128,7 +126,7 @@ public interface DataSource {
     OperationResult insertToken(String token);
 
     //device id
-    DeviceIDLoadOperationResult loadDeviceID(String url, String token);
+    DeviceIDLoadOperationResult loadDeviceID();
 
     OperationResult insertDeviceID(String deviceID);
 
@@ -158,7 +156,7 @@ public interface DataSource {
 
     void saveShowPhotoReturnTipsValue(boolean value);
 
-    List<EquipmentAlias> loadEquipmentAlias(String token, String url);
+    List<EquipmentAlias> loadEquipmentAlias(String url);
 
     boolean getAutoUploadOrNot();
 

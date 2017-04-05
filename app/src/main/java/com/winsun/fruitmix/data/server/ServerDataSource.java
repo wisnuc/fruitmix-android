@@ -80,6 +80,12 @@ public class ServerDataSource implements DataSource {
 
     public static final String TAG = ServerDataSource.class.getSimpleName();
 
+    private String mGateway = "http://192.168.5.98";
+
+    private String mToken = null;
+
+    private String mDeviceID = null;
+
     private ServerDataSource() {
 
     }
@@ -90,6 +96,10 @@ public class ServerDataSource implements DataSource {
             INSTANCE = new ServerDataSource();
 
         return INSTANCE;
+    }
+
+    private String generateUrl(String req) {
+        return mGateway + ":" + Util.PORT + req;
     }
 
     @Override
@@ -126,13 +136,13 @@ public class ServerDataSource implements DataSource {
         return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
     }
 
-    public List<EquipmentAlias> loadEquipmentAlias(String token, String url) {
+    public List<EquipmentAlias> loadEquipmentAlias(String url) {
 
         List<EquipmentAlias> equipmentAliases = new ArrayList<>();
 
         try {
 
-            String str = getRemoteCall(url, token).getResponseData();
+            String str = getRemoteCall(url, mToken).getResponseData();
 
             JSONArray json = new JSONArray(str);
 
@@ -159,13 +169,13 @@ public class ServerDataSource implements DataSource {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
-    public List<User> loadUserByLoginApi(String token, String url) {
+    public List<User> loadRemoteUserByLoginApi(String url) {
 
         List<User> users = new ArrayList<>();
 
         try {
 
-            String str = getRemoteCall(url, token).getResponseData();
+            String str = getRemoteCall(url, mToken).getResponseData();
 
             JSONArray json = new JSONArray(str);
 
@@ -193,13 +203,16 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public OperateUserResult insertUser(String url, String token, String userName, String userPassword) {
+    public OperateUserResult insertRemoteUser(String userName, String userPassword) {
 
-        return handleActionCreateRemoteUser(url, token, userName, userPassword);
+        return handleActionCreateRemoteUser( userName, userPassword);
 
     }
 
-    private OperateUserResult handleActionCreateRemoteUser(String url, String token, String userName, String userPassword) {
+    private OperateUserResult handleActionCreateRemoteUser(String userName, String userPassword) {
+
+        String url =generateUrl(Util.USER_PARAMETER);
+
 
         String body = User.generateCreateRemoteUserBody(userName, userPassword);
 
@@ -208,7 +221,7 @@ public class ServerDataSource implements DataSource {
         OperateUserResult result = new OperateUserResult();
 
         try {
-            httpResponse = postRemoteCall(url, token, body);
+            httpResponse = postRemoteCall(url, mToken, body);
 
             if (httpResponse.getResponseCode() == 200) {
 
@@ -259,12 +272,12 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult insertUsers(List<User> users) {
+    public OperationResult insertRemoteUsers(List<User> users) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public Collection<String> loadAllUserUUID() {
+    public Collection<String> loadAllRemoteUserUUID() {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
@@ -279,12 +292,14 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public OperateMediaShareResult insertRemoteMediaShare(String url, String token, MediaShare mediaShare) {
+    public OperateMediaShareResult insertRemoteMediaShare(MediaShare mediaShare) {
 
-        return handleActionCreateRemoteMediaShareTask(url, token, mediaShare);
+        return handleActionCreateRemoteMediaShareTask(mediaShare);
     }
 
-    private OperateMediaShareResult handleActionCreateRemoteMediaShareTask(String url, String token, MediaShare mediaShare) {
+    private OperateMediaShareResult handleActionCreateRemoteMediaShareTask(MediaShare mediaShare) {
+
+        String url = generateUrl(Util.MEDIASHARE_PARAMETER);
 
         String data = generateCreateMediaShareData(mediaShare);
 
@@ -293,7 +308,7 @@ public class ServerDataSource implements DataSource {
         HttpResponse httpResponse;
 
         try {
-            httpResponse = postRemoteCall(url, token, data);
+            httpResponse = postRemoteCall(url, mToken, data);
 
             if (httpResponse.getResponseCode() == 200) {
 
@@ -436,9 +451,11 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult insertLocalMedia(String url, String token, Media media) {
+    public OperationResult insertLocalMedia(Media media) {
 
-        boolean result = uploadFile(url, token, media);
+        String url = generateUrl(Util.DEVICE_ID_PARAMETER + "/" + mDeviceID);
+
+        boolean result = uploadFile(url, mToken, media);
 
         if (result)
             return new OperationSuccess();
@@ -448,12 +465,12 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult updateLocalMedia(Media media) {
+    public OperationResult updateLocalMediaMiniThumb(Media media) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult updateLocalMedias(Collection<Media> medias) {
+    public OperationResult updateLocalMediaUploadedDeviceID(Media media) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
@@ -580,18 +597,20 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult modifyRemoteMediaShare(String url, String token, String requestData, MediaShare modifiedMediaShare) {
+    public OperationResult modifyRemoteMediaShare(String requestData, MediaShare modifiedMediaShare) {
 
-        return handleActionModifyRemoteShare(url, token, modifiedMediaShare, requestData);
+        return handleActionModifyRemoteShare(modifiedMediaShare, requestData);
     }
 
     @Override
-    public OperationResult modifyMediaInRemoteMediaShare(String url, String token, String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
+    public OperationResult modifyMediaInRemoteMediaShare(String requestData, MediaShare diffContentsOriginalMediaShare, MediaShare diffContentsModifiedMediaShare, MediaShare modifiedMediaShare) {
 
-        return handleActionModifyRemoteShare(url, token, modifiedMediaShare, requestData);
+        return handleActionModifyRemoteShare(modifiedMediaShare, requestData);
     }
 
-    private OperationResult handleActionModifyRemoteShare(String url, String token, MediaShare mediaShare, String requestData) {
+    private OperationResult handleActionModifyRemoteShare(MediaShare mediaShare, String requestData) {
+
+        String url =generateUrl(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid() + "/update");
 
         if (mediaShare.isLocal()) {
 
@@ -600,7 +619,7 @@ public class ServerDataSource implements DataSource {
         } else {
 
             try {
-                HttpResponse httpResponse = postRemoteCall(url, token, requestData);
+                HttpResponse httpResponse = postRemoteCall(url, mToken, requestData);
 
                 if (httpResponse.getResponseCode() == 200) {
                     return new OperationSuccess();
@@ -632,12 +651,15 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult deleteRemoteMediaShare(String url, String token, MediaShare mediaShare) {
+    public OperationResult deleteRemoteMediaShare(MediaShare mediaShare) {
 
-        return handleActionDeleteRemoteShare(url, token, mediaShare);
+        return handleActionDeleteRemoteShare( mediaShare);
     }
 
-    private OperationResult handleActionDeleteRemoteShare(String url, String token, MediaShare mediaShare) {
+    private OperationResult handleActionDeleteRemoteShare( MediaShare mediaShare) {
+
+        String url =generateUrl(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid() + "/update");
+
 
         if (mediaShare.isLocal()) {
 
@@ -648,7 +670,7 @@ public class ServerDataSource implements DataSource {
 //            data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mediaShare.getUuid() + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"true\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mediaShare.getDate() + "\\\", \\\"desc\\\":\\\"" + mediaShare.getDesc() + "\\\"}], \\\"viewers\\\":[]}}]\"}";
 
             try {
-                deleteRemoteCall(url, token, "");
+                deleteRemoteCall(url, mToken, "");
 
                 Log.i(TAG, "delete remote media share which source is network succeed");
 
@@ -675,16 +697,20 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public DeviceIDLoadOperationResult loadDeviceID(String url, String token) {
+    public DeviceIDLoadOperationResult loadDeviceID() {
+
+        String url = generateUrl(Util.DEVICE_ID_PARAMETER);
 
         DeviceIDLoadOperationResult result = new DeviceIDLoadOperationResult();
 
         try {
-            HttpResponse httpResponse = postRemoteCall(url, token, "");
+            HttpResponse httpResponse = postRemoteCall(url, mToken, "");
 
             if (httpResponse.getResponseCode() == 200) {
 
                 String deviceID = new JSONObject(httpResponse.getResponseData()).getString("uuid");
+
+                insertDeviceID(deviceID);
 
                 result.setDeviceID(deviceID);
 
@@ -717,12 +743,15 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public UsersLoadOperationResult loadUsers(String loadUserUrl, String loadOtherUserUrl, String token) {
+    public UsersLoadOperationResult loadRemoteUsers() {
 
-        return handleActionRetrieveRemoteUser(loadUserUrl, loadOtherUserUrl, token);
+        return handleActionRetrieveRemoteUser();
     }
 
-    private UsersLoadOperationResult handleActionRetrieveRemoteUser(String loadUserUrl, String loadOtherUserUrl, String token) {
+    private UsersLoadOperationResult handleActionRetrieveRemoteUser() {
+
+        String loadUserUrl = generateUrl(Util.USER_PARAMETER);
+        String loadOtherUserUrl = generateUrl(Util.LOGIN_PARAMETER);
 
         UsersLoadOperationResult result = new UsersLoadOperationResult();
 
@@ -730,12 +759,12 @@ public class ServerDataSource implements DataSource {
 
         try {
 
-            HttpResponse httpResponse = getRemoteCall(loadUserUrl, token);
+            HttpResponse httpResponse = getRemoteCall(loadUserUrl, mToken);
 
             RemoteDataParser<User> parser = new RemoteUserParser();
             users = parser.parse(httpResponse.getResponseData());
 
-            List<User> otherUsers = parser.parse(getRemoteCall(loadOtherUserUrl, token).getResponseData());
+            List<User> otherUsers = parser.parse(getRemoteCall(loadOtherUserUrl, mToken).getResponseData());
 
             result.setUsers(addDifferentUsers(users, otherUsers));
             result.setOperationResult(new OperationSuccess());
@@ -782,17 +811,19 @@ public class ServerDataSource implements DataSource {
 
 
     @Override
-    public User loadUser(String userUUID) {
+    public User loadRemoteUser(String userUUID) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public MediasLoadOperationResult loadAllRemoteMedias(String url, String token) {
+    public MediasLoadOperationResult loadAllRemoteMedias() {
 
-        return handleActionRetrieveRemoteMedia(url, token);
+        return handleActionRetrieveRemoteMedia();
     }
 
-    private MediasLoadOperationResult handleActionRetrieveRemoteMedia(String url, String token) {
+    private MediasLoadOperationResult handleActionRetrieveRemoteMedia() {
+
+        String url = generateUrl(Util.MEDIA_PARAMETER);
 
         MediasLoadOperationResult result = new MediasLoadOperationResult();
 
@@ -802,7 +833,7 @@ public class ServerDataSource implements DataSource {
 
             Log.d(TAG, "handleActionRetrieveRemoteMedia: before load" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-            HttpResponse httpResponse = getRemoteCall(url, token);
+            HttpResponse httpResponse = getRemoteCall(url, mToken);
 
             Log.d(TAG, "handleActionRetrieveRemoteMedia: load media finish" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
@@ -872,7 +903,9 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public MediaSharesLoadOperationResult loadAllRemoteMediaShares(String url, String token) {
+    public MediaSharesLoadOperationResult loadAllRemoteMediaShares() {
+
+        String url = generateUrl(Util.MEDIASHARE_PARAMETER);
 
         List<MediaShare> mediaShares;
 
@@ -880,7 +913,7 @@ public class ServerDataSource implements DataSource {
 
         try {
 
-            HttpResponse httpResponse = getRemoteCall(url, token);
+            HttpResponse httpResponse = getRemoteCall(url, mToken);
 
             Log.d(TAG, "loadRemoteShare:" + httpResponse.getResponseData().equals(""));
 
@@ -914,12 +947,14 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public FilesLoadOperationResult loadRemoteFolder(String url, String token) {
+    public FilesLoadOperationResult loadRemoteFolder(String folderUUID) {
+
+        String url = generateUrl(Util.FILE_PARAMETER + "/" + folderUUID);
 
         FilesLoadOperationResult result = new FilesLoadOperationResult();
 
         try {
-            HttpResponse httpResponse = getRemoteCall(url, token);
+            HttpResponse httpResponse = getRemoteCall(url, mToken);
 
             if (httpResponse.getResponseCode() == 200) {
 
@@ -955,9 +990,11 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public OperationResult loadRemoteFile(String baseUrl, String token, FileDownloadState fileDownloadState) {
+    public OperationResult downloadRemoteFile(FileDownloadState fileDownloadState) {
 
-        FileDownloadUploadInterface fileDownloadUploadInterface = RetrofitInstance.INSTANCE.getRetrofitInstance(baseUrl, token).create(FileDownloadUploadInterface.class);
+        String baseUrl = mGateway + ":" + Util.PORT;
+
+        FileDownloadUploadInterface fileDownloadUploadInterface = RetrofitInstance.INSTANCE.getRetrofitInstance(baseUrl, mToken).create(FileDownloadUploadInterface.class);
 
         Call<ResponseBody> call = fileDownloadUploadInterface.downloadFile(baseUrl + Util.FILE_PARAMETER + "/" + fileDownloadState.getFileUUID());
 
@@ -987,22 +1024,20 @@ public class ServerDataSource implements DataSource {
     }
 
     @Override
-    public FileDownloadItem loadDownloadFileRecord(String fileUUID) {
-        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
-    }
-
-    @Override
     public FileDownloadLoadOperationResult loadDownloadedFilesRecord(String userUUID) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs,String userUUID) {
+    public OperationResult deleteDownloadedFileRecord(List<String> fileUUIDs, String userUUID) {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
     @Override
-    public FileSharesLoadOperationResult loadRemoteFileRootShares(String loadFileSharedWithMeUrl, String loadFileShareWithOthersUrl, String token) {
+    public FileSharesLoadOperationResult loadRemoteFileRootShares() {
+
+        String loadFileSharedWithMeUrl = generateUrl(Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_ME_PARAMETER);
+        String loadFileShareWithOthersUrl = generateUrl(Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_OTHERS_PARAMETER);
 
         FileSharesLoadOperationResult result = new FileSharesLoadOperationResult();
 
@@ -1010,7 +1045,7 @@ public class ServerDataSource implements DataSource {
 
         try {
 
-            HttpResponse remoteFileShareWithMeJSON = getRemoteCall(loadFileSharedWithMeUrl, token);
+            HttpResponse remoteFileShareWithMeJSON = getRemoteCall(loadFileSharedWithMeUrl, mToken);
 
             if (remoteFileShareWithMeJSON.getResponseCode() == 200) {
                 RemoteDataParser<AbstractRemoteFile> parser = new RemoteFileShareParser();
@@ -1019,7 +1054,7 @@ public class ServerDataSource implements DataSource {
 
                 files.addAll(parser.parse(remoteFileShareWithMeJSON.getResponseData()));
 
-                HttpResponse remoteFileShareWithOthersJSON = getRemoteCall(loadFileShareWithOthersUrl, token);
+                HttpResponse remoteFileShareWithOthersJSON = getRemoteCall(loadFileShareWithOthersUrl, mToken);
 
                 if (remoteFileShareWithOthersJSON.getResponseCode() == 200) {
 
@@ -1088,6 +1123,9 @@ public class ServerDataSource implements DataSource {
 
                 String token = new JSONObject(httpResponse.getResponseData()).getString("token");
 
+                insertGateway(param.getGateway());
+                insertToken(token);
+
                 result.setToken(token);
                 result.setOperationResult(new OperationSuccess());
 
@@ -1124,7 +1162,9 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public OperationResult insertGateway(String gateway) {
-        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+        mGateway = gateway;
+
+        return null;
     }
 
     @Override
@@ -1169,12 +1209,16 @@ public class ServerDataSource implements DataSource {
 
     @Override
     public OperationResult insertToken(String token) {
-        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+        mToken = token;
+
+        return null;
     }
 
     @Override
     public OperationResult insertDeviceID(String deviceID) {
-        throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
+        mDeviceID = deviceID;
+
+        return null;
     }
 
     @Override

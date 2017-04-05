@@ -182,7 +182,7 @@ public class MediaFragmentInNewPhotoSelectPresenterImpl implements MediaFragment
     }
 
     @Override
-    public void onCreate(Context context) {
+    public void onCreate() {
         mRepository.loadMediasInThread(new MediaOperationCallback.LoadMediasCallback() {
             @Override
             public void onLoadSucceed(OperationResult operationResult, List<Media> medias) {
@@ -207,7 +207,7 @@ public class MediaFragmentInNewPhotoSelectPresenterImpl implements MediaFragment
 
     @Override
     public void loadThumbMediaToView(Context context, Media media, NetworkImageView view) {
-        mRepository.loadThumbMediaToNetworkImageView(context, media, view);
+        mRepository.loadThumbMediaToNetworkImageView(media, view);
     }
 
     @Override

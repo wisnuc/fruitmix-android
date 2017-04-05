@@ -367,7 +367,7 @@ public class DBUtils {
         return returnValue;
     }
 
-    public long insertRemoteUser(User user){
+    public long insertRemoteUser(User user) {
 
         return insertRemoteUsers(Collections.singletonList(user));
 
@@ -615,6 +615,23 @@ public class DBUtils {
         return deleteMediaShareContentByID(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, id);
     }
 
+    private long deleteMediaShareContent(String tableName, String mediaDigest, String shareUUID) {
+
+        openWritableDB();
+
+        long returnValue = database.delete(tableName, DBHelper.SHARE_CONTENT_KEY_DIGEST + " = ? and "
+                + DBHelper.SHARE_CONTENT_KEY_SHARE_UUID + " = ?", new String[]{mediaDigest, shareUUID});
+
+        close();
+
+        return returnValue;
+
+    }
+
+    public long deleteRemoteMediaShareContent(String mediaDigest, String shareUUID) {
+        return deleteMediaShareContent(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaDigest, shareUUID);
+    }
+
     private void bindMediaShareContent(SQLiteStatement sqLiteStatement, String mediaShareContentUUID) {
         sqLiteStatement.bindString(1, mediaShareContentUUID);
     }
@@ -720,8 +737,8 @@ public class DBUtils {
 
         return deleteAllMediaShare(DBHelper.REMOTE_SHARE_TABLE_NAME, DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
     }
-	
-	    public long deleteLoggerUserByUserUUID(String userUUID) {
+
+    public long deleteLoggerUserByUserUUID(String userUUID) {
 
         openWritableDB();
 
@@ -893,14 +910,15 @@ public class DBUtils {
         openReadableDB();
 
         Cursor cursor = database.rawQuery("select * from " + shareDBName + " where " + DBHelper.SHARE_KEY_UUID + " = ?", new String[]{uuid});
-        MediaShare mediaShare = new MediaShare();
+        MediaShare mediaShare = null;
         LocalDataParser<MediaShare> parser = new LocalMediaShareParser();
         while (cursor.moveToNext()) {
             mediaShare = parser.parse(cursor);
         }
         cursor.close();
 
-        mediaShare.initMediaShareContents(getMediaShareContents(shareContentDBName, mediaShare.getUuid()));
+        if (mediaShare != null)
+            mediaShare.initMediaShareContents(getMediaShareContents(shareContentDBName, mediaShare.getUuid()));
 
         close();
 
@@ -1085,31 +1103,36 @@ public class DBUtils {
 
     }
 
-    private long updateMedias(String dbName, Collection<Media> medias) {
+    private long updateMedia(String dbName, Media media, ContentValues contentValues) {
         openWritableDB();
 
         long returnValue = 0;
 
-        for (Media media:medias){
+        returnValue = database.update(dbName, contentValues, DBHelper.MEDIA_KEY_THUMB + " = ?", new String[]{media.getThumb()});
 
-            ContentValues contentValues = createMediaContentValues(media);
-
-            returnValue = database.update(dbName, contentValues, DBHelper.MEDIA_KEY_THUMB + " = ?", new String[]{media.getThumb()});
-
-            Log.d(TAG, "update media uuid:" + media.getUuid());
-        }
+        Log.d(TAG, "update media uuid:" + media.getUuid());
 
         close();
 
         return returnValue;
     }
 
-    public long updateLocalMedia(Media media) {
-        return updateMedias(DBHelper.LOCAL_MEDIA_TABLE_NAME, Collections.singletonList(media));
+    public long updateLocalMediaMiniThumb(Media media) {
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.MEDIA_KEY_MINI_THUMB, media.getMiniThumb());
+
+        return updateMedia(DBHelper.LOCAL_MEDIA_TABLE_NAME, media, contentValues);
+
     }
 
-    public long updateLocalMedias(Collection<Media> medias){
-        return updateMedias(DBHelper.LOCAL_MEDIA_TABLE_NAME,medias);
+    public long updateLocalMediaUploadedDeviceID(Media media) {
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID, media.getUploadedDeviceIDs());
+
+        return updateMedia(DBHelper.LOCAL_MEDIA_TABLE_NAME, media, contentValues);
+
     }
 
     public long deleteOldAndInsertNewRemoteMediaShare(Collection<MediaShare> oldMediaShares, Collection<MediaShare> newMediaShares) {

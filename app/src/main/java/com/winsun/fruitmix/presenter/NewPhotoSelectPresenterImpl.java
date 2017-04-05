@@ -54,7 +54,7 @@ public class NewPhotoSelectPresenterImpl implements NewPhotoSelectContract.NewPh
 
         mediaFragmentPresenter.enterChooseMode();
 
-        mediaFragmentPresenter.onCreate(context);
+        mediaFragmentPresenter.onCreate();
     }
 
     @Override
