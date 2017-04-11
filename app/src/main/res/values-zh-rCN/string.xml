@@ -16,16 +16,20 @@
     <string name="android_photo_comment_url">%1$s?type=comments</string>
     <string name="android_update_mediashare_url">%1$s/%2$s/update</string>
     <!-- 格式化时间-->
-    <string name="android_seconds_ago">%1$s秒前</string>
-    <string name="android_minutes_ago">%1$s分钟前</string>
-    <string name="android_hours_ago">%1$s小时前</string>
     <string name="android_yesterday">昨天</string>
     <!-- 第一个值是相册名字，第二个是照片张数-->
-    <string name="android_share_album_title">%1$s·%2$s张</string>
-    <string name="android_share_count">分享了%1$s张照片</string>
+    <string name="android_share_album_title">%1$s·%2$s %3$s</string>
+    <string name="android_share_count">分享了%1$s%2$s</string>
     <string name="android_share_comment_text">%1$s : %2$s</string>
 
     <!-- Symbo -->
+
+    <plurals name="photo">
+
+        <item quantity="other">张</item>
+
+    </plurals>
+
     <string name="android_ellipsize">…</string>
 
     <string name="android_no_write_external_storage_permission">SD卡没有写权限</string>
@@ -44,25 +48,28 @@
     <string name="delete_text">删除</string>
     <string name="loading">正在加载…</string>        <!-- loading resource: photos, file, data -->
     <!--   <string name="loading_message">请稍候</string>-->
+
     <string name="operating_title">正在执行…</string> <!-- waiting for server response -->
-    <string name="no_content">没有内容</string>       <!-- empty list -->
+
+    <string name="no_photos">没有图片</string>       <!-- empty list -->
+
+    <string name="no_files">没有文件</string>
+
     <string name="coming_soon">功能暂未实现</string>
     <string name="ok">确定</string>
+
+    <string name="remove">删除</string>
+
     <string name="cancel">取消</string>
     <string name="clear_select_item">清除选择</string>
-    <string name="confirm_delete">是否删除</string>
+    <string name="confirm_delete">%1$s将被删除</string>
+
+    <string name="confirm_clear_cache">缓存将被清除</string>
+
+    <string name="clear">清除</string>
 
     <string name="need_auto_upload">是否自动备份该手机的照片至WISNUC服务器?</string>
     <string name="photo_auto_upload_already_close">照片自动备份功能被关闭，可以到设置中打开</string>
-
-    <!-- 头像显示用户名首字母的默认值 -->
-    <string name="user_name_abbreviations">未</string>
-
-    <!-- 默认用户名 -->
-    <string name="user_default_name">未知</string>
-
-    <!-- 未选择内容提示-->
-    <string name="select_nothing">请选择照片</string>
 
     <string name="download_original_photo_fail">下载照片原图失败</string>
 
@@ -101,6 +108,9 @@
     <string name="album_item_title">未命名 %1$s</string>      <!-- defaut name + date&Time -->
     <string name="private_text">私密</string>
     <string name="share_text">分享</string>
+
+    <string name="share_verb">分享</string>
+
 
     <!-- 主界面-照片模块 -->
     <string name="photo">照片</string>
@@ -143,7 +153,6 @@
     <string name="clear_cache">清除缓存</string>
     <string name="already_upload_media_count_hint">已上传照片数</string>
     <string name="already_upload_media_count_text">%1$d(共%2$d)张</string>
-
 
     <!-- create user -->
     <string name="user_name">用户名</string>

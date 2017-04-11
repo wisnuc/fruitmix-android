@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.SharedElementCallback;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
@@ -219,7 +220,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        ivBack.setImageResource(R.drawable.ic_back);
+        ivBack.setImageResource(R.drawable.ic_back_black);
         commentImg.setImageResource(R.drawable.comment);
         mReturnResize.setImageResource(R.drawable.return_resize);
 
@@ -379,7 +380,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         if (mediaList.size() > position && position > -1) {
 
             String title = mediaList.get(position).getTime();
-            if (title == null || title.contains("1916-01-01")) {
+            if (title == null || title.contains(Util.DEFAULT_DATE)) {
                 lbDate.setText(getString(R.string.unknown_time));
             } else {
                 lbDate.setText(title);
@@ -546,7 +547,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 mainPic.registerImageLoadListener(PhotoSliderActivity.this);
 
-                mainPic.setDefaultImageResId(R.drawable.placeholder_photo);
+                mainPic.setDefaultImageResId(R.drawable.new_placeholder);
+//                mainPic.setDefaultBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
 
                 mImageLoader.setShouldCache(!media.isLocal());
 

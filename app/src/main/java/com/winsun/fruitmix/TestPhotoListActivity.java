@@ -1,6 +1,7 @@
 package com.winsun.fruitmix;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -344,7 +345,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
                 title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDate();
             }
 
-            if (title.contains("1916-01-01")) {
+            if (title.contains(Util.DEFAULT_DATE)) {
                 return getString(R.string.unknown_time);
             } else {
                 String[] titleSplit = title.split("-");
@@ -383,9 +384,13 @@ public class TestPhotoListActivity extends AppCompatActivity {
             if (currentMedia.isLocal())
                 mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
 
-            mPhotoIv.setBackgroundResource(R.drawable.placeholder_photo);
+            mPhotoIv.setBackgroundResource(R.drawable.new_placeholder);
 
-            mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
+//            mPhotoIv.setBackgroundColor(ContextCompat.getColor(mContext, R.color.default_imageview_color));
+
+            mPhotoIv.setDefaultImageResId(R.drawable.new_placeholder);
+
+//            mPhotoIv.setDefaultBackgroundColor(ContextCompat.getColor(mContext, R.color.default_imageview_color));
 
             if (!mIsFling) {
 

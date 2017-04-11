@@ -60,7 +60,7 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/4/19.
  */
-public class MediaShareList implements Page,IShowHideFragmentListener {
+public class MediaShareList implements Page, IShowHideFragmentListener {
 
     public static final String TAG = MediaShareList.class.getSimpleName();
 
@@ -79,6 +79,8 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
     RecyclerView mainRecyclerView;
     @BindView(R.id.no_content_imageview)
     ImageView noContentImageView;
+    @BindView(R.id.no_content_textview)
+    TextView noContentTextView;
 
     private List<MediaShare> mediaShareList;
     private Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
@@ -88,6 +90,8 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
     private Bundle reenterState;
 
     private boolean mShowPhoto;
+
+    private boolean mIsFling = false;
 
     public MediaShareList(Activity activity_, OnMediaFragmentInteractionListener listener) {
         containerActivity = activity_;
@@ -100,6 +104,11 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
 
         noContentImageView.setImageResource(R.drawable.no_photo);
 
+        noContentTextView.setText(containerActivity.getString(R.string.no_photos));
+
+//        ShareRecycleViewScrollListener shareRecycleViewScrollListener = new ShareRecycleViewScrollListener();
+//        mainRecyclerView.addOnScrollListener(shareRecycleViewScrollListener);
+
         mAdapter = new ShareRecyclerViewAdapter();
         mainRecyclerView.setAdapter(mAdapter);
         mainRecyclerView.setLayoutManager(new LinearLayoutManager(containerActivity));
@@ -110,12 +119,12 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
     }
 
     @Override
-    public void show(){
+    public void show() {
         MobclickAgent.onPageStart("MediaShareFragment");
     }
 
     @Override
-    public void hide(){
+    public void hide() {
         MobclickAgent.onPageEnd("MediaShareFragment");
     }
 
@@ -313,7 +322,6 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
 
         ShareRecyclerViewAdapter() {
 
-            setHasStableIds(true);
         }
 
         @Override
@@ -458,7 +466,7 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
 
             String title = currentItem.getTitle();
 
-            String photoCount = String.valueOf(currentItem.getMediaShareContents().size());
+            String photoCount = String.valueOf(currentItem.getMediaContentsListSize());
 
             if (title.length() > 8) {
                 title = title.substring(0, 8);
@@ -466,7 +474,7 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
                 title += containerActivity.getString(R.string.android_ellipsize);
             }
 
-            title = String.format(containerActivity.getString(R.string.android_share_album_title), title, photoCount);
+            title = String.format(containerActivity.getString(R.string.android_share_album_title), title, photoCount, containerActivity.getResources().getQuantityString(R.plurals.photo, currentItem.getMediaContentsListSize()));
 
             lbAlbumTitle.setText(title);
 
@@ -481,17 +489,24 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
                 }
             }
 
+            ivCover.setBackgroundResource(R.drawable.new_placeholder);
+//            ivCover.setBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
+
             if (coverImg != null && mShowPhoto) {
 
                 String imageUrl = coverImg.getImageOriginalUrl(containerActivity);
                 mImageLoader.setShouldCache(!coverImg.isLocal());
                 ivCover.setTag(imageUrl);
-                ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivCover.setDefaultImageResId(R.drawable.new_placeholder);
+//                ivCover.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
+
                 ivCover.setOrientationNumber(coverImg.getOrientationNumber());
                 ivCover.setImageUrl(imageUrl, mImageLoader);
 
             } else {
-                ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivCover.setDefaultImageResId(R.drawable.new_placeholder);
+//                ivCover.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
+
                 ivCover.setImageUrl(null, mImageLoader);
             }
 
@@ -554,13 +569,19 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
                 itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(0));
             }
 
+            ivCover.setBackgroundResource(R.drawable.new_placeholder);
+//            ivCover.setBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
+
             if (itemImg != null) {
 
-                if(mShowPhoto){
+                if (mShowPhoto) {
                     String imageUrl = itemImg.getImageOriginalUrl(containerActivity);
                     mImageLoader.setShouldCache(!itemImg.isLocal());
                     ivCover.setTag(imageUrl);
-                    ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                    ivCover.setDefaultImageResId(R.drawable.new_placeholder);
+
+//                    ivCover.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
+
                     ivCover.setOrientationNumber(itemImg.getOrientationNumber());
                     ivCover.setImageUrl(imageUrl, mImageLoader);
                 }
@@ -603,7 +624,10 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
                 });
 
             } else {
-                ivCover.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivCover.setDefaultImageResId(R.drawable.new_placeholder);
+
+//                ivCover.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
+
                 ivCover.setImageUrl(null, mImageLoader);
             }
 
@@ -717,7 +741,7 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
                 llPic2.setVisibility(View.GONE);
                 llPic3.setVisibility(View.GONE);
 
-                mCheckMorePhoto.setVisibility(View.GONE);
+//                mCheckMorePhoto.setVisibility(View.GONE);
 
             } else if (imageKeys.size() <= 6) {
 
@@ -725,7 +749,7 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
                 llPic2.setVisibility(View.VISIBLE);
                 llPic3.setVisibility(View.GONE);
 
-                mCheckMorePhoto.setVisibility(View.GONE);
+//                mCheckMorePhoto.setVisibility(View.GONE);
 
             } else {
 
@@ -733,22 +757,22 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
                 llPic2.setVisibility(View.VISIBLE);
                 llPic3.setVisibility(View.VISIBLE);
 
-                if (imageKeys.size() > 9) {
-                    mCheckMorePhoto.setVisibility(View.VISIBLE);
-                    mCheckMorePhoto.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
-                    mCheckMorePhoto.getPaint().setAntiAlias(true);
-
-                    mCheckMorePhoto.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(containerActivity, MoreMediaActivity.class);
-                            intent.putExtra(Util.KEY_MEDIA_SHARE_UUID, currentItem.getUuid());
-                            containerActivity.startActivity(intent);
-                        }
-                    });
-                } else {
-                    mCheckMorePhoto.setVisibility(View.GONE);
-                }
+//                if (imageKeys.size() > 9) {
+//                    mCheckMorePhoto.setVisibility(View.VISIBLE);
+//                    mCheckMorePhoto.getPaint().setFlags(Paint.UNDERLINE_TEXT_FLAG);
+//                    mCheckMorePhoto.getPaint().setAntiAlias(true);
+//
+//                    mCheckMorePhoto.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            Intent intent = new Intent(containerActivity, MoreMediaActivity.class);
+//                            intent.putExtra(Util.KEY_MEDIA_SHARE_UUID, currentItem.getUuid());
+//                            containerActivity.startActivity(intent);
+//                        }
+//                    });
+//                } else {
+//                    mCheckMorePhoto.setVisibility(View.GONE);
+//                }
 
             }
 
@@ -756,7 +780,9 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
         }
 
         private void setShareCountText() {
-            String shareCountText = String.format(containerActivity.getString(R.string.android_share_count), String.valueOf(imageKeys.size()));
+
+            String shareCountText = String.format(containerActivity.getString(R.string.android_share_count), String.valueOf(imageKeys.size()), containerActivity.getResources().getQuantityString(R.plurals.photo, imageKeys.size()));
+
             int start = shareCountText.indexOf(String.valueOf(imageKeys.size()));
             int end = start + String.valueOf(imageKeys.size()).length();
             SpannableStringBuilder builder = new SpannableStringBuilder(shareCountText);
@@ -767,6 +793,16 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
             builder.setSpan(span, start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
             builder.setSpan(afterSpan, end, shareCountText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             mShareCountTextView.setText(builder);
+
+            mShareCountTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(containerActivity, MoreMediaActivity.class);
+                    intent.putExtra(Util.KEY_MEDIA_SHARE_UUID, currentItem.getUuid());
+                    containerActivity.startActivity(intent);
+                }
+            });
+
         }
 
         private void refreshViewAttributeWhenNotOneImage() {
@@ -786,6 +822,10 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
                 if (itemImg == null)
                     itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(i));
 
+                ivItems[i].setBackgroundResource(R.drawable.new_placeholder);
+
+//                ivItems[i].setBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
+
                 if (itemImg != null && mShowPhoto) {
 
                     String imageUrl = itemImg.getImageThumbUrl(containerActivity);
@@ -795,11 +835,17 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
                         ivItems[i].setOrientationNumber(itemImg.getOrientationNumber());
 
                     ivItems[i].setTag(imageUrl);
-                    ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
+                    ivItems[i].setDefaultImageResId(R.drawable.new_placeholder);
+
+//                    ivItems[i].setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
+
                     ivItems[i].setImageUrl(imageUrl, mImageLoader);
 
                 } else {
-                    ivItems[i].setDefaultImageResId(R.drawable.placeholder_photo);
+                    ivItems[i].setDefaultImageResId(R.drawable.new_placeholder);
+
+//                    ivItems[i].setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
+
                     ivItems[i].setImageUrl(null, mImageLoader);
                 }
 
@@ -841,6 +887,31 @@ public class MediaShareList implements Page,IShowHideFragmentListener {
             }
         }
     }
+
+    private class ShareRecycleViewScrollListener extends RecyclerView.OnScrollListener {
+
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+
+            if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
+
+                mIsFling = true;
+
+            } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+
+                if (mIsFling) {
+
+                    mIsFling = false;
+
+                    mAdapter.notifyDataSetChanged();
+                }
+
+            }
+        }
+
+    }
+
 
     private void fillLocalCachePhotoData(List<Media> imageList) {
         PhotoSliderActivity.setMediaList(imageList);

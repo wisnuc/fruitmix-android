@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import com.github.druk.rxdnssd.RxDnssd;
 import com.github.druk.rxdnssd.RxDnssdBindable;
 import com.github.druk.rxdnssd.RxDnssdEmbedded;

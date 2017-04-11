@@ -173,30 +173,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                         saveLoggedUser();
 
-                        startNavPagerActivity();
+                        startNavPagerActivity(false);
 
                     } else {
 
                         saveLoggedUser();
 
-                        new AlertDialog.Builder(mContext).setMessage(getString(R.string.need_auto_upload)).setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                                LocalCache.setCurrentUploadDeviceID(mContext, LocalCache.DeviceID);
-                                LocalCache.setAutoUploadOrNot(mContext, true);
-
-                                startNavPagerActivity();
-                            }
-                        }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                                LocalCache.setAutoUploadOrNot(mContext, false);
-
-                                startNavPagerActivity();
-                            }
-                        }).setCancelable(false).create().show();
+                        startNavPagerActivity(true);
 
                     }
 
@@ -221,8 +204,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         LocalCache.LocalLoggedInUsers.add(loggedInUser);
     }
 
-    private void startNavPagerActivity() {
+    private void startNavPagerActivity(boolean needShowAutoUploadDialog) {
         Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
+        jumpIntent.putExtra(Util.NEED_SHOW_AUTO_UPLOAD_DIALOG,needShowAutoUploadDialog);
         startActivity(jumpIntent);
         LoginActivity.this.setResult(RESULT_OK);
         finish();

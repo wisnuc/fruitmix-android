@@ -506,6 +506,8 @@ public class LocalCache {
             if (thumb.contains(FileUtil.getOriginalPhotoFolderPath()))
                 continue;
 
+            Log.d(TAG, "PhotoList: thumb: " + thumb);
+
             media = new Media();
             media.setThumb(thumb);
             media.setWidth(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)));
@@ -710,7 +712,7 @@ public class LocalCache {
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
 
         User user = new User();
-        user.setUserName(sp.getString(Util.USER_NAME, context.getString(R.string.user_default_name)));
+        user.setUserName(sp.getString(Util.USER_NAME, ""));
         user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
         user.setDefaultAvatarBgColor(sp.getInt(Util.USER_BG_COLOR, 0));
         user.setAdmin(sp.getBoolean(Util.USER_IS_ADMIN, false));

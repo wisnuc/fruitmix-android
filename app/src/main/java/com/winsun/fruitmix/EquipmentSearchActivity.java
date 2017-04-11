@@ -178,7 +178,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         if (mEquipmentExpandableListView.isGroupExpanded(i)) {
                             mEquipmentExpandableListView.collapseGroupWithAnimation(i);
                         } else {
-                            mEquipmentExpandableListView.expandGroupWithAnimation(i);
+                            mEquipmentExpandableListView.expandGroup(i,true);
                         }
 
                     } else {

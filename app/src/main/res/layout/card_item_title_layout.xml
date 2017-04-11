@@ -17,7 +17,6 @@
         android:layout_marginBottom="16dp"
         android:background="@drawable/share_portrait_bg"
         android:gravity="center"
-        android:text="@string/user_name_abbreviations"
         android:textColor="@color/white"
         android:textSize="18dp"/>
 
@@ -27,7 +26,6 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/avatar"
         android:layout_toRightOf="@id/avatar"
-        android:text="@string/user_default_name"
         android:textColor="@color/light_black"
         android:textSize="15dp"/>
 

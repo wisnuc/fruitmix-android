@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +32,7 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.android.volley.toolbox.StringRequest;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
@@ -440,8 +442,12 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             setMainPicScreenHeight(networkImageView, currentItem);
 
+            networkImageView.setBackgroundResource(R.drawable.new_placeholder);
+//            networkImageView.setBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
+
             networkImageView.setTag(imageUrl);
-            networkImageView.setDefaultImageResId(R.drawable.placeholder_photo);
+            networkImageView.setDefaultImageResId(R.drawable.new_placeholder);
+//            networkImageView.setDefaultBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
             networkImageView.setImageUrl(imageUrl, mImageLoader);
 
             networkImageView.setOnClickListener(new View.OnClickListener() {
@@ -459,9 +465,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private void setMainPicScreenHeight(NetworkImageView mainPic, Media media) {
 
-        if (media.isLocal())
-            return;
-
         int mediaWidth = Integer.parseInt(media.getWidth());
         int mediaHeight = Integer.parseInt(media.getHeight());
         int actualWidth;
@@ -471,6 +474,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         actualWidth = Util.calcScreenWidth(AlbumPicContentActivity.this) / SPAN_COUNT;
         actualHeight = mediaHeight * actualWidth / mediaWidth;
 
+        layoutParams.width = actualWidth;
         layoutParams.height = actualHeight;
 
         mainPic.setLayoutParams(layoutParams);
@@ -569,8 +573,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private void deleteCurrentAlbum() {
 
-        new AlertDialog.Builder(mContext).setMessage(getString(R.string.confirm_delete))
-                .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+        new AlertDialog.Builder(mContext).setMessage(String.format(getString(R.string.confirm_delete), mediaShare.getTitle()))
+                .setPositiveButton(getString(R.string.remove), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 

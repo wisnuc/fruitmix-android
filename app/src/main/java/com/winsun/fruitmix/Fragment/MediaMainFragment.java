@@ -52,6 +52,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
+import com.winsun.fruitmix.model.operationResult.OperationNoChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -519,9 +520,13 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 Log.i(TAG, "handleOperationEvent: calc new local media digest finished");
 
-                setPhotoListRefresh();
+                if (operationEvent.getOperationResult().getOperationResultType() != OperationResultType.NO_CHANGED) {
+                    setPhotoListRefresh();
+                }
 
-                photoList.refreshView();
+                if(!photoList.isLoaded()){
+                    photoList.refreshView();
+                }
 
                 break;
             case Util.LOCAL_MEDIA_RETRIEVED:
@@ -710,7 +715,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private void showChooseHeader() {
         fab.setVisibility(View.VISIBLE);
-        toolbar.setNavigationIcon(R.drawable.ic_back);
+        toolbar.setNavigationIcon(R.drawable.ic_back_black);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -741,7 +746,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             collapseFab();
         }
         fab.setVisibility(View.GONE);
-        toolbar.setNavigationIcon(R.drawable.menu);
+        toolbar.setNavigationIcon(R.drawable.menu_black);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -822,7 +827,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             collapseFab();
         }
 
-        setSelectCountText(String.format(getString(R.string.select_count), selectedItemCount));
+        if (selectedItemCount == 0) {
+            handleBackPressed();
+        } else {
+            setSelectCountText(String.format(getString(R.string.select_count), selectedItemCount));
+        }
+
     }
 
     private void dismissDialog() {
@@ -866,8 +876,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 mSelectMedias = photoList.getSelectedMedias();
 
-                if (showNothingSelectToast(mSelectMedias)) return;
-
                 AbstractCommand shareInAppCommand = new AbstractCommand() {
                     @Override
                     public void execute() {
@@ -902,7 +910,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             case R.id.bt_album:
                 selectMediaUUIDs = photoList.getSelectedImageUUIDs();
-                if (showNothingSelectToast(selectMediaUUIDs)) return;
 
                 photoList.createAlbum(selectMediaUUIDs);
                 hideChooseHeader();
@@ -973,14 +980,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         intent.setType("image/*");
         startActivity(Intent.createChooser(intent, getString(R.string.share_text)));
 
-    }
-
-    private boolean showNothingSelectToast(List list) {
-        if (list.size() == 0) {
-            Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
-            return true;
-        }
-        return false;
     }
 
     private void refreshFabState() {

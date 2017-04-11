@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -26,7 +27,7 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/5/9.
  */
-public class NewAlbumPicChooseActivity extends AppCompatActivity {
+public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPhotoListListener {
 
     public static final String TAG = "NewAlbumPicChooseActivity";
 
@@ -40,9 +41,9 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity {
 
     private NewPhotoList mNewPhotoList;
 
-    private Context mContext;
-
     private boolean onResume = false;
+
+    private int mAlreadySelectedImageKeyListSize = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +53,12 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        mContext = this;
-
         mNewPhotoList = new NewPhotoList(this);
 
         final List<String> alreadySelectedImageKeyArrayList = getIntent().getStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST);
+
+        if (alreadySelectedImageKeyArrayList != null)
+            mAlreadySelectedImageKeyListSize = alreadySelectedImageKeyArrayList.size();
 
         mMainFrameLayout.addView(mNewPhotoList.getView());
         mNewPhotoList.setSelectMode(true);
@@ -74,10 +76,6 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 List<String> selectImageKeys = getSelectedImageUUIDs();
-                if (selectImageKeys.size() == 0) {
-                    Toast.makeText(mContext, getString(R.string.select_nothing), Toast.LENGTH_SHORT).show();
-                    return;
-                }
 
                 Intent intent = getIntent();
 
@@ -96,6 +94,9 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity {
 
             }
         });
+
+        mNewPhotoList.addPhotoListListener(this);
+
     }
 
     @Override
@@ -123,7 +124,8 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        mContext = null;
+        mNewPhotoList.removePhotoListListener(this);
+
     }
 
     @Override
@@ -139,4 +141,22 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity {
         return mNewPhotoList.getSelectedImageUUIDs();
     }
 
+    @Override
+    public void onPhotoItemClick(int selectedItemCount) {
+
+        if (selectedItemCount > mAlreadySelectedImageKeyListSize) {
+            tfOK.setVisibility(View.VISIBLE);
+        } else {
+            tfOK.setVisibility(View.INVISIBLE);
+        }
+
+    }
+
+    @Override
+    public void onPhotoItemLongClick() {
+    }
+
+    @Override
+    public void onNoPhotoItem(boolean noPhotoItem) {
+    }
 }

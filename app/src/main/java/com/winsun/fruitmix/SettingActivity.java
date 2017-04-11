@@ -150,8 +150,8 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 break;
             case R.id.clear_cache_layout:
 
-                new AlertDialog.Builder(this).setMessage(getString(R.string.confirm_delete))
-                        .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                new AlertDialog.Builder(this).setMessage(getString(R.string.confirm_clear_cache))
+                        .setPositiveButton(getString(R.string.clear), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 

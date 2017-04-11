@@ -14,7 +14,6 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/share_portrait_bg"
         android:gravity="center"
-        android:text="@string/user_name_abbreviations"
         android:textColor="@color/white"
         android:textSize="18dp" />
 
@@ -25,7 +24,6 @@
         android:layout_below="@id/avatar"
         android:layout_marginTop="@dimen/nav_header_vertical_spacing"
         android:gravity="center"
-        android:text="@string/user_default_name"
         android:textColor="@color/white"
         android:textSize="14dp" />
 
@@ -47,7 +45,6 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/share_portrait_bg"
         android:gravity="center"
-        android:text="@string/user_name_abbreviations"
         android:textColor="@color/white"
         android:textSize="18dp"
         android:visibility="gone" />
@@ -61,7 +58,6 @@
         android:layout_toLeftOf="@id/logged_in_user0_avatar"
         android:background="@drawable/share_portrait_bg"
         android:gravity="center"
-        android:text="@string/user_name_abbreviations"
         android:textColor="@color/white"
         android:textSize="18dp"
         android:visibility="gone" />

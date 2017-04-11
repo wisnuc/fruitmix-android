@@ -145,6 +145,8 @@ public class Util {
     public static final String SWITCH_MEDIA_MODULE_UMENG_EVENT_ID = "switch_media_module";
     public static final String SWITCH_ORIGINAL_MEDIA_UMENG_EVENT_ID = "switch_original_media";
 
+    public static final String DEFAULT_DATE = "1916-01-01";
+
     public static final String KEY_MEDIA_SHARE_UUID = "key_media_share_uuid";
 
     public static final String KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST = "key_already_selected_image_uuid_arraylist";
@@ -160,6 +162,8 @@ public class Util {
     public static final String KEY_SHOULD_STOP_SERVICE = "key_should_stop_service";
 
     public static final int WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 1;
+
+    public static final String NEED_SHOW_AUTO_UPLOAD_DIALOG = "need_show_auto_upload_dialog";
 
     public static boolean startTimingRetrieveMediaShare = false;
 

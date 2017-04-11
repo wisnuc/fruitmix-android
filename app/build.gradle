@@ -9,8 +9,8 @@ android {
         applicationId "com.winsun.fruitmix"
         minSdkVersion 16
         targetSdkVersion 21
-        versionCode 1
-        versionName "1.1.28"
+        versionCode 2
+        versionName "1.1.33"
     }
     buildTypes {
 
@@ -58,7 +58,7 @@ dependencies {
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
     apt 'org.greenrobot:eventbus-annotation-processor:3.0.1'
     compile 'com.daimajia.swipelayout:library:1.2.0@aar'
-    compile "com.github.andriydruk:rxdnssd:0.8.3"
+    compile 'com.github.andriydruk:rxdnssd:0.8.3'
     compile 'com.umeng.analytics:analytics:latest.integration'
 }
 

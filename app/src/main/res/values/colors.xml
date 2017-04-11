@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryDark">#bdbdbd</color>
     <color name="colorAccent">#FF4081</color>
 
     <!-- begin add by liang.wu-->
@@ -20,7 +20,12 @@
     <color name="album_time">#666666</color>
     <color name="check_circle_solid_color">#e0e0e0</color>
 
-    <color name="bottom_item_select_color">#8aFFFFFF</color>
+    <color name="bottom_item_select_color">#039be5</color>
+    <color name="bottom_item_unselect_color">#757575</color>
+    <color name="bottom_text_select_color">#039be5</color>
+    <color name="bottom_text_unselect_color">#757575</color>
+
+    <color name="toolbar_title">#212121</color>
 
     <!-- finish add by liang.wu-->
 

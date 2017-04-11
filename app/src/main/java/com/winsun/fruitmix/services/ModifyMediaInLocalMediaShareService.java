@@ -93,7 +93,7 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
         long dbResult = 0;
 
         for (MediaShareContent mediaShareContent : differentContentsInOriginalMediaShare) {
-            dbResult = dbUtils.deleteLocalMediaShareContentByID(mediaShareContent.getId());
+            dbResult = dbUtils.deleteLocalMediaShareContent(mediaShareContent.getMediaUUID(),diffContentsInOriginalMediaShare.getUuid());
         }
 
         for (MediaShareContent mediaShareContent : differentContentsInModifiedMediaShare) {

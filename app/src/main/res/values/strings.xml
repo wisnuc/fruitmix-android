@@ -6,7 +6,7 @@
 
     <string name="android_finishAppToast">Please click BACK again to exit</string>
 
-    <string name="and"> 和 </string>
+    <string name="and"> and </string>
 
     <!-- url -->
 
@@ -17,18 +17,23 @@
     <string name="android_update_mediashare_url">%1$s/%2$s/update</string>
 
     <!-- time format -->
-
-    <string name="android_seconds_ago">%1$s seconds ago</string>
-    <string name="android_minutes_ago">%1$s minutes ago</string>
-    <string name="android_hours_ago">%1$s hours ago</string>
     <string name="android_yesterday">yesterday</string>
-    <string name="android_share_album_title">%1$s·%2$sPhoto</string>
-    <string name="android_share_count">Share %1$s Pictures</string>
+    <string name="android_share_album_title">%1$s·%2$s %3$s</string>
+    <string name="android_share_count">Share %1$s %2$s</string>
     <string name="android_share_comment_text">%1$s : %2$s</string>
+
+    <!-- Symbo -->
+
+    <plurals name="photo">
+
+        <item quantity="one">Photo</item>
+        <item quantity="other">Photos</item>
+
+    </plurals>
 
     <string name="android_ellipsize">…</string>
 
-    <string name="android_no_write_external_storage_permission">SD卡没有写权限</string>
+    <string name="android_no_write_external_storage_permission">System Issue: Write permission denied.</string>
 
     <!-- android end -->
 
@@ -36,9 +41,9 @@
 
     <string name="app_name">WISNUC</string>
 
-    <string name="finish_text">Finish</string>
+    <string name="finish_text">Done</string>
 
-    <string name="choose_text">Choose</string>
+    <string name="choose_text">Select</string>
 
     <string name="delete_text">Delete</string>
 
@@ -46,55 +51,57 @@
 
     <!-- <string name="loading_message">Please Wait!</string> -->
 
-    <string name="no_content">Sorry,No content!</string>
+    <string name="no_photos">No photos</string>
 
-    <string name="operating_title">Operating</string>
+    <string name="no_files">No files</string>
+
+    <string name="operating_title">Please wait…</string>
 
     <string name="coming_soon">Coming Soon</string>
 
-    <string name="ok">Confirm</string>
+    <string name="ok">OK</string>
+
+    <string name="remove">Remove</string>
 
     <string name="cancel">Cancel</string>
 
-    <string name="clear_select_item">Clear select item</string>
+    <string name="clear_select_item">Clear selection</string>
 
-    <string name="confirm_delete">Please confirm whether to delete</string>
+    <string name="confirm_delete">%1$s will be removed.</string>
 
-    <string name="need_auto_upload">Need auto upload photo?</string>
-    <string name="photo_auto_upload_already_close">Photo auto upload closed,you can check setting module</string>
+    <string name="confirm_clear_cache">Temporary files will be cleared.</string>
 
-    <string name="user_name_abbreviations">D</string>
+    <string name="clear">Clear</string>
 
-    <string name="user_default_name">Default</string>
+    <string name="need_auto_upload">Automatic backup your photos?</string>
+    <string name="photo_auto_upload_already_close">Automatic backup turn off, you can turn on in \'Setting\'.</string>
 
-    <string name="select_nothing">Select nothing,please select</string>
-
-    <string name="download_original_photo_fail">Download original photo failed</string>
+    <string name="download_original_photo_fail">Download original photo failed! </string>
 
     <!-- slide menu -->
 
-    <string name="person_data">Person Data</string>
-    <string name="user_manage">User Manage</string>
+    <string name="person_data">Biography</string>
+    <string name="user_manage">Manage User</string>
     <string name="setting">Setting</string>
     <string name="help">Help</string>
     <string name="logout">Logout</string>
 
-    <string name="my_file">My File</string>
-    <string name="my_photo">My Photo</string>
+    <string name="my_file">My Files</string>
+    <string name="my_photo">My Photos</string>
 
-    <string name="account_manage">Account Manage</string>
+    <string name="account_manage">Manage Account</string>
 
     <string name="already_upload_media_percent_text">Already upload %1$s</string>
-    <string name="already_upload_finished">Already upload finished</string>
+    <string name="already_upload_finished">Backup Completed</string>
 
     <!-- share bottom menu -->
-    <string name="all_people">All people</string>
-    <string name="other_app">Other app</string>
+    <string name="all_people">All users</string>
+    <string name="other_app">Other apps</string>
 
     <!-- login -->
 
     <string name="login">Login</string>
-    <string name="password_error">Input Password Error</string>
+    <string name="password_error">Wrong password. Try again.</string>
     <string name="password_text">Password</string>
 
     <!-- personal data -->
@@ -109,17 +116,19 @@
 
     <string name="album">Album</string>
 
-    <string name="album_item_title">Unnamed %1$s</string>
+    <string name="album_item_title">Untitled album %1$s</string>
 
     <string name="private_text">Private</string>
-    <string name="share_text">Share</string>
+    <string name="share_text">Shares</string>
+
+    <string name="share_verb">Share</string>
 
     <!-- photo -->
 
     <string name="photo">Photo</string>
     <string name="unknown_time">Unknown Time</string>
 
-    <string name="choose_photo">Choose Photo</string>
+    <string name="choose_photo">Select Photo</string>
     <string name="select_count">Select %1$d item</string>
 
     <!-- share -->
@@ -136,17 +145,18 @@
 
     <!-- album content menu -->
 
-    <string name="set_private">Set Private</string>
-    <string name="set_public">Set Public</string>
+    <string name="set_private">Unshare</string>
+    <string name="set_public">Share</string>
 
-    <string name="set_album">Setting Album</string>
-    <string name="edit_photo">Edit Photo</string>
+    <string name="set_album">Album Setting</string>
+    <string name="edit_photo">Edit Photos</string>
     <string name="delete_album">Delete Album</string>
 
     <!-- equipment -->
 
-    <string name="search_equipment">Search Equipment</string>
+    <string name="search_equipment">Search WISNUC Server</string>
 
+    <!-- 设备名 默认值-->
     <string name="equipment_group_default_text">WISNUC</string>
 
     <!-- share comment -->
@@ -161,29 +171,28 @@
     <!-- setting -->
 
     <string name="setting_text">Setting</string>
-    <string name="photo_auto_upload_setting_text">Auto upload photos</string>
-    <string name="mobile_network_upload">Mobile network upload</string>
-    <string name="clear_cache">Clear cache</string>
-    <string name="already_upload_media_count_hint">Already upload media count</string>
-    <string name="already_upload_media_count_text">%1$d(Totally%2$d)</string>
+    <string name="photo_auto_upload_setting_text">Automatic backup</string>
+    <string name="mobile_network_upload">Mobile network backup</string>
+    <string name="clear_cache">Clear temporary files</string>
+    <string name="already_upload_media_count_hint">Backups / Total Photos</string>
+    <string name="already_upload_media_count_text">%1$d/%2$d</string>
 
     <!-- create user -->
     <string name="user_name">User Name</string>
-    <string name="confirm_user_password">Confirm User Password</string>
+    <string name="confirm_user_password">Confirm Password</string>
     <string name="create_user">Create User</string>
-    <string name="username_not_unique">User name is not unique</string>
-    <string name="empty_username">Empty username</string>
-    <string name="not_same_password">Not same password</string>
+    <string name="username_not_unique">User name is exist.</string>
+    <string name="empty_username">Please enter username</string>
+    <string name="not_same_password">Passwords do not match.</string>
 
     <!-- file -->
 
     <string name="file">File</string>
     <string name="download">Download</string>
     <string name="select_file">Select File</string>
-    <string name="download_select_item">Download select item</string>
-    <string name="download_the_item">Download the item</string>
-    <string name="open_the_item">Open the item</string>
-
+    <string name="download_select_item">Download selection</string>
+    <string name="download_the_item">Download</string>
+    <string name="open_the_item">Open</string>
 
     <!-- file download -->
 
@@ -196,18 +205,18 @@
     <string name="local_media_share_uploading">Sorry,it is uploading,please wait!</string>
 
     <!-- Errors -->
-    <string name="network_exception">网络数据异常，错误码：%1$s</string>    <!-- String + ErrorCode -->
+    <string name="network_exception">Network exception,error code：%1$s</string>    <!-- String + ErrorCode -->
 
     <!-- network error -->
-    <string name="no_network">No Network,Please check it</string>
+    <string name="no_network">No internet connection, check your network.</string>
     <string name="socket_timeout_exception">Socket Timeout Exception</string>
 
-    <string name="no_operate_media_share_permission">You have not the permission to operate</string>
+    <string name="no_operate_media_share_permission">you do not own this album.</string>
     <string name="already_select_media">Sorry,the photo has been selected</string>
-    <string name="photo_not_sharing">Sorry,the photo can not be shared</string>
-    <string name="open_file_failed">Sorry,open this file failed</string>
+    <string name="photo_not_sharing">You do not own this photo.</string>
+    <string name="open_file_failed">No apps supports this file.</string> <!-- not final version -->
     <string name="no_enough_space">No enough space</string>
 
-    <string name="max_select_photo">Max photo count</string>
+    <string name="max_select_photo">An album could not contains more than 1000 photos.</string> <!-- not final version -->
 
 </resources>

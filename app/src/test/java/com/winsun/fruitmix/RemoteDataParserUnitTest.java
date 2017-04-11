@@ -13,6 +13,7 @@ import com.winsun.fruitmix.parser.RemoteMediaCommentParser;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
 import com.winsun.fruitmix.parser.RemoteMediaShareParser;
 import com.winsun.fruitmix.parser.RemoteUserParser;
+import com.winsun.fruitmix.util.Util;
 
 import static org.junit.Assert.*;
 
@@ -88,7 +89,7 @@ public class RemoteDataParserUnitTest {
         assertEquals(media.getUuid(), "ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16");
         assertEquals(media.getWidth(), "1601");
         assertEquals(media.getHeight(), "1601");
-        assertEquals(media.getTime(), "1916-01-01");
+        assertEquals(media.getTime(), Util.DEFAULT_DATE);
         assertEquals(media.isSharing(), true);
 
         media = medias.get(1);

@@ -12,10 +12,12 @@ public class GenerateLocalMediaMiniThumbTask implements Runnable {
 
     private DBUtils dbUtils;
     private Media media;
+    private boolean stopGenerateMiniThumb;
 
-    public GenerateLocalMediaMiniThumbTask(Media media, DBUtils dbUtils) {
+    public GenerateLocalMediaMiniThumbTask(Media media, DBUtils dbUtils, boolean stopGenerateMiniThumb) {
         this.media = media;
         this.dbUtils = dbUtils;
+        this.stopGenerateMiniThumb = stopGenerateMiniThumb;
     }
 
     /**
@@ -26,11 +28,13 @@ public class GenerateLocalMediaMiniThumbTask implements Runnable {
     @Override
     public void run() {
 
+        if (stopGenerateMiniThumb) return;
+
         boolean result = FileUtil.writeBitmapToLocalPhotoThumbnailFolder(media);
 
-        if (result) {
+        if (result && !stopGenerateMiniThumb) {
 
-            if (dbUtils != null && dbUtils.isOpen())
+            if (dbUtils != null)
                 dbUtils.updateLocalMedia(media);
         }
 

@@ -14,17 +14,18 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            android:elevation="@dimen/appbar_elevation"
             android:theme="@style/AppTheme.AppBarOverlay"
-            app:navigationIcon="@drawable/menu"
+            app:navigationIcon="@drawable/menu_black"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
             <TextView
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
                 android:text="@string/photo"
-                android:textColor="@color/white"
+                android:textColor="@color/toolbar_title"
                 android:textSize="18dp" />
 
 
@@ -35,7 +36,7 @@
                 android:layout_gravity="center_vertical|end"
                 android:layout_marginRight="15dp"
                 android:text="@string/choose_text"
-                android:textColor="@color/white"
+                android:textColor="#757575"
                 android:textSize="16dp"
                 android:visibility="visible" />
 
@@ -97,15 +98,17 @@
     <!--app:tabIndicatorColor="#0026c6da"-->
     <!--app:tabIndicatorHeight="4dp"/>-->
 
+
+
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/bottom_navigation_view"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_gravity="bottom|end"
-        android:elevation="8dp"
-        app:itemBackground="@color/colorPrimary"
+        android:elevation="@dimen/appbar_elevation"
+        android:background="@color/colorPrimary"
         app:itemIconTint="@drawable/bottom_navigation_item_bg"
-        app:itemTextColor="@drawable/bottom_navigation_item_bg"
+        app:itemTextColor="@drawable/bottom_navigation_text_bg"
         app:menu="@menu/media_bottom_menu" />
 
 

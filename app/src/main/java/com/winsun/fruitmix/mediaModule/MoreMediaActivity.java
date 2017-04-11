@@ -3,16 +3,19 @@ package com.winsun.fruitmix.mediaModule;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
@@ -44,7 +47,8 @@ public class MoreMediaActivity extends AppCompatActivity {
     @BindView(R.id.no_content_layout)
     LinearLayout noContentLayout;
 
-    private int mSpanCount = 3;
+    public static final int SPAN_COUNT = 2;
+
     private Context mContext;
     private List<Media> mPhotos;
     private ImageLoader mImageLoader;
@@ -72,8 +76,11 @@ public class MoreMediaActivity extends AppCompatActivity {
         String mediaShareUUID = getIntent().getStringExtra(Util.KEY_MEDIA_SHARE_UUID);
         mediaShare = LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID);
 
-        GridLayoutManager mManager = new GridLayoutManager(mContext, mSpanCount);
-        mMorePhotoRecyclerView.setLayoutManager(mManager);
+//        GridLayoutManager manager = new GridLayoutManager(mContext, SPAN_COUNT);
+
+        StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(SPAN_COUNT, StaggeredGridLayoutManager.VERTICAL);
+
+        mMorePhotoRecyclerView.setLayoutManager(manager);
         mMorePhotoRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         mAdapter = new MorePhotoAdapter();
@@ -159,8 +166,15 @@ public class MoreMediaActivity extends AppCompatActivity {
             if (media.isLocal())
                 mPhotoItem.setOrientationNumber(media.getOrientationNumber());
 
+            setMainPicScreenHeight(mPhotoItem, media);
+
+            mPhotoItem.setBackgroundResource(R.drawable.new_placeholder);
+//            mPhotoItem.setBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
+
             mPhotoItem.setTag(imageUrl);
-            mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
+            mPhotoItem.setDefaultImageResId(R.drawable.new_placeholder);
+//            mPhotoItem.setDefaultBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
+
             mPhotoItem.setImageUrl(imageUrl, mImageLoader);
 
             mMorelPhotoItemLayout.setOnClickListener(new View.OnClickListener() {
@@ -179,6 +193,24 @@ public class MoreMediaActivity extends AppCompatActivity {
         }
 
     }
+
+    private void setMainPicScreenHeight(NetworkImageView mainPic, Media media) {
+
+        int mediaWidth = Integer.parseInt(media.getWidth());
+        int mediaHeight = Integer.parseInt(media.getHeight());
+        int actualWidth;
+        int actualHeight;
+        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mainPic.getLayoutParams();
+
+        actualWidth = Util.calcScreenWidth(MoreMediaActivity.this) / SPAN_COUNT;
+        actualHeight = mediaHeight * actualWidth / mediaWidth;
+
+        layoutParams.width = actualWidth;
+        layoutParams.height = actualHeight;
+
+        mainPic.setLayoutParams(layoutParams);
+    }
+
 
     class MorePhotoAdapter extends RecyclerView.Adapter<MorePhotoViewHolder> {
         @Override

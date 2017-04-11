@@ -231,7 +231,9 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         String url = media.getImageOriginalUrl(this);
         ivMain.setTag(url);
-        ivMain.setDefaultImageResId(R.drawable.placeholder_photo);
+        ivMain.setDefaultImageResId(R.drawable.new_placeholder);
+//        ivMain.setDefaultBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
+
         ivMain.setOrientationNumber(media.getOrientationNumber());
         ivMain.setImageUrl(url, mImageLoader);
     }

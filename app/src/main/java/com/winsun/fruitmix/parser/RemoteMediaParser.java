@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.parser;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,7 +57,7 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
             String dateTime = itemRaw.optString("exifDateTime");
 
             if (dateTime.equals("")) {
-                media.setTime("1916-01-01");
+                media.setTime(Util.DEFAULT_DATE);
             } else {
                 media.setTime(dateTime.substring(0, 4) + "-" + dateTime.substring(5, 7) + "-" + dateTime.substring(8, 10));
             }

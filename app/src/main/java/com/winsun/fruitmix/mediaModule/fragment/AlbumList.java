@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -64,6 +65,8 @@ public class AlbumList implements Page, IShowHideFragmentListener {
     ListView mainListView;
     @BindView(R.id.no_content_imageview)
     ImageView noContentImageView;
+    @BindView(R.id.no_content_textview)
+    TextView noContentTextView;
 
     private List<MediaShare> mediaShareList;
 
@@ -84,6 +87,8 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         ButterKnife.bind(this, view);
 
         noContentImageView.setImageResource(R.drawable.no_photo);
+
+        noContentTextView.setText(containerActivity.getString(R.string.no_photos));
 
         mainListView.setAdapter(new AlbumListAdapter(this));
 
@@ -357,18 +362,20 @@ public class AlbumList implements Page, IShowHideFragmentListener {
                     ivMainPic.setOrientationNumber(coverImg.getOrientationNumber());
 
                 ivMainPic.setTag(imageUrl);
-                ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivMainPic.setDefaultImageResId(R.drawable.new_placeholder);
+//                ivMainPic.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
                 ivMainPic.setImageUrl(imageUrl, mImageLoader);
 
             } else {
-                ivMainPic.setDefaultImageResId(R.drawable.placeholder_photo);
+                ivMainPic.setDefaultImageResId(R.drawable.new_placeholder);
+//                ivMainPic.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
                 ivMainPic.setImageUrl(null, mImageLoader);
 
             }
 
             if (currentItem.getViewersListSize() == 0) {
                 ivLock.setVisibility(View.GONE);
-                lbShare.setText(containerActivity.getString(R.string.share_text));
+                lbShare.setText(containerActivity.getString(R.string.share_verb));
             } else {
                 ivLock.setVisibility(View.VISIBLE);
                 lbShare.setText(containerActivity.getString(R.string.private_text));
@@ -376,7 +383,7 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
             String title = currentItem.getTitle();
 
-            String photoCount = String.valueOf(currentItem.getMediaShareContents().size());
+            String photoCount = String.valueOf(currentItem.getMediaContentsListSize());
 
             if (title.length() > 8) {
                 title = title.substring(0, 8);
@@ -384,7 +391,9 @@ public class AlbumList implements Page, IShowHideFragmentListener {
                 title += containerActivity.getString(R.string.android_ellipsize);
             }
 
-            title = String.format(containerActivity.getString(R.string.android_share_album_title), title, photoCount);
+            //TODO: 复数实现 使用android api,高亮显示 使用html格式
+
+            title = String.format(containerActivity.getString(R.string.android_share_album_title), title, photoCount, containerActivity.getResources().getQuantityString(R.plurals.photo,currentItem.getMediaContentsListSize()));
 
             lbTitle.setText(title);
 
@@ -421,8 +430,8 @@ public class AlbumList implements Page, IShowHideFragmentListener {
                 @Override
                 public void onClick(final View v) {
 
-                    new AlertDialog.Builder(containerActivity).setMessage(containerActivity.getString(R.string.confirm_delete))
-                            .setPositiveButton(containerActivity.getString(R.string.ok), new DialogInterface.OnClickListener() {
+                    new AlertDialog.Builder(containerActivity).setMessage(String.format(containerActivity.getString(R.string.confirm_delete), currentItem.getTitle()))
+                            .setPositiveButton(containerActivity.getString(R.string.remove), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
 

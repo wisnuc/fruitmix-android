@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <View
         android:id="@+id/spacing_layout"
         android:layout_width="match_parent"
         android:layout_height="16dp"
-        android:background="@color/white"/>
+        android:background="@color/white"
+        android:visibility="gone" />
 
     <View
         android:id="@+id/spacing_second_layout"
         android:layout_width="match_parent"
         android:layout_height="8dp"
-        android:background="#F8F8F8"/>
+        android:background="@color/white"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/photo_title_layout"
@@ -33,17 +35,18 @@
             android:layout_gravity="center_vertical"
             android:layout_marginRight="8dp"
             android:src="@drawable/photo_title_bg"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/photo_group_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:text="2016-7-26"
-            android:textColor="@color/light_black"
-            android:textSize="14dp"/>
+            android:textColor="#212121"
+            android:textSize="14dp" />
 
     </LinearLayout>
 

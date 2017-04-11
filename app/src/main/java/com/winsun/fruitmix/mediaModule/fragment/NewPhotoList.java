@@ -2,11 +2,13 @@ package com.winsun.fruitmix.mediaModule.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -76,6 +78,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     LinearLayout mNoContentLayout;
     @BindView(R.id.no_content_imageview)
     ImageView noContentImageView;
+    @BindView(R.id.no_content_textview)
+    TextView noContentTextView;
 
     private int mSpanCount = 3;
 
@@ -125,6 +129,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private boolean mCancelPreLoadPhoto = false;
 
+    private Typeface mTypeface;
+
+    private boolean mIsLoaded = false;
 
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
@@ -134,6 +141,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         ButterKnife.bind(this, view);
 
         noContentImageView.setImageResource(R.drawable.no_photo);
+
+        noContentTextView.setText(containerActivity.getString(R.string.no_photos));
 
         mPhotoListListeners = new ArrayList<>();
 
@@ -158,6 +167,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         setupFastJumper();
         mRecyclerView.setAdapter(mPhotoRecycleAdapter);
         setupLayoutManager();
+
+        mTypeface = Typeface.createFromAsset(containerActivity.getAssets(), "fonts/Roboto-Medium.ttf");
 
     }
 
@@ -215,6 +226,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 @Override
                 public void onDataLoadFinished() {
                     doAfterReloadData(loader);
+
+                    mIsLoaded = true;
                 }
             });
         } else {
@@ -224,6 +237,12 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         }
 
     }
+
+    public boolean isLoaded() {
+
+        return mIsLoaded;
+    }
+
 
     private void doAfterReloadData(NewPhotoListDataLoader loader) {
 
@@ -257,8 +276,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             }
 
         }
-
-        clearSelectedPhoto();
 
     }
 
@@ -456,24 +473,29 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         if (mMapKeyIsPhotoPositionValueIsPhoto == null || mMapKeyIsPhotoPositionValueIsPhoto.size() == 0)
             return;
 
-        for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
-            for (Media media : mediaList) {
-                media.setSelected(false);
-            }
+        Media media;
+
+        for (int i = 0; i < mMapKeyIsPhotoPositionValueIsPhoto.size(); i++) {
+
+            media = mMapKeyIsPhotoPositionValueIsPhoto.get(mMapKeyIsPhotoPositionValueIsPhoto.keyAt(i));
+
+            media.setSelected(false);
         }
+
     }
 
     private void calcSelectedPhoto() {
 
-        mSelectCount = 0;
+        int selectCount = 0;
 
         for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
             for (Media media : mediaList) {
                 if (media.isSelected())
-                    mSelectCount++;
+                    selectCount++;
             }
         }
 
+        mSelectCount = selectCount;
     }
 
     public void createAlbum(List<String> selectKeys) {
@@ -719,10 +741,17 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             if (mMapKeyIsPhotoPositionValueIsPhotoDate.indexOfKey(position) >= 0)
                 title = mMapKeyIsPhotoPositionValueIsPhotoDate.get(position);
             else {
-                title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDate();
+
+                Media media = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
+
+                if (media == null) {
+                    title = Util.DEFAULT_DATE;
+                } else
+                    title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDate();
+
             }
 
-            if (title.contains("1916-01-01")) {
+            if (title.contains(Util.DEFAULT_DATE)) {
                 return containerActivity.getString(R.string.unknown_time);
             } else {
                 String[] titleSplit = title.split("-");
@@ -759,14 +788,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             final String date = mMapKeyIsPhotoPositionValueIsPhotoDate.get(groupPosition);
 
             if (groupPosition == 0) {
-                mSpacingLayout.setVisibility(View.GONE);
-                mSpacingSecondLayout.setVisibility(View.GONE);
-            } else {
-                mSpacingLayout.setVisibility(View.VISIBLE);
                 mSpacingSecondLayout.setVisibility(View.VISIBLE);
+            } else {
+                mSpacingSecondLayout.setVisibility(View.GONE);
             }
 
-            if (date.equals("1916-01-01")) {
+            mPhotoTitle.setTypeface(mTypeface);
+
+            if (date.equals(Util.DEFAULT_DATE)) {
                 mPhotoTitle.setText(containerActivity.getString(R.string.unknown_time));
             } else {
                 mPhotoTitle.setText(date);
@@ -934,9 +963,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             if (currentMedia.isLocal())
                 mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
 
-            mPhotoIv.setBackgroundResource(R.drawable.placeholder_photo);
+            mPhotoIv.setBackgroundResource(R.drawable.new_placeholder);
 
-            mPhotoIv.setDefaultImageResId(R.drawable.placeholder_photo);
+//            mPhotoIv.setBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
+
+            mPhotoIv.setDefaultImageResId(R.drawable.new_placeholder);
+
+//            mPhotoIv.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
             if (!mIsFling) {
 

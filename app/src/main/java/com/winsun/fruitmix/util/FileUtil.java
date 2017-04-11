@@ -122,6 +122,9 @@ public class FileUtil {
         File file = new File(getLocalPhotoThumbnailFolderPath(), miniThumbName);
 
         if (file.exists()) {
+
+            Log.d(TAG, "writeBitmapToLocalPhotoThumbnailFolder: exist mini thumb: " + file.getAbsolutePath());
+
             media.setMiniThumbPath(file.getAbsolutePath());
             return true;
         }

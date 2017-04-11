@@ -77,6 +77,8 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
 
     private Media currentMedia;
 
+    private int mDefaultBackgroundColor;
+
     public GifTouchNetworkImageView(Context context) {
         this(context, null);
     }
@@ -133,6 +135,10 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
      */
     public void setErrorImageResId(int errorImage) {
         mErrorImageId = errorImage;
+    }
+
+    public void setDefaultBackgroundColor(int DefaultBackgroundColor) {
+        this.mDefaultBackgroundColor = DefaultBackgroundColor;
     }
 
     public void registerImageLoadListener(IImageLoadListener loadListener) {
@@ -210,11 +216,13 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                 new GifLoader.GifListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if (mErrorImageId != 0) {
-                            setImageResource(mErrorImageId);
-                        } else if (mDefaultImageId != 0) {
-                            setImageResource(mDefaultImageId);
-                        }
+//                        if (mErrorImageId != 0) {
+//                            setImageResource(mErrorImageId);
+//                        } else if (mDefaultImageId != 0) {
+//                            setImageResource(mDefaultImageId);
+//                        }
+
+                        setDefaultColor();
 
                         deliverImageLoadFinish();
 
@@ -249,7 +257,9 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                             } catch (IOException e) {
                                 e.printStackTrace();
 
-                                setImageResource(mDefaultImageId);
+//                                setImageResource(mDefaultImageId);
+
+                                setDefaultColor();
                             }
 
                             deliverImageLoadFinish();
@@ -257,6 +267,17 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                         }
                     }
                 });
+    }
+
+    private void setDefaultColor() {
+
+        if (mDefaultImageId != 0) {
+            setImageResource(mDefaultImageId);
+        }
+
+//        if(mDefaultBackgroundColor != 0){
+//            setImageResource(mDefaultBackgroundColor);
+//        }
     }
 
     void loadImageIfNecessary(final boolean isInLayoutPass) {
@@ -314,11 +335,13 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                 new ImageLoader.ImageListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if (mErrorImageId != 0) {
-                            setImageResource(mErrorImageId);
-                        } else if (mDefaultImageId != 0) {
-                            setImageResource(mDefaultImageId);
-                        }
+//                        if (mErrorImageId != 0) {
+//                            setImageResource(mErrorImageId);
+//                        } else if (mDefaultImageId != 0) {
+//                            setImageResource(mDefaultImageId);
+//                        }
+
+                        setDefaultColor();
 
                         deliverImageLoadFinish();
                     }
@@ -352,6 +375,8 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
 
                             setImageBitmap(bitmap);
 
+                            setBackgroundColor(0);
+
                             deliverImageLoadFinish();
 
                         }
@@ -373,9 +398,12 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
     }
 
     private void setDefaultImageOrNull() {
-        if (mDefaultImageId != 0) {
-            setImageResource(mDefaultImageId);
-        }
+//        if (mDefaultImageId != 0) {
+//            setImageResource(mDefaultImageId);
+//        }
+
+        setDefaultColor();
+
         setImageBitmap(null);
     }
 

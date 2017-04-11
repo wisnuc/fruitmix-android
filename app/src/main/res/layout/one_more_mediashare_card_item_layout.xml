@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/one_more_mediashare_card_item_layout"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical">
+    android:id="@+id/one_more_mediashare_card_item_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/pic_row1"
@@ -17,8 +17,8 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:scaleType="centerCrop"
-            android:background="@drawable/placeholder_photo"/>
+            android:background="@drawable/new_placeholder"
+            android:scaleType="centerCrop" />
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic1"
@@ -26,8 +26,8 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:scaleType="centerCrop"
-            android:background="@drawable/placeholder_photo"/>
+            android:background="@drawable/new_placeholder"
+            android:scaleType="centerCrop" />
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic2"
@@ -35,8 +35,8 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:scaleType="centerCrop"
-            android:background="@drawable/placeholder_photo"/>
+            android:background="@drawable/new_placeholder"
+            android:scaleType="centerCrop" />
 
     </LinearLayout>
 
@@ -52,8 +52,8 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:scaleType="centerCrop"
-            android:background="@drawable/placeholder_photo"/>
+            android:background="@drawable/new_placeholder"
+            android:scaleType="centerCrop" />
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic4"
@@ -61,8 +61,8 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:scaleType="centerCrop"
-            android:background="@drawable/placeholder_photo"/>
+            android:background="@drawable/new_placeholder"
+            android:scaleType="centerCrop" />
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic5"
@@ -70,8 +70,8 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:scaleType="centerCrop"
-            android:background="@drawable/placeholder_photo"/>
+            android:background="@drawable/new_placeholder"
+            android:scaleType="centerCrop" />
 
     </LinearLayout>
 
@@ -87,8 +87,8 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:scaleType="centerCrop"
-            android:background="@drawable/placeholder_photo"/>
+            android:background="@drawable/new_placeholder"
+            android:scaleType="centerCrop" />
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic7"
@@ -96,8 +96,8 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:scaleType="centerCrop"
-            android:background="@drawable/placeholder_photo"/>
+            android:background="@drawable/new_placeholder"
+            android:scaleType="centerCrop" />
 
         <com.android.volley.toolbox.NetworkImageView
             android:id="@+id/mainPic8"
@@ -105,8 +105,8 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:scaleType="centerCrop"
-            android:background="@drawable/placeholder_photo"/>
+            android:background="@drawable/new_placeholder"
+            android:scaleType="centerCrop" />
 
     </LinearLayout>
 
@@ -120,11 +120,12 @@
             android:id="@+id/share_count_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="18dp"
+            android:layout_marginRight="18dp"
             android:gravity="center"
             android:text="@string/android_share_count"
-            android:textSize="14dp"/>
+            android:textSize="14dp" />
 
         <TextView
             android:id="@+id/check_more_photos"
@@ -136,7 +137,7 @@
             android:text="@string/check_more_photos"
             android:textColor="@color/light_black"
             android:textSize="14dp"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
 
     </RelativeLayout>

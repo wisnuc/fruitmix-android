@@ -59,14 +59,14 @@ public class DBUtils {
         return dbUtils;
     }
 
-    private void openWritableDB() {
+    private synchronized void openWritableDB() {
 
         referenceCount.incrementAndGet();
 
         database = dbHelper.getWritableDatabase();
     }
 
-    private void openReadableDB() {
+    private synchronized void openReadableDB() {
 
         referenceCount.incrementAndGet();
 
@@ -444,7 +444,7 @@ public class DBUtils {
         contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER, media.getOrientationNumber());
         contentValues.put(DBHelper.MEDIA_KEY_TYPE, media.getType());
         contentValues.put(DBHelper.MEDIA_KEY_MINI_THUMB, media.getMiniThumbPath());
-        contentValues.put(DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH,media.getOriginalPhotoPath());
+        contentValues.put(DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH, media.getOriginalPhotoPath());
 
         return contentValues;
     }
@@ -461,7 +461,7 @@ public class DBUtils {
         sqLiteStatement.bindLong(9, media.getOrientationNumber());
         sqLiteStatement.bindString(10, media.getType());
         sqLiteStatement.bindString(11, media.getMiniThumbPath());
-        sqLiteStatement.bindString(12,media.getOriginalPhotoPath());
+        sqLiteStatement.bindString(12, media.getOriginalPhotoPath());
     }
 
     @NonNull
@@ -618,6 +618,27 @@ public class DBUtils {
 
     public long deleteRemoteMediaShareContentByID(String id) {
         return deleteMediaShareContentByID(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, id);
+    }
+
+    private long deleteMediaShareContent(String tableName, String mediaDigest, String shareUUID) {
+
+        openWritableDB();
+
+        long returnValue = database.delete(tableName, DBHelper.SHARE_CONTENT_KEY_DIGEST + " = ? and "
+                + DBHelper.SHARE_CONTENT_KEY_SHARE_UUID + " = ?", new String[]{mediaDigest, shareUUID});
+
+        close();
+
+        return returnValue;
+
+    }
+
+    public long deleteRemoteMediaShareContent(String mediaDigest, String shareUUID) {
+        return deleteMediaShareContent(DBHelper.REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaDigest, shareUUID);
+    }
+
+    public long deleteLocalMediaShareContent(String mediaDigest, String shareUUID) {
+        return deleteMediaShareContent(DBHelper.LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME, mediaDigest, shareUUID);
     }
 
     private void bindMediaShareContent(SQLiteStatement sqLiteStatement, String mediaShareContentUUID) {
@@ -1069,28 +1090,34 @@ public class DBUtils {
 
     }
 
-    private long updateMedia(String dbName, Media media) {
+    public long updateRemoteMedia(Media media) {
+
         openWritableDB();
 
         ContentValues contentValues = createMediaContentValues(media);
 
-        long returnValue = database.update(dbName, contentValues, DBHelper.MEDIA_KEY_UUID + " = ?", new String[]{media.getUuid()});
+        long returnValue = database.update(DBHelper.REMOTE_MEDIA_TABLE_NAME, contentValues, DBHelper.MEDIA_KEY_UUID + " = ?", new String[]{media.getUuid()});
 
         Log.d(TAG, "update media uuid:" + media.getUuid());
 
         close();
 
         return returnValue;
-    }
-
-    public long updateRemoteMedia(Media media) {
-
-        return updateMedia(DBHelper.REMOTE_MEDIA_TABLE_NAME, media);
 
     }
 
     public long updateLocalMedia(Media media) {
-        return updateMedia(DBHelper.LOCAL_MEDIA_TABLE_NAME, media);
+        openWritableDB();
+
+        ContentValues contentValues = createMediaContentValues(media);
+
+        long returnValue = database.update(DBHelper.LOCAL_MEDIA_TABLE_NAME, contentValues, DBHelper.MEDIA_KEY_THUMB + " = ?", new String[]{media.getThumb()});
+
+        Log.d(TAG, "update media thumb:" + media.getThumb());
+
+        close();
+
+        return returnValue;
     }
 
     public long deleteOldAndInsertNewRemoteMediaShare(Collection<MediaShare> oldMediaShares, Collection<MediaShare> newMediaShares) {

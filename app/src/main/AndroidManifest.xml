@@ -19,7 +19,7 @@
         android:theme="@style/CustomAppTheme">
         <meta-data
             android:name="UMENG_APPKEY"
-            android:value="58be61e8c62dca355a000ae1" />
+            android:value="58ddc80f1061d20d4e000596" />
         <meta-data
             android:name="UMENG_CHANNEL"
             android:value="Official Website" />

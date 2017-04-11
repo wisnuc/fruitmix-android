@@ -12,55 +12,76 @@ public enum ExecutorServiceInstance {
 
     SINGLE_INSTANCE;
 
-    private ExecutorService executorService;
+    private ExecutorService cacheThreadPool;
 
-    private ExecutorService fixedThreadPool;
+    private ExecutorService updateMediaThreadPool;
+
+    private ExecutorService generateMiniThumbThreadPool;
 
     private static final int THREAD_SIZE = 5;
 
     ExecutorServiceInstance() {
-        executorService = Executors.newCachedThreadPool();
+        cacheThreadPool = Executors.newCachedThreadPool();
     }
 
     public void doOneTaskInCachedThread(Runnable runnable) {
-        executorService.execute(runnable);
+        cacheThreadPool.execute(runnable);
     }
 
     public <V> Future<V> doOneTaskInCachedThreadUsingCallable(Callable<V> callable) {
-        return executorService.submit(callable);
+        return cacheThreadPool.submit(callable);
     }
 
-    public <V> Future<V> doOneTaskInFixedThreadPool(Callable<V> callable) {
+    public <V> Future<V> doOneTaskInUploadMediaThreadPool(Callable<V> callable) {
 
-        if (fixedThreadPool == null || fixedThreadPool.isShutdown())
-            startFixedThreadPool();
+        if (updateMediaThreadPool == null || updateMediaThreadPool.isShutdown())
+            startUploadMediaThreadPool();
 
-        return fixedThreadPool.submit(callable);
+        return updateMediaThreadPool.submit(callable);
     }
 
-    public void doOnTaskInFixedThreadPool(Runnable runnable) {
+    public void doOnTaskInUploadMediaThreadPool(Runnable runnable) {
 
-        if (fixedThreadPool == null || fixedThreadPool.isShutdown())
-            startFixedThreadPool();
+        if (updateMediaThreadPool == null || updateMediaThreadPool.isShutdown())
+            startUploadMediaThreadPool();
 
-        fixedThreadPool.execute(runnable);
+        updateMediaThreadPool.execute(runnable);
     }
 
-    private void startFixedThreadPool() {
-        fixedThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
+    private void startUploadMediaThreadPool() {
+        updateMediaThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
     }
 
-    public void shutdownFixedThreadPool() {
-        if (fixedThreadPool != null && !fixedThreadPool.isShutdown()) {
-            fixedThreadPool.shutdown();
-            fixedThreadPool = null;
+    public void doOnTaskInGenerateMiniThumbThreadPool(Runnable runnable) {
+
+        if (generateMiniThumbThreadPool == null || generateMiniThumbThreadPool.isShutdown())
+            startGenerateMiniThumbThreadPool();
+
+        generateMiniThumbThreadPool.execute(runnable);
+    }
+
+    private void startGenerateMiniThumbThreadPool() {
+         generateMiniThumbThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
+    }
+
+    public void shutdownUploadMediaThreadPool() {
+        if (updateMediaThreadPool != null && !updateMediaThreadPool.isShutdown()) {
+            updateMediaThreadPool.shutdown();
+            updateMediaThreadPool = null;
         }
     }
 
-    public void shutdownFixedThreadPoolNow() {
-        if (fixedThreadPool != null && !fixedThreadPool.isShutdown()) {
-            fixedThreadPool.shutdownNow();
-            fixedThreadPool = null;
+    public void shutdownUploadMediaThreadPoolNow() {
+        if (updateMediaThreadPool != null && !updateMediaThreadPool.isShutdown()) {
+            updateMediaThreadPool.shutdownNow();
+            updateMediaThreadPool = null;
+        }
+    }
+
+    public void shutdownGenerateMiniThumbThreadPoolNow() {
+        if (generateMiniThumbThreadPool != null && !generateMiniThumbThreadPool.isShutdown()) {
+            generateMiniThumbThreadPool.shutdownNow();
+            generateMiniThumbThreadPool = null;
         }
     }
 }

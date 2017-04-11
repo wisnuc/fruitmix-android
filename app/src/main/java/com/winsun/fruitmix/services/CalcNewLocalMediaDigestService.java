@@ -82,6 +82,8 @@ public class CalcNewLocalMediaDigestService extends IntentService {
                 media.setUuid(uuid);
 
                 newMediaList.add(media);
+
+                Log.d(TAG, "handleActionCalcNewLocalMediaDigest: media thumb: " + media.getThumb() + " uuid: " + media.getUuid());
             }
         }
 

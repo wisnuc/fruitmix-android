@@ -603,8 +603,6 @@ public class ImageLoader {
 
     }
 
-    private List<ImageRequest> imageRequests = new ArrayList<>();
-
     public void preLoadMedia(final String url, final int width, final int height, final ScaleType scaleType) {
 
         ImageRequest request = new ImageRequest(url, new Response.Listener<Bitmap>() {
@@ -622,17 +620,12 @@ public class ImageLoader {
         request.setPriority(Request.Priority.LOW);
         mRequestQueue.add(request);
 
-        imageRequests.add(request);
     }
 
     public void cancelAllPreLoadMedia() {
 
         cancelRetry = true;
 
-        for (ImageRequest request : imageRequests) {
-            if (request != null)
-                request.cancel();
-        }
     }
 
     private Handler handler;
@@ -690,8 +683,6 @@ public class ImageLoader {
 
         request.setPriority(Request.Priority.LOW);
         mRequestQueue.add(request);
-
-        imageRequests.add(request);
 
     }
 

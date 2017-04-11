@@ -120,7 +120,7 @@ public class ModifyMediaInRemoteMediaShareService extends IntentService {
                 long dbResult = 0;
 
                 for (MediaShareContent mediaShareContent : diffContentsInOriginalMediaShare.getMediaShareContents()) {
-                    dbResult = dbUtils.deleteRemoteMediaShareContentByID(mediaShareContent.getId());
+                    dbResult = dbUtils.deleteRemoteMediaShareContent(mediaShareContent.getMediaUUID(), diffContentsInOriginalMediaShare.getUuid());
                 }
 
                 for (MediaShareContent mediaShareContent : diffContentsInModifiedMediaShare.getMediaShareContents()) {

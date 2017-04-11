@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -323,8 +324,13 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
 
             setMainPicScreenHeight(mPhotoItem, mMap);
 
+            mPhotoItem.setBackgroundResource(R.drawable.new_placeholder);
+//            mPhotoItem.setBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
+
             mPhotoItem.setTag(imageUrl);
-            mPhotoItem.setDefaultImageResId(R.drawable.placeholder_photo);
+            mPhotoItem.setDefaultImageResId(R.drawable.new_placeholder);
+//            mPhotoItem.setDefaultBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
+
             mPhotoItem.setImageUrl(imageUrl, mImageLoader);
 
             mDelPhotoLayout.setOnClickListener(new View.OnClickListener() {
@@ -346,9 +352,6 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
 
     private void setMainPicScreenHeight(NetworkImageView mainPic, Media media) {
 
-        if (media.isLocal())
-            return;
-
         int mediaWidth = Integer.parseInt(media.getWidth());
         int mediaHeight = Integer.parseInt(media.getHeight());
         int actualWidth;
@@ -358,6 +361,7 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
         actualWidth = Util.calcScreenWidth(EditPhotoActivity.this) / SPAN_COUNT;
         actualHeight = mediaHeight * actualWidth / mediaWidth;
 
+        layoutParams.width = actualWidth;
         layoutParams.height = actualHeight;
 
         mainPic.setLayoutParams(layoutParams);

@@ -71,6 +71,8 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
     LinearLayout noContentLayout;
     @BindView(R.id.no_content_imageview)
     ImageView noContentImageView;
+    @BindView(R.id.no_content_textview)
+    TextView noContentTextView;
 
     private FileRecyclerViewAdapter fileRecyclerViewAdapter;
 
@@ -154,6 +156,8 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
 
         noContentImageView.setImageResource(R.drawable.no_file);
 
+        noContentTextView.setText(getString(R.string.no_files));
+
         return view;
     }
 
@@ -204,7 +208,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
         if (handleBackPressedOrNot()) {
 
             onFileInteractionListener.setToolbarTitle(currentFolderName);
-            onFileInteractionListener.setNavigationIcon(R.drawable.ic_back);
+            onFileInteractionListener.setNavigationIcon(R.drawable.ic_back_black);
             onFileInteractionListener.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -214,7 +218,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
 
         } else {
             onFileInteractionListener.setToolbarTitle(getString(R.string.file));
-            onFileInteractionListener.setNavigationIcon(R.drawable.menu);
+            onFileInteractionListener.setNavigationIcon(R.drawable.menu_black);
             onFileInteractionListener.setDefaultNavigationOnClickListener();
         }
 

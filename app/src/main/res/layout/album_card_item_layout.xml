@@ -13,7 +13,7 @@
         android:layout_marginTop="2dp"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
-        android:background="@drawable/placeholder_photo" />
+        android:background="@drawable/new_placeholder" />
 
     <ImageView
         android:id="@+id/album_share"

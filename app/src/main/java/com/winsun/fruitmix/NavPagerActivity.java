@@ -33,7 +33,6 @@ import android.widget.Toast;
 
 import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
-import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.fragment.FileMainFragment;
@@ -319,6 +318,12 @@ public class NavPagerActivity extends AppCompatActivity
 
         mCustomHandler = new CustomHandler(this);
 
+        boolean needShowAutoUploadDialog = getIntent().getBooleanExtra(Util.NEED_SHOW_AUTO_UPLOAD_DIALOG, false);
+
+        if (needShowAutoUploadDialog) {
+            showNeedAutoUploadDialog();
+        }
+
         Log.d(TAG, "onCreate: ");
     }
 
@@ -478,6 +483,26 @@ public class NavPagerActivity extends AppCompatActivity
         }
     }
 
+    private void showNeedAutoUploadDialog() {
+        new AlertDialog.Builder(mContext).setMessage(getString(R.string.need_auto_upload)).setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                LocalCache.setCurrentUploadDeviceID(mContext, LocalCache.DeviceID);
+                LocalCache.setAutoUploadOrNot(mContext, true);
+
+                EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
+
+            }
+        }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                LocalCache.setAutoUploadOrNot(mContext, false);
+
+            }
+        }).setCancelable(false).create().show();
+    }
 
     @Override
     protected void onStart() {
@@ -490,9 +515,9 @@ public class NavPagerActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
 
-        if(currentPage == PAGE_MEDIA){
+        if (currentPage == PAGE_MEDIA) {
             mediaMainFragment.show();
-        }else {
+        } else {
             fileMainFragment.show();
         }
     }
@@ -501,9 +526,9 @@ public class NavPagerActivity extends AppCompatActivity
     protected void onPause() {
         super.onPause();
 
-        if(currentPage == PAGE_MEDIA){
+        if (currentPage == PAGE_MEDIA) {
             mediaMainFragment.hide();
-        }else {
+        } else {
             fileMainFragment.hide();
         }
     }
@@ -518,8 +543,6 @@ public class NavPagerActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        ExecutorServiceInstance.SINGLE_INSTANCE.shutdownFixedThreadPoolNow();
 
         ImageGifLoaderInstance.INSTANCE.getImageLoader(mContext).cancelAllPreLoadMedia();
 
@@ -690,6 +713,10 @@ public class NavPagerActivity extends AppCompatActivity
                 mLoggedInUser0Avatar.setVisibility(View.INVISIBLE);
             }
 
+            if (mLoggedInUser1Avatar.getVisibility() == View.VISIBLE) {
+                mLoggedInUser1Avatar.setVisibility(View.INVISIBLE);
+            }
+
             mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemLoggedInUser);
             mNavigationItemAdapter.notifyDataSetChanged();
 
@@ -737,7 +764,7 @@ public class NavPagerActivity extends AppCompatActivity
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title)
                 .setMessage(message)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         ActivityCompat.requestPermissions(NavPagerActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Util.WRITE_EXTERNAL_STORAGE_REQUEST_CODE);
                     }
@@ -802,7 +829,11 @@ public class NavPagerActivity extends AppCompatActivity
 
     private void finishApp() {
 
-        if (System.currentTimeMillis() - backPressedTimeMillis < TIME_INTERNAL) {
+        ButlerService.stopButlerService(mContext);
+
+        super.onBackPressed();
+
+/*        if (System.currentTimeMillis() - backPressedTimeMillis < TIME_INTERNAL) {
 
             ButlerService.stopButlerService(mContext);
 
@@ -812,7 +843,8 @@ public class NavPagerActivity extends AppCompatActivity
             Toast.makeText(mContext, getString(R.string.android_finishAppToast), Toast.LENGTH_SHORT).show();
         }
 
-        backPressedTimeMillis = System.currentTimeMillis();
+        backPressedTimeMillis = System.currentTimeMillis();*/
+
     }
 
 
@@ -1074,6 +1106,8 @@ public class NavPagerActivity extends AppCompatActivity
 
     class NavigationAccountItemViewHolder extends BaseNavigationViewHolder {
 
+        @BindView(R.id.avatar)
+        TextView avatarTextView;
         @BindView(R.id.item_title)
         TextView itemTitle;
         @BindView(R.id.item_sub_title)
@@ -1092,7 +1126,14 @@ public class NavPagerActivity extends AppCompatActivity
 
             final NavigationAccountManageItem item = (NavigationAccountManageItem) type;
 
-            itemTitle.setText(item.getItemTextResID());
+            String title = getString(item.getItemTextResID());
+
+            itemTitle.setText(title);
+
+            String avatar = title.substring(0, 1).toUpperCase();
+
+            avatarTextView.setText(avatar);
+
             itemSubTitle.setVisibility(View.GONE);
 
             itemLayout.setOnClickListener(new View.OnClickListener() {

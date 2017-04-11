@@ -8,6 +8,7 @@ import android.util.Log;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
+import com.winsun.fruitmix.model.operationResult.OperationNoChanged;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -84,7 +85,7 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
             EventBus.getDefault().post(new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, new OperationSuccess()));
 
         } else {
-            EventBus.getDefault().post(new OperationEvent(Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED, new OperationSuccess()));
+            EventBus.getDefault().post(new OperationEvent(Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED, new OperationNoChanged()));
         }
 
     }

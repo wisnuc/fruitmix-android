@@ -67,6 +67,8 @@ public class ButlerService extends Service {
 
     private boolean mStopUpload = false;
 
+    private boolean mStopGenerateMiniThumb = false;
+
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
         context.startService(intent);
@@ -121,6 +123,10 @@ public class ButlerService extends Service {
 
         task = null;
 
+        stopUpload();
+
+        stopGenerateMiniThumb();
+
         super.onDestroy();
 
     }
@@ -159,7 +165,7 @@ public class ButlerService extends Service {
 
         ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
         DownloadFileTask downloadFileTask = new DownloadFileTask(downloadFileEvent.getFileDownloadState(), DBUtils.getInstance(this));
-        instance.doOneTaskInFixedThreadPool(downloadFileTask);
+        instance.doOneTaskInUploadMediaThreadPool(downloadFileTask);
 
     }
 
@@ -263,19 +269,32 @@ public class ButlerService extends Service {
 
         for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
 
+            if (mStopGenerateMiniThumb) return;
+
             if (media.getMiniThumbPath().isEmpty()) {
 
-                GenerateLocalMediaMiniThumbTask task = new GenerateLocalMediaMiniThumbTask(media, dbUtils);
-                instance.doOnTaskInFixedThreadPool(task);
+                GenerateLocalMediaMiniThumbTask task = new GenerateLocalMediaMiniThumbTask(media, dbUtils, mStopGenerateMiniThumb);
+                instance.doOnTaskInGenerateMiniThumbThreadPool(task);
             }
 
         }
 
     }
 
+    private void stopGenerateMiniThumb() {
+
+        mStopGenerateMiniThumb = true;
+
+        ExecutorServiceInstance.SINGLE_INSTANCE.shutdownGenerateMiniThumbThreadPoolNow();
+
+    }
+
     private void startUpload() {
 
         Log.i(TAG, "startUpload: auto upload:" + LocalCache.getAutoUploadOrNot(this));
+
+        if (mStopUpload)
+            mStopUpload = false;
 
         if (mCalcNewLocalMediaDigestFinished && mRetrieveRemoteMediaFinished && LocalCache.getAutoUploadOrNot(this)) {
             startUploadAllLocalPhoto();
@@ -288,8 +307,9 @@ public class ButlerService extends Service {
 
         mStopUpload = true;
 
-        ExecutorServiceInstance.SINGLE_INSTANCE.shutdownFixedThreadPoolNow();
+        ExecutorServiceInstance.SINGLE_INSTANCE.shutdownUploadMediaThreadPoolNow();
     }
+
 
     private void startUploadAllLocalPhoto() {
         for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
@@ -364,8 +384,8 @@ public class ButlerService extends Service {
                 media = ((MediaRequestEvent) requestEvent).getMedia();
 
                 instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-                UploadMediaTask task = new UploadMediaTask(DBUtils.getInstance(this), media);
-                instance.doOneTaskInFixedThreadPool(task);
+                UploadMediaTask task = new UploadMediaTask(DBUtils.getInstance(this), media, mStopUpload);
+                instance.doOneTaskInUploadMediaThreadPool(task);
 
                 break;
             case REMOTE_MEDIA_SHARE:

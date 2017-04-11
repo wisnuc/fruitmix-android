@@ -53,7 +53,7 @@ public class MainActivity extends Activity {
 
     }
 
-    public static boolean checkPermission(Context context, String permission) {
+    private static boolean checkPermission(Context context, String permission) {
         boolean result = false;
         if (Build.VERSION.SDK_INT >= 23) {
             try {

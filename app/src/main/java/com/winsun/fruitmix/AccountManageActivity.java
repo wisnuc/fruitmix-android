@@ -260,17 +260,17 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
 
         @Override
         public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-            AccountChildHolder groupViewHolder;
+            AccountChildHolder childViewHolder;
             if (convertView == null) {
                 convertView = LayoutInflater.from(mContext).inflate(R.layout.account_child_item, parent, false);
 
-                groupViewHolder = new AccountChildHolder(convertView);
-                convertView.setTag(groupViewHolder);
+                childViewHolder = new AccountChildHolder(convertView);
+                convertView.setTag(childViewHolder);
             } else {
-                groupViewHolder = (AccountChildHolder) convertView.getTag();
+                childViewHolder = (AccountChildHolder) convertView.getTag();
             }
 
-            groupViewHolder.refreshView(mUsers, groupPosition, childPosition);
+            childViewHolder.refreshView(mUsers, groupPosition, childPosition);
 
             return convertView;
         }

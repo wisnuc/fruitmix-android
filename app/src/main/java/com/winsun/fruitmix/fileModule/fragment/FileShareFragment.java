@@ -53,6 +53,8 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
     RecyclerView fileShareRecyclerView;
     @BindView(R.id.no_content_imageview)
     ImageView noContentImageView;
+    @BindView(R.id.no_content_textview)
+    TextView noContentTextView;
 
     private List<AbstractRemoteFile> abstractRemoteFiles;
     private FileShareRecyclerAdapter fileShareRecyclerAdapter;
@@ -114,6 +116,8 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
 
         noContentImageView.setImageResource(R.drawable.no_file);
 
+        noContentTextView.setText(getString(R.string.no_files));
+
         return view;
     }
 
@@ -142,7 +146,7 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
         if (handleBackPressedOrNot()) {
 
             onFileInteractionListener.setToolbarTitle(currentFolderName);
-            onFileInteractionListener.setNavigationIcon(R.drawable.ic_back);
+            onFileInteractionListener.setNavigationIcon(R.drawable.ic_back_black);
             onFileInteractionListener.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -152,7 +156,7 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
 
         } else {
             onFileInteractionListener.setToolbarTitle(getString(R.string.file));
-            onFileInteractionListener.setNavigationIcon(R.drawable.menu);
+            onFileInteractionListener.setNavigationIcon(R.drawable.menu_black);
             onFileInteractionListener.setDefaultNavigationOnClickListener();
         }
     }

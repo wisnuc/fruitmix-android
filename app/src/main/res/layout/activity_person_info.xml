@@ -70,7 +70,6 @@
                 android:layout_height="50dp"
                 android:background="@drawable/user_portrait_bg_green"
                 android:gravity="center"
-                android:text="@string/user_name_abbreviations"
                 android:textSize="18dp"
                 android:textColor="@color/white"/>
 
@@ -79,7 +78,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:layout_marginLeft="8dp"
-                android:text="@string/user_default_name"
                 android:textSize="24dp" />
 
         </LinearLayout>
