@@ -73,10 +73,13 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
         if (mMapKeyIsPhotoPositionValueIsPhoto == null || mMapKeyIsPhotoPositionValueIsPhoto.size() == 0)
             return;
 
-        for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
-            for (Media media : mediaList) {
-                media.setSelected(false);
-            }
+        Media media;
+
+        for (int i = 0; i < mMapKeyIsPhotoPositionValueIsPhoto.size(); i++) {
+
+            media = mMapKeyIsPhotoPositionValueIsPhoto.get(mMapKeyIsPhotoPositionValueIsPhoto.keyAt(i));
+
+            media.setSelected(false);
         }
     }
 
@@ -422,8 +425,6 @@ public class MediaFragmentPresenterImpl implements MediaFragmentContract.MediaFr
                 mPhotoDateGroups = loader.getPhotoDateGroups();
                 mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
                 mMapKeyIsDateValueIsPhotoList = loader.getMapKeyIsDateValueIsPhotoList();
-
-                clearSelectPhoto();
 
                 if (mView == null)
                     return;

@@ -86,16 +86,25 @@ public class ServerDataSource implements DataSource {
 
     private String mDeviceID = null;
 
-    private ServerDataSource() {
+    private OkHttpUtil okHttpUtil;
 
+    private RetrofitInstance retrofitInstance;
+
+    private ServerDataSource(OkHttpUtil okHttpUtil, RetrofitInstance retrofitInstance) {
+        this.okHttpUtil = okHttpUtil;
+        this.retrofitInstance = retrofitInstance;
     }
 
-    public static ServerDataSource getInstance() {
+    public static ServerDataSource getInstance(OkHttpUtil okHttpUtil, RetrofitInstance retrofitInstance) {
 
         if (INSTANCE == null)
-            INSTANCE = new ServerDataSource();
+            INSTANCE = new ServerDataSource(okHttpUtil, retrofitInstance);
 
         return INSTANCE;
+    }
+
+    public void destroyInstance() {
+        INSTANCE = null;
     }
 
     private String generateUrl(String req) {
@@ -111,7 +120,7 @@ public class ServerDataSource implements DataSource {
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
 
-        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
+        return okHttpUtil.remoteCallMethod(httpRequest);
 
     }
 
@@ -123,7 +132,7 @@ public class ServerDataSource implements DataSource {
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
         httpRequest.setBody(data);
 
-        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
+        return okHttpUtil.remoteCallMethod(httpRequest);
     }
 
     private HttpResponse deleteRemoteCall(String url, String token, String data) throws MalformedURLException, IOException, SocketTimeoutException {
@@ -133,7 +142,7 @@ public class ServerDataSource implements DataSource {
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
         httpRequest.setBody(data);
 
-        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
+        return okHttpUtil.remoteCallMethod(httpRequest);
     }
 
     public List<EquipmentAlias> loadEquipmentAlias(String url) {
@@ -157,6 +166,7 @@ public class ServerDataSource implements DataSource {
                 equipmentAliases.add(equipmentAlias);
             }
 
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -169,26 +179,18 @@ public class ServerDataSource implements DataSource {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
     }
 
+    @Override
     public List<User> loadRemoteUserByLoginApi(String url) {
 
-        List<User> users = new ArrayList<>();
+        List<User> users = null;
 
         try {
 
             String str = getRemoteCall(url, mToken).getResponseData();
 
-            JSONArray json = new JSONArray(str);
+            RemoteUserParser parser = new RemoteUserParser();
 
-            int length = json.length();
-
-            for (int i = 0; i < length; i++) {
-                JSONObject itemRaw = json.getJSONObject(i);
-                User user = new User();
-                user.setUserName(itemRaw.getString("username"));
-                user.setUuid(itemRaw.getString("uuid"));
-                user.setAvatar(itemRaw.getString("avatar"));
-                users.add(user);
-            }
+            users = parser.parse(str);
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -205,14 +207,13 @@ public class ServerDataSource implements DataSource {
     @Override
     public OperateUserResult insertRemoteUser(String userName, String userPassword) {
 
-        return handleActionCreateRemoteUser( userName, userPassword);
+        return handleActionCreateRemoteUser(userName, userPassword);
 
     }
 
     private OperateUserResult handleActionCreateRemoteUser(String userName, String userPassword) {
 
-        String url =generateUrl(Util.USER_PARAMETER);
-
+        String url = generateUrl(Util.USER_PARAMETER);
 
         String body = User.generateCreateRemoteUserBody(userName, userPassword);
 
@@ -453,9 +454,22 @@ public class ServerDataSource implements DataSource {
     @Override
     public OperationResult insertLocalMedia(Media media) {
 
+        String hash = media.getUuid();
+
+        Log.d(TAG, "thumb:" + media.getThumb() + "hash:" + hash);
+
         String url = generateUrl(Util.DEVICE_ID_PARAMETER + "/" + mDeviceID);
 
-        boolean result = uploadFile(url, mToken, media);
+        Log.d(TAG, "Photo UP: " + url);
+
+//        boolean result = uploadFile(url, mToken, media);
+
+        HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_POST_METHOD);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + mToken);
+
+        boolean result = okHttpUtil.uploadFile(httpRequest, media);
+
+        Log.d(TAG, "UploadFile: result:" + result);
 
         if (result)
             return new OperationSuccess();
@@ -610,7 +624,7 @@ public class ServerDataSource implements DataSource {
 
     private OperationResult handleActionModifyRemoteShare(MediaShare mediaShare, String requestData) {
 
-        String url =generateUrl(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid() + "/update");
+        String url = generateUrl(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid() + "/update");
 
         if (mediaShare.isLocal()) {
 
@@ -653,12 +667,12 @@ public class ServerDataSource implements DataSource {
     @Override
     public OperationResult deleteRemoteMediaShare(MediaShare mediaShare) {
 
-        return handleActionDeleteRemoteShare( mediaShare);
+        return handleActionDeleteRemoteShare(mediaShare);
     }
 
-    private OperationResult handleActionDeleteRemoteShare( MediaShare mediaShare) {
+    private OperationResult handleActionDeleteRemoteShare(MediaShare mediaShare) {
 
-        String url =generateUrl(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid() + "/update");
+        String url = generateUrl(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid() + "/update");
 
 
         if (mediaShare.isLocal()) {
@@ -670,12 +684,13 @@ public class ServerDataSource implements DataSource {
 //            data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mediaShare.getUuid() + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"true\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mediaShare.getDate() + "\\\", \\\"desc\\\":\\\"" + mediaShare.getDesc() + "\\\"}], \\\"viewers\\\":[]}}]\"}";
 
             try {
-                deleteRemoteCall(url, mToken, "");
+                HttpResponse httpResponse = deleteRemoteCall(url, mToken, "");
 
-                Log.i(TAG, "delete remote media share which source is network succeed");
-
-                return new OperationSuccess();
-
+                if (httpResponse.getResponseCode() == 200) {
+                    return new OperationSuccess();
+                } else {
+                    return new OperationNetworkException(httpResponse.getResponseCode());
+                }
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -745,10 +760,10 @@ public class ServerDataSource implements DataSource {
     @Override
     public UsersLoadOperationResult loadRemoteUsers() {
 
-        return handleActionRetrieveRemoteUser();
+        return handleActionRetrieveRemoteUsers();
     }
 
-    private UsersLoadOperationResult handleActionRetrieveRemoteUser() {
+    private UsersLoadOperationResult handleActionRetrieveRemoteUsers() {
 
         String loadUserUrl = generateUrl(Util.USER_PARAMETER);
         String loadOtherUserUrl = generateUrl(Util.LOGIN_PARAMETER);
@@ -761,15 +776,23 @@ public class ServerDataSource implements DataSource {
 
             HttpResponse httpResponse = getRemoteCall(loadUserUrl, mToken);
 
-            RemoteDataParser<User> parser = new RemoteUserParser();
-            users = parser.parse(httpResponse.getResponseData());
+            if (httpResponse.getResponseCode() == 200) {
 
-            List<User> otherUsers = parser.parse(getRemoteCall(loadOtherUserUrl, mToken).getResponseData());
+                RemoteDataParser<User> parser = new RemoteUserParser();
+                users = parser.parse(httpResponse.getResponseData());
 
-            result.setUsers(addDifferentUsers(users, otherUsers));
-            result.setOperationResult(new OperationSuccess());
+                httpResponse = getRemoteCall(loadOtherUserUrl, mToken);
+                if (httpResponse.getResponseCode() == 200) {
+                    List<User> otherUsers = parser.parse(httpResponse.getResponseData());
 
-            Log.i(TAG, "handleActionRetrieveRemoteUser: retrieve user from network");
+                    result.setUsers(addDifferentUsers(users, otherUsers));
+                }
+
+                result.setOperationResult(new OperationSuccess());
+
+            } else {
+                result.setOperationResult(new OperationNetworkException(httpResponse.getResponseCode()));
+            }
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -818,10 +841,10 @@ public class ServerDataSource implements DataSource {
     @Override
     public MediasLoadOperationResult loadAllRemoteMedias() {
 
-        return handleActionRetrieveRemoteMedia();
+        return handleActionRetrieveRemoteMedias();
     }
 
-    private MediasLoadOperationResult handleActionRetrieveRemoteMedia() {
+    private MediasLoadOperationResult handleActionRetrieveRemoteMedias() {
 
         String url = generateUrl(Util.MEDIA_PARAMETER);
 
@@ -831,20 +854,23 @@ public class ServerDataSource implements DataSource {
 
         try {
 
-            Log.d(TAG, "handleActionRetrieveRemoteMedia: before load" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.d(TAG, "handleActionRetrieveRemoteMedias: before load" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
             HttpResponse httpResponse = getRemoteCall(url, mToken);
 
-            Log.d(TAG, "handleActionRetrieveRemoteMedia: load media finish" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.d(TAG, "handleActionRetrieveRemoteMedias: load media finish" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-            RemoteDataParser<Media> parser = new RemoteMediaParser();
-            medias = parser.parse(httpResponse.getResponseData());
+            if (httpResponse.getResponseCode() == 200) {
+                RemoteDataParser<Media> parser = new RemoteMediaParser();
+                medias = parser.parse(httpResponse.getResponseData());
 
-            Log.i(TAG, "handleActionRetrieveRemoteMedia: parse json finish");
+                Log.i(TAG, "handleActionRetrieveRemoteMedias: parse json finish");
 
-            result.setMedias(medias);
-            result.setOperationResult(new OperationSuccess());
-
+                result.setMedias(medias);
+                result.setOperationResult(new OperationSuccess());
+            } else {
+                result.setOperationResult(new OperationNetworkException(httpResponse.getResponseCode()));
+            }
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -915,15 +941,20 @@ public class ServerDataSource implements DataSource {
 
             HttpResponse httpResponse = getRemoteCall(url, mToken);
 
-            Log.d(TAG, "loadRemoteShare:" + httpResponse.getResponseData().equals(""));
+            if (httpResponse.getResponseCode() == 200) {
 
-            RemoteDataParser<MediaShare> parser = new RemoteMediaShareParser();
-            mediaShares = parser.parse(httpResponse.getResponseData());
+                Log.d(TAG, "loadRemoteShare:" + httpResponse.getResponseData().equals(""));
 
-            Log.d(TAG, "handleActionRetrieveRemoteMediaShare: parse remote media share");
+                RemoteDataParser<MediaShare> parser = new RemoteMediaShareParser();
+                mediaShares = parser.parse(httpResponse.getResponseData());
 
-            result.setMediaShares(mediaShares);
-            result.setOperationResult(new OperationSuccess());
+                Log.d(TAG, "handleActionRetrieveRemoteMediaShare: parse remote media share");
+
+                result.setMediaShares(mediaShares);
+                result.setOperationResult(new OperationSuccess());
+            } else {
+                result.setOperationResult(new OperationNetworkException(httpResponse.getResponseCode()));
+            }
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -994,7 +1025,7 @@ public class ServerDataSource implements DataSource {
 
         String baseUrl = mGateway + ":" + Util.PORT;
 
-        FileDownloadUploadInterface fileDownloadUploadInterface = RetrofitInstance.INSTANCE.getRetrofitInstance(baseUrl, mToken).create(FileDownloadUploadInterface.class);
+        FileDownloadUploadInterface fileDownloadUploadInterface = retrofitInstance.getRetrofitInstance(baseUrl, mToken).create(FileDownloadUploadInterface.class);
 
         Call<ResponseBody> call = fileDownloadUploadInterface.downloadFile(baseUrl + Util.FILE_PARAMETER + "/" + fileDownloadState.getFileUUID());
 
@@ -1115,7 +1146,7 @@ public class ServerDataSource implements DataSource {
             HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
             httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((param.getUserUUID() + ":" + param.getUserPassword()).getBytes(), Base64.NO_WRAP));
 
-            HttpResponse httpResponse = OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
+            HttpResponse httpResponse = okHttpUtil.remoteCallMethod(httpRequest);
 
             int responseCode = httpResponse.getResponseCode();
 
@@ -1167,6 +1198,10 @@ public class ServerDataSource implements DataSource {
         return null;
     }
 
+    public String getGateway() {
+        return mGateway;
+    }
+
     @Override
     public boolean getShowAlbumTipsValue() {
         throw new UnsupportedOperationException(Util.UNSUPPORT_OPERATION);
@@ -1214,11 +1249,19 @@ public class ServerDataSource implements DataSource {
         return null;
     }
 
+    public String getToken() {
+        return mToken;
+    }
+
     @Override
     public OperationResult insertDeviceID(String deviceID) {
         mDeviceID = deviceID;
 
         return null;
+    }
+
+    public String getDeviceID() {
+        return mDeviceID;
     }
 
     @Override

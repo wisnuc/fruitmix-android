@@ -292,7 +292,10 @@ public class MemoryDataSource implements DataSource {
     }
 
     public User loadRemoteUser(String userUUID) {
-        if (remoteUserMapKeyIsUUID.containsKey(userUUID)) {
+
+        if (userUUID == null || remoteUserMapKeyIsUUID == null) {
+            return null;
+        } else if (remoteUserMapKeyIsUUID.containsKey(userUUID)) {
             return remoteUserMapKeyIsUUID.get(userUUID);
         } else
             return null;

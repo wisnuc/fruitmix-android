@@ -16,21 +16,31 @@ import retrofit2.Retrofit;
  * Created by Administrator on 2016/11/3.
  */
 
-public enum RetrofitInstance {
-
-    INSTANCE;
+public class RetrofitInstance {
 
     public static final String TAG = RetrofitInstance.class.getSimpleName();
+
+    private static RetrofitInstance Instance;
 
     private String mToken;
     private Retrofit retrofitInstance;
 
-    public Retrofit getRetrofitInstance(String baseUrl,String token) {
+    public Retrofit getRetrofitInstance(String baseUrl, String token) {
         if (retrofitInstance == null) {
             retrofitInstance = new Retrofit.Builder().baseUrl(baseUrl).client(createOKHTTPClient()).build();
             mToken = token;
         }
         return retrofitInstance;
+    }
+
+    public static RetrofitInstance getInstance() {
+
+        if (Instance == null) {
+            Instance = new RetrofitInstance();
+        }
+
+        return Instance;
+
     }
 
 
@@ -39,7 +49,7 @@ public enum RetrofitInstance {
                 .addInterceptor(createHeaderInterceptor())
                 .addInterceptor(createHttpInterceptor())
                 .connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
-                .readTimeout(Util.HTTP_CONNECT_TIMEOUT,TimeUnit.MILLISECONDS)
+                .readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
                 .build();
     }
 

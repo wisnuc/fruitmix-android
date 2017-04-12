@@ -6,7 +6,7 @@
 
     <string name="android_finishAppToast">Please click BACK again to exit</string>
 
-    <string name="and"> 和 </string>
+    <string name="and"> and </string>
 
     <!-- url -->
 
@@ -28,7 +28,7 @@
 
     <string name="android_ellipsize">…</string>
 
-    <string name="android_no_write_external_storage_permission">SD卡没有写权限</string>
+    <string name="android_no_write_external_storage_permission">No write external storage permission</string>
 
     <!-- android end -->
 
@@ -191,7 +191,7 @@
     <string name="local_media_share_uploading">Sorry,it is uploading,please wait!</string>
 
     <!-- Errors -->
-    <string name="network_exception">网络数据异常，错误码：%1$s</string>    <!-- String + ErrorCode -->
+    <string name="network_exception">Network exception,error code：%1$s</string>    <!-- String + ErrorCode -->
 
     <!-- network error -->
     <string name="no_network">No Network,Please check it</string>

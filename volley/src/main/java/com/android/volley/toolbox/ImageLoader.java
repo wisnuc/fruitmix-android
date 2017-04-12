@@ -597,9 +597,7 @@ public class ImageLoader {
                 .append("#H").append(maxHeight).append("#S").append(scaleType.ordinal()).append(url)
                 .toString();
     }
-
-    private List<ImageRequest> imageRequests = new ArrayList<>();
-
+    
     private Handler handler;
     private boolean cancelRetry = false;
 
@@ -620,17 +618,12 @@ public class ImageLoader {
         request.setPriority(Request.Priority.LOW);
         mRequestQueue.add(request);
 
-        imageRequests.add(request);
     }
 
     public void cancelAllPreLoadMedia() {
 
         cancelRetry = true;
 
-        for (ImageRequest request : imageRequests) {
-            if (request != null)
-                request.cancel();
-        }
     }
 
     public void preLoadMediaSmallThumb(final String url, final int width, final int height) {
@@ -684,8 +677,6 @@ public class ImageLoader {
 
         request.setPriority(Request.Priority.LOW);
         mRequestQueue.add(request);
-
-        imageRequests.add(request);
 
     }
 

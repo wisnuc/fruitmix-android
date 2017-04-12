@@ -57,14 +57,14 @@ public class DBUtils {
         return dbUtils;
     }
 
-    private void openWritableDB() {
+    private synchronized void openWritableDB() {
 
         referenceCount.incrementAndGet();
 
         database = dbHelper.getWritableDatabase();
     }
 
-    private void openReadableDB() {
+    private synchronized void openReadableDB() {
 
         referenceCount.incrementAndGet();
 

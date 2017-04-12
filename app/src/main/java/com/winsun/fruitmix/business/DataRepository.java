@@ -612,7 +612,7 @@ public class DataRepository {
 
                         boolean result = FileUtil.writeBitmapToLocalPhotoThumbnailFolder(media);
 
-                        if (result) {
+                        if (result && !mStopGenerateMiniThumb) {
 
                             mDBDataSource.updateLocalMediaMiniThumb(media);
 
@@ -631,6 +631,8 @@ public class DataRepository {
 
         if (mCalcNewLocalMediaDigestFinished && remoteMediaLoaded && getAutoUploadOrNot()) {
 
+            Log.d(TAG, "startUploadMedia");
+
             mStopUpload = false;
 
             List<Media> localMedias = mMemoryDataSource.loadAllLocalMedias().getMedias();
@@ -648,7 +650,6 @@ public class DataRepository {
                     }
                 });
 
-
             }
 
         }
@@ -656,8 +657,6 @@ public class DataRepository {
     }
 
     private void startUploadMedia(Media media, Collection<String> remoteMediaUUIDs, String deviceID) {
-
-        Log.d(TAG, "startUploadMedia: ");
 
         if (mStopUpload) return;
 
@@ -690,7 +689,6 @@ public class DataRepository {
             }
             mDBDataSource.updateLocalMediaUploadedDeviceID(media);
         }
-
 
     }
 
@@ -2104,7 +2102,7 @@ public class DataRepository {
 
     }
 
-    public void cancelPreLoadMediaSmallThumb(){
+    public void cancelPreLoadMediaSmallThumb() {
 
         imageGifLoaderInstance.getImageLoader(mMemoryDataSource.loadToken()).cancelAllPreLoadMedia();
 
