@@ -25,6 +25,7 @@ import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.fileModule.model.BottomMenuItem;
 import com.winsun.fruitmix.presenter.FileFragmentPresenterImpl;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.Collections;
@@ -69,7 +70,7 @@ public class FileFragment implements FileFragmentContract.FileFragmentView {
 
         noContentImageView.setImageResource(R.drawable.no_file);
 
-        mPresenter = new FileFragmentPresenterImpl(fileMainFragmentPresenter, Injection.injectDataRepository(baseActivity));
+        mPresenter = new FileFragmentPresenterImpl(fileMainFragmentPresenter, Injection.injectDataRepository(baseActivity), FileUtil.getInstance());
         mPresenter.attachView(this);
 
     }

@@ -19,7 +19,7 @@ public class FileDownloadingState extends FileDownloadState {
     @Override
     public void startWork() {
 
-        if (!FileUtil.checkExternalDirectoryForDownloadAvailableSizeEnough()) {
+        if (!FileUtil.getInstance().checkExternalDirectoryForDownloadAvailableSizeEnough()) {
             getFileDownloadItem().setFileDownloadState(new FileDownloadNoEnoughSpaceState(getFileDownloadItem()));
         } else {
             getFileDownloadItem().startDownload();

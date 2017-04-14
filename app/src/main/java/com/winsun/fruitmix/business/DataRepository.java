@@ -87,6 +87,8 @@ public class DataRepository {
     private DataSource mDBDataSource;
     private DataSource mServerDataSource;
 
+    private FileUtil mFileUtil;
+
     private Handler mHandler;
 
     private ExecutorServiceInstance instance;
@@ -137,11 +139,13 @@ public class DataRepository {
     private static final String SERVICE_PORT = "_http._tcp";
     private static final String DEMAIN = "local.";
 
-    private DataRepository(Context context, DataSource memoryDataSource, DataSource dbDataSource, DataSource serverDataSource) {
+    private DataRepository(Context context, DataSource memoryDataSource, DataSource dbDataSource, DataSource serverDataSource,FileUtil fileUtil) {
 
         mMemoryDataSource = memoryDataSource;
         mDBDataSource = dbDataSource;
         mServerDataSource = serverDataSource;
+
+        mFileUtil = fileUtil;
 
         mHandler = new Handler(Looper.getMainLooper());
 
@@ -158,9 +162,9 @@ public class DataRepository {
 
     }
 
-    public static DataRepository getInstance(Context context, DataSource cacheDataSource, DataSource dbDataSource, DataSource serverDataSource) {
+    public static DataRepository getInstance(Context context, DataSource cacheDataSource, DataSource dbDataSource, DataSource serverDataSource,FileUtil fileUtil) {
         if (INSTANCE == null) {
-            INSTANCE = new DataRepository(context, cacheDataSource, dbDataSource, serverDataSource);
+            INSTANCE = new DataRepository(context, cacheDataSource, dbDataSource, serverDataSource,fileUtil);
         }
         return INSTANCE;
     }
@@ -610,7 +614,7 @@ public class DataRepository {
 
                         if (mStopGenerateMiniThumb) return;
 
-                        boolean result = FileUtil.writeBitmapToLocalPhotoThumbnailFolder(media);
+                        boolean result = mFileUtil.writeBitmapToLocalPhotoThumbnailFolder(media);
 
                         if (result && !mStopGenerateMiniThumb) {
 

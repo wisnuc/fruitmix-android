@@ -11,6 +11,7 @@ import com.winsun.fruitmix.common.BaseActivity;
 import com.winsun.fruitmix.common.Injection;
 import com.winsun.fruitmix.contract.SplashContract;
 import com.winsun.fruitmix.presenter.SplashPresenterImpl;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.File;
@@ -41,7 +42,7 @@ public class SplashScreenActivity extends BaseActivity implements SplashContract
 
         dataRepository.init();
 
-        mSplashPresenter = new SplashPresenterImpl(dataRepository);
+        mSplashPresenter = new SplashPresenterImpl(dataRepository, FileUtil.getInstance());
 
         mSplashPresenter.attachView(this);
 

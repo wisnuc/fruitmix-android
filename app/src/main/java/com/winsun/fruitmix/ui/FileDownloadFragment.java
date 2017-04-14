@@ -66,7 +66,7 @@ public class FileDownloadFragment implements FileDownloadFragmentContract.FileDo
         fileDownloadedRecyclerView.setAdapter(downloadedFileAdapter);
         fileDownloadedRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
 
-        mPresenter = new FileDownloadFragmentPresenterImpl(Injection.injectDataRepository(baseActivity), fileMainFragmentPresenter);
+        mPresenter = new FileDownloadFragmentPresenterImpl(Injection.injectDataRepository(baseActivity),FileUtil.getInstance(), fileMainFragmentPresenter);
         mPresenter.attachView(this);
         mPresenter.loadDownloadedFile();
 
@@ -243,7 +243,7 @@ public class FileDownloadFragment implements FileDownloadFragmentContract.FileDo
             fileName.setText(fileDownloadItem.getFileName());
 
             if (downloadState.equals(DownloadState.FINISHED)) {
-                fileSize.setText(FileUtil.formatFileSize(fileDownloadItem.getFileSize()));
+                fileSize.setText(FileUtil.getInstance().formatFileSize(fileDownloadItem.getFileSize()));
             } else {
                 fileSize.setText(getString(R.string.download_failed));
             }

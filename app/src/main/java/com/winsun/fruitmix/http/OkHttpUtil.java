@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.http;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.winsun.fruitmix.mediaModule.model.Media;

@@ -597,7 +597,7 @@ public class ImageLoader {
                 .append("#H").append(maxHeight).append("#S").append(scaleType.ordinal()).append(url)
                 .toString();
     }
-    
+
     private Handler handler;
     private boolean cancelRetry = false;
 

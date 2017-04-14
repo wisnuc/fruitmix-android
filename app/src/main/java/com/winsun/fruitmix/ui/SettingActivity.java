@@ -53,7 +53,7 @@ public class SettingActivity extends BaseActivity implements SettingContract.Set
         mBackImageView.setOnClickListener(this);
         mClearCacheLayout.setOnClickListener(this);
 
-        mSettingPresenter = new SettingPresenterImpl(Injection.injectDataRepository(this));
+        mSettingPresenter = new SettingPresenterImpl(Injection.injectDataRepository(this),FileUtil.getInstance());
 
         mSettingPresenter.attachView(this);
         mSettingPresenter.initView(this);

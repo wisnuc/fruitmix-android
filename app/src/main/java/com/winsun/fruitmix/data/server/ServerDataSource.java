@@ -90,15 +90,19 @@ public class ServerDataSource implements DataSource {
 
     private RetrofitInstance retrofitInstance;
 
-    private ServerDataSource(OkHttpUtil okHttpUtil, RetrofitInstance retrofitInstance) {
+    private FileUtil mFileUtil;
+
+    private ServerDataSource(OkHttpUtil okHttpUtil, RetrofitInstance retrofitInstance, FileUtil fileUtil) {
         this.okHttpUtil = okHttpUtil;
         this.retrofitInstance = retrofitInstance;
+
+        mFileUtil = fileUtil;
     }
 
-    public static ServerDataSource getInstance(OkHttpUtil okHttpUtil, RetrofitInstance retrofitInstance) {
+    public static ServerDataSource getInstance(OkHttpUtil okHttpUtil, RetrofitInstance retrofitInstance, FileUtil fileUtil) {
 
         if (INSTANCE == null)
-            INSTANCE = new ServerDataSource(okHttpUtil, retrofitInstance);
+            INSTANCE = new ServerDataSource(okHttpUtil, retrofitInstance, fileUtil);
 
         return INSTANCE;
     }
@@ -1025,14 +1029,13 @@ public class ServerDataSource implements DataSource {
 
         String baseUrl = mGateway + ":" + Util.PORT;
 
-        FileDownloadUploadInterface fileDownloadUploadInterface = retrofitInstance.getRetrofitInstance(baseUrl, mToken).create(FileDownloadUploadInterface.class);
-
-        Call<ResponseBody> call = fileDownloadUploadInterface.downloadFile(baseUrl + Util.FILE_PARAMETER + "/" + fileDownloadState.getFileUUID());
-
         boolean result = false;
 
         try {
-            result = FileUtil.writeResponseBodyToFolder(call.execute().body(), fileDownloadState);
+
+            ResponseBody responseBody = retrofitInstance.downloadFile(baseUrl, mToken,fileDownloadState.getFileUUID());
+
+            result = mFileUtil.writeResponseBodyToFolder(responseBody, fileDownloadState);
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -37,6 +37,8 @@ public class LocalFileActivity extends AppCompatActivity {
 
     private String currentPath;
 
+    private FileUtil mFileUtil;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,14 +48,16 @@ public class LocalFileActivity extends AppCompatActivity {
 
         mContext = this;
 
+        mFileUtil = FileUtil.getInstance();
+
         abstractLocalFiles = new ArrayList<>();
 
         fileRecyclerAdapter = new FileRecyclerAdapter();
         fileRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         fileRecyclerView.setAdapter(fileRecyclerAdapter);
 
-        if (FileUtil.checkExternalStorageState()) {
-            String path = FileUtil.getExternalStorageDirectoryPath();
+        if (mFileUtil.checkExternalStorageState()) {
+            String path = mFileUtil.getExternalStorageDirectoryPath();
 
             currentPath = path;
 
@@ -72,7 +76,7 @@ public class LocalFileActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        if(currentPath.equals(FileUtil.getExternalStorageDirectoryPath())){
+        if(currentPath.equals(mFileUtil.getExternalStorageDirectoryPath())){
             super.onBackPressed();
         }else {
 

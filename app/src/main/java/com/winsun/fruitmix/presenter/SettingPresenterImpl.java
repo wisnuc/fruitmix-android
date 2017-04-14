@@ -20,6 +20,8 @@ public class SettingPresenterImpl implements SettingContract.SettingPresenter {
 
     private DataRepository mRepository;
 
+    private FileUtil mFileUtil;
+
     private boolean mAutoUploadOrNot = false;
 
     private int mAlreadyUploadMediaCount = -1;
@@ -27,8 +29,9 @@ public class SettingPresenterImpl implements SettingContract.SettingPresenter {
 
     private long mTotalCacheSize = 0;
 
-    public SettingPresenterImpl(DataRepository repository) {
+    public SettingPresenterImpl(DataRepository repository,FileUtil fileUtil) {
         this.mRepository = repository;
+        mFileUtil = fileUtil;
     }
 
     @Override
@@ -51,7 +54,7 @@ public class SettingPresenterImpl implements SettingContract.SettingPresenter {
                 mAlreadyUploadMediaCount = mRepository.getAlreadyUploadMediaCount();
                 mTotalLocalMediaCount = mRepository.getTotalMediaCount();
 
-                mTotalCacheSize = FileUtil.getTotalCacheSize(context);
+                mTotalCacheSize = mFileUtil.getTotalCacheSize(context);
 
                 return null;
             }
@@ -63,7 +66,7 @@ public class SettingPresenterImpl implements SettingContract.SettingPresenter {
                 mView.setAlreadyUploadMediaCountTextViewVisibility(View.VISIBLE);
                 mView.setAlreadyUploadMediaCountText(String.format(mView.getString(R.string.already_upload_media_count_text), mAlreadyUploadMediaCount, mTotalLocalMediaCount));
 
-                mView.setCacheSizeText(FileUtil.formatFileSize(mTotalCacheSize));
+                mView.setCacheSizeText(mFileUtil.formatFileSize(mTotalCacheSize));
 
             }
         }.execute();
@@ -73,8 +76,8 @@ public class SettingPresenterImpl implements SettingContract.SettingPresenter {
     @Override
     public void clearCache(Context context) {
 
-        FileUtil.clearAllCache(context);
-        mView.setCacheSizeText(FileUtil.formatFileSize(FileUtil.getTotalCacheSize(context)));
+        mFileUtil.clearAllCache(context);
+        mView.setCacheSizeText(mFileUtil.formatFileSize(mFileUtil.getTotalCacheSize(context)));
     }
 
     @Override

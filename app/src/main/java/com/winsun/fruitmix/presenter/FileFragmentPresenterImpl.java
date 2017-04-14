@@ -65,11 +65,15 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
 
     private DataRepository mRepository;
 
-    public FileFragmentPresenterImpl(FileMainFragmentContract.FileMainFragmentPresenter fileMainFragmentPresenter, DataRepository repository) {
+    private FileUtil mFileUtil;
+
+    public FileFragmentPresenterImpl(FileMainFragmentContract.FileMainFragmentPresenter fileMainFragmentPresenter, DataRepository repository,FileUtil fileUtil) {
 
         this.fileMainFragmentPresenter = fileMainFragmentPresenter;
 
         mRepository = repository;
+
+        mFileUtil = fileUtil;
 
         abstractRemoteFiles = new ArrayList<>();
 
@@ -314,7 +318,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
             menuItem = new BottomMenuItem(mView.getString(R.string.open_the_item), new AbstractCommand() {
                 @Override
                 public void execute() {
-                    FileUtil.openAbstractRemoteFile(context, file.getName());
+                    mFileUtil.openAbstractRemoteFile(context, file.getName());
                 }
 
                 @Override
@@ -349,7 +353,7 @@ public class FileFragmentPresenterImpl implements FileFragmentContract.FileFragm
 
         if (mRepository.checkIsDownloaded(abstractRemoteFile.getUuid())) {
 
-            if (!FileUtil.openAbstractRemoteFile(context, abstractRemoteFile.getName())) {
+            if (!mFileUtil.openAbstractRemoteFile(context, abstractRemoteFile.getName())) {
                 mView.showOpenFileFailToast();
             }
 

@@ -11,6 +11,9 @@ import com.winsun.fruitmix.data.dataOperationResult.OperateUserResult;
 import com.winsun.fruitmix.data.dataOperationResult.TokenLoadOperationResult;
 import com.winsun.fruitmix.data.dataOperationResult.UsersLoadOperationResult;
 import com.winsun.fruitmix.data.server.ServerDataSource;
+import com.winsun.fruitmix.fileModule.download.FileDownloadPendingState;
+import com.winsun.fruitmix.fileModule.download.FileDownloadState;
+import com.winsun.fruitmix.fileModule.download.FileDownloadingState;
 import com.winsun.fruitmix.fileModule.interfaces.FileDownloadUploadInterface;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.http.HttpRequest;
@@ -24,6 +27,7 @@ import com.winsun.fruitmix.model.EquipmentAlias;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.util.FileUtil;
 
 import org.junit.After;
 import org.junit.Before;
@@ -63,6 +67,9 @@ public class ServerDataSourceTest {
     @Mock
     private RetrofitInstance retrofitInstance;
 
+    @Mock
+    private FileUtil fileUtil;
+
     private ServerDataSource serverDataSource;
 
     @Before
@@ -70,7 +77,7 @@ public class ServerDataSourceTest {
 
         MockitoAnnotations.initMocks(this);
 
-        serverDataSource = ServerDataSource.getInstance(okHttpUtil, retrofitInstance);
+        serverDataSource = ServerDataSource.getInstance(okHttpUtil, retrofitInstance, fileUtil);
 
     }
 
@@ -716,29 +723,34 @@ public class ServerDataSourceTest {
 
     }
 
-    //TODO: mock FileUtil writeResponseBodyToFolder
+    //TODO: change FileUtil to singleton and mock FileUtil writeResponseBodyToFolder
 
-    @Ignore
+    @Test
     public void downloadRemoteFile_verifyResult() {
+
+        FileDownloadState fileDownloadState = new FileDownloadPendingState(null);
+
+        fileDownloadState.setFileUUID("");
+
+        ResponseBody responseBody = Mockito.mock(ResponseBody.class);
 
         try {
 
-            Retrofit retrofit = Mockito.mock(Retrofit.class);
+            serverDataSource.insertToken("");
 
-            FileDownloadUploadInterface fileDownloadUploadInterface = Mockito.mock(FileDownloadUploadInterface.class);
+            when(retrofitInstance.downloadFile(anyString(), anyString(), anyString())).thenReturn(responseBody);
 
-            ResponseBody response = Mockito.mock(ResponseBody.class);
+            when(fileUtil.writeResponseBodyToFolder(any(ResponseBody.class), any(FileDownloadState.class))).thenReturn(true);
 
-            when(fileDownloadUploadInterface.downloadFile(anyString()).execute().body()).thenReturn(response);
+            assertEquals(true, fileUtil.writeResponseBodyToFolder(responseBody, fileDownloadState));
 
-            when(retrofit.create(FileDownloadUploadInterface.class)).thenReturn(fileDownloadUploadInterface);
+            OperationResult result = serverDataSource.downloadRemoteFile(fileDownloadState);
 
-            when(retrofitInstance.getRetrofitInstance(anyString(), anyString())).thenReturn(retrofit);
+            assertEquals(OperationResultType.SUCCEED, result.getOperationResultType());
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
     }
 

@@ -60,17 +60,21 @@ public class DBDataSource implements DataSource {
     private SharedPreferences mSharedPreferences;
     private ContentResolver mContentResolver;
 
-    private DBDataSource(Context context) {
+    private FileUtil mFileUtil;
+
+    private DBDataSource(Context context,FileUtil fileUtil) {
 
         mDBUtils = DBUtils.getInstance(context);
         mSharedPreferences = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         mContentResolver = context.getContentResolver();
 
+        mFileUtil = fileUtil;
+
     }
 
-    public static DBDataSource getInstance(Context context) {
+    public static DBDataSource getInstance(Context context,FileUtil fileUtil) {
         if (INSTANCE == null)
-            INSTANCE = new DBDataSource(context);
+            INSTANCE = new DBDataSource(context,fileUtil);
 
         return INSTANCE;
     }
@@ -341,7 +345,7 @@ public class DBDataSource implements DataSource {
 
         List<FileDownloadItem> fileDownloadItems = mDBUtils.getAllCurrentLoginUserDownloadedFile(userUUID);
 
-        String[] fileNames = new File(FileUtil.getDownloadFileStoreFolderPath()).list();
+        String[] fileNames = new File(mFileUtil.getDownloadFileStoreFolderPath()).list();
 
         if (fileNames != null && fileNames.length != 0) {
 
@@ -434,7 +438,7 @@ public class DBDataSource implements DataSource {
                 continue;
             }
 
-            if (thumb.contains(FileUtil.getLocalPhotoThumbnailFolderPath())) {
+            if (thumb.contains(mFileUtil.getLocalPhotoThumbnailFolderPath())) {
                 continue;
             }
 

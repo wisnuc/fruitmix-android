@@ -9,12 +9,16 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.util.FileUtil;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +26,7 @@ import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by Administrator on 2017/4/1.
@@ -66,7 +71,8 @@ public class DBDataSourceTest {
 
     @Before
     public void setup() {
-        dbDataSource = DBDataSource.getInstance(InstrumentationRegistry.getTargetContext());
+
+        dbDataSource = DBDataSource.getInstance(InstrumentationRegistry.getTargetContext(), FileUtil.getInstance());
     }
 
     @After

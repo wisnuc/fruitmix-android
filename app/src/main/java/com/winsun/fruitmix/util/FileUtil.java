@@ -37,16 +37,26 @@ public class FileUtil {
 
     public static final String TAG = FileUtil.class.getSimpleName();
 
+    private static FileUtil Instance;
+
     private static final String DOWNLOAD_FOLDER_NAME = "winsuc";
 
     private static final String LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME = "thumbnail";
 
-    public static boolean checkExternalStorageState() {
+    public static FileUtil getInstance() {
+
+        if (Instance == null)
+            Instance = new FileUtil();
+
+        return Instance;
+    }
+
+    public boolean checkExternalStorageState() {
         String state = Environment.getExternalStorageState();
         return state.equals(Environment.MEDIA_MOUNTED);
     }
 
-    public static boolean checkExternalDirectoryForDownloadAvailableSizeEnough() {
+    public boolean checkExternalDirectoryForDownloadAvailableSizeEnough() {
 
         StatFs statFs = new StatFs(getExternalDirectoryPathForDownload());
 
@@ -65,23 +75,23 @@ public class FileUtil {
         }
     }
 
-    public static String getExternalStorageDirectoryPath() {
+    public String getExternalStorageDirectoryPath() {
         return Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
-    private static String getExternalDirectoryPathForDownload() {
+    private String getExternalDirectoryPathForDownload() {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
     }
 
-    public static boolean createDownloadFileStoreFolder() {
+    public boolean createDownloadFileStoreFolder() {
         return createFolder(getDownloadFileStoreFolderPath());
     }
 
-    public static boolean createLocalPhotoThumbnailFolder() {
+    public boolean createLocalPhotoThumbnailFolder() {
         return createFolder(getLocalPhotoThumbnailFolderPath());
     }
 
-    private static boolean createFolder(String path) {
+    private boolean createFolder(String path) {
         if (!checkExternalStorageState()) {
             Log.i(TAG, "create folder: External storage not mounted");
             return false;
@@ -91,15 +101,15 @@ public class FileUtil {
         return folder.mkdirs() || folder.isDirectory();
     }
 
-    public static String getLocalPhotoThumbnailFolderPath() {
+    public String getLocalPhotoThumbnailFolderPath() {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
     }
 
-    public static String getDownloadFileStoreFolderPath() {
+    public String getDownloadFileStoreFolderPath() {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator;
     }
 
-    public static boolean writeResponseBodyToFolder(ResponseBody responseBody, FileDownloadState fileDownloadState) {
+    public boolean writeResponseBodyToFolder(ResponseBody responseBody, FileDownloadState fileDownloadState) {
 
         File downloadFile = new File(getDownloadFileStoreFolderPath(), fileDownloadState.getFileName());
 
@@ -185,12 +195,12 @@ public class FileUtil {
 
     }
 
-    public static boolean openAbstractRemoteFile(Context context, String fileName) {
+    public boolean openAbstractRemoteFile(Context context, String fileName) {
 
-        File file = new File(FileUtil.getDownloadFileStoreFolderPath(), fileName);
+        File file = new File(getDownloadFileStoreFolderPath(), fileName);
 
         try {
-            FileUtil.openFile(context, file);
+            openFile(context, file);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -199,7 +209,7 @@ public class FileUtil {
 
     }
 
-    private static void openFile(Context context, File file) throws Exception {
+    private void openFile(Context context, File file) throws Exception {
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(Intent.ACTION_VIEW);
@@ -209,7 +219,7 @@ public class FileUtil {
         context.startActivity(intent);
     }
 
-    private static String getMIMEType(File file) {
+    private String getMIMEType(File file) {
 
         String type = "*/*";
         String fName = file.getName();
@@ -226,7 +236,7 @@ public class FileUtil {
         return type;
     }
 
-    private static String[][] MIME_MapTable = {
+    private String[][] MIME_MapTable = {
             {".3gp", "video/3gpp"},
             {".apk", "application/vnd.android.package-archive"},
             {".asf", "video/x-ms-asf"},
@@ -295,7 +305,7 @@ public class FileUtil {
             {"", "*/*"}
     };
 
-    public static String formatFileSize(long fileSize) {
+    public String formatFileSize(long fileSize) {
 
         String formatFileSize = "";
 
@@ -327,7 +337,7 @@ public class FileUtil {
     }
 
 
-    public static long getTotalCacheSize(Context context) {
+    public long getTotalCacheSize(Context context) {
         long cacheSize = getFolderSize(context.getCacheDir());
         if (Environment.getExternalStorageState().equals(
                 Environment.MEDIA_MOUNTED)) {
@@ -336,7 +346,7 @@ public class FileUtil {
         return cacheSize;
     }
 
-    private static long getFolderSize(File file) {
+    private long getFolderSize(File file) {
         long size = 0;
 
         File[] fileList = file.listFiles();
@@ -355,7 +365,7 @@ public class FileUtil {
         return size;
     }
 
-    public static void clearAllCache(Context context) {
+    public void clearAllCache(Context context) {
         deleteDir(context.getCacheDir());
         if (Environment.getExternalStorageState().equals(
                 Environment.MEDIA_MOUNTED)) {
@@ -363,7 +373,7 @@ public class FileUtil {
         }
     }
 
-    private static boolean deleteDir(File dir) {
+    private boolean deleteDir(File dir) {
         if (dir != null && dir.isDirectory()) {
             String[] children = dir.list();
             int length;
@@ -381,7 +391,7 @@ public class FileUtil {
         return dir == null || dir.delete();
     }
 
-    public static boolean writeBitmapToLocalPhotoThumbnailFolder(Media media) {
+    public boolean writeBitmapToLocalPhotoThumbnailFolder(Media media) {
 
         if (!media.getMiniThumb().isEmpty())
             return false;
@@ -446,7 +456,7 @@ public class FileUtil {
 
     }
 
-    private static int findBestSampleSize(
+    private int findBestSampleSize(
             int actualWidth, int actualHeight, int desiredWidth, int desiredHeight) {
         double wr = (double) actualWidth / desiredWidth;
         double hr = (double) actualHeight / desiredHeight;

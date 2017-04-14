@@ -49,11 +49,16 @@ public class FileDownloadFragmentPresenterImpl implements FileDownloadFragmentCo
 
     private DataRepository mRepository;
 
+    private FileUtil mFileUtil;
+
     private FileMainFragmentContract.FileMainFragmentPresenter mainFragmentPresenter;
 
     private FileDownloadOperationCallback.FileDownloadStateChangedCallback fileDownloadStateChangedCallback;
 
-    public FileDownloadFragmentPresenterImpl(DataRepository mRepository, FileMainFragmentContract.FileMainFragmentPresenter mainFragmentPresenter) {
+    public FileDownloadFragmentPresenterImpl(DataRepository mRepository,FileUtil fileUtil, FileMainFragmentContract.FileMainFragmentPresenter mainFragmentPresenter) {
+
+        mFileUtil = fileUtil;
+
         this.mRepository = mRepository;
         this.mainFragmentPresenter = mainFragmentPresenter;
 
@@ -182,7 +187,7 @@ public class FileDownloadFragmentPresenterImpl implements FileDownloadFragmentCo
     public void openFileIfDownloaded(Context context, FileDownloadItem fileDownloadItem) {
 
         if (fileDownloadItem.getDownloadState().equals(DownloadState.FINISHED)) {
-            FileUtil.openAbstractRemoteFile(context, fileDownloadItem.getFileName());
+            mFileUtil.openAbstractRemoteFile(context, fileDownloadItem.getFileName());
         }
     }
 

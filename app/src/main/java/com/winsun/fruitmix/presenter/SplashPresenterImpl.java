@@ -31,10 +31,13 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
 
     private DataRepository mRepository;
 
-    public SplashPresenterImpl(DataRepository repository) {
+    private FileUtil mFileUtil;
+
+    public SplashPresenterImpl(DataRepository repository,FileUtil fileUtil) {
 
         mRepository = repository;
 
+        mFileUtil = fileUtil;
     }
 
     @Override
@@ -44,7 +47,7 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
 
     @Override
     public void createLocalPhotoThumbnailFolder() {
-        boolean result = FileUtil.createLocalPhotoThumbnailFolder();
+        boolean result = mFileUtil.createLocalPhotoThumbnailFolder();
 
         if (!result) {
             Log.i(TAG, "onCreate: Create local photo thumbnail folder failed");
@@ -53,7 +56,7 @@ public class SplashPresenterImpl implements SplashContract.SplashPresenter {
 
     @Override
     public void createDownloadFileStoreFolder() {
-        boolean result = FileUtil.createDownloadFileStoreFolder();
+        boolean result = mFileUtil.createDownloadFileStoreFolder();
 
         if (!result) {
             Log.i(TAG, "onCreate: Create download file store folder failed");
