@@ -13,52 +13,54 @@
         android:stateListAnimator="@animator/appbar_elevation"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:theme="@style/AppTheme.AppBarOverlay"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
+        <include layout="@layout/toolbar_layout" />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+        <!--<android.support.v7.widget.Toolbar-->
+        <!--android:id="@+id/toolbar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="?attr/actionBarSize"-->
+        <!--android:background="?attr/colorPrimary"-->
+        <!--android:theme="@style/AppTheme.AppBarOverlay"-->
+        <!--app:popupTheme="@style/AppTheme.PopupOverlay">-->
 
-                <ImageView
-                    android:id="@+id/back"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_back" />
+        <!--<RelativeLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent">-->
 
-                <TextView
-                    android:id="@+id/ok"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="16dp"
-                    android:text="@string/finish_text"
-                    android:textColor="@color/white"
-                    android:textSize="16dp" />
+        <!--<ImageView-->
+        <!--android:id="@+id/back"-->
+        <!--android:layout_width="24dp"-->
+        <!--android:layout_height="24dp"-->
+        <!--android:layout_centerVertical="true"-->
+        <!--android:src="@drawable/ic_back_black" />-->
 
-                <TextView
-                    android:id="@+id/layout_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="32dp"
-                    android:layout_toLeftOf="@id/ok"
-                    android:layout_toRightOf="@+id/back"
-                    android:text="@string/set_album"
-                    android:textColor="@color/white"
-                    android:textSize="18dp" />
+        <!--<TextView-->
+        <!--android:id="@+id/ok"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_centerVertical="true"-->
+        <!--android:layout_marginRight="16dp"-->
+        <!--android:text="@string/finish_text"-->
+        <!--android:textColor="@color/toolbar_right_text"-->
+        <!--android:textSize="16dp" />-->
+
+        <!--<TextView-->
+        <!--android:id="@+id/layout_title"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_centerVertical="true"-->
+        <!--android:layout_marginLeft="32dp"-->
+        <!--android:layout_toLeftOf="@id/ok"-->
+        <!--android:layout_toRightOf="@+id/back"-->
+        <!--android:text="@string/set_album"-->
+        <!--android:textColor="@color/toolbar_title"-->
+        <!--android:textSize="18dp" />-->
 
 
-            </RelativeLayout>
+        <!--</RelativeLayout>-->
 
-        </android.support.v7.widget.Toolbar>
+        <!--</android.support.v7.widget.Toolbar>-->
 
 
     </android.support.design.widget.AppBarLayout>
@@ -83,7 +85,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="bottom"
-                android:inputType="textMultiLine"
+                android:inputType="text"
                 android:maxLength="20"
                 android:textColor="@color/black"
                 android:textSize="16dp" />

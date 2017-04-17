@@ -10,6 +10,8 @@ public class Equipment {
     private String serviceName;
     private List<String> hosts;
     private int port;
+    private String model;
+    private String serialNumber;
 
     public Equipment(String serviceName, List<String> hosts, int port) {
         this.serviceName = serviceName;
@@ -42,5 +44,21 @@ public class Equipment {
 
     public void setHosts(List<String> hosts) {
         this.hosts = hosts;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
     }
 }

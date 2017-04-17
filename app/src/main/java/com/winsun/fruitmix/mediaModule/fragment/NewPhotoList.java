@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.mediaModule.fragment;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -756,6 +758,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             } else {
                 String[] titleSplit = title.split("-");
                 return titleSplit[0] + "年" + titleSplit[1] + "月";
+
             }
 
         }
@@ -788,8 +791,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             final String date = mMapKeyIsPhotoPositionValueIsPhotoDate.get(groupPosition);
 
             if (groupPosition == 0) {
+                mSpacingLayout.setVisibility(View.VISIBLE);
                 mSpacingSecondLayout.setVisibility(View.VISIBLE);
             } else {
+                mSpacingLayout.setVisibility(View.GONE);
                 mSpacingSecondLayout.setVisibility(View.GONE);
             }
 
@@ -950,6 +955,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (currentMedia == null) return;
 
+            Log.d(TAG, "refreshView: media uuid: " + currentMedia.getUuid());
+
             if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getUuid()))
                 currentMedia.setSelected(true);
 
@@ -963,11 +970,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             if (currentMedia.isLocal())
                 mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
 
-            mPhotoIv.setBackgroundResource(R.drawable.new_placeholder);
+            mPhotoIv.setBackgroundResource(R.drawable.default_place_holder);
 
 //            mPhotoIv.setBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
-            mPhotoIv.setDefaultImageResId(R.drawable.new_placeholder);
+            mPhotoIv.setDefaultImageResId(R.drawable.default_place_holder);
 
 //            mPhotoIv.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
@@ -992,20 +999,22 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (mSelectMode) {
                 boolean selected = currentMedia.isSelected();
-                if (selected) {
-                    int selectMargin = Util.dip2px(containerActivity, 20);
-                    setPhotoIvLayoutParams(selectMargin);
+                if (selected && mPhotoSelectedIv.getVisibility() != View.VISIBLE) {
+                    scalePhoto(true);
                     mPhotoSelectedIv.setVisibility(View.VISIBLE);
-                } else {
-                    setPhotoIvLayoutParams(0);
+                } else if (!selected && mPhotoSelectedIv.getVisibility() != View.GONE) {
+                    restorePhoto(true);
                     mPhotoSelectedIv.setVisibility(View.GONE);
                 }
             } else {
 
                 currentMedia.setSelected(false);
 
-                setPhotoIvLayoutParams(0);
-                mPhotoSelectedIv.setVisibility(View.GONE);
+                if (mPhotoSelectedIv.getVisibility() != View.GONE) {
+                    restorePhoto(true);
+                    mPhotoSelectedIv.setVisibility(View.GONE);
+                }
+
             }
 
             mImageLayout.setOnClickListener(new View.OnClickListener() {
@@ -1032,16 +1041,20 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                             return;
                         }
 
+                        //TODO:check photo scale state change logic
+
+
+                        selected = !selected;
+
                         if (selected) {
-                            int selectMargin = Util.dip2px(containerActivity, 20);
-                            setPhotoIvLayoutParams(selectMargin);
+                            scalePhoto(false);
                             mPhotoSelectedIv.setVisibility(View.VISIBLE);
                         } else {
-                            setPhotoIvLayoutParams(0);
+                            restorePhoto(false);
                             mPhotoSelectedIv.setVisibility(View.GONE);
                         }
 
-                        currentMedia.setSelected(!selected);
+                        currentMedia.setSelected(selected);
                         mPhotoRecycleAdapter.notifyDataSetChanged();
 
                         calcSelectedPhoto();
@@ -1104,6 +1117,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                     mSelectCount = 1;
 
+                    scalePhoto(false);
+                    mPhotoSelectedIv.setVisibility(View.VISIBLE);
+
                     return true;
                 }
             });
@@ -1124,6 +1140,31 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             }
 
             mImageLayout.setLayoutParams(params);
+        }
+
+        private void scalePhoto(boolean immediate) {
+
+            Animator animator = AnimatorInflater.loadAnimator(containerActivity, R.animator.photo_scale);
+            animator.setTarget(mPhotoIv);
+
+            if (immediate) {
+                animator.setDuration(0);
+            }
+
+            animator.start();
+        }
+
+        private void restorePhoto(boolean immediate) {
+
+            Animator animator = AnimatorInflater.loadAnimator(containerActivity, R.animator.photo_restore);
+            animator.setTarget(mPhotoIv);
+
+            if (immediate) {
+                animator.setDuration(0);
+            }
+
+            animator.start();
+
         }
 
         private void setPhotoIvLayoutParams(int margin) {
@@ -1154,6 +1195,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
 
+            Log.d(TAG, "onScrollStateChanged: state: " + newState);
+
             if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
 
                 mIsFling = true;
@@ -1165,11 +1208,35 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                     mIsFling = false;
 
                     mPhotoRecycleAdapter.notifyDataSetChanged();
+
+                    for (IPhotoListListener listener : mPhotoListListeners) {
+                        listener.onPhotoListScrollFinished();
+                    }
+
                 }
 
             }
         }
 
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+
+            if (dy > 0) {
+
+                for (IPhotoListListener listener : mPhotoListListeners) {
+                    listener.onPhotoListScrollDown();
+                }
+
+            } else if (dy < 0) {
+
+                for (IPhotoListListener listener : mPhotoListListeners) {
+                    listener.onPhotoListScrollUp();
+                }
+
+            }
+
+        }
     }
 
     private class PinchScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {

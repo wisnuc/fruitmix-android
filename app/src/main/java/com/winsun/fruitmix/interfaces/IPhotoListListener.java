@@ -10,4 +10,10 @@ public interface IPhotoListListener {
     void onPhotoItemLongClick();
 
     void onNoPhotoItem(boolean noPhotoItem);
+
+    void onPhotoListScrollUp();
+
+    void onPhotoListScrollDown();
+
+    void onPhotoListScrollFinished();
 }

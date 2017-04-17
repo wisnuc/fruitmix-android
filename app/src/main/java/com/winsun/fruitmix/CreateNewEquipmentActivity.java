@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -16,12 +17,15 @@ import butterknife.ButterKnife;
 
 public class CreateNewEquipmentActivity extends AppCompatActivity implements View.OnClickListener {
 
+    @BindView(R.id.title)
+    TextView mLayoutTitle;
+    @BindView(R.id.toolbar)
+    Toolbar mToolBar;
+    @BindView(R.id.right)
+    TextView rightTextView;
+
     @BindView(R.id.ip_edit)
     TextInputEditText ipInputEditText;
-    @BindView(R.id.ok)
-    TextView okTextView;
-    @BindView(R.id.back)
-    ImageView backImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,19 +34,24 @@ public class CreateNewEquipmentActivity extends AppCompatActivity implements Vie
 
         ButterKnife.bind(this);
 
-        backImageView.setOnClickListener(this);
+        mLayoutTitle.setText("手动输入ip");
 
-        okTextView.setOnClickListener(this);
+        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        rightTextView.setVisibility(View.VISIBLE);
+        rightTextView.setOnClickListener(this);
 
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.back:
-                finish();
-                break;
-            case R.id.ok:
+            case R.id.right:
                 String ip = ipInputEditText.getText().toString();
 
                 if (ip.equals("")) {

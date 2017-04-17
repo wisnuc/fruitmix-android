@@ -36,7 +36,9 @@ public class FileUtil {
 
     private static final String DOWNLOAD_FOLDER_NAME = "winsuc";
 
-    private static final String LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME = "thumbnail";
+    private static final String LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME = "thumbnail_64";
+
+    private static final String OLD_LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME = "thumbnail";
 
     private static final String ORIGINAL_PHOTO_FOLDER_NAME = "originalPhoto";
 
@@ -102,6 +104,10 @@ public class FileUtil {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
     }
 
+    static String getOldLocalPhotoThumbnailFolderPath(){
+        return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + OLD_LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
+    }
+
     static String getOriginalPhotoFolderPath() {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + ORIGINAL_PHOTO_FOLDER_NAME;
     }
@@ -138,7 +144,7 @@ public class FileUtil {
         int actualHeight = decodeOptions.outHeight;
 
         decodeOptions.inJustDecodeBounds = false;
-        decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, 32, 32);
+        decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, 64, 64);
         Bitmap bitmap = BitmapFactory.decodeFile(thumb, decodeOptions);
 
         FileOutputStream outputStream = null;

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,8 +36,10 @@ public class UserManageActivity extends AppCompatActivity implements View.OnClic
 
     public static final String TAG = "UserManageActivity";
 
-    @BindView(R.id.back)
-    ImageView mBack;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.title)
+    TextView mTitleTextView;
 
     @BindView(R.id.user_list)
     ListView mUserListView;
@@ -62,7 +65,15 @@ public class UserManageActivity extends AppCompatActivity implements View.OnClic
 
         mContext = this;
 
-        mBack.setOnClickListener(this);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        mTitleTextView.setText(getString(R.string.user_manage));
+
         mAddUserBtn.setOnClickListener(this);
 
         refreshView();

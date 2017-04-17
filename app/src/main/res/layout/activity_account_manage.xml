@@ -12,29 +12,32 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <android.support.v7.widget.Toolbar
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="#3F52B4">
+        <include
+            layout="@layout/toolbar_layout"/>
 
-            <ImageView
-                android:id="@+id/back"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="16dp"
-                android:src="@drawable/ic_back" />
+        <!--<android.support.v7.widget.Toolbar-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="60dp"-->
+            <!--android:background="@color/colorPrimary">-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/account_manage"
-                android:textColor="@color/white"
-                android:textSize="18dp" />
+            <!--<ImageView-->
+                <!--android:id="@+id/back"-->
+                <!--android:layout_width="24dp"-->
+                <!--android:layout_height="24dp"-->
+                <!--android:layout_centerVertical="true"-->
+                <!--android:layout_marginLeft="16dp"-->
+                <!--android:src="@drawable/ic_back_black" />-->
+
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginLeft="30dp"-->
+                <!--android:text="@string/account_manage"-->
+                <!--android:textColor="@color/toolbar_title"-->
+                <!--android:textSize="18dp" />-->
 
 
-        </android.support.v7.widget.Toolbar>
+        <!--</android.support.v7.widget.Toolbar>-->
 
         <ExpandableListView
             android:id="@+id/account_expandable_list_view"

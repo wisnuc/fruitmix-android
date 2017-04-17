@@ -27,6 +27,10 @@
 
     <color name="toolbar_title">#212121</color>
 
+    <color name="toolbar_right_text">#757575</color>
+
+    <color name="default_place_holder">#F5F5F5</color>
+
     <!-- finish add by liang.wu-->
 
 </resources>

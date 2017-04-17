@@ -7,7 +7,7 @@
     <View
         android:id="@+id/spacing_layout"
         android:layout_width="match_parent"
-        android:layout_height="16dp"
+        android:layout_height="56dp"
         android:background="@color/white"
         android:visibility="gone" />
 

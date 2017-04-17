@@ -116,7 +116,7 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
 
         noContentImageView.setImageResource(R.drawable.no_file);
 
-        noContentTextView.setText(getString(R.string.no_files));
+        noContentTextView.setText(getString(R.string.no_file_shares));
 
         return view;
     }

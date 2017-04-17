@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -45,8 +46,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     public static final String TAG = "LoginActivity";
 
-    @BindView(R.id.back)
-    ImageView mBack;
+    @BindView(R.id.title)
+    TextView mTitleTextView;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
 
     @BindView(R.id.equipment_group_name)
     TextView mEquipmentGroupNameTextView;
@@ -82,7 +85,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         mContext = this;
 
-        mBack.setOnClickListener(this);
+        mTitleTextView.setText(getString(R.string.login));
+
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         mPwdEdit.setOnFocusChangeListener(this);
         mLoginBtn.setOnClickListener(this);
 
@@ -206,7 +216,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void startNavPagerActivity(boolean needShowAutoUploadDialog) {
         Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
-        jumpIntent.putExtra(Util.NEED_SHOW_AUTO_UPLOAD_DIALOG,needShowAutoUploadDialog);
+        jumpIntent.putExtra(Util.NEED_SHOW_AUTO_UPLOAD_DIALOG, needShowAutoUploadDialog);
         startActivity(jumpIntent);
         LoginActivity.this.setResult(RESULT_OK);
         finish();
@@ -248,7 +258,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
      */
     private void login() {
 
-        mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+        mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title),getString(R.string.login)), true, false);
 
         FNAS.retrieveRemoteToken(mContext, mGateway, mUserUUid, mPwd);
 

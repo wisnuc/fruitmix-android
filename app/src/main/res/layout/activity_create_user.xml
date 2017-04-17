@@ -8,23 +8,25 @@
     android:orientation="vertical"
     tools:context="com.winsun.fruitmix.CreateUserActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="#3F52B4"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:popupTheme="@style/AppTheme.PopupOverlay">
+    <include layout="@layout/toolbar_layout" />
 
-        <ImageView
-            android:id="@+id/back"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
-            android:src="@drawable/ic_back" />
+    <!--<android.support.v7.widget.Toolbar-->
+    <!--android:id="@+id/toolbar"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="?attr/actionBarSize"-->
+    <!--android:background="@color/colorPrimary"-->
+    <!--android:theme="@style/AppTheme.AppBarOverlay"-->
+    <!--app:popupTheme="@style/AppTheme.PopupOverlay">-->
 
-    </android.support.v7.widget.Toolbar>
+    <!--<ImageView-->
+    <!--android:id="@+id/back"-->
+    <!--android:layout_width="24dp"-->
+    <!--android:layout_height="24dp"-->
+    <!--android:layout_centerVertical="true"-->
+    <!--android:layout_marginLeft="16dp"-->
+    <!--android:src="@drawable/ic_back_black" />-->
+
+    <!--</android.support.v7.widget.Toolbar>-->
 
 
     <ImageView
@@ -49,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/user_name"
-            android:inputType="textMultiLine"
+            android:inputType="text"
             android:maxLength="20" />
 
     </android.support.design.widget.TextInputLayout>

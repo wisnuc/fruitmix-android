@@ -7,28 +7,30 @@
     android:orientation="vertical"
     tools:context="com.winsun.fruitmix.SettingActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="#3F52B4">
+    <include layout="@layout/toolbar_layout" />
 
-        <ImageView
-            android:id="@+id/back"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
-            android:src="@drawable/ic_back" />
+    <!--    <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="#3F52B4">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/setting"
-            android:textColor="@color/white"
-            android:textSize="18dp" />
+            <ImageView
+                android:id="@+id/back"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:src="@drawable/ic_back" />
 
-    </android.support.v7.widget.Toolbar>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/setting"
+                android:textColor="@color/white"
+                android:textSize="18dp" />
+
+        </android.support.v7.widget.Toolbar>-->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -82,7 +84,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:text="100"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
         </RelativeLayout>
 
@@ -91,7 +93,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/light_gray"
-            android:visibility="visible"/>
+            android:visibility="visible" />
 
         <RelativeLayout
             android:layout_width="match_parent"

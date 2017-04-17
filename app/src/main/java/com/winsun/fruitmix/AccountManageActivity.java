@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,8 +37,10 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
 
     public static final String TAG = "AccountManageActivity";
 
-    @BindView(R.id.back)
-    ImageView mBackImageView;
+    @BindView(R.id.title)
+    TextView title;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
     @BindView(R.id.account_expandable_list_view)
     ExpandableListView mAccountExpandableListView;
     @BindView(R.id.add_account)
@@ -65,7 +68,15 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
 
         mContext = this;
 
-        mBackImageView.setOnClickListener(this);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleBack();
+                finish();
+            }
+        });
+        title.setText(getString(R.string.account_manage));
+
         mAddAccountBtn.setOnClickListener(this);
 
         mEquipmentNames = new ArrayList<>();
@@ -157,10 +168,6 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.back:
-                handleBack();
-                finish();
-                break;
             case R.id.add_account:
                 Intent intent = new Intent(mContext, EquipmentSearchActivity.class);
                 intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE, false);

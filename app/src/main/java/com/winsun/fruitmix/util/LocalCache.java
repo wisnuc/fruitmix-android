@@ -503,6 +503,10 @@ public class LocalCache {
                 continue;
             }
 
+            if (thumb.contains(FileUtil.getOldLocalPhotoThumbnailFolderPath())) {
+                continue;
+            }
+
             if (thumb.contains(FileUtil.getOriginalPhotoFolderPath()))
                 continue;
 

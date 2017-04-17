@@ -17,7 +17,7 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:background="@drawable/new_placeholder"
+            android:background="@drawable/default_place_holder"
             android:scaleType="centerCrop" />
 
         <com.android.volley.toolbox.NetworkImageView
@@ -26,7 +26,7 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:background="@drawable/new_placeholder"
+            android:background="@drawable/default_place_holder"
             android:scaleType="centerCrop" />
 
         <com.android.volley.toolbox.NetworkImageView
@@ -35,7 +35,7 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:background="@drawable/new_placeholder"
+            android:background="@drawable/default_place_holder"
             android:scaleType="centerCrop" />
 
     </LinearLayout>
@@ -52,7 +52,7 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:background="@drawable/new_placeholder"
+            android:background="@drawable/default_place_holder"
             android:scaleType="centerCrop" />
 
         <com.android.volley.toolbox.NetworkImageView
@@ -61,7 +61,7 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:background="@drawable/new_placeholder"
+            android:background="@drawable/default_place_holder"
             android:scaleType="centerCrop" />
 
         <com.android.volley.toolbox.NetworkImageView
@@ -70,7 +70,7 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:background="@drawable/new_placeholder"
+            android:background="@drawable/default_place_holder"
             android:scaleType="centerCrop" />
 
     </LinearLayout>
@@ -87,7 +87,7 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:background="@drawable/new_placeholder"
+            android:background="@drawable/default_place_holder"
             android:scaleType="centerCrop" />
 
         <com.android.volley.toolbox.NetworkImageView
@@ -96,7 +96,7 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:background="@drawable/new_placeholder"
+            android:background="@drawable/default_place_holder"
             android:scaleType="centerCrop" />
 
         <com.android.volley.toolbox.NetworkImageView
@@ -105,7 +105,7 @@
             android:layout_height="match_parent"
             android:layout_margin="1dp"
             android:layout_weight="1"
-            android:background="@drawable/new_placeholder"
+            android:background="@drawable/default_place_holder"
             android:scaleType="centerCrop" />
 
     </LinearLayout>

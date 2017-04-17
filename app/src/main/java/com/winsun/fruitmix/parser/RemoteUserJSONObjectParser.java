@@ -16,13 +16,15 @@ public class RemoteUserJSONObjectParser {
 
     private Random random;
 
-    public RemoteUserJSONObjectParser(){
+    private int preAvatarBgColor = 0;
+
+    public RemoteUserJSONObjectParser() {
 
         random = new Random();
 
     }
 
-    public User getUser(JSONObject itemRaw) throws JSONException{
+    public User getUser(JSONObject itemRaw) throws JSONException {
 
         String uuid;
         User user;
@@ -52,7 +54,28 @@ public class RemoteUserJSONObjectParser {
             user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
         }
         if (user.getDefaultAvatarBgColor() == 0) {
-            user.setDefaultAvatarBgColor(random.nextInt(3) + 1);
+
+            int avatarBgColor = random.nextInt(3) + 1;
+
+            if (preAvatarBgColor != 0) {
+
+                if (avatarBgColor == preAvatarBgColor) {
+                    if (avatarBgColor == 3) {
+                        avatarBgColor--;
+                    } else if (avatarBgColor == 1) {
+                        avatarBgColor++;
+                    } else {
+                        avatarBgColor++;
+                    }
+                }
+
+                preAvatarBgColor = avatarBgColor;
+
+            } else {
+                preAvatarBgColor = avatarBgColor;
+            }
+
+            user.setDefaultAvatarBgColor(avatarBgColor);
         }
 
         user.setHome(itemRaw.optString("home"));

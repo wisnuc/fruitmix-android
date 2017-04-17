@@ -88,7 +88,7 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
         noContentImageView.setImageResource(R.drawable.no_photo);
 
-        noContentTextView.setText(containerActivity.getString(R.string.no_photos));
+        noContentTextView.setText(containerActivity.getString(R.string.no_albums));
 
         mainListView.setAdapter(new AlbumListAdapter(this));
 
@@ -265,7 +265,7 @@ public class AlbumList implements Page, IShowHideFragmentListener {
             viewHolder = (AlbumListViewHolder) view.getTag();
 
             MediaShare currentItem = (MediaShare) getItem(position);
-            viewHolder.refreshView(currentItem);
+            viewHolder.refreshView(position,currentItem);
 
         }
 
@@ -328,6 +328,9 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         @BindView(R.id.swipe_layout)
         SwipeLayout swipeLayout;
 
+        @BindView(R.id.spacing_layout)
+        View mSpacingLayout;
+
         Media coverImg;
         MediaShare currentItem;
 
@@ -336,7 +339,13 @@ public class AlbumList implements Page, IShowHideFragmentListener {
             ButterKnife.bind(this, view);
         }
 
-        void refreshView(MediaShare mediaShare) {
+        void refreshView(int position,MediaShare mediaShare) {
+
+            if(position == 0){
+                mSpacingLayout.setVisibility(View.VISIBLE);
+            }else {
+                mSpacingLayout.setVisibility(View.GONE);
+            }
 
             currentItem = mediaShare;
             restoreSwipeLayoutState();
@@ -362,12 +371,12 @@ public class AlbumList implements Page, IShowHideFragmentListener {
                     ivMainPic.setOrientationNumber(coverImg.getOrientationNumber());
 
                 ivMainPic.setTag(imageUrl);
-                ivMainPic.setDefaultImageResId(R.drawable.new_placeholder);
+                ivMainPic.setDefaultImageResId(R.drawable.default_place_holder);
 //                ivMainPic.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
                 ivMainPic.setImageUrl(imageUrl, mImageLoader);
 
             } else {
-                ivMainPic.setDefaultImageResId(R.drawable.new_placeholder);
+                ivMainPic.setDefaultImageResId(R.drawable.default_place_holder);
 //                ivMainPic.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
                 ivMainPic.setImageUrl(null, mImageLoader);
 
@@ -390,8 +399,6 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
                 title += containerActivity.getString(R.string.android_ellipsize);
             }
-
-            //TODO: 复数实现 使用android api,高亮显示 使用html格式
 
             title = String.format(containerActivity.getString(R.string.android_share_album_title), title, photoCount, containerActivity.getResources().getQuantityString(R.plurals.photo,currentItem.getMediaContentsListSize()));
 

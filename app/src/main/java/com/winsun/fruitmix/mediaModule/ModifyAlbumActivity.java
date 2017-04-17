@@ -4,9 +4,11 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -49,10 +51,12 @@ public class ModifyAlbumActivity extends AppCompatActivity {
     CheckBox ckPublic;
     @BindView(R.id.set_maintainer)
     CheckBox ckSetMaintainer;
-    @BindView(R.id.ok)
-    TextView btOK;
-    @BindView(R.id.back)
-    ImageView ivBack;
+    @BindView(R.id.right)
+    TextView rightTextView;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.title)
+    TextView mTitleTextView;
 
     private MediaShare mAlbumMap;
 
@@ -98,7 +102,10 @@ public class ModifyAlbumActivity extends AppCompatActivity {
             }
         });
 
-        btOK.setOnClickListener(new View.OnClickListener() {
+        mTitleTextView.setText(getString(R.string.set_album));
+
+        rightTextView.setVisibility(View.VISIBLE);
+        rightTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Util.hideSoftInput(ModifyAlbumActivity.this);
@@ -129,14 +136,14 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                     return;
                 }
 
-                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title),getString(R.string.set_album)), true, false);
 
                 FNAS.modifyRemoteMediaShare(mContext, mAlbumMap, requestData);
 
             }
         });
 
-        ivBack.setOnClickListener(new View.OnClickListener() {
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 

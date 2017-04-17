@@ -65,14 +65,12 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     public static final String TAG = "AlbumPicContentActivity";
 
-    @BindView(R.id.album_content_recycler_view)
-    RecyclerView albumContentRecyclerView;
-    @BindView(R.id.back)
-    ImageView ivBack;
     @BindView(R.id.title)
     TextView mTitleTextView;
     @BindView(R.id.toolbar)
     Toolbar mToolBar;
+    @BindView(R.id.album_content_recycler_view)
+    RecyclerView albumContentRecyclerView;
     @BindView(R.id.loading_layout)
     LinearLayout loadingLayout;
     @BindView(R.id.no_content_layout)
@@ -152,7 +150,9 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        ivBack.setOnClickListener(new View.OnClickListener() {
+        mTitleTextView.setText(getString(R.string.album));
+
+        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackOperation();
@@ -442,11 +442,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
             setMainPicScreenHeight(networkImageView, currentItem);
 
-            networkImageView.setBackgroundResource(R.drawable.new_placeholder);
+            networkImageView.setBackgroundResource(R.drawable.default_place_holder);
 //            networkImageView.setBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
 
             networkImageView.setTag(imageUrl);
-            networkImageView.setDefaultImageResId(R.drawable.new_placeholder);
+            networkImageView.setDefaultImageResId(R.drawable.default_place_holder);
 //            networkImageView.setDefaultBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
             networkImageView.setImageUrl(imageUrl, mImageLoader);
 
@@ -580,7 +580,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                         if (Util.getNetworkState(mContext)) {
 
-                            mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+                            mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title),getString(R.string.delete_text)), true, false);
                             FNAS.deleteRemoteMediaShare(mContext, mediaShare);
 
                         } else {
@@ -606,8 +606,11 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("[");
 
+        String operation;
+
         if (cloneMediaShare.getViewersListSize() == 0) {
 
+            operation = String.format(getString(R.string.operating_title),getString(R.string.set_public));
 
             for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
                 cloneMediaShare.addViewer(userUUID);
@@ -617,6 +620,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         } else {
 
+            operation = String.format(getString(R.string.operating_title),getString(R.string.set_private));
+
             stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare(Util.DELETE));
 
             cloneMediaShare.clearViewers();
@@ -625,7 +630,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         stringBuilder.append("]");
         requestData = stringBuilder.toString();
 
-        mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+        mDialog = ProgressDialog.show(mContext, null, operation, true, false);
 
         FNAS.modifyRemoteMediaShare(mContext, cloneMediaShare, requestData);
 

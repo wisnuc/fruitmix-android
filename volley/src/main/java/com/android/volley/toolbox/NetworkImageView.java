@@ -220,7 +220,7 @@ public class NetworkImageView extends ImageView {
 //                            setBackgroundResource(mDefaultImageId);
 //                        }
 
-                        setDefaultBackgroundColor();
+                        setDefaultBackground();
 
                         if (error.networkResponse != null && error.networkResponse.statusCode == 500 && !cancelRequest) {
 
@@ -278,7 +278,7 @@ public class NetworkImageView extends ImageView {
                             }
 
                             setImageBitmap(bitmap);
-                            setBackgroundColor(0);
+                            setBackgroundResource(0);
 
                             Log.d(TAG, "onResponse: url:" + mUrl);
 
@@ -302,9 +302,9 @@ public class NetworkImageView extends ImageView {
         mImageContainer = newContainer;
     }
 
-    private void setDefaultBackgroundColor() {
-        if (mDefaultBackgroundColor != 0) {
-            setBackgroundColor(mDefaultBackgroundColor);
+    private void setDefaultBackground() {
+        if (mDefaultImageId != 0) {
+            setBackgroundResource(mDefaultImageId);
         }
     }
 
@@ -312,7 +312,7 @@ public class NetworkImageView extends ImageView {
 //        if (mDefaultImageId != 0) {
 //            setBackgroundResource(mDefaultImageId);
 //        }
-        setDefaultBackgroundColor();
+        setDefaultBackground();
         setImageBitmap(null);
     }
 
@@ -330,7 +330,7 @@ public class NetworkImageView extends ImageView {
             mImageContainer.cancelRequest();
             setImageBitmap(null);
 //            setBackgroundResource(mDefaultImageId);
-            setDefaultBackgroundColor();
+            setDefaultBackground();
             // also clear out the container so we can reload the image if necessary.
             mImageContainer = null;
             cancelRequest = true;

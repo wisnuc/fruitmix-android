@@ -59,8 +59,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     public static final String TAG = "EquipmentSearchActivity";
 
-    @BindView(R.id.back)
-    ImageView mBack;
+    @BindView(R.id.title)
+    TextView mTitleTextView;
     @BindView(R.id.toolbar)
     Toolbar mToolBar;
     @BindView(R.id.equipment_expandablelist)
@@ -93,6 +93,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     private RxDnssd mRxDnssd;
     private Subscription mSubscription;
 
+    private Random random;
+
+    private int preAvatarBgColor = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +105,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         ButterKnife.bind(this);
 
         mContext = this;
+
+        random = new Random();
 
         Util.loginType = LoginType.LOGIN;
 
@@ -150,9 +156,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                 }
 
+                Equipment equipment = mUserLoadedEquipments.get(groupPosition);
+
                 Intent intent = new Intent(mContext, LoginActivity.class);
-                intent.putExtra(Util.GATEWAY, "http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0));
-                intent.putExtra(Util.USER_GROUP_NAME, mUserLoadedEquipments.get(groupPosition).getServiceName());
+                intent.putExtra(Util.GATEWAY, "http://" + equipment.getHosts().get(0));
+                intent.putExtra(Util.USER_GROUP_NAME, equipment.getModel() + "-" + equipment.getSerialNumber());
                 intent.putExtra(Util.USER_NAME, user.getUserName());
                 intent.putExtra(Util.USER_UUID, user.getUuid());
                 intent.putExtra(Util.USER_BG_COLOR, user.getDefaultAvatarBgColor());
@@ -178,7 +186,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         if (mEquipmentExpandableListView.isGroupExpanded(i)) {
                             mEquipmentExpandableListView.collapseGroupWithAnimation(i);
                         } else {
-                            mEquipmentExpandableListView.expandGroup(i,true);
+                            mEquipmentExpandableListView.expandGroup(i, true);
                         }
 
                     } else {
@@ -194,9 +202,19 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             }
         });
 
-        mBack.setOnClickListener(this);
+        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getIntent().getBooleanExtra(Util.KEY_SHOULD_STOP_SERVICE, true))
+                    ButlerService.stopButlerService(mContext);
+
+                finish();
+            }
+        });
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        mTitleTextView.setText(getString(R.string.search_equipment));
 
         mRxDnssd = CustomApplication.getRxDnssd(mContext);
     }
@@ -263,13 +281,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.back:
-
-                if (getIntent().getBooleanExtra(Util.KEY_SHOULD_STOP_SERVICE, true))
-                    ButlerService.stopButlerService(mContext);
-
-                finish();
-                break;
             case R.id.fab:
                 Intent intent = new Intent(mContext, CreateNewEquipmentActivity.class);
                 startActivityForResult(intent, Util.KEY_MANUAL_INPUT_IP_REQUEST_CODE);
@@ -413,7 +424,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 return;
             }
 
-            mGroupName.setText(equipment.getServiceName());
+            mGroupName.setText(equipment.getModel() + "-" + equipment.getSerialNumber());
 
             List<String> hosts = equipment.getHosts();
 
@@ -484,7 +495,35 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             mUserDefaultPortrait.setText(firstLetter);
 
             if (user.getDefaultAvatarBgColor() == 0) {
-                user.setDefaultAvatarBgColor(new Random().nextInt(3) + 1);
+
+                int avatarBgColor = random.nextInt(3) + 1;
+
+                if (preAvatarBgColor != 0) {
+
+                    if (avatarBgColor == preAvatarBgColor) {
+                        if (avatarBgColor == 3) {
+                            avatarBgColor--;
+                        } else if (avatarBgColor == 1) {
+                            avatarBgColor++;
+                        } else {
+
+                            if (random.nextBoolean()) {
+                                avatarBgColor++;
+                            } else {
+                                avatarBgColor--;
+                            }
+
+                        }
+                    }
+
+                    preAvatarBgColor = avatarBgColor;
+
+                } else {
+                    preAvatarBgColor = avatarBgColor;
+                }
+
+
+                user.setDefaultAvatarBgColor(avatarBgColor);
             }
 
             mUserDefaultPortrait.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
@@ -509,10 +548,33 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         if (!serviceName.toLowerCase().contains("wisnuc")) return;
 
                         if (bonjourService.getInet4Address() == null) return;
+
                         String hostAddress = bonjourService.getInet4Address().getHostAddress();
 
+                        String hostName = bonjourService.getHostname();
+
+                        Log.d(TAG, "call: hostName: " + hostName);
+
+                        String model = "";
+                        String serialNumber = "";
+
+                        if (hostName != null && hostName.contains("-")) {
+
+                            String[] hostNames = hostName.split("-");
+
+                            model = hostNames[1].toUpperCase();
+
+                            String[] hostNames2 = hostNames[2].split("\\.");
+
+                            serialNumber = hostNames2[0].toUpperCase();
+
+                            Log.d(TAG, "discovery: model:" + model + " serialNumber:" + serialNumber);
+                        }
+
                         for (Equipment equipment : mFoundedEquipments) {
-                            if (equipment == null || serviceName.equals(equipment.getServiceName()) || equipment.getHosts().contains(hostAddress)) {
+                            if (equipment == null || serviceName.equals(equipment.getServiceName())
+                                    || equipment.getHosts().contains(hostAddress)
+                                    || serialNumber.equals(equipment.getSerialNumber())) {
                                 return;
                             }
                         }
@@ -526,6 +588,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                         equipment.setHosts(hosts);
                         equipment.setPort(bonjourService.getPort());
+
+                        equipment.setModel(model);
+                        equipment.setSerialNumber(serialNumber);
 
                         mFoundedEquipments.add(equipment);
 

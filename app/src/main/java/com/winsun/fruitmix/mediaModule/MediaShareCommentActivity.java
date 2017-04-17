@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.IImageLoadListener;
+import com.android.volley.toolbox.StringRequest;
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.EditTextPreIme;
@@ -203,7 +204,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
                 Log.i(TAG, "onClick: mediaUUID:" + media.getUuid());
 
-                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title),getString(R.string.comment)), true, false);
 
                 FNAS.createLocalMediaComment(mContext, media.getUuid(), createComment(media.getBelongingMediaShareUUID(), mComment));
             }
@@ -231,7 +232,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         String url = media.getImageOriginalUrl(this);
         ivMain.setTag(url);
-        ivMain.setDefaultImageResId(R.drawable.new_placeholder);
+        ivMain.setDefaultImageResId(R.drawable.default_place_holder);
 //        ivMain.setDefaultBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
 
         ivMain.setOrientationNumber(media.getOrientationNumber());

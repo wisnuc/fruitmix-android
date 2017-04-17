@@ -10,12 +10,14 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
@@ -38,8 +40,10 @@ public class MoreMediaActivity extends AppCompatActivity {
 
     public static final String TAG = "MoreMediaActivity";
 
-    @BindView(R.id.back)
-    ImageView mBack;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.title)
+    TextView mTitleTextView;
     @BindView(R.id.more_photo_gridview)
     RecyclerView mMorePhotoRecyclerView;
     @BindView(R.id.loading_layout)
@@ -64,7 +68,9 @@ public class MoreMediaActivity extends AppCompatActivity {
 
         initImageLoader();
 
-        mBack.setOnClickListener(new View.OnClickListener() {
+        mTitleTextView.setVisibility(View.INVISIBLE);
+
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
@@ -168,11 +174,11 @@ public class MoreMediaActivity extends AppCompatActivity {
 
             setMainPicScreenHeight(mPhotoItem, media);
 
-            mPhotoItem.setBackgroundResource(R.drawable.new_placeholder);
+            mPhotoItem.setBackgroundResource(R.drawable.default_place_holder);
 //            mPhotoItem.setBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
 
             mPhotoItem.setTag(imageUrl);
-            mPhotoItem.setDefaultImageResId(R.drawable.new_placeholder);
+            mPhotoItem.setDefaultImageResId(R.drawable.default_place_holder);
 //            mPhotoItem.setDefaultBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
 
             mPhotoItem.setImageUrl(imageUrl, mImageLoader);

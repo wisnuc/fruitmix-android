@@ -3,6 +3,7 @@ package com.winsun.fruitmix.fragment;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.StateListAnimator;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -10,11 +11,14 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringDef;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -25,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -170,6 +175,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         ButterKnife.bind(this, view);
 
+        toolbar.setNavigationIcon(R.drawable.menu_black);
+
         toolbar.setTitle("");
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -178,6 +185,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 mListener.switchDrawerOpenState();
             }
         });
+
+        lbRight.setVisibility(View.VISIBLE);
 
         initNavigationView();
 
@@ -524,7 +533,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                     setPhotoListRefresh();
                 }
 
-                if(!photoList.isLoaded()){
+                if (!photoList.isLoaded()) {
                     photoList.refreshView();
                 }
 
@@ -864,6 +873,36 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     @Override
+    public void onPhotoListScrollDown() {
+
+        if (toolbar.getVisibility() == View.GONE)
+            return;
+
+        ViewCompat.setElevation(toolbar, Util.dip2px(mContext, 6f));
+
+        toolbar.setVisibility(View.GONE);
+
+    }
+
+    @Override
+    public void onPhotoListScrollUp() {
+
+        if (toolbar.getVisibility() == View.VISIBLE)
+            return;
+
+        ViewCompat.setElevation(toolbar, Util.dip2px(mContext, 6f));
+
+        toolbar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onPhotoListScrollFinished() {
+
+        ViewCompat.setElevation(toolbar, Util.dip2px(mContext, 2f));
+
+    }
+
+    @Override
     public void onClick(View v) {
         List<String> selectMediaUUIDs;
         switch (v.getId()) {
@@ -946,7 +985,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             sendShare(mSelectMediaOriginalPhotoPaths);
         } else {
 
-            mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, true);
+            mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, true);
             mDialog.setCanceledOnTouchOutside(false);
 
             EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, mSelectMedias));
@@ -960,7 +999,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             selectMediaUUIDs.add(media.getUuid());
         }
 
-        mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+        mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, false);
 
         photoList.createShare(selectMediaUUIDs);
 
@@ -1044,7 +1083,15 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         if (Util.getNetworkState(mContext)) {
 
             if (mediaShare.checkPermissionToOperate()) {
-                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+
+                String operation;
+                if (mediaShare.getViewersListSize() == 0) {
+                    operation = String.format(getString(R.string.operating_title), getString(R.string.set_public));
+                } else {
+                    operation = String.format(getString(R.string.operating_title), getString(R.string.set_private));
+                }
+
+                mDialog = ProgressDialog.show(mContext, null, operation, true, false);
 
                 String requestData = mediaShare.createToggleShareStateRequestData();
 
@@ -1066,7 +1113,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         if (Util.getNetworkState(mContext)) {
 
             if (mediaShare.checkPermissionToOperate()) {
-                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.delete_text)), true, false);
 
                 FNAS.deleteRemoteMediaShare(mContext, mediaShare);
             } else {
@@ -1085,6 +1132,10 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         if (sInChooseMode) {
             hideChooseHeader();
             showBottomNav();
+        }
+
+        if (toolbar.getVisibility() != View.VISIBLE) {
+            toolbar.setVisibility(View.VISIBLE);
         }
 
         switch (position) {

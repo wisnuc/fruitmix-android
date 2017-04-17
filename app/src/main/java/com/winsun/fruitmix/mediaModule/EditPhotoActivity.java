@@ -12,6 +12,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,10 +55,12 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
 
     public static final String TAG = "EditPhotoActivity";
 
-    @BindView(R.id.back)
-    ImageView mBack;
-    @BindView(R.id.finish)
-    TextView mFinish;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.title)
+    TextView title;
+    @BindView(R.id.right)
+    TextView rightTextView;
     @BindView(R.id.edit_photo_gridview)
     RecyclerView mEditPhotoRecyclerView;
     @BindView(R.id.add_album)
@@ -95,9 +98,19 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
 
         initImageLoader();
 
-        mBack.setOnClickListener(this);
+        title.setVisibility(View.INVISIBLE);
+
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         mAddPhoto.setOnClickListener(this);
-        mFinish.setOnClickListener(this);
+
+        rightTextView.setVisibility(View.VISIBLE);
+        rightTextView.setOnClickListener(this);
 
         String mediaShareUUID = getIntent().getStringExtra(Util.KEY_MEDIA_SHARE_UUID);
         mediaShare = LocalCache.findMediaShareInLocalCacheMap(mediaShareUUID);
@@ -246,7 +259,7 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
                 intent.putExtra(Util.EDIT_PHOTO, true);
                 startActivityForResult(intent, Util.KEY_CHOOSE_PHOTO_REQUEST_CODE);
                 break;
-            case R.id.finish:
+            case R.id.right:
 
                 if (!Util.getNetworkState(mContext)) {
                     Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
@@ -274,7 +287,7 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
                     modifiedMediaShare.setCoverImageUUID("");
                 }
 
-                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title),getString(R.string.edit_photo)), true, false);
 
                 FNAS.editPhotoInRemoteMediaShare(mContext, diffContentsOriginalMediaShare, diffContentsModifiedMediaShare, modifiedMediaShare);
 
@@ -324,11 +337,11 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
 
             setMainPicScreenHeight(mPhotoItem, mMap);
 
-            mPhotoItem.setBackgroundResource(R.drawable.new_placeholder);
+            mPhotoItem.setBackgroundResource(R.drawable.default_place_holder);
 //            mPhotoItem.setBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
 
             mPhotoItem.setTag(imageUrl);
-            mPhotoItem.setDefaultImageResId(R.drawable.new_placeholder);
+            mPhotoItem.setDefaultImageResId(R.drawable.default_place_holder);
 //            mPhotoItem.setDefaultBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
 
             mPhotoItem.setImageUrl(imageUrl, mImageLoader);

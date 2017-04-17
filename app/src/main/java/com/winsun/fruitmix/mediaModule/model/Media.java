@@ -277,7 +277,7 @@ public class Media implements Parcelable {
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
             imageUrl = String.format(context.getString(R.string.android_thumb_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid(),
-                    String.valueOf(32), String.valueOf(32));
+                    String.valueOf(64), String.valueOf(64));
 
         }
         return imageUrl;

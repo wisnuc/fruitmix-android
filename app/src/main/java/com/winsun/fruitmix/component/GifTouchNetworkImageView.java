@@ -21,6 +21,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.ImageView;
 
 import com.android.volley.VolleyError;
 import com.android.volley.orientation.OrientationOperation;
@@ -76,8 +77,6 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
     private boolean isLoadGif = false;
 
     private Media currentMedia;
-
-    private int mDefaultBackgroundColor;
 
     public GifTouchNetworkImageView(Context context) {
         this(context, null);
@@ -135,10 +134,6 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
      */
     public void setErrorImageResId(int errorImage) {
         mErrorImageId = errorImage;
-    }
-
-    public void setDefaultBackgroundColor(int DefaultBackgroundColor) {
-        this.mDefaultBackgroundColor = DefaultBackgroundColor;
     }
 
     public void registerImageLoadListener(IImageLoadListener loadListener) {
@@ -374,8 +369,6 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
                             }
 
                             setImageBitmap(bitmap);
-
-                            setBackgroundColor(0);
 
                             deliverImageLoadFinish();
 

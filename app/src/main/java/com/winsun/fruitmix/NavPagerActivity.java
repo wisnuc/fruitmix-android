@@ -28,6 +28,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +40,6 @@ import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.fragment.FileMainFragment;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
-import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.LoggedInUser;
@@ -80,16 +81,20 @@ public class NavPagerActivity extends AppCompatActivity
     TextView versionName;
     @BindView(R.id.avatar)
     TextView mUserAvatar;
-    @BindView(R.id.upload_percent)
-    TextView mUploadMediaPercentTextView;
     @BindView(R.id.user_name_textview)
     TextView mUserNameTextView;
-    @BindView(R.id.logged_in_user0_avatar)
-    TextView mLoggedInUser0Avatar;
-    @BindView(R.id.logged_in_user1_avatar)
-    TextView mLoggedInUser1Avatar;
-    @BindView(R.id.navigation_header_arrow)
+    @BindView(R.id.equipment_name)
+    TextView mEquipmentNameTextView;
+    @BindView(R.id.upload_percent_textview)
+    TextView mUploadMediaPercentTextView;
+    @BindView(R.id.upload_percent_progressbar)
+    ProgressBar mUploadPercentProgressBar;
+    @BindView(R.id.upload_count_textview)
+    TextView mUploadCountTextView;
+    @BindView(R.id.navigation_header_arrow_imageview)
     ImageView mNavigationHeaderArrow;
+    @BindView(R.id.navigation_header_arrow_layout)
+    LinearLayout mNavigationHeaderArrowLayout;
     @BindView(R.id.navigation_menu_recycler_view)
     RecyclerView mNavigationMenuRecyclerView;
 
@@ -197,7 +202,7 @@ public class NavPagerActivity extends AppCompatActivity
 
         public void onClick() {
 
-            mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+            mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.change_user)), true, false);
             startDiscovery(loggedInUser);
             mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT_MESSAGE, DISCOVERY_TIMEOUT_TIME);
         }
@@ -256,7 +261,7 @@ public class NavPagerActivity extends AppCompatActivity
 
                     weakReference.get().mDialog.dismiss();
 
-                    Toast.makeText(weakReference.get(), "操作失败", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(weakReference.get(), weakReference.get().getString(R.string.search_equipment_failed), Toast.LENGTH_SHORT).show();
 
                     weakReference.get().mDrawerLayout.closeDrawer(GravityCompat.START);
 
@@ -300,6 +305,13 @@ public class NavPagerActivity extends AppCompatActivity
                 super.onDrawerOpened(drawerView);
 
                 calcAlreadyUploadMediaCount();
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+
+                switchToNavigationItemMenu();
             }
         });
 
@@ -360,14 +372,21 @@ public class NavPagerActivity extends AppCompatActivity
 
                 if (mAlreadyUploadMediaCount == mTotalLocalMediaCount) {
                     mUploadMediaPercentTextView.setText(getString(R.string.already_upload_finished));
+
+                    mUploadPercentProgressBar.setProgress(100);
+
                 } else {
 
                     float percent = mAlreadyUploadMediaCount * 100 / mTotalLocalMediaCount;
+
+                    mUploadPercentProgressBar.setProgress((int) percent);
 
                     String percentText = (int) percent + "%";
 
                     mUploadMediaPercentTextView.setText(String.format(getString(R.string.already_upload_media_percent_text), percentText));
                 }
+
+                mUploadCountTextView.setText(mAlreadyUploadMediaCount + "/" + mTotalLocalMediaCount);
 
             }
         }.execute();
@@ -399,7 +418,7 @@ public class NavPagerActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
-        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.logout, getString(R.string.logout)) {
+        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_logout_black_24dp, getString(R.string.logout)) {
             @Override
             public void onClick() {
                 handleLogoutOnClick();
@@ -635,13 +654,14 @@ public class NavPagerActivity extends AppCompatActivity
         while (iterator.hasNext()) {
             LoggedInUser loggedInUser = iterator.next();
             if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
+
+                mEquipmentNameTextView.setText(loggedInUser.getEquipmentName());
+
                 iterator.remove();
             }
         }
 
         int loggedInUserListSize = loggedInUsers.size();
-        User user0;
-        User user1;
 
         if (loggedInUserListSize > 0) {
 
@@ -651,50 +671,13 @@ public class NavPagerActivity extends AppCompatActivity
             }
             mNavigationItemLoggedInUser.add(new NavigationAccountManageItem());
 
-            user0 = loggedInUsers.get(0).getUser();
-
-            mLoggedInUser0Avatar.setVisibility(View.VISIBLE);
-            mLoggedInUser0Avatar.setText(user0.getDefaultAvatar());
-            mLoggedInUser0Avatar.setBackgroundResource(user0.getDefaultAvatarBgColorResourceId());
-            mLoggedInUser0Avatar.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ((NavigationLoggerInUserItem) mNavigationItemLoggedInUser.get(0)).onClick();
-                }
-            });
-
-            if (loggedInUserListSize > 1) {
-                user1 = loggedInUsers.get(1).getUser();
-
-                mLoggedInUser1Avatar.setVisibility(View.VISIBLE);
-                mLoggedInUser1Avatar.setText(user1.getDefaultAvatar());
-                mLoggedInUser1Avatar.setBackgroundResource(user1.getDefaultAvatarBgColorResourceId());
-
-                mLoggedInUser1Avatar.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        ((NavigationLoggerInUserItem) mNavigationItemLoggedInUser.get(1)).onClick();
-
-                    }
-                });
-
-            } else {
-                mLoggedInUser1Avatar.setVisibility(View.INVISIBLE);
-            }
-
         } else {
-
-            mLoggedInUser0Avatar.setVisibility(View.INVISIBLE);
-            mLoggedInUser1Avatar.setVisibility(View.INVISIBLE);
 
             mNavigationItemLoggedInUser.clear();
             mNavigationItemLoggedInUser.add(new NavigationAccountManageItem());
         }
 
-        mNavigationHeaderArrow.setVisibility(View.VISIBLE);
-
-        mNavigationHeaderArrow.setOnClickListener(new View.OnClickListener() {
+        mNavigationHeaderArrowLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mNavigationHeaderArrowExpanded = !mNavigationHeaderArrowExpanded;
@@ -707,37 +690,28 @@ public class NavPagerActivity extends AppCompatActivity
     private void refreshNavigationHeader() {
         if (mNavigationHeaderArrowExpanded) {
 
-            mNavigationHeaderArrow.setImageResource(R.drawable.navigation_header_arrow_down);
-
-            if (mLoggedInUser0Avatar.getVisibility() == View.VISIBLE) {
-                mLoggedInUser0Avatar.setVisibility(View.INVISIBLE);
-            }
-
-            if (mLoggedInUser1Avatar.getVisibility() == View.VISIBLE) {
-                mLoggedInUser1Avatar.setVisibility(View.INVISIBLE);
-            }
-
-            mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemLoggedInUser);
-            mNavigationItemAdapter.notifyDataSetChanged();
+            switchToNavigationItemLoggedInUser();
 
 
         } else {
 
-            mNavigationHeaderArrow.setImageResource(R.drawable.navigation_header_arrow_up);
-
-            int size = mNavigationItemLoggedInUser.size();
-
-            if (mLoggedInUser0Avatar.getVisibility() == View.INVISIBLE && size > 1) {
-                mLoggedInUser0Avatar.setVisibility(View.VISIBLE);
-            }
-            if (mLoggedInUser1Avatar.getVisibility() == View.INVISIBLE && size > 2) {
-                mLoggedInUser1Avatar.setVisibility(View.VISIBLE);
-            }
-
-            mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemMenu);
-            mNavigationItemAdapter.notifyDataSetChanged();
+            switchToNavigationItemMenu();
 
         }
+    }
+
+    private void switchToNavigationItemLoggedInUser() {
+        mNavigationHeaderArrow.setImageResource(R.drawable.navigation_header_arrow_up);
+
+        mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemLoggedInUser);
+        mNavigationItemAdapter.notifyDataSetChanged();
+    }
+
+    private void switchToNavigationItemMenu() {
+        mNavigationHeaderArrow.setImageResource(R.drawable.navigation_header_arrow_down);
+
+        mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemMenu);
+        mNavigationItemAdapter.notifyDataSetChanged();
     }
 
     private void toggleUserManageNavigationItem(User user) {
@@ -882,7 +856,7 @@ public class NavPagerActivity extends AppCompatActivity
             protected void onPreExecute() {
                 super.onPreExecute();
 
-                mDialog = ProgressDialog.show(mContext, null, getString(R.string.operating_title), true, false);
+                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.logout)), true, false);
 
             }
 

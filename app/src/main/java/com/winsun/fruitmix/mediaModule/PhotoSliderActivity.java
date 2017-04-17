@@ -59,16 +59,14 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
     public static final String TAG = "PhotoSliderActivity";
 
-    @BindView(R.id.date)
-    TextView lbDate;
-    @BindView(R.id.back)
-    ImageView ivBack;
+    @BindView(R.id.title)
+    TextView mTitleTextView;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
     @BindView(R.id.comment_layout)
     LinearLayout ivComment;
     @BindView(R.id.comment)
     ImageView commentImg;
-    @BindView(R.id.chooseHeader)
-    Toolbar rlChooseHeader;
     @BindView(R.id.panelFooter)
     RelativeLayout rlPanelFooter;
     @BindView(R.id.return_resize)
@@ -159,7 +157,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         refreshReturnResizeVisibility();
 
-        ivBack.setOnClickListener(new View.OnClickListener() {
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finishActivity();
@@ -220,7 +218,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        ivBack.setImageResource(R.drawable.ic_back_black);
+        mToolbar.setNavigationIcon(R.drawable.ic_back_black);
         commentImg.setImageResource(R.drawable.comment);
         mReturnResize.setImageResource(R.drawable.return_resize);
 
@@ -381,9 +379,9 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             String title = mediaList.get(position).getTime();
             if (title == null || title.contains(Util.DEFAULT_DATE)) {
-                lbDate.setText(getString(R.string.unknown_time));
+                mTitleTextView.setText(getString(R.string.unknown_time));
             } else {
-                lbDate.setText(title);
+                mTitleTextView.setText(title);
             }
         }
 
@@ -744,10 +742,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     private void convertEditState() {
         sInEdit = !sInEdit;
         if (sInEdit) {
-            rlChooseHeader.setVisibility(View.VISIBLE);
+            mToolbar.setVisibility(View.VISIBLE);
             rlPanelFooter.setVisibility(View.VISIBLE);
         } else {
-            rlChooseHeader.setVisibility(View.INVISIBLE);
+            mToolbar.setVisibility(View.INVISIBLE);
             rlPanelFooter.setVisibility(View.INVISIBLE);
         }
     }

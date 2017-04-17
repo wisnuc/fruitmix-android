@@ -300,6 +300,9 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
+        if (!mIsResume)
+            return;
+
         String action = operationEvent.getAction();
         if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
 

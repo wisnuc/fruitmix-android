@@ -12,7 +12,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <android.support.v7.widget.Toolbar
+    <include layout="@layout/toolbar_layout" />
+
+    <!--    <android.support.v7.widget.Toolbar
         android:id="@+id/chooseHeader"
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -21,22 +23,22 @@
         android:visibility="visible">
 
         <ImageView
-            android:id="@+id/back"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
-            android:src="@drawable/ic_back" />
+        android:id="@+id/back"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="16dp"
+        android:src="@drawable/ic_back" />
 
         <TextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="2015-01-01 00:00:00"
-            android:textColor="#FFFFFF"
-            android:textSize="18dp" />
-    </android.support.v7.widget.Toolbar>
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="2015-01-01 00:00:00"
+        android:textColor="#FFFFFF"
+        android:textSize="18dp" />
+        </android.support.v7.widget.Toolbar>-->
 
     <RelativeLayout
         android:id="@+id/panelFooter"

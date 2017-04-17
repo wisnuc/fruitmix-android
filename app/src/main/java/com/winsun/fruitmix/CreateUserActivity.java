@@ -5,6 +5,7 @@ import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -34,8 +35,8 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
 
     public static final String TAG = "CreateUserActivity";
 
-    @BindView(R.id.back)
-    ImageView back;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
     @BindView(R.id.user_name_layout)
     TextInputLayout userNameInputLayout;
     @BindView(R.id.user_name_edittext)
@@ -70,7 +71,12 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
             remoteUserNames.add(user.getUserName());
         }
 
-        back.setOnClickListener(this);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         createUserBtn.setOnClickListener(this);
 
     }
@@ -200,7 +206,7 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
 
                 }
 
-                mDialog = ProgressDialog.show(CreateUserActivity.this, null, getString(R.string.operating_title), true, false);
+                mDialog = ProgressDialog.show(CreateUserActivity.this, null, String.format(getString(R.string.operating_title),getString(R.string.create_user)), true, false);
 
                 FNAS.createRemoteUser(userName, password);
 

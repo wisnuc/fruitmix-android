@@ -384,11 +384,11 @@ public class TestPhotoListActivity extends AppCompatActivity {
             if (currentMedia.isLocal())
                 mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
 
-            mPhotoIv.setBackgroundResource(R.drawable.new_placeholder);
+            mPhotoIv.setBackgroundResource(R.drawable.default_place_holder);
 
 //            mPhotoIv.setBackgroundColor(ContextCompat.getColor(mContext, R.color.default_imageview_color));
 
-            mPhotoIv.setDefaultImageResId(R.drawable.new_placeholder);
+            mPhotoIv.setDefaultImageResId(R.drawable.default_place_holder);
 
 //            mPhotoIv.setDefaultBackgroundColor(ContextCompat.getColor(mContext, R.color.default_imageview_color));
 

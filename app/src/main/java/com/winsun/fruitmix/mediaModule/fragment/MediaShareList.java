@@ -104,7 +104,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
         noContentImageView.setImageResource(R.drawable.no_photo);
 
-        noContentTextView.setText(containerActivity.getString(R.string.no_photos));
+        noContentTextView.setText(containerActivity.getString(R.string.no_media_shares));
 
 //        ShareRecycleViewScrollListener shareRecycleViewScrollListener = new ShareRecycleViewScrollListener();
 //        mainRecyclerView.addOnScrollListener(shareRecycleViewScrollListener);
@@ -387,6 +387,8 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
         FrameLayout cardItemContentFrameLayout;
         CardView cardView;
 
+        View mSpacingLayout;
+
         String nickName;
 
         CardItemViewHolder(View view) {
@@ -398,13 +400,21 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
             lbTime = (TextView) view.findViewById(R.id.time);
             cardItemContentFrameLayout = (FrameLayout) view.findViewById(R.id.card_item_content_frame_layout);
             cardView = (CardView) view.findViewById(R.id.card_view);
+
+            mSpacingLayout = view.findViewById(R.id.spacing_layout);
         }
 
         public void refreshView(MediaShare mediaShare, int position) {
 
+            if(position == 0){
+                mSpacingLayout.setVisibility(View.VISIBLE);
+            }else {
+                mSpacingLayout.setVisibility(View.GONE);
+            }
+
             currentItem = mediaShare;
 
-            RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) cardView.getLayoutParams();
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) cardView.getLayoutParams();
             int margin = Util.dip2px(containerActivity, 8);
 
             if (position == 0) {
@@ -489,7 +499,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
                 }
             }
 
-            ivCover.setBackgroundResource(R.drawable.new_placeholder);
+            ivCover.setBackgroundResource(R.drawable.default_place_holder);
 //            ivCover.setBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
             if (coverImg != null && mShowPhoto) {
@@ -497,14 +507,14 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
                 String imageUrl = coverImg.getImageOriginalUrl(containerActivity);
                 mImageLoader.setShouldCache(!coverImg.isLocal());
                 ivCover.setTag(imageUrl);
-                ivCover.setDefaultImageResId(R.drawable.new_placeholder);
+                ivCover.setDefaultImageResId(R.drawable.default_place_holder);
 //                ivCover.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
                 ivCover.setOrientationNumber(coverImg.getOrientationNumber());
                 ivCover.setImageUrl(imageUrl, mImageLoader);
 
             } else {
-                ivCover.setDefaultImageResId(R.drawable.new_placeholder);
+                ivCover.setDefaultImageResId(R.drawable.default_place_holder);
 //                ivCover.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
                 ivCover.setImageUrl(null, mImageLoader);
@@ -569,7 +579,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
                 itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(0));
             }
 
-            ivCover.setBackgroundResource(R.drawable.new_placeholder);
+            ivCover.setBackgroundResource(R.drawable.default_place_holder);
 //            ivCover.setBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
             if (itemImg != null) {
@@ -578,7 +588,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
                     String imageUrl = itemImg.getImageOriginalUrl(containerActivity);
                     mImageLoader.setShouldCache(!itemImg.isLocal());
                     ivCover.setTag(imageUrl);
-                    ivCover.setDefaultImageResId(R.drawable.new_placeholder);
+                    ivCover.setDefaultImageResId(R.drawable.default_place_holder);
 
 //                    ivCover.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
@@ -624,7 +634,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
                 });
 
             } else {
-                ivCover.setDefaultImageResId(R.drawable.new_placeholder);
+                ivCover.setDefaultImageResId(R.drawable.default_place_holder);
 
 //                ivCover.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
@@ -822,7 +832,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
                 if (itemImg == null)
                     itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(i));
 
-                ivItems[i].setBackgroundResource(R.drawable.new_placeholder);
+                ivItems[i].setBackgroundResource(R.drawable.default_place_holder);
 
 //                ivItems[i].setBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
@@ -835,14 +845,14 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
                         ivItems[i].setOrientationNumber(itemImg.getOrientationNumber());
 
                     ivItems[i].setTag(imageUrl);
-                    ivItems[i].setDefaultImageResId(R.drawable.new_placeholder);
+                    ivItems[i].setDefaultImageResId(R.drawable.default_place_holder);
 
 //                    ivItems[i].setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
                     ivItems[i].setImageUrl(imageUrl, mImageLoader);
 
                 } else {
-                    ivItems[i].setDefaultImageResId(R.drawable.new_placeholder);
+                    ivItems[i].setDefaultImageResId(R.drawable.default_place_holder);
 
 //                    ivItems[i].setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 

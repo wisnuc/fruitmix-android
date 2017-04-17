@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -28,8 +29,10 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
 
     public static final String TAG = "SettingActivity";
 
-    @BindView(R.id.back)
-    ImageView mBackImageView;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.title)
+    TextView mTitleTextView;
     @BindView(R.id.auto_upload_photos_switch)
     SwitchCompat mAutoUploadPhotosSwitch;
     @BindView(R.id.mobile_network_upload_switch)
@@ -55,7 +58,15 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
 
         ButterKnife.bind(this);
 
-        mBackImageView.setOnClickListener(this);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        mTitleTextView.setText(getString(R.string.setting));
+
         mClearCacheLayout.setOnClickListener(this);
 
         mAutoUploadOrNot = LocalCache.getAutoUploadOrNot(this);

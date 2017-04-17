@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="112dp"
+    android:layout_height="wrap_content"
     android:background="#f0f0f0"
-    android:orientation="vertical"
-    android:paddingBottom="4dp"
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp"
-    android:paddingTop="4dp">
+    android:orientation="vertical">
+
+    <View
+        android:id="@+id/spacing_layout"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/white"
+        android:visibility="gone" />
 
     <com.daimajia.swipe.SwipeLayout
         android:id="@+id/swipe_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="112dp"
+        android:paddingBottom="4dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="4dp">
 
         <LinearLayout
             android:layout_width="100dp"
@@ -70,7 +77,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:background="@drawable/new_placeholder" />
+                    android:background="@drawable/default_place_holder" />
 
                 <ImageView
                     android:layout_width="150dp"

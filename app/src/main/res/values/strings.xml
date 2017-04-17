@@ -51,11 +51,17 @@
 
     <!-- <string name="loading_message">Please Wait!</string> -->
 
-    <string name="no_photos">No photos</string>
+    <string name="no_photos">No Photos</string>
 
-    <string name="no_files">No files</string>
+    <string name="no_media_shares">No Media Shares</string>
 
-    <string name="operating_title">Please wait…</string>
+    <string name="no_albums">No Albums</string>
+
+    <string name="no_files">No Files</string>
+
+    <string name="no_file_shares">No File Shares</string>
+
+    <string name="operating_title">%1$s,Please wait…</string>
 
     <string name="coming_soon">Coming Soon</string>
 
@@ -93,6 +99,8 @@
 
     <string name="already_upload_media_percent_text">Already upload %1$s</string>
     <string name="already_upload_finished">Backup Completed</string>
+
+    <string name="change_user">Change user</string>
 
     <!-- share bottom menu -->
     <string name="all_people">All users</string>
@@ -135,9 +143,13 @@
 
     <string name="check_more_photos">Check more photos</string>
 
+    <string name="create_share">Create share</string>
+
     <!-- create、modify album -->
 
-    <string name="create_album">New Album</string>
+    <string name="new_album">New Album</string>
+
+    <string name="create_album">Create Album</string>
 
     <string name="set_maintainer">Set Maintainer</string>
 
@@ -158,6 +170,8 @@
 
     <!-- 设备名 默认值-->
     <string name="equipment_group_default_text">WISNUC</string>
+
+    <string name="search_equipment_failed">Search equipment failed</string>
 
     <!-- share comment -->
 

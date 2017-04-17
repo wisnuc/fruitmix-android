@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:background="@drawable/new_placeholder"
+                android:background="@drawable/default_place_holder"
                 app:layout_collapseMode="parallax"
                 app:layout_collapseParallaxMultiplier="0.5"
                 />
@@ -44,7 +44,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginLeft="16dp"
-                    android:src="@drawable/ic_back"/>
+                    android:src="@drawable/ic_back_black"/>
 
 
             </android.support.v7.widget.Toolbar>

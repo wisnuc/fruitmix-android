@@ -49,11 +49,17 @@
     <string name="loading">正在加载…</string>        <!-- loading resource: photos, file, data -->
     <!--   <string name="loading_message">请稍候</string>-->
 
-    <string name="operating_title">正在执行…</string> <!-- waiting for server response -->
+    <string name="operating_title">正在%1$s…</string> <!-- waiting for server response -->
 
-    <string name="no_photos">没有图片</string>       <!-- empty list -->
+    <string name="no_photos">还没有照片</string>       <!-- empty list -->
 
-    <string name="no_files">没有文件</string>
+    <string name="no_media_shares">还没有分享</string>
+
+    <string name="no_albums">还没有相册</string>
+
+    <string name="no_files">还没有文件</string>
+
+    <string name="no_file_shares">还没有分享</string>
 
     <string name="coming_soon">功能暂未实现</string>
     <string name="ok">确定</string>
@@ -86,6 +92,8 @@
 
     <string name="already_upload_media_percent_text">已备份%1$s</string>
     <string name="already_upload_finished">已完全备份</string>
+
+    <string name="change_user">切换用户</string>
 
     <!-- 分享底部菜单 -->
     <string name="all_people">所有人</string>
@@ -121,8 +129,13 @@
     <!-- 主界面-分享模块 -->
     <string name="check_more_photos">查看更多照片</string>
 
+    <string name="create_share">创建分享</string>
+
     <!-- 创建、修改相册 -->
-    <string name="create_album">新相册</string>
+    <string name="new_album">新相册</string>
+
+    <string name="create_album">创建相册</string>
+
     <string name="set_maintainer">他人是否可添加</string>
     <string name="description">描述</string>
 
@@ -135,6 +148,9 @@
 
     <!-- 设备 -->
     <string name="search_equipment">搜索设备</string>
+
+    <string name="search_equipment_failed">搜索设备失败</string>
+
 
     <!-- 设备名 默认值-->
     <string name="equipment_group_default_text">WISNUC</string>

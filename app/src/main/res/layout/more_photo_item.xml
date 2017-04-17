@@ -12,7 +12,7 @@
         android:id="@+id/photo_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/new_placeholder"
+        android:background="@drawable/default_place_holder"
         android:scaleType="centerCrop" />
 
 </LinearLayout>

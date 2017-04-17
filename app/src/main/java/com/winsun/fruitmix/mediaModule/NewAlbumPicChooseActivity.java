@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -31,10 +33,12 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
 
     public static final String TAG = "NewAlbumPicChooseActivity";
 
-    @BindView(R.id.back)
-    ImageView ivBack;
-    @BindView(R.id.ok)
-    TextView tfOK;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.title)
+    TextView mTitleTextView;
+    @BindView(R.id.right)
+    TextView rightTextView;
 
     @BindView(R.id.main_framelayout)
     FrameLayout mMainFrameLayout;
@@ -64,14 +68,17 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
         mNewPhotoList.setSelectMode(true);
         mNewPhotoList.setAlreadySelectedImageKeyArrayList(alreadySelectedImageKeyArrayList);
 
-        ivBack.setOnClickListener(new View.OnClickListener() {
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
 
-        tfOK.setOnClickListener(new View.OnClickListener() {
+        mTitleTextView.setText(getString(R.string.choose_text));
+
+        rightTextView.setVisibility(View.VISIBLE);
+        rightTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -145,9 +152,9 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
     public void onPhotoItemClick(int selectedItemCount) {
 
         if (selectedItemCount > mAlreadySelectedImageKeyListSize) {
-            tfOK.setVisibility(View.VISIBLE);
+            rightTextView.setVisibility(View.VISIBLE);
         } else {
-            tfOK.setVisibility(View.INVISIBLE);
+            rightTextView.setVisibility(View.INVISIBLE);
         }
 
     }
@@ -159,4 +166,34 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
     @Override
     public void onNoPhotoItem(boolean noPhotoItem) {
     }
+
+    @Override
+    public void onPhotoListScrollDown() {
+
+        if (mToolbar.getVisibility() == View.INVISIBLE)
+            return;
+
+        ViewCompat.setElevation(mToolbar, Util.dip2px(this, 6f));
+
+        mToolbar.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onPhotoListScrollUp() {
+
+        if (mToolbar.getVisibility() == View.VISIBLE)
+            return;
+
+        ViewCompat.setElevation(mToolbar, Util.dip2px(this, 6f));
+
+        mToolbar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onPhotoListScrollFinished() {
+
+        ViewCompat.setElevation(mToolbar, Util.dip2px(this, 2f));
+
+    }
+
 }
