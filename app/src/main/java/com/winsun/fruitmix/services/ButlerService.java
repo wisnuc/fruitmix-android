@@ -30,6 +30,7 @@ import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.DownloadFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.GenerateLocalMediaMiniThumbTask;
+import com.winsun.fruitmix.executor.GenerateLocalMediaThumbTask;
 import com.winsun.fruitmix.executor.RetrieveOriginalPhotoTask;
 import com.winsun.fruitmix.executor.UploadMediaTask;
 import com.winsun.fruitmix.http.OkHttpUtil;
@@ -68,6 +69,8 @@ public class ButlerService extends Service {
     private boolean mStopUpload = false;
 
     private boolean mStopGenerateMiniThumb = false;
+
+    private boolean mStopGenerateThumb = false;
 
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
@@ -124,6 +127,8 @@ public class ButlerService extends Service {
         task = null;
 
         stopUpload();
+
+        stopGenerateThumb();
 
         stopGenerateMiniThumb();
 
@@ -184,6 +189,8 @@ public class ButlerService extends Service {
 
                 startGenerateLocalPhotoThumbnail();
 
+                startGenerateLocalPhotoMiniThumbnail();
+
                 mCalcNewLocalMediaDigestFinished = true;
                 startUpload();
                 break;
@@ -203,7 +210,7 @@ public class ButlerService extends Service {
             case Util.REMOTE_USER_RETRIEVED:
 
                 if (Util.loginType == LoginType.LOGIN) {
-                    EventBus.getDefault().post(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
+                    EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
                 } else {
                     EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
                 }
@@ -229,7 +236,7 @@ public class ButlerService extends Service {
                     Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
 
                 } else {
-                    EventBus.getDefault().post(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
+                    EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
                 }
 
         }
@@ -256,7 +263,7 @@ public class ButlerService extends Service {
                     Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
 
                 } else {
-                    EventBus.getDefault().post(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
+                    EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
                 }
 
         }
@@ -267,7 +274,35 @@ public class ButlerService extends Service {
         DBUtils dbUtils = DBUtils.getInstance(this);
         ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
 
-        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+        for (Media media : LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()) {
+
+            if (mStopGenerateThumb) return;
+
+            if (media.getThumb().isEmpty()) {
+
+                GenerateLocalMediaThumbTask task = new GenerateLocalMediaThumbTask(media, dbUtils, mStopGenerateThumb);
+                instance.doOnTaskInGenerateThumbThreadPool(task);
+            }
+
+        }
+
+    }
+
+    private void stopGenerateThumb() {
+
+        mStopGenerateThumb = true;
+
+        ExecutorServiceInstance.SINGLE_INSTANCE.shutdownGenerateMiniThumbThreadPoolNow();
+
+    }
+
+
+    private void startGenerateLocalPhotoMiniThumbnail() {
+
+        DBUtils dbUtils = DBUtils.getInstance(this);
+        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+
+        for (Media media : LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()) {
 
             if (mStopGenerateMiniThumb) return;
 
@@ -312,7 +347,7 @@ public class ButlerService extends Service {
 
 
     private void startUploadAllLocalPhoto() {
-        for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+        for (Media media : LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()) {
 
             if (mStopUpload) return;
 

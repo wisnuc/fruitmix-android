@@ -122,7 +122,7 @@ public enum NewPhotoListDataLoader {
         mMapKeyIsPhotoPositionValueIsPhotoDate.clear();
         mMapKeyIsPhotoPositionValueIsPhoto.clear();
 
-        Collection<Media> medias = LocalCache.LocalMediaMapKeyIsThumb.values();
+        Collection<Media> medias = LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values();
         Map<String,Media> remoteMediaMap = new HashMap<>(LocalCache.RemoteMediaMapKeyIsUUID);
 
         Log.d(TAG, "reloadData: before load local key is date value is photo list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));

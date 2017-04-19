@@ -100,7 +100,7 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String DOWNLOADED_FILE_TABLE_NAME = "downloaded_file";
     static final String LOGGED_IN_USER_TABLE_NAME = "logged_in_user";
 
-    private static final int DB_VERSION = 25;
+    private static final int DB_VERSION = 26;
 
     private static final String CREATE_TABLE = "create table ";
 
@@ -185,20 +185,25 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-        Log.i(TAG, "Upgrading database from version " + oldVersion + "to " +
-                newVersion + ", which will destroy all old data");
-        db.execSQL(DROP_TABLE + REMOTE_COMMENT_TABLE_NAME);
-        db.execSQL(DROP_TABLE + LOCAL_COMMENT_TABLE_NAME);
-        db.execSQL(DROP_TABLE + LOCAL_SHARE_TABLE_NAME);
-        db.execSQL(DROP_TABLE + REMOTE_SHARE_TABLE_NAME);
-        db.execSQL(DROP_TABLE + REMOTE_MEDIA_TABLE_NAME);
-        db.execSQL(DROP_TABLE + LOCAL_MEDIA_TABLE_NAME);
-        db.execSQL(DROP_TABLE + REMOTE_USER_TABLE_NAME);
-        db.execSQL(DROP_TABLE + REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
-        db.execSQL(DROP_TABLE + LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME);
-        db.execSQL(DROP_TABLE + DOWNLOADED_FILE_TABLE_NAME);
-        db.execSQL(DROP_TABLE + LOGGED_IN_USER_TABLE_NAME);
+//        Log.i(TAG, "Upgrading database from version " + oldVersion + "to " +
+//                newVersion + ", which will destroy all old data");
+//        db.execSQL(DROP_TABLE + REMOTE_COMMENT_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + LOCAL_COMMENT_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + LOCAL_SHARE_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + REMOTE_SHARE_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + REMOTE_MEDIA_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + LOCAL_MEDIA_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + REMOTE_USER_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + DOWNLOADED_FILE_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + LOGGED_IN_USER_TABLE_NAME);
+//
+//        onCreate(db);
 
-        onCreate(db);
+        db.execSQL(DROP_TABLE + LOCAL_MEDIA_TABLE_NAME);
+
+        db.execSQL(DATABASE_LOCAL_MEDIA_CREATE);
+
     }
 }

@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.SharedElementCallback;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -27,6 +28,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -92,9 +94,7 @@ public class NavPagerActivity extends AppCompatActivity
     @BindView(R.id.upload_count_textview)
     TextView mUploadCountTextView;
     @BindView(R.id.navigation_header_arrow_imageview)
-    ImageView mNavigationHeaderArrow;
-    @BindView(R.id.navigation_header_arrow_layout)
-    LinearLayout mNavigationHeaderArrowLayout;
+    ImageButton mNavigationHeaderArrow;
     @BindView(R.id.navigation_menu_recycler_view)
     RecyclerView mNavigationMenuRecyclerView;
 
@@ -154,29 +154,39 @@ public class NavPagerActivity extends AppCompatActivity
         private int menuIconResID;
         private String menuText;
 
+        private boolean selected;
+
+        void setSelected(boolean checked) {
+            this.selected = checked;
+        }
+
+        boolean isSelected() {
+            return selected;
+        }
+
         @Override
         public int getType() {
             return NAVIGATION_ITEM_TYPE_MENU;
         }
 
-        public NavigationMenuItem(int menuIconResID, String menuText) {
+        NavigationMenuItem(int menuIconResID, String menuText) {
             this.menuIconResID = menuIconResID;
             this.menuText = menuText;
         }
 
-        public void setMenuIconResID(int menuIconResID) {
+        void setMenuIconResID(int menuIconResID) {
             this.menuIconResID = menuIconResID;
         }
 
-        public void setMenuText(String menuText) {
+        void setMenuText(String menuText) {
             this.menuText = menuText;
         }
 
-        public int getMenuIconResID() {
+        int getMenuIconResID() {
             return menuIconResID;
         }
 
-        public String getMenuText() {
+        String getMenuText() {
             return menuText;
         }
 
@@ -192,11 +202,11 @@ public class NavPagerActivity extends AppCompatActivity
             return NAVIGATION_ITEM_TYPE_LOGGED_IN_USER;
         }
 
-        public NavigationLoggerInUserItem(LoggedInUser loggedInUser) {
+        NavigationLoggerInUserItem(LoggedInUser loggedInUser) {
             this.loggedInUser = loggedInUser;
         }
 
-        public LoggedInUser getLoggedInUser() {
+        LoggedInUser getLoggedInUser() {
             return loggedInUser;
         }
 
@@ -328,6 +338,8 @@ public class NavPagerActivity extends AppCompatActivity
 
         currentPage = PAGE_MEDIA;
 
+        //((NavigationMenuItem) mNavigationItemMenu.get(0)).setSelected(true);
+
         mCustomHandler = new CustomHandler(this);
 
         boolean needShowAutoUploadDialog = getIntent().getBooleanExtra(Util.NEED_SHOW_AUTO_UPLOAD_DIALOG, false);
@@ -341,7 +353,7 @@ public class NavPagerActivity extends AppCompatActivity
 
     private void calcAlreadyUploadMediaCount() {
 
-        if (LocalCache.LocalMediaMapKeyIsThumb == null)
+        if (LocalCache.LocalMediaMapKeyIsOriginalPhotoPath == null || LocalCache.DeviceID == null)
             return;
 
         new AsyncTask<Void, Void, Void>() {
@@ -351,7 +363,7 @@ public class NavPagerActivity extends AppCompatActivity
                 int alreadyUploadMediaCount = 0;
                 int totalUploadMediaCount = 0;
 
-                for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+                for (Media media : LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()) {
 
                     if (media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
                         alreadyUploadMediaCount++;
@@ -404,12 +416,59 @@ public class NavPagerActivity extends AppCompatActivity
 
     private void initNavigationItemMenu() {
 
+ /*       mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.navigation_photo_menu_bg, getString(R.string.my_photo)) {
+            @Override
+            public void onClick() {
+
+                if (currentPage != PAGE_MEDIA) {
+
+                    currentPage = PAGE_MEDIA;
+
+                    ((NavigationMenuItem) mNavigationItemMenu.get(0)).setSelected(true);
+                    ((NavigationMenuItem) mNavigationItemMenu.get(1)).setSelected(false);
+
+                    fragmentManager.beginTransaction().hide(fileMainFragment).show(mediaMainFragment).commit();
+
+                    fileMainFragment.hide();
+                    mediaMainFragment.show();
+
+                    mNavigationItemAdapter.notifyItemRangeChanged(0, 2);
+                }
+
+            }
+        });
+
+        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.navigation_file_menu_bg, getString(R.string.my_file)) {
+            @Override
+            public void onClick() {
+
+                if (currentPage != PAGE_FILE) {
+
+                    currentPage = PAGE_FILE;
+
+                    ((NavigationMenuItem) mNavigationItemMenu.get(0)).setSelected(false);
+                    ((NavigationMenuItem) mNavigationItemMenu.get(1)).setSelected(true);
+
+                    fragmentManager.beginTransaction().hide(mediaMainFragment).show(fileMainFragment).commit();
+
+                    mediaMainFragment.hide();
+                    fileMainFragment.show();
+
+                    ButlerService.stopTimingRetrieveMediaShare();
+
+                    mNavigationItemAdapter.notifyItemRangeChanged(0, 2);
+                }
+
+            }
+        });*/
+
         mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_folder, getString(R.string.my_file)) {
             @Override
             public void onClick() {
-                toggleFileOrMediaFragment();
+                toggleFileOrMediaFragment(0);
             }
         });
+
         mNavigationItemMenu.add(new NavigationDividerItem());
         mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_settings, getString(R.string.setting)) {
             @Override
@@ -650,6 +709,14 @@ public class NavPagerActivity extends AppCompatActivity
 
         List<LoggedInUser> loggedInUsers = new ArrayList<>(LocalCache.LocalLoggedInUsers);
 
+        int loggedInUserListSize = loggedInUsers.size();
+
+        if (loggedInUserListSize == 1) {
+            mEquipmentNameTextView.setVisibility(View.GONE);
+        } else {
+            mEquipmentNameTextView.setVisibility(View.VISIBLE);
+        }
+
         Iterator<LoggedInUser> iterator = loggedInUsers.iterator();
         while (iterator.hasNext()) {
             LoggedInUser loggedInUser = iterator.next();
@@ -660,8 +727,6 @@ public class NavPagerActivity extends AppCompatActivity
                 iterator.remove();
             }
         }
-
-        int loggedInUserListSize = loggedInUsers.size();
 
         if (loggedInUserListSize > 0) {
 
@@ -677,7 +742,7 @@ public class NavPagerActivity extends AppCompatActivity
             mNavigationItemLoggedInUser.add(new NavigationAccountManageItem());
         }
 
-        mNavigationHeaderArrowLayout.setOnClickListener(new View.OnClickListener() {
+        mNavigationHeaderArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mNavigationHeaderArrowExpanded = !mNavigationHeaderArrowExpanded;
@@ -691,7 +756,6 @@ public class NavPagerActivity extends AppCompatActivity
         if (mNavigationHeaderArrowExpanded) {
 
             switchToNavigationItemLoggedInUser();
-
 
         } else {
 
@@ -890,7 +954,7 @@ public class NavPagerActivity extends AppCompatActivity
         }.execute();
     }
 
-    private void toggleFileOrMediaFragment() {
+    private void toggleFileOrMediaFragment(int navigationItemMenuPosition) {
 
         NavigationMenuItem item = (NavigationMenuItem) mNavigationItemMenu.get(0);
 
@@ -1014,6 +1078,15 @@ public class NavPagerActivity extends AppCompatActivity
 
             menuIcon.setImageResource(item.getMenuIconResID());
             menuTextView.setText(item.getMenuText());
+
+            menuIcon.setSelected(item.isSelected());
+
+            if (item.isSelected()) {
+                menuTextView.setTextColor(ContextCompat.getColor(mContext, R.color.checked_navigation_menu_item_text_color));
+            } else {
+                menuTextView.setTextColor(ContextCompat.getColor(mContext, R.color.navigation_menu_item_text_color));
+            }
+
             menuLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

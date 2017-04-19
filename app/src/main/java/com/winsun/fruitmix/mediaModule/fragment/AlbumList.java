@@ -4,16 +4,16 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -21,8 +21,9 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.daimajia.swipe.SimpleSwipeListener;
 import com.daimajia.swipe.SwipeLayout;
-import com.daimajia.swipe.adapters.BaseSwipeAdapter;
+import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.mediaModule.AlbumPicContentActivity;
 import com.winsun.fruitmix.mediaModule.NewAlbumPicChooseActivity;
@@ -61,12 +62,14 @@ public class AlbumList implements Page, IShowHideFragmentListener {
     LinearLayout mLoadingLayout;
     @BindView(R.id.no_content_layout)
     LinearLayout mNoContentLayout;
-    @BindView(R.id.mainList)
-    ListView mainListView;
+    @BindView(R.id.mainRecylerView)
+    RecyclerView mainRecyclerView;
     @BindView(R.id.no_content_imageview)
     ImageView noContentImageView;
     @BindView(R.id.no_content_textview)
     TextView noContentTextView;
+
+    private AlbumRecyclerViewAdapter mAdapter;
 
     private List<MediaShare> mediaShareList;
 
@@ -75,6 +78,9 @@ public class AlbumList implements Page, IShowHideFragmentListener {
     private SwipeLayout lastSwipeLayout;
 
     private boolean mShowPhoto = false;
+
+    private List<IPhotoListListener> mPhotoListListeners;
+
 
     public AlbumList(Activity activity_, OnMediaFragmentInteractionListener listener) {
 
@@ -90,7 +96,14 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
         noContentTextView.setText(containerActivity.getString(R.string.no_albums));
 
-        mainListView.setAdapter(new AlbumListAdapter(this));
+        mainRecyclerView.addOnScrollListener(new AlbumRecycleViewScrollListener());
+
+        mainRecyclerView.setLayoutManager(new LinearLayoutManager(containerActivity));
+        mainRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        mAdapter = new AlbumRecyclerViewAdapter();
+
+        mainRecyclerView.setAdapter(mAdapter);
 
         ivAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,6 +115,16 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         });
 
         mediaShareList = new ArrayList<>();
+
+        mPhotoListListeners = new ArrayList<>();
+    }
+
+    public void addPhotoListListener(IPhotoListListener listListener) {
+        mPhotoListListeners.add(listListener);
+    }
+
+    public void removePhotoListListener(IPhotoListListener listListener) {
+        mPhotoListListeners.remove(listListener);
     }
 
     @Override
@@ -168,8 +191,8 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         if (!mShowPhoto) {
             mShowPhoto = true;
 
-            if (mainListView.getVisibility() == View.VISIBLE)
-                ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
+            if (mainRecyclerView.getVisibility() == View.VISIBLE)
+                mAdapter.notifyDataSetChanged();
         }
     }
 
@@ -190,11 +213,11 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         ivAdd.setVisibility(View.VISIBLE);
         if (mediaShareList.size() == 0) {
             mNoContentLayout.setVisibility(View.VISIBLE);
-            mainListView.setVisibility(View.GONE);
+            mainRecyclerView.setVisibility(View.GONE);
         } else {
             mNoContentLayout.setVisibility(View.GONE);
-            mainListView.setVisibility(View.VISIBLE);
-            ((BaseAdapter) (mainListView.getAdapter())).notifyDataSetChanged();
+            mainRecyclerView.setVisibility(View.VISIBLE);
+            mAdapter.notifyDataSetChanged();
         }
 
     }
@@ -202,7 +225,7 @@ public class AlbumList implements Page, IShowHideFragmentListener {
     public void onDidAppear() {
 
         refreshView();
-        mainListView.smoothScrollToPosition(0);
+        mainRecyclerView.smoothScrollToPosition(0);
     }
 
 
@@ -210,13 +233,7 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         return view;
     }
 
-    private class AlbumListAdapter extends BaseSwipeAdapter {
-
-        AlbumList albumList;
-
-        AlbumListAdapter(AlbumList albumList) {
-            this.albumList = albumList;
-        }
+    private class AlbumRecyclerViewAdapter extends RecyclerSwipeAdapter<AlbumListViewHolder> {
 
         /**
          * return the {@link SwipeLayout} resource id, int the view item.
@@ -230,82 +247,34 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         }
 
         /**
-         * generate a new view item.
-         * Never bind SwipeListener or fill values here, every item has a chance to fill value or bind
-         * listeners in fillValues.
-         * to fill it in {@code fillValues} method.
+         * Returns the total number of items in the data set held by the adapter.
          *
-         * @param position
-         * @param parent
-         * @return
+         * @return The total number of items in this adapter.
          */
         @Override
-        public View generateView(int position, ViewGroup parent) {
+        public int getItemCount() {
+            if (mediaShareList == null) return 0;
+            return mediaShareList.size();
+        }
+
+        @Override
+        public AlbumListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
             View view = LayoutInflater.from(containerActivity).inflate(R.layout.album_list_item, parent, false);
 
-            AlbumListViewHolder viewHolder = new AlbumListViewHolder(view);
-            view.setTag(viewHolder);
-
-            return view;
-        }
-
-        /**
-         * fill values or bind listeners to the view.
-         *
-         * @param position
-         * @param convertView
-         */
-        @Override
-        public void fillValues(int position, View convertView) {
-
-            View view;
-            AlbumListViewHolder viewHolder;
-
-            view = convertView;
-            viewHolder = (AlbumListViewHolder) view.getTag();
-
-            MediaShare currentItem = (MediaShare) getItem(position);
-            viewHolder.refreshView(position,currentItem);
+            return new AlbumListViewHolder(view);
 
         }
 
-        /**
-         * How many items are in the data set represented by this Adapter.
-         *
-         * @return Count of items.
-         */
         @Override
-        public int getCount() {
-            if (albumList.mediaShareList == null) return 0;
-            return albumList.mediaShareList.size();
-        }
+        public void onBindViewHolder(AlbumListViewHolder viewHolder, int position) {
 
-        /**
-         * Get the data item associated with the specified position in the data set.
-         *
-         * @param position Position of the item whose data we want within the adapter's
-         *                 data set.
-         * @return The data at the specified position.
-         */
-        @Override
-        public Object getItem(int position) {
-            return albumList.mediaShareList.get(position);
-        }
-
-        /**
-         * Get the row id associated with the specified position in the list.
-         *
-         * @param position The position of the item within the adapter's data set whose row id we want.
-         * @return The id of the item at the specified position.
-         */
-        @Override
-        public long getItemId(int position) {
-            return position;
+            viewHolder.refreshView(position, mediaShareList.get(position));
         }
     }
 
 
-    class AlbumListViewHolder {
+    class AlbumListViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.mainBar)
         RelativeLayout mainBar;
@@ -336,14 +305,16 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
         AlbumListViewHolder(View view) {
 
+            super(view);
+
             ButterKnife.bind(this, view);
         }
 
-        void refreshView(int position,MediaShare mediaShare) {
+        void refreshView(int position, MediaShare mediaShare) {
 
-            if(position == 0){
+            if (position == 0) {
                 mSpacingLayout.setVisibility(View.VISIBLE);
-            }else {
+            } else {
                 mSpacingLayout.setVisibility(View.GONE);
             }
 
@@ -400,7 +371,7 @@ public class AlbumList implements Page, IShowHideFragmentListener {
                 title += containerActivity.getString(R.string.android_ellipsize);
             }
 
-            title = String.format(containerActivity.getString(R.string.android_share_album_title), title, photoCount, containerActivity.getResources().getQuantityString(R.plurals.photo,currentItem.getMediaContentsListSize()));
+            title = String.format(containerActivity.getString(R.string.android_share_album_title), title, photoCount, containerActivity.getResources().getQuantityString(R.plurals.photo, currentItem.getMediaContentsListSize()));
 
             lbTitle.setText(title);
 
@@ -485,6 +456,41 @@ public class AlbumList implements Page, IShowHideFragmentListener {
             swipeLayout.close();
         }
 
+    }
+
+    private class AlbumRecycleViewScrollListener extends RecyclerView.OnScrollListener {
+
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+
+                for (IPhotoListListener listener : mPhotoListListeners) {
+                    listener.onPhotoListScrollFinished();
+                }
+
+            }
+        }
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+
+            if(dy > 0){
+
+                for (IPhotoListListener listener : mPhotoListListeners) {
+                    listener.onPhotoListScrollDown();
+                }
+
+            }else if(dy < 0){
+
+                for (IPhotoListListener listener : mPhotoListListeners) {
+                    listener.onPhotoListScrollUp();
+                }
+
+            }
+        }
     }
 
 }

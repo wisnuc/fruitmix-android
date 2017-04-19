@@ -79,9 +79,9 @@ public class RetrieveLocalMediaService extends IntentService {
 
         mediaConcurrentMap = LocalCache.BuildMediaMapKeyIsThumb(medias);
 
-        LocalCache.LocalMediaMapKeyIsThumb.clear();
+        LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.clear();
 
-        LocalCache.LocalMediaMapKeyIsThumb.putAll(mediaConcurrentMap);
+        LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.putAll(mediaConcurrentMap);
 
         Util.setLocalMediaInDBLoaded(true);
         NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);

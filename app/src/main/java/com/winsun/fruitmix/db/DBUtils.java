@@ -1111,9 +1111,9 @@ public class DBUtils {
 
         ContentValues contentValues = createMediaContentValues(media);
 
-        long returnValue = database.update(DBHelper.LOCAL_MEDIA_TABLE_NAME, contentValues, DBHelper.MEDIA_KEY_THUMB + " = ?", new String[]{media.getThumb()});
+        long returnValue = database.update(DBHelper.LOCAL_MEDIA_TABLE_NAME, contentValues, DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH + " = ?", new String[]{media.getOriginalPhotoPath()});
 
-        Log.d(TAG, "update media thumb:" + media.getThumb());
+        Log.d(TAG, "update media original photo path:" + media.getOriginalPhotoPath());
 
         close();
 

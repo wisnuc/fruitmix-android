@@ -200,6 +200,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         lbRight.setOnClickListener(this);
 
         photoList.addPhotoListListener(this);
+        shareList.addPhotoListListener(this);
+        albumList.addPhotoListListener(this);
 
         Log.d(TAG, "onCreateView: ");
 
@@ -279,6 +281,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         photoList.cancelPreLoadMediaMiniThumb();
 
         photoList.removePhotoListListener(this);
+        shareList.removePhotoListListener(this);
+        albumList.removePhotoListListener(this);
 
         mContext = null;
 
@@ -293,6 +297,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         if (mIsResume)
             mCurrentFragment.show();
+
     }
 
     public void show() {

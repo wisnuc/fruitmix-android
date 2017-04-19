@@ -224,9 +224,6 @@ public class Media implements Parcelable {
 
     public String getOriginalPhotoPath() {
 
-        if (originalPhotoPath.isEmpty() && isLocal())
-            originalPhotoPath = getThumb();
-
         return originalPhotoPath == null ? "" : originalPhotoPath;
 
     }
@@ -248,7 +245,7 @@ public class Media implements Parcelable {
             uploaded = true;
 
         } else {
-            uploaded = FNAS.UploadFile(thumb);
+            uploaded = FNAS.UploadFile(originalPhotoPath);
         }
 
         if (!uploaded) return false;
@@ -272,6 +269,10 @@ public class Media implements Parcelable {
             if (imageUrl.isEmpty())
                 imageUrl = getThumb();
 
+            if(imageUrl.isEmpty()){
+                imageUrl = getOriginalPhotoPath();
+            }
+
         } else {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
@@ -289,6 +290,11 @@ public class Media implements Parcelable {
         String imageUrl;
         if (isLocal()) {
             imageUrl = getThumb();
+
+            if(imageUrl.isEmpty()){
+                imageUrl = getOriginalPhotoPath();
+            }
+
         } else {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
@@ -305,7 +311,7 @@ public class Media implements Parcelable {
 
         String imageUrl;
         if (isLocal()) {
-            imageUrl = getThumb();
+            imageUrl = getOriginalPhotoPath();
         } else {
             imageUrl = String.format(context.getString(R.string.android_original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid());
         }
@@ -314,7 +320,7 @@ public class Media implements Parcelable {
 
     public String getKey() {
         if (isLocal())
-            return getThumb();
+            return getOriginalPhotoPath();
         else
             return getUuid();
     }

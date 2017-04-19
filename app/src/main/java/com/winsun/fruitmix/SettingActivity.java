@@ -1,6 +1,5 @@
 package com.winsun.fruitmix;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
@@ -10,10 +9,8 @@ import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationType;
@@ -57,6 +54,8 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_setting);
 
         ButterKnife.bind(this);
+
+        setSupportActionBar(mToolbar);
 
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,7 +101,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 int alreadyUploadMediaCount = 0;
                 int totalUploadMediaCount = 0;
 
-                for (Media media : LocalCache.LocalMediaMapKeyIsThumb.values()) {
+                for (Media media : LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()) {
 
                     if (media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
                         alreadyUploadMediaCount++;

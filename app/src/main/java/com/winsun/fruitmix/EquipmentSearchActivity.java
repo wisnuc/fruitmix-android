@@ -202,6 +202,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             }
         });
 
+        setSupportActionBar(mToolBar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -211,8 +214,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 finish();
             }
         });
-        setSupportActionBar(mToolBar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mTitleTextView.setText(getString(R.string.search_equipment));
 

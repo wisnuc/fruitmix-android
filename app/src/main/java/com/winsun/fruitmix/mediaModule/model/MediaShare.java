@@ -156,7 +156,7 @@ public class MediaShare implements Parcelable {
             String mediaUUID = value.getMediaUUID();
             if (mediaUUID.contains("/")) {
 
-                Media media = LocalCache.LocalMediaMapKeyIsThumb.get(mediaUUID);
+                Media media = LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.get(mediaUUID);
                 mediaUUID = media.getUuid();
                 if (mediaUUID.isEmpty()) {
                     mediaUUID = Util.CalcSHA256OfFile(mediaUUID);

@@ -8,16 +8,16 @@ import com.winsun.fruitmix.util.FileUtil;
  * Created by Administrator on 2017/3/15.
  */
 
-public class GenerateLocalMediaMiniThumbTask implements Runnable {
+public class GenerateLocalMediaThumbTask implements Runnable {
 
     private DBUtils dbUtils;
     private Media media;
-    private boolean stopGenerateMiniThumb;
+    private boolean stopGenerateThumb;
 
-    public GenerateLocalMediaMiniThumbTask(Media media, DBUtils dbUtils, boolean stopGenerateMiniThumb) {
+    public GenerateLocalMediaThumbTask(Media media, DBUtils dbUtils, boolean stopGenerateThumb) {
         this.media = media;
         this.dbUtils = dbUtils;
-        this.stopGenerateMiniThumb = stopGenerateMiniThumb;
+        this.stopGenerateThumb = stopGenerateThumb;
     }
 
     /**
@@ -28,11 +28,11 @@ public class GenerateLocalMediaMiniThumbTask implements Runnable {
     @Override
     public void run() {
 
-        if (stopGenerateMiniThumb) return;
+        if (stopGenerateThumb) return;
 
-        boolean result = FileUtil.writeBitmapToLocalPhotoMiniThumbnailFolder(media);
+        boolean result = FileUtil.writeBitmapToLocalPhotoThumbnailFolder(media);
 
-        if (result && !stopGenerateMiniThumb) {
+        if (result && !stopGenerateThumb) {
 
             if (dbUtils != null)
                 dbUtils.updateLocalMedia(media);

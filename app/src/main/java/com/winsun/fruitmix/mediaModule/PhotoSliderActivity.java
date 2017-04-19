@@ -5,14 +5,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.SharedElementCallback;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
@@ -22,33 +19,25 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageLruCache;
 import com.android.volley.toolbox.IImageLoadListener;
 import com.umeng.analytics.MobclickAgent;
-import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
 import com.winsun.fruitmix.gif.GifLoader;
-import com.winsun.fruitmix.gif.GifLruCache;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.CustomTransitionListener;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -395,20 +384,12 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         Media media = ((GifTouchNetworkImageView) view).getCurrentMedia();
 
-        if (media.isLocal()) {
-
-            handleLocalMediaLoaded(media);
-
-        } else {
-
-            handleRemoteMediaLoaded(url, view, media);
-
-        }
+        handleMediaLoaded(url, view, media);
 
     }
 
-    private void handleRemoteMediaLoaded(String url, View view, Media media) {
-        if (isImageThumb(url)) {
+    private void handleMediaLoaded(String url, View view, Media media) {
+        if (isImageThumb(url, media)) {
 
             handleThumbLoaded(view, media);
 
@@ -423,6 +404,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         if (!transitionMediaNeedShowThumb && needTransition) {
             ActivityCompat.startPostponedEnterTransition(this);
             transitionMediaNeedShowThumb = true;
+        } else if (media.isLocal() && media.getThumb().isEmpty()) {
+            ActivityCompat.startPostponedEnterTransition(this);
         }
 
         if (!media.isLoaded()) {
@@ -469,8 +452,16 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         return mViewPager.getCurrentItem() == viewPosition;
     }
 
-    public boolean isImageThumb(String imageUrl) {
-        return imageUrl.contains("thumb");
+    public boolean isImageThumb(String imageUrl, Media media) {
+
+        if (media.isLocal()) {
+
+            return imageUrl.contains(FileUtil.getFolderPathForLocalPhotoThumbnailFolderName200());
+
+        } else {
+            return imageUrl.contains("thumb");
+        }
+
     }
 
     private void startLoadCurrentImageAfterTransition(final View view, final Media media) {
@@ -569,13 +560,13 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                     mainPic.setOrientationNumber(media.getOrientationNumber());
 
-                    String originalImageUrl = media.getImageOriginalUrl(mContext);
-                    mainPic.setTag(originalImageUrl);
+                    String imageThumbUrl = media.getImageThumbUrl(mContext);
+                    mainPic.setTag(imageThumbUrl);
 
-                    if (originalImageUrl.endsWith(".gif")) {
-                        mainPic.setGifUrl(originalImageUrl, mGifLoader);
+                    if (imageThumbUrl.endsWith(".gif")) {
+                        mainPic.setGifUrl(imageThumbUrl, mGifLoader);
                     } else {
-                        mainPic.setImageUrl(originalImageUrl, mImageLoader);
+                        mainPic.setImageUrl(imageThumbUrl, mImageLoader);
                     }
 
                 }

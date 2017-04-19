@@ -5,7 +5,6 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.EditPhotoInMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaCommentRequestEvent;
@@ -38,7 +37,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.util.Collection;
 
 /**
  * Created by Administrator on 2016/4/22.
@@ -413,7 +411,7 @@ public class FNAS {
         try {
             while (JWT == null) Thread.sleep(500);
             // calc SHA256
-            localHashMap = LocalCache.LocalMediaMapKeyIsThumb.get(fileName);
+            localHashMap = LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.get(fileName);
             hash = localHashMap.getUuid();
 
             Log.d(TAG, "thumb:" + fileName + "hash:" + hash);

@@ -68,7 +68,7 @@ public class CalcNewLocalMediaDigestService extends IntentService {
      */
     private void handleActionCalcNewLocalMediaDigest() {
 
-        Collection<Media> medias = LocalCache.LocalMediaMapKeyIsThumb.values();
+        Collection<Media> medias = LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values();
 
         List<Media> newMediaList = new ArrayList<>();
 
@@ -78,12 +78,12 @@ public class CalcNewLocalMediaDigestService extends IntentService {
 
         for (Media media : medias) {
             if (media.getUuid().isEmpty()) {
-                String uuid = Util.CalcSHA256OfFile(media.getThumb());
+                String uuid = Util.CalcSHA256OfFile(media.getOriginalPhotoPath());
                 media.setUuid(uuid);
 
                 newMediaList.add(media);
 
-                Log.d(TAG, "handleActionCalcNewLocalMediaDigest: media thumb: " + media.getThumb() + " uuid: " + media.getUuid());
+                Log.d(TAG, "handleActionCalcNewLocalMediaDigest: media original photo path: " + media.getOriginalPhotoPath() + " uuid: " + media.getUuid());
             }
         }
 

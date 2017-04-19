@@ -71,6 +71,8 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
             remoteUserNames.add(user.getUserName());
         }
 
+        setSupportActionBar(mToolbar);
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

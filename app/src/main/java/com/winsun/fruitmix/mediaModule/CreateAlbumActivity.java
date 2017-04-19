@@ -137,6 +137,8 @@ public class CreateAlbumActivity extends AppCompatActivity {
             }
         });
 
+        setSupportActionBar(mToolBar);
+
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

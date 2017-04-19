@@ -36,6 +36,8 @@ public class FileUtil {
 
     private static final String DOWNLOAD_FOLDER_NAME = "winsuc";
 
+    private static final String LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME_200 = "thumbnail_200";
+
     private static final String LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME = "thumbnail_64";
 
     private static final String OLD_LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME = "thumbnail";
@@ -78,8 +80,12 @@ public class FileUtil {
         return createFolder(getDownloadFileStoreFolderPath());
     }
 
-    public static boolean createLocalPhotoThumbnailFolder() {
+    public static boolean createLocalPhotoMiniThumbnailFolder() {
         return createFolder(getLocalPhotoThumbnailFolderPath());
+    }
+
+    public static boolean createLocalPhotoThumbnailFolder() {
+        return createFolder(getFolderPathForLocalPhotoThumbnailFolderName200());
     }
 
     public static boolean createOriginalPhotoFolder() {
@@ -104,7 +110,11 @@ public class FileUtil {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
     }
 
-    static String getOldLocalPhotoThumbnailFolderPath(){
+    public static String getFolderPathForLocalPhotoThumbnailFolderName200() {
+        return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME_200;
+    }
+
+    static String getOldLocalPhotoThumbnailFolderPath() {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + OLD_LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
     }
 
@@ -112,12 +122,12 @@ public class FileUtil {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + ORIGINAL_PHOTO_FOLDER_NAME;
     }
 
-    public static boolean writeBitmapToLocalPhotoThumbnailFolder(Media media) {
+    public static boolean writeBitmapToLocalPhotoMiniThumbnailFolder(Media media) {
 
         if (!media.getMiniThumbPath().isEmpty())
             return false;
 
-        String thumb = media.getThumb();
+        String thumb = media.getOriginalPhotoPath();
 
         if (media.getUuid().isEmpty()) {
             media.setUuid(Util.CalcSHA256OfFile(thumb));
@@ -129,7 +139,7 @@ public class FileUtil {
 
         if (file.exists()) {
 
-            Log.d(TAG, "writeBitmapToLocalPhotoThumbnailFolder: exist mini thumb: " + file.getAbsolutePath());
+            Log.d(TAG, "writeBitmapToLocalPhotoMiniThumbnailFolder: exist mini thumb: " + file.getAbsolutePath());
 
             media.setMiniThumbPath(file.getAbsolutePath());
             return true;
@@ -157,7 +167,77 @@ public class FileUtil {
 
             media.setMiniThumbPath(file.getAbsolutePath());
 
-            Log.d(TAG, "writeBitmapToLocalPhotoThumbnailFolder: media mini thumb:" + media.getMiniThumbPath());
+            Log.d(TAG, "writeBitmapToLocalPhotoMiniThumbnailFolder: media mini thumb:" + media.getMiniThumbPath());
+
+            return true;
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+
+            bitmap = null;
+
+            try {
+                if (outputStream != null)
+                    outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        return false;
+
+    }
+
+    public static boolean writeBitmapToLocalPhotoThumbnailFolder(Media media) {
+
+        if (!media.getThumb().isEmpty())
+            return false;
+
+        String thumb = media.getOriginalPhotoPath();
+
+        if (media.getUuid().isEmpty()) {
+            media.setUuid(Util.CalcSHA256OfFile(thumb));
+        }
+
+        String thumbName = media.getUuid() + ".jpg";
+
+        File file = new File(getFolderPathForLocalPhotoThumbnailFolderName200(), thumbName);
+
+        if (file.exists()) {
+
+            Log.d(TAG, "writeBitmapToLocalPhotoMiniThumbnailFolder: exist thumb: " + file.getAbsolutePath());
+
+            media.setThumb(file.getAbsolutePath());
+            return true;
+        }
+
+        BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
+
+        decodeOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(thumb, decodeOptions);
+
+        int actualWidth = decodeOptions.outWidth;
+        int actualHeight = decodeOptions.outHeight;
+
+        decodeOptions.inJustDecodeBounds = false;
+        decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, 200, 200);
+        Bitmap bitmap = BitmapFactory.decodeFile(thumb, decodeOptions);
+
+        FileOutputStream outputStream = null;
+
+        try {
+            outputStream = new FileOutputStream(file);
+
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            outputStream.flush();
+
+            media.setThumb(file.getAbsolutePath());
+
+            Log.d(TAG, "writeBitmapToLocalPhotoThumbnailFolder: media thumb:" + media.getThumb());
 
             return true;
 

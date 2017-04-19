@@ -5,16 +5,12 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <ListView
-        android:id="@+id/mainList"
-        package="com.winsun.fruitmix"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/mainRecylerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:cacheColorHint="@color/white"
-        android:divider="@null"
-        android:fadingEdge="none"
-        android:visibility="gone"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        android:background="@color/white"
+        android:visibility="gone" />
 
     <include layout="@layout/no_content_layout" />
 
@@ -28,7 +24,7 @@
         android:src="@drawable/ic_add_white_24dp"
         android:visibility="invisible"
         app:borderWidth="0dp"
-        app:fabSize="normal"/>
+        app:fabSize="normal" />
 
     <include layout="@layout/loading_layout" />
 

@@ -2,7 +2,6 @@ package com.winsun.fruitmix.mediaModule.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -29,6 +28,7 @@ import android.widget.Toast;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.mediaModule.AlbumPicContentActivity;
 import com.winsun.fruitmix.mediaModule.MediaShareCommentActivity;
@@ -75,7 +75,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
     LinearLayout mNoContentLayout;
     @BindView(R.id.share_list_framelayout)
     FrameLayout mShareListFrameLayout;
-    @BindView(R.id.mainList)
+    @BindView(R.id.mainRecylerView)
     RecyclerView mainRecyclerView;
     @BindView(R.id.no_content_imageview)
     ImageView noContentImageView;
@@ -91,7 +91,8 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
     private boolean mShowPhoto;
 
-    private boolean mIsFling = false;
+    private List<IPhotoListListener> mPhotoListListeners;
+
 
     public MediaShareList(Activity activity_, OnMediaFragmentInteractionListener listener) {
         containerActivity = activity_;
@@ -106,8 +107,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
         noContentTextView.setText(containerActivity.getString(R.string.no_media_shares));
 
-//        ShareRecycleViewScrollListener shareRecycleViewScrollListener = new ShareRecycleViewScrollListener();
-//        mainRecyclerView.addOnScrollListener(shareRecycleViewScrollListener);
+        mainRecyclerView.addOnScrollListener(new ShareRecycleViewScrollListener());
 
         mAdapter = new ShareRecyclerViewAdapter();
         mainRecyclerView.setAdapter(mAdapter);
@@ -116,6 +116,16 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
         mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
 
         mediaShareList = new ArrayList<>();
+
+        mPhotoListListeners = new ArrayList<>();
+    }
+
+    public void addPhotoListListener(IPhotoListListener listListener) {
+        mPhotoListListeners.add(listListener);
+    }
+
+    public void removePhotoListListener(IPhotoListListener listListener) {
+        mPhotoListListeners.remove(listListener);
     }
 
     @Override
@@ -406,9 +416,9 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
         public void refreshView(MediaShare mediaShare, int position) {
 
-            if(position == 0){
+            if (position == 0) {
                 mSpacingLayout.setVisibility(View.VISIBLE);
-            }else {
+            } else {
                 mSpacingLayout.setVisibility(View.GONE);
             }
 
@@ -904,22 +914,33 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
 
-            if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                mIsFling = true;
-
-            } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-
-                if (mIsFling) {
-
-                    mIsFling = false;
-
-                    mAdapter.notifyDataSetChanged();
+                for (IPhotoListListener listener : mPhotoListListeners) {
+                    listener.onPhotoListScrollFinished();
                 }
 
             }
         }
 
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+
+            if (dy > 0) {
+
+                for (IPhotoListListener listener : mPhotoListListeners) {
+                    listener.onPhotoListScrollDown();
+                }
+
+            } else if (dy < 0) {
+
+                for (IPhotoListListener listener : mPhotoListListeners) {
+                    listener.onPhotoListScrollUp();
+                }
+
+            }
+        }
     }
 
 

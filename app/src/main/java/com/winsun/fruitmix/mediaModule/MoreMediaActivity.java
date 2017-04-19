@@ -70,6 +70,8 @@ public class MoreMediaActivity extends AppCompatActivity {
 
         mTitleTextView.setVisibility(View.INVISIBLE);
 
+        setSupportActionBar(mToolbar);
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

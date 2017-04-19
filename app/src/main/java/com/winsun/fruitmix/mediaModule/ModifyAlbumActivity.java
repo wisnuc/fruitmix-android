@@ -143,6 +143,8 @@ public class ModifyAlbumActivity extends AppCompatActivity {
             }
         });
 
+        setSupportActionBar(mToolbar);
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

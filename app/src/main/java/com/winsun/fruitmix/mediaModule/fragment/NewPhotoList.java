@@ -89,7 +89,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private FastJumper mFastJumper;
     private SpannableCallback mJumperCallback;
-    private SpannableCallback.ScrollCalculator mLinearScrollCalculator;
     private SpannableCallback.ScrollCalculator mScrollCalculator;
     private RecyclerView.LayoutManager mLayoutManager;
 
@@ -135,6 +134,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private boolean mIsLoaded = false;
 
+    private boolean mIsScrollUp = false;
+
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
@@ -152,8 +153,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         mPinchScaleDetector = new ScaleGestureDetector(containerActivity, new PinchScaleListener());
 
-        NewPhotoListScrollListener mScrollListener = new NewPhotoListScrollListener();
-        mRecyclerView.addOnScrollListener(mScrollListener);
+        mRecyclerView.addOnScrollListener(new NewPhotoListScrollListener());
+
         mRecyclerView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -274,7 +275,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (!mPreLoadPhoto) {
                 mPreLoadPhoto = true;
-                loadSmallThumbnail(medias);
+//                loadSmallThumbnail(medias);
             }
 
         }
@@ -324,24 +325,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     }
 
     private void setupFastJumper() {
-        mLinearScrollCalculator = new LinearScrollCalculator(mRecyclerView) {
-
-            @Override
-            public int getItemHeight(int position) {
-                return mPhotoRecycleAdapter.getItemHeight(position);
-            }
-
-            @Override
-            public int getSpanSize(int position) {
-                return mPhotoRecycleAdapter.getSpanSize(position);
-            }
-
-            @Override
-            public int getSpanCount() {
-                return mSpanCount;
-            }
-        };
-
         mJumperCallback = new SpannableCallback() {
             @Override
             public boolean isSectionEnable() {
@@ -374,14 +357,45 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                         mIsFling = false;
 
                         mPhotoRecycleAdapter.notifyDataSetChanged();
+
                     }
+
+                    if (mIsScrollUp && !mSelectMode) {
+
+                        for (IPhotoListListener listener : mPhotoListListeners) {
+                            listener.onPhotoListScrollUp();
+                        }
+
+                    }
+
                 }
             }
+
         });
 
     }
 
     private void setupGridLayoutManager() {
+
+        SpannableCallback.ScrollCalculator mLinearScrollCalculator = new LinearScrollCalculator(mRecyclerView) {
+
+            @Override
+            public int getItemHeight(int position) {
+                return mPhotoRecycleAdapter.getItemHeight(position);
+            }
+
+            @Override
+            public int getSpanSize(int position) {
+                return mPhotoRecycleAdapter.getSpanSize(position);
+            }
+
+            @Override
+            public int getSpanCount() {
+                return mSpanCount;
+            }
+        };
+
+
         calcPhotoItemWidth();
         GridLayoutManager glm = new GridLayoutManager(containerActivity, mSpanCount);
         glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -390,6 +404,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 return mPhotoRecycleAdapter.getSpanSize(position);
             }
         });
+
         mLayoutManager = glm;
         mScrollCalculator = mLinearScrollCalculator;
     }
@@ -428,7 +443,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                     String mediaUUID = media.getUuid();
                     if (mediaUUID.isEmpty()) {
-                        mediaUUID = Util.CalcSHA256OfFile(media.getThumb());
+                        mediaUUID = Util.CalcSHA256OfFile(media.getOriginalPhotoPath());
                         media.setUuid(mediaUUID);
                     }
 
@@ -451,7 +466,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                     String mediaUUID = media.getUuid();
                     if (mediaUUID.isEmpty()) {
-                        mediaUUID = Util.CalcSHA256OfFile(media.getThumb());
+                        mediaUUID = Util.CalcSHA256OfFile(media.getOriginalPhotoPath());
                     }
 
                     selectedImageUUIDs.add(mediaUUID);
@@ -1041,9 +1056,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                             return;
                         }
 
-                        //TODO:check photo scale state change logic
-
-
                         selected = !selected;
 
                         if (selected) {
@@ -1215,6 +1227,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 }
 
+                if (mIsScrollUp) {
+
+                    for (IPhotoListListener listener : mPhotoListListeners) {
+                        listener.onPhotoListScrollUp();
+                    }
+
+                }
+
             }
         }
 
@@ -1222,13 +1242,26 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
 
+            if (mSelectMode)
+                return;
+
             if (dy > 0) {
+
+                if (mIsScrollUp)
+                    mIsScrollUp = false;
 
                 for (IPhotoListListener listener : mPhotoListListeners) {
                     listener.onPhotoListScrollDown();
                 }
 
             } else if (dy < 0) {
+
+                if (!mIsScrollUp)
+                    mIsScrollUp = true;
+
+                if (mFastJumper.getState() != FastJumper.STATE_GONE) {
+                    return;
+                }
 
                 for (IPhotoListListener listener : mPhotoListListeners) {
                     listener.onPhotoListScrollUp();

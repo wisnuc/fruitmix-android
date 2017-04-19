@@ -100,6 +100,8 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
 
         title.setVisibility(View.INVISIBLE);
 
+        setSupportActionBar(mToolbar);
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

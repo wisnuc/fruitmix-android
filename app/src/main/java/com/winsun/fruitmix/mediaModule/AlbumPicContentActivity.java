@@ -152,14 +152,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         mTitleTextView.setText(getString(R.string.album));
 
-        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackOperation();
-                finish();
-            }
-        });
-
         albumContentRecyclerView.setItemAnimator(new DefaultItemAnimator());
         albumContentRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(SPAN_COUNT, StaggeredGridLayoutManager.VERTICAL));
         albumContentRecyclerView.setAdapter(new PicGridViewAdapter(this));
@@ -168,6 +160,14 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackOperation();
+                finish();
+            }
+        });
 
         loader = MediaInMediaShareLoader.INSTANCE;
         initOnMediaInMediaShareLoadListener();

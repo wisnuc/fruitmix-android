@@ -87,6 +87,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         mTitleTextView.setText(getString(R.string.login));
 
+        setSupportActionBar(mToolbar);
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -156,13 +158,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
         String action = operationEvent.getAction();
 
         switch (action) {
             case Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED: {
+
+                EventBus.getDefault().removeStickyEvent(operationEvent);
 
                 if (mDialog != null)
                     mDialog.dismiss();

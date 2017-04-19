@@ -58,6 +58,12 @@ public class SplashScreenActivity extends AppCompatActivity {
             Log.i(TAG, "onCreate: Create download file store folder failed");
         }
 
+        result = FileUtil.createLocalPhotoMiniThumbnailFolder();
+
+        if (!result) {
+            Log.i(TAG, "onCreate: Create local photo mini thumbnail folder failed");
+        }
+
         result = FileUtil.createLocalPhotoThumbnailFolder();
 
         if (!result) {

@@ -11,7 +11,6 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
@@ -51,7 +50,7 @@ public class LocalCache {
     public static ConcurrentMap<String, MediaShare> LocalMediaShareMapKeyIsUUID = null;
     public static ConcurrentMap<String, User> RemoteUserMapKeyIsUUID = null;
     public static ConcurrentMap<String, Media> RemoteMediaMapKeyIsUUID = null;
-    public static ConcurrentMap<String, Media> LocalMediaMapKeyIsThumb = null;
+    public static ConcurrentMap<String, Media> LocalMediaMapKeyIsOriginalPhotoPath = null;
     public static ConcurrentMap<String, AbstractRemoteFile> RemoteFileMapKeyIsUUID = null;
     public static List<AbstractRemoteFile> RemoteFileShareList = null;
 
@@ -148,8 +147,8 @@ public class LocalCache {
         else
             mediaKeysInCreateAlbum.clear();
 
-        if (LocalMediaMapKeyIsThumb == null)
-            LocalMediaMapKeyIsThumb = new ConcurrentHashMap<>();
+        if (LocalMediaMapKeyIsOriginalPhotoPath == null)
+            LocalMediaMapKeyIsOriginalPhotoPath = new ConcurrentHashMap<>();
 
         if (LocalLoggedInUsers == null)
             LocalLoggedInUsers = new ArrayList<>();
@@ -190,7 +189,7 @@ public class LocalCache {
 
         ConcurrentMap<String, Media> mediaConcurrentMap = new ConcurrentHashMap<>(medias.size());
         for (Media media : medias) {
-            mediaConcurrentMap.put(media.getThumb(), media);
+            mediaConcurrentMap.put(media.getOriginalPhotoPath(), media);
         }
         return mediaConcurrentMap;
     }
@@ -206,10 +205,10 @@ public class LocalCache {
 
     public static Media findMediaInLocalMediaMap(String key) {
 
-        Collection<Media> collection = LocalMediaMapKeyIsThumb.values();
+        Collection<Media> collection = LocalMediaMapKeyIsOriginalPhotoPath.values();
 
         for (Media media : collection) {
-            if (media.getUuid().equals(key) || media.getThumb().equals(key))
+            if (media.getUuid().equals(key) || media.getOriginalPhotoPath().equals(key))
                 return media;
         }
 
@@ -490,34 +489,38 @@ public class LocalCache {
 
         do {
 
-            String thumb = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+            String originalPhotoPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
 
-            if (LocalMediaMapKeyIsThumb == null)
+            if (LocalMediaMapKeyIsOriginalPhotoPath == null)
                 break;
 
-            if (LocalCache.LocalMediaMapKeyIsThumb.containsKey(thumb)) {
+            if (LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.containsKey(originalPhotoPath)) {
                 continue;
             }
 
-            if (thumb.contains(FileUtil.getLocalPhotoThumbnailFolderPath())) {
+            if (originalPhotoPath.contains(FileUtil.getLocalPhotoThumbnailFolderPath())) {
                 continue;
             }
 
-            if (thumb.contains(FileUtil.getOldLocalPhotoThumbnailFolderPath())) {
+            if (originalPhotoPath.contains(FileUtil.getOldLocalPhotoThumbnailFolderPath())) {
                 continue;
             }
 
-            if (thumb.contains(FileUtil.getOriginalPhotoFolderPath()))
+            if (originalPhotoPath.contains(FileUtil.getFolderPathForLocalPhotoThumbnailFolderName200())) {
+                continue;
+            }
+
+            if (originalPhotoPath.contains(FileUtil.getOriginalPhotoFolderPath()))
                 continue;
 
-            Log.d(TAG, "PhotoList: thumb: " + thumb);
+            Log.d(TAG, "PhotoList: originalPhotoPath: " + originalPhotoPath);
 
             media = new Media();
-            media.setThumb(thumb);
+            media.setOriginalPhotoPath(originalPhotoPath);
             media.setWidth(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)));
             media.setHeight(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)));
 
-            f = new File(thumb);
+            f = new File(originalPhotoPath);
             date.setTimeInMillis(f.lastModified());
             media.setTime(df.format(date.getTime()));
             media.setSelected(false);
@@ -548,9 +551,9 @@ public class LocalCache {
 
             mediaList.add(media);
 
-            Media mapResult = LocalCache.LocalMediaMapKeyIsThumb.put(media.getThumb(), media);
+            Media mapResult = LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.put(media.getOriginalPhotoPath(), media);
 
-//            Log.i(TAG, "insert local media to map key is thumb result:" + (mapResult != null ? "true" : "false"));
+//            Log.i(TAG, "insert local media to map key is originalPhotoPath result:" + (mapResult != null ? "true" : "false"));
 
         }
         while (cursor.moveToNext());

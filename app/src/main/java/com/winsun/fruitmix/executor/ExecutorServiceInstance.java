@@ -18,6 +18,8 @@ public enum ExecutorServiceInstance {
 
     private ExecutorService generateMiniThumbThreadPool;
 
+    private ExecutorService generateThumbThreadPool;
+
     private static final int THREAD_SIZE = 5;
 
     ExecutorServiceInstance() {
@@ -61,8 +63,21 @@ public enum ExecutorServiceInstance {
     }
 
     private void startGenerateMiniThumbThreadPool() {
-         generateMiniThumbThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
+        generateMiniThumbThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
     }
+
+    public void doOnTaskInGenerateThumbThreadPool(Runnable runnable) {
+
+        if (generateThumbThreadPool == null || generateThumbThreadPool.isShutdown())
+            startGenerateThumbThreadPool();
+
+        generateThumbThreadPool.execute(runnable);
+    }
+
+    private void startGenerateThumbThreadPool() {
+        generateThumbThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
+    }
+
 
     public void shutdownUploadMediaThreadPool() {
         if (updateMediaThreadPool != null && !updateMediaThreadPool.isShutdown()) {
@@ -84,4 +99,12 @@ public enum ExecutorServiceInstance {
             generateMiniThumbThreadPool = null;
         }
     }
+
+    public void shutdownGenerateThumbThreadPoolNow() {
+        if (generateThumbThreadPool != null && !generateThumbThreadPool.isShutdown()) {
+            generateThumbThreadPool.shutdownNow();
+            generateThumbThreadPool = null;
+        }
+    }
+
 }
