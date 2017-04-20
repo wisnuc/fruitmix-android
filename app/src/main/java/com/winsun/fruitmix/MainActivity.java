@@ -34,7 +34,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
 //        Log.d(TAG, "onCreate: getDeviceInfo:" + getDeviceInfo(this));
 
         MobclickAgent.setDebugMode(true);

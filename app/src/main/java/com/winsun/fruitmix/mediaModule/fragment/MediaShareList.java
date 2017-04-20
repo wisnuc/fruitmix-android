@@ -107,7 +107,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
         noContentTextView.setText(containerActivity.getString(R.string.no_media_shares));
 
-        mainRecyclerView.addOnScrollListener(new ShareRecycleViewScrollListener());
+//        mainRecyclerView.addOnScrollListener(new ShareRecycleViewScrollListener());
 
         mAdapter = new ShareRecyclerViewAdapter();
         mainRecyclerView.setAdapter(mAdapter);
@@ -416,11 +416,11 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
         public void refreshView(MediaShare mediaShare, int position) {
 
-            if (position == 0) {
+/*            if (position == 0) {
                 mSpacingLayout.setVisibility(View.VISIBLE);
             } else {
                 mSpacingLayout.setVisibility(View.GONE);
-            }
+            }*/
 
             currentItem = mediaShare;
 
@@ -488,8 +488,8 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
             String photoCount = String.valueOf(currentItem.getMediaContentsListSize());
 
-            if (title.length() > 8) {
-                title = title.substring(0, 8);
+            if (title.length() > 20) {
+                title = title.substring(0, 20);
 
                 title += containerActivity.getString(R.string.android_ellipsize);
             }

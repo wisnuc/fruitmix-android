@@ -96,7 +96,7 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
         noContentTextView.setText(containerActivity.getString(R.string.no_albums));
 
-        mainRecyclerView.addOnScrollListener(new AlbumRecycleViewScrollListener());
+//        mainRecyclerView.addOnScrollListener(new AlbumRecycleViewScrollListener());
 
         mainRecyclerView.setLayoutManager(new LinearLayoutManager(containerActivity));
         mainRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -312,11 +312,11 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
         void refreshView(int position, MediaShare mediaShare) {
 
-            if (position == 0) {
+/*            if (position == 0) {
                 mSpacingLayout.setVisibility(View.VISIBLE);
             } else {
                 mSpacingLayout.setVisibility(View.GONE);
-            }
+            }*/
 
             currentItem = mediaShare;
             restoreSwipeLayoutState();

@@ -34,6 +34,11 @@
     <color name="navigation_menu_item_text_color">#DE000000</color>
     <color name="checked_navigation_menu_item_text_color">#039be5</color>
 
+    <color name="fab_bg_color">#03a9f4</color>
+    
+    <color name="media_share_album_mask_start_color">#42000000</color>
+    <color name="media_share_album_mask_end_color">#00000000</color>
+
     <!-- finish add by liang.wu-->
 
 </resources>

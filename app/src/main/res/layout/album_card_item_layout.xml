@@ -12,8 +12,16 @@
         android:layout_marginBottom="2dp"
         android:layout_marginTop="2dp"
         android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
-        android:background="@drawable/default_place_holder" />
+        android:background="@drawable/default_place_holder"
+        android:scaleType="centerCrop" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_marginBottom="2dp"
+        android:layout_marginTop="2dp"
+        android:background="@drawable/album_mask_in_mediashare"
+        android:visibility="visible" />
 
     <ImageView
         android:id="@+id/album_share"
@@ -38,4 +46,6 @@
         android:text=""
         android:textColor="#FFFFFF"
         android:textSize="15dp" />
+
+
 </RelativeLayout>

@@ -360,13 +360,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                     }
 
-                    if (mIsScrollUp && !mSelectMode) {
-
-                        for (IPhotoListListener listener : mPhotoListListeners) {
-                            listener.onPhotoListScrollUp();
-                        }
-
-                    }
+//                    if (mIsScrollUp && !mSelectMode) {
+//
+//                        for (IPhotoListListener listener : mPhotoListListeners) {
+//                            listener.onPhotoListScrollUp();
+//                        }
+//
+//                    }
 
                 }
             }
@@ -806,10 +806,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             final String date = mMapKeyIsPhotoPositionValueIsPhotoDate.get(groupPosition);
 
             if (groupPosition == 0) {
-                mSpacingLayout.setVisibility(View.VISIBLE);
                 mSpacingSecondLayout.setVisibility(View.VISIBLE);
             } else {
-                mSpacingLayout.setVisibility(View.GONE);
                 mSpacingSecondLayout.setVisibility(View.GONE);
             }
 
@@ -1015,10 +1013,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             if (mSelectMode) {
                 boolean selected = currentMedia.isSelected();
                 if (selected && mPhotoSelectedIv.getVisibility() != View.VISIBLE) {
-                    scalePhoto(true);
+                    scalePhoto(false);
                     mPhotoSelectedIv.setVisibility(View.VISIBLE);
                 } else if (!selected && mPhotoSelectedIv.getVisibility() != View.GONE) {
-                    restorePhoto(true);
+                    restorePhoto(false);
                     mPhotoSelectedIv.setVisibility(View.GONE);
                 }
             } else {
@@ -1121,6 +1119,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 @Override
                 public boolean onLongClick(View v) {
 
+                    if (mSelectMode)
+                        return true;
+
                     for (IPhotoListListener listListener : mPhotoListListeners) {
                         listListener.onPhotoItemLongClick();
                     }
@@ -1221,55 +1222,55 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                     mPhotoRecycleAdapter.notifyDataSetChanged();
 
-                    for (IPhotoListListener listener : mPhotoListListeners) {
-                        listener.onPhotoListScrollFinished();
-                    }
+//                    for (IPhotoListListener listener : mPhotoListListeners) {
+//                        listener.onPhotoListScrollFinished();
+//                    }
 
                 }
 
-                if (mIsScrollUp) {
-
-                    for (IPhotoListListener listener : mPhotoListListeners) {
-                        listener.onPhotoListScrollUp();
-                    }
-
-                }
+//                if (mIsScrollUp) {
+//
+//                    for (IPhotoListListener listener : mPhotoListListeners) {
+//                        listener.onPhotoListScrollUp();
+//                    }
+//
+//                }
 
             }
         }
 
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-
-            if (mSelectMode)
-                return;
-
-            if (dy > 0) {
-
-                if (mIsScrollUp)
-                    mIsScrollUp = false;
-
-                for (IPhotoListListener listener : mPhotoListListeners) {
-                    listener.onPhotoListScrollDown();
-                }
-
-            } else if (dy < 0) {
-
-                if (!mIsScrollUp)
-                    mIsScrollUp = true;
-
-                if (mFastJumper.getState() != FastJumper.STATE_GONE) {
-                    return;
-                }
-
-                for (IPhotoListListener listener : mPhotoListListeners) {
-                    listener.onPhotoListScrollUp();
-                }
-
-            }
-
-        }
+//        @Override
+//        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+//            super.onScrolled(recyclerView, dx, dy);
+//
+//            if (mSelectMode)
+//                return;
+//
+//            if (dy > 0) {
+//
+//                if (mIsScrollUp)
+//                    mIsScrollUp = false;
+//
+//                for (IPhotoListListener listener : mPhotoListListeners) {
+//                    listener.onPhotoListScrollDown();
+//                }
+//
+//            } else if (dy < 0) {
+//
+//                if (!mIsScrollUp)
+//                    mIsScrollUp = true;
+//
+//                if (mFastJumper.getState() != FastJumper.STATE_GONE) {
+//                    return;
+//                }
+//
+//                for (IPhotoListListener listener : mPhotoListListeners) {
+//                    listener.onPhotoListScrollUp();
+//                }
+//
+//            }
+//
+//        }
     }
 
     private class PinchScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {

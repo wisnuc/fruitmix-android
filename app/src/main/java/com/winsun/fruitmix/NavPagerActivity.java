@@ -338,7 +338,7 @@ public class NavPagerActivity extends AppCompatActivity
 
         currentPage = PAGE_MEDIA;
 
-        //((NavigationMenuItem) mNavigationItemMenu.get(0)).setSelected(true);
+        ((NavigationMenuItem) mNavigationItemMenu.get(0)).setSelected(true);
 
         mCustomHandler = new CustomHandler(this);
 
@@ -416,7 +416,7 @@ public class NavPagerActivity extends AppCompatActivity
 
     private void initNavigationItemMenu() {
 
- /*       mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.navigation_photo_menu_bg, getString(R.string.my_photo)) {
+        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.navigation_photo_menu_bg, getString(R.string.my_photo)) {
             @Override
             public void onClick() {
 
@@ -460,14 +460,14 @@ public class NavPagerActivity extends AppCompatActivity
                 }
 
             }
-        });*/
-
-        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_folder, getString(R.string.my_file)) {
-            @Override
-            public void onClick() {
-                toggleFileOrMediaFragment(0);
-            }
         });
+
+//        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_folder, getString(R.string.my_file)) {
+//            @Override
+//            public void onClick() {
+//                toggleFileOrMediaFragment(0);
+//            }
+//        });
 
         mNavigationItemMenu.add(new NavigationDividerItem());
         mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_settings, getString(R.string.setting)) {
@@ -781,8 +781,8 @@ public class NavPagerActivity extends AppCompatActivity
     private void toggleUserManageNavigationItem(User user) {
         if (user.isAdmin()) {
 
-            if (mNavigationItemMenu.get(1).getType() != NAVIGATION_ITEM_TYPE_MENU) {
-                mNavigationItemMenu.add(1, new NavigationMenuItem(R.drawable.ic_person_add, getString(R.string.user_manage)) {
+            if (mNavigationItemMenu.get(2).getType() != NAVIGATION_ITEM_TYPE_MENU) {
+                mNavigationItemMenu.add(2, new NavigationMenuItem(R.drawable.ic_person_add, getString(R.string.user_manage)) {
                     @Override
                     public void onClick() {
                         Intent intent = new Intent(NavPagerActivity.this, UserManageActivity.class);
@@ -793,8 +793,8 @@ public class NavPagerActivity extends AppCompatActivity
 
         } else {
 
-            if (mNavigationItemMenu.get(1).getType() == NAVIGATION_ITEM_TYPE_MENU)
-                mNavigationItemMenu.remove(1);
+            if (mNavigationItemMenu.get(2).getType() == NAVIGATION_ITEM_TYPE_MENU)
+                mNavigationItemMenu.remove(2);
         }
     }
 
