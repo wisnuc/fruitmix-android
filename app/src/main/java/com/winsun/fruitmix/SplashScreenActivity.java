@@ -2,6 +2,7 @@ package com.winsun.fruitmix;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -75,6 +76,30 @@ public class SplashScreenActivity extends AppCompatActivity {
         if (!result) {
             Log.i(TAG, "onCreate: Create shared photo folder failed");
         }
+
+/*        result = FileUtil.createOriginalPhotoFolderNoMedia();
+
+        if (!result) {
+            Log.i(TAG, "onCreate: Create shared photo folder no media failed");
+        }
+
+        result = FileUtil.createLocalPhotoThumbnailFolderNoMedia();
+
+        if (!result) {
+            Log.i(TAG, "onCreate: Create local photo thumbnail folder failed");
+        }
+
+        result = FileUtil.createLocalPhotoMiniThumbnailFolderNoMedia();
+
+        if (!result) {
+            Log.i(TAG, "onCreate: Create local photo mini thumbnail folder failed");
+        }
+
+        result = FileUtil.createOldLocalPhotoThumbnailFolderNoMedia();
+
+        if (!result) {
+            Log.i(TAG, "onCreate: Create old local photo thumbnail folder failed");
+        }*/
 
         FNAS.retrieveLocalMedia(mContext);
 

@@ -797,6 +797,15 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
             }
 
             mShareCountLayout.setVisibility(View.VISIBLE);
+
+            mShareCountLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(containerActivity, MoreMediaActivity.class);
+                    intent.putExtra(Util.KEY_MEDIA_SHARE_UUID, currentItem.getUuid());
+                    containerActivity.startActivity(intent);
+                }
+            });
         }
 
         private void setShareCountText() {
@@ -813,15 +822,6 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
             builder.setSpan(span, start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
             builder.setSpan(afterSpan, end, shareCountText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             mShareCountTextView.setText(builder);
-
-            mShareCountTextView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(containerActivity, MoreMediaActivity.class);
-                    intent.putExtra(Util.KEY_MEDIA_SHARE_UUID, currentItem.getUuid());
-                    containerActivity.startActivity(intent);
-                }
-            });
 
         }
 

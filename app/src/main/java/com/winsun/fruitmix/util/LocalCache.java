@@ -476,10 +476,20 @@ public class LocalCache {
         SimpleDateFormat df;
         Calendar date;
 
+        String data = MediaStore.Images.Media.DATA;
+
+        String thumbnailFolderPath = FileUtil.getLocalPhotoThumbnailFolderPath();
+        String oldThumbnailFolderPath = FileUtil.getOldLocalPhotoThumbnailFolderPath();
+        String thumbnailFolder200Path = FileUtil.getFolderPathForLocalPhotoThumbnailFolderName200();
+        String originalFolderPath = FileUtil.getOriginalPhotoFolderPath();
+
+        String selection = data + " not like ? and " + data + " not like ? and " + data + " not like ? and " + data + " not like ?";
+        String[] selectionArgs = {thumbnailFolderPath + "%", oldThumbnailFolderPath + "%", thumbnailFolder200Path + "%", originalFolderPath + "%"};
+
         cr = context.getContentResolver();
 //        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "='" + bucketName + "'", null, null);
 
-        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, null, null, null);
+        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, selection, selectionArgs, null);
 
         mediaList = new ArrayList<>();
         if (cursor == null || !cursor.moveToFirst()) return mediaList;
@@ -487,9 +497,11 @@ public class LocalCache {
         df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         date = Calendar.getInstance();
 
+        Log.i(TAG, "PhotoList: cursor count: " + cursor.getCount());
+
         do {
 
-            String originalPhotoPath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+            String originalPhotoPath = cursor.getString(cursor.getColumnIndexOrThrow(data));
 
             if (LocalMediaMapKeyIsOriginalPhotoPath == null)
                 break;

@@ -300,7 +300,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                         iterator.remove();
                 }
 
-                Log.i(TAG, "remote media size: " + preLoadMediaMiniThumbs.size());
+                Log.i(TAG, "pre load media size: " + preLoadMediaMiniThumbs.size());
 
                 for (int i = 0; i < preLoadMediaMiniThumbs.size(); i++) {
 

@@ -16,6 +16,7 @@ import com.winsun.fruitmix.util.Util;
 import org.greenrobot.eventbus.EventBus;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -66,11 +67,13 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
      */
     private void handleActionRetrieveLocalMedia() {
 
-        Log.d(TAG, "handleActionRetrieveLocalMedia: before retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "handleActionRetrieveLocalMedia: before retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         List<Media> medias = LocalCache.PhotoList(this, "Camera");
 
-        Log.d(TAG, "handleActionRetrieveLocalMedia: after retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+//        List<Media> medias = Collections.emptyList();
+
+        Log.i(TAG, "handleActionRetrieveLocalMedia: after retrieve local media time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         Util.setLocalMediaInCameraLoaded(true);
 

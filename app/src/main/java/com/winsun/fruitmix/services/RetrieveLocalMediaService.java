@@ -16,6 +16,7 @@ import com.winsun.fruitmix.util.Util;
 import org.greenrobot.eventbus.EventBus;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
@@ -71,11 +72,13 @@ public class RetrieveLocalMediaService extends IntentService {
         ConcurrentMap<String, Media> mediaConcurrentMap;
         DBUtils dbUtils = DBUtils.getInstance(this);
 
-        Log.d(TAG, "handleActionRetrieveLocalMedia: before retrieve " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "handleActionRetrieveLocalMedia: before retrieve " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         medias = dbUtils.getAllLocalMedia();
 
-        Log.d(TAG, "handleActionRetrieveLocalMedia: after retrieve " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+//        medias = Collections.emptyList();
+
+        Log.i(TAG, "handleActionRetrieveLocalMedia: after retrieve " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         mediaConcurrentMap = LocalCache.BuildMediaMapKeyIsThumb(medias);
 

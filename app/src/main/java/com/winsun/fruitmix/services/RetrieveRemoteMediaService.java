@@ -20,6 +20,7 @@ import com.winsun.fruitmix.util.Util;
 import org.greenrobot.eventbus.EventBus;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
@@ -79,14 +80,16 @@ public class RetrieveRemoteMediaService extends IntentService {
 
         try {
 
-            Log.d(TAG, "handleActionRetrieveRemoteMedia: before load" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: before load" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
             HttpResponse httpResponse = FNAS.loadMedia();
 
-            Log.d(TAG, "handleActionRetrieveRemoteMedia: load media finish" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: load media finish" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
             RemoteDataParser<Media> parser = new RemoteMediaParser();
             medias = parser.parse(httpResponse.getResponseData());
+
+//            medias = Collections.emptyList();
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: parse json finish");
 
@@ -101,11 +104,11 @@ public class RetrieveRemoteMediaService extends IntentService {
 
             sendEvent();
 
-            Log.d(TAG, "handleActionRetrieveRemoteMedia: before delete all remote media" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: before delete all remote media" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
             dbUtils.deleteAllRemoteMedia();
 
-            Log.d(TAG, "handleActionRetrieveRemoteMedia: after delete all remote media" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.i(TAG, "handleActionRetrieveRemoteMedia: after delete all remote media" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
             long result = dbUtils.insertRemoteMedias(mediaConcurrentMap);
 

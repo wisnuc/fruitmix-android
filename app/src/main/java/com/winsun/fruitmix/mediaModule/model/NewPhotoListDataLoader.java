@@ -125,7 +125,7 @@ public enum NewPhotoListDataLoader {
         Collection<Media> medias = LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values();
         Map<String,Media> remoteMediaMap = new HashMap<>(LocalCache.RemoteMediaMapKeyIsUUID);
 
-        Log.d(TAG, "reloadData: before load local key is date value is photo list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "reloadData: before load local key is date value is photo list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         for (Media media : medias) {
 
@@ -149,11 +149,11 @@ public enum NewPhotoListDataLoader {
 
         }
 
-        Log.d(TAG, "reloadData: after load local key is date value is photo list" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "reloadData: after load local key is date value is photo list" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         medias = remoteMediaMap.values();
 
-        Log.d(TAG, "reloadData: remote media length:" + medias.size());
+        Log.i(TAG, "reloadData: remote media length:" + medias.size());
 
         for (Media media : medias) {
 
@@ -174,7 +174,7 @@ public enum NewPhotoListDataLoader {
 
         }
 
-        Log.d(TAG, "reloadData: after load remote key is date value is photo list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "reloadData: after load remote key is date value is photo list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         Collections.sort(mPhotoDateGroups, new Comparator<String>() {
             @Override
@@ -183,11 +183,11 @@ public enum NewPhotoListDataLoader {
             }
         });
 
-        Log.d(TAG, "reloadData: after sort photo date groups :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "reloadData: after sort photo date groups :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         calcPhotoPositionNumber();
 
-        Log.d(TAG, "reloadData: after calc photo position number" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "reloadData: after calc photo position number" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
     }
 
     public void calcPhotoPositionNumber() {

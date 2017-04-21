@@ -44,6 +44,8 @@ public class FileUtil {
 
     private static final String ORIGINAL_PHOTO_FOLDER_NAME = "originalPhoto";
 
+    private static final String NO_MEDIA = ".nomedia";
+
     public static boolean checkExternalStorageState() {
         String state = Environment.getExternalStorageState();
         return state.equals(Environment.MEDIA_MOUNTED);
@@ -84,13 +86,30 @@ public class FileUtil {
         return createFolder(getLocalPhotoThumbnailFolderPath());
     }
 
+    public static boolean createLocalPhotoMiniThumbnailFolderNoMedia() {
+        return createFolder(getLocalPhotoThumbnailFolderPath() + File.separator + NO_MEDIA);
+    }
+
     public static boolean createLocalPhotoThumbnailFolder() {
         return createFolder(getFolderPathForLocalPhotoThumbnailFolderName200());
+    }
+
+    public static boolean createLocalPhotoThumbnailFolderNoMedia() {
+        return createFolder(getFolderPathForLocalPhotoThumbnailFolderName200() + File.separator + NO_MEDIA);
     }
 
     public static boolean createOriginalPhotoFolder() {
         return createFolder(getOriginalPhotoFolderPath());
     }
+
+    public static boolean createOriginalPhotoFolderNoMedia() {
+        return createFolder(getOriginalPhotoFolderPath() + File.separator + NO_MEDIA);
+    }
+
+    public static boolean createOldLocalPhotoThumbnailFolderNoMedia() {
+        return createFolder(getOldLocalPhotoThumbnailFolderPath() + File.separator + NO_MEDIA);
+    }
+
 
     private static boolean createFolder(String path) {
         if (!checkExternalStorageState()) {
@@ -174,6 +193,8 @@ public class FileUtil {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
 

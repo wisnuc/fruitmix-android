@@ -130,6 +130,14 @@
             android:text="@string/android_share_count"
             android:textSize="14dp" />
 
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="18dp"
+            android:layout_toLeftOf="@id/share_count_textview"
+            android:src="@drawable/media_share_count" />
+
         <TextView
             android:id="@+id/check_more_photos"
             android:layout_width="wrap_content"
