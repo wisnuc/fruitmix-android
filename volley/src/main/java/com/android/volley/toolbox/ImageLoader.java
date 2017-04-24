@@ -669,7 +669,7 @@ public class ImageLoader {
                             preLoadMediaSmallThumb(url, width, height);
 
                         }
-                    }, 3 * 1000);
+                    }, 60 * 1000);
 
                 }
 

@@ -112,6 +112,7 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
         mAddPhoto.setOnClickListener(this);
 
         rightTextView.setVisibility(View.VISIBLE);
+        rightTextView.setText(getString(R.string.finish_text));
         rightTextView.setOnClickListener(this);
 
         String mediaShareUUID = getIntent().getStringExtra(Util.KEY_MEDIA_SHARE_UUID);

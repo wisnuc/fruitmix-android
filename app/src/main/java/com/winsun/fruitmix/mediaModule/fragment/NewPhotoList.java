@@ -275,7 +275,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (!mPreLoadPhoto) {
                 mPreLoadPhoto = true;
-//                loadSmallThumbnail(medias);
+                loadSmallThumbnail(medias);
             }
 
         }

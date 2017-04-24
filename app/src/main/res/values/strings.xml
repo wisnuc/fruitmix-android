@@ -65,8 +65,6 @@
 
     <string name="coming_soon">Coming Soon</string>
 
-    <string name="ok">OK</string>
-
     <string name="remove">Remove</string>
 
     <string name="cancel">Cancel</string>
@@ -78,6 +76,8 @@
     <string name="confirm_clear_cache">Temporary files will be cleared.</string>
 
     <string name="clear">Clear</string>
+
+    <string name="backup">Backup</string>
 
     <string name="need_auto_upload">Automatic backup your photos?</string>
     <string name="photo_auto_upload_already_close">Automatic backup turn off, you can turn on in \'Setting\'.</string>

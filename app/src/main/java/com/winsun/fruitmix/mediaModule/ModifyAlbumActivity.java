@@ -105,6 +105,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         mTitleTextView.setText(getString(R.string.set_album));
 
         rightTextView.setVisibility(View.VISIBLE);
+        rightTextView.setText(getString(R.string.finish_text));
         rightTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,7 +137,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
                     return;
                 }
 
-                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title),getString(R.string.set_album)), true, false);
+                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.set_album)), true, false);
 
                 FNAS.modifyRemoteMediaShare(mContext, mAlbumMap, requestData);
 

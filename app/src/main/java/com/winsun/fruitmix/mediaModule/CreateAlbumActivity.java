@@ -102,6 +102,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
         ckSetMaintainer.setClickable(false);
 
         rightTextView.setVisibility(View.VISIBLE);
+        rightTextView.setText(getString(R.string.finish_text));
         rightTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {

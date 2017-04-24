@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#f0f0f0"
     android:orientation="vertical">
 
     <View
@@ -15,11 +14,7 @@
     <com.daimajia.swipe.SwipeLayout
         android:id="@+id/swipe_layout"
         android:layout_width="match_parent"
-        android:layout_height="112dp"
-        android:paddingBottom="4dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:paddingTop="4dp">
+        android:layout_height="112dp">
 
         <LinearLayout
             android:layout_width="100dp"
@@ -54,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="@string/delete_text"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 android:textSize="16dp" />
 
         </LinearLayout>
@@ -64,7 +59,11 @@
             android:id="@+id/mainBar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#FFFFFF">
+            android:background="#FFFFFF"
+            android:paddingBottom="4dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="4dp">
 
             <FrameLayout
                 android:id="@+id/mainPic_layout"
@@ -76,8 +75,8 @@
                     android:id="@+id/mainPic"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/default_place_holder" />
+                    android:background="@drawable/default_place_holder"
+                    android:scaleType="centerCrop" />
 
                 <ImageView
                     android:layout_width="150dp"

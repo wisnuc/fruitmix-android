@@ -46,6 +46,7 @@ public class CreateNewEquipmentActivity extends AppCompatActivity implements Vie
         });
 
         rightTextView.setVisibility(View.VISIBLE);
+        rightTextView.setText(getString(R.string.finish_text));
         rightTextView.setOnClickListener(this);
 
     }
