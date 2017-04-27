@@ -636,6 +636,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 }
             });
+
         } else {
             startLoadingOriginalPhoto(view, media);
         }

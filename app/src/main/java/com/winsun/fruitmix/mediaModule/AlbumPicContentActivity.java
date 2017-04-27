@@ -6,12 +6,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
@@ -20,13 +18,13 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.transition.Transition;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -34,7 +32,6 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
-import com.android.volley.toolbox.StringRequest;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
@@ -44,11 +41,10 @@ import com.winsun.fruitmix.mediaModule.model.MediaInMediaShareLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.util.EnterPatternPathMotion;
+import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationResultType;
-import com.winsun.fruitmix.util.ReturnPatternPathMotion;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
@@ -345,6 +341,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     public void onActivityReenter(int resultCode, Intent data) {
         super.onActivityReenter(resultCode, data);
 
+        dismissToolbarWhenSharedElementTransition();
+
         reenterState = new Bundle(data.getExtras());
         int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
         int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
@@ -366,6 +364,28 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 }
             });*/
             ActivityCompat.startPostponedEnterTransition(AlbumPicContentActivity.this);
+        }
+    }
+
+    private void dismissToolbarWhenSharedElementTransition() {
+        if (Util.checkRunningOnLollipopOrHigher()) {
+            getWindow().getSharedElementEnterTransition().addListener(new CustomTransitionListener() {
+
+                @Override
+                public void onTransitionStart(Transition transition) {
+                    super.onTransitionStart(transition);
+
+                    mToolBar.setVisibility(View.INVISIBLE);
+                }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    super.onTransitionEnd(transition);
+
+                    mToolBar.setVisibility(View.VISIBLE);
+                }
+            });
+
         }
     }
 

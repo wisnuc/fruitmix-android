@@ -22,6 +22,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Transition;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -59,6 +60,7 @@ import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationNoChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationResultType;
@@ -355,10 +357,38 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     public void onActivityReenter(int resultCode, Intent data) {
+
+        dismissToolbarBottomBarWhenSharedElementTransition();
+
         if (viewPager.getCurrentItem() == PAGE_PHOTO) {
             ((NewPhotoList) pageList.get(viewPager.getCurrentItem())).onActivityReenter(resultCode, data);
         } else if (viewPager.getCurrentItem() == PAGE_SHARE) {
             ((MediaShareList) pageList.get(viewPager.getCurrentItem())).onActivityReenter(resultCode, data);
+        }
+    }
+
+    private void dismissToolbarBottomBarWhenSharedElementTransition() {
+        if (Util.checkRunningOnLollipopOrHigher()) {
+            getActivity().getWindow().getSharedElementEnterTransition().addListener(new CustomTransitionListener() {
+
+                @Override
+                public void onTransitionStart(Transition transition) {
+                    super.onTransitionStart(transition);
+
+                    toolbar.setVisibility(View.INVISIBLE);
+                    bottomNavigationView.setVisibility(View.INVISIBLE);
+
+                }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    super.onTransitionEnd(transition);
+
+                    toolbar.setVisibility(View.VISIBLE);
+                    bottomNavigationView.setVisibility(View.VISIBLE);
+                }
+            });
+
         }
     }
 
@@ -378,6 +408,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+
         if (viewPager.getCurrentItem() == PAGE_PHOTO) {
             ((NewPhotoList) pageList.get(viewPager.getCurrentItem())).onMapSharedElements(names, sharedElements);
         } else if (viewPager.getCurrentItem() == PAGE_SHARE) {
@@ -592,7 +623,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 if (mSelectMediaOriginalPhotoPaths.isEmpty()) {
                     Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
                 } else {
-                    Util.sendShare(getContext(),mSelectMediaOriginalPhotoPaths);
+                    Util.sendShare(getContext(), mSelectMediaOriginalPhotoPaths);
                 }
 
                 break;
@@ -986,7 +1017,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         }
 
         if (mSelectMedias.size() == 0) {
-            Util.sendShare(getContext(),mSelectMediaOriginalPhotoPaths);
+            Util.sendShare(getContext(), mSelectMediaOriginalPhotoPaths);
         } else {
 
             mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, true);

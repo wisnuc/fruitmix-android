@@ -16,6 +16,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.transition.Transition;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -47,6 +48,7 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
+import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.EnterPatternPathMotion;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -584,6 +586,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     }
 
     public void onActivityReenter(int resultCode, Intent data) {
+
         reenterState = new Bundle(data.getExtras());
         int initialPhotoPosition = reenterState.getInt(Util.INITIAL_PHOTO_POSITION);
         int currentPhotoPosition = reenterState.getInt(Util.CURRENT_PHOTO_POSITION);
