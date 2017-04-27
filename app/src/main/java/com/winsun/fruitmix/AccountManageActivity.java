@@ -69,6 +69,7 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
         mContext = this;
 
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

@@ -48,7 +48,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:text="@string/photo_auto_upload_setting_text" />
+                android:text="@string/photo_auto_upload_setting_text"
+                android:textColor="@color/fifty_four_percent_black" />
 
             <android.support.v7.widget.SwitchCompat
                 android:id="@+id/auto_upload_photos_switch"
@@ -75,7 +76,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:text="@string/already_upload_media_count_hint" />
+                android:text="@string/already_upload_media_count_hint"
+                android:textColor="@color/fifty_four_percent_black" />
 
             <TextView
                 android:id="@+id/already_upload_media_count"
@@ -84,6 +86,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:text="100"
+                android:textColor="@color/fifty_four_percent_black"
                 android:visibility="gone" />
 
         </RelativeLayout>
@@ -105,7 +108,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:text="@string/mobile_network_upload" />
+                android:text="@string/mobile_network_upload"
+                android:textColor="@color/fifty_four_percent_black" />
 
             <android.support.v7.widget.SwitchCompat
                 android:id="@+id/mobile_network_upload_switch"
@@ -132,14 +136,16 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:text="@string/clear_cache" />
+                android:text="@string/clear_cache"
+                android:textColor="@color/fifty_four_percent_black" />
 
             <TextView
                 android:id="@+id/cache_size"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:layout_centerVertical="true" />
+                android:layout_centerVertical="true"
+                android:textColor="@color/fifty_four_percent_black" />
 
         </RelativeLayout>
 

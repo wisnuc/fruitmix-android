@@ -8,7 +8,7 @@
         android:id="@+id/normal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
+        android:background="@color/white"
         android:paddingLeft="8dp">
 
         <TextView
@@ -18,7 +18,7 @@
             android:layout_gravity="center"
             android:background="@drawable/share_portrait_bg"
             android:gravity="center"
-            android:textColor="@color/white"
+            android:textColor="@color/eighty_seven_percent_white"
             android:textSize="18dp" />
 
         <TextView

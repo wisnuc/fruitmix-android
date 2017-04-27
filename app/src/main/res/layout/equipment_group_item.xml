@@ -32,7 +32,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/equipment_group_default_text"
-                android:textColor="@color/light_black"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="16dp" />
 
             <TextView
@@ -40,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="192.168.5.156"
-                android:textColor="@color/light_black"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="14dp" />
 
         </LinearLayout>

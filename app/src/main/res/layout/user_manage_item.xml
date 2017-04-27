@@ -13,7 +13,7 @@
         android:layout_marginLeft="16dp"
         android:background="@drawable/user_portrait_bg_green"
         android:gravity="center"
-        android:textColor="@color/white"
+        android:textColor="@color/eighty_seven_percent_white"
         android:textSize="16dp" />
 
     <LinearLayout
@@ -30,6 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:textColor="@color/fifty_four_percent_black"
             android:gravity="center_vertical"
             android:textSize="16dp" />
 
@@ -39,7 +40,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:textColor="#8E8E8E"
+            android:textColor="@color/fifty_four_percent_black"
             android:textSize="14dp"
             android:visibility="visible" />
 

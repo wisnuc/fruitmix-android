@@ -7,6 +7,7 @@
     android:background="@color/colorPrimary"
     android:elevation="@dimen/appbar_elevation"
     android:theme="@style/AppTheme.AppBarOverlay"
+    android:transitionName="@string/transition_toolbar"
     app:navigationIcon="@drawable/ic_back_black"
     app:popupTheme="@style/AppTheme.PopupOverlay">
 
@@ -28,8 +29,10 @@
         android:layout_gravity="center_vertical|end"
         android:layout_marginRight="15dp"
         android:text="@string/choose_text"
-        android:textColor="#757575"
+        android:textColor="@color/eighty_seven_percent_black"
         android:textSize="16dp"
         android:visibility="gone" />
+    <!--android:textColor="#757575"-->
+
 
 </android.support.v7.widget.Toolbar>

@@ -132,13 +132,14 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                 mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title),getString(R.string.create_album)), true, false);
 
-                FNAS.createRemoteMediaShare(mContext, generateMediaShare(sPublic, sSetMaintainer, title, desc, mSelectedImageKeys));
+                FNAS.createRemoteMediaShare(mContext, Util.generateMediaShare(true,sPublic, sSetMaintainer, title, desc, mSelectedImageKeys));
 
                 LocalCache.mediaKeysInCreateAlbum.clear();
             }
         });
 
         setSupportActionBar(mToolBar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -224,57 +225,6 @@ public class CreateAlbumActivity extends AppCompatActivity {
     private void dismissDialog() {
         if (mDialog != null && mDialog.isShowing())
             mDialog.dismiss();
-    }
-
-    private MediaShare generateMediaShare(boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaKeys) {
-
-        MediaShare mediaShare = new MediaShare();
-        mediaShare.setUuid(Util.createLocalUUid());
-
-        Log.i(TAG, "create album digest:" + mediaKeys);
-
-        List<MediaShareContent> mediaShareContents = new ArrayList<>();
-
-        for (String mediaKey : mediaKeys) {
-            MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setMediaUUID(mediaKey);
-            mediaShareContent.setAuthor(FNAS.userUUID);
-            mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
-            mediaShareContents.add(mediaShareContent);
-
-        }
-
-        mediaShare.initMediaShareContents(mediaShareContents);
-
-        mediaShare.setCoverImageUUID(mediaKeys.get(0));
-
-        mediaShare.setTitle(title);
-        mediaShare.setDesc(desc);
-
-        if (isPublic) {
-            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-                mediaShare.addViewer(userUUID);
-            }
-        } else mediaShare.clearViewers();
-
-        if (otherMaintainer) {
-            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-                mediaShare.addMaintainer(userUUID);
-            }
-        } else {
-            mediaShare.clearMaintainers();
-            mediaShare.addMaintainer(FNAS.userUUID);
-        }
-
-        mediaShare.setCreatorUUID(FNAS.userUUID);
-        mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
-        mediaShare.setAlbum(true);
-        mediaShare.setLocal(true);
-        mediaShare.setArchived(false);
-        mediaShare.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(mediaShare.getTime()))));
-
-        return mediaShare;
-
     }
 
 }

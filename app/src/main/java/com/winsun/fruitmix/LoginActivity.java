@@ -88,6 +88,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         mTitleTextView.setText(getString(R.string.login));
 
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

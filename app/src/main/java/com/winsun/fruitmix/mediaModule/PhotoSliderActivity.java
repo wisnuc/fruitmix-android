@@ -1,12 +1,15 @@
 package com.winsun.fruitmix.mediaModule;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.SharedElementCallback;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
@@ -19,6 +22,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -29,15 +34,28 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.IImageLoadListener;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
+import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
+import com.winsun.fruitmix.model.OperationTargetType;
+import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.util.CustomTransitionListener;
+import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +80,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     ImageView mReturnResize;
     @BindView(R.id.viewPager)
     ViewPager mViewPager;
+    @BindView(R.id.ic_cloud_off)
+    ImageView mCloudOff;
+    @BindView(R.id.share)
+    ImageButton mShareBtn;
 
     private static List<Media> mediaList;
 
@@ -85,6 +107,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     private boolean transitionMediaNeedShowThumb = true;
 
     private boolean needTransition = true;
+
+    private ProgressDialog mDialog;
 
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
@@ -146,6 +170,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         refreshReturnResizeVisibility();
 
+        Util.showSystemUI(getWindow().getDecorView());
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,7 +193,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
                 if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
                     // TODO: The system bars are visible. Make any desired
-                    // adjustments to your UI, such as showing the action bar or
+                    // adjustments to your UI, such as showing the action bar or0
                     // other navigational controls.
 
                     if (!sInEdit) {
@@ -185,6 +211,17 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 }
             }
         });
+
+        initShareBtn();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        EventBus.getDefault().register(this);
+
+        Log.d(TAG, "onStart: ");
     }
 
     @Override
@@ -204,10 +241,21 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     }
 
     @Override
+    public void onStop() {
+
+        EventBus.getDefault().unregister(this);
+
+        super.onStop();
+
+        Log.d(TAG, "onStop: ");
+
+    }
+
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        mToolbar.setNavigationIcon(R.drawable.ic_back_black);
+        mToolbar.setNavigationIcon(R.drawable.ic_back);
         commentImg.setImageResource(R.drawable.comment);
         mReturnResize.setImageResource(R.drawable.return_resize);
 
@@ -284,6 +332,111 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         } else {
             ivComment.setVisibility(View.GONE);
         }
+    }
+
+    private void initShareBtn() {
+
+        mShareBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (!Util.getNetworkState(mContext)) {
+                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                final Media media = mediaList.get(currentPhotoPosition);
+
+                String mediaUUID = media.getUuid();
+                if (mediaUUID.isEmpty()) {
+                    mediaUUID = Util.CalcSHA256OfFile(media.getOriginalPhotoPath());
+                    media.setUuid(mediaUUID);
+                }
+
+                AbstractCommand shareInAppCommand = new AbstractCommand() {
+                    @Override
+                    public void execute() {
+
+                        mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, false);
+
+                        FNAS.createRemoteMediaShare(mContext, Util.generateMediaShare(false, true, false, "", "", Collections.singletonList(media.getUuid())));
+
+                    }
+
+                    @Override
+                    public void unExecute() {
+                    }
+                };
+
+                AbstractCommand shareToOtherAppCommand = new AbstractCommand() {
+                    @Override
+                    public void execute() {
+
+                        String originalPhotoPath = media.getOriginalPhotoPath();
+
+                        if (originalPhotoPath.length() != 0) {
+
+                            Util.sendShare(mContext, Collections.singletonList(originalPhotoPath));
+
+                        } else {
+                            mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, true);
+                            mDialog.setCanceledOnTouchOutside(false);
+
+                            EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, Collections.singletonList(media)));
+                        }
+
+                    }
+
+                    @Override
+                    public void unExecute() {
+                    }
+                };
+
+                new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(mContext).show();
+            }
+        });
+
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleOperationEvent(OperationEvent operationEvent) {
+
+        String action = operationEvent.getAction();
+
+        Log.i(TAG, "handleOperationEvent: action:" + action);
+
+        switch (action) {
+            case Util.REMOTE_MEDIA_SHARE_CREATED:
+
+                dismissDialog();
+
+                Toast.makeText(mContext, operationEvent.getOperationResult().getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+
+                break;
+            case Util.SHARED_PHOTO_THUMB_RETRIEVED:
+
+                if (mDialog == null || !mDialog.isShowing()) {
+                    return;
+                }
+
+                dismissDialog();
+
+                String originalPhotoPath = mediaList.get(currentPhotoPosition).getOriginalPhotoPath();
+
+                if (originalPhotoPath.isEmpty()) {
+                    Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
+                } else {
+                    Util.sendShare(mContext, Collections.singletonList(originalPhotoPath));
+                }
+
+                break;
+        }
+
+    }
+
+    private void dismissDialog() {
+        if (mDialog != null && mDialog.isShowing())
+            mDialog.dismiss();
     }
 
     private void refreshReturnResizeVisibility() {
@@ -366,11 +519,19 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         if (mediaList.size() > position && position > -1) {
 
-            String title = mediaList.get(position).getTime();
+            Media media = mediaList.get(position);
+
+            String title = media.getTime();
             if (title == null || title.contains(Util.DEFAULT_DATE)) {
                 mTitleTextView.setText(getString(R.string.unknown_time));
             } else {
                 mTitleTextView.setText(title);
+            }
+
+            if (LocalCache.DeviceID != null && media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
+                mCloudOff.setVisibility(View.INVISIBLE);
+            } else {
+                mCloudOff.setVisibility(View.VISIBLE);
             }
         }
 

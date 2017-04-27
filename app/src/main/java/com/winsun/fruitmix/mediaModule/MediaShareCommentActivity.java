@@ -130,7 +130,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
         setSupportActionBar(toolbar);
 
         collapsingToolbarLayout.setTitle(getString(R.string.comment));
-        collapsingToolbarLayout.setExpandedTitleColor(ContextCompat.getColor(mContext, R.color.white));
+        collapsingToolbarLayout.setExpandedTitleColor(ContextCompat.getColor(mContext, R.color.eighty_seven_percent_white));
         collapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.CollapsedToolbarTitle);
 
         appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {

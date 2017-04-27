@@ -69,6 +69,7 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
         mNewPhotoList.setAlreadySelectedImageKeyArrayList(alreadySelectedImageKeyArrayList);
 
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

@@ -66,6 +66,7 @@ public class UserManageActivity extends AppCompatActivity implements View.OnClic
         mContext = this;
 
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

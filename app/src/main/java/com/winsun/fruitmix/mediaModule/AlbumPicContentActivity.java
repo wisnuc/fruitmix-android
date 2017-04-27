@@ -6,11 +6,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -42,9 +44,11 @@ import com.winsun.fruitmix.mediaModule.model.MediaInMediaShareLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.util.EnterPatternPathMotion;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.util.ReturnPatternPathMotion;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
@@ -367,6 +371,8 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
     private void showPhotoSlider(int position, View sharedElement, String sharedElementName) {
 
+        Util.setMotion(position, SPAN_COUNT);
+
         PhotoSliderActivity.setMediaList(mediaList);
 
         Intent intent = new Intent();
@@ -374,7 +380,13 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, mShowCommentBtn);
         intent.setClass(this, PhotoSliderActivity.class);
 
-        ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, sharedElement, sharedElementName);
+        Pair mediaPair = new Pair<>(sharedElement, sharedElementName);
+
+        Pair[] pairs = Util.createSafeTransitionPairs(this, false, mediaPair);
+
+        ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, pairs);
+
+//        ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, sharedElement, sharedElementName);
         startActivity(intent, optionsCompat.toBundle());
     }
 
@@ -580,7 +592,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
                         if (Util.getNetworkState(mContext)) {
 
-                            mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title),getString(R.string.delete_text)), true, false);
+                            mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.delete_text)), true, false);
                             FNAS.deleteRemoteMediaShare(mContext, mediaShare);
 
                         } else {
@@ -610,7 +622,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         if (cloneMediaShare.getViewersListSize() == 0) {
 
-            operation = String.format(getString(R.string.operating_title),getString(R.string.set_public));
+            operation = String.format(getString(R.string.operating_title), getString(R.string.set_public));
 
             for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
                 cloneMediaShare.addViewer(userUUID);
@@ -620,7 +632,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
 
         } else {
 
-            operation = String.format(getString(R.string.operating_title),getString(R.string.set_private));
+            operation = String.format(getString(R.string.operating_title), getString(R.string.set_private));
 
             stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare(Util.DELETE));
 

@@ -62,7 +62,7 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/item_menu_layout"
             android:text="owner"
-            android:textColor="#DE000000"
+            android:textColor="@color/fifty_four_percent_black"
             android:textSize="16dp"
             android:visibility="invisible" />
 
@@ -82,7 +82,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="文件名"
-                android:textColor="#DE000000"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="16dp" />
 
             <TextView
@@ -90,7 +90,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="2016-7-14"
-                android:textColor="#8a000000"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="12dp" />
 
 

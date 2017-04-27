@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#FFFFFF</color>
-    <color name="colorPrimaryDark">#bdbdbd</color>
+    <color name="colorPrimaryDark">#1F000000</color>
     <color name="colorAccent">#FF4081</color>
 
     <!-- begin add by liang.wu-->
@@ -25,7 +25,7 @@
     <color name="bottom_text_select_color">#039be5</color>
     <color name="bottom_text_unselect_color">#757575</color>
 
-    <color name="toolbar_title">#212121</color>
+    <color name="toolbar_title">#DE000000</color>
 
     <color name="toolbar_right_text">#757575</color>
 
@@ -35,9 +35,15 @@
     <color name="checked_navigation_menu_item_text_color">#039be5</color>
 
     <color name="fab_bg_color">#03a9f4</color>
-    
+
     <color name="media_share_album_mask_start_color">#42000000</color>
     <color name="media_share_album_mask_end_color">#00000000</color>
+
+    <color name="eighty_seven_percent_black">#DE000000</color>
+    <color name="fifty_four_percent_black">#8A000000</color>
+
+    <color name="eighty_seven_percent_white">#DEFFFFFF</color>
+    <color name="fifty_four_percent_white">#8AFFFFFF</color>
 
     <!-- finish add by liang.wu-->
 

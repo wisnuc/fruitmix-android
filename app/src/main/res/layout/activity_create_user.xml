@@ -39,7 +39,7 @@
     <android.support.design.widget.TextInputLayout
         android:id="@+id/user_name_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/text_input_layout_height"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="40dp"
@@ -52,14 +52,15 @@
             android:layout_height="wrap_content"
             android:hint="@string/user_name"
             android:inputType="text"
-            android:maxLength="20" />
+            android:maxLength="20"
+            android:textColor="@color/fifty_four_percent_black" />
 
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/user_password_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/text_input_layout_height"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="40dp"
@@ -72,14 +73,15 @@
             android:layout_height="wrap_content"
             android:hint="@string/password_text"
             android:inputType="textPassword"
-            android:maxLength="40" />
+            android:maxLength="40"
+            android:textColor="@color/fifty_four_percent_black" />
 
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/confirm_password_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/text_input_layout_height"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="40dp"
@@ -92,7 +94,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/confirm_user_password"
             android:inputType="textPassword"
-            android:maxLength="40" />
+            android:maxLength="40"
+            android:textColor="@color/fifty_four_percent_black" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -104,7 +107,7 @@
         android:layout_marginTop="40dp"
         android:background="@drawable/rect_login"
         android:text="@string/create_user"
-        android:textColor="@color/white"
+        android:textColor="@color/eighty_seven_percent_white"
         android:textSize="16dp" />
 
 

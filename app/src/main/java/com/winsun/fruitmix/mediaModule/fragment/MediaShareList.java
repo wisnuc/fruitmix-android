@@ -2,10 +2,12 @@ package com.winsun.fruitmix.mediaModule.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -42,8 +44,10 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.util.EnterPatternPathMotion;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.ReturnPatternPathMotion;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -89,10 +93,9 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
     private ImageLoader mImageLoader;
     private Bundle reenterState;
 
-    private boolean mShowPhoto;
+    private boolean mShowPhoto = false;
 
     private List<IPhotoListListener> mPhotoListListeners;
-
 
     public MediaShareList(Activity activity_, OnMediaFragmentInteractionListener listener) {
         containerActivity = activity_;
@@ -192,12 +195,11 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
     public void showPhoto() {
 
-        if (!mShowPhoto) {
-            mShowPhoto = true;
+        mShowPhoto = true;
 
-            if (mainRecyclerView.getVisibility() == View.VISIBLE)
-                mAdapter.notifyDataSetChanged();
-        }
+        if (mainRecyclerView.getVisibility() == View.VISIBLE)
+            mAdapter.notifyDataSetChanged();
+
     }
 
     public void refreshView() {
@@ -512,6 +514,8 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
             ivCover.setBackgroundResource(R.drawable.default_place_holder);
 //            ivCover.setBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
+            Log.d(TAG, "refreshView: coverImg: " + coverImg + " mShowPhoto: " + mShowPhoto);
+
             if (coverImg != null && mShowPhoto) {
 
                 String imageUrl = coverImg.getImageOriginalUrl(containerActivity);
@@ -594,6 +598,8 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
             if (itemImg != null) {
 
+                Log.d(TAG, "refreshView: itemImg: " + itemImg + " mShowPhoto: " + mShowPhoto);
+
                 if (mShowPhoto) {
                     String imageUrl = itemImg.getImageOriginalUrl(containerActivity);
                     mImageLoader.setShouldCache(!itemImg.isLocal());
@@ -671,7 +677,13 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
                         ViewCompat.setTransitionName(ivCover, transitionName);
 
-                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
+                        Pair mediaPair = new Pair<>((View) ivCover, transitionName);
+
+                        Pair[] pairs = Util.createSafeTransitionPairs(containerActivity, true, mediaPair);
+
+                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, pairs);
+
+//                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
 
                         containerActivity.startActivity(intent, options.toBundle());
                     } else {
@@ -695,7 +707,13 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
             ViewCompat.setTransitionName(ivCover, transitionName);
 
-            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
+            Pair mediaPair = new Pair<>((View) ivCover, transitionName);
+
+            Pair[] pairs = Util.createSafeTransitionPairs(containerActivity, true, mediaPair);
+
+            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, pairs);
+
+//            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
 
             containerActivity.startActivity(intent, options.toBundle());
         }
@@ -846,6 +864,8 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
 //                ivItems[i].setBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
+                Log.d(TAG, "refreshViewAttributeWhenNotOneImage: ivItems[" + i + "]: " + ivItems[i] + " mShowPhoto: " + mShowPhoto);
+
                 if (itemImg != null && mShowPhoto) {
 
                     String imageUrl = itemImg.getImageThumbUrl(containerActivity);
@@ -889,11 +909,19 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
                         if (((NetworkImageView) transitionView).isLoaded()) {
 
+                            Util.setMotion(mItemPosition, 3);
+
                             String transitionName = String.valueOf(imageList.get(mItemPosition).getKey());
 
                             ViewCompat.setTransitionName(ivItems[mItemPosition], transitionName);
 
-                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, transitionView, transitionName);
+                            Pair mediaPair = new Pair<>((View) ivItems[mItemPosition], transitionName);
+
+                            Pair[] pairs = Util.createSafeTransitionPairs(containerActivity, true, mediaPair);
+
+                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, pairs);
+
+//                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, transitionView, transitionName);
 
                             containerActivity.startActivity(intent, options.toBundle());
 

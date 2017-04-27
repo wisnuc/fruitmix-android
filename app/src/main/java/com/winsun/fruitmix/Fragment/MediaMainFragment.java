@@ -468,10 +468,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 resetBottomNavigationItemCheckState();
                 bottomNavigationView.getMenu().getItem(position).setChecked(true);
 
-                if (position == PAGE_ALBUM) {
+                if (position == PAGE_ALBUM && mPhotoListRefresh) {
                     albumList.showPhoto();
-                } else if (position == PAGE_SHARE) {
-
+                } else if (position == PAGE_SHARE && mPhotoListRefresh) {
                     shareList.showPhoto();
                 }
             }
@@ -593,7 +592,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 if (mSelectMediaOriginalPhotoPaths.isEmpty()) {
                     Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
                 } else {
-                    sendShare(mSelectMediaOriginalPhotoPaths);
+                    Util.sendShare(getContext(),mSelectMediaOriginalPhotoPaths);
                 }
 
                 break;
@@ -987,7 +986,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         }
 
         if (mSelectMedias.size() == 0) {
-            sendShare(mSelectMediaOriginalPhotoPaths);
+            Util.sendShare(getContext(),mSelectMediaOriginalPhotoPaths);
         } else {
 
             mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, true);
@@ -1007,22 +1006,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, false);
 
         photoList.createShare(selectMediaUUIDs);
-
-    }
-
-    private void sendShare(List<String> selectMediaOriginalPhotoPaths) {
-        ArrayList<Uri> uris = new ArrayList<>();
-
-        for (String originalPhotoPath : selectMediaOriginalPhotoPaths) {
-            Uri uri = Uri.fromFile(new File(originalPhotoPath));
-            uris.add(uri);
-        }
-
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_SEND_MULTIPLE);
-        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        intent.setType("image/*");
-        startActivity(Intent.createChooser(intent, getString(R.string.share_text)));
 
     }
 

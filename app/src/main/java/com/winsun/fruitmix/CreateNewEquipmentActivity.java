@@ -37,6 +37,7 @@ public class CreateNewEquipmentActivity extends AppCompatActivity implements Vie
         mLayoutTitle.setText("手动输入ip");
 
         setSupportActionBar(mToolBar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

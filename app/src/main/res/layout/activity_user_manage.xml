@@ -61,6 +61,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/equipment_group_default_text"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="24dp" />
 
         </LinearLayout>
@@ -82,6 +83,7 @@
             android:layout_gravity="center"
             android:layout_margin="8dp"
             android:background="@color/white"
+            android:textColor="@color/fifty_four_percent_black"
             android:gravity="center"
             android:text="@string/no_user"
             android:textSize="24dp"

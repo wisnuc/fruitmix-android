@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="@string/person_data"
-                android:textColor="@color/white"
+                android:textColor="@color/eighty_seven_percent_white"
                 android:textSize="24dp" />
 
             <TextView
@@ -39,7 +39,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginRight="16dp"
                 android:text="@string/finish_text"
-                android:textColor="@color/white"
+                android:textColor="@color/eighty_seven_percent_white"
                 android:textSize="22dp" />
         </RelativeLayout>
 
@@ -71,13 +71,14 @@
                 android:background="@drawable/user_portrait_bg_green"
                 android:gravity="center"
                 android:textSize="18dp"
-                android:textColor="@color/white"/>
+                android:textColor="@color/eighty_seven_percent_white"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:layout_marginLeft="8dp"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="24dp" />
 
         </LinearLayout>
@@ -92,12 +93,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="16dp" />
 
             <EditText
                 android:id="@+id/email_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="18dp"
                 android:inputType="textEmailAddress"/>
 
@@ -113,12 +116,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="16dp" />
 
             <EditText
                 android:id="@+id/password_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="18dp"
                 android:inputType="textPassword"/>
 
@@ -134,12 +139,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="16dp" />
 
             <EditText
                 android:id="@+id/confirm_password_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="18dp"
                 android:inputType="textPassword"/>
 
@@ -161,6 +168,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="16dp" />
 
         </LinearLayout>

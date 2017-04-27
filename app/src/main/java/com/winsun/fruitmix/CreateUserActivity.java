@@ -72,6 +72,7 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
         }
 
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

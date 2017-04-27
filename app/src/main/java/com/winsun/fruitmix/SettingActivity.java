@@ -56,6 +56,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         ButterKnife.bind(this);
 
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

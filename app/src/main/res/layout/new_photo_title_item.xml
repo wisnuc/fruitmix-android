@@ -45,7 +45,7 @@
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:text="2016-7-26"
-            android:textColor="#212121"
+            android:textColor="@color/eighty_seven_percent_black"
             android:textSize="14dp" />
 
     </LinearLayout>

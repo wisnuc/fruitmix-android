@@ -3,7 +3,6 @@
     android:id="@+id/downloading_file_item_layout"
     android:layout_width="match_parent"
     android:layout_height="64dp"
-    android:background="?attr/selectableItemBackground"
     android:orientation="vertical"
     android:paddingLeft="16dp"
     android:paddingRight="16dp">
@@ -32,7 +31,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="文件名"
-            android:textColor="#DE000000"
+            android:textColor="@color/fifty_four_percent_black"
             android:textSize="16dp" />
 
         <ProgressBar

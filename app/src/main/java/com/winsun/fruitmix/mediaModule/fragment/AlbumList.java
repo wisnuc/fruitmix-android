@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,7 +81,6 @@ public class AlbumList implements Page, IShowHideFragmentListener {
     private boolean mShowPhoto = false;
 
     private List<IPhotoListListener> mPhotoListListeners;
-
 
     public AlbumList(Activity activity_, OnMediaFragmentInteractionListener listener) {
 
@@ -188,12 +188,11 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
     public void showPhoto() {
 
-        if (!mShowPhoto) {
-            mShowPhoto = true;
+        mShowPhoto = true;
 
-            if (mainRecyclerView.getVisibility() == View.VISIBLE)
-                mAdapter.notifyDataSetChanged();
-        }
+        if (mainRecyclerView.getVisibility() == View.VISIBLE)
+            mAdapter.notifyDataSetChanged();
+
     }
 
     public void refreshView() {
@@ -331,6 +330,8 @@ public class AlbumList implements Page, IShowHideFragmentListener {
                     coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(key);
                 }
             }
+
+            Log.d(TAG, "refreshView: coverImg: " + coverImg + " mShowPhoto: " + mShowPhoto);
 
             if (coverImg != null && mShowPhoto) {
 
@@ -477,13 +478,13 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
 
-            if(dy > 0){
+            if (dy > 0) {
 
                 for (IPhotoListListener listener : mPhotoListListeners) {
                     listener.onPhotoListScrollDown();
                 }
 
-            }else if(dy < 0){
+            } else if (dy < 0) {
 
                 for (IPhotoListListener listener : mPhotoListListeners) {
                     listener.onPhotoListScrollUp();

@@ -5,5 +5,5 @@
     android:layout_height="60dp"
     android:background="@drawable/rounded_rectangle_bg"
     android:gravity="center"
-    android:textColor="@color/white"
+    android:textColor="@color/eighty_seven_percent_white"
     android:textSize="17dp" />

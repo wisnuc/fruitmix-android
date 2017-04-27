@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
-    android:fitsSystemWindows="true"
+    android:background="@color/black"
     tools:context="com.winsun.fruitmix.mediaModule.PhotoSliderActivity">
 
     <android.support.v4.view.ViewPager
@@ -12,7 +12,93 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <include layout="@layout/toolbar_layout" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            android:elevation="@dimen/appbar_elevation"
+            android:theme="@style/AppTheme.AppBarOverlay"
+            android:transitionName="@string/transition_toolbar"
+            app:navigationIcon="@drawable/ic_back"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/photo"
+                android:textColor="@color/eighty_seven_percent_white"
+                android:textSize="18dp" />
+
+
+            <ImageView
+                android:id="@+id/ic_cloud_off"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginRight="15dp"
+                android:src="@drawable/ic_cloud_off_white_24dp" />
+
+        </android.support.v7.widget.Toolbar>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#1F000000" />
+
+        <RelativeLayout
+            android:id="@+id/panelFooter"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_gravity="bottom"
+            android:background="@android:color/transparent"
+            android:visibility="visible">
+
+            <ImageButton
+                android:id="@+id/share"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:background="@null"
+                android:src="@drawable/ic_share" />
+
+            <LinearLayout
+                android:id="@+id/comment_layout"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="20dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/comment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/comment" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_gravity="bottom"
+            android:background="#1F000000" />
+
+    </FrameLayout>
+
 
     <!--    <android.support.v7.widget.Toolbar
         android:id="@+id/chooseHeader"
@@ -39,35 +125,6 @@
         android:textColor="#FFFFFF"
         android:textSize="18dp" />
         </android.support.v7.widget.Toolbar>-->
-
-    <RelativeLayout
-        android:id="@+id/panelFooter"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_gravity="bottom"
-        android:visibility="visible">
-
-        <LinearLayout
-            android:id="@+id/comment_layout"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="20dp"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:id="@+id/comment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/comment" />
-
-        </LinearLayout>
-
-
-    </RelativeLayout>
-
 
     <ImageView
         android:id="@+id/return_resize"

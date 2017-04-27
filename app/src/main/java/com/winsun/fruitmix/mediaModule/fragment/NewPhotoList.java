@@ -5,12 +5,13 @@ import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -46,8 +47,10 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
+import com.winsun.fruitmix.util.EnterPatternPathMotion;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.ReturnPatternPathMotion;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -133,8 +136,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     private Typeface mTypeface;
 
     private boolean mIsLoaded = false;
-
-    private boolean mIsScrollUp = false;
 
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
@@ -528,45 +529,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     public void createShare(List<String> selectMediaKeys) {
 
-        FNAS.createRemoteMediaShare(containerActivity, createMediaShare(selectMediaKeys));
+        FNAS.createRemoteMediaShare(containerActivity, Util.generateMediaShare(false,true,false,"","",selectMediaKeys));
 
         clearSelectedPhoto();
-    }
-
-    private MediaShare createMediaShare(List<String> selectMediaKeys) {
-
-        MediaShare mediaShare = new MediaShare();
-        mediaShare.setUuid(Util.createLocalUUid());
-
-        List<MediaShareContent> mediaShareContents = new ArrayList<>();
-
-        for (String mediaKey : selectMediaKeys) {
-            MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setMediaUUID(mediaKey);
-            mediaShareContent.setAuthor(FNAS.userUUID);
-            mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
-            mediaShareContents.add(mediaShareContent);
-
-        }
-
-        mediaShare.initMediaShareContents(mediaShareContents);
-
-        mediaShare.setCoverImageUUID(selectMediaKeys.get(0));
-        mediaShare.setTitle("");
-        mediaShare.setDesc("");
-        for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-            mediaShare.addViewer(userUUID);
-        }
-        mediaShare.addMaintainer(FNAS.userUUID);
-        mediaShare.setCreatorUUID(FNAS.userUUID);
-        mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
-        mediaShare.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(mediaShare.getTime()))));
-        mediaShare.setArchived(false);
-        mediaShare.setAlbum(false);
-        mediaShare.setLocal(true);
-
-        return mediaShare;
-
     }
 
     @Override
@@ -1006,7 +971,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             mPhotoIv.setImageUrl(imageUrl, mImageLoader);
 
             List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());
-            int mediaInListPosition = getPosition(mediaList, currentMedia);
+            final int mediaInListPosition = getPosition(mediaList, currentMedia);
 
             setPhotoItemMargin(mediaInListPosition);
 
@@ -1097,11 +1062,21 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                         if (mPhotoIv.isLoaded()) {
 
+                            Util.setMotion(mediaInListPosition, mSpanCount);
+
                             ViewCompat.setTransitionName(mPhotoIv, currentMedia.getKey());
 
-                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, mPhotoIv, currentMedia.getKey());
+                            Pair mediaPair = new Pair<>((View) mPhotoIv, currentMedia.getKey());
+
+                            Pair[] pairs = Util.createSafeTransitionPairs(containerActivity, true, mediaPair);
+
+                            ActivityOptionsCompat options = ActivityOptionsCompat.
+                                    makeSceneTransitionAnimation(containerActivity, pairs);
+
+//                              ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, mPhotoIv, currentMedia.getKey());
 
                             containerActivity.startActivity(intent, options.toBundle());
+
                         } else {
 
                             intent.putExtra(Util.KEY_NEED_TRANSITION, false);

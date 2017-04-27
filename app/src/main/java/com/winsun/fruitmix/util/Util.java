@@ -2,23 +2,36 @@ package com.winsun.fruitmix.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
+import android.support.v4.util.Pair;
+import android.support.v4.view.ViewCompat;
+import android.transition.ArcMotion;
+import android.transition.PatternPathMotion;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.LoginType;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -26,6 +39,8 @@ import java.util.UUID;
  * Created by Administrator on 2016/4/29.
  */
 public class Util {
+
+    public static final String TAG = Util.class.getSimpleName();
 
     public static final String SHOW_ALBUM_TIPS = "show_album_tips";
     public static final String SHOW_PHOTO_RETURN_TIPS = "show_photo_return_tips";
@@ -420,5 +435,139 @@ public class Util {
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
     }
+
+    public static Pair<View, String>[] createSafeTransitionPairs(Activity activity, boolean includeBottomNavigationView, Pair... otherPairs) {
+
+        // Avoid system UI glitches as described here:
+        // https://plus.google.com/+AlexLockwood/posts/RPtwZ5nNebb
+        View decor = activity.getWindow().getDecorView();
+
+        List<Pair> pairs = new ArrayList<>();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+
+            View statusBar = decor.findViewById(android.R.id.statusBarBackground);
+            View navBar = decor.findViewById(android.R.id.navigationBarBackground);
+
+            Pair statusBarPair = new Pair<>(statusBar, ViewCompat.getTransitionName(statusBar));
+            Pair navBarPair = new Pair<>(navBar, ViewCompat.getTransitionName(navBar));
+
+            pairs.add(statusBarPair);
+            pairs.add(navBarPair);
+        }
+
+        Pair toolbarPair = new Pair<>(decor.findViewById(R.id.toolbar), activity.getString(R.string.transition_toolbar));
+        pairs.add(toolbarPair);
+
+        if (includeBottomNavigationView) {
+            Pair bottomNavigationViewPair = new Pair<>(decor.findViewById(R.id.bottom_navigation_view),
+                    activity.getString(R.string.transition_bottom_navigation_view));
+
+            pairs.add(bottomNavigationViewPair);
+        }
+
+        // only add transition participants if there's at least one none-null element
+        if (otherPairs != null && !(otherPairs.length == 1
+                && otherPairs[0] == null)) {
+            pairs.addAll(Arrays.asList(otherPairs));
+        }
+
+        return pairs.toArray(new Pair[pairs.size()]);
+    }
+
+    public static void setMotion(int position, int spanCount) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+
+            if ((position) % spanCount == 0) {
+
+                EnterPatternPathMotion.setMotion(true);
+
+                ReturnPatternPathMotion.setMotion(true);
+
+            } else if ((position + 1) % spanCount == 0) {
+
+                EnterPatternPathMotion.setMotion(false);
+
+                ReturnPatternPathMotion.setMotion(false);
+
+            } else {
+
+                EnterPatternPathMotion.setMotion(true);
+
+                ReturnPatternPathMotion.setMotion(true);
+            }
+
+        }
+
+    }
+
+    public static MediaShare generateMediaShare(boolean isAlbum, boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaKeys) {
+
+        MediaShare mediaShare = new MediaShare();
+        mediaShare.setUuid(Util.createLocalUUid());
+
+        Log.i(TAG, "create album digest:" + mediaKeys);
+
+        List<MediaShareContent> mediaShareContents = new ArrayList<>();
+
+        for (String mediaKey : mediaKeys) {
+            MediaShareContent mediaShareContent = new MediaShareContent();
+            mediaShareContent.setMediaUUID(mediaKey);
+            mediaShareContent.setAuthor(FNAS.userUUID);
+            mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
+            mediaShareContents.add(mediaShareContent);
+
+        }
+
+        mediaShare.initMediaShareContents(mediaShareContents);
+
+        mediaShare.setCoverImageUUID(mediaKeys.get(0));
+
+        mediaShare.setTitle(title);
+        mediaShare.setDesc(desc);
+
+        if (isPublic) {
+            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+                mediaShare.addViewer(userUUID);
+            }
+        } else mediaShare.clearViewers();
+
+        if (otherMaintainer) {
+            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+                mediaShare.addMaintainer(userUUID);
+            }
+        } else {
+            mediaShare.clearMaintainers();
+            mediaShare.addMaintainer(FNAS.userUUID);
+        }
+
+        mediaShare.setCreatorUUID(FNAS.userUUID);
+        mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
+        mediaShare.setAlbum(isAlbum);
+        mediaShare.setLocal(true);
+        mediaShare.setArchived(false);
+        mediaShare.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(mediaShare.getTime()))));
+
+        return mediaShare;
+
+    }
+
+    public static void sendShare(Context context,List<String> selectMediaOriginalPhotoPaths) {
+        ArrayList<Uri> uris = new ArrayList<>();
+
+        for (String originalPhotoPath : selectMediaOriginalPhotoPaths) {
+            Uri uri = Uri.fromFile(new File(originalPhotoPath));
+            uris.add(uri);
+        }
+
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND_MULTIPLE);
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+        intent.setType("image/*");
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_text)));
+
+    }
+
 
 }

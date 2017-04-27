@@ -145,6 +145,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         });
 
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

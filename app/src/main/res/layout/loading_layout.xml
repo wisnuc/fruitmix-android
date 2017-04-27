@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/loading"
-        android:textColor="@color/light_black"
+        android:textColor="@color/fifty_four_percent_black"
         android:textSize="20dp"/>
 
 </LinearLayout>
