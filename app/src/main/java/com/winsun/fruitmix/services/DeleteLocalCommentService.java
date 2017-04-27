@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Comment;
@@ -102,7 +103,7 @@ public class DeleteLocalCommentService extends IntentService {
 
             Log.i(TAG, "delete local comment in map result:" + result);
 
-            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.LOCAL_COMMENT_DELETED, new OperationSuccess(), comment, imageUUID);
+            mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.LOCAL_COMMENT_DELETED, new OperationSuccess(R.string.operate), comment, imageUUID);
 
         } else {
 

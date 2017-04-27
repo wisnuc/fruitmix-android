@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
@@ -171,7 +172,7 @@ public class CreateRemoteMediaShareService extends IntentService {
 
                 Log.i(TAG, "insert remote mediashare which source is network succeed");
 
-                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_CREATED, new OperationSuccess(), mediaShare.cloneMyself());
+                mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_CREATED, new OperationSuccess(R.string.create_share), mediaShare.cloneMyself());
 
                 RemoteMediaShareJSONObjectParser parser = new RemoteMediaShareJSONObjectParser();
 

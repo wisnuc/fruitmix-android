@@ -160,7 +160,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                 Intent intent = new Intent(mContext, LoginActivity.class);
                 intent.putExtra(Util.GATEWAY, "http://" + equipment.getHosts().get(0));
-                intent.putExtra(Util.USER_GROUP_NAME, equipment.getModel() + "-" + equipment.getSerialNumber());
+                intent.putExtra(Util.USER_GROUP_NAME, Util.getEquipmentName(equipment));
                 intent.putExtra(Util.USER_NAME, user.getUserName());
                 intent.putExtra(Util.USER_UUID, user.getUuid());
                 intent.putExtra(Util.USER_BG_COLOR, user.getDefaultAvatarBgColor());

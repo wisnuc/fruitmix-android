@@ -11,9 +11,15 @@ import com.winsun.fruitmix.model.OperationResultType;
 
 public class OperationSuccess extends OperationResult {
 
+    private int mOperationResID;
+
+    public OperationSuccess(int operationResID) {
+        mOperationResID = operationResID;
+    }
+
     @Override
     public String getResultMessage(Context context) {
-        return context.getString(R.string.success);
+        return String.format(context.getString(R.string.success), context.getString(mOperationResID));
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -82,7 +83,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
             try {
                 FNAS.DeleteRemoteCall(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid(), "");
 
-                operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_DELETED, new OperationSuccess());
+                operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_DELETED, new OperationSuccess(R.string.delete_text));
 
                 Log.i(TAG, "delete remote mediashare which source is network succeed");
 

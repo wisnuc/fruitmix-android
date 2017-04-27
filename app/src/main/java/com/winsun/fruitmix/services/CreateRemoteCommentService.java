@@ -108,7 +108,7 @@ public class CreateRemoteCommentService extends IntentService {
 
                 Log.i(TAG, "insert remote media comment to map result:" + mapResult);
 
-                mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, new OperationSuccess(), comment, mediaUUID);
+                mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, new OperationSuccess(R.string.operate), comment, mediaUUID);
 
             } else {
                 mediaShareCommentOperationEvent = new MediaShareCommentOperationEvent(Util.REMOTE_COMMENT_CREATED, new OperationNetworkException(httpResponse.getResponseCode()), comment, mediaUUID);

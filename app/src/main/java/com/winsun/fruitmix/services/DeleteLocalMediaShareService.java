@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -77,7 +78,7 @@ public class DeleteLocalMediaShareService extends IntentService {
 
             if (value > 0) {
 
-                operationEvent = new OperationEvent(Util.LOCAL_MEDIA_SHARE_DELETED, new OperationSuccess());
+                operationEvent = new OperationEvent(Util.LOCAL_MEDIA_SHARE_DELETED, new OperationSuccess(R.string.operate));
 
                 Log.i(TAG, "delete local mediashare succeed");
 

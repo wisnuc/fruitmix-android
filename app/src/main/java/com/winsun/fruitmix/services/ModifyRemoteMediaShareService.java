@@ -92,7 +92,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
 
                 if (httpResponse.getResponseCode() == 200) {
 
-                    mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_MODIFIED, new OperationSuccess(), mediaShare);
+                    mediaShareOperationEvent = new MediaShareOperationEvent(Util.REMOTE_MEDIA_SHARE_MODIFIED, new OperationSuccess(R.string.set_album), mediaShare);
 
                     Log.i(TAG, "modify remote share succeed");
 

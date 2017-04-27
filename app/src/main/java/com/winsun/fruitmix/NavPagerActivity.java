@@ -245,13 +245,12 @@ public class NavPagerActivity extends AppCompatActivity
 
     }
 
-
     private List<NavigationItemType> mNavigationItemMenu;
     private List<NavigationItemType> mNavigationItemLoggedInUser;
 
     public static final int DISCOVERY_TIMEOUT_MESSAGE = 0x1001;
 
-    public static final int DISCOVERY_TIMEOUT_TIME = 10 * 1000;
+    public static final int DISCOVERY_TIMEOUT_TIME = 15 * 1000;
 
     private CustomHandler mCustomHandler;
 
@@ -499,10 +498,7 @@ public class NavPagerActivity extends AppCompatActivity
                     @Override
                     public void call(BonjourService bonjourService) {
 
-                        if (bonjourService.isLost()) return;
-
-                        String serviceName = bonjourService.getServiceName();
-                        if (!serviceName.equals(loggedInUser.getEquipmentName())) return;
+                        if (checkEquipment(bonjourService, loggedInUser)) return;
 
                         if (bonjourService.getInet4Address() == null) return;
 
@@ -529,7 +525,11 @@ public class NavPagerActivity extends AppCompatActivity
 
                         FNAS.retrieveUser(mContext);
 
-                        checkAutoUpload();
+                        if (checkAutoUpload()) {
+                            Toast.makeText(mContext, String.format(getString(R.string.success), getString(R.string.change_user)), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
+                        }
 
                         Util.setRemoteMediaShareLoaded(false);
                         Util.setRemoteMediaLoaded(false);
@@ -541,18 +541,31 @@ public class NavPagerActivity extends AppCompatActivity
 
     }
 
-    private void checkAutoUpload() {
+    private boolean checkEquipment(BonjourService bonjourService, LoggedInUser loggedInUser) {
+        if (bonjourService.isLost()) return true;
+
+        String serviceName = bonjourService.getServiceName();
+        if (!serviceName.toLowerCase().contains("wisnuc")) return true;
+
+        String equipmentName = Util.getEquipmentName(bonjourService);
+
+        return !equipmentName.equals(loggedInUser.getEquipmentName());
+    }
+
+    private boolean checkAutoUpload() {
         for (LoggedInUser loggedInUser : LocalCache.LocalLoggedInUsers) {
 
             if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
                 if (!LocalCache.getCurrentUploadDeviceID(mContext).equals(LocalCache.DeviceID)) {
                     LocalCache.setAutoUploadOrNot(mContext, false);
-                    Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
+                    return false;
                 } else {
                     LocalCache.setAutoUploadOrNot(mContext, true);
+                    return true;
                 }
             }
         }
+        return true;
     }
 
     private void stopDiscovery() {

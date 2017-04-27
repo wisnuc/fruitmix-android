@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -107,7 +108,7 @@ public class ModifyMediaInLocalMediaShareService extends IntentService {
 
             Log.i(TAG, "modify media in local mediashare in map result:" + (mapResult != null ? "true" : "false"));
 
-            operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED, new OperationSuccess());
+            operationEvent = new OperationEvent(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED, new OperationSuccess(R.string.operate));
 
         } else {
 

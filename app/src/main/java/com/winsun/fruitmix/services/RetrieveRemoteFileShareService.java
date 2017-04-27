@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.http.HttpResponse;
@@ -87,7 +88,7 @@ public class RetrieveRemoteFileShareService extends IntentService {
 
                     LocalCache.RemoteFileShareList.addAll(parser.parse(remoteFileShareWithOthersJSON.getResponseData()));
 
-                    EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, new OperationSuccess()));
+                    EventBus.getDefault().post(new OperationEvent(Util.REMOTE_FILE_SHARE_RETRIEVED, new OperationSuccess(R.string.operate)));
 
                 } else {
 

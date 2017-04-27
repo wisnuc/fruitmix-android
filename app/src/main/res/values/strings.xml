@@ -8,14 +8,6 @@
 
     <string name="and"> and </string>
 
-    <!-- url -->
-
-    <string name="android_new_thumb_photo_url">%1$s/download</string>
-    <string name="android_thumb_photo_url">%1$s/thumbnail?width=%2$s&amp;height=%3$s&amp;autoOrient=true&amp;modifier=caret</string>
-    <string name="android_original_photo_url">%1$s/download</string>
-    <string name="android_photo_comment_url">%1$s?type=comments</string>
-    <string name="android_update_mediashare_url">%1$s/%2$s/update</string>
-
     <!-- time format -->
     <string name="android_yesterday">yesterday</string>
     <string name="android_share_album_title">%1$s·%2$s %3$s</string>
@@ -215,7 +207,7 @@
     <string name="download_failed">Download failed</string>
 
     <!-- hints -->
-    <string name="success">Success</string>
+    <string name="success">%1$s succeeded</string>
     <string name="local_media_share_uploading">Sorry,it is uploading,please wait!</string>
 
     <!-- Errors -->

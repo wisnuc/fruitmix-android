@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Comment;
@@ -69,7 +70,7 @@ public class RetrieveLocalMediaCommentService extends IntentService {
 
         }
 
-        OperationEvent operationEvent = new OperationEvent(Util.LOCAL_MEDIA_COMMENT_RETRIEVED, new OperationSuccess());
+        OperationEvent operationEvent = new OperationEvent(Util.LOCAL_MEDIA_COMMENT_RETRIEVED, new OperationSuccess(R.string.operate));
         EventBus.getDefault().post(operationEvent);
     }
 

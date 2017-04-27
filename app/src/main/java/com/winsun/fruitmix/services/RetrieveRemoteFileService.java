@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.fileModule.model.RemoteFolder;
@@ -92,7 +93,7 @@ public class RetrieveRemoteFileService extends IntentService {
 
                 LocalCache.RemoteFileMapKeyIsUUID.put(folderUUID,remoteFolder);
 
-                EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationSuccess(),folderUUID));
+                EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationSuccess(R.string.operate),folderUUID));
 
             }else {
                 EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()),folderUUID));

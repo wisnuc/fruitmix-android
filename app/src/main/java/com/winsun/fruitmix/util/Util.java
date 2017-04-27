@@ -19,9 +19,11 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.github.druk.rxdnssd.BonjourService;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
+import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.model.LoginType;
 
 import java.io.File;
@@ -553,7 +555,7 @@ public class Util {
 
     }
 
-    public static void sendShare(Context context,List<String> selectMediaOriginalPhotoPaths) {
+    public static void sendShare(Context context, List<String> selectMediaOriginalPhotoPaths) {
         ArrayList<Uri> uris = new ArrayList<>();
 
         for (String originalPhotoPath : selectMediaOriginalPhotoPaths) {
@@ -566,6 +568,36 @@ public class Util {
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
         intent.setType("image/*");
         context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_text)));
+
+    }
+
+    public static String getEquipmentName(Equipment equipment) {
+        return equipment.getModel() + "-" + equipment.getSerialNumber();
+    }
+
+    public static String getEquipmentName(BonjourService bonjourService) {
+
+        String hostName = bonjourService.getHostname();
+
+        Log.d(TAG, "call: hostName: " + hostName);
+
+        String model = "";
+        String serialNumber = "";
+
+        if (hostName != null && hostName.contains("-")) {
+
+            String[] hostNames = hostName.split("-");
+
+            model = hostNames[1].toUpperCase();
+
+            String[] hostNames2 = hostNames[2].split("\\.");
+
+            serialNumber = hostNames2[0].toUpperCase();
+
+            Log.d(TAG, "discovery: model:" + model + " serialNumber:" + serialNumber);
+        }
+
+        return model + "-" + serialNumber;
 
     }
 

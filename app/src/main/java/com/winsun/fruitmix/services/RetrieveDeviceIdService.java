@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
@@ -79,7 +80,7 @@ public class RetrieveDeviceIdService extends IntentService {
         LocalCache.DeviceID = LocalCache.GetGlobalData(this,Util.DEVICE_ID_MAP_NAME);
         if (LocalCache.DeviceID != null && !LocalCache.DeviceID.equals("")) {
 
-            operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationSuccess());
+            operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationSuccess(R.string.operate));
 
         } else {
 
@@ -93,7 +94,7 @@ public class RetrieveDeviceIdService extends IntentService {
                     LocalCache.SetGlobalData(this,Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
                     Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(this,Util.DEVICE_ID_MAP_NAME));
 
-                    operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationSuccess());
+                    operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationSuccess(R.string.operate));
 
                 } else {
 

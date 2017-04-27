@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
@@ -97,7 +98,7 @@ public class CreateRemoteUserService extends IntentService {
 
                 Log.i(TAG, "insert remote user to map result:" + (mapResult != null ? "true" : "false"));
 
-                operationEvent = new OperationEvent(Util.REMOTE_USER_CREATED, new OperationSuccess());
+                operationEvent = new OperationEvent(Util.REMOTE_USER_CREATED, new OperationSuccess(R.string.create_user));
 
             } else {
 

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
@@ -73,7 +74,7 @@ public class CreateLocalMediaShareService extends IntentService {
 
         if (returnValue > 0) {
 
-            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_MEDIA_SHARE_CREATED, new OperationSuccess(), mediaShare);
+            mediaShareOperationEvent = new MediaShareOperationEvent(Util.LOCAL_MEDIA_SHARE_CREATED, new OperationSuccess(R.string.operate), mediaShare);
 
             Log.i(TAG, "insert local mediashare succeed");
 
