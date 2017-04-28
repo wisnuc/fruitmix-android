@@ -633,10 +633,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         private int mSubHeaderHeight = containerActivity.getResources().getDimensionPixelSize(R.dimen.photo_title_height);
 
-        PhotoRecycleAdapter() {
-            setHasStableIds(true);
-        }
-
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             int type = getItemViewType(position);
