@@ -72,6 +72,8 @@ public class ButlerService extends Service {
 
     private boolean mStopGenerateThumb = false;
 
+    private boolean mCreateRecommendAlbum = false;
+
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
         context.startService(intent);
@@ -186,6 +188,11 @@ public class ButlerService extends Service {
 
         switch (action) {
             case Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED:
+
+                if (!mCreateRecommendAlbum) {
+                    CreateRecommendAlbumService.startActionCreateRecommendAlbum(this);
+                    mCreateRecommendAlbum = true;
+                }
 
                 startGenerateLocalPhotoThumbnail();
 

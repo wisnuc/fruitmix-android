@@ -12,7 +12,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -82,6 +81,8 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
     private List<IPhotoListListener> mPhotoListListeners;
 
+    private boolean mFillRecommendAlbum = false;
+
     public AlbumList(Activity activity_, OnMediaFragmentInteractionListener listener) {
 
         containerActivity = activity_;
@@ -117,6 +118,9 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         mediaShareList = new ArrayList<>();
 
         mPhotoListListeners = new ArrayList<>();
+
+        initImageLoader();
+
     }
 
     public void addPhotoListListener(IPhotoListListener listListener) {
@@ -144,13 +148,18 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
     }
 
-
     private void reloadList() {
         mediaShareList.clear();
 
         fillMediaShareList(mediaShareList);
 
         sortMediaShareList(mediaShareList);
+
+        if (mFillRecommendAlbum) {
+
+            mediaShareList.addAll(0, LocalCache.RecommendMediaShares);
+
+        }
 
     }
 
@@ -184,6 +193,7 @@ public class AlbumList implements Page, IShowHideFragmentListener {
                 mediaShareList.add(mediaShare);
             }
         }
+
     }
 
     public void showPhoto() {
@@ -204,8 +214,6 @@ public class AlbumList implements Page, IShowHideFragmentListener {
             return;
         }
 
-        initImageLoader();
-
         reloadList();
 
         mLoadingLayout.setVisibility(View.GONE);
@@ -221,18 +229,41 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
     }
 
+    public void refreshRecommendAlbum() {
+
+        mFillRecommendAlbum = true;
+
+        refreshView();
+
+    }
+
+
     public void onDidAppear() {
 
         refreshView();
         mainRecyclerView.smoothScrollToPosition(0);
     }
 
-
     public View getView() {
         return view;
     }
 
-    private class AlbumRecyclerViewAdapter extends RecyclerSwipeAdapter<AlbumListViewHolder> {
+    private class AlbumRecyclerViewAdapter extends RecyclerSwipeAdapter<BaseAlbumViewHolder> {
+
+        static final int NORMAL_ALBUM = 0x1001;
+        static final int RECOMMEND_ALBUM = 0x1002;
+
+        @Override
+        public int getItemViewType(int position) {
+
+            if (mediaShareList.get(position).isRecommend()) {
+                return RECOMMEND_ALBUM;
+            } else {
+                return NORMAL_ALBUM;
+            }
+
+        }
+
 
         /**
          * return the {@link SwipeLayout} resource id, int the view item.
@@ -257,23 +288,115 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         }
 
         @Override
-        public AlbumListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public BaseAlbumViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-            View view = LayoutInflater.from(containerActivity).inflate(R.layout.album_list_item, parent, false);
+            View view;
 
-            return new AlbumListViewHolder(view);
+            switch (viewType) {
+                case NORMAL_ALBUM:
+                    view = LayoutInflater.from(containerActivity).inflate(R.layout.album_list_item, parent, false);
+                    return new AlbumListViewHolder(view);
+
+                case RECOMMEND_ALBUM:
+
+                    view = LayoutInflater.from(containerActivity).inflate(R.layout.recommend_album_list_item, parent, false);
+                    return new RecommendAlbumViewHolder(view);
+
+            }
+
+            return null;
 
         }
 
         @Override
-        public void onBindViewHolder(AlbumListViewHolder viewHolder, int position) {
+        public void onBindViewHolder(BaseAlbumViewHolder viewHolder, int position) {
 
             viewHolder.refreshView(position, mediaShareList.get(position));
+
         }
     }
 
+    class BaseAlbumViewHolder extends RecyclerView.ViewHolder {
 
-    class AlbumListViewHolder extends RecyclerView.ViewHolder {
+        Media coverImg;
+        MediaShare currentItem;
+
+        BaseAlbumViewHolder(View itemView) {
+            super(itemView);
+        }
+
+        void refreshView(int position, MediaShare mediaShare) {
+
+            currentItem = mediaShare;
+
+            String key = currentItem.getCoverImageUUID();
+
+            if (key.isEmpty()) {
+                coverImg = null;
+            } else {
+                coverImg = LocalCache.findMediaInLocalMediaMap(key);
+                if (coverImg == null) {
+                    coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(key);
+                }
+            }
+
+            Log.d(TAG, "refreshView: coverImg: " + coverImg + " mShowPhoto: " + mShowPhoto);
+        }
+    }
+
+    class RecommendAlbumViewHolder extends BaseAlbumViewHolder {
+
+        @BindView(R.id.network_image_view)
+        NetworkImageView networkImageView;
+        @BindView(R.id.time)
+        TextView mTimeTextView;
+        @BindView(R.id.photo_count)
+        TextView mPhotoCountTextView;
+
+        RecommendAlbumViewHolder(View itemView) {
+            super(itemView);
+
+            ButterKnife.bind(this, itemView);
+        }
+
+        void refreshView(int position, MediaShare mediaShare) {
+
+            super.refreshView(position, mediaShare);
+
+            if (coverImg != null && mShowPhoto) {
+
+                String imageUrl = coverImg.getImageThumbUrl(containerActivity);
+
+                mImageLoader.setShouldCache(!coverImg.isLocal());
+
+                if (coverImg.isLocal())
+                    networkImageView.setOrientationNumber(coverImg.getOrientationNumber());
+
+                networkImageView.setTag(imageUrl);
+                networkImageView.setDefaultImageResId(R.drawable.default_place_holder);
+//                ivMainPic.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
+                networkImageView.setImageUrl(imageUrl, mImageLoader);
+
+            } else {
+                networkImageView.setDefaultImageResId(R.drawable.default_place_holder);
+//                ivMainPic.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
+                networkImageView.setImageUrl(null, mImageLoader);
+
+            }
+
+            mTimeTextView.setText(currentItem.getRecommendPhotoTime());
+
+            Log.i(TAG, "refreshView: media contents list size: " + currentItem.getMediaContentsListSize());
+
+            int mediaContentsListSize = currentItem.getMediaContentsListSize();
+
+            String count = mediaContentsListSize + " " + containerActivity.getResources().getQuantityString(R.plurals.photo, mediaContentsListSize);
+
+            mPhotoCountTextView.setText(count);
+        }
+    }
+
+    class AlbumListViewHolder extends BaseAlbumViewHolder {
 
         @BindView(R.id.mainBar)
         RelativeLayout mainBar;
@@ -299,8 +422,6 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         @BindView(R.id.spacing_layout)
         View mSpacingLayout;
 
-        Media coverImg;
-        MediaShare currentItem;
 
         AlbumListViewHolder(View view) {
 
@@ -311,27 +432,13 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
         void refreshView(int position, MediaShare mediaShare) {
 
+            super.refreshView(position, mediaShare);
+
 /*            if (position == 0) {
                 mSpacingLayout.setVisibility(View.VISIBLE);
             } else {
                 mSpacingLayout.setVisibility(View.GONE);
             }*/
-
-            currentItem = mediaShare;
-            restoreSwipeLayoutState();
-
-            String key = currentItem.getCoverImageUUID();
-
-            if (key.isEmpty()) {
-                coverImg = null;
-            } else {
-                coverImg = LocalCache.findMediaInLocalMediaMap(key);
-                if (coverImg == null) {
-                    coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(key);
-                }
-            }
-
-            Log.d(TAG, "refreshView: coverImg: " + coverImg + " mShowPhoto: " + mShowPhoto);
 
             if (coverImg != null && mShowPhoto) {
 

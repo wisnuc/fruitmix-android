@@ -60,6 +60,8 @@ public class LocalCache {
 
     public static List<String> mediaKeysInCreateAlbum = null;
 
+    public static List<MediaShare> RecommendMediaShares = null;
+
     //optimize get media from db, modify send media info mode: use static list instead of put it into bundle
 
     // optimize photo list view refresh view when data is too large
@@ -154,6 +156,11 @@ public class LocalCache {
             LocalLoggedInUsers = new ArrayList<>();
         else
             LocalLoggedInUsers.clear();
+
+        if (RecommendMediaShares == null)
+            RecommendMediaShares = new ArrayList<>();
+        else
+            RecommendMediaShares.clear();
 
         return true;
     }

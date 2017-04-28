@@ -33,6 +33,9 @@ public class MediaShare implements Parcelable {
     private String shareDigest;
     private boolean isSticky;
 
+    private boolean isRecommend;
+    private String recommendPhotoTime;
+
     public MediaShare() {
         mediaShareContents = new ArrayList<>();
         viewers = new ArrayList<>();
@@ -457,5 +460,22 @@ public class MediaShare implements Parcelable {
     public boolean checkPermissionToOperate() {
         return checkMaintainersListContainCurrentUserUUID() || getCreatorUUID().equals(FNAS.userUUID);
     }
+
+    public boolean isRecommend() {
+        return isRecommend;
+    }
+
+    public void setRecommend(boolean recommend) {
+        isRecommend = recommend;
+    }
+
+    public String getRecommendPhotoTime() {
+        return recommendPhotoTime;
+    }
+
+    public void setRecommendPhotoTime(String recommendPhotoTime) {
+        this.recommendPhotoTime = recommendPhotoTime;
+    }
+
 
 }

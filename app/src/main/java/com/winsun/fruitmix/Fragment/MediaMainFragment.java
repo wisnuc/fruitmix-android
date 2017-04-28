@@ -508,6 +508,26 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         });
     }
 
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void handleStickyOperationEvent(OperationEvent operationEvent) {
+
+        String action = operationEvent.getAction();
+
+        Log.i(TAG, "handleStickyOperationEvent: action: " + action);
+
+        switch (action) {
+
+            case Util.RECOMMEND_ALBUM_CREATED:
+
+                EventBus.getDefault().removeStickyEvent(operationEvent);
+
+                albumList.refreshRecommendAlbum();
+
+                break;
+        }
+
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
@@ -631,6 +651,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         }
 
     }
+
 
     public void setPhotoListRefresh() {
         if (Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && Util.isRemoteMediaLoaded())

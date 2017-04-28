@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.transition.ArcMotion;
@@ -21,6 +22,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.github.druk.rxdnssd.BonjourService;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.Equipment;
@@ -29,12 +31,18 @@ import com.winsun.fruitmix.model.LoginType;
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.MessageDigest;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -104,6 +112,8 @@ public class Util {
     public static final String DOWNLOADED_FILE_RETRIEVED = "downloaded_file_retrieved";
 
     public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
+
+    public static final String RECOMMEND_ALBUM_CREATED = "recommend_album_created";
 
     public static final String NEED_SHOW_MENU = "need_show_menu";
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
@@ -600,6 +610,5 @@ public class Util {
         return model + "-" + serialNumber;
 
     }
-
 
 }

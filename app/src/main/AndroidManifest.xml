@@ -198,11 +198,13 @@
         <activity
             android:name=".AccountManageActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".TestPhotoListActivity"
             android:screenOrientation="portrait" />
 
+        <service
+            android:name=".services.CreateRecommendAlbumService"
+            android:exported="false" />
     </application>
 
 </manifest>
