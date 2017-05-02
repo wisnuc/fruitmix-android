@@ -1,15 +1,12 @@
 package com.winsun.fruitmix.mediaModule;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
@@ -20,14 +17,11 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
-import com.umeng.analytics.MobclickAgent;
-import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -305,10 +299,10 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
 
         if (requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            loadMedia(new ArrayList<>(LocalCache.mediaKeysInCreateAlbum), true, true);
+            loadMedia(new ArrayList<>(LocalCache.mediaUUIDsInCreateAlbum), true, true);
 
-            fillMediaShareContents(LocalCache.mediaKeysInCreateAlbum);
-            LocalCache.mediaKeysInCreateAlbum.clear();
+            fillMediaShareContents(LocalCache.mediaUUIDsInCreateAlbum);
+            LocalCache.mediaUUIDsInCreateAlbum.clear();
 
         }
     }

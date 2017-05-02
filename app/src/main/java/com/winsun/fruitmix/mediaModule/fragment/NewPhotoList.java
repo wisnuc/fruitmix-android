@@ -5,7 +5,6 @@ import android.animation.AnimatorInflater;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.support.annotation.NonNull;
@@ -16,7 +15,6 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.transition.Transition;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -44,19 +42,13 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.util.CustomTransitionListener;
-import com.winsun.fruitmix.util.EnterPatternPathMotion;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.ReturnPatternPathMotion;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -470,6 +462,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                     String mediaUUID = media.getUuid();
                     if (mediaUUID.isEmpty()) {
                         mediaUUID = Util.CalcSHA256OfFile(media.getOriginalPhotoPath());
+                        media.setUuid(mediaUUID);
                     }
 
                     selectedImageUUIDs.add(mediaUUID);
@@ -522,16 +515,16 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         Intent intent = new Intent();
         intent.setClass(containerActivity, CreateAlbumActivity.class);
 
-        LocalCache.mediaKeysInCreateAlbum.addAll(selectKeys);
+        LocalCache.mediaUUIDsInCreateAlbum.addAll(selectKeys);
 
         containerActivity.startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
 
         clearSelectedPhoto();
     }
 
-    public void createShare(List<String> selectMediaKeys) {
+    public void createShare(List<String> selectMediaUUIDs) {
 
-        FNAS.createRemoteMediaShare(containerActivity, Util.generateMediaShare(false,true,false,"","",selectMediaKeys));
+        FNAS.createRemoteMediaShare(containerActivity, Util.createMediaShare(false,true,false,"","",selectMediaUUIDs));
 
         clearSelectedPhoto();
     }

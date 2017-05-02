@@ -11,13 +11,13 @@ import java.util.List;
  * Created by Administrator on 2017/4/28.
  */
 
-public abstract class ChooseRecommendAlbumStrategy {
+public abstract class RecommendAlbumStrategy {
 
     double averageValueWeightedValue = 1;
 
     int days = 1;
 
-    ChooseRecommendAlbumStrategy(int days, double averageValueWeightedValue) {
+    RecommendAlbumStrategy(int days, double averageValueWeightedValue) {
         this.days = days;
         this.averageValueWeightedValue = averageValueWeightedValue;
     }

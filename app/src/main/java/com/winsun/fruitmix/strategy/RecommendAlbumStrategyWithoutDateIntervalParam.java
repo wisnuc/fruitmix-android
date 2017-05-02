@@ -12,9 +12,9 @@ import java.util.List;
  * Created by Administrator on 2017/4/28.
  */
 
-public class ChooseRecommendAlbumStrategyA extends ChooseRecommendAlbumStrategy {
+public class RecommendAlbumStrategyWithoutDateIntervalParam extends RecommendAlbumStrategy {
 
-    public ChooseRecommendAlbumStrategyA(int days, double averageValueWeightedValue) {
+    public RecommendAlbumStrategyWithoutDateIntervalParam(int days, double averageValueWeightedValue) {
         super(days, averageValueWeightedValue);
     }
 
@@ -25,7 +25,7 @@ public class ChooseRecommendAlbumStrategyA extends ChooseRecommendAlbumStrategy 
 
         Collection<List<Long>> results = new ArrayList<>();
 
-        List<Long> greatThanAverageValue = null;
+        List<Long> greatThanAverageValue = new ArrayList<>();
 
         for (Long time : times) {
 
@@ -33,32 +33,29 @@ public class ChooseRecommendAlbumStrategyA extends ChooseRecommendAlbumStrategy 
 
             if (photoCount > photoCountAverageValue * averageValueWeightedValue) {
 
-                if (greatThanAverageValueCount == 0)
-                    greatThanAverageValue = new ArrayList<>();
-
                 greatThanAverageValueCount++;
 
                 greatThanAverageValue.add(time);
             } else {
 
-                greatThanAverageValueCount = 0;
+                if (greatThanAverageValueCount >= days) {
 
-                if (greatThanAverageValue != null)
-                    greatThanAverageValue.clear();
+                    results.add(new ArrayList<>(greatThanAverageValue));
 
-            }
-
-            if (greatThanAverageValueCount >= days) {
-                greatThanAverageValueCount = 0;
-
-                if (greatThanAverageValue != null) {
-
-                    results.add(greatThanAverageValue);
-
-                    greatThanAverageValue = null;
                 }
 
+                greatThanAverageValueCount = 0;
+
+                greatThanAverageValue.clear();
+
             }
+
+        }
+
+        //check the end
+        if (greatThanAverageValueCount >= days) {
+
+            results.add(new ArrayList<>(greatThanAverageValue));
 
         }
 

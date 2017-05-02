@@ -1,7 +1,5 @@
 package com.winsun.fruitmix.mediaModule;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
@@ -9,12 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.umeng.analytics.MobclickAgent;
-import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
@@ -91,7 +85,7 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
 
                 if (intent.getBooleanExtra(Util.EDIT_PHOTO, false)) {
 
-                    LocalCache.mediaKeysInCreateAlbum.addAll(selectImageKeys);
+                    LocalCache.mediaUUIDsInCreateAlbum.addAll(selectImageKeys);
                     mNewPhotoList.clearSelectedPhoto();
 
                     setResult(RESULT_OK, intent);

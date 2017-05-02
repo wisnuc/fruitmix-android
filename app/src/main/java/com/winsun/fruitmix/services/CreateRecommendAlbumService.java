@@ -13,8 +13,8 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.strategy.ChooseRecommendAlbumStrategy;
-import com.winsun.fruitmix.strategy.ChooseRecommendAlbumStrategyA;
+import com.winsun.fruitmix.strategy.RecommendAlbumStrategy;
+import com.winsun.fruitmix.strategy.RecommendAlbumStrategyWithoutDateIntervalParam;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -29,6 +29,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+
+import okhttp3.OkHttpClient;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -107,7 +109,7 @@ public class CreateRecommendAlbumService extends IntentService {
 
         Log.i(TAG, "handleActionCreateRecommendAlbumService: averageValue: " + averageValue);
 
-        ChooseRecommendAlbumStrategy strategy = new ChooseRecommendAlbumStrategyA(2, 1.5);
+        RecommendAlbumStrategy strategy = new RecommendAlbumStrategyWithoutDateIntervalParam(2, 1.5);
 
         Collection<List<Long>> results = strategy.chooseRecommendAlbum(times, mapKeyIsDateValueIsMedias, averageValue);
 
@@ -128,24 +130,24 @@ public class CreateRecommendAlbumService extends IntentService {
 
     @NonNull
     private MediaShare createRecommendAlbum(SimpleDateFormat df, Date date, LongSparseArray<List<Media>> mapKeyIsDateValueIsMedias, List<Long> greatThanAverageValue) {
-        MediaShare recommendAlbum = new MediaShare();
-        recommendAlbum.setRecommend(true);
+
+        List<String> mediaUUIDs = new ArrayList<>();
 
         for (Long time1 : greatThanAverageValue) {
 
             List<Media> medias = mapKeyIsDateValueIsMedias.get(time1);
 
-            int currentMediaContentSize = recommendAlbum.getMediaContentsListSize();
+            int currentMediaUUIDsSize = mediaUUIDs.size();
             int mediaSize = medias.size();
 
             int length;
 
-            if (currentMediaContentSize == 1000) {
+            if (currentMediaUUIDsSize == 1000) {
                 break;
             }
 
-            if (currentMediaContentSize + mediaSize >= 1000) {
-                length = 1000 - currentMediaContentSize;
+            if (currentMediaUUIDsSize + mediaSize >= 1000) {
+                length = 1000 - currentMediaUUIDsSize;
             } else {
                 length = mediaSize;
             }
@@ -154,32 +156,28 @@ public class CreateRecommendAlbumService extends IntentService {
 
                 Media media = medias.get(i);
 
-                MediaShareContent mediaShareContent = new MediaShareContent();
-                mediaShareContent.setAuthor(FNAS.userUUID);
-                mediaShareContent.setMediaUUID(media.getUuid());
-                recommendAlbum.addMediaShareContent(mediaShareContent);
+                mediaUUIDs.add(media.getUuid());
+
             }
         }
 
         date.setTime(greatThanAverageValue.get(0));
         String preTime = df.format(date).substring(0, 10);
 
+        String recommendPhotoTime;
+
         if (greatThanAverageValue.size() > 1) {
 
             date.setTime(greatThanAverageValue.get(greatThanAverageValue.size() - 1));
             String lastTime = df.format(date).substring(0, 10);
 
-            recommendAlbum.setRecommendPhotoTime(preTime + " - " + lastTime);
+            recommendPhotoTime = preTime + " - " + lastTime;
         } else {
 
-            recommendAlbum.setRecommendPhotoTime(preTime);
+            recommendPhotoTime = preTime;
         }
 
-        recommendAlbum.setAlbum(true);
-
-        recommendAlbum.setCreatorUUID(FNAS.userUUID);
-        recommendAlbum.setTime(String.valueOf(System.currentTimeMillis()));
-        return recommendAlbum;
+        return Util.createMediaShare(true, true, false, "", "", mediaUUIDs, true, recommendPhotoTime);
     }
 
     private void fillTimesAndMap(Collection<Media> allLocalMedias, SimpleDateFormat df, List<Long> times, LongSparseArray<List<Media>> mapKeyIsDateValueIsMedias) {

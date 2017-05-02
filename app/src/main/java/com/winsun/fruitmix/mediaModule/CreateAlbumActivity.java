@@ -7,18 +7,16 @@ import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.toolbox.Volley;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
-import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -30,13 +28,12 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.OkHttpClient;
 
 /**
  * Created by Administrator on 2016/4/28.
@@ -63,7 +60,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
     @BindView(R.id.set_maintainer)
     CheckBox ckSetMaintainer;
 
-    private List<String> mSelectedImageKeys;
+    private List<String> mSelectedImageUUIDs;
 
     private Context mContext;
 
@@ -75,7 +72,7 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
         mContext = this;
 
-        mSelectedImageKeys = LocalCache.mediaKeysInCreateAlbum;
+        mSelectedImageUUIDs = LocalCache.mediaUUIDsInCreateAlbum;
 
         setContentView(R.layout.activity_create_album);
 
@@ -130,11 +127,11 @@ public class CreateAlbumActivity extends AppCompatActivity {
 
                 desc = tfDesc.getText().toString();
 
-                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title),getString(R.string.create_album)), true, false);
+                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_album)), true, false);
 
-                FNAS.createRemoteMediaShare(mContext, Util.generateMediaShare(true,sPublic, sSetMaintainer, title, desc, mSelectedImageKeys));
+                FNAS.createRemoteMediaShare(mContext, Util.createMediaShare(true, sPublic, sSetMaintainer, title, desc, mSelectedImageUUIDs));
 
-                LocalCache.mediaKeysInCreateAlbum.clear();
+                LocalCache.mediaUUIDsInCreateAlbum.clear();
             }
         });
 
@@ -208,8 +205,8 @@ public class CreateAlbumActivity extends AppCompatActivity {
                 boolean mCreateAlbumSucceed = operationResultType.equals(OperationResultType.SUCCEED);
                 if (mCreateAlbumSucceed) {
 
-                    MobclickAgent.onEvent(mContext,Util.CRETAE_ALUBM_UMENG_EVENT_ID);
-                    MobclickAgent.onEvent(mContext,Util.CREATE_MEDIA_SHARE_UMENG_EVENT_ID);
+                    MobclickAgent.onEvent(mContext, Util.CRETAE_ALUBM_UMENG_EVENT_ID);
+                    MobclickAgent.onEvent(mContext, Util.CREATE_MEDIA_SHARE_UMENG_EVENT_ID);
 
                     CreateAlbumActivity.this.setResult(RESULT_OK);
                 } else

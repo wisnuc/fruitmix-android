@@ -63,6 +63,43 @@ public class MediaShare implements Parcelable {
         isSticky = in.readByte() != 0;
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(uuid);
+        dest.writeString(creatorUUID);
+        dest.writeString(time);
+        dest.writeString(title);
+        dest.writeString(desc);
+        dest.writeTypedList(mediaShareContents);
+        dest.writeStringList(viewers);
+        dest.writeStringList(maintainers);
+        dest.writeByte((byte) (isAlbum ? 1 : 0));
+        dest.writeByte((byte) (isArchived ? 1 : 0));
+        dest.writeString(date);
+        dest.writeString(coverImageUUID);
+        dest.writeByte((byte) (isLocal ? 1 : 0));
+        dest.writeString(shareDigest);
+        dest.writeByte((byte) (isSticky ? 1 : 0));
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<MediaShare> CREATOR = new Creator<MediaShare>() {
+        @Override
+        public MediaShare createFromParcel(Parcel in) {
+            return new MediaShare(in);
+        }
+
+        @Override
+        public MediaShare[] newArray(int size) {
+            return new MediaShare[size];
+        }
+    };
+
     public String createToggleShareStateRequestData() {
         String requestData;
 
@@ -190,43 +227,6 @@ public class MediaShare implements Parcelable {
                 desc +
                 "\"}}";
     }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeString(uuid);
-        dest.writeString(creatorUUID);
-        dest.writeString(time);
-        dest.writeString(title);
-        dest.writeString(desc);
-        dest.writeTypedList(mediaShareContents);
-        dest.writeStringList(viewers);
-        dest.writeStringList(maintainers);
-        dest.writeByte((byte) (isAlbum ? 1 : 0));
-        dest.writeByte((byte) (isArchived ? 1 : 0));
-        dest.writeString(date);
-        dest.writeString(coverImageUUID);
-        dest.writeByte((byte) (isLocal ? 1 : 0));
-        dest.writeString(shareDigest);
-        dest.writeByte((byte) (isSticky ? 1 : 0));
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<MediaShare> CREATOR = new Creator<MediaShare>() {
-        @Override
-        public MediaShare createFromParcel(Parcel in) {
-            return new MediaShare(in);
-        }
-
-        @Override
-        public MediaShare[] newArray(int size) {
-            return new MediaShare[size];
-        }
-    };
 
     public int getId() {
         return id;
@@ -477,5 +477,68 @@ public class MediaShare implements Parcelable {
         this.recommendPhotoTime = recommendPhotoTime;
     }
 
+/*
+
+    public static class Builder {
+
+        private String uuid;
+        private String creatorUUID;
+        private String time;
+        private String title;
+        private String desc;
+        private List<MediaShareContent> mediaShareContents;
+        private List<String> viewers;
+        private List<String> maintainers;
+        private boolean isAlbum;
+        private boolean isArchived;
+        private String date;
+        private String coverImageUUID;
+        private boolean isLocal;
+        private String shareDigest;
+        private boolean isSticky;
+
+        private boolean isRecommend;
+        private String recommendPhotoTime;
+
+        public Builder(String uuid, String creatorUUID, String time, String date, boolean isAlbum, List<MediaShareContent> mediaShareContents) {
+
+            this.uuid = uuid;
+            this.creatorUUID = creatorUUID;
+            this.time = time;
+            title = "";
+            desc = "";
+
+            if (mediaShareContents != null)
+                this.mediaShareContents = mediaShareContents;
+            else
+                this.mediaShareContents = new ArrayList<>();
+
+            viewers = new ArrayList<>();
+            maintainers = new ArrayList<>();
+            this.isAlbum = isAlbum;
+            isArchived = false;
+            this.date = date;
+
+            shareDigest = "";
+            isRecommend = false;
+            recommendPhotoTime = "";
+
+        }
+
+        public Builder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder desc(String desc) {
+            this.desc = desc;
+            return this;
+        }
+
+
+
+    }
+
+*/
 
 }

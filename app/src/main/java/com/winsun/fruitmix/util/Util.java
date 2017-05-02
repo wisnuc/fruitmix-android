@@ -514,16 +514,27 @@ public class Util {
 
     }
 
-    public static MediaShare generateMediaShare(boolean isAlbum, boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaKeys) {
+    public static MediaShare createMediaShare(boolean isAlbum, boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaUUIDs,boolean isRecommend,
+                                              String recommendPhotoTime){
+
+        MediaShare mediaShare = createMediaShare(isAlbum,isPublic,otherMaintainer,title,desc,mediaUUIDs);
+
+        mediaShare.setRecommend(isRecommend);
+        mediaShare.setRecommendPhotoTime(recommendPhotoTime);
+
+        return mediaShare;
+    }
+
+    public static MediaShare createMediaShare(boolean isAlbum, boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaUUIDs) {
 
         MediaShare mediaShare = new MediaShare();
         mediaShare.setUuid(Util.createLocalUUid());
 
-        Log.i(TAG, "create album digest:" + mediaKeys);
+        Log.i(TAG, "create album digest:" + mediaUUIDs);
 
         List<MediaShareContent> mediaShareContents = new ArrayList<>();
 
-        for (String mediaKey : mediaKeys) {
+        for (String mediaKey : mediaUUIDs) {
             MediaShareContent mediaShareContent = new MediaShareContent();
             mediaShareContent.setMediaUUID(mediaKey);
             mediaShareContent.setAuthor(FNAS.userUUID);
@@ -534,7 +545,7 @@ public class Util {
 
         mediaShare.initMediaShareContents(mediaShareContents);
 
-        mediaShare.setCoverImageUUID(mediaKeys.get(0));
+        mediaShare.setCoverImageUUID(mediaUUIDs.get(0));
 
         mediaShare.setTitle(title);
         mediaShare.setDesc(desc);

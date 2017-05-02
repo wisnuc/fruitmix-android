@@ -20,7 +20,7 @@ public class FileUtilTest {
     }
 
     @Test
-    public void f(){
+    public void percentTest(){
 
         float percent = 400 * 100 / 7000;
 

@@ -58,7 +58,7 @@ public class LocalCache {
 
     public static List<LoggedInUser> LocalLoggedInUsers = null;
 
-    public static List<String> mediaKeysInCreateAlbum = null;
+    public static List<String> mediaUUIDsInCreateAlbum = null;
 
     public static List<MediaShare> RecommendMediaShares = null;
 
@@ -144,10 +144,10 @@ public class LocalCache {
         else
             RemoteFileShareList.clear();
 
-        if (mediaKeysInCreateAlbum == null)
-            mediaKeysInCreateAlbum = new ArrayList<>();
+        if (mediaUUIDsInCreateAlbum == null)
+            mediaUUIDsInCreateAlbum = new ArrayList<>();
         else
-            mediaKeysInCreateAlbum.clear();
+            mediaUUIDsInCreateAlbum.clear();
 
         if (LocalMediaMapKeyIsOriginalPhotoPath == null)
             LocalMediaMapKeyIsOriginalPhotoPath = new ConcurrentHashMap<>();
