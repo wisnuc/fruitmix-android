@@ -35,6 +35,9 @@ public class Media implements Parcelable {
     private String miniThumbPath;
     private String originalPhotoPath;
 
+    private String longitude;
+    private String latitude;
+
     public Media() {
         uuid = "";
         orientationNumber = 1;
@@ -48,6 +51,9 @@ public class Media implements Parcelable {
         local = false;
         miniThumbPath = "";
         originalPhotoPath = "";
+
+        longitude = "";
+        latitude = "";
     }
 
     protected Media(Parcel in) {
@@ -235,6 +241,22 @@ public class Media implements Parcelable {
             this.originalPhotoPath = originalPhotoPath;
     }
 
+    public String getLatitude() {
+        return latitude == null ? "" : latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude == null ? "" : longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
     public synchronized boolean uploadIfNotDone(DBUtils dbUtils) {
 
         boolean uploaded;
@@ -269,7 +291,7 @@ public class Media implements Parcelable {
             if (imageUrl.isEmpty())
                 imageUrl = getThumb();
 
-            if(imageUrl.isEmpty()){
+            if (imageUrl.isEmpty()) {
                 imageUrl = getOriginalPhotoPath();
             }
 
@@ -291,7 +313,7 @@ public class Media implements Parcelable {
         if (isLocal()) {
             imageUrl = getThumb();
 
-            if(imageUrl.isEmpty()){
+            if (imageUrl.isEmpty()) {
                 imageUrl = getOriginalPhotoPath();
             }
 

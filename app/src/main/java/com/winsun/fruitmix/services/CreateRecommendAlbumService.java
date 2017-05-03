@@ -88,6 +88,11 @@ public class CreateRecommendAlbumService extends IntentService {
 
         fillTimesAndMap(allLocalMedias, df, times, mapKeyIsDateValueIsMedias);
 
+        int mapSize = mapKeyIsDateValueIsMedias.size();
+
+        if (mapSize == 0)
+            return recommendAlbums;
+
         Collections.sort(times, new Comparator<Long>() {
             @Override
             public int compare(Long lhs, Long rhs) {

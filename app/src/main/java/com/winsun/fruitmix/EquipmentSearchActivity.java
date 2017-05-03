@@ -620,17 +620,19 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 JSONArray json;
                 String str;
 
+                int length;
+
                 try {
 
-                    String url = Util.HTTP + equipment.getHosts().get(0) + ":" + SYSTEM_PORT + IPALIASING;
+                    String ipaliasingUrl = Util.HTTP + equipment.getHosts().get(0) + ":" + SYSTEM_PORT + IPALIASING;
 
-                    Log.d(TAG, "login retrieve equipment alias:" + url);
+                    Log.d(TAG, "login retrieve equipment alias:" + ipaliasingUrl);
 
-                    str = FNAS.RemoteCallWithUrl(url).getResponseData();
+                    str = FNAS.RemoteCallWithUrl(ipaliasingUrl).getResponseData();
 
                     json = new JSONArray(str);
 
-                    int length = json.length();
+                    length = json.length();
 
                     for (int i = 0; i < length; i++) {
                         itemRaw = json.getJSONObject(i);
@@ -643,7 +645,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         }
                     }
 
-                    url = Util.HTTP + equipment.getHosts().get(0) + ":" + FNAS.PORT + Util.LOGIN_PARAMETER;
+                    String url = Util.HTTP + equipment.getHosts().get(0) + ":" + FNAS.PORT + Util.LOGIN_PARAMETER;
 
                     Log.d(TAG, "login url:" + url);
 

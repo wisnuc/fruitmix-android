@@ -475,7 +475,9 @@ public class LocalCache {
 
     public static List<Media> PhotoList(Context context, String bucketName) {
         ContentResolver cr;
-        String[] fields = {MediaStore.Images.Media._ID, MediaStore.Images.Media.HEIGHT, MediaStore.Images.Media.WIDTH, MediaStore.Images.Media.DATA, MediaStore.Images.Media.ORIENTATION};
+        String[] fields = {MediaStore.Images.Media._ID, MediaStore.Images.Media.HEIGHT,
+                MediaStore.Images.Media.WIDTH, MediaStore.Images.Media.DATA, MediaStore.Images.Media.ORIENTATION,
+                MediaStore.Images.Media.LATITUDE, MediaStore.Images.Media.LONGITUDE};
         Cursor cursor;
         List<Media> mediaList;
         Media media;
@@ -532,8 +534,6 @@ public class LocalCache {
             if (originalPhotoPath.contains(FileUtil.getOriginalPhotoFolderPath()))
                 continue;
 
-            Log.d(TAG, "PhotoList: originalPhotoPath: " + originalPhotoPath);
-
             media = new Media();
             media.setOriginalPhotoPath(originalPhotoPath);
             media.setWidth(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)));
@@ -567,6 +567,14 @@ public class LocalCache {
             media.setLocal(true);
             media.setSharing(true);
             media.setUuid("");
+
+            String longitude = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.LONGITUDE));
+            String latitude = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.LATITUDE));
+
+            Log.d(TAG, "PhotoList: originalPhotoPath: " + media.getOriginalPhotoPath() + " longitude: " + longitude + " latitude: " + latitude);
+
+            media.setLongitude(longitude);
+            media.setLatitude(latitude);
 
             mediaList.add(media);
 

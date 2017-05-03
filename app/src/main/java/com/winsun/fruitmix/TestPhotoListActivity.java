@@ -1,7 +1,6 @@
 package com.winsun.fruitmix;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -56,7 +55,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
     //TODO use SparseArray or ArrayMap to optimize memory use effect
 
-    private SparseArray<String> mMapKeyIsPhotoPositionValueIsPhotoDate;
+    private Map<Integer,String> mMapKeyIsPhotoPositionValueIsPhotoDate;
     private SparseArray<Media> mMapKeyIsPhotoPositionValueIsPhoto;
 
     private List<Media> medias;
@@ -118,10 +117,10 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
     private void doAfterReloadData(NewPhotoListDataLoader loader) {
 
-        List<String> mPhotoDateGroups = loader.getmPhotoDateGroups();
-        mMapKeyIsDateValueIsPhotoList = loader.getmMapKeyIsDateValueIsPhotoList();
-        mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getmMapKeyIsPhotoPositionValueIsPhotoDate();
-        mMapKeyIsPhotoPositionValueIsPhoto = loader.getmMapKeyIsPhotoPositionValueIsPhoto();
+        List<String> mPhotoDateGroups = loader.getPhotoDateGroups();
+        mMapKeyIsDateValueIsPhotoList = loader.getMapKeyIsDateValueIsPhotoList();
+        mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getMapKeyIsPhotoPositionValueIsPhotoDate();
+        mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
         medias = new ArrayList<>();
 
         for (Media media : loader.getMedias()) {
@@ -339,7 +338,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
                 position = getItemCount() - 1;
             }
 
-            if (mMapKeyIsPhotoPositionValueIsPhotoDate.indexOfKey(position) >= 0)
+            if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsKey(position))
                 title = mMapKeyIsPhotoPositionValueIsPhotoDate.get(position);
             else {
                 title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDate();

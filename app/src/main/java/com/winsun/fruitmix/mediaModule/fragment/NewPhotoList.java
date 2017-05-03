@@ -93,9 +93,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
 
-    //TODO use SparseArray or ArrayMap to optimize memory use effect
+    private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
 
-    private SparseArray<String> mMapKeyIsPhotoPositionValueIsPhotoDate;
     private SparseArray<Media> mMapKeyIsPhotoPositionValueIsPhoto;
 
     private List<Media> medias;
@@ -228,6 +227,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                     mIsLoaded = true;
                 }
             });
+
         } else {
 
             mLoadingLayout.setVisibility(View.VISIBLE);
@@ -244,11 +244,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private void doAfterReloadData(NewPhotoListDataLoader loader) {
 
-        List<String> mPhotoDateGroups = loader.getmPhotoDateGroups();
-        mAdapterItemTotalCount = loader.getmAdapterItemTotalCount();
-        mMapKeyIsDateValueIsPhotoList = loader.getmMapKeyIsDateValueIsPhotoList();
-        mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getmMapKeyIsPhotoPositionValueIsPhotoDate();
-        mMapKeyIsPhotoPositionValueIsPhoto = loader.getmMapKeyIsPhotoPositionValueIsPhoto();
+        List<String> mPhotoDateGroups = loader.getPhotoDateGroups();
+        mAdapterItemTotalCount = loader.getAdapterItemTotalCount();
+        mMapKeyIsDateValueIsPhotoList = loader.getMapKeyIsDateValueIsPhotoList();
+        mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getMapKeyIsPhotoPositionValueIsPhotoDate();
+        mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
         medias = loader.getMedias();
 
         mLoadingLayout.setVisibility(View.GONE);
@@ -524,7 +524,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     public void createShare(List<String> selectMediaUUIDs) {
 
-        FNAS.createRemoteMediaShare(containerActivity, Util.createMediaShare(false,true,false,"","",selectMediaUUIDs));
+        FNAS.createRemoteMediaShare(containerActivity, Util.createMediaShare(false, true, false, "", "", selectMediaUUIDs));
 
         clearSelectedPhoto();
     }
@@ -621,8 +621,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private class PhotoRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        private static final int VIEW_TYPE_HEAD = 0;
-        private static final int VIEW_TYPE_CONTENT = 1;
+        private static final int VIEW_TYPE_HEAD = 0x1000;
+        private static final int VIEW_TYPE_CONTENT = 0x1001;
 
         private int mSubHeaderHeight = containerActivity.getResources().getDimensionPixelSize(R.dimen.photo_title_height);
 
@@ -680,7 +680,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         @Override
         public int getItemViewType(int position) {
-            if (mMapKeyIsPhotoPositionValueIsPhotoDate.indexOfKey(position) >= 0)
+            if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsKey(position))
                 return VIEW_TYPE_HEAD;
             else
                 return VIEW_TYPE_CONTENT;
@@ -712,7 +712,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 position = getItemCount() - 1;
             }
 
-            if (mMapKeyIsPhotoPositionValueIsPhotoDate.indexOfKey(position) >= 0)
+            if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsKey(position))
                 title = mMapKeyIsPhotoPositionValueIsPhotoDate.get(position);
             else {
 

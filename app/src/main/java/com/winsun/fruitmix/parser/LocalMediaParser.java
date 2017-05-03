@@ -21,7 +21,7 @@ public class LocalMediaParser implements LocalDataParser<Media> {
         media.setThumb(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_THUMB)));
         media.setLocal(cursor.getInt(cursor.getColumnIndex(DBHelper.MEDIA_KEY_LOCAL)) == 1);
 
-        if(!cursor.isNull(cursor.getColumnIndex(DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID))){
+        if (!cursor.isNull(cursor.getColumnIndex(DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID))) {
             media.setUploadedDeviceIDs(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID)));
         }
 
@@ -30,6 +30,9 @@ public class LocalMediaParser implements LocalDataParser<Media> {
         media.setType(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_TYPE)));
         media.setMiniThumbPath(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_MINI_THUMB)));
         media.setOriginalPhotoPath(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH)));
+
+        media.setLongitude(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_LONGITUDE)));
+        media.setLatitude(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_LATITUDE)));
 
         return media;
     }
