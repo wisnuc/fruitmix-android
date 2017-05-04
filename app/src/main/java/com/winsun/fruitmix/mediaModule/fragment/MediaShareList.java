@@ -97,6 +97,8 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
     private List<IPhotoListListener> mPhotoListListeners;
 
+    private boolean mIsFling = false;
+
     public MediaShareList(Activity activity_, OnMediaFragmentInteractionListener listener) {
         containerActivity = activity_;
 
@@ -110,7 +112,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
         noContentTextView.setText(containerActivity.getString(R.string.no_media_shares));
 
-//        mainRecyclerView.addOnScrollListener(new ShareRecycleViewScrollListener());
+        mainRecyclerView.addOnScrollListener(new ShareRecycleViewScrollListener());
 
         mAdapter = new ShareRecyclerViewAdapter();
         mainRecyclerView.setAdapter(mAdapter);
@@ -333,7 +335,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
         private static final int VIEW_ONE_MEDIA_SHARE_CARD_ITEM = 2;
 
         ShareRecyclerViewAdapter() {
-
+            setHasStableIds(true);
         }
 
         @Override
@@ -685,6 +687,8 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
 //                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, ivCover, transitionName);
 
+                        intent.putExtra(Util.KEY_NEED_TRANSITION,true);
+
                         containerActivity.startActivity(intent, options.toBundle());
                     } else {
 
@@ -923,6 +927,8 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
 //                            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, transitionView, transitionName);
 
+                            intent.putExtra(Util.KEY_NEED_TRANSITION,true);
+
                             containerActivity.startActivity(intent, options.toBundle());
 
                         } else {
@@ -942,33 +948,41 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
 
-            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+            if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
+                mIsFling = true;
+            } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                for (IPhotoListListener listener : mPhotoListListeners) {
-                    listener.onPhotoListScrollFinished();
+                if(mIsFling){
+                    mIsFling = false;
+
+                    mAdapter.notifyDataSetChanged();
                 }
+
+//                for (IPhotoListListener listener : mPhotoListListeners) {
+//                    listener.onPhotoListScrollFinished();
+//                }
 
             }
         }
 
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-
-            if (dy > 0) {
-
-                for (IPhotoListListener listener : mPhotoListListeners) {
-                    listener.onPhotoListScrollDown();
-                }
-
-            } else if (dy < 0) {
-
-                for (IPhotoListListener listener : mPhotoListListeners) {
-                    listener.onPhotoListScrollUp();
-                }
-
-            }
-        }
+//        @Override
+//        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+//            super.onScrolled(recyclerView, dx, dy);
+//
+//            if (dy > 0) {
+//
+//                for (IPhotoListListener listener : mPhotoListListeners) {
+//                    listener.onPhotoListScrollDown();
+//                }
+//
+//            } else if (dy < 0) {
+//
+//                for (IPhotoListListener listener : mPhotoListListeners) {
+//                    listener.onPhotoListScrollUp();
+//                }
+//
+//            }
+//        }
     }
 
 

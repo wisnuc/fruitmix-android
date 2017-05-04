@@ -146,7 +146,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         ButterKnife.bind(this);
 
-        needTransition = getIntent().getBooleanExtra(Util.KEY_NEED_TRANSITION, true);
+        needTransition = getIntent().getBooleanExtra(Util.KEY_NEED_TRANSITION, false);
 
         Log.d(TAG, "onCreate: needTransition:" + needTransition);
 

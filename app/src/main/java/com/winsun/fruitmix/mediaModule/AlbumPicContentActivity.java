@@ -389,27 +389,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
     }
 
-    private void showPhotoSlider(int position, View sharedElement, String sharedElementName) {
-
-        Util.setMotion(position, SPAN_COUNT);
-
-        PhotoSliderActivity.setMediaList(mediaList);
-
-        Intent intent = new Intent();
-        intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
-        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, mShowCommentBtn);
-        intent.setClass(this, PhotoSliderActivity.class);
-
-        Pair mediaPair = new Pair<>(sharedElement, sharedElementName);
-
-        Pair[] pairs = Util.createSafeTransitionPairs(this, false, mediaPair);
-
-        ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, pairs);
-
-//        ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, sharedElement, sharedElementName);
-        startActivity(intent, optionsCompat.toBundle());
-    }
-
     class PicGridViewAdapter extends RecyclerView.Adapter<AlbumContentViewHolder> {
 
         AlbumPicContentActivity activity;
@@ -486,9 +465,37 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
 
-                    String sharedElementName = currentItem.getKey();
-                    ViewCompat.setTransitionName(networkImageView, sharedElementName);
-                    showPhotoSlider(position, networkImageView, currentItem.getKey());
+                    PhotoSliderActivity.setMediaList(mediaList);
+
+                    Intent intent = new Intent();
+                    intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
+                    intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, mShowCommentBtn);
+                    intent.setClass(AlbumPicContentActivity.this, PhotoSliderActivity.class);
+
+                    if (networkImageView.isLoaded()) {
+                        String sharedElementName = currentItem.getKey();
+                        ViewCompat.setTransitionName(networkImageView, sharedElementName);
+
+                        Util.setMotion(position, SPAN_COUNT);
+
+                        Pair mediaPair = new Pair<>((View) networkImageView, currentItem.getKey());
+
+                        Pair[] pairs = Util.createSafeTransitionPairs(AlbumPicContentActivity.this, false, mediaPair);
+
+                        ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(AlbumPicContentActivity.this, pairs);
+
+                        intent.putExtra(Util.KEY_NEED_TRANSITION,true);
+
+//        ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this, sharedElement, sharedElementName);
+                        startActivity(intent, optionsCompat.toBundle());
+                    } else {
+
+                        intent.putExtra(Util.KEY_NEED_TRANSITION, false);
+                        startActivity(intent);
+
+                    }
+
+
                 }
             });
 

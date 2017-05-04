@@ -115,7 +115,7 @@ public class MoreMediaActivity extends AppCompatActivity {
                 }
 
             }
-        },true,true);
+        }, true, true);
     }
 
     @Override
@@ -196,6 +196,7 @@ public class MoreMediaActivity extends AppCompatActivity {
                     intent.putExtra(Util.INITIAL_PHOTO_POSITION, getAdapterPosition());
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                     intent.setClass(mContext, PhotoSliderActivity.class);
+                    intent.putExtra(Util.KEY_NEED_TRANSITION, false);
                     startActivity(intent);
                 }
             });

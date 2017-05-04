@@ -626,19 +626,21 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         private int mSubHeaderHeight = containerActivity.getResources().getDimensionPixelSize(R.dimen.photo_title_height);
 
+        PhotoRecycleAdapter() {
+            setHasStableIds(true);
+        }
+
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            int type = getItemViewType(position);
-            switch (type) {
-                case VIEW_TYPE_HEAD:
-                    PhotoGroupHolder groupHolder = (PhotoGroupHolder) holder;
-                    groupHolder.refreshView(position);
-                    break;
-                case VIEW_TYPE_CONTENT:
-                    PhotoHolder photoHolder = (PhotoHolder) holder;
-                    photoHolder.refreshView(position);
-                    break;
+
+            if (holder instanceof PhotoGroupHolder) {
+                PhotoGroupHolder groupHolder = (PhotoGroupHolder) holder;
+                groupHolder.refreshView(position);
+            } else if (holder instanceof PhotoHolder) {
+                PhotoHolder photoHolder = (PhotoHolder) holder;
+                photoHolder.refreshView(position);
             }
+
         }
 
         @Override
@@ -1066,6 +1068,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                                     makeSceneTransitionAnimation(containerActivity, pairs);
 
 //                              ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, mPhotoIv, currentMedia.getKey());
+
+                            intent.putExtra(Util.KEY_NEED_TRANSITION,true);
 
                             containerActivity.startActivity(intent, options.toBundle());
 

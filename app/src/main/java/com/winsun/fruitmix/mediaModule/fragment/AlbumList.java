@@ -83,6 +83,8 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
     private boolean mFillRecommendAlbum = false;
 
+    private boolean mIsFling = false;
+
     public AlbumList(Activity activity_, OnMediaFragmentInteractionListener listener) {
 
         containerActivity = activity_;
@@ -252,6 +254,10 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
         static final int NORMAL_ALBUM = 0x1001;
         static final int RECOMMEND_ALBUM = 0x1002;
+
+        AlbumRecyclerViewAdapter() {
+//            setHasStableIds(true);
+        }
 
         @Override
         public int getItemViewType(int position) {
@@ -572,33 +578,41 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
 
-            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+            if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
+                mIsFling = true;
+            } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
 
-                for (IPhotoListListener listener : mPhotoListListeners) {
-                    listener.onPhotoListScrollFinished();
+                if (mIsFling) {
+                    mIsFling = false;
+
+                    mAdapter.notifyDataSetChanged();
                 }
+
+//                for (IPhotoListListener listener : mPhotoListListeners) {
+//                    listener.onPhotoListScrollFinished();
+//                }
 
             }
         }
 
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-
-            if (dy > 0) {
-
-                for (IPhotoListListener listener : mPhotoListListeners) {
-                    listener.onPhotoListScrollDown();
-                }
-
-            } else if (dy < 0) {
-
-                for (IPhotoListListener listener : mPhotoListListeners) {
-                    listener.onPhotoListScrollUp();
-                }
-
-            }
-        }
+//        @Override
+//        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+//            super.onScrolled(recyclerView, dx, dy);
+//
+//            if (dy > 0) {
+//
+//                for (IPhotoListListener listener : mPhotoListListeners) {
+//                    listener.onPhotoListScrollDown();
+//                }
+//
+//            } else if (dy < 0) {
+//
+//                for (IPhotoListListener listener : mPhotoListListeners) {
+//                    listener.onPhotoListScrollUp();
+//                }
+//
+//            }
+//        }
     }
 
 }
