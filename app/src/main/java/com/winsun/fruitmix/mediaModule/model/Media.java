@@ -38,6 +38,8 @@ public class Media implements Parcelable {
     private String longitude;
     private String latitude;
 
+    private Address address;
+
     public Media() {
         uuid = "";
         orientationNumber = 1;
@@ -255,6 +257,14 @@ public class Media implements Parcelable {
 
     public void setLongitude(String longitude) {
         this.longitude = longitude;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
     public synchronized boolean uploadIfNotDone(DBUtils dbUtils) {

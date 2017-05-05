@@ -205,6 +205,9 @@
         <service
             android:name=".services.CreateRecommendAlbumService"
             android:exported="false" />
+        <service
+            android:name=".services.ReverseGeocodeService"
+            android:exported="false" />
     </application>
 
 </manifest>
