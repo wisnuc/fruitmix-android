@@ -48,7 +48,9 @@ public class RetrieveOriginalPhotoTask implements Callable<Boolean> {
 
             Log.d(TAG, "call: media uuid:" + media.getUuid());
 
-            Call<ResponseBody> call = fileDownloadUploadInterface.downloadFile(FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + media.getUuid() + "/download");
+            String downloadMediaUrl = FNAS.getDownloadOriginalMediaUrl(media);
+
+            Call<ResponseBody> call = fileDownloadUploadInterface.downloadFile(downloadMediaUrl);
 
             boolean result = false;
             try {

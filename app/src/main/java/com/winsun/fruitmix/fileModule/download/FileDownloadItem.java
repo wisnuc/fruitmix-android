@@ -14,10 +14,19 @@ public class FileDownloadItem {
     private String fileCreatorUUID;
     private FileDownloadState fileDownloadState;
 
+    private String parentFolderUUID;
+
     public FileDownloadItem(String fileName, long fileSize, String fileUUID) {
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.fileUUID = fileUUID;
+    }
+
+    public FileDownloadItem(String fileName, long fileSize, String fileUUID, String parentFolderUUID) {
+        this.fileName = fileName;
+        this.fileUUID = fileUUID;
+        this.fileSize = fileSize;
+        this.parentFolderUUID = parentFolderUUID;
     }
 
     public void setFileDownloadState(FileDownloadState fileDownloadState) {
@@ -74,5 +83,9 @@ public class FileDownloadItem {
 
     public void setFileCreatorUUID(String fileCreatorUUID) {
         this.fileCreatorUUID = fileCreatorUUID;
+    }
+
+    public String getParentFolderUUID() {
+        return parentFolderUUID;
     }
 }

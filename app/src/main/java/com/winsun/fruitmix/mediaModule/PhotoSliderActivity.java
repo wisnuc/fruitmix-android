@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.mediaModule;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +8,9 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
+import android.support.v4.util.Pair;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
@@ -29,6 +32,7 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.IImageLoadListener;
+import com.android.volley.toolbox.NetworkImageView;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
@@ -135,6 +139,39 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         }
     };
+
+    public static void startPhotoSliderActivity(Activity activity, List<Media> transitionMedias, Intent intent, int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
+
+        setMediaList(transitionMedias);
+
+        if (transitionView.isLoaded()) {
+            
+            Util.setMotion(motionPosition, spanCount);
+
+            ViewCompat.setTransitionName(transitionView, currentMedia.getKey());
+
+            Pair mediaPair = new Pair<>((View) transitionView, currentMedia.getKey());
+
+            Pair[] pairs = Util.createSafeTransitionPairs(activity, true, mediaPair);
+
+            ActivityOptionsCompat options = ActivityOptionsCompat.
+                    makeSceneTransitionAnimation(activity, pairs);
+
+//                              ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, mPhotoIv, currentMedia.getKey());
+
+            intent.putExtra(Util.KEY_NEED_TRANSITION, true);
+
+            activity.startActivity(intent, options.toBundle());
+
+        } else {
+
+            intent.putExtra(Util.KEY_NEED_TRANSITION, false);
+            activity.startActivity(intent);
+
+        }
+
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

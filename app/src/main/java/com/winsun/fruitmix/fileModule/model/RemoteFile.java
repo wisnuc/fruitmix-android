@@ -25,7 +25,7 @@ public class RemoteFile extends AbstractRemoteFile {
     }
 
     @Override
-    public boolean openAbstractRemoteFile(Context context) {
+    public boolean openAbstractRemoteFile(Context context,String rootUUID) {
 
         return FileUtil.openAbstractRemoteFile(context, getName());
 
@@ -34,7 +34,7 @@ public class RemoteFile extends AbstractRemoteFile {
     @Override
     public void downloadFile() {
 
-        FileDownloadItem fileDownloadItem = new FileDownloadItem(getName(), Long.parseLong(getSize()), getUuid());
+        FileDownloadItem fileDownloadItem = new FileDownloadItem(getName(), Long.parseLong(getSize()), getUuid(),getParentFolderUUID());
 
         FileDownloadManager.INSTANCE.addFileDownloadItem(fileDownloadItem);
     }

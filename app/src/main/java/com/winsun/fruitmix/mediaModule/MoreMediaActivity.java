@@ -190,14 +190,12 @@ public class MoreMediaActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
 
-                    PhotoSliderActivity.setMediaList(mPhotos);
-
                     Intent intent = new Intent();
                     intent.putExtra(Util.INITIAL_PHOTO_POSITION, getAdapterPosition());
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                     intent.setClass(mContext, PhotoSliderActivity.class);
-                    intent.putExtra(Util.KEY_NEED_TRANSITION, false);
-                    startActivity(intent);
+
+                    PhotoSliderActivity.startPhotoSliderActivity(((MoreMediaActivity)mContext),mPhotos,intent,0,1,mPhotoItem,media);
                 }
             });
         }

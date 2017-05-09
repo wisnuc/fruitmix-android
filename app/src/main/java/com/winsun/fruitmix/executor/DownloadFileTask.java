@@ -41,7 +41,9 @@ public class DownloadFileTask implements Callable<Boolean> {
 
         FileDownloadUploadInterface fileDownloadUploadInterface = RetrofitInstance.INSTANCE.getRetrofitInstance().create(FileDownloadUploadInterface.class);
 
-        Call<ResponseBody> call = fileDownloadUploadInterface.downloadFile(FNAS.Gateway + ":" + FNAS.PORT + Util.FILE_PARAMETER + "/" + fileDownloadState.getFileUUID());
+        String downloadFileUrl = FNAS.getDownloadFileUrl(fileDownloadState.getFileUUID(), fileDownloadState.getParentFolderUUID());
+
+        Call<ResponseBody> call = fileDownloadUploadInterface.downloadFile(downloadFileUrl);
 
         Log.d(TAG, "call: fileDownloadInterface downloadFile");
 

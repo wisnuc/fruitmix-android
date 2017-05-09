@@ -546,20 +546,21 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         if (bonjourService.isLost()) return;
 
                         String serviceName = bonjourService.getServiceName();
-                        if (!serviceName.toLowerCase().contains("wisnuc")) return;
+
+                        String hostName = bonjourService.getHostname();
+
+                        if (hostName == null || !hostName.contains("wisnuc")) return;
+
+                        Log.d(TAG, "call: hostName: " + hostName);
 
                         if (bonjourService.getInet4Address() == null) return;
 
                         String hostAddress = bonjourService.getInet4Address().getHostAddress();
 
-                        String hostName = bonjourService.getHostname();
-
-                        Log.d(TAG, "call: hostName: " + hostName);
-
                         String model = "";
                         String serialNumber = "";
 
-                        if (hostName != null && hostName.contains("-")) {
+                        if (hostName.contains("-")) {
 
                             String[] hostNames = hostName.split("-");
 
@@ -573,8 +574,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         }
 
                         for (Equipment equipment : mFoundedEquipments) {
-                            if (equipment == null || serviceName.equals(equipment.getServiceName())
-                                    || equipment.getHosts().contains(hostAddress)
+                            if (equipment == null || equipment.getHosts().contains(hostAddress)
                                     || serialNumber.equals(equipment.getSerialNumber())) {
                                 return;
                             }

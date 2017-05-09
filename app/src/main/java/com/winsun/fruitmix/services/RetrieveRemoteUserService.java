@@ -12,13 +12,17 @@ import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
+import com.winsun.fruitmix.parser.RemoteUserJSONObjectParser;
 import com.winsun.fruitmix.parser.RemoteUserParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
@@ -78,12 +82,20 @@ public class RetrieveRemoteUserService extends IntentService {
 
             HttpResponse httpResponse = FNAS.loadUser();
 
+            User user = new RemoteUserJSONObjectParser().getUser(new JSONObject(httpResponse.getResponseData()));
+
+            users = new ArrayList<>();
+            users.add(user);
+
+            LocalCache.saveUser(this, user.getUserName(), user.getDefaultAvatarBgColor(), user.isAdmin(), user.getHome(), user.getUuid());
+
+            if (LocalCache.DeviceID == null || LocalCache.DeviceID.isEmpty()) {
+                LocalCache.DeviceID = user.getLibrary();
+                LocalCache.SetGlobalData(this, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
+                Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME));
+            }
+
             RemoteDataParser<User> parser = new RemoteUserParser();
-            users = parser.parse(httpResponse.getResponseData());
-
-            User user = users.get(0);
-            LocalCache.saveUser(this, user.getUserName(), user.getDefaultAvatarBgColor(), user.isAdmin(),user.getHome(),user.getUuid());
-
             List<User> otherUsers = parser.parse(FNAS.loadOtherUsers().getResponseData());
 
             addDifferentUsers(users, otherUsers);

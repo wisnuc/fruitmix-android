@@ -42,6 +42,10 @@ public abstract class FileDownloadState {
         return fileUUID;
     }
 
+    public String getParentFolderUUID(){
+        return fileDownloadItem.getParentFolderUUID();
+    }
+
     public FileDownloadItem getFileDownloadItem() {
         return fileDownloadItem;
     }

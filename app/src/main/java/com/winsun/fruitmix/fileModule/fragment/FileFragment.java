@@ -100,6 +100,8 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
 
     private AbstractCommand nullCommand;
 
+    private String rootUUID;
+
     public FileFragment() {
         // Required empty public constructor
     }
@@ -171,12 +173,14 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
 
             currentFolderUUID = user.getHome();
 
+            rootUUID = user.getHome();
+
             if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
                 retrievedFolderUUIDList.add(currentFolderUUID);
                 retrievedFolderNameList.add(getString(R.string.file));
             }
 
-            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
+            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID,rootUUID);
         }
 
     }
@@ -290,7 +294,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
             retrievedFolderNameList.remove(retrievedFolderNameList.size() - 1);
             currentFolderName = retrievedFolderNameList.get(retrievedFolderUUIDList.size() - 1);
 
-            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
+            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID,rootUUID);
 
         } else {
             selectMode = false;
@@ -524,7 +528,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
 
                     loadingLayout.setVisibility(View.VISIBLE);
 
-                    abstractRemoteFile.openAbstractRemoteFile(getActivity());
+                    abstractRemoteFile.openAbstractRemoteFile(getActivity(),rootUUID);
 
                     handleTitle();
                 }
@@ -631,10 +635,9 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
                         FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
                         if (fileDownloadManager.checkIsDownloaded(abstractRemoteFile.getUuid())) {
 
-                            if (!abstractRemoteFile.openAbstractRemoteFile(getActivity())) {
+                            if (!abstractRemoteFile.openAbstractRemoteFile(getActivity(),rootUUID)) {
                                 Toast.makeText(getActivity(), getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
                             }
-
 
                         } else {
                             selectedFiles.add(abstractRemoteFile);

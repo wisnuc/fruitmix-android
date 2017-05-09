@@ -24,35 +24,35 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
 
         JSONArray jsonArray;
         JSONObject itemRaw;
+
+        JSONObject itemObject;
+
+        JSONArray item;
+
         Media media;
 
         jsonArray = new JSONArray(json);
 
         for (int i = 0; i < jsonArray.length(); i++) {
-            itemRaw = jsonArray.getJSONObject(i);
+            item = jsonArray.getJSONArray(i);
 
             media = new Media();
 
-            media.setUuid(itemRaw.optString("digest"));
+            media.setUuid(item.getString(0));
 
-            String sharing = itemRaw.optString("sharing");
-            media.setSharing(!sharing.equals("2") && !sharing.equals("6"));
+            itemObject = item.getJSONObject(1);
+
+            boolean sharing = itemObject.optBoolean("permittedToShare");
+
+            media.setSharing(sharing);
+
+            itemRaw = itemObject.getJSONObject("metadata");
 
             String width = itemRaw.optString("width");
-            if (width.equals("")) {
-                JSONObject itemRaw2 = itemRaw.optJSONObject("meta");
+            String height = itemRaw.optString("height");
 
-                if(itemRaw2 == null){
-                    media.setWidth("200");
-                    media.setHeight("200");
-                }else {
-                    media.setWidth(itemRaw2.optString("width"));
-                    media.setHeight(itemRaw2.optString("height"));
-                }
-            }else {
-                media.setWidth(itemRaw.optString("width"));
-                media.setHeight(itemRaw.optString("height"));
-            }
+            media.setWidth(width);
+            media.setHeight(height);
 
             String dateTime = itemRaw.optString("exifDateTime");
 
@@ -70,7 +70,7 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
             media.setOrientationNumber(orientationNumber);
             media.setLocal(false);
 
-            media.setType(itemRaw.optString("type"));
+            media.setType(itemRaw.optString("format"));
 
             medias.add(media);
 

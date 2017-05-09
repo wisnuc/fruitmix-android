@@ -256,7 +256,7 @@ public class ButlerService extends Service {
                     LocalCache.CleanAll(this);
                     LocalCache.Init();
                 }
-                FNAS.retrieveRemoteDeviceID(this);
+                FNAS.retrieveUser(this);
                 break;
             default:
 
@@ -603,8 +603,12 @@ public class ButlerService extends Service {
                 RetrieveNewLocalMediaInCameraService.startActionRetrieveNewLocalMediaInCamera(this);
                 break;
             case REMOTE_FILE:
-                String folderUUID = ((AbstractFileRequestEvent) requestEvent).getFolderUUID();
-                RetrieveRemoteFileService.startActionRetrieveRemoteFile(this, folderUUID);
+
+                AbstractFileRequestEvent fileRequestEvent = (AbstractFileRequestEvent) requestEvent;
+
+                String folderUUID = fileRequestEvent.getFolderUUID();
+                String rootUUID = fileRequestEvent.getRootUUID();
+                RetrieveRemoteFileService.startActionRetrieveRemoteFile(this, folderUUID,rootUUID);
                 break;
             case REMOTE_FILE_SHARE:
                 RetrieveRemoteFileShareService.startActionRetrieveRemoteFileShare(this);

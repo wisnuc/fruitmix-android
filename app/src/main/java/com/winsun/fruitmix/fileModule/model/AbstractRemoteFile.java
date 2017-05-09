@@ -22,6 +22,8 @@ public abstract class AbstractRemoteFile {
     private String time;
     private String size;
 
+    private String parentFolderUUID;
+
     AbstractRemoteFile() {
         owners = new ArrayList<>();
         writeList = new ArrayList<>();
@@ -30,7 +32,7 @@ public abstract class AbstractRemoteFile {
 
     public abstract boolean isFolder();
 
-    public abstract boolean openAbstractRemoteFile(Context context);
+    public abstract boolean openAbstractRemoteFile(Context context,String rootUUID);
 
     public abstract void downloadFile();
 
@@ -98,6 +100,14 @@ public abstract class AbstractRemoteFile {
 
     public void setSize(String size) {
         this.size = size;
+    }
+
+    public String getParentFolderUUID() {
+        return parentFolderUUID;
+    }
+
+    public void setParentFolderUUID(String parentFolderUUID) {
+        this.parentFolderUUID = parentFolderUUID;
     }
 
     @Override

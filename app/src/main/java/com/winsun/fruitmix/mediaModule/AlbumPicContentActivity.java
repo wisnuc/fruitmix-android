@@ -465,13 +465,14 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
 
-                    PhotoSliderActivity.setMediaList(mediaList);
-
                     Intent intent = new Intent();
                     intent.putExtra(Util.INITIAL_PHOTO_POSITION, position);
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, mShowCommentBtn);
                     intent.setClass(AlbumPicContentActivity.this, PhotoSliderActivity.class);
 
+                    PhotoSliderActivity.startPhotoSliderActivity((Activity) mContext,mediaList,intent,position,SPAN_COUNT,networkImageView,currentItem);
+
+/*
                     if (networkImageView.isLoaded()) {
                         String sharedElementName = currentItem.getKey();
                         ViewCompat.setTransitionName(networkImageView, sharedElementName);
@@ -494,7 +495,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                         startActivity(intent);
 
                     }
-
+*/
 
                 }
             });

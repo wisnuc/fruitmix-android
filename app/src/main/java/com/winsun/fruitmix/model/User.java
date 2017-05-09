@@ -114,7 +114,7 @@ public class User {
 
     public static String generateCreateRemoteUserBody(String userName, String userPassword) {
 
-        return "{\"username\":\"" + userName + "\",\"password\":\"" + userPassword + "\"}";
+        return "{\"type\":\"local\",\"username\":\"" + userName + "\",\"password\":\"" + userPassword + "\"}";
 
     }
 

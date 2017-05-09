@@ -30,13 +30,13 @@ import java.util.List;
  * Created by Administrator on 2016/9/2.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23,application = MockApplication.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
 public class RemoteDataParserUnitTest {
 
     @Test
     public void parseRemoteMediaTest() {
 
-        String json = "[\n" +
+/*        String json = "[\n" +
                 "   {\n" +
                 "    \"digest\": \"ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16\",\n" +
                 "    \"type\": \"JPEG\",\n" +
@@ -71,8 +71,58 @@ public class RemoteDataParserUnitTest {
                 "    \"size\": 1208081,\n" +
                 "    \"sharing\": 1\n" +
                 "  }" +
-                "]";
+                "]";*/
 
+        String json = "[\n" +
+                "  [\n" +
+                "    \"01534abee224484fc82892f0d620a35c3a915c6222c878f83a86aca376af7505\",\n" +
+                "    {\n" +
+                "      \"metadata\": {\n" +
+                "        \"format\": \"JPEG\",\n" +
+                "        \"width\": 3264,\n" +
+                "        \"height\": 2448,\n" +
+                "        \"exifOrientation\": 6,\n" +
+                "        \"exifDateTime\": \"2016:12:13 13:34:52\",\n" +
+                "        \"exifMake\": \"Apple\",\n" +
+                "        \"exifModel\": \"iPhone 6 Plus\",\n" +
+                "        \"size\": 1786157\n" +
+                "      },\n" +
+                "      \"permittedToShare\": true\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  [\n" +
+                "    \"0232827939051677a2c78e605a4bd3ae5d581e10d1b51105938c907a8ede8a63\",\n" +
+                "    {\n" +
+                "      \"metadata\": {\n" +
+                "        \"format\": \"JPEG\",\n" +
+                "        \"width\": 1000,\n" +
+                "        \"height\": 669,\n" +
+                "        \"exifOrientation\": 1,\n" +
+                "        \"exifDateTime\": \"2010:10:10 20:45:31\",\n" +
+                "        \"exifMake\": \"NIKON CORPORATION\",\n" +
+                "        \"exifModel\": \"NIKON D40X\",\n" +
+                "        \"size\": 244642\n" +
+                "      },\n" +
+                "      \"permittedToShare\": true\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  [\n" +
+                "    \"4a669343bad6371b6d6b18405e965e6829c02f282f24c92b24158debe88bb552\",\n" +
+                "    {\n" +
+                "      \"metadata\": {\n" +
+                "        \"format\": \"JPEG\",\n" +
+                "        \"width\": 1024,\n" +
+                "        \"height\": 680,\n" +
+                "        \"exifOrientation\": 1,\n" +
+                "        \"exifDateTime\": \"2014:08:31 18:55:03\",\n" +
+                "        \"exifMake\": \"SONY\",\n" +
+                "        \"exifModel\": \"NEX-3N\",\n" +
+                "        \"size\": 241967\n" +
+                "      },\n" +
+                "      \"permittedToShare\": true\n" +
+                "    }\n" +
+                "  ]\n" +
+                "]";
 
         RemoteDataParser<Media> remoteDataParser = new RemoteMediaParser();
 
@@ -86,14 +136,14 @@ public class RemoteDataParserUnitTest {
         assertFalse(medias.size() == 0);
 
         Media media = medias.get(0);
-        assertEquals(media.getUuid(), "ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16");
-        assertEquals(media.getWidth(), "1601");
-        assertEquals(media.getHeight(), "1601");
-        assertEquals(media.getTime(), Util.DEFAULT_DATE);
+        assertEquals(media.getUuid(), "01534abee224484fc82892f0d620a35c3a915c6222c878f83a86aca376af7505");
+        assertEquals(media.getWidth(), "3264");
+        assertEquals(media.getHeight(), "2448");
+        assertEquals(media.getTime(), "2016-12-13");
         assertEquals(media.isSharing(), true);
 
         media = medias.get(1);
-        assertEquals(media.getTime(), "2016-10-13");
+        assertEquals(media.getTime(), "2010-10-10");
 
     }
 
@@ -193,7 +243,7 @@ public class RemoteDataParserUnitTest {
     @Test
     public void parseRemoteUserTest() {
 
-        String json = "[\n" +
+/*        String json = "[\n" +
                 "  {\n" +
                 "    \"uuid\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
                 "    \"username\": \"Alice\",\n" +
@@ -221,7 +271,27 @@ public class RemoteDataParserUnitTest {
                 "    \"home\": \"6bd8cbad-3c7d-4a32-831b-0fadf3c8ef53\",\n" +
                 "    \"library\": \"1ec6533f-fab8-4fad-8e76-adc76f80aa2f\"\n" +
                 "  }" +
-                "]";
+                "]";*/
+
+        String json = "{\n" +
+                "  \"type\": \"local\",\n" +
+                "  \"uuid\": \"1be51e91-d75e-4b92-ad5e-e3a40be81aa0\",\n" +
+                "  \"username\": \"1\",\n" +
+                "  \"nologin\": false,\n" +
+                "  \"isFirstUser\": false,\n" +
+                "  \"isAdmin\": false,\n" +
+                "  \"email\": null,\n" +
+                "  \"avatar\": null,\n" +
+                "  \"home\": \"80ee1d87-7232-4316-89ff-0f9a7ec60ab5\",\n" +
+                "  \"library\": \"ed0aa850-3211-4dba-a75b-dc980a77545f\",\n" +
+                "  \"service\": \"4d35da73-144d-4655-b8ef-04e59fea887f\",\n" +
+                "  \"unixuid\": 2001,\n" +
+                "  \"lastChangeTime\": 1494237689522,\n" +
+                "  \"friends\": [],\n" +
+                "  \"unixPassword\": \"$6$oQl3d5ZU$3.zeM65/mm3dfhoWyVL.TQwTVGW4IuOUs3GleZwnx.C102bd2keNQ16hONCNrFGi4Sb313MIS4ExIm/7QAihF/\",\n" +
+                "  \"smbPassword\": \"69943C5E63B4D2C104DBBCC15138B72B\",\n" +
+                "  \"password\": \"$2a$10$asi43Ivt58yT4yowWF3LbOdysDfvezKRG1CfStF3indLr2ko5CaW.\"\n" +
+                "}";
 
 
         RemoteDataParser<User> parser = new RemoteUserParser();
@@ -236,14 +306,18 @@ public class RemoteDataParserUnitTest {
         assertFalse(users.size() == 0);
 
         User user = users.get(0);
-        assertEquals(user.getUuid(), "5da92303-33a1-4f79-8d8f-a7b6becde6c3");
-        assertEquals(user.getUserName(), "Alice");
-        assertEquals(user.getHome(), "b9aa7c34-8b86-4306-9042-396cf8fa1a9c");
-        assertEquals(user.getLibrary(), "f97f9e1f-848b-4ed4-bd47-1ddfa82b2777");
-        assertEquals(user.isAdmin(),true);
+//        assertEquals(user.getUuid(), "5da92303-33a1-4f79-8d8f-a7b6becde6c3");
+//        assertEquals(user.getUserName(), "Alice");
+//        assertEquals(user.getHome(), "b9aa7c34-8b86-4306-9042-396cf8fa1a9c");
+//        assertEquals(user.getLibrary(), "f97f9e1f-848b-4ed4-bd47-1ddfa82b2777");
+//        assertEquals(user.isAdmin(),true);
 
+        assertEquals(user.getUuid(), "1be51e91-d75e-4b92-ad5e-e3a40be81aa0");
+        assertEquals(user.getUserName(), "1");
+        assertEquals(user.getHome(), "80ee1d87-7232-4316-89ff-0f9a7ec60ab5");
+        assertEquals(user.getLibrary(), "ed0aa850-3211-4dba-a75b-dc980a77545f");
+        assertEquals(user.isAdmin(), false);
     }
-
 
     @Test
     public void parseRemoteMediaCommentTest() {
@@ -283,7 +357,7 @@ public class RemoteDataParserUnitTest {
 
     @Test
     public void parseRemoteFileFolderTest() {
-        String json = "[\n" +
+/*        String json = "[\n" +
                 "  {\n" +
                 "    \"uuid\": \"5d463eac-f73f-4987-a3e9-bb68fee726e0\",\n" +
                 "    \"type\": \"file\",\n" +
@@ -322,6 +396,37 @@ public class RemoteDataParserUnitTest {
                 "    ],\n" +
                 "    \"name\": \"src\"\n" +
                 "  }\n" +
+                "]";*/
+
+        String json  = "[\n" +
+                "  {\n" +
+                "    \"uuid\": \"a27ce6f9-580f-4065-9917-29c0765e890a\",\n" +
+                "    \"type\": \"file\",\n" +
+                "    \"name\": \"1-2 [DOM] 事件捕获.mp4\",\n" +
+                "    \"size\": 4789790,\n" +
+                "    \"mtime\": 1494318844512\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"uuid\": \"caabcf69-360c-456a-9ca7-10dab1ba1216\",\n" +
+                "    \"type\": \"file\",\n" +
+                "    \"name\": \"1-1 [DOM] 事件冒泡.mp4\",\n" +
+                "    \"size\": 15550310,\n" +
+                "    \"mtime\": 1494318845724\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"uuid\": \"72315ee9-0154-4536-a839-cfe52f72ca2f\",\n" +
+                "    \"type\": \"file\",\n" +
+                "    \"name\": \"4-2 [DOM事件] QQ面板拖拽效果（下）.mp4\",\n" +
+                "    \"size\": 125267353,\n" +
+                "    \"mtime\": 1494318899467\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"uuid\": \"e8b9ee4b-55be-4f0c-ba9e-570b0766c374\",\n" +
+                "    \"type\": \"file\",\n" +
+                "    \"name\": \"4-3 [DOM事件] QQ面板状态切换效果.mp4\",\n" +
+                "    \"size\": 134264485,\n" +
+                "    \"mtime\": 1494318900643\n" +
+                "  }\n" +
                 "]";
 
         RemoteDataParser<AbstractRemoteFile> remoteDataParser = new RemoteFileFolderParser();
@@ -333,10 +438,10 @@ public class RemoteDataParserUnitTest {
         }
 
         AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(0);
-        assertEquals(abstractRemoteFile.getTime(), "1477386652380");
-        assertEquals(abstractRemoteFile.getUuid(), "5d463eac-f73f-4987-a3e9-bb68fee726e0");
-        assertEquals(abstractRemoteFile.getName(), "7685_spec.png");
-        assertEquals(abstractRemoteFile.getSize(), "95516");
+        assertEquals(abstractRemoteFile.getTime(), "1494318844512");
+        assertEquals(abstractRemoteFile.getUuid(), "a27ce6f9-580f-4065-9917-29c0765e890a");
+        assertEquals(abstractRemoteFile.getName(), "1-2 [DOM] 事件捕获.mp4");
+        assertEquals(abstractRemoteFile.getSize(), "4789790");
 
     }
 

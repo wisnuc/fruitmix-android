@@ -964,7 +964,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             mPhotoIv.setImageUrl(imageUrl, mImageLoader);
 
-            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());
+            final List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());
             final int mediaInListPosition = getPosition(mediaList, currentMedia);
 
             setPhotoItemMargin(mediaInListPosition);
@@ -1047,14 +1047,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                         }
 
-                        PhotoSliderActivity.setMediaList(medias);
-
                         Intent intent = new Intent();
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                        if (mPhotoIv.isLoaded()) {
+                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity,medias,intent,mediaInListPosition,mSpanCount,mPhotoIv,currentMedia);
+
+/*                        if (mPhotoIv.isLoaded()) {
 
                             Util.setMotion(mediaInListPosition, mSpanCount);
 
@@ -1078,7 +1078,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                             intent.putExtra(Util.KEY_NEED_TRANSITION, false);
                             containerActivity.startActivity(intent);
 
-                        }
+                        }*/
 
                     }
 

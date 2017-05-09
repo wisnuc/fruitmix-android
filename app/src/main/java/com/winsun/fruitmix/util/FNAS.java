@@ -78,9 +78,9 @@ public class FNAS {
         return result;
     }
 
-    public static HttpResponse loadFileInFolder(String folderUUID) throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse loadFileInFolder(String folderUUID, String rootUUID) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(Util.FILE_PARAMETER + "/" + folderUUID);
+        return FNAS.RemoteCall(Util.LIST_FILE_PARAMETER + "/" + folderUUID + "/" + rootUUID);
     }
 
     public static HttpResponse loadFileSharedWithMe() throws MalformedURLException, IOException, SocketTimeoutException {
@@ -95,7 +95,7 @@ public class FNAS {
 
     public static HttpResponse loadUser() throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(Util.USER_PARAMETER);
+        return FNAS.RemoteCall(Util.ACCOUNT_PARAMETER);
 
     }
 
@@ -160,8 +160,8 @@ public class FNAS {
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_MEDIA));
     }
 
-    public static void retrieveLocalLoggedInUser(){
-        EventBus.getDefault().post(new RequestEvent(OperationType.GET,OperationTargetType.LOCAL_LOGGED_IN_USER));
+    public static void retrieveLocalLoggedInUser() {
+        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.LOCAL_LOGGED_IN_USER));
     }
 
     public static void retrieveRemoteMedia(Context context) {
@@ -191,9 +191,9 @@ public class FNAS {
         EventBus.getDefault().post(new MediaCommentRequestEvent(OperationType.GET, OperationTargetType.REMOTE_MEDIA_COMMENT, imageUUID, null));
     }
 
-    public static void retrieveRemoteFile(Context context, String folderUUID) {
+    public static void retrieveRemoteFile(Context context, String folderUUID, String rootUUID) {
 
-        EventBus.getDefault().post(new AbstractFileRequestEvent(OperationType.GET, OperationTargetType.REMOTE_FILE, folderUUID));
+        EventBus.getDefault().post(new AbstractFileRequestEvent(OperationType.GET, OperationTargetType.REMOTE_FILE, folderUUID, rootUUID));
     }
 
     public static void retrieveRemoteFileShare() {
@@ -271,6 +271,14 @@ public class FNAS {
 
     private static String generateUrl(String req) {
         return Gateway + ":" + FNAS.PORT + req;
+    }
+
+    public static String getDownloadOriginalMediaUrl(Media media) {
+        return generateUrl(Util.MEDIA_PARAMETER + "/" + media.getUuid() + "/download");
+    }
+
+    public static String getDownloadFileUrl(String fileUUID, String parentFolderUUID) {
+        return generateUrl(Util.DOWNLOAD_FILE_PARAMETER + "/" + parentFolderUUID + "/" + fileUUID);
     }
 
     private static HttpResponse RemoteCall(String req) throws MalformedURLException, IOException, SocketTimeoutException {
@@ -417,7 +425,10 @@ public class FNAS {
             Log.d(TAG, "thumb:" + fileName + "hash:" + hash);
 
             // head
-            url = Gateway + ":" + FNAS.PORT + Util.DEVICE_ID_PARAMETER + "/" + LocalCache.DeviceID;
+//            url = Gateway + ":" + FNAS.PORT + Util.DEVICE_ID_PARAMETER + "/" + LocalCache.DeviceID;
+
+            url = generateUrl(Util.MEDIA_PARAMETER + "/" + hash);
+
             Log.d(TAG, "Photo UP: " + url);
             boundary = java.util.UUID.randomUUID().toString();
             conn = (HttpURLConnection) new URL(url).openConnection();

@@ -36,6 +36,8 @@ public class MediaShare implements Parcelable {
     private boolean isRecommend;
     private String recommendPhotoTime;
 
+    public static final String OPERATION_PARAR = "op";
+
     public MediaShare() {
         mediaShareContents = new ArrayList<>();
         viewers = new ArrayList<>();
@@ -131,7 +133,7 @@ public class MediaShare implements Parcelable {
         String returnValue;
 
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("{\"op\":\"");
+        stringBuilder.append("{\"" + OPERATION_PARAR + "\":\"");
         stringBuilder.append(op);
         stringBuilder.append("\",\"path\":\"");
         stringBuilder.append("viewers");
@@ -158,7 +160,7 @@ public class MediaShare implements Parcelable {
         String returnValue;
 
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("{\"op\":\"");
+        stringBuilder.append("{\"" + OPERATION_PARAR + "\":\"");
         stringBuilder.append(op);
         stringBuilder.append("\",\"path\":\"");
         stringBuilder.append("maintainers");
@@ -185,7 +187,7 @@ public class MediaShare implements Parcelable {
         String returnValue;
 
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("{\"op\":\"");
+        stringBuilder.append("{\"" + OPERATION_PARAR + "\":\"");
         stringBuilder.append(op);
         stringBuilder.append("\",\"path\":\"");
         stringBuilder.append("contents");
@@ -220,7 +222,7 @@ public class MediaShare implements Parcelable {
     }
 
     public String createStringReplaceTitleTextAboutMediaShare() {
-        return "{\"op\":\"replace\",\"path\":\"album\",\"value\":{" +
+        return "{\"" + OPERATION_PARAR + "\":\"replace\",\"path\":\"album\",\"value\":{" +
                 "\"title\":\"" +
                 title +
                 "\",\"text\":\"" +

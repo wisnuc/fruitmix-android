@@ -83,7 +83,7 @@ public class CreateRemoteUserService extends IntentService {
         OperationEvent operationEvent;
 
         try {
-            httpResponse = FNAS.PostRemoteCall(Util.USER_PARAMETER, body);
+            httpResponse = FNAS.PostRemoteCall(Util.ADMIN_USER_PARAMETER, body);
 
             if (httpResponse.getResponseCode() == 200) {
 

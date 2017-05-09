@@ -2,7 +2,6 @@ package com.winsun.fruitmix.mediaModule.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -44,10 +43,8 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.User;
-import com.winsun.fruitmix.util.EnterPatternPathMotion;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.ReturnPatternPathMotion;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -664,8 +661,6 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
                 public void onClick(View v) {
                     List<Media> imageList = getImgList(currentItem.getMediaUUIDInMediaShareContents());
 
-                    fillLocalCachePhotoData(imageList);
-
                     Intent intent = new Intent();
                     intent.putExtra(Util.INITIAL_PHOTO_POSITION, 0);
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
@@ -673,7 +668,9 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
                     intent.putExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, false);
                     intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                    if (ivCover.isLoaded()) {
+                    PhotoSliderActivity.startPhotoSliderActivity(containerActivity,imageList,intent,0,1,ivCover,imageList.get(0));
+
+/*                    if (ivCover.isLoaded()) {
 
                         String transitionName = imageList.get(0).getKey();
 
@@ -695,7 +692,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
                         intent.putExtra(Util.KEY_NEED_TRANSITION, false);
                         containerActivity.startActivity(intent);
 
-                    }
+                    }*/
 
                 }
             });
@@ -901,15 +898,15 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
                         List<Media> imageList = getImgList(currentItem.getMediaUUIDInMediaShareContents());
 
-                        fillLocalCachePhotoData(imageList);
-
                         Intent intent = new Intent();
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, mItemPosition);
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, true);
                         intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, currentItem.getTime());
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                        View transitionView = ivItems[mItemPosition];
+                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity,imageList,intent,mItemPosition,3,ivItems[mItemPosition],imageList.get(mItemPosition));
+
+/*                        View transitionView = ivItems[mItemPosition];
 
                         if (((NetworkImageView) transitionView).isLoaded()) {
 
@@ -935,7 +932,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
                             intent.putExtra(Util.KEY_NEED_TRANSITION, false);
                             containerActivity.startActivity(intent);
-                        }
+                        }*/
                     }
                 });
             }
@@ -985,10 +982,6 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 //        }
     }
 
-
-    private void fillLocalCachePhotoData(List<Media> imageList) {
-        PhotoSliderActivity.setMediaList(imageList);
-    }
 
     private List<Media> getImgList(List<String> imageKeys) {
         ArrayList<Media> picList;

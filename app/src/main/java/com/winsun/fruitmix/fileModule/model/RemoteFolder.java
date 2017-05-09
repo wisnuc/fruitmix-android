@@ -30,9 +30,9 @@ public class RemoteFolder extends AbstractRemoteFile {
     }
 
     @Override
-    public boolean openAbstractRemoteFile(Context context) {
+    public boolean openAbstractRemoteFile(Context context,String rootUUID) {
 
-        FNAS.retrieveRemoteFile(context, getUuid());
+        FNAS.retrieveRemoteFile(context, getUuid(),rootUUID);
         return true;
     }
 

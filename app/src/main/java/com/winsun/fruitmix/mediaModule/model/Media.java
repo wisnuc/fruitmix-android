@@ -345,7 +345,7 @@ public class Media implements Parcelable {
         if (isLocal()) {
             imageUrl = getOriginalPhotoPath();
         } else {
-            imageUrl = String.format(context.getString(R.string.android_original_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid());
+            imageUrl = FNAS.getDownloadOriginalMediaUrl(this);
         }
         return imageUrl;
     }

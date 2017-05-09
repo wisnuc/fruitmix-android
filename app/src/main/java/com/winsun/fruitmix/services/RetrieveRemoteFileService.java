@@ -41,6 +41,8 @@ public class RetrieveRemoteFileService extends IntentService {
 
     private static final String EXTRA_FOLDER_UUID = "com.winsun.fruitmix.services.extra.folder_uuid";
 
+    private static final String EXTRA_ROOT_UUID = "com.winsun.fruitmix.services.extra.root_uuid";
+
     public RetrieveRemoteFileService() {
         super("RetrieveRemoteFileService");
     }
@@ -52,10 +54,11 @@ public class RetrieveRemoteFileService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionRetrieveRemoteFile(Context context, String folderUUID) {
+    public static void startActionRetrieveRemoteFile(Context context, String folderUUID, String rootUUID) {
         Intent intent = new Intent(context, RetrieveRemoteFileService.class);
         intent.setAction(ACTION_RETRIEVE_REMOTE_FILE);
         intent.putExtra(EXTRA_FOLDER_UUID, folderUUID);
+        intent.putExtra(EXTRA_ROOT_UUID, rootUUID);
         context.startService(intent);
     }
 
@@ -66,7 +69,8 @@ public class RetrieveRemoteFileService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_RETRIEVE_REMOTE_FILE.equals(action)) {
                 final String folderUUID = intent.getStringExtra(EXTRA_FOLDER_UUID);
-                handleActionRetrieveRemoteFile(folderUUID);
+                String rootUUID = intent.getStringExtra(EXTRA_ROOT_UUID);
+                handleActionRetrieveRemoteFile(folderUUID, rootUUID);
             }
         }
     }
@@ -75,15 +79,19 @@ public class RetrieveRemoteFileService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionRetrieveRemoteFile(String folderUUID) {
+    private void handleActionRetrieveRemoteFile(String folderUUID, String rootUUID) {
 
         try {
-            HttpResponse httpResponse = FNAS.loadFileInFolder(folderUUID);
+            HttpResponse httpResponse = FNAS.loadFileInFolder(folderUUID, rootUUID);
 
-            if(httpResponse.getResponseCode() == 200){
+            if (httpResponse.getResponseCode() == 200) {
 
                 RemoteFileFolderParser parser = new RemoteFileFolderParser();
                 List<AbstractRemoteFile> abstractRemoteFiles = parser.parse(httpResponse.getResponseData());
+
+                for (AbstractRemoteFile file : abstractRemoteFiles) {
+                    file.setParentFolderUUID(folderUUID);
+                }
 
                 LocalCache.RemoteFileMapKeyIsUUID.clear();
 
@@ -91,30 +99,30 @@ public class RetrieveRemoteFileService extends IntentService {
                 remoteFolder.setUuid(folderUUID);
                 remoteFolder.initChildAbstractRemoteFileList(abstractRemoteFiles);
 
-                LocalCache.RemoteFileMapKeyIsUUID.put(folderUUID,remoteFolder);
+                LocalCache.RemoteFileMapKeyIsUUID.put(folderUUID, remoteFolder);
 
-                EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationSuccess(R.string.operate),folderUUID));
+                EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationSuccess(R.string.operate), folderUUID));
 
-            }else {
-                EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()),folderUUID));
+            } else {
+                EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()), folderUUID));
             }
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
 
-            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationMalformedUrlException(),folderUUID));
-        }catch (SocketTimeoutException e) {
+            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationMalformedUrlException(), folderUUID));
+        } catch (SocketTimeoutException e) {
             e.printStackTrace();
 
-            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationSocketTimeoutException(),folderUUID));
-        }catch (IOException e) {
+            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationSocketTimeoutException(), folderUUID));
+        } catch (IOException e) {
             e.printStackTrace();
 
-            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationIOException(),folderUUID));
-        }catch (JSONException e) {
+            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationIOException(), folderUUID));
+        } catch (JSONException e) {
             e.printStackTrace();
 
-            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationJSONException(),folderUUID));
+            EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationJSONException(), folderUUID));
         }
 
     }

@@ -69,6 +69,8 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
 
     private OnFileInteractionListener onFileInteractionListener;
 
+    private String rootUUID;
+
     public FileShareFragment() {
         // Required empty public constructor
     }
@@ -136,6 +138,8 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
                 retrievedFolderUUIDList.add(currentFolderUUID);
                 retrievedFolderNameList.add(getString(R.string.file));
             }
+
+            rootUUID = LocalCache.getUser(getContext()).getHome();
 
             FNAS.retrieveRemoteFileShare();
         }
@@ -268,7 +272,7 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
         if (currentFolderUUID.equals(FNAS.userUUID)) {
             FNAS.retrieveRemoteFileShare();
         } else {
-            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID);
+            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID,rootUUID);
         }
 
         handleTitle();
@@ -373,7 +377,7 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
 
                     loadingLayout.setVisibility(View.VISIBLE);
 
-                    abstractRemoteFile.openAbstractRemoteFile(getActivity());
+                    abstractRemoteFile.openAbstractRemoteFile(getActivity(),rootUUID);
 
                     handleTitle();
                 }
