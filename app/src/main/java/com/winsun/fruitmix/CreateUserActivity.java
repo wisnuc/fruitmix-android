@@ -82,6 +82,7 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
         });
         createUserBtn.setOnClickListener(this);
 
+
     }
 
     @Override
@@ -209,7 +210,7 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
 
                 }
 
-                mDialog = ProgressDialog.show(CreateUserActivity.this, null, String.format(getString(R.string.operating_title),getString(R.string.create_user)), true, false);
+                mDialog = ProgressDialog.show(CreateUserActivity.this, null, String.format(getString(R.string.operating_title), getString(R.string.create_user)), true, false);
 
                 FNAS.createRemoteUser(userName, password);
 

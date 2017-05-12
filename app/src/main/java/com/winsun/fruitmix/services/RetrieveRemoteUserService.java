@@ -9,7 +9,9 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteUserJSONObjectParser;
@@ -78,9 +80,17 @@ public class RetrieveRemoteUserService extends IntentService {
         ConcurrentMap<String, User> userConcurrentMap;
         DBUtils dbUtils = DBUtils.getInstance(this);
 
+        HttpResponse httpResponse;
+
         try {
 
-            HttpResponse httpResponse = FNAS.loadUser();
+            httpResponse = FNAS.loadUser();
+
+            if(httpResponse.getResponseCode() != 200 && Util.loginType == LoginType.LOGIN){
+                OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()));
+                EventBus.getDefault().post(operationEvent);
+                return;
+            }
 
             User user = new RemoteUserJSONObjectParser().getUser(new JSONObject(httpResponse.getResponseData()));
 

@@ -1,5 +1,8 @@
 package com.winsun.fruitmix.util;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +13,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.transition.ArcMotion;
@@ -18,7 +22,9 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import com.github.druk.rxdnssd.BonjourService;
 import com.winsun.fruitmix.R;
@@ -26,10 +32,16 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.Equipment;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -516,10 +528,10 @@ public class Util {
 
     }
 
-    public static MediaShare createMediaShare(boolean isAlbum, boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaUUIDs,boolean isRecommend,
-                                              String recommendPhotoTime){
+    public static MediaShare createMediaShare(boolean isAlbum, boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaUUIDs, boolean isRecommend,
+                                              String recommendPhotoTime) {
 
-        MediaShare mediaShare = createMediaShare(isAlbum,isPublic,otherMaintainer,title,desc,mediaUUIDs);
+        MediaShare mediaShare = createMediaShare(isAlbum, isPublic, otherMaintainer, title, desc, mediaUUIDs);
 
         mediaShare.setRecommend(isRecommend);
         mediaShare.setRecommendPhotoTime(recommendPhotoTime);
@@ -594,34 +606,124 @@ public class Util {
 
     }
 
-    public static String getEquipmentName(Equipment equipment) {
-        return equipment.getModel() + "-" + equipment.getSerialNumber();
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void dismissViewWithReveal(final View view) {
+
+        // get the center for the clipping circle
+        int cx = (view.getLeft() + view.getRight()) / 2;
+        int cy = view.getBottom();
+
+        // get the initial radius for the clipping circle
+        int initialRadius = Math.max(view.getWidth(), view.getHeight());
+
+        // create the animation (the final radius is zero)
+        Animator anim =
+                ViewAnimationUtils.createCircularReveal(view, cx, cy, initialRadius, 0);
+
+        // make the view invisible when the animation is done
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                view.setVisibility(View.GONE);
+            }
+        });
+
+        // start the animation
+        anim.setDuration(200);
+        anim.start();
+
     }
 
-    public static String getEquipmentName(BonjourService bonjourService) {
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void showViewWithReveal(View view) {
+
+        // get the center for the clipping circle
+        int cx = (view.getLeft() + view.getRight()) / 2;
+        int cy = view.getBottom();
+
+        // get the final radius for the clipping circle
+        int finalRadius = Math.max(view.getWidth(), view.getHeight());
+
+        // create the animator for this view (the start radius is zero)
+        Animator anim =
+                ViewAnimationUtils.createCircularReveal(view, cx, cy, 0, finalRadius);
+
+        // make the view visible and start the animation
+        view.setVisibility(View.VISIBLE);
+
+        anim.setDuration(200);
+        anim.start();
+
+    }
+
+    public static boolean checkBonjourService(BonjourService bonjourService) {
+
+        if (bonjourService.isLost()) return false;
 
         String hostName = bonjourService.getHostname();
 
+        if (hostName == null || !hostName.contains("wisnuc")) return false;
+
         Log.d(TAG, "call: hostName: " + hostName);
 
-        String model = "";
-        String serialNumber = "";
+        return bonjourService.getInet4Address() != null;
 
-        if (hostName != null && hostName.contains("-")) {
+    }
 
-            String[] hostNames = hostName.split("-");
+    public static boolean checkAutoUpload(Context context) {
+        for (LoggedInUser loggedInUser : LocalCache.LocalLoggedInUsers) {
 
-            model = hostNames[1].toUpperCase();
+            if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
+                if (!LocalCache.getCurrentUploadDeviceID(context).equals(LocalCache.DeviceID)) {
+                    LocalCache.setAutoUploadOrNot(context, false);
+                    return false;
+                } else {
+                    LocalCache.setAutoUploadOrNot(context, true);
+                    return true;
+                }
+            }
+        }
+        return true;
+    }
 
-            String[] hostNames2 = hostNames[2].split("\\.");
+    public static void setStatusBarColor(Activity activity, int colorResID) {
 
-            serialNumber = hostNames2[0].toUpperCase();
-
-            Log.d(TAG, "discovery: model:" + model + " serialNumber:" + serialNumber);
+        if (checkRunningOnLollipopOrHigher()) {
+            activity.getWindow().setStatusBarColor(ContextCompat.getColor(activity, colorResID));
         }
 
-        return model + "-" + serialNumber;
+    }
 
+    public static boolean checkIP(String ip) {
+
+        String http = "http://";
+
+        if (ip.contains(http)) {
+            ip = ip.substring(7, ip.length());
+        }
+
+        Process process = null;
+
+        try {
+
+            process = new ProcessBuilder()
+                    .command("/system/bin/ping","-c 3","-w 3",ip)
+                    .redirectErrorStream(true)
+                    .start();
+
+            int status = process.waitFor();
+
+            return status == 0;
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            if (process != null)
+                process.destroy();
+        }
+
+        return false;
     }
 
 }

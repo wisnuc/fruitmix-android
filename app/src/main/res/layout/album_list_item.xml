@@ -131,7 +131,7 @@
                     android:ellipsize="end"
                     android:gravity="center_vertical"
                     android:maxLines="2"
-                    android:textColor="@color/album_time"
+                    android:textColor="@color/fifty_four_percent_black"
                     android:textSize="14dp" />
 
                 <LinearLayout
@@ -144,7 +144,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:maxLines="1"
-                        android:textColor="#999999"
+                        android:textColor="@color/fifty_four_percent_black"
                         android:textSize="12dp" />
 
                     <TextView
@@ -155,7 +155,7 @@
                         android:layout_marginLeft="8dp"
                         android:maxLines="1"
                         android:text="admin"
-                        android:textColor="#999999"
+                        android:textColor="@color/fifty_four_percent_black"
                         android:textSize="12dp" />
 
 

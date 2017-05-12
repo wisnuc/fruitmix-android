@@ -17,8 +17,10 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
@@ -145,7 +147,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         setMediaList(transitionMedias);
 
         if (transitionView.isLoaded()) {
-            
+
             Util.setMotion(motionPosition, spanCount);
 
             ViewCompat.setTransitionName(transitionView, currentMedia.getKey());
@@ -246,7 +248,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             }
         });
 
-        initShareBtn();
+//        initShareBtn();
+
+        registerForContextMenu(mViewPager);
+
     }
 
     @Override
@@ -374,62 +379,87 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             @Override
             public void onClick(View v) {
 
-                if (!Util.getNetworkState(mContext)) {
-                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                final Media media = mediaList.get(currentPhotoPosition);
-
-                String mediaUUID = media.getUuid();
-                if (mediaUUID.isEmpty()) {
-                    mediaUUID = Util.CalcSHA256OfFile(media.getOriginalPhotoPath());
-                    media.setUuid(mediaUUID);
-                }
-
-                AbstractCommand shareInAppCommand = new AbstractCommand() {
-                    @Override
-                    public void execute() {
-
-                        mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, false);
-
-                        FNAS.createRemoteMediaShare(mContext, Util.createMediaShare(false, true, false, "", "", Collections.singletonList(media.getUuid())));
-
-                    }
-
-                    @Override
-                    public void unExecute() {
-                    }
-                };
-
-                AbstractCommand shareToOtherAppCommand = new AbstractCommand() {
-                    @Override
-                    public void execute() {
-
-                        String originalPhotoPath = media.getOriginalPhotoPath();
-
-                        if (originalPhotoPath.length() != 0) {
-
-                            Util.sendShare(mContext, Collections.singletonList(originalPhotoPath));
-
-                        } else {
-                            mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, true);
-                            mDialog.setCanceledOnTouchOutside(false);
-
-                            EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, Collections.singletonList(media)));
-                        }
-
-                    }
-
-                    @Override
-                    public void unExecute() {
-                    }
-                };
-
-                new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(mContext).show();
+                showCreateShareBottomDialog();
             }
         });
 
+    }
+
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        getMenuInflater().inflate(R.menu.menu_photo_slider, menu);
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.share:
+                showCreateShareBottomDialog();
+                break;
+        }
+
+        return super.onContextItemSelected(item);
+    }
+
+    private void showCreateShareBottomDialog() {
+        if (!Util.getNetworkState(mContext)) {
+            Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final Media media = mediaList.get(currentPhotoPosition);
+
+        String mediaUUID = media.getUuid();
+        if (mediaUUID.isEmpty()) {
+            mediaUUID = Util.CalcSHA256OfFile(media.getOriginalPhotoPath());
+            media.setUuid(mediaUUID);
+        }
+
+        AbstractCommand shareInAppCommand = new AbstractCommand() {
+            @Override
+            public void execute() {
+
+                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, false);
+
+                FNAS.createRemoteMediaShare(mContext, Util.createMediaShare(false, true, false, "", "", Collections.singletonList(media.getUuid())));
+
+            }
+
+            @Override
+            public void unExecute() {
+            }
+        };
+
+        AbstractCommand shareToOtherAppCommand = new AbstractCommand() {
+            @Override
+            public void execute() {
+
+                String originalPhotoPath = media.getOriginalPhotoPath();
+
+                if (originalPhotoPath.length() != 0) {
+
+                    Util.sendShare(mContext, Collections.singletonList(originalPhotoPath));
+
+                } else {
+                    mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, true);
+                    mDialog.setCanceledOnTouchOutside(false);
+
+                    EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, Collections.singletonList(media)));
+                }
+
+            }
+
+            @Override
+            public void unExecute() {
+            }
+        };
+
+        new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(mContext).show();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

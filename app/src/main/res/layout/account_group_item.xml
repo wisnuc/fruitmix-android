@@ -11,6 +11,6 @@
         android:layout_height="wrap_content"
         android:text="fadf"
         android:textSize="14dp"
-        android:textColor="@color/fifty_four_percent_black"/>
+        android:textColor="@color/eighty_seven_percent_black"/>
 
 </LinearLayout>

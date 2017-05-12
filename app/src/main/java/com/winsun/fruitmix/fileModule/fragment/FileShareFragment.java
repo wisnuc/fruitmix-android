@@ -139,7 +139,7 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
                 retrievedFolderNameList.add(getString(R.string.file));
             }
 
-            rootUUID = LocalCache.getUser(getContext()).getHome();
+            rootUUID = LocalCache.getUserHome(getContext());
 
             FNAS.retrieveRemoteFileShare();
         }

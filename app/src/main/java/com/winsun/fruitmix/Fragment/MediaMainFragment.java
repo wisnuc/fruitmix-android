@@ -3,16 +3,12 @@ package com.winsun.fruitmix.fragment;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.StateListAnimator;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringDef;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -20,7 +16,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
@@ -30,7 +25,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -58,7 +52,6 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
-import com.winsun.fruitmix.model.operationResult.OperationNoChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
@@ -70,7 +63,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -105,6 +97,13 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     ImageView mAlbumBalloon;
     @BindView(R.id.bottom_navigation_view)
     BottomNavigationView bottomNavigationView;
+
+    @BindView(R.id.reveal_toolbar)
+    Toolbar revealToolbar;
+    @BindView(R.id.select_count_title)
+    TextView mSelectCountTitle;
+    @BindView(R.id.enter_select_mode)
+    TextView mEnterSelectMode;
 
     private List<Page> pageList;
     private AlbumList albumList;
@@ -180,7 +179,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         toolbar.setNavigationIcon(R.drawable.menu_black);
 
         toolbar.setTitle("");
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+//        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -188,7 +189,22 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             }
         });
 
+        revealToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (sInChooseMode) {
+                    hideChooseHeader();
+                    showBottomNavAnim();
+                } else {
+                    mListener.onBackPress();
+                }
+
+            }
+        });
+
         lbRight.setVisibility(View.VISIBLE);
+
+        mEnterSelectMode.setVisibility(View.INVISIBLE);
 
         initNavigationView();
 
@@ -376,6 +392,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                     super.onTransitionStart(transition);
 
                     toolbar.setVisibility(View.INVISIBLE);
+
                     bottomNavigationView.setVisibility(View.INVISIBLE);
 
                 }
@@ -385,6 +402,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                     super.onTransitionEnd(transition);
 
                     toolbar.setVisibility(View.VISIBLE);
+
                     bottomNavigationView.setVisibility(View.VISIBLE);
                 }
             });
@@ -745,7 +763,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     public void setSelectCountText(String text) {
-        title.setText(text);
+//        title.setText(text);
+
+        mSelectCountTitle.setText(text);
     }
 
     public void showTips() {
@@ -779,8 +799,14 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     private void showChooseHeader() {
-        fab.setVisibility(View.VISIBLE);
-        toolbar.setNavigationIcon(R.drawable.ic_back_black);
+
+//        fab.setVisibility(View.VISIBLE);
+
+        showFab(createAnimator(R.animator.fab_translation));
+
+        showRevealToolbarAnim();
+
+/*        toolbar.setNavigationIcon(R.drawable.ic_back_black);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -793,13 +819,15 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             }
         });
-        lbRight.setVisibility(View.GONE);
+        lbRight.setVisibility(View.GONE);*/
 
         CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
         lp.bottomMargin = 0;
         viewPager.setLayoutParams(lp);
+
         sInChooseMode = true;
         photoList.setSelectMode(sInChooseMode);
+
         setSelectCountText(getString(R.string.choose_photo));
 
         mListener.lockDrawer();
@@ -810,8 +838,14 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             sMenuUnfolding = false;
             collapseFab();
         }
-        fab.setVisibility(View.GONE);
-        toolbar.setNavigationIcon(R.drawable.menu_black);
+
+//        fab.setVisibility(View.GONE);
+
+        dismissFab(createAnimator(R.animator.fab_translation_restore));
+
+        dismissRevealToolbarAnim();
+
+/*        toolbar.setNavigationIcon(R.drawable.menu_black);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -820,12 +854,98 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         });
         lbRight.setVisibility(View.VISIBLE);
 
+        setSelectCountText(getString(R.string.photo));*/
+
         sInChooseMode = false;
         photoList.setSelectMode(sInChooseMode);
-        setSelectCountText(getString(R.string.photo));
 
         mListener.unlockDrawer();
     }
+
+    private Animator createAnimator(int animatorResId) {
+        return AnimatorInflater.loadAnimator(getContext(), animatorResId);
+    }
+
+    private void showFab(Animator animator) {
+
+        animator.setTarget(fab);
+
+        animator.addListener(new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+
+                fab.setVisibility(View.VISIBLE);
+            }
+        });
+
+        animator.start();
+    }
+
+    private void dismissFab(Animator animator) {
+
+        animator.setTarget(fab);
+
+        animator.addListener(new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                fab.setVisibility(View.GONE);
+            }
+        });
+
+        animator.start();
+
+    }
+
+    private void showRevealToolbarAnim() {
+
+        // fix bug:toolbar阴影 和 两个toolbar动画问题
+
+        revealToolbar.setVisibility(View.VISIBLE);
+
+        Animator animator = createAnimator(R.animator.reveal_toolbar_translation);
+
+        animator.setTarget(revealToolbar);
+
+        animator.addListener(new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                Util.setStatusBarColor(getActivity(), R.color.fab_bg_color);
+            }
+        });
+
+        animator.start();
+    }
+
+    private void dismissRevealToolbarAnim() {
+
+        Animator animator = createAnimator(R.animator.reveal_toolbar_translation_restore);
+
+        animator.setTarget(revealToolbar);
+
+        animator.addListener(new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                revealToolbar.setVisibility(View.GONE);
+
+                Util.setStatusBarColor(getActivity(), R.color.colorPrimaryDark);
+            }
+        });
+
+        animator.start();
+
+    }
+
 
     private void showBottomNavAnim() {
 
@@ -879,6 +999,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     public void handleBackPressed() {
+
+//        Util.dismissViewWithReveal(mRevealToolbar);
 
         hideChooseHeader();
         showBottomNavAnim();
@@ -1015,6 +1137,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 refreshFabState();
                 break;
             case R.id.right:
+
+//                Util.showViewWithReveal(mRevealToolbar);
+
                 showChooseHeader();
                 dismissBottomNavAnim();
                 break;
@@ -1073,7 +1198,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private void collapseFab() {
 
-        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.fab_restore);
+        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.fab_remote_restore);
         mAnimator.setTarget(fab);
         mAnimator.start();
 

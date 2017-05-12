@@ -126,7 +126,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="18dp"
-            android:textColor="@color/fifty_four_percent_black"
+            android:textColor="@color/eighty_seven_percent_black"
             android:gravity="center"
             android:text="@string/android_share_count"
             android:textSize="14dp" />
@@ -147,7 +147,7 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="18dp"
             android:text="@string/check_more_photos"
-            android:textColor="@color/fifty_four_percent_black"
+            android:textColor="@color/eighty_seven_percent_black"
             android:textSize="14dp"
             android:visibility="gone" />
 

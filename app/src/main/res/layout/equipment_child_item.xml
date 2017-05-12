@@ -27,7 +27,7 @@
             android:layout_height="50dp"
             android:layout_marginLeft="16dp"
             android:gravity="center_vertical"
-            android:textColor="@color/fifty_four_percent_black"
+            android:textColor="@color/eighty_seven_percent_black"
             android:textSize="16dp" />
 
     </LinearLayout>

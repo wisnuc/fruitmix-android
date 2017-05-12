@@ -216,11 +216,13 @@ public class ButlerService extends Service {
                 break;
             case Util.REMOTE_USER_RETRIEVED:
 
-                if (Util.loginType == LoginType.LOGIN) {
+                /*if (Util.loginType == LoginType.LOGIN) {
                     EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
                 } else {
                     EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
-                }
+                }*/
+
+                EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
 
                 FNAS.retrieveRemoteMedia(this);
                 break;

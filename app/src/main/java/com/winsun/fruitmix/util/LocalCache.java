@@ -741,6 +741,13 @@ public class LocalCache {
         editor.apply();
     }
 
+    public static String getUserHome(Context context){
+        SharedPreferences sp;
+        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+
+        return sp.getString(Util.USER_HOME, "");
+    }
+
     public static User getUser(Context context) {
         SharedPreferences sp;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);

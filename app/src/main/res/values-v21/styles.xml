@@ -17,12 +17,16 @@
         <item name="colorAccent">@color/fab_bg_color</item>
         <item name="android:backgroundDimEnabled">false</item>
 
-        <item name="android:alertDialogTheme">@style/CustomDialog</item>
+        <!--<item name="android:alertDialogTheme">@style/CustomDialog</item>-->
 
         <item name="android:windowContentTransitions">true</item>
 
-        <item name="android:windowSharedElementEnterTransition">@transition/new_change_image_transform_enter</item>
-        <item name="android:windowSharedElementReturnTransition">@transition/change_image_transform_exit</item>
+        <item name="android:windowSharedElementEnterTransition">
+            @transition/new_change_image_transform_enter
+        </item>
+        <item name="android:windowSharedElementReturnTransition">
+            @transition/change_image_transform_exit
+        </item>
 
     </style>
 

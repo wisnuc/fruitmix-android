@@ -85,7 +85,7 @@
                 android:layout_marginLeft="16dp"
                 android:layout_toRightOf="@id/user_default_portrait"
                 android:gravity="center"
-                android:textColor="@color/fifty_four_percent_black"
+                android:textColor="@color/eighty_seven_percent_black"
                 android:textSize="17dp" />
 
         </RelativeLayout>
@@ -96,7 +96,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/password_text"
             android:inputType="textPassword"
-            android:textColor="@color/fifty_four_percent_black"
+            android:textColorHint="@color/eighty_seven_percent_black"
+            android:textColor="@color/eighty_seven_percent_black"
             android:textSize="17dp" />
 
         <Button

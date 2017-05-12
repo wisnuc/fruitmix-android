@@ -144,7 +144,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         LocalCache.saveUserUUID(mContext, FNAS.userUUID);
                         LocalCache.SetGlobalData(mContext, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
 
-                        checkAutoUpload();
+                        if (!Util.checkAutoUpload(mContext)) {
+                            Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
+                        }
 
                         FNAS.retrieveUser(mContext);
                         startActivity(new Intent(mContext, NavPagerActivity.class));
@@ -160,7 +162,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                 Intent intent = new Intent(mContext, LoginActivity.class);
                 intent.putExtra(Util.GATEWAY, "http://" + equipment.getHosts().get(0));
-                intent.putExtra(Util.USER_GROUP_NAME, Util.getEquipmentName(equipment));
+                intent.putExtra(Util.USER_GROUP_NAME, equipment.getEquipmentName());
                 intent.putExtra(Util.USER_NAME, user.getUserName());
                 intent.putExtra(Util.USER_UUID, user.getUuid());
                 intent.putExtra(Util.USER_BG_COLOR, user.getDefaultAvatarBgColor());
@@ -245,20 +247,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         super.onDestroy();
 
         mContext = null;
-    }
-
-    private void checkAutoUpload() {
-        for (LoggedInUser loggedInUser : LocalCache.LocalLoggedInUsers) {
-
-            if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
-                if (!LocalCache.getCurrentUploadDeviceID(mContext).equals(LocalCache.DeviceID)) {
-                    LocalCache.setAutoUploadOrNot(mContext, false);
-                    Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
-                } else {
-                    LocalCache.setAutoUploadOrNot(mContext, true);
-                }
-            }
-        }
     }
 
     @Override
@@ -543,59 +531,22 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                     @Override
                     public void call(BonjourService bonjourService) {
 
-                        if (bonjourService.isLost()) return;
+                        if (!Util.checkBonjourService(bonjourService)) return;
 
-                        String serviceName = bonjourService.getServiceName();
+                        Equipment createdEquipment = Equipment.createEquipment(bonjourService);
 
-                        String hostName = bonjourService.getHostname();
-
-                        if (hostName == null || !hostName.contains("wisnuc")) return;
-
-                        Log.d(TAG, "call: hostName: " + hostName);
-
-                        if (bonjourService.getInet4Address() == null) return;
-
-                        String hostAddress = bonjourService.getInet4Address().getHostAddress();
-
-                        String model = "";
-                        String serialNumber = "";
-
-                        if (hostName.contains("-")) {
-
-                            String[] hostNames = hostName.split("-");
-
-                            model = hostNames[1].toUpperCase();
-
-                            String[] hostNames2 = hostNames[2].split("\\.");
-
-                            serialNumber = hostNames2[0].toUpperCase();
-
-                            Log.d(TAG, "discovery: model:" + model + " serialNumber:" + serialNumber);
-                        }
+                        if (createdEquipment == null) return;
 
                         for (Equipment equipment : mFoundedEquipments) {
-                            if (equipment == null || equipment.getHosts().contains(hostAddress)
-                                    || serialNumber.equals(equipment.getSerialNumber())) {
+                            if (equipment == null || equipment.getHosts().contains(createdEquipment.getHosts().get(0))
+                                    || equipment.getSerialNumber().equals(createdEquipment.getSerialNumber())) {
                                 return;
                             }
                         }
 
-                        Equipment equipment = new Equipment();
-                        equipment.setServiceName(serviceName);
-                        Log.d(TAG, "host address:" + hostAddress);
+                        mFoundedEquipments.add(createdEquipment);
 
-                        List<String> hosts = new ArrayList<>();
-                        hosts.add(hostAddress);
-
-                        equipment.setHosts(hosts);
-                        equipment.setPort(bonjourService.getPort());
-
-                        equipment.setModel(model);
-                        equipment.setSerialNumber(serialNumber);
-
-                        mFoundedEquipments.add(equipment);
-
-                        getUserList(equipment);
+                        getUserList(createdEquipment);
 
                     }
                 });

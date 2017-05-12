@@ -52,7 +52,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#1F000000" />
+            android:background="@drawable/album_mask_in_mediashare" />
 
         <RelativeLayout
             android:id="@+id/panelFooter"
@@ -69,7 +69,8 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="16dp"
                 android:background="@null"
-                android:src="@drawable/ic_share" />
+                android:src="@drawable/ic_share"
+                android:visibility="gone"/>
 
             <LinearLayout
                 android:id="@+id/comment_layout"
@@ -95,7 +96,8 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_gravity="bottom"
-            android:background="#1F000000" />
+            android:visibility="gone"
+            android:background="@drawable/album_mask_in_mediashare" />
 
     </FrameLayout>
 

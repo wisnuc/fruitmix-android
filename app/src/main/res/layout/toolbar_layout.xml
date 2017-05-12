@@ -18,7 +18,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="@string/photo"
-        android:textColor="@color/toolbar_title"
+        android:textColor="@color/eighty_seven_percent_black"
         android:textSize="18dp" />
 
 
@@ -34,5 +34,6 @@
         android:visibility="gone" />
     <!--android:textColor="#757575"-->
 
-
 </android.support.v7.widget.Toolbar>
+
+

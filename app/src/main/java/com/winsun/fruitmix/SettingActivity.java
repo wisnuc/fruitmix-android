@@ -146,6 +146,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 LocalCache.setCurrentUploadDeviceID(this, LocalCache.DeviceID);
                 EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
             } else {
+                LocalCache.setCurrentUploadDeviceID(this, "");
                 EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
             }
         }

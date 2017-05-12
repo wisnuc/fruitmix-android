@@ -34,6 +34,13 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
     @BindView(R.id.right)
     TextView rightTextView;
 
+    @BindView(R.id.reveal_toolbar)
+    Toolbar revealToolbar;
+    @BindView(R.id.select_count_title)
+    TextView mSelectCountTitle;
+    @BindView(R.id.enter_select_mode)
+    TextView mEnterSelectMode;
+
     @BindView(R.id.main_framelayout)
     FrameLayout mMainFrameLayout;
 
@@ -62,20 +69,26 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
         mNewPhotoList.setSelectMode(true);
         mNewPhotoList.setAlreadySelectedImageKeyArrayList(alreadySelectedImageKeyArrayList);
 
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+//        setSupportActionBar(mToolbar);
+//        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        mToolbar.setVisibility(View.GONE);
+        revealToolbar.setVisibility(View.VISIBLE);
+
+        Util.setStatusBarColor(this, R.color.fab_bg_color);
+
+        revealToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
 
-        mTitleTextView.setText(getString(R.string.choose_text));
+        setSelectCountText(getString(R.string.choose_text));
 
-        rightTextView.setVisibility(View.VISIBLE);
-        rightTextView.setOnClickListener(new View.OnClickListener() {
+        setEnterSelectModeVisibility(View.VISIBLE);
+
+        mEnterSelectMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -125,6 +138,13 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+
+        Util.setStatusBarColor(this, R.color.colorPrimaryDark);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -149,11 +169,21 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
     public void onPhotoItemClick(int selectedItemCount) {
 
         if (selectedItemCount > mAlreadySelectedImageKeyListSize) {
-            rightTextView.setVisibility(View.VISIBLE);
+            setEnterSelectModeVisibility(View.VISIBLE);
         } else {
-            rightTextView.setVisibility(View.INVISIBLE);
+            setEnterSelectModeVisibility(View.INVISIBLE);
         }
 
+        setSelectCountText(String.format(getString(R.string.select_count), selectedItemCount));
+
+    }
+
+    public void setSelectCountText(String text) {
+        mSelectCountTitle.setText(text);
+    }
+
+    private void setEnterSelectModeVisibility(int visibility) {
+        mEnterSelectMode.setVisibility(visibility);
     }
 
     @Override
@@ -167,29 +197,29 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
     @Override
     public void onPhotoListScrollDown() {
 
-        if (mToolbar.getVisibility() == View.INVISIBLE)
+        if (revealToolbar.getVisibility() == View.INVISIBLE)
             return;
 
-        ViewCompat.setElevation(mToolbar, Util.dip2px(this, 6f));
+        ViewCompat.setElevation(revealToolbar, Util.dip2px(this, 6f));
 
-        mToolbar.setVisibility(View.GONE);
+        revealToolbar.setVisibility(View.GONE);
     }
 
     @Override
     public void onPhotoListScrollUp() {
 
-        if (mToolbar.getVisibility() == View.VISIBLE)
+        if (revealToolbar.getVisibility() == View.VISIBLE)
             return;
 
-        ViewCompat.setElevation(mToolbar, Util.dip2px(this, 6f));
+        ViewCompat.setElevation(revealToolbar, Util.dip2px(this, 6f));
 
-        mToolbar.setVisibility(View.VISIBLE);
+        revealToolbar.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onPhotoListScrollFinished() {
 
-        ViewCompat.setElevation(mToolbar, Util.dip2px(this, 2f));
+        ViewCompat.setElevation(revealToolbar, Util.dip2px(this, 2f));
 
     }
 

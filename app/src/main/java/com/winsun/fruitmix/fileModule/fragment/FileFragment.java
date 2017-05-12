@@ -169,11 +169,11 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
 
         if (!remoteFileLoaded && !isHidden()) {
 
-            User user = LocalCache.getUser(getContext());
+            String userHome = LocalCache.getUserHome(getContext());
 
-            currentFolderUUID = user.getHome();
+            currentFolderUUID = userHome;
 
-            rootUUID = user.getHome();
+            rootUUID = userHome;
 
             if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
                 retrievedFolderUUIDList.add(currentFolderUUID);
@@ -271,9 +271,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
 
     private boolean notRootFolder() {
 
-        User user = LocalCache.getUser(getContext());
-
-        String homeFolderUUID = user.getHome();
+        String homeFolderUUID = LocalCache.getUserHome(getContext());
 
         return !currentFolderUUID.equals(homeFolderUUID);
     }

@@ -2,6 +2,7 @@ package com.winsun.fruitmix.http;
 
 import android.util.Log;
 
+import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.IOException;

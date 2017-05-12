@@ -43,6 +43,7 @@ import com.winsun.fruitmix.fragment.FileMainFragment;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
@@ -469,14 +470,14 @@ public class NavPagerActivity extends AppCompatActivity
 //        });
 
         mNavigationItemMenu.add(new NavigationDividerItem());
-        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_settings, getString(R.string.setting)) {
+        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_settings_black_24dp, getString(R.string.setting)) {
             @Override
             public void onClick() {
                 Intent intent = new Intent(NavPagerActivity.this, SettingActivity.class);
                 startActivity(intent);
             }
         });
-        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_logout_black_24dp, getString(R.string.logout)) {
+        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_power_settings_new_black_24dp, getString(R.string.logout)) {
             @Override
             public void onClick() {
                 handleLogoutOnClick();
@@ -498,16 +499,25 @@ public class NavPagerActivity extends AppCompatActivity
                     @Override
                     public void call(BonjourService bonjourService) {
 
-                        if (checkEquipment(bonjourService, loggedInUser)) return;
+                        if (!Util.checkBonjourService(bonjourService)) return;
 
-                        if (bonjourService.getInet4Address() == null) return;
+                        Equipment createdEquipment = Equipment.createEquipment(bonjourService);
+
+                        if (createdEquipment == null) return;
+
+                        Log.d(TAG, "search equipment: loggedinuser equipment name: " + loggedInUser.getEquipmentName() + " createEquipment equipment name: " + createdEquipment.getEquipmentName());
+
+                        if (!loggedInUser.getEquipmentName().equals(createdEquipment.getEquipmentName()))
+                            return;
+
+                        String hostAddress = createdEquipment.getHosts().get(0);
+
+                        Log.i(TAG, "search equipment: hostAddress: " + hostAddress);
 
                         mDialog.dismiss();
                         stopDiscovery();
 
                         mCustomHandler.removeMessages(DISCOVERY_TIMEOUT_MESSAGE);
-
-                        String hostAddress = bonjourService.getInet4Address().getHostAddress();
 
                         FNAS.Gateway = "http://" + hostAddress;
                         FNAS.userUUID = loggedInUser.getUser().getUuid();
@@ -525,7 +535,7 @@ public class NavPagerActivity extends AppCompatActivity
 
                         FNAS.retrieveUser(mContext);
 
-                        if (checkAutoUpload()) {
+                        if (Util.checkAutoUpload(mContext)) {
                             Toast.makeText(mContext, String.format(getString(R.string.success), getString(R.string.change_user)), Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
@@ -539,33 +549,6 @@ public class NavPagerActivity extends AppCompatActivity
                     }
                 });
 
-    }
-
-    private boolean checkEquipment(BonjourService bonjourService, LoggedInUser loggedInUser) {
-        if (bonjourService.isLost()) return true;
-
-        String serviceName = bonjourService.getServiceName();
-        if (!serviceName.toLowerCase().contains("wisnuc")) return true;
-
-        String equipmentName = Util.getEquipmentName(bonjourService);
-
-        return !equipmentName.equals(loggedInUser.getEquipmentName());
-    }
-
-    private boolean checkAutoUpload() {
-        for (LoggedInUser loggedInUser : LocalCache.LocalLoggedInUsers) {
-
-            if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
-                if (!LocalCache.getCurrentUploadDeviceID(mContext).equals(LocalCache.DeviceID)) {
-                    LocalCache.setAutoUploadOrNot(mContext, false);
-                    return false;
-                } else {
-                    LocalCache.setAutoUploadOrNot(mContext, true);
-                    return true;
-                }
-            }
-        }
-        return true;
     }
 
     private void stopDiscovery() {
@@ -589,6 +572,7 @@ public class NavPagerActivity extends AppCompatActivity
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
+                LocalCache.setCurrentUploadDeviceID(mContext, "");
                 LocalCache.setAutoUploadOrNot(mContext, false);
 
             }
@@ -795,7 +779,7 @@ public class NavPagerActivity extends AppCompatActivity
         if (user.isAdmin()) {
 
             if (mNavigationItemMenu.get(2).getType() != NAVIGATION_ITEM_TYPE_MENU) {
-                mNavigationItemMenu.add(2, new NavigationMenuItem(R.drawable.ic_person_add, getString(R.string.user_manage)) {
+                mNavigationItemMenu.add(2, new NavigationMenuItem(R.drawable.ic_person_add_black_24dp, getString(R.string.user_manage)) {
                     @Override
                     public void onClick() {
                         Intent intent = new Intent(NavPagerActivity.this, UserManageActivity.class);
