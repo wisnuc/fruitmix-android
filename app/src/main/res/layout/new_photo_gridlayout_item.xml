@@ -3,7 +3,7 @@
     android:id="@+id/photo_item_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#f0f0f0"
+    android:background="@color/white"
     android:clickable="true">
 
     <com.android.volley.toolbox.NetworkImageView

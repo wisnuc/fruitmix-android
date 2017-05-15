@@ -4,7 +4,7 @@
     android:duration="200"
     android:interpolator="@android:anim/linear_interpolator"
     android:propertyName="translationY"
-    android:valueFrom="168"
+    android:valueFrom="-168"
     android:valueTo="0" />
 
 

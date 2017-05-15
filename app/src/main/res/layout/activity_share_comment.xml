@@ -74,7 +74,7 @@
             android:layout_marginRight="60dp"
             android:hint="@string/send_comment_hint"
             android:lines="2"
-            android:textColor="@color/fifty_four_percent_black"
+            android:textColor="@color/eighty_seven_percent_black"
             android:textColorHint="@color/comment_hint"
             android:textSize="15dp" />
 

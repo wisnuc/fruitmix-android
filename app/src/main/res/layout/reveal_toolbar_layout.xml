@@ -8,14 +8,9 @@
     android:elevation="@dimen/appbar_elevation"
     android:theme="@style/AppTheme.AppBarOverlay"
     android:transitionName="@string/transition_toolbar"
+    app:navigationIcon="@drawable/ic_back"
     android:visibility="gone"
     app:popupTheme="@style/AppTheme.PopupOverlay">
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="32dp"
-        android:src="@drawable/ic_back" />
 
     <TextView
         android:id="@+id/select_count_title"

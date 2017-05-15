@@ -46,9 +46,11 @@
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize" />
 
-    <include layout="@layout/toolbar_layout" />
+    <include layout="@layout/toolbar_layout"
+        android:visibility="gone"/>
 
-    <include layout="@layout/reveal_toolbar_layout" />
+    <include layout="@layout/reveal_toolbar_layout"
+        android:visibility="visible"/>
 
 
 </FrameLayout>

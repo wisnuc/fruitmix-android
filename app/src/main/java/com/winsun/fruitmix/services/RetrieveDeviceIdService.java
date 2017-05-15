@@ -77,7 +77,7 @@ public class RetrieveDeviceIdService extends IntentService {
 
         OperationEvent operationEvent;
 
-        LocalCache.DeviceID = LocalCache.GetGlobalData(this,Util.DEVICE_ID_MAP_NAME);
+        LocalCache.DeviceID = LocalCache.getGlobalData(this,Util.DEVICE_ID_MAP_NAME);
         if (LocalCache.DeviceID != null && !LocalCache.DeviceID.equals("")) {
 
             operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationSuccess(R.string.operate));
@@ -91,8 +91,8 @@ public class RetrieveDeviceIdService extends IntentService {
 
                     LocalCache.DeviceID = new JSONObject(httpResponse.getResponseData()).getString("uuid");
 
-                    LocalCache.SetGlobalData(this,Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
-                    Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(this,Util.DEVICE_ID_MAP_NAME));
+                    LocalCache.setGlobalData(this,Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
+                    Log.d(TAG, "deviceID: " + LocalCache.getGlobalData(this,Util.DEVICE_ID_MAP_NAME));
 
                     operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationSuccess(R.string.operate));
 

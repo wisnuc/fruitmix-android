@@ -58,10 +58,17 @@
     <!--app:tabIndicatorColor="#0026c6da"-->
     <!--app:tabIndicatorHeight="4dp"/>-->
 
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:stateListAnimator="@animator/appbar_elevation">
 
-    <include layout="@layout/toolbar_layout" />
+        <include layout="@layout/toolbar_layout" />
 
-    <include layout="@layout/reveal_toolbar_layout" />
+        <include layout="@layout/reveal_toolbar_layout" />
+
+    </android.support.design.widget.AppBarLayout>
+
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/bottom_navigation_view"

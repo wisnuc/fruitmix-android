@@ -25,7 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:text="hah"
-            android:textColor="@color/fifty_four_percent_black"
+            android:textColor="@color/eighty_seven_percent_black"
             android:textSize="24dp"/>
 
     </LinearLayout>

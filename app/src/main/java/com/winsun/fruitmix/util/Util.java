@@ -273,6 +273,13 @@ public class Util {
         return metric.widthPixels;
     }
 
+    public static int calcScreenHeight(Activity activity) {
+        DisplayMetrics metric = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metric);
+
+        return metric.heightPixels;
+    }
+
     public static String CalcSHA256OfFile(String fname) {
         MessageDigest md;
         FileInputStream fin;

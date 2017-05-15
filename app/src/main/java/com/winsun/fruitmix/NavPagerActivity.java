@@ -30,7 +30,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -527,7 +526,7 @@ public class NavPagerActivity extends AppCompatActivity
                         LocalCache.saveToken(mContext, FNAS.JWT);
                         LocalCache.saveGateway(mContext, FNAS.Gateway);
                         LocalCache.saveUserUUID(mContext, FNAS.userUUID);
-                        LocalCache.SetGlobalData(mContext, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
+                        LocalCache.setGlobalData(mContext, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
 
                         EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
 

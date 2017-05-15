@@ -238,7 +238,7 @@ public class ButlerService extends Service {
             default:
 
                 if (Util.loginType == LoginType.SPLASH_SCREEN) {
-                    LocalCache.DeviceID = LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME);
+                    LocalCache.DeviceID = LocalCache.getGlobalData(this, Util.DEVICE_ID_MAP_NAME);
 
                     FNAS.retrieveUser(this);
 
@@ -265,7 +265,7 @@ public class ButlerService extends Service {
                 if (Util.loginType == LoginType.SPLASH_SCREEN) {
                     FNAS.JWT = LocalCache.getToken(this);
 
-                    LocalCache.DeviceID = LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME);
+                    LocalCache.DeviceID = LocalCache.getGlobalData(this, Util.DEVICE_ID_MAP_NAME);
 
                     FNAS.retrieveUser(this);
 

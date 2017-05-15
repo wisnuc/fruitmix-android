@@ -24,7 +24,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
@@ -101,8 +100,8 @@ public class RetrieveRemoteUserService extends IntentService {
 
             if (LocalCache.DeviceID == null || LocalCache.DeviceID.isEmpty()) {
                 LocalCache.DeviceID = user.getLibrary();
-                LocalCache.SetGlobalData(this, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
-                Log.d(TAG, "deviceID: " + LocalCache.GetGlobalData(this, Util.DEVICE_ID_MAP_NAME));
+                LocalCache.setGlobalData(this, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
+                Log.d(TAG, "deviceID: " + LocalCache.getGlobalData(this, Util.DEVICE_ID_MAP_NAME));
             }
 
             RemoteDataParser<User> parser = new RemoteUserParser();

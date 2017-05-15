@@ -69,7 +69,7 @@
             android:layout_height="wrap_content"
             android:hint="IP"
             android:inputType="textAutoComplete"
-            android:textColor="@color/fifty_four_percent_black"
+            android:textColor="@color/eighty_seven_percent_black"
             android:textColorHighlight="#f57c00" />
 
     </android.support.design.widget.TextInputLayout>

@@ -82,7 +82,7 @@ public class LocalCache {
 
     public static void CleanAll(final Context context) {
 
-        LocalCache.DropGlobalData(context, Util.DEVICE_ID_MAP_NAME);
+        LocalCache.dropGlobalData(context, Util.DEVICE_ID_MAP_NAME);
 
         DeviceID = null;
 
@@ -656,13 +656,13 @@ public class LocalCache {
     }
 
 
-    public static String GetGlobalData(Context context, String name) {
+    public static String getGlobalData(Context context, String name) {
         SharedPreferences sp;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         return sp.getString(name, null);
     }
 
-    public static void SetGlobalData(Context context, String name, String data) {
+    public static void setGlobalData(Context context, String name, String data) {
         SharedPreferences sp;
         SharedPreferences.Editor mEditor;
 
@@ -672,7 +672,7 @@ public class LocalCache {
         mEditor.apply();
     }
 
-    private static void DropGlobalData(Context context, String name) {
+    private static void dropGlobalData(Context context, String name) {
         SharedPreferences sp;
         SharedPreferences.Editor mEditor;
 

@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -83,8 +84,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     ImageView mReturnResize;
     @BindView(R.id.viewPager)
     ViewPager mViewPager;
-    @BindView(R.id.ic_cloud_off)
-    ImageView mCloudOff;
     @BindView(R.id.share)
     ImageButton mShareBtn;
 
@@ -592,11 +591,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 mTitleTextView.setText(title);
             }
 
-            if (LocalCache.DeviceID != null && media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
-                mCloudOff.setVisibility(View.INVISIBLE);
-            } else {
-                mCloudOff.setVisibility(View.VISIBLE);
-            }
         }
 
     }
@@ -652,13 +646,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             startLoadingOriginalPhoto(view, media);
         }
 
-    }
-
-    private void setViewWidthHeightMatchParent(View view) {
-        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
-        layoutParams.width = RelativeLayout.LayoutParams.MATCH_PARENT;
-        layoutParams.height = RelativeLayout.LayoutParams.MATCH_PARENT;
-        view.setLayoutParams(layoutParams);
     }
 
     private void handleLocalMediaLoaded(Media media) {
@@ -752,11 +739,21 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             view = LayoutInflater.from(mContext).inflate(R.layout.photo_slider_cell, null);
 
+            LinearLayout mCloudOff = (LinearLayout) view.findViewById(R.id.ic_cloud_off);
+
             GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view.findViewById(R.id.mainPic);
 
             if (mediaList.size() > position && position > -1) {
 
                 Media media = mediaList.get(position);
+
+                if (LocalCache.DeviceID != null && media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
+                    mCloudOff.setVisibility(View.INVISIBLE);
+                } else {
+                    mCloudOff.setVisibility(View.VISIBLE);
+
+                    setCloudOffPosition(mCloudOff, media);
+                }
 
                 Log.d(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
 
@@ -892,32 +889,34 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             }
         }
 
-        private void setMainPicScreenHeight(GifTouchNetworkImageView mainPic, Media media) {
-
-            if (media.isLocal())
-                return;
+        private void setCloudOffPosition(View view, Media media) {
 
             int mediaWidth = Integer.parseInt(media.getWidth());
             int mediaHeight = Integer.parseInt(media.getHeight());
-            int actualWidth = 0;
-            int actualHeight = 0;
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mainPic.getLayoutParams();
+            int actualWidth;
+            int actualHeight;
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
 
-            if (mediaWidthLargerThanHeight(media, mediaWidth, mediaHeight)) {
+            int systemUIHeight = Util.dip2px(mContext, 24);
+
+            int screenWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
+            int screenHeight = Util.calcScreenHeight(PhotoSliderActivity.this);
+
+            if (mediaWidth - mediaHeight >= screenWidth - screenHeight) {
                 actualWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
                 actualHeight = mediaHeight * actualWidth / mediaWidth;
-            } else if (mediaHeightLargerThanWidth(media, mediaWidth, mediaHeight)) {
-                actualHeight = Util.dip2px(mContext, 600);
-                actualWidth = mediaWidth * actualHeight / mediaHeight;
-            } else if (mediaWidthEqualsHeight(mediaWidth, mediaHeight)) {
 
-                actualWidth = actualHeight = Util.calcScreenWidth(PhotoSliderActivity.this);
+                int marginTop = (Util.calcScreenHeight(PhotoSliderActivity.this) - actualHeight) / 2 + systemUIHeight;
+
+                layoutParams.setMargins(0, marginTop, 0, 0);
+
+            } else if (mediaWidth - mediaHeight < screenWidth - screenHeight) {
+
+                layoutParams.setMargins(0, systemUIHeight, 0, 0);
+
             }
 
-            layoutParams.width = actualWidth;
-            layoutParams.height = actualHeight;
-
-            mainPic.setLayoutParams(layoutParams);
+            view.setLayoutParams(layoutParams);
         }
 
         private boolean mediaWidthEqualsHeight(int mediaWidth, int mediaHeight) {

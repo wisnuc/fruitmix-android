@@ -72,9 +72,6 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
 //        setSupportActionBar(mToolbar);
 //        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        mToolbar.setVisibility(View.GONE);
-        revealToolbar.setVisibility(View.VISIBLE);
-
         Util.setStatusBarColor(this, R.color.fab_bg_color);
 
         revealToolbar.setNavigationOnClickListener(new View.OnClickListener() {

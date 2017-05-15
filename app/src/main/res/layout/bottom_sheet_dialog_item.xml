@@ -12,7 +12,7 @@
         android:layout_centerInParent="true"
         android:gravity="center"
         android:text="fsdaf"
-        android:textColor="@color/fifty_four_percent_black"
+        android:textColor="@color/eighty_seven_percent_black"
         android:textSize="18dp"/>
 
     <View

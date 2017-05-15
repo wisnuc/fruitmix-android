@@ -149,7 +149,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
      *
      * @return A new instance of fragment MediaMainFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static MediaMainFragment newInstance() {
         MediaMainFragment fragment = new MediaMainFragment();
         Bundle args = new Bundle();
@@ -903,7 +902,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private void showRevealToolbarAnim() {
 
-        // fix bug:toolbar阴影 和 两个toolbar动画问题
+        toolbar.setVisibility(View.GONE);
 
         revealToolbar.setVisibility(View.VISIBLE);
 
@@ -937,6 +936,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 super.onAnimationEnd(animation);
 
                 revealToolbar.setVisibility(View.GONE);
+
+                toolbar.setVisibility(View.VISIBLE);
 
                 Util.setStatusBarColor(getActivity(), R.color.colorPrimaryDark);
             }

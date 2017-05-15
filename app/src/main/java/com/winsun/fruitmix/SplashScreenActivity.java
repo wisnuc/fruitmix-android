@@ -2,7 +2,6 @@ package com.winsun.fruitmix;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -111,7 +110,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         mGateway = LocalCache.getGateway(mContext);
         mUuid = LocalCache.getUserUUID(mContext);
         mToken = LocalCache.getToken(mContext);
-        String mDeviceID = LocalCache.GetGlobalData(mContext, Util.DEVICE_ID_MAP_NAME);
+        String mDeviceID = LocalCache.getGlobalData(mContext, Util.DEVICE_ID_MAP_NAME);
 
         if (!mUuid.isEmpty() && mGateway != null && mToken != null) {
 
