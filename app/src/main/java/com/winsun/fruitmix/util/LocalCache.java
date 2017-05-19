@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,6 +56,8 @@ public class LocalCache {
     public static List<AbstractRemoteFile> RemoteFileShareList = null;
 
     public static String DeviceID = null;
+
+    public static String currentEquipmentName;
 
     public static List<LoggedInUser> LocalLoggedInUsers = null;
 
@@ -99,6 +102,20 @@ public class LocalCache {
                 dbUtils.deleteAllRemoteMedia();
             }
         });
+
+    }
+
+    public static void initCurrentEquipmentName() {
+
+        if (LocalLoggedInUsers == null || FNAS.userUUID == null)
+            return;
+
+        for (LoggedInUser loggedInUser : LocalLoggedInUsers) {
+            if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
+
+                currentEquipmentName = loggedInUser.getEquipmentName();
+            }
+        }
 
     }
 
@@ -741,7 +758,7 @@ public class LocalCache {
         editor.apply();
     }
 
-    public static String getUserHome(Context context){
+    public static String getUserHome(Context context) {
         SharedPreferences sp;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
 

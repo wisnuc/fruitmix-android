@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -277,7 +279,18 @@ public class Media implements Parcelable {
             uploaded = true;
 
         } else {
-            uploaded = FNAS.UploadFile(originalPhotoPath);
+
+            Log.i(TAG, "original path: " + getOriginalPhotoPath() + "hash:" + getUuid());
+
+            String url = FNAS.getUploadMediaUrl(this);
+
+            Log.i(TAG, "uploadIfNotDone: url: " + url);
+
+            HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_POST_METHOD);
+            httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+
+            uploaded = new OkHttpUtil().uploadFile(httpRequest, this);
+
         }
 
         if (!uploaded) return false;

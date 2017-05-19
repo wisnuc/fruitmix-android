@@ -15,4 +15,5 @@ public abstract class AbstractCommand {
 
     public void removeCommand(AbstractCommand command) {
     }
+
 }

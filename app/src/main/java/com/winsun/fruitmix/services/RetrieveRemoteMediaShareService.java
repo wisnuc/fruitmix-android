@@ -95,7 +95,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
         }
 
         try {
-            HttpResponse httpResponse = FNAS.loadRemoteShare();
+            HttpResponse httpResponse = FNAS.loadRemoteShare(this);
 
             Log.i(TAG, "loadRemoteShare:" + httpResponse.getResponseData().equals(""));
 
@@ -194,7 +194,7 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
         try {
 
-            HttpResponse httpResponse = FNAS.loadRemoteShare();
+            HttpResponse httpResponse = FNAS.loadRemoteShare(this);
 
             Log.d(TAG, "loadRemoteShare:" + httpResponse.getResponseData().equals(""));
 

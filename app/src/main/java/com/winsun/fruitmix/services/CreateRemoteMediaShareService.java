@@ -166,7 +166,7 @@ public class CreateRemoteMediaShareService extends IntentService {
         HttpResponse httpResponse;
 
         try {
-            httpResponse = FNAS.PostRemoteCall(Util.MEDIASHARE_PARAMETER, data);
+            httpResponse = FNAS.PostRemoteCall(this,Util.MEDIASHARE_PARAMETER, data);
 
             if (httpResponse.getResponseCode() == 200) {
 

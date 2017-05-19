@@ -83,7 +83,7 @@ public class RetrieveRemoteMediaService extends IntentService {
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: before load" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-            HttpResponse httpResponse = FNAS.loadMedia();
+            HttpResponse httpResponse = FNAS.loadMedia(this);
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: load media finish" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 

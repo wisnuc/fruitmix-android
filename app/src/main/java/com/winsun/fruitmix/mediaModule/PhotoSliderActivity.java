@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.mediaModule;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.util.Pair;
 import android.support.v4.view.PagerAdapter;
@@ -22,6 +24,7 @@ import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
@@ -39,7 +42,10 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
+import com.winsun.fruitmix.component.GifTouchImageView;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
+import com.winsun.fruitmix.dialog.DialogFactory;
+import com.winsun.fruitmix.dialog.PhotoOperationAlertDialogFactory;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
@@ -86,6 +92,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     ViewPager mViewPager;
     @BindView(R.id.share)
     ImageButton mShareBtn;
+
+    private MyAdapter myAdapter;
 
     private static List<Media> mediaList;
 
@@ -249,7 +257,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
 //        initShareBtn();
 
-        registerForContextMenu(mViewPager);
+//        registerForContextMenu(mViewPager);
 
     }
 
@@ -297,6 +305,18 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         commentImg.setImageResource(R.drawable.comment);
         mReturnResize.setImageResource(R.drawable.return_resize);
 
+        Media media = mediaList.get(currentPhotoPosition);
+
+        LinearLayout cloudOff = (LinearLayout) mViewPager.findViewWithTag(media.getKey() + currentPhotoPosition);
+
+        if (cloudOff.getVisibility() == View.VISIBLE) {
+
+            boolean isLandScape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
+
+            myAdapter.setCloudOffPosition(cloudOff, media, isLandScape);
+
+        }
+
     }
 
     @Override
@@ -322,7 +342,8 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     }
 
     private void initViewPager() {
-        MyAdapter myAdapter = new MyAdapter();
+        myAdapter = new MyAdapter();
+
         mViewPager.setAdapter(myAdapter);
         mViewPager.setCurrentItem(initialPhotoPosition);
         mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
@@ -336,6 +357,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             }
 
         });
+
     }
 
     private void initCommentBtn(boolean mShowCommentBtn) {
@@ -383,7 +405,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         });
 
     }
-
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -747,12 +768,14 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
                 Media media = mediaList.get(position);
 
+                mCloudOff.setTag(media.getKey() + position);
+
                 if (LocalCache.DeviceID != null && media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
                     mCloudOff.setVisibility(View.INVISIBLE);
                 } else {
                     mCloudOff.setVisibility(View.VISIBLE);
 
-                    setCloudOffPosition(mCloudOff, media);
+                    setCloudOffPosition(mCloudOff, media, false);
                 }
 
                 Log.d(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
@@ -797,6 +820,18 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
                 mainPic.setOnTouchListener(new CustomTouchListener());
                 mainPic.setOnDoubleTapListener(new CustomTapListener(mainPic));
 
+                mainPic.setUserScaleGestureListener(new CustomScaleListener(mainPic));
+
+                mainPic.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+
+                        handleOnLongClick();
+
+                        return false;
+                    }
+                });
+
             }
 
             container.addView(view);
@@ -804,6 +839,45 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             Log.d(TAG, "inistatiate position : " + position);
 
             return view;
+
+        }
+
+        private void handleOnLongClick() {
+            AbstractCommand abstractCommand = new AbstractCommand() {
+                @Override
+                public void execute() {
+                    showCreateShareBottomDialog();
+                }
+
+                @Override
+                public void unExecute() {
+                }
+            };
+
+            List<AbstractCommand> commands = Collections.singletonList(abstractCommand);
+
+            DialogFactory dialogFactory = new PhotoOperationAlertDialogFactory(Collections.singletonList(getString(R.string.share_verb)), commands);
+
+            dialogFactory.createDialog(mContext).show();
+        }
+
+        private class CustomScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+
+            private GifTouchNetworkImageView mView;
+
+            CustomScaleListener(GifTouchNetworkImageView view) {
+                this.mView = view;
+            }
+
+            @Override
+            public boolean onScaleBegin(ScaleGestureDetector detector) {
+
+                if (!mIsFullScreen) {
+                    setCloudOffVisibility(View.INVISIBLE);
+                }
+
+                return super.onScaleBegin(detector);
+            }
 
         }
 
@@ -832,6 +906,11 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
              */
             @Override
             public boolean onDoubleTap(MotionEvent e) {
+
+                if (!mIsFullScreen) {
+                    setCloudOffVisibility(View.INVISIBLE);
+                }
+
                 return false;
             }
 
@@ -889,7 +968,7 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
             }
         }
 
-        private void setCloudOffPosition(View view, Media media) {
+        private void setCloudOffPosition(View view, Media media, boolean isLandScape) {
 
             int mediaWidth = Integer.parseInt(media.getWidth());
             int mediaHeight = Integer.parseInt(media.getHeight());
@@ -899,8 +978,12 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             int systemUIHeight = Util.dip2px(mContext, 24);
 
+            int navigationBarHeight = Util.dip2px(mContext, 48);
+
             int screenWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
             int screenHeight = Util.calcScreenHeight(PhotoSliderActivity.this);
+
+            Log.d(TAG, "setCloudOffPosition: mediaWidth: " + mediaWidth + " mediaHeight: " + mediaHeight + " screenWidth: " + screenWidth + " screenHeight: " + screenHeight);
 
             if (mediaWidth - mediaHeight >= screenWidth - screenHeight) {
                 actualWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
@@ -912,7 +995,9 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
             } else if (mediaWidth - mediaHeight < screenWidth - screenHeight) {
 
-                layoutParams.setMargins(0, systemUIHeight, 0, 0);
+                int marginRight = isLandScape ? navigationBarHeight : 0;
+
+                layoutParams.setMargins(0, systemUIHeight, marginRight, 0);
 
             }
 
@@ -956,14 +1041,36 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     }
 
     private void convertEditState() {
+
+        LinearLayout cloudOff = findCurrentCloudOff();
+
         sInEdit = !sInEdit;
         if (sInEdit) {
             mToolbar.setVisibility(View.VISIBLE);
             rlPanelFooter.setVisibility(View.VISIBLE);
+
+            if (cloudOff.getVisibility() != View.VISIBLE)
+                cloudOff.setVisibility(View.VISIBLE);
+
         } else {
             mToolbar.setVisibility(View.INVISIBLE);
             rlPanelFooter.setVisibility(View.INVISIBLE);
+
+            if (cloudOff.getVisibility() != View.INVISIBLE)
+                cloudOff.setVisibility(View.INVISIBLE);
         }
+    }
+
+    private LinearLayout findCurrentCloudOff() {
+        Media media = mediaList.get(currentPhotoPosition);
+
+        return (LinearLayout) mViewPager.findViewWithTag(media.getKey() + currentPhotoPosition);
+    }
+
+    private void setCloudOffVisibility(int visibility) {
+        LinearLayout cloudOff = findCurrentCloudOff();
+
+        cloudOff.setVisibility(visibility);
     }
 
     private void toggleFullScreenState(View view) {

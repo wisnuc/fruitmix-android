@@ -26,6 +26,7 @@ import com.github.druk.rxdnssd.RxDnssd;
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.model.EquipmentSearchManager;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.User;
@@ -70,9 +71,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private List<Equipment> mFoundedEquipments;
 
-    private static final String SERVICE_PORT = "_http._tcp";
-    private static final String DEMAIN = "local.";
-
     private List<List<User>> mUserExpandableLists;
 
     private CustomHandler mHandler;
@@ -84,8 +82,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private boolean mStartAnimateArrow = false;
 
-    private RxDnssd mRxDnssd;
-    private Subscription mSubscription;
+    private EquipmentSearchManager mEquipmentSearchManager;
 
     private Random random;
 
@@ -128,7 +125,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                         Util.loginType = LoginType.SPLASH_SCREEN;
 
-                        FNAS.Gateway = "http://" + mUserLoadedEquipments.get(groupPosition).getHosts().get(0);
+                        FNAS.Gateway = Util.HTTP + mUserLoadedEquipments.get(groupPosition).getHosts().get(0);
                         FNAS.userUUID = loggedInUser.getUser().getUuid();
                         FNAS.JWT = loggedInUser.getToken();
                         LocalCache.DeviceID = loggedInUser.getDeviceID();
@@ -213,7 +210,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         mTitleTextView.setText(getString(R.string.search_equipment));
 
-        mRxDnssd = CustomApplication.getRxDnssd(mContext);
+        mEquipmentSearchManager = new EquipmentSearchManager(mContext);
     }
 
     @Override
@@ -516,41 +513,27 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private void startDiscovery() {
 
-        mSubscription = mRxDnssd.browse(SERVICE_PORT, DEMAIN)
-                .compose(mRxDnssd.resolve())
-                .compose(mRxDnssd.queryRecords())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<BonjourService>() {
-                    @Override
-                    public void call(BonjourService bonjourService) {
-
-                        if (!Util.checkBonjourService(bonjourService)) return;
-
-                        Equipment createdEquipment = Equipment.createEquipment(bonjourService);
-
-                        if (createdEquipment == null) return;
-
-                        for (Equipment equipment : mFoundedEquipments) {
-                            if (equipment == null || equipment.getHosts().contains(createdEquipment.getHosts().get(0))
-                                    || equipment.getSerialNumber().equals(createdEquipment.getSerialNumber())) {
-                                return;
-                            }
-                        }
-
-                        mFoundedEquipments.add(createdEquipment);
-
-                        getUserList(createdEquipment);
-
+        mEquipmentSearchManager.startDiscovery(new EquipmentSearchManager.IEquipmentDiscoveryListener() {
+            @Override
+            public void call(Equipment equipment) {
+                for (Equipment foundedEquipment : mFoundedEquipments) {
+                    if (foundedEquipment == null || foundedEquipment.getHosts().contains(equipment.getHosts().get(0))
+                            || foundedEquipment.getSerialNumber().equals(equipment.getSerialNumber())) {
+                        return;
                     }
-                });
+                }
+
+                mFoundedEquipments.add(equipment);
+
+                getUserList(equipment);
+            }
+        });
 
     }
 
     private void stopDiscovery() {
-        if (mSubscription != null) {
-            mSubscription.unsubscribe();
-        }
+
+        mEquipmentSearchManager.stopDiscovery();
     }
 
     private void getUserList(final Equipment equipment) {

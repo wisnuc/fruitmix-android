@@ -82,7 +82,7 @@ public class RetrieveRemoteFileService extends IntentService {
     private void handleActionRetrieveRemoteFile(String folderUUID, String rootUUID) {
 
         try {
-            HttpResponse httpResponse = FNAS.loadFileInFolder(folderUUID, rootUUID);
+            HttpResponse httpResponse = FNAS.loadFileInFolder(this,folderUUID, rootUUID);
 
             if (httpResponse.getResponseCode() == 200) {
 

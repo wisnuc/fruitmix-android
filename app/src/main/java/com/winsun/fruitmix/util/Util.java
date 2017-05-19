@@ -435,6 +435,10 @@ public class Util {
     }
 
     public static String getUserNameFirstLetter(String userName) {
+
+        if (userName.isEmpty())
+            return userName;
+
         StringBuilder stringBuilder = new StringBuilder();
         String[] splitStrings = userName.split(" ");
         for (String splitString : splitStrings) {
@@ -715,7 +719,7 @@ public class Util {
         try {
 
             process = new ProcessBuilder()
-                    .command("/system/bin/ping","-c 3","-w 3",ip)
+                    .command("/system/bin/ping", "-c 3", "-w 3", ip)
                     .redirectErrorStream(true)
                     .start();
 

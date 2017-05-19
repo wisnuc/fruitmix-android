@@ -103,6 +103,8 @@ public class GifTouchImageView extends GifImageView {
     // when hide system ui if is zoomed,fitImageToView will move image, so call fitImageToView if this value is true,otherwise not call it
     private boolean needFitImageToView = true;
 
+    private ScaleGestureDetector.OnScaleGestureListener userScaleGestureListener = null;
+
     public GifTouchImageView(Context context) {
         super(context);
         sharedConstructing(context);
@@ -156,6 +158,10 @@ public class GifTouchImageView extends GifImageView {
 
     public void setOnDoubleTapListener(GestureDetector.OnDoubleTapListener l) {
         doubleTapListener = l;
+    }
+
+    public void setUserScaleGestureListener(ScaleGestureDetector.OnScaleGestureListener userScaleGestureListener) {
+        this.userScaleGestureListener = userScaleGestureListener;
     }
 
     @Override
@@ -835,15 +841,20 @@ public class GifTouchImageView extends GifImageView {
             Log.d(TAG, "onDoubleTap: ");
 
             boolean consumed = false;
+
             if (doubleTapListener != null) {
-                consumed = doubleTapListener.onDoubleTap(e);
+                doubleTapListener.onDoubleTap(e);
             }
+
             if (state == State.NONE) {
                 float targetZoom = (normalizedScale == minScale) ? maxScale : minScale;
                 DoubleTapZoom doubleTap = new DoubleTapZoom(targetZoom, e.getX(), e.getY(), false);
+
                 compatPostOnAnimation(doubleTap);
+
                 consumed = true;
             }
+
             return consumed;
         }
 
@@ -945,6 +956,10 @@ public class GifTouchImageView extends GifImageView {
             Log.d(TAG, "onScaleBegin: ");
 
             setState(State.ZOOM);
+
+            if (userScaleGestureListener != null)
+                userScaleGestureListener.onScaleBegin(detector);
+
             return true;
         }
 
@@ -961,6 +976,10 @@ public class GifTouchImageView extends GifImageView {
             if (touchImageViewListener != null) {
                 touchImageViewListener.onMove();
             }
+
+            if (userScaleGestureListener != null)
+                userScaleGestureListener.onScale(detector);
+
             return true;
         }
 
@@ -986,6 +1005,9 @@ public class GifTouchImageView extends GifImageView {
                 DoubleTapZoom doubleTap = new DoubleTapZoom(targetZoom, viewWidth / 2, viewHeight / 2, true);
                 compatPostOnAnimation(doubleTap);
             }
+
+            if (userScaleGestureListener != null)
+                userScaleGestureListener.onScaleEnd(detector);
         }
     }
 
@@ -1052,8 +1074,6 @@ public class GifTouchImageView extends GifImageView {
         @Override
         public void run() {
 
-            Log.d(TAG, "DoubleTapZoom run: ");
-
             float t = interpolate();
             double deltaScale = calculateDeltaScale(t);
             scaleImage(deltaScale, bitmapX, bitmapY, stretchImageToSuper);
@@ -1082,6 +1102,7 @@ public class GifTouchImageView extends GifImageView {
                 setState(State.NONE);
 
             }
+            
         }
 
         /**

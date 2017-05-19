@@ -75,14 +75,14 @@ public class RetrieveRemoteFileShareService extends IntentService {
 
             LocalCache.RemoteFileShareList.clear();
 
-            HttpResponse remoteFileShareWithMeJSON = FNAS.loadFileSharedWithMe();
+            HttpResponse remoteFileShareWithMeJSON = FNAS.loadFileSharedWithMe(this);
 
             if (remoteFileShareWithMeJSON.getResponseCode() == 200) {
                 RemoteDataParser<AbstractRemoteFile> parser = new RemoteFileShareParser();
 
                 LocalCache.RemoteFileShareList.addAll(parser.parse(remoteFileShareWithMeJSON.getResponseData()));
 
-                HttpResponse remoteFileShareWithOthersJSON = FNAS.loadFileShareWithOthers();
+                HttpResponse remoteFileShareWithOthersJSON = FNAS.loadFileShareWithOthers(this);
 
                 if (remoteFileShareWithOthersJSON.getResponseCode() == 200) {
 

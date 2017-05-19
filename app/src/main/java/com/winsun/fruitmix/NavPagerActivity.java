@@ -43,6 +43,7 @@ import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.Equipment;
+import com.winsun.fruitmix.model.EquipmentSearchManager;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
@@ -110,11 +111,7 @@ public class NavPagerActivity extends AppCompatActivity
 
     private boolean mNavigationHeaderArrowExpanded = false;
 
-    private RxDnssd mRxDnssd;
-    private Subscription mSubscription;
-
-    private static final String SERVICE_PORT = "_http._tcp";
-    private static final String DEMAIN = "local.";
+    private EquipmentSearchManager mEquipmentSearchManager;
 
     public static final int PAGE_FILE = 1;
     public static final int PAGE_MEDIA = 0;
@@ -486,74 +483,65 @@ public class NavPagerActivity extends AppCompatActivity
 
     private void startDiscovery(final LoggedInUser loggedInUser) {
 
-        if (mRxDnssd == null)
-            mRxDnssd = CustomApplication.getRxDnssd(mContext);
+        if (mEquipmentSearchManager == null) {
+            mEquipmentSearchManager = new EquipmentSearchManager(mContext);
+        }
 
-        mSubscription = mRxDnssd.browse(SERVICE_PORT, DEMAIN)
-                .compose(mRxDnssd.resolve())
-                .compose(mRxDnssd.queryRecords())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<BonjourService>() {
-                    @Override
-                    public void call(BonjourService bonjourService) {
-
-                        if (!Util.checkBonjourService(bonjourService)) return;
-
-                        Equipment createdEquipment = Equipment.createEquipment(bonjourService);
-
-                        if (createdEquipment == null) return;
-
-                        Log.d(TAG, "search equipment: loggedinuser equipment name: " + loggedInUser.getEquipmentName() + " createEquipment equipment name: " + createdEquipment.getEquipmentName());
-
-                        if (!loggedInUser.getEquipmentName().equals(createdEquipment.getEquipmentName()))
-                            return;
-
-                        String hostAddress = createdEquipment.getHosts().get(0);
-
-                        Log.i(TAG, "search equipment: hostAddress: " + hostAddress);
-
-                        mDialog.dismiss();
-                        stopDiscovery();
-
-                        mCustomHandler.removeMessages(DISCOVERY_TIMEOUT_MESSAGE);
-
-                        FNAS.Gateway = "http://" + hostAddress;
-                        FNAS.userUUID = loggedInUser.getUser().getUuid();
-                        FNAS.JWT = loggedInUser.getToken();
-                        LocalCache.DeviceID = loggedInUser.getDeviceID();
-
-                        LocalCache.saveToken(mContext, FNAS.JWT);
-                        LocalCache.saveGateway(mContext, FNAS.Gateway);
-                        LocalCache.saveUserUUID(mContext, FNAS.userUUID);
-                        LocalCache.setGlobalData(mContext, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
-
-                        EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
-
-                        ButlerService.stopTimingRetrieveMediaShare();
-
-                        FNAS.retrieveUser(mContext);
-
-                        if (Util.checkAutoUpload(mContext)) {
-                            Toast.makeText(mContext, String.format(getString(R.string.success), getString(R.string.change_user)), Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
-                        }
-
-                        Util.setRemoteMediaShareLoaded(false);
-                        Util.setRemoteMediaLoaded(false);
-                        mediaMainFragment.refreshAllViews();
-
-                        mDrawerLayout.closeDrawer(GravityCompat.START);
-                    }
-                });
+        mEquipmentSearchManager.startDiscovery(new EquipmentSearchManager.IEquipmentDiscoveryListener() {
+            @Override
+            public void call(Equipment equipment) {
+                handleFoundEquipment(equipment, loggedInUser);
+            }
+        });
 
     }
 
-    private void stopDiscovery() {
-        if (mSubscription != null) {
-            mSubscription.unsubscribe();
+    private void handleFoundEquipment(Equipment createdEquipment, LoggedInUser loggedInUser) {
+        Log.d(TAG, "search equipment: loggedinuser equipment name: " + loggedInUser.getEquipmentName() + " createEquipment equipment name: " + createdEquipment.getEquipmentName());
+
+        if (!loggedInUser.getEquipmentName().equals(createdEquipment.getEquipmentName()))
+            return;
+
+        String hostAddress = createdEquipment.getHosts().get(0);
+
+        Log.i(TAG, "search equipment: hostAddress: " + hostAddress);
+
+        mDialog.dismiss();
+        stopDiscovery();
+
+        mCustomHandler.removeMessages(DISCOVERY_TIMEOUT_MESSAGE);
+
+        FNAS.Gateway = Util.HTTP + hostAddress;
+        FNAS.userUUID = loggedInUser.getUser().getUuid();
+        FNAS.JWT = loggedInUser.getToken();
+        LocalCache.DeviceID = loggedInUser.getDeviceID();
+
+        LocalCache.saveToken(mContext, FNAS.JWT);
+        LocalCache.saveGateway(mContext, FNAS.Gateway);
+        LocalCache.saveUserUUID(mContext, FNAS.userUUID);
+        LocalCache.setGlobalData(mContext, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
+
+        EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
+
+        ButlerService.stopTimingRetrieveMediaShare();
+
+        FNAS.retrieveUser(mContext);
+
+        if (Util.checkAutoUpload(mContext)) {
+            Toast.makeText(mContext, String.format(getString(R.string.success), getString(R.string.change_user)), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
         }
+
+        Util.setRemoteMediaShareLoaded(false);
+        Util.setRemoteMediaLoaded(false);
+        mediaMainFragment.refreshAllViews();
+
+        mDrawerLayout.closeDrawer(GravityCompat.START);
+    }
+
+    private void stopDiscovery() {
+        mEquipmentSearchManager.stopDiscovery();
     }
 
     private void showNeedAutoUploadDialog() {
@@ -1183,6 +1171,8 @@ public class NavPagerActivity extends AppCompatActivity
                 @Override
                 public void onClick(View v) {
                     item.onClick();
+
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
                 }
             });
         }

@@ -83,7 +83,7 @@ public class RetrieveRemoteUserService extends IntentService {
 
         try {
 
-            httpResponse = FNAS.loadUser();
+            httpResponse = FNAS.loadUser(this);
 
             if(httpResponse.getResponseCode() != 200 && Util.loginType == LoginType.LOGIN){
                 OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()));
@@ -105,7 +105,7 @@ public class RetrieveRemoteUserService extends IntentService {
             }
 
             RemoteDataParser<User> parser = new RemoteUserParser();
-            List<User> otherUsers = parser.parse(FNAS.loadOtherUsers().getResponseData());
+            List<User> otherUsers = parser.parse(FNAS.loadOtherUsers(this).getResponseData());
 
             addDifferentUsers(users, otherUsers);
 

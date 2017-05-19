@@ -3,7 +3,7 @@
     android:shape="rectangle">
 
     <gradient
-        android:angle="90"
+        android:angle="-90"
         android:endColor="@color/media_share_album_mask_end_color"
         android:startColor="@color/media_share_album_mask_start_color" />
 

@@ -85,7 +85,7 @@ public class RetrieveDeviceIdService extends IntentService {
         } else {
 
             try {
-                HttpResponse httpResponse = FNAS.loadDeviceId();
+                HttpResponse httpResponse = FNAS.loadDeviceId(this);
 
                 if (httpResponse.getResponseCode() == 200) {
 

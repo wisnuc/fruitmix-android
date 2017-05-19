@@ -87,7 +87,7 @@ public class CreateRemoteCommentService extends IntentService {
 
         try {
 
-            HttpResponse httpResponse = FNAS.PostRemoteCall(request, data);
+            HttpResponse httpResponse = FNAS.PostRemoteCall(this,request, data);
 
             if (httpResponse.getResponseCode() == 200) {
 

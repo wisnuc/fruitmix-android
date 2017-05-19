@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -25,7 +26,7 @@ import butterknife.ButterKnife;
  * Created by Administrator on 2016/11/18.
  */
 
-public class BottomMenuDialogFactory extends DialogFactory {
+public class BottomMenuDialogFactory implements DialogFactory {
 
     private List<BottomMenuItem> bottomMenuItems;
 
@@ -51,9 +52,9 @@ public class BottomMenuDialogFactory extends DialogFactory {
 
     private View createBottomSheetView(Context context, List<BottomMenuItem> bottomMenuItems) {
 
-        View bottomSheetView = View.inflate(context, R.layout.bottom_sheet_dialog_layout, null);
+        View bottomSheetView = View.inflate(context, R.layout.list_dialog_layout, null);
 
-        RecyclerView bottomSheetRecyclerView = (RecyclerView) bottomSheetView.findViewById(R.id.bottom_sheet_recyclerview);
+        RecyclerView bottomSheetRecyclerView = (RecyclerView) bottomSheetView.findViewById(R.id.recyclerview);
 
         BottomSheetRecyclerViewAdapter bottomSheetRecyclerViewAdapter = new BottomSheetRecyclerViewAdapter(context);
 

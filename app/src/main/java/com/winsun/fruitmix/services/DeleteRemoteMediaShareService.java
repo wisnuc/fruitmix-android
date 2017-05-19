@@ -81,7 +81,7 @@ public class DeleteRemoteMediaShareService extends IntentService {
 //            data = "{\"commands\": \"[{\\\"op\\\":\\\"replace\\\", \\\"path\\\":\\\"" + mediaShare.getUuid() + "\\\", \\\"value\\\":{\\\"archived\\\":\\\"true\\\",\\\"album\\\":\\\"true\\\", \\\"maintainers\\\":[\\\"" + FNAS.userUUID + "\\\"], \\\"tags\\\":[{\\\"albumname\\\":\\\"" + mediaShare.getDate() + "\\\", \\\"desc\\\":\\\"" + mediaShare.getDesc() + "\\\"}], \\\"viewers\\\":[]}}]\"}";
 
             try {
-                FNAS.DeleteRemoteCall(Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid(), "");
+                FNAS.DeleteRemoteCall(this,Util.MEDIASHARE_PARAMETER + "/" + mediaShare.getUuid(), "");
 
                 operationEvent = new OperationEvent(Util.REMOTE_MEDIA_SHARE_DELETED, new OperationSuccess(R.string.delete_text));
 

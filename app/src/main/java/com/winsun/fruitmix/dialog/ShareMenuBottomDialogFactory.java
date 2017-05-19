@@ -14,7 +14,7 @@ import com.winsun.fruitmix.command.AbstractCommand;
  * Created by Administrator on 2017/3/29.
  */
 
-public class ShareMenuBottomDialogFactory extends DialogFactory implements View.OnClickListener {
+public class ShareMenuBottomDialogFactory implements DialogFactory, View.OnClickListener {
 
     private AbstractCommand mShareInAppCommand;
     private AbstractCommand mShareToOtherAppCommand;

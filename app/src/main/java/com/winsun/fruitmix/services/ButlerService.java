@@ -124,7 +124,7 @@ public class ButlerService extends Service {
 
         stopTimingRetrieveMediaShare();
 
-        OkHttpUtil.INSTANCE.cancelAllNotFinishCall();
+        OkHttpUtil.cancelAllNotFinishCall();
 
         task = null;
 
@@ -360,7 +360,7 @@ public class ButlerService extends Service {
 
             if (mStopUpload) return;
 
-            if (!media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
+            if (LocalCache.DeviceID != null && !media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
                 FNAS.createRemoteMedia(this, media);
             }
         }
@@ -610,7 +610,7 @@ public class ButlerService extends Service {
 
                 String folderUUID = fileRequestEvent.getFolderUUID();
                 String rootUUID = fileRequestEvent.getRootUUID();
-                RetrieveRemoteFileService.startActionRetrieveRemoteFile(this, folderUUID,rootUUID);
+                RetrieveRemoteFileService.startActionRetrieveRemoteFile(this, folderUUID, rootUUID);
                 break;
             case REMOTE_FILE_SHARE:
                 RetrieveRemoteFileShareService.startActionRetrieveRemoteFileShare(this);

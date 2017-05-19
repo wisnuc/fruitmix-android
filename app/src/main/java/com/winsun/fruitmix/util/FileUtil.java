@@ -340,6 +340,9 @@ public class FileUtil {
         } finally {
 
             try {
+
+                responseBody.close();
+
                 if (inputStream != null) {
                     inputStream.close();
                 }
@@ -429,6 +432,10 @@ public class FileUtil {
         } finally {
 
             try {
+
+                if (responseBody != null)
+                    responseBody.close();
+
                 if (inputStream != null) {
                     inputStream.close();
                 }

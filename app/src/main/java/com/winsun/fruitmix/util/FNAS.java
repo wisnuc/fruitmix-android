@@ -15,12 +15,15 @@ import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.eventbus.UserRequestEvent;
+import com.winsun.fruitmix.http.CheckIpHttpUtil;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.EquipmentSearchManager;
+import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
 
@@ -78,59 +81,59 @@ public class FNAS {
         return result;
     }
 
-    public static HttpResponse loadFileInFolder(String folderUUID, String rootUUID) throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse loadFileInFolder(Context context,String folderUUID, String rootUUID) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(Util.LIST_FILE_PARAMETER + "/" + folderUUID + "/" + rootUUID);
+        return FNAS.RemoteCall(context,Util.LIST_FILE_PARAMETER + "/" + folderUUID + "/" + rootUUID);
     }
 
-    public static HttpResponse loadFileSharedWithMe() throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse loadFileSharedWithMe(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_ME_PARAMETER);
+        return FNAS.RemoteCall(context,Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_ME_PARAMETER);
     }
 
-    public static HttpResponse loadFileShareWithOthers() throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse loadFileShareWithOthers(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_OTHERS_PARAMETER);
+        return FNAS.RemoteCall(context,Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_OTHERS_PARAMETER);
     }
 
-    public static HttpResponse loadUser() throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse loadUser(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(Util.ACCOUNT_PARAMETER);
-
-    }
-
-    public static HttpResponse loadOtherUsers() throws MalformedURLException, IOException, SocketTimeoutException {
-
-        return FNAS.RemoteCall(Util.LOGIN_PARAMETER);
+        return FNAS.RemoteCall(context,Util.ACCOUNT_PARAMETER);
 
     }
 
-    public static HttpResponse loadMedia() throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse loadOtherUsers(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(Util.MEDIA_PARAMETER); // get all pictures;
+        return FNAS.RemoteCall(context,Util.LOGIN_PARAMETER);
 
     }
 
-    public static HttpResponse loadRemoteShare() throws MalformedURLException, IOException, SocketTimeoutException {
-        return FNAS.RemoteCall(Util.MEDIASHARE_PARAMETER);
+    public static HttpResponse loadMedia(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
+
+        return FNAS.RemoteCall(context,Util.MEDIA_PARAMETER); // get all pictures;
+
+    }
+
+    public static HttpResponse loadRemoteShare(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
+        return FNAS.RemoteCall(context,Util.MEDIASHARE_PARAMETER);
     }
 
     public static HttpResponse loadRemoteMediaComment(Context context, String mediaUUID) throws MalformedURLException, IOException, SocketTimeoutException {
-        return FNAS.RemoteCall(String.format(context.getString(R.string.android_photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID));
+        return FNAS.RemoteCall(context,String.format(context.getString(R.string.android_photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID));
     }
 
     public static HttpResponse loadToken(Context context, String gateway, String userUUID, String userPassword) throws MalformedURLException, IOException, SocketTimeoutException {
 
         String url = gateway + ":" + FNAS.PORT + Util.TOKEN_PARAMETER;
 
-        return FNAS.RemoteCallWithUrl(url, Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((userUUID + ":" + userPassword).getBytes(), Base64.NO_WRAP));
+        return FNAS.RemoteCallWithUrl(context, url, Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((userUUID + ":" + userPassword).getBytes(), Base64.NO_WRAP));
 
     }
 
-    public static HttpResponse loadDeviceId() throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse loadDeviceId(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
         HttpResponse httpResponse = new HttpResponse();
         if (LocalCache.DeviceID == null || LocalCache.DeviceID.equals("")) {
-            httpResponse = FNAS.PostRemoteCall(Util.DEVICE_ID_PARAMETER, "");
+            httpResponse = FNAS.PostRemoteCall(context, Util.DEVICE_ID_PARAMETER, "");
         }
 
         return httpResponse;
@@ -273,6 +276,10 @@ public class FNAS {
         return Gateway + ":" + FNAS.PORT + req;
     }
 
+    public static String getUploadMediaUrl(Media media) {
+        return generateUrl(Util.MEDIA_PARAMETER + "/" + media.getUuid());
+    }
+
     public static String getDownloadOriginalMediaUrl(Media media) {
         return generateUrl(Util.MEDIA_PARAMETER + "/" + media.getUuid() + "/download");
     }
@@ -281,11 +288,16 @@ public class FNAS {
         return generateUrl(Util.DOWNLOAD_FILE_PARAMETER + "/" + parentFolderUUID + "/" + fileUUID);
     }
 
-    private static HttpResponse RemoteCall(String req) throws MalformedURLException, IOException, SocketTimeoutException {
+    private static HttpResponse RemoteCall(Context context, String req) throws MalformedURLException, IOException, SocketTimeoutException {
 
 //        return GetRemoteCall(Gateway + ":" + FNAS.PORT + req);
 
-        return RemoteCallWithUrl(generateUrl(req));
+        HttpRequest httpRequest = new HttpRequest(generateUrl(req), Util.HTTP_GET_METHOD);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
+
+//        return new OkHttpUtil().remoteCall(httpRequest);
+
+        return getHttpResponse(context, httpRequest);
     }
 
     public static HttpResponse RemoteCallWithUrl(String url) throws MalformedURLException, IOException, SocketTimeoutException {
@@ -293,49 +305,60 @@ public class FNAS {
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
 
-        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
+        return new OkHttpUtil().remoteCall(httpRequest);
 
     }
 
-    private static HttpResponse RemoteCallWithUrl(String url, String headerKey, String headerValue) throws MalformedURLException, IOException, SocketTimeoutException {
+    private static HttpResponse getHttpResponse(Context context, HttpRequest httpRequest) throws IOException {
+
+//        return new OkHttpUtil().remoteCall(httpRequest);
+
+        if (LocalCache.currentEquipmentName == null) {
+            LocalCache.initCurrentEquipmentName();
+        }
+
+        return new CheckIpHttpUtil(new OkHttpUtil(), LocalCache.currentEquipmentName, new EquipmentSearchManager(context)).remoteCall(httpRequest);
+    }
+
+    private static HttpResponse RemoteCallWithUrl(Context context, String url, String headerKey, String headerValue) throws MalformedURLException, IOException, SocketTimeoutException {
 
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
         httpRequest.setHeader(headerKey, headerValue);
 
-        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
+        return new OkHttpUtil().remoteCall(httpRequest);
 
     }
 
     // create object and store it to the server
-    public static HttpResponse PostRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse PostRemoteCall(Context context, String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
 //        return RemoteCallMethod(Util.HTTP_POST_METHOD, req, data);
 
         HttpRequest httpRequest = new HttpRequest(generateUrl(req), Util.HTTP_POST_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         httpRequest.setBody(data);
 
-        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
+        return getHttpResponse(context, httpRequest);
     }
 
     // modify data and save it
-    public static HttpResponse PatchRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse PatchRemoteCall(Context context, String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
 //        return RemoteCallMethod(Util.HTTP_PATCH_METHOD, req, data);
 
         HttpRequest httpRequest = new HttpRequest(generateUrl(req), Util.HTTP_PATCH_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         httpRequest.setBody(data);
 
-        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
+        return getHttpResponse(context, httpRequest);
     }
 
-    public static HttpResponse DeleteRemoteCall(String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse DeleteRemoteCall(Context context, String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
 //        return RemoteCallMethod(Util.HTTP_DELETE_METHOD, req, data);
 
         HttpRequest httpRequest = new HttpRequest(generateUrl(req), Util.HTTP_DELETE_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         httpRequest.setBody(data);
 
-        return OkHttpUtil.INSTANCE.remoteCallMethod(httpRequest);
+        return getHttpResponse(context, httpRequest);
     }
 
     // get media files and cache it locally

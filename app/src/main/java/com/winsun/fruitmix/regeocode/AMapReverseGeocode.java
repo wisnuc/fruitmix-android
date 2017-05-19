@@ -68,7 +68,7 @@ public class AMapReverseGeocode implements ReverseGeocode {
         HttpRequest request = new HttpRequest(url, Util.HTTP_GET_METHOD);
 
         try {
-            HttpResponse response = OkHttpUtil.INSTANCE.remoteCallMethod(request);
+            HttpResponse response = new OkHttpUtil().remoteCall(request);
 
             if (response.getResponseCode() == 200) {
 

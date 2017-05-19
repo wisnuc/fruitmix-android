@@ -4,10 +4,9 @@ import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.fileModule.interfaces.FileDownloadUploadInterface;
-import com.winsun.fruitmix.http.retrofit.RetrofitInstance;
+import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
@@ -19,7 +18,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import okhttp3.ResponseBody;
-import retrofit2.Call;
 
 /**
  * Created by Administrator on 2017/3/24.
@@ -42,19 +40,23 @@ public class RetrieveOriginalPhotoTask implements Callable<Boolean> {
 
         Log.d(TAG, "call: begin retrieve original photo task");
 
-        FileDownloadUploadInterface fileDownloadUploadInterface = RetrofitInstance.INSTANCE.getRetrofitInstance().create(FileDownloadUploadInterface.class);
-
         for (Media media : medias) {
 
             Log.d(TAG, "call: media uuid:" + media.getUuid());
 
             String downloadMediaUrl = FNAS.getDownloadOriginalMediaUrl(media);
 
-            Call<ResponseBody> call = fileDownloadUploadInterface.downloadFile(downloadMediaUrl);
+            HttpRequest httpRequest = new HttpRequest(downloadMediaUrl, Util.HTTP_GET_METHOD);
+            httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
 
             boolean result = false;
+
             try {
-                result = FileUtil.downloadMediaToOriginalPhotoFolder(call.execute().body(), media);
+
+                ResponseBody responseBody = new OkHttpUtil().downloadFile(httpRequest);
+
+                result = FileUtil.downloadMediaToOriginalPhotoFolder(responseBody, media);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

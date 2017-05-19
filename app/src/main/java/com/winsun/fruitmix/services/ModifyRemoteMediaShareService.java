@@ -88,7 +88,7 @@ public class ModifyRemoteMediaShareService extends IntentService {
         } else {
 
             try {
-                HttpResponse httpResponse = FNAS.PostRemoteCall(String.format(getString(R.string.android_update_mediashare_url), Util.MEDIASHARE_PARAMETER, mediaShare.getUuid()), requestData);
+                HttpResponse httpResponse = FNAS.PostRemoteCall(this,String.format(getString(R.string.android_update_mediashare_url), Util.MEDIASHARE_PARAMETER, mediaShare.getUuid()), requestData);
 
                 if (httpResponse.getResponseCode() == 200) {
 
