@@ -210,7 +210,7 @@ public class ButlerService extends Service {
                 handleRemoteTokenRetrieved(operationResult, operationResultType);
 
                 break;
-            case Util.REMOTE_DEVICEID_RETRIEVED:
+            case Util.REMOTE_DEVICE_ID_RETRIEVED:
 
                 handleRemoteDeviceIdRetrieved(operationResult, operationResultType);
                 break;
@@ -224,7 +224,9 @@ public class ButlerService extends Service {
 
                 EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
 
-                FNAS.retrieveRemoteMedia(this);
+                if (Util.loginType != LoginType.LOGIN)
+                    FNAS.retrieveRemoteMedia(this);
+
                 break;
         }
 

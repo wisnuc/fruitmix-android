@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
@@ -61,7 +62,7 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/4/28.
  */
-public class AlbumPicContentActivity extends AppCompatActivity {
+public class AlbumPicContentActivity extends BaseActivity {
 
     public static final String TAG = "AlbumPicContentActivity";
 
@@ -208,13 +209,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
 
@@ -231,13 +225,6 @@ public class AlbumPicContentActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        EventBus.getDefault().unregister(this);
-
-        super.onStop();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -249,10 +236,10 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Override
     public void handleOperationEvent(OperationEvent operationEvent) {
 
-        String action = operationEvent.getAction();
+        super.handleOperationEvent(operationEvent);
 
         if (action.equals(Util.LOCAL_MEDIA_SHARE_DELETED) || action.equals(Util.REMOTE_MEDIA_SHARE_DELETED)) {
 
@@ -389,7 +376,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
     }
 
-    class PicGridViewAdapter extends RecyclerView.Adapter<AlbumContentViewHolder> {
+    private class PicGridViewAdapter extends RecyclerView.Adapter<AlbumContentViewHolder> {
 
         AlbumPicContentActivity activity;
 
@@ -434,7 +421,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         @BindView(R.id.mainPic)
         NetworkImageView networkImageView;
 
-        public AlbumContentViewHolder(View itemView) {
+        AlbumContentViewHolder(View itemView) {
             super(itemView);
 
             ButterKnife.bind(this, itemView);
@@ -470,7 +457,7 @@ public class AlbumPicContentActivity extends AppCompatActivity {
                     intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, mShowCommentBtn);
                     intent.setClass(AlbumPicContentActivity.this, PhotoSliderActivity.class);
 
-                    PhotoSliderActivity.startPhotoSliderActivity((Activity) mContext,mediaList,intent,position,SPAN_COUNT,networkImageView,currentItem);
+                    PhotoSliderActivity.startPhotoSliderActivity((Activity) mContext, mediaList, intent, position, SPAN_COUNT, networkImageView, currentItem);
 
 /*
                     if (networkImageView.isLoaded()) {
@@ -641,34 +628,16 @@ public class AlbumPicContentActivity extends AppCompatActivity {
         }
 
         MediaShare cloneMediaShare = mediaShare.cloneMyself();
-        String requestData;
 
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("[");
+        String requestData = cloneMediaShare.createToggleShareStateRequestData();
 
         String operation;
 
         if (cloneMediaShare.getViewersListSize() == 0) {
-
             operation = String.format(getString(R.string.operating_title), getString(R.string.set_public));
-
-            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-                cloneMediaShare.addViewer(userUUID);
-            }
-
-            stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare(Util.ADD));
-
         } else {
-
             operation = String.format(getString(R.string.operating_title), getString(R.string.set_private));
-
-            stringBuilder.append(cloneMediaShare.createStringOperateViewersInMediaShare(Util.DELETE));
-
-            cloneMediaShare.clearViewers();
         }
-
-        stringBuilder.append("]");
-        requestData = stringBuilder.toString();
 
         mDialog = ProgressDialog.show(mContext, null, operation, true, false);
 

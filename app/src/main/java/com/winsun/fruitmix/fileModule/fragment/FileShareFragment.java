@@ -20,6 +20,7 @@ import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
+import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
@@ -28,7 +29,9 @@ import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -55,6 +58,8 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
     ImageView noContentImageView;
     @BindView(R.id.no_content_textview)
     TextView noContentTextView;
+
+    private Map<String,User> remoteUserMaps;
 
     private List<AbstractRemoteFile> abstractRemoteFiles;
     private FileShareRecyclerAdapter fileShareRecyclerAdapter;
@@ -103,6 +108,7 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
         retrievedFolderUUIDList = new ArrayList<>();
         retrievedFolderNameList = new ArrayList<>();
 
+        remoteUserMaps = new HashMap<>();
     }
 
     @Override
@@ -216,6 +222,9 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
 
                         abstractRemoteFiles.clear();
                         abstractRemoteFiles.addAll(LocalCache.RemoteFileShareList);
+
+                        refreshRemoteUserMaps();
+
                         fileShareRecyclerAdapter.notifyDataSetChanged();
                     }
 
@@ -241,6 +250,9 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
 
                         abstractRemoteFiles.clear();
                         abstractRemoteFiles.addAll(LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent) operationEvent).getFolderUUID()).listChildAbstractRemoteFileList());
+
+                        refreshRemoteUserMaps();
+
                         fileShareRecyclerAdapter.notifyDataSetChanged();
                     }
 
@@ -251,6 +263,11 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
             }
         }
 
+    }
+
+    private void refreshRemoteUserMaps() {
+        remoteUserMaps.clear();
+        remoteUserMaps.putAll(LocalCache.RemoteUserMapKeyIsUUID);
     }
 
 
@@ -288,7 +305,7 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
         return !currentFolderUUID.equals(FNAS.userUUID);
     }
 
-    class FileShareRecyclerAdapter extends RecyclerView.Adapter<BaseRecyclerViewHolder> {
+    private class FileShareRecyclerAdapter extends RecyclerView.Adapter<BaseRecyclerViewHolder> {
 
         private static final int VIEW_FILE = 0;
         private static final int VIEW_FOLDER = 1;
@@ -439,10 +456,10 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
         if (!owners.isEmpty()) {
             String owner = owners.get(0);
 
-            if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(owner)) {
+            if (remoteUserMaps.containsKey(owner)) {
 
                 ownerTextView.setVisibility(View.VISIBLE);
-                ownerTextView.setText(LocalCache.RemoteUserMapKeyIsUUID.get(owner).getUserName());
+                ownerTextView.setText(remoteUserMaps.get(owner).getUserName());
             }
         }
     }

@@ -80,7 +80,7 @@ public class RetrieveDeviceIdService extends IntentService {
         LocalCache.DeviceID = LocalCache.getGlobalData(this,Util.DEVICE_ID_MAP_NAME);
         if (LocalCache.DeviceID != null && !LocalCache.DeviceID.equals("")) {
 
-            operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationSuccess(R.string.operate));
+            operationEvent = new OperationEvent(Util.REMOTE_DEVICE_ID_RETRIEVED, new OperationSuccess(R.string.operate));
 
         } else {
 
@@ -94,29 +94,29 @@ public class RetrieveDeviceIdService extends IntentService {
                     LocalCache.setGlobalData(this,Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
                     Log.d(TAG, "deviceID: " + LocalCache.getGlobalData(this,Util.DEVICE_ID_MAP_NAME));
 
-                    operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationSuccess(R.string.operate));
+                    operationEvent = new OperationEvent(Util.REMOTE_DEVICE_ID_RETRIEVED, new OperationSuccess(R.string.operate));
 
                 } else {
 
-                    operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()));
+                    operationEvent = new OperationEvent(Util.REMOTE_DEVICE_ID_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()));
                 }
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationMalformedUrlException());
+                operationEvent = new OperationEvent(Util.REMOTE_DEVICE_ID_RETRIEVED, new OperationMalformedUrlException());
             } catch (SocketTimeoutException e) {
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationSocketTimeoutException());
+                operationEvent = new OperationEvent(Util.REMOTE_DEVICE_ID_RETRIEVED, new OperationSocketTimeoutException());
             } catch (IOException e) {
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationIOException());
+                operationEvent = new OperationEvent(Util.REMOTE_DEVICE_ID_RETRIEVED, new OperationIOException());
             } catch (JSONException e) {
                 e.printStackTrace();
 
-                operationEvent = new OperationEvent(Util.REMOTE_DEVICEID_RETRIEVED, new OperationJSONException());
+                operationEvent = new OperationEvent(Util.REMOTE_DEVICE_ID_RETRIEVED, new OperationJSONException());
             }
 
         }

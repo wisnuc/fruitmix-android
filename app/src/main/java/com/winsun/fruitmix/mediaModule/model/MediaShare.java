@@ -8,7 +8,9 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -105,12 +107,14 @@ public class MediaShare implements Parcelable {
     public String createToggleShareStateRequestData() {
         String requestData;
 
+        Collection<String> userUUIDs = new HashSet<>(LocalCache.RemoteUserMapKeyIsUUID.keySet());
+
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("[");
 
         if (getViewersListSize() == 0) {
 
-            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+            for (String userUUID : userUUIDs) {
                 addViewer(userUUID);
             }
 

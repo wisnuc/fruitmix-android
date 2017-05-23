@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/1/22.
@@ -79,13 +81,15 @@ public enum MediaInMediaShareLoader {
         if (mClearMedias)
             medias.clear();
 
+        Map<String,Media> remoteMediaMaps = new HashMap<>(LocalCache.RemoteMediaMapKeyIsUUID);
+
         for (String aStArr : imageKeys) {
 
             picItemRaw = LocalCache.findMediaInLocalMediaMap(aStArr);
 
             if (picItemRaw == null) {
 
-                picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
+                picItemRaw = remoteMediaMaps.get(aStArr);
 
                 if (picItemRaw == null) {
                     picItem = new Media();

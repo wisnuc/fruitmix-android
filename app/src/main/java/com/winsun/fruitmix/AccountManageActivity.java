@@ -33,7 +33,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class AccountManageActivity extends AppCompatActivity implements View.OnClickListener {
+public class AccountManageActivity extends BaseActivity implements View.OnClickListener {
 
     public static final String TAG = "AccountManageActivity";
 
@@ -96,22 +96,6 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
             mAccountExpandableListView.expandGroup(i);
         }
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-//        MobclickAgent.onPageStart(TAG);
-//        MobclickAgent.onResume(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-//        MobclickAgent.onPageEnd(TAG);
-//        MobclickAgent.onPause(this);
     }
 
     @Override
@@ -186,12 +170,7 @@ public class AccountManageActivity extends AppCompatActivity implements View.OnC
 
         if (requestCode == START_EQUIPMENT_SEARCH && resultCode == RESULT_OK) {
 
-            EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
-
-            ButlerService.stopTimingRetrieveMediaShare();
-
-            Util.setRemoteMediaLoaded(false);
-            Util.setRemoteMediaShareLoaded(false);
+            FNAS.handleLogout();
 
             mNewUserLoginSucceed = true;
             handleBack();

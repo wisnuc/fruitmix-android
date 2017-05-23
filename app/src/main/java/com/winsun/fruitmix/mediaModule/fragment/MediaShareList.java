@@ -87,6 +87,12 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
     private Map<String, List<Comment>> mMapKeyIsImageUUIDValueIsComments;
     private ShareRecyclerViewAdapter mAdapter;
 
+    private List<MediaShare> remoteMediaShares;
+
+    private Map<String,User> remoteUserMaps;
+
+    private Map<String,Media> remoteMediaMaps;
+
     private ImageLoader mImageLoader;
     private Bundle reenterState;
 
@@ -118,6 +124,12 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
         mMapKeyIsImageUUIDValueIsComments = new HashMap<>();
 
         mediaShareList = new ArrayList<>();
+
+        remoteMediaShares = new ArrayList<>();
+
+        remoteUserMaps = new HashMap<>();
+
+        remoteMediaMaps = new HashMap<>();
 
         mPhotoListListeners = new ArrayList<>();
     }
@@ -151,6 +163,9 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
         mediaShareList.clear();
 
+        remoteMediaShares.clear();
+        remoteMediaShares.addAll(LocalCache.RemoteMediaShareMapKeyIsUUID.values());
+
         fillMediaShareList(mediaShareList);
 
         sortMediaShareList(mediaShareList);
@@ -181,7 +196,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
             }
         }
 
-        for (MediaShare mediaShare : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
+        for (MediaShare mediaShare : remoteMediaShares) {
             if (isMediaSharePublic(mediaShare)) {
                 mediaShareList.add(mediaShare);
             }
@@ -220,6 +235,13 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
         } else {
             mNoContentLayout.setVisibility(View.GONE);
             mainRecyclerView.setVisibility(View.VISIBLE);
+
+            remoteUserMaps.clear();
+            remoteUserMaps.putAll(LocalCache.RemoteUserMapKeyIsUUID);
+
+            remoteMediaMaps.clear();
+            remoteMediaMaps.putAll(LocalCache.RemoteMediaMapKeyIsUUID);
+
             mAdapter.notifyDataSetChanged();
 
         }
@@ -308,7 +330,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
     private String findMediaTagByMediaKey(String imageKey) {
         String currentMediaTag;
-        Media currentMedia = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKey);
+        Media currentMedia = remoteMediaMaps.get(imageKey);
         if (currentMedia == null) {
             currentMedia = LocalCache.findMediaInLocalMediaMap(imageKey);
         }
@@ -438,9 +460,9 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
             lbTime.setText(Util.formatTime(containerActivity, Long.parseLong(currentItem.getTime())));
 
             String createUUID = currentItem.getCreatorUUID();
-            if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(createUUID)) {
+            if (remoteUserMaps.containsKey(createUUID)) {
 
-                User user = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreatorUUID());
+                User user = remoteUserMaps.get(currentItem.getCreatorUUID());
 
                 nickName = user.getUserName();
                 lbNick.setText(nickName);
@@ -506,7 +528,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
             } else {
                 coverImg = LocalCache.findMediaInLocalMediaMap(key);
                 if (coverImg == null) {
-                    coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(key);
+                    coverImg = remoteMediaMaps.get(key);
                 }
             }
 
@@ -589,7 +611,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
             itemImg = LocalCache.findMediaInLocalMediaMap(imageKeys.get(0));
             if (itemImg == null) {
-                itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(0));
+                itemImg = remoteMediaMaps.get(imageKeys.get(0));
             }
 
             ivCover.setBackgroundResource(R.drawable.default_place_holder);
@@ -859,7 +881,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
                 itemImg = LocalCache.findMediaInLocalMediaMap(imageKeys.get(i));
 
                 if (itemImg == null)
-                    itemImg = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKeys.get(i));
+                    itemImg = remoteMediaMaps.get(imageKeys.get(i));
 
                 ivItems[i].setBackgroundResource(R.drawable.default_place_holder);
 
@@ -996,7 +1018,7 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
             if (picItemRaw == null) {
 
-                picItemRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(aStArr);
+                picItemRaw = remoteMediaMaps.get(aStArr);
 
                 if (picItemRaw == null) {
                     picItem = new Media();

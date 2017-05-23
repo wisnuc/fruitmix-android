@@ -115,7 +115,7 @@ public class Util {
     public static final String REMOTE_MEDIA_RETRIEVED = "remote_media_retrieved";
     public static final String REMOTE_USER_RETRIEVED = "remote_user_retrieved";
     public static final String REMOTE_TOKEN_RETRIEVED = "remote_token_retrieved";
-    public static final String REMOTE_DEVICEID_RETRIEVED = "remote_deviceid_retrieved";
+    public static final String REMOTE_DEVICE_ID_RETRIEVED = "remote_device_id_retrieved";
     public static final String REMOTE_FILE_RETRIEVED = "remote_file_retrieved";
     public static final String REMOTE_FILE_SHARE_RETRIEVED = "remote_file_share_retrieved";
 
@@ -126,6 +126,8 @@ public class Util {
     public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
 
     public static final String RECOMMEND_ALBUM_CREATED = "recommend_album_created";
+
+    public static final String TOKEN_INVALID = "token_invalid";
 
     public static final String NEED_SHOW_MENU = "need_show_menu";
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";

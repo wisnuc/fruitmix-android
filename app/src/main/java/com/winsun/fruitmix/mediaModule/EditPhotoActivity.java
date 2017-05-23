@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -45,7 +46,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class EditPhotoActivity extends AppCompatActivity implements View.OnClickListener {
+public class EditPhotoActivity extends BaseActivity implements View.OnClickListener {
 
     public static final String TAG = "EditPhotoActivity";
 
@@ -161,46 +162,16 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-//        MobclickAgent.onPageStart(TAG);
-//        MobclickAgent.onResume(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-//        MobclickAgent.onPageEnd(TAG);
-//        MobclickAgent.onPause(this);
-    }
-
-    @Override
-    protected void onStop() {
-        EventBus.getDefault().unregister(this);
-
-        super.onStop();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
 
         mContext = null;
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Override
     public void handleOperationEvent(OperationEvent operationEvent) {
 
-        String action = operationEvent.getAction();
+        super.handleOperationEvent(operationEvent);
 
         if (action.equals(Util.PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED) || action.equals(Util.PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED)) {
 
@@ -377,7 +348,7 @@ public class EditPhotoActivity extends AppCompatActivity implements View.OnClick
         mainPic.setLayoutParams(layoutParams);
     }
 
-    class EditPhotoAdapter extends RecyclerView.Adapter<EditPhotoViewHolder> {
+    private class EditPhotoAdapter extends RecyclerView.Adapter<EditPhotoViewHolder> {
         @Override
         public int getItemCount() {
             return mPhotoList == null ? 0 : mPhotoList.size();

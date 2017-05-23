@@ -81,6 +81,20 @@ public class RetrieveRemoteUserService extends IntentService {
 
         HttpResponse httpResponse;
 
+        if(Util.loginType != LoginType.LOGIN){
+
+            users = dbUtils.getAllRemoteUser();
+
+            userConcurrentMap = LocalCache.BuildRemoteUserMapKeyIsUUID(users);
+
+            Log.i(TAG, "handleActionRetrieveRemoteUser: retrieve user from db");
+
+            fillUserMap(userConcurrentMap);
+
+            sendEvent();
+
+        }
+
         try {
 
             httpResponse = FNAS.loadUser(this);
@@ -116,20 +130,24 @@ public class RetrieveRemoteUserService extends IntentService {
 
             Log.i(TAG, "handleActionRetrieveRemoteUser: retrieve user from network");
 
+            fillUserMap(userConcurrentMap);
+
+            sendEvent();
+
         } catch (Exception e) {
             e.printStackTrace();
 
-            users = dbUtils.getAllRemoteUser();
-
-            userConcurrentMap = LocalCache.BuildRemoteUserMapKeyIsUUID(users);
-
-            Log.i(TAG, "handleActionRetrieveRemoteUser: retrieve user from db");
         }
 
+    }
+
+    private void fillUserMap(ConcurrentMap<String, User> userConcurrentMap) {
         LocalCache.RemoteUserMapKeyIsUUID.clear();
 
         LocalCache.RemoteUserMapKeyIsUUID.putAll(userConcurrentMap);
+    }
 
+    private void sendEvent() {
         OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationSuccess(R.string.operate));
         EventBus.getDefault().post(operationEvent);
     }

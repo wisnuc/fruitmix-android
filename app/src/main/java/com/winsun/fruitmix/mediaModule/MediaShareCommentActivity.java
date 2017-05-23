@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -63,7 +64,7 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/5/9.
  */
-public class MediaShareCommentActivity extends AppCompatActivity implements IImageLoadListener {
+public class MediaShareCommentActivity extends BaseActivity implements IImageLoadListener {
 
     public static final String TAG = MediaShareCommentActivity.class.getSimpleName();
 
@@ -85,6 +86,12 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
     private Media media;
     private List<Comment> commentData;
+
+    private List<MediaShare> remoteMediaShares;
+
+    private Map<String,User> remoteUserMaps;
+
+    private Map<String,Media> remoteMediaMaps;
 
     private String mComment;
 
@@ -175,6 +182,12 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         commentData = new ArrayList<>();
 
+        remoteMediaShares = new ArrayList<>(LocalCache.RemoteMediaShareMapKeyIsUUID.values());
+
+        remoteUserMaps = new HashMap<>();
+
+        remoteMediaMaps = new HashMap<>(LocalCache.RemoteMediaMapKeyIsUUID);
+
         showSoftInputWhenEnter = getIntent().getBooleanExtra(Util.KEY_SHOW_SOFT_INPUT_WHEN_ENTER, false);
 
         retrieveMediaByImageKey();
@@ -246,7 +259,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         imageRaw = LocalCache.findMediaInLocalMediaMap(imageKey);
         if (imageRaw == null) {
-            imageRaw = LocalCache.RemoteMediaMapKeyIsUUID.get(imageKey);
+            imageRaw = remoteMediaMaps.get(imageKey);
 
             if (imageRaw == null) {
                 media = new Media();
@@ -264,7 +277,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         media.setSelected(false);
 
-        for (MediaShare shareRaw : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
+        for (MediaShare shareRaw : remoteMediaShares) {
 
             if (shareRaw.getMediaUUIDInMediaShareContents().contains(media.getUuid())) {
                 Log.d(TAG, "shareRaw uuid: " + shareRaw.getUuid());
@@ -273,20 +286,6 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
                 break;
             }
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void onStop() {
-        EventBus.getDefault().unregister(this);
-
-        super.onStop();
     }
 
     @Override
@@ -306,10 +305,10 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Override
     public void handleOperationEvent(OperationEvent operationEvent) {
 
-        String action = operationEvent.getAction();
+        super.handleOperationEvent(operationEvent);
 
         switch (action) {
             case Util.LOCAL_COMMENT_DELETED:
@@ -475,6 +474,9 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
 
         sortCommentData();
 
+        remoteUserMaps.clear();
+        remoteUserMaps.putAll(LocalCache.RemoteUserMapKeyIsUUID);
+
         mAdapter.commentList.clear();
         mAdapter.commentList.addAll(commentData);
         mAdapter.notifyDataSetChanged();
@@ -564,7 +566,7 @@ public class MediaShareCommentActivity extends AppCompatActivity implements IIma
             refreshViewVisibility(currentItem);
 
             if (currentItem != null) {
-                User map = LocalCache.RemoteUserMapKeyIsUUID.get(currentItem.getCreator());
+                User map = remoteUserMaps.get(currentItem.getCreator());
                 ivAvatar.setText(map.getDefaultAvatar());
                 ivAvatar.setBackgroundResource(map.getDefaultAvatarBgColorResourceId());
             }

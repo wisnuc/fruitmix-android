@@ -1102,7 +1102,7 @@ public class GifTouchImageView extends GifImageView {
                 setState(State.NONE);
 
             }
-            
+
         }
 
         /**

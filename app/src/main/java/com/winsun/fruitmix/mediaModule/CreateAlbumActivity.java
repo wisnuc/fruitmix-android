@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.Volley;
 import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -38,7 +39,7 @@ import okhttp3.OkHttpClient;
 /**
  * Created by Administrator on 2016/4/28.
  */
-public class CreateAlbumActivity extends AppCompatActivity {
+public class CreateAlbumActivity extends BaseActivity {
 
     public static final String TAG = "CreateAlbumActivity";
 
@@ -145,38 +146,6 @@ public class CreateAlbumActivity extends AppCompatActivity {
             }
         });
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-//        MobclickAgent.onPageStart(TAG);
-//        MobclickAgent.onResume(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-//        MobclickAgent.onPageEnd(TAG);
-//        MobclickAgent.onPause(this);
-    }
-
-
-    @Override
-    protected void onStop() {
-        EventBus.getDefault().unregister(this);
-
-        super.onStop();
     }
 
     @Override

@@ -22,7 +22,7 @@ import org.greenrobot.eventbus.EventBus;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class SettingActivity extends AppCompatActivity implements View.OnClickListener {
+public class SettingActivity extends BaseActivity implements View.OnClickListener {
 
     public static final String TAG = "SettingActivity";
 
@@ -75,23 +75,6 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         calcAlreadyUploadMediaCountAndTotalCacheSize();
 
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-//        MobclickAgent.onPageStart(TAG);
-//        MobclickAgent.onResume(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-//        MobclickAgent.onPageEnd(TAG);
-//        MobclickAgent.onPause(this);
-    }
-
 
     private void calcAlreadyUploadMediaCountAndTotalCacheSize() {
 

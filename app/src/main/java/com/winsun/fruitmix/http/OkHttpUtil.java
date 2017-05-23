@@ -2,12 +2,16 @@ package com.winsun.fruitmix.http;
 
 import android.util.Log;
 
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
@@ -31,13 +35,20 @@ import okhttp3.logging.HttpLoggingInterceptor;
  * Created by Administrator on 2016/12/22.
  */
 
-public class OkHttpUtil implements IHttpUtil{
+public class OkHttpUtil implements IHttpUtil {
 
     public static final String TAG = OkHttpUtil.class.getSimpleName();
 
     private static OkHttpClient okHttpClient;
 
     private static List<Call> calls;
+
+    private static final String APPLICATION_JSON_STRING = "application/json";
+    private static final String JPEG_STRING = "image/jpeg";
+
+
+    private static final String SHA_256_STRING = "sha256";
+    private static final String FILE_STRING = "file";
 
     static {
         okHttpClient = new OkHttpClient.Builder().connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).addInterceptor(createHttpInterceptor()).build();
@@ -67,15 +78,15 @@ public class OkHttpUtil implements IHttpUtil{
                 request = builder.get().build();
                 break;
             case Util.HTTP_POST_METHOD:
-                requestBody = RequestBody.create(MediaType.parse("application/json"), httpRequest.getBody());
+                requestBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_STRING), httpRequest.getBody());
                 request = builder.post(requestBody).build();
                 break;
             case Util.HTTP_DELETE_METHOD:
-                requestBody = RequestBody.create(MediaType.parse("application/json"), httpRequest.getBody());
+                requestBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_STRING), httpRequest.getBody());
                 request = builder.delete(requestBody).build();
                 break;
             case Util.HTTP_PATCH_METHOD:
-                requestBody = RequestBody.create(MediaType.parse("application/json"), httpRequest.getBody());
+                requestBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_STRING), httpRequest.getBody());
                 request = builder.patch(requestBody).build();
                 break;
         }
@@ -83,15 +94,16 @@ public class OkHttpUtil implements IHttpUtil{
         Response response = executeRequest(request);
 
         String str = "";
+
         int responseCode = response.code();
 
-        body = response.body();
+        if(handleResponseCode(response)){
+            body = response.body();
 
-        if (responseCode == 200) {
-            str = body.string();
+            str = response.body().string();
+
+            body.close();
         }
-
-        body.close();
 
         Log.d(TAG, "remoteCallMethod: after read response body" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
@@ -138,7 +150,12 @@ public class OkHttpUtil implements IHttpUtil{
 
         Response response = executeRequest(request);
 
-        return response.body();
+        if(handleResponseCode(response)){
+            return response.body();
+        }else {
+            throw new IOException();
+        }
+
     }
 
     @Override
@@ -147,8 +164,8 @@ public class OkHttpUtil implements IHttpUtil{
         Request.Builder builder = generateRequestBuilder(httpRequest);
 
         RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("sha256", media.getUuid())
-                .addFormDataPart("file", media.getOriginalPhotoPath(), RequestBody.create(MediaType.parse("image/jpeg"), new File(media.getOriginalPhotoPath())))
+                .addFormDataPart(SHA_256_STRING, media.getUuid())
+                .addFormDataPart(FILE_STRING, media.getOriginalPhotoPath(), RequestBody.create(MediaType.parse(JPEG_STRING), new File(media.getOriginalPhotoPath())))
                 .build();
 
         Request request = builder.post(requestBody).build();
@@ -156,7 +173,7 @@ public class OkHttpUtil implements IHttpUtil{
         try {
             Response response = executeRequest(request);
 
-            return response.code() == 200;
+            return handleResponseCode(response);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -176,6 +193,23 @@ public class OkHttpUtil implements IHttpUtil{
         return builder;
     }
 
+    private boolean handleResponseCode(Response response) {
+
+        int code = response.code();
+
+        if (code == 200) {
+            return true;
+        } else {
+
+            Log.d(TAG, "handleResponseCode: " + code);
+
+            if (code == HttpURLConnection.HTTP_FORBIDDEN)
+                EventBus.getDefault().post(new OperationEvent(Util.TOKEN_INVALID, null));
+
+            return false;
+        }
+
+    }
 
     public static void cancelAllNotFinishCall() {
         for (Call call : calls) {

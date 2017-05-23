@@ -1,6 +1,7 @@
 package com.winsun.fruitmix;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -71,7 +72,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class NavPagerActivity extends AppCompatActivity
+public class NavPagerActivity extends BaseActivity
         implements OnMainFragmentInteractionListener {
 
     public static final String TAG = NavPagerActivity.class.getSimpleName();
@@ -511,6 +512,8 @@ public class NavPagerActivity extends AppCompatActivity
 
         mCustomHandler.removeMessages(DISCOVERY_TIMEOUT_MESSAGE);
 
+        FNAS.handleLogout();
+
         FNAS.Gateway = Util.HTTP + hostAddress;
         FNAS.userUUID = loggedInUser.getUser().getUuid();
         FNAS.JWT = loggedInUser.getToken();
@@ -521,10 +524,6 @@ public class NavPagerActivity extends AppCompatActivity
         LocalCache.saveUserUUID(mContext, FNAS.userUUID);
         LocalCache.setGlobalData(mContext, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
 
-        EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
-
-        ButlerService.stopTimingRetrieveMediaShare();
-
         FNAS.retrieveUser(mContext);
 
         if (Util.checkAutoUpload(mContext)) {
@@ -533,8 +532,6 @@ public class NavPagerActivity extends AppCompatActivity
             Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
         }
 
-        Util.setRemoteMediaShareLoaded(false);
-        Util.setRemoteMediaLoaded(false);
         mediaMainFragment.refreshAllViews();
 
         mDrawerLayout.closeDrawer(GravityCompat.START);
@@ -567,13 +564,6 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
 
@@ -593,13 +583,6 @@ public class NavPagerActivity extends AppCompatActivity
         } else {
             fileMainFragment.hide();
         }
-    }
-
-    @Override
-    protected void onStop() {
-        EventBus.getDefault().unregister(this);
-
-        super.onStop();
     }
 
     @Override
@@ -638,7 +621,7 @@ public class NavPagerActivity extends AppCompatActivity
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(OperationEvent operationEvent) {
+    public void handleStickyOperationEvent(OperationEvent operationEvent) {
 
         String action = operationEvent.getAction();
 
@@ -911,13 +894,9 @@ public class NavPagerActivity extends AppCompatActivity
             @Override
             protected Void doInBackground(Void... params) {
 
+                FNAS.handleLogout();
+
                 LocalCache.clearToken(mContext);
-                EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
-
-                ButlerService.stopTimingRetrieveMediaShare();
-
-                Util.setRemoteMediaLoaded(false);
-                Util.setRemoteMediaShareLoaded(false);
 
                 return null;
             }
@@ -928,15 +907,13 @@ public class NavPagerActivity extends AppCompatActivity
 
                 mDialog.dismiss();
 
-                Intent intent = new Intent(NavPagerActivity.this, EquipmentSearchActivity.class);
-                intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE, true);
-                startActivity(intent);
-                finish();
+                FNAS.gotoEquipmentActivity((Activity) mContext, true);
 
             }
 
         }.execute();
     }
+
 
     private void toggleFileOrMediaFragment(int navigationItemMenuPosition) {
 

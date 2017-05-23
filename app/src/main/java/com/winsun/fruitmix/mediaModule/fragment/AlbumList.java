@@ -33,13 +33,16 @@ import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -70,6 +73,10 @@ public class AlbumList implements Page, IShowHideFragmentListener {
     TextView noContentTextView;
 
     private AlbumRecyclerViewAdapter mAdapter;
+
+    private List<MediaShare> remoteMediaShares;
+    private Map<String,User> remoteUserMaps;
+    private Map<String,Media> remoteMediaMaps;
 
     private List<MediaShare> mediaShareList;
 
@@ -119,6 +126,10 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
         mediaShareList = new ArrayList<>();
 
+        remoteMediaShares = new ArrayList<>();
+        remoteUserMaps = new HashMap<>();
+        remoteMediaMaps = new HashMap<>();
+
         mPhotoListListeners = new ArrayList<>();
 
         initImageLoader();
@@ -152,6 +163,15 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
     private void reloadList() {
         mediaShareList.clear();
+
+        remoteMediaShares.clear();
+        remoteMediaShares.addAll(LocalCache.RemoteMediaShareMapKeyIsUUID.values());
+
+        remoteUserMaps.clear();
+        remoteUserMaps.putAll(LocalCache.RemoteUserMapKeyIsUUID);
+
+        remoteMediaMaps.clear();
+        remoteMediaMaps.putAll(LocalCache.RemoteMediaMapKeyIsUUID);
 
         fillMediaShareList(mediaShareList);
 
@@ -189,7 +209,7 @@ public class AlbumList implements Page, IShowHideFragmentListener {
             }
         }
 
-        for (MediaShare mediaShare : LocalCache.RemoteMediaShareMapKeyIsUUID.values()) {
+        for (MediaShare mediaShare : remoteMediaShares) {
 
             if (mediaShare.isAlbum() && !mediaShare.isArchived()) {
                 mediaShareList.add(mediaShare);
@@ -342,7 +362,7 @@ public class AlbumList implements Page, IShowHideFragmentListener {
             } else {
                 coverImg = LocalCache.findMediaInLocalMediaMap(key);
                 if (coverImg == null) {
-                    coverImg = LocalCache.RemoteMediaMapKeyIsUUID.get(key);
+                    coverImg = remoteMediaMaps.get(key);
                 }
             }
 
@@ -501,8 +521,8 @@ public class AlbumList implements Page, IShowHideFragmentListener {
             lbDate.setText(currentItem.getDate().substring(0, 10));
 
             String createUUID = currentItem.getCreatorUUID();
-            if (LocalCache.RemoteUserMapKeyIsUUID.containsKey(createUUID)) {
-                lbOwner.setText(LocalCache.RemoteUserMapKeyIsUUID.get(createUUID).getUserName());
+            if (remoteUserMaps.containsKey(createUUID)) {
+                lbOwner.setText(remoteUserMaps.get(createUUID).getUserName());
             }
 
             lbShare.setOnClickListener(new View.OnClickListener() {

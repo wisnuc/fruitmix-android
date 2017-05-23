@@ -40,6 +40,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.IImageLoadListener;
 import com.android.volley.toolbox.NetworkImageView;
 import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.component.GifTouchImageView;
@@ -72,7 +73,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class PhotoSliderActivity extends AppCompatActivity implements IImageLoadListener {
+public class PhotoSliderActivity extends BaseActivity implements IImageLoadListener {
 
     public static final String TAG = "PhotoSliderActivity";
 
@@ -262,15 +263,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
-
-        Log.d(TAG, "onStart: ");
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
 
@@ -284,17 +276,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
 
         MobclickAgent.onPageEnd(TAG);
         MobclickAgent.onPause(this);
-    }
-
-    @Override
-    public void onStop() {
-
-        EventBus.getDefault().unregister(this);
-
-        super.onStop();
-
-        Log.d(TAG, "onStop: ");
-
     }
 
     @Override
@@ -482,10 +463,10 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(mContext).show();
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Override
     public void handleOperationEvent(OperationEvent operationEvent) {
 
-        String action = operationEvent.getAction();
+        super.handleOperationEvent(operationEvent);
 
         Log.i(TAG, "handleOperationEvent: action:" + action);
 
@@ -731,8 +712,6 @@ public class PhotoSliderActivity extends AppCompatActivity implements IImageLoad
         String remoteUrl = media.getImageOriginalUrl(mContext);
 
         GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view;
-
-        mImageLoader.setShouldCache(true);
 
         mainPic.setOrientationNumber(media.getOrientationNumber());
 

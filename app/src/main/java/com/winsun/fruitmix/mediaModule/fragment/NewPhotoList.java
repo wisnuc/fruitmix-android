@@ -937,8 +937,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             String imageUrl;
 
-//            mImageLoader.setShouldCache(!currentMedia.isLocal());
-            mImageLoader.setShouldCache(true);
+            mImageLoader.setShouldCache(!currentMedia.isLocal());
 
             if (currentMedia.isLocal())
                 mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());

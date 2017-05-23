@@ -1,9 +1,13 @@
 package com.winsun.fruitmix.util;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Base64;
 import android.util.Log;
 
+import com.winsun.fruitmix.EquipmentSearchActivity;
+import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.EditPhotoInMediaShareRequestEvent;
@@ -26,6 +30,7 @@ import com.winsun.fruitmix.model.EquipmentSearchManager;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
+import com.winsun.fruitmix.services.ButlerService;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -81,45 +86,45 @@ public class FNAS {
         return result;
     }
 
-    public static HttpResponse loadFileInFolder(Context context,String folderUUID, String rootUUID) throws MalformedURLException, IOException, SocketTimeoutException {
+    public static HttpResponse loadFileInFolder(Context context, String folderUUID, String rootUUID) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(context,Util.LIST_FILE_PARAMETER + "/" + folderUUID + "/" + rootUUID);
+        return FNAS.RemoteCall(context, Util.LIST_FILE_PARAMETER + "/" + folderUUID + "/" + rootUUID);
     }
 
     public static HttpResponse loadFileSharedWithMe(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(context,Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_ME_PARAMETER);
+        return FNAS.RemoteCall(context, Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_ME_PARAMETER);
     }
 
     public static HttpResponse loadFileShareWithOthers(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(context,Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_OTHERS_PARAMETER);
+        return FNAS.RemoteCall(context, Util.FILE_SHARE_PARAMETER + Util.FILE_SHARED_WITH_OTHERS_PARAMETER);
     }
 
     public static HttpResponse loadUser(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(context,Util.ACCOUNT_PARAMETER);
+        return FNAS.RemoteCall(context, Util.ACCOUNT_PARAMETER);
 
     }
 
     public static HttpResponse loadOtherUsers(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(context,Util.LOGIN_PARAMETER);
+        return FNAS.RemoteCall(context, Util.LOGIN_PARAMETER);
 
     }
 
     public static HttpResponse loadMedia(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        return FNAS.RemoteCall(context,Util.MEDIA_PARAMETER); // get all pictures;
+        return FNAS.RemoteCall(context, Util.MEDIA_PARAMETER); // get all pictures;
 
     }
 
     public static HttpResponse loadRemoteShare(Context context) throws MalformedURLException, IOException, SocketTimeoutException {
-        return FNAS.RemoteCall(context,Util.MEDIASHARE_PARAMETER);
+        return FNAS.RemoteCall(context, Util.MEDIASHARE_PARAMETER);
     }
 
     public static HttpResponse loadRemoteMediaComment(Context context, String mediaUUID) throws MalformedURLException, IOException, SocketTimeoutException {
-        return FNAS.RemoteCall(context,String.format(context.getString(R.string.android_photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID));
+        return FNAS.RemoteCall(context, String.format(context.getString(R.string.android_photo_comment_url), Util.MEDIA_PARAMETER + "/" + mediaUUID));
     }
 
     public static HttpResponse loadToken(Context context, String gateway, String userUUID, String userPassword) throws MalformedURLException, IOException, SocketTimeoutException {
@@ -521,6 +526,23 @@ public class FNAS {
         }
 
         return false;
+    }
+
+    public static void handleLogout() {
+
+        EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
+
+        ButlerService.stopTimingRetrieveMediaShare();
+
+        Util.setRemoteMediaLoaded(false);
+        Util.setRemoteMediaShareLoaded(false);
+    }
+
+    public static void gotoEquipmentActivity(Activity activity, boolean shouldStopService) {
+        Intent intent = new Intent(activity, EquipmentSearchActivity.class);
+        intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE, shouldStopService);
+        activity.startActivity(intent);
+        activity.finish();
     }
 
 }

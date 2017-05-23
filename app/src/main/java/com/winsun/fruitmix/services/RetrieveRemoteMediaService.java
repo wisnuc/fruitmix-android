@@ -79,6 +79,21 @@ public class RetrieveRemoteMediaService extends IntentService {
         ConcurrentMap<String, Media> mediaConcurrentMap;
         DBUtils dbUtils = DBUtils.getInstance(this);
 
+        medias = dbUtils.getAllRemoteMedia();
+
+        Log.i(TAG, "handleActionRetrieveRemoteMedia: retrieve media from db");
+
+        mediaConcurrentMap = LocalCache.BuildMediaMapKeyIsUUID(medias);
+
+        fillRemoteMediaMap(mediaConcurrentMap);
+
+        Util.setRemoteMediaLoaded(true);
+        NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+
+        sendEvent();
+
+        FNAS.retrieveRemoteMediaShare(this, true);
+
         try {
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: before load" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
@@ -117,23 +132,7 @@ public class RetrieveRemoteMediaService extends IntentService {
 
         } catch (Exception e) {
             e.printStackTrace();
-
-            medias = dbUtils.getAllRemoteMedia();
-
-            mediaConcurrentMap = LocalCache.BuildMediaMapKeyIsUUID(medias);
-
-            Log.i(TAG, "handleActionRetrieveRemoteMedia: retrieve media from db");
-
-            fillRemoteMediaMap(mediaConcurrentMap);
-
-            Util.setRemoteMediaLoaded(true);
-            NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
-
-            sendEvent();
-
         }
-
-        FNAS.retrieveRemoteMediaShare(this, true);
 
     }
 

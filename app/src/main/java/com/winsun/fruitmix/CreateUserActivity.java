@@ -31,7 +31,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class CreateUserActivity extends AppCompatActivity implements View.OnClickListener {
+public class CreateUserActivity extends BaseActivity implements View.OnClickListener {
 
     public static final String TAG = "CreateUserActivity";
 
@@ -66,7 +66,7 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
         int size = LocalCache.RemoteUserMapKeyIsUUID.size();
         remoteUserNames = new ArrayList<>(size);
 
-        final Collection<User> users = LocalCache.RemoteUserMapKeyIsUUID.values();
+        final Collection<User> users = new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.values());
         for (User user : users) {
             remoteUserNames.add(user.getUserName());
         }
@@ -86,37 +86,6 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-//        MobclickAgent.onPageStart(TAG);
-//        MobclickAgent.onResume(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-//        MobclickAgent.onPageEnd(TAG);
-//        MobclickAgent.onPause(this);
-    }
-
-    @Override
-    protected void onStop() {
-
-        EventBus.getDefault().unregister(this);
-
-        super.onStop();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -126,10 +95,12 @@ public class CreateUserActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Override
     public void handleOperationEvent(OperationEvent operationEvent) {
 
-        String action = operationEvent.getAction();
+        super.handleOperationEvent(operationEvent);
+
+        action = operationEvent.getAction();
 
         switch (action) {
             case Util.REMOTE_USER_CREATED: {

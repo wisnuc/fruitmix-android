@@ -36,7 +36,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MoreMediaActivity extends AppCompatActivity {
+public class MoreMediaActivity extends BaseActivity {
 
     public static final String TAG = "MoreMediaActivity";
 
@@ -116,22 +116,6 @@ public class MoreMediaActivity extends AppCompatActivity {
 
             }
         }, true, true);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-//        MobclickAgent.onPageStart(TAG);
-//        MobclickAgent.onResume(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-//        MobclickAgent.onPageEnd(TAG);
-//        MobclickAgent.onPause(this);
     }
 
     @Override
@@ -220,7 +204,7 @@ public class MoreMediaActivity extends AppCompatActivity {
     }
 
 
-    class MorePhotoAdapter extends RecyclerView.Adapter<MorePhotoViewHolder> {
+    private class MorePhotoAdapter extends RecyclerView.Adapter<MorePhotoViewHolder> {
         @Override
         public int getItemCount() {
             return mPhotos == null ? 0 : mPhotos.size();

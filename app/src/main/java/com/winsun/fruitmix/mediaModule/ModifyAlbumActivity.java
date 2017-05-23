@@ -17,9 +17,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
+import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationResultType;
@@ -29,13 +31,16 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
  * Created by Administrator on 2016/4/28.
  */
-public class ModifyAlbumActivity extends AppCompatActivity {
+public class ModifyAlbumActivity extends BaseActivity {
 
     public static final String TAG = "ModifyAlbumActivity";
 
@@ -162,6 +167,8 @@ public class ModifyAlbumActivity extends AppCompatActivity {
     private String createRequestData(boolean sPublic, boolean sSetMaintainer, String title, String desc) {
         String requestData;
 
+        Collection<String > userUUIDs = new HashSet<>(LocalCache.RemoteUserMapKeyIsUUID.keySet());
+
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("[");
 
@@ -169,7 +176,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         if (sPublic != isPublic) {
             if (sPublic) {
 
-                for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+                for (String userUUID : userUUIDs) {
                     mAlbumMap.addViewer(userUUID);
                 }
 
@@ -191,7 +198,7 @@ public class ModifyAlbumActivity extends AppCompatActivity {
 
             if (sSetMaintainer) {
 
-                for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
+                for (String userUUID : userUUIDs) {
                     mAlbumMap.addMaintainer(userUUID);
                 }
 
@@ -227,37 +234,6 @@ public class ModifyAlbumActivity extends AppCompatActivity {
         }
 
         return requestData;
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-//        MobclickAgent.onPageStart(TAG);
-//        MobclickAgent.onResume(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-//        MobclickAgent.onPageEnd(TAG);
-//        MobclickAgent.onPause(this);
-    }
-
-    @Override
-    protected void onStop() {
-        EventBus.getDefault().unregister(this);
-
-        super.onStop();
     }
 
     @Override

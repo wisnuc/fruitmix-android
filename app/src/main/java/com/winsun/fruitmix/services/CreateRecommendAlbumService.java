@@ -66,9 +66,13 @@ public class CreateRecommendAlbumService extends IntentService {
 
     private void handleActionCreateRecommendAlbumService() {
 
-        LocalCache.RecommendMediaShares.addAll(createRecommendAlbums(LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()));
+        if (LocalCache.LocalMediaMapKeyIsOriginalPhotoPath != null) {
 
-        Log.i(TAG, "handleActionCreateRecommendAlbumService: LocalCache.RecommendMediaShare size: " + LocalCache.RecommendMediaShares.size());
+            LocalCache.RecommendMediaShares.addAll(createRecommendAlbums(LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()));
+
+            Log.i(TAG, "handleActionCreateRecommendAlbumService: LocalCache.RecommendMediaShare size: " + LocalCache.RecommendMediaShares.size());
+
+        }
 
         EventBus.getDefault().postSticky(new OperationEvent(Util.RECOMMEND_ALBUM_CREATED, new OperationSuccess(R.string.operate)));
 

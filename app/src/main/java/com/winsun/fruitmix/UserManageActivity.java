@@ -32,7 +32,7 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class UserManageActivity extends AppCompatActivity implements View.OnClickListener {
+public class UserManageActivity extends BaseActivity implements View.OnClickListener {
 
     public static final String TAG = "UserManageActivity";
 
@@ -83,22 +83,6 @@ public class UserManageActivity extends AppCompatActivity implements View.OnClic
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-//        MobclickAgent.onPageStart(TAG);
-//        MobclickAgent.onResume(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-//        MobclickAgent.onPageEnd(TAG);
-//        MobclickAgent.onPause(this);
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -135,10 +119,7 @@ public class UserManageActivity extends AppCompatActivity implements View.OnClic
         else
             mUserList.clear();
 
-        Collection<User> collection = LocalCache.RemoteUserMapKeyIsUUID.values();
-        for (User user : collection) {
-            mUserList.add(user);
-        }
+        mUserList.addAll(LocalCache.RemoteUserMapKeyIsUUID.values());
 
         Collections.sort(mUserList, new Comparator<User>() {
             @Override

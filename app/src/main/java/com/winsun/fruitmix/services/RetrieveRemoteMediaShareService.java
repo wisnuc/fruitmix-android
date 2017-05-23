@@ -192,6 +192,23 @@ public class RetrieveRemoteMediaShareService extends IntentService {
         List<String> oldMediaSharesDigests;
         List<String> newMediaSharesDigests;
 
+        if (loadMediaShareInDBWhenExceptionOccur) {
+
+            mediaShares = dbUtils.getAllRemoteShare();
+
+            mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
+
+            Log.i(TAG, "handleActionRetrieveRemoteMediaShare: retrieve remote media share from db");
+
+            fillLocalCacheRemoteMediaShareMap(mediaShareConcurrentMap);
+
+            Util.setRemoteMediaShareLoaded(true);
+
+            postEvent();
+
+        }
+
+
         try {
 
             HttpResponse httpResponse = FNAS.loadRemoteShare(this);
@@ -254,22 +271,6 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
         } catch (Exception e) {
             e.printStackTrace();
-
-            if (loadMediaShareInDBWhenExceptionOccur) {
-
-                mediaShares = dbUtils.getAllRemoteShare();
-
-                mediaShareConcurrentMap = LocalCache.BuildMediaShareMapKeyIsUUID(mediaShares);
-
-                Log.i(TAG, "handleActionRetrieveRemoteMediaShare: retrieve remote media share from db");
-
-                fillLocalCacheRemoteMediaShareMap(mediaShareConcurrentMap);
-
-                Util.setRemoteMediaShareLoaded(true);
-
-                postEvent();
-
-            }
 
         }
 

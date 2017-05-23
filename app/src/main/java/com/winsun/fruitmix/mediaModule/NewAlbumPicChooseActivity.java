@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
@@ -23,7 +24,7 @@ import butterknife.ButterKnife;
 /**
  * Created by Administrator on 2016/5/9.
  */
-public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPhotoListListener {
+public class NewAlbumPicChooseActivity extends BaseActivity implements IPhotoListListener {
 
     public static final String TAG = "NewAlbumPicChooseActivity";
 
@@ -122,16 +123,6 @@ public class NewAlbumPicChooseActivity extends AppCompatActivity implements IPho
             onResume = true;
         }
 
-//        MobclickAgent.onPageStart(TAG);
-//        MobclickAgent.onResume(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-//        MobclickAgent.onPageEnd(TAG);
-//        MobclickAgent.onPause(this);
     }
 
     @Override
