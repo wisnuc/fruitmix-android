@@ -31,6 +31,7 @@ import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.services.ButlerService;
+import com.winsun.fruitmix.util.AnimatorBuilder;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -420,21 +421,22 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
             if (mStartAnimateArrow) {
 
-                Animator animator;
+                AnimatorBuilder animatorBuilder;
 
                 Boolean preIsExpanded = (Boolean) mArrow.getTag();
                 if (preIsExpanded != null && preIsExpanded == isExpanded) return;
 
                 if (isExpanded) {
-                    animator = AnimatorInflater.loadAnimator(mContext, R.animator.ic_back_remote);
+
+                    animatorBuilder = new AnimatorBuilder(mContext, R.animator.ic_back_remote, mArrow);
 
                 } else {
-                    animator = AnimatorInflater.loadAnimator(mContext, R.animator.ic_back_restore);
+
+                    animatorBuilder = new AnimatorBuilder(mContext, R.animator.ic_back_restore, mArrow);
 
                 }
-                animator.setTarget(mArrow);
 
-                animator.start();
+                animatorBuilder.startAnimator();
 
                 mArrow.setTag(isExpanded);
 

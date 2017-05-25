@@ -3,7 +3,7 @@
 
     <changeBounds
         android:duration="200"
-        android:interpolator="@android:interpolator/linear_out_slow_in">
+        android:interpolator="@android:interpolator/linear">
 
         <arcMotion
             android:maximumAngle="90"
@@ -14,7 +14,7 @@
 
     <changeImageTransform
         android:duration="200"
-        android:interpolator="@android:interpolator/linear_out_slow_in"/>
+        android:interpolator="@android:interpolator/linear"/>
 
 
 </transitionSet>

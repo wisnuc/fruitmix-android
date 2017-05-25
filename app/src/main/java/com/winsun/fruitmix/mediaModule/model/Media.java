@@ -51,7 +51,6 @@ public class Media implements Parcelable {
         thumb = "";
         type = "JPEG";
         date = "";
-        belongingMediaShareUUID = "";
         local = false;
         miniThumbPath = "";
         originalPhotoPath = "";

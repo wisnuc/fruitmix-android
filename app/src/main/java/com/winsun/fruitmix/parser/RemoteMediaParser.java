@@ -46,7 +46,10 @@ public class RemoteMediaParser implements RemoteDataParser<Media> {
 
             media.setSharing(sharing);
 
-            itemRaw = itemObject.getJSONObject("metadata");
+            itemRaw = itemObject.optJSONObject("metadata");
+
+            if (itemRaw == null)
+                continue;
 
             String width = itemRaw.optString("width");
             String height = itemRaw.optString("height");

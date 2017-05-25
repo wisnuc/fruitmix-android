@@ -304,8 +304,6 @@ public class GifTouchImageView extends GifImageView {
     @Override
     protected void onDraw(Canvas canvas) {
 
-        Log.d(TAG, "onDraw: ");
-
         onDrawReady = true;
         imageRenderedAtLeastOnce = true;
         if (delayedZoomVariables != null) {
@@ -552,8 +550,6 @@ public class GifTouchImageView extends GifImageView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-
-        Log.d(TAG, "onMeasure: ");
 
         Drawable drawable = getDrawable();
         if (drawable == null || drawable.getIntrinsicWidth() == 0 || drawable.getIntrinsicHeight() == 0) {
@@ -843,7 +839,7 @@ public class GifTouchImageView extends GifImageView {
             boolean consumed = false;
 
             if (doubleTapListener != null) {
-                doubleTapListener.onDoubleTap(e);
+                consumed = doubleTapListener.onDoubleTap(e);
             }
 
             if (state == State.NONE) {
@@ -1080,6 +1076,8 @@ public class GifTouchImageView extends GifImageView {
             translateImageToCenterTouchPosition(t);
             fixScaleTrans();
             setImageMatrix(matrix);
+
+//            Log.d(TAG, "run: t: " + t + " deltaScale: " + deltaScale + " matrix: " + matrix);
 
             //
             // OnTouchImageViewListener is set: double tap runnable updates listener

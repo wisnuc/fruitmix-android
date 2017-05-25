@@ -144,12 +144,12 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
     @Override
     public void show() {
-        MobclickAgent.onPageStart("MediaShareFragment");
+        //MobclickAgent.onPageStart("MediaShareFragment");
     }
 
     @Override
     public void hide() {
-        MobclickAgent.onPageEnd("MediaShareFragment");
+        //MobclickAgent.onPageEnd("MediaShareFragment");
     }
 
     private void initImageLoader() {

@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.mediaModule.fragment;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,6 +36,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.util.AnimatorBuilder;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
@@ -75,8 +78,8 @@ public class AlbumList implements Page, IShowHideFragmentListener {
     private AlbumRecyclerViewAdapter mAdapter;
 
     private List<MediaShare> remoteMediaShares;
-    private Map<String,User> remoteUserMaps;
-    private Map<String,Media> remoteMediaMaps;
+    private Map<String, User> remoteUserMaps;
+    private Map<String, Media> remoteMediaMaps;
 
     private List<MediaShare> mediaShareList;
 
@@ -146,12 +149,28 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
     @Override
     public void show() {
-        MobclickAgent.onPageStart("AlbumFragment");
+        //MobclickAgent.onPageStart("AlbumFragment");
+
+        //TODO:fix bug about show fab animator
+
+//        if (mLoadingLayout.getVisibility() != View.VISIBLE) {
+//            ivAdd.setVisibility(View.INVISIBLE);
+//            new AnimatorBuilder(containerActivity, R.animator.fab_scale_restore, ivAdd).setStartDelay(200)
+//                    .addAdapter(new AnimatorListenerAdapter() {
+//                        @Override
+//                        public void onAnimationStart(Animator animation) {
+//                            super.onAnimationStart(animation);
+//
+//                            ivAdd.setVisibility(View.VISIBLE);
+//                        }
+//                    }).startAnimator();
+//
+//        }
     }
 
     @Override
     public void hide() {
-        MobclickAgent.onPageEnd("AlbumFragment");
+        //MobclickAgent.onPageEnd("AlbumFragment");
     }
 
     private void initImageLoader() {
@@ -258,7 +277,6 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         refreshView();
 
     }
-
 
     public void onDidAppear() {
 

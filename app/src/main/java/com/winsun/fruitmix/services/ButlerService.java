@@ -282,6 +282,9 @@ public class ButlerService extends Service {
 
     private void startGenerateLocalPhotoThumbnail() {
 
+        if (LocalCache.LocalMediaMapKeyIsOriginalPhotoPath == null)
+            return;
+
         DBUtils dbUtils = DBUtils.getInstance(this);
         ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
 
@@ -309,6 +312,9 @@ public class ButlerService extends Service {
 
 
     private void startGenerateLocalPhotoMiniThumbnail() {
+
+        if (LocalCache.LocalMediaMapKeyIsOriginalPhotoPath == null)
+            return;
 
         DBUtils dbUtils = DBUtils.getInstance(this);
         ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;

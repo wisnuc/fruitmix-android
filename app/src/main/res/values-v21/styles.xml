@@ -25,7 +25,7 @@
             @transition/new_change_image_transform_enter
         </item>
         <item name="android:windowSharedElementReturnTransition">
-            @transition/change_image_transform_exit
+            @transition/new_change_image_transform_exit
         </item>
 
     </style>

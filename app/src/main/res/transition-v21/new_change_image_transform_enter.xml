@@ -3,7 +3,7 @@
 
     <changeBounds
         android:duration="200"
-        android:interpolator="@android:interpolator/linear_out_slow_in">
+        android:interpolator="@android:interpolator/linear">
 
         <pathMotion
             class="com.winsun.fruitmix.util.EnterPatternPathMotion"
@@ -13,6 +13,6 @@
 
     <changeImageTransform
         android:duration="200"
-        android:interpolator="@android:interpolator/linear_out_slow_in" />
+        android:interpolator="@android:interpolator/linear" />
 
 </transitionSet>

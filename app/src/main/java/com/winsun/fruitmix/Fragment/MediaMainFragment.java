@@ -53,6 +53,7 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.util.AnimatorBuilder;
 import com.winsun.fruitmix.util.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -109,8 +110,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private AlbumList albumList;
     private NewPhotoList photoList;
     private MediaShareList shareList;
-
-    private Animator mAnimator;
 
     private boolean sMenuUnfolding = false;
 
@@ -801,7 +800,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
 //        fab.setVisibility(View.VISIBLE);
 
-        showFab(createAnimator(R.animator.fab_translation));
+        showFab();
 
         showRevealToolbarAnim();
 
@@ -840,7 +839,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
 //        fab.setVisibility(View.GONE);
 
-        dismissFab(createAnimator(R.animator.fab_translation_restore));
+        dismissFab();
 
         dismissRevealToolbarAnim();
 
@@ -861,32 +860,22 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         mListener.unlockDrawer();
     }
 
-    private Animator createAnimator(int animatorResId) {
-        return AnimatorInflater.loadAnimator(getContext(), animatorResId);
-    }
+    private void showFab() {
 
-    private void showFab(Animator animator) {
-
-        animator.setTarget(fab);
-
-        animator.addListener(new AnimatorListenerAdapter() {
-
+        new AnimatorBuilder(getContext(), R.animator.fab_translation, fab).addAdapter(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
 
                 fab.setVisibility(View.VISIBLE);
             }
-        });
+        }).startAnimator();
 
-        animator.start();
     }
 
-    private void dismissFab(Animator animator) {
+    private void dismissFab() {
 
-        animator.setTarget(fab);
-
-        animator.addListener(new AnimatorListenerAdapter() {
+        new AnimatorBuilder(getContext(), R.animator.fab_translation_restore, fab).addAdapter(new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -894,9 +883,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 fab.setVisibility(View.GONE);
             }
-        });
-
-        animator.start();
+        }).startAnimator();
 
     }
 
@@ -906,31 +893,20 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         revealToolbar.setVisibility(View.VISIBLE);
 
-        Animator animator = createAnimator(R.animator.reveal_toolbar_translation);
-
-        animator.setTarget(revealToolbar);
-
-        animator.addListener(new AnimatorListenerAdapter() {
-
+        new AnimatorBuilder(getContext(), R.animator.reveal_toolbar_translation, revealToolbar).addAdapter(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
 
                 Util.setStatusBarColor(getActivity(), R.color.fab_bg_color);
             }
-        });
+        }).startAnimator();
 
-        animator.start();
     }
 
     private void dismissRevealToolbarAnim() {
 
-        Animator animator = createAnimator(R.animator.reveal_toolbar_translation_restore);
-
-        animator.setTarget(revealToolbar);
-
-        animator.addListener(new AnimatorListenerAdapter() {
-
+        new AnimatorBuilder(getContext(), R.animator.reveal_toolbar_translation_restore, revealToolbar).addAdapter(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
@@ -941,9 +917,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 Util.setStatusBarColor(getActivity(), R.color.colorPrimaryDark);
             }
-        });
-
-        animator.start();
+        }).startAnimator();
 
     }
 
@@ -1199,19 +1173,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private void collapseFab() {
 
-        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.fab_remote_restore);
-        mAnimator.setTarget(fab);
-        mAnimator.start();
+        new AnimatorBuilder(getContext(), R.animator.fab_remote_restore, fab).startAnimator();
 
-        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.album_btn_restore);
-        mAnimator.setTarget(ivBtAlbum);
-        mAnimator.start();
+        new AnimatorBuilder(getContext(), R.animator.album_btn_restore, ivBtAlbum).startAnimator();
 
-        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.share_btn_restore);
-        mAnimator.setTarget(ivBtShare);
-        mAnimator.start();
+        new AnimatorBuilder(getContext(), R.animator.share_btn_restore, ivBtShare).addAdapter(new AnimatorListenerAdapter() {
 
-        mAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
@@ -1220,7 +1187,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 ivBtShare.setVisibility(View.GONE);
 
             }
-        });
+        }).startAnimator();
 
     }
 
@@ -1229,18 +1196,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         ivBtAlbum.setVisibility(View.VISIBLE);
         ivBtShare.setVisibility(View.VISIBLE);
 
-        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.fab_remote);
-        mAnimator.setTarget(fab);
-        mAnimator.start();
+        new AnimatorBuilder(getContext(), R.animator.fab_remote, fab).startAnimator();
 
-        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.album_btn_translation);
-        mAnimator.setTarget(ivBtAlbum);
-        mAnimator.start();
+        new AnimatorBuilder(getContext(), R.animator.album_btn_translation, ivBtAlbum).startAnimator();
 
-        mAnimator = AnimatorInflater.loadAnimator(getActivity(), R.animator.share_btn_translation);
-        mAnimator.setTarget(ivBtShare);
-        mAnimator.start();
-
+        new AnimatorBuilder(getContext(), R.animator.share_btn_translation, ivBtShare).startAnimator();
     }
 
     @Override
@@ -1307,6 +1267,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         switch (position) {
             case PAGE_SHARE:
 
+                setCurrentItem(shareList);
+
                 title.setText(getString(R.string.share_text));
                 fab.setVisibility(View.GONE);
                 ivBtAlbum.setVisibility(View.GONE);
@@ -1315,11 +1277,15 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 break;
             case PAGE_PHOTO:
 
+                setCurrentItem(photoList);
+
                 title.setText(getString(R.string.photo));
                 lbRight.setVisibility(View.VISIBLE);
                 fab.setVisibility(View.GONE);
                 break;
             case PAGE_ALBUM:
+
+                setCurrentItem(albumList);
 
                 title.setText(getString(R.string.album));
                 fab.setVisibility(View.GONE);

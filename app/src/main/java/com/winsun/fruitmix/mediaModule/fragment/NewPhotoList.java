@@ -9,13 +9,9 @@ import android.os.Bundle;
 import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -24,8 +20,6 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -35,7 +29,6 @@ import android.widget.Toast;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.umeng.analytics.MobclickAgent;
-import com.winsun.fruitmix.anim.BaseAnimationListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
@@ -45,6 +38,7 @@ import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
+import com.winsun.fruitmix.util.AnimatorBuilder;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -172,12 +166,12 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     @Override
     public void show() {
-        MobclickAgent.onPageStart("PhotoFragment");
+//        MobclickAgent.onPageStart("PhotoFragment");
     }
 
     @Override
     public void hide() {
-        MobclickAgent.onPageEnd("PhotoFragment");
+//        MobclickAgent.onPageEnd("PhotoFragment");
     }
 
     private void initImageLoader() {
@@ -750,6 +744,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         @BindView(R.id.photo_title_layout)
         LinearLayout mPhotoTitleLayout;
 
+        @BindView(R.id.photo_title_container)
+        LinearLayout mPhotoTitleContainer;
+
         @BindView(R.id.spacing_layout)
         View mSpacingLayout;
 
@@ -781,7 +778,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (mSelectMode) {
 
-                if (!isPhotoTitleSelectImgVisible()) {
+                if (!isPhotoTitleContainerHasTranslation()) {
                     if (mUseAnim) {
                         showPhotoTitleSelectImgAnim();
                     } else
@@ -801,12 +798,15 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             } else {
 
-                if (isPhotoTitleSelectImgVisible()) {
+                if (isPhotoTitleContainerHasTranslation()) {
+
                     if (mUseAnim) {
                         dismissPhotoTitleSelectImgAnim();
                     } else
                         dismissPhotoTitleSelectImg();
+
                 }
+
             }
 
 
@@ -866,42 +866,87 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         }
 
-        private boolean isPhotoTitleSelectImgVisible() {
-            return mPhotoTitleSelectImg.getVisibility() == View.VISIBLE;
+        private boolean isPhotoTitleContainerHasTranslation() {
+
+            return mPhotoTitleContainer.getTranslationX() == 0;
+
         }
 
         private void showPhotoTitleSelectImgAnim() {
-            mPhotoTitleSelectImg.setVisibility(View.VISIBLE);
 
-            Animation animation = AnimationUtils.loadAnimation(containerActivity, R.anim.show_right_item_anim);
+//            Animation animation = AnimationUtils.loadAnimation(containerActivity, R.anim.show_right_item_anim);
+//
+//            animation.setInterpolator(new LinearInterpolator());
+//
+//            animation.setAnimationListener(new BaseAnimationListener() {
+//
+//                @Override
+//                public void onAnimationEnd(Animation animation) {
+//                    super.onAnimationEnd(animation);
+//
+//                    showPhotoTitleSelectImg();
+//
+//                }
+//            });
+//
+//            mPhotoTitleContainer.startAnimation(animation);
 
-            mPhotoTitleSelectImg.startAnimation(animation);
+            showPhotoTitleSelectImgAnimator(false);
 
         }
 
         private void dismissPhotoTitleSelectImgAnim() {
-            Animation animation = AnimationUtils.loadAnimation(containerActivity, R.anim.dismiss_right_item_anim);
-            animation.setAnimationListener(new BaseAnimationListener() {
 
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    super.onAnimationEnd(animation);
+//            Animation animation = AnimationUtils.loadAnimation(containerActivity, R.anim.dismiss_right_item_anim);
+//
+//            animation.setInterpolator(new LinearInterpolator());
+//
+//            animation.setAnimationListener(new BaseAnimationListener() {
+//
+//                @Override
+//                public void onAnimationEnd(Animation animation) {
+//                    super.onAnimationEnd(animation);
+//
+//                    dismissPhotoTitleSelectImg();
+//
+//                }
+//            });
+//
+//            mPhotoTitleContainer.startAnimation(animation);
 
-                    mPhotoTitleSelectImg.setVisibility(View.GONE);
-
-                }
-            });
-
-            mPhotoTitleSelectImg.startAnimation(animation);
-
+            dismissPhotoTitleSelectImgAnimator(false);
         }
 
         private void showPhotoTitleSelectImg() {
-            mPhotoTitleSelectImg.setVisibility(View.VISIBLE);
+//            mPhotoTitleSelectImg.setVisibility(View.VISIBLE);
+            showPhotoTitleSelectImgAnimator(true);
         }
 
         private void dismissPhotoTitleSelectImg() {
-            mPhotoTitleSelectImg.setVisibility(View.GONE);
+//            mPhotoTitleSelectImg.setVisibility(View.GONE);
+            dismissPhotoTitleSelectImgAnimator(true);
+        }
+
+
+        private void showPhotoTitleSelectImgAnimator(boolean immediate) {
+
+            startPhotoTitleContainerAnimator(R.animator.photo_title_select_img_translation, immediate);
+
+        }
+
+        private void dismissPhotoTitleSelectImgAnimator(boolean immediate) {
+
+            startPhotoTitleContainerAnimator(R.animator.photo_title_select_img_translation_restore, immediate);
+        }
+
+        private void startPhotoTitleContainerAnimator(int animatorResID, boolean immediate) {
+
+            AnimatorBuilder animatorBuilder = new AnimatorBuilder(containerActivity, animatorResID, mPhotoTitleContainer);
+
+            if (immediate)
+                animatorBuilder.setDuration(0);
+
+            animatorBuilder.startAnimator();
         }
 
     }
@@ -1052,7 +1097,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity,medias,intent,mediaInListPosition,mSpanCount,mPhotoIv,currentMedia);
+                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity, medias, intent, mediaInListPosition, mSpanCount, mPhotoIv, currentMedia);
 
 /*                        if (mPhotoIv.isLoaded()) {
 

@@ -5,12 +5,14 @@
     <objectAnimator
         android:duration="200"
         android:propertyName="scaleX"
+        android:interpolator="@android:anim/linear_interpolator"
         android:valueFrom="0.8"
         android:valueTo="1" />
 
     <objectAnimator
         android:duration="200"
         android:propertyName="scaleY"
+        android:interpolator="@android:anim/linear_interpolator"
         android:valueFrom="0.8"
         android:valueTo="1" />
 

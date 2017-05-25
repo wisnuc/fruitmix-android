@@ -557,7 +557,11 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
         intent.putExtra(Util.CURRENT_PHOTO_POSITION, currentPhotoPosition);
 
-        intent.putExtra(Util.CURRENT_MEDIA_KEY, mediaList.get(currentPhotoPosition).getKey());
+        Media media = mediaList.get(currentPhotoPosition);
+
+        if (media != null)
+            intent.putExtra(Util.CURRENT_MEDIA_KEY, mediaList.get(currentPhotoPosition).getKey());
+
         intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, getIntent().getStringExtra(Util.CURRENT_MEDIASHARE_TIME));
         setResult(RESULT_OK, intent);
 
@@ -953,7 +957,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             int mediaHeight = Integer.parseInt(media.getHeight());
             int actualWidth;
             int actualHeight;
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
 
             int systemUIHeight = Util.dip2px(mContext, 24);
 

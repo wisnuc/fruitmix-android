@@ -11,4 +11,5 @@ public interface Page {
     View getView();
 
     void refreshView();
+
 }
