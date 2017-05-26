@@ -285,7 +285,12 @@ public class RetrieveRemoteMediaShareService extends IntentService {
 
     private void fillLocalCacheRemoteMediaShareMap(ConcurrentMap<String, MediaShare> mediaShareConcurrentMap) {
 
-        if (LocalCache.RemoteMediaShareMapKeyIsUUID == null) return;
+        if (LocalCache.RemoteMediaShareMapKeyIsUUID == null) {
+
+            Log.w(TAG, "fillLocalCacheRemoteMediaShareMap: RemoteMediaShareMapKeyIsUUID", new NullPointerException());
+
+            return;
+        }
 
         LocalCache.RemoteMediaShareMapKeyIsUUID.clear();
 

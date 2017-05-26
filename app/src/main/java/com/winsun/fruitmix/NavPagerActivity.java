@@ -28,6 +28,7 @@ import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -350,8 +351,13 @@ public class NavPagerActivity extends BaseActivity
 
     private void calcAlreadyUploadMediaCount() {
 
-        if (LocalCache.LocalMediaMapKeyIsOriginalPhotoPath == null || LocalCache.DeviceID == null)
+        if (LocalCache.LocalMediaMapKeyIsOriginalPhotoPath == null || LocalCache.DeviceID == null) {
+
+            Log.w(TAG, " LocalMediaMapKeyIsOriginalPhotoPath", new NullPointerException());
+
             return;
+
+        }
 
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -650,6 +656,10 @@ public class NavPagerActivity extends BaseActivity
     private void refreshUserInNavigationView() {
 
         User user;
+
+        if (LocalCache.RemoteUserMapKeyIsUUID == null) {
+            Log.w(TAG, "refreshUserInNavigationView: RemoteUserMapKeyIsUUID", new NullPointerException());
+        }
 
         if (FNAS.userUUID != null && LocalCache.RemoteUserMapKeyIsUUID != null && LocalCache.RemoteUserMapKeyIsUUID.containsKey(FNAS.userUUID)) {
             user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);

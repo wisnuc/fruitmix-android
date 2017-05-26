@@ -16,6 +16,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.animation.FastOutLinearInInterpolator;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
+import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
@@ -819,10 +822,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         });
         lbRight.setVisibility(View.GONE);*/
 
-        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
-        lp.bottomMargin = 0;
-        viewPager.setLayoutParams(lp);
-
         sInChooseMode = true;
         photoList.setSelectMode(sInChooseMode);
 
@@ -869,7 +868,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 fab.setVisibility(View.VISIBLE);
             }
-        }).startAnimator();
+        }).setInterpolator(new LinearOutSlowInInterpolator()).startAnimator();
 
     }
 
@@ -883,7 +882,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 fab.setVisibility(View.GONE);
             }
-        }).startAnimator();
+        }).setInterpolator(new FastOutLinearInInterpolator()).startAnimator();
 
     }
 
@@ -900,7 +899,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 Util.setStatusBarColor(getActivity(), R.color.fab_bg_color);
             }
-        }).startAnimator();
+        }).setInterpolator(new LinearOutSlowInInterpolator()).startAnimator();
 
     }
 
@@ -917,56 +916,44 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 Util.setStatusBarColor(getActivity(), R.color.colorPrimaryDark);
             }
-        }).startAnimator();
+        }).setInterpolator(new FastOutLinearInInterpolator()).startAnimator();
 
     }
 
 
     private void showBottomNavAnim() {
 
-        bottomNavigationView.setVisibility(View.VISIBLE);
+        new AnimatorBuilder(getContext(), R.animator.bottom_nav_translation_restore, bottomNavigationView)
+                .addAdapter(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
 
-        Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.show_bottom_item_anim);
-        animation.setAnimationListener(new BaseAnimationListener() {
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                super.onAnimationEnd(animation);
+                        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
+                        lp.bottomMargin = Util.dip2px(getActivity(), 56.0f);
 
-                CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
-                lp.bottomMargin = Util.dip2px(getActivity(), 56.0f);
-                //if(LocalCache.ScreenWidth==540) lp.bottomMargin=76;
-                //else if(LocalCache.ScreenWidth==1080) lp.bottomMargin=140;
-                viewPager.setLayoutParams(lp);
-            }
-        });
+                        viewPager.setLayoutParams(lp);
+                    }
+                }).setInterpolator(new FastOutSlowInInterpolator()).startAnimator();
 
-
-        bottomNavigationView.startAnimation(animation);
     }
 
     private void showBottomNav() {
-        bottomNavigationView.setVisibility(View.VISIBLE);
+        bottomNavigationView.setTranslationX(0);
     }
 
     private void dismissBottomNavAnim() {
 
-        Animation animation = AnimationUtils.loadAnimation(getContext(), R.anim.dismiss_bottom_item_anim);
-        animation.setAnimationListener(new BaseAnimationListener() {
+        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
+        lp.bottomMargin = 0;
+        viewPager.setLayoutParams(lp);
 
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                super.onAnimationEnd(animation);
-
-                bottomNavigationView.setVisibility(View.GONE);
-            }
-        });
-
-        bottomNavigationView.startAnimation(animation);
+        new AnimatorBuilder(getContext(), R.animator.bottom_nav_translation, bottomNavigationView)
+                .setInterpolator(new FastOutSlowInInterpolator()).startAnimator();
     }
 
-
     private void dismissBottomNav() {
-        bottomNavigationView.setVisibility(View.GONE);
+        bottomNavigationView.setTranslationX(168);
     }
 
     public boolean handleBackPressedOrNot() {

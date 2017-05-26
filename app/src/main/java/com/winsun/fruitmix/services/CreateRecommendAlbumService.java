@@ -66,6 +66,12 @@ public class CreateRecommendAlbumService extends IntentService {
 
     private void handleActionCreateRecommendAlbumService() {
 
+        if (LocalCache.LocalMediaMapKeyIsOriginalPhotoPath == null) {
+            Log.w(TAG, "LocalMediaMapKeyIsOriginalPhotoPath", new NullPointerException());
+
+            return;
+        }
+
         if (LocalCache.LocalMediaMapKeyIsOriginalPhotoPath != null) {
 
             LocalCache.RecommendMediaShares.addAll(createRecommendAlbums(LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()));

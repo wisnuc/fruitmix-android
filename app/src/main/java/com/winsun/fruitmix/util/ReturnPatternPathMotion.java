@@ -20,10 +20,13 @@ public class ReturnPatternPathMotion extends PatternPathMotion {
 
     private static boolean mLeftMotion = true;
 
-    public static void setMotion(boolean leftMotion) {
+    private static boolean mRightMotion = true;
+
+    public static void setMotion(boolean leftMotion,boolean rightMotion) {
 
         mLeftMotion = leftMotion;
 
+        mRightMotion = rightMotion;
     }
 
     @Override
@@ -31,15 +34,19 @@ public class ReturnPatternPathMotion extends PatternPathMotion {
 
         Path path = new Path();
 
+        path.moveTo(0, 0);
+
         if (mLeftMotion) {
 
-            path.moveTo(0, 0);
-            path.quadTo(80, 20, 100, 100);
+            path.quadTo(50, 0, 100, 100);
 
-        } else {
+        } else if(mRightMotion){
 
-            path.moveTo(0, 0);
-            path.quadTo(20, 80, 100, 100);
+            path.quadTo(0, 50, 100, 100);
+
+        }else {
+
+            path.lineTo(100,100);
 
         }
 

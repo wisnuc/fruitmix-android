@@ -28,7 +28,6 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
-import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
@@ -157,8 +156,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         mPhotoRecycleAdapter = new PhotoRecycleAdapter();
 
         setupFastJumper();
-        mRecyclerView.setAdapter(mPhotoRecycleAdapter);
-        setupLayoutManager();
+
+        setupRecyclerView();
 
         mTypeface = Typeface.createFromAsset(containerActivity.getAssets(), "fonts/Roboto-Medium.ttf");
 
@@ -166,6 +165,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     @Override
     public void show() {
+
 //        MobclickAgent.onPageStart("PhotoFragment");
     }
 
@@ -399,9 +399,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         mScrollCalculator = mLinearScrollCalculator;
     }
 
-    private void setupLayoutManager() {
+    private void setupRecyclerView() {
         mFastJumper.attachToRecyclerView(null);
         setupGridLayoutManager();
+        mRecyclerView.setAdapter(mPhotoRecycleAdapter);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mJumperCallback.setScrollCalculator(mScrollCalculator);

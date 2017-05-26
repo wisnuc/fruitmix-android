@@ -518,23 +518,39 @@ public class Util {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
-            if ((position) % spanCount == 0) {
+            int halfSpanCount = spanCount / 2;
 
-                EnterPatternPathMotion.setMotion(true);
+            if (spanCount % 2 == 0) {
 
-                ReturnPatternPathMotion.setMotion(true);
+                if (position < halfSpanCount) {
 
-            } else if ((position + 1) % spanCount == 0) {
+                    EnterPatternPathMotion.setMotion(true, false);
 
-                EnterPatternPathMotion.setMotion(false);
+                    ReturnPatternPathMotion.setMotion(true, false);
 
-                ReturnPatternPathMotion.setMotion(false);
+                } else if (position >= halfSpanCount) {
+                    EnterPatternPathMotion.setMotion(false, true);
+
+                    ReturnPatternPathMotion.setMotion(false, true);
+                }
 
             } else {
 
-                EnterPatternPathMotion.setMotion(true);
+                if (position < halfSpanCount) {
+                    EnterPatternPathMotion.setMotion(true, false);
 
-                ReturnPatternPathMotion.setMotion(true);
+                    ReturnPatternPathMotion.setMotion(true, false);
+                } else if (position > halfSpanCount) {
+                    EnterPatternPathMotion.setMotion(false, true);
+
+                    ReturnPatternPathMotion.setMotion(false, true);
+
+                } else if (position == halfSpanCount) {
+                    EnterPatternPathMotion.setMotion(false, false);
+
+                    ReturnPatternPathMotion.setMotion(false, false);
+                }
+
             }
 
         }

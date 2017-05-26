@@ -21,8 +21,9 @@
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
+        android:scaleX="0"
+        android:scaleY="0"
         android:src="@drawable/ic_add_white_24dp"
-        android:visibility="invisible"
         app:borderWidth="0dp"
         app:fabSize="normal" />
 

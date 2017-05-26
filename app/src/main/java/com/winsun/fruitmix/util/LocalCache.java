@@ -121,6 +121,8 @@ public class LocalCache {
 
     public static boolean Init() {
 
+        Log.d(TAG, "Init: ");
+
         if (RemoteMediaCommentMapKeyIsImageUUID == null)
             RemoteMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
         else
@@ -136,6 +138,8 @@ public class LocalCache {
         else
             RemoteMediaShareMapKeyIsUUID.clear();
 
+        Log.d(TAG, "Init: RemoteMediaShareMapKeyIsUUID == null: " + (RemoteMediaShareMapKeyIsUUID == null ? "true" : "false"));
+
         if (LocalMediaShareMapKeyIsUUID == null)
             LocalMediaShareMapKeyIsUUID = new ConcurrentHashMap<>();
         else
@@ -145,6 +149,9 @@ public class LocalCache {
             RemoteUserMapKeyIsUUID = new ConcurrentHashMap<>();
         else
             RemoteUserMapKeyIsUUID.clear();
+
+        Log.d(TAG, "Init: RemoteUserMapKeyIsUUID == null: " + (RemoteUserMapKeyIsUUID == null ? "true" : "false"));
+
 
         if (RemoteMediaMapKeyIsUUID == null)
             RemoteMediaMapKeyIsUUID = new ConcurrentHashMap<>();
@@ -168,6 +175,8 @@ public class LocalCache {
 
         if (LocalMediaMapKeyIsOriginalPhotoPath == null)
             LocalMediaMapKeyIsOriginalPhotoPath = new ConcurrentHashMap<>();
+
+        Log.d(TAG, "Init: init LocalMediaMapKeyIsOriginalPhotoPath ");
 
         if (LocalLoggedInUsers == null)
             LocalLoggedInUsers = new ArrayList<>();

@@ -153,24 +153,21 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
         //TODO:fix bug about show fab animator
 
-//        if (mLoadingLayout.getVisibility() != View.VISIBLE) {
-//            ivAdd.setVisibility(View.INVISIBLE);
-//            new AnimatorBuilder(containerActivity, R.animator.fab_scale_restore, ivAdd).setStartDelay(200)
-//                    .addAdapter(new AnimatorListenerAdapter() {
-//                        @Override
-//                        public void onAnimationStart(Animator animation) {
-//                            super.onAnimationStart(animation);
-//
-//                            ivAdd.setVisibility(View.VISIBLE);
-//                        }
-//                    }).startAnimator();
-//
-//        }
+        if (mLoadingLayout.getVisibility() != View.VISIBLE) {
+
+            new AnimatorBuilder(containerActivity, R.animator.fab_scale_restore, ivAdd).setStartDelay(200)
+                    .startAnimator();
+
+        }
     }
 
     @Override
     public void hide() {
         //MobclickAgent.onPageEnd("AlbumFragment");
+
+        ivAdd.setScaleX(0);
+        ivAdd.setScaleY(0);
+
     }
 
     private void initImageLoader() {
@@ -249,7 +246,7 @@ public class AlbumList implements Page, IShowHideFragmentListener {
     public void refreshView() {
 
         mLoadingLayout.setVisibility(View.VISIBLE);
-        ivAdd.setVisibility(View.INVISIBLE);
+
 
         if (!Util.isRemoteMediaShareLoaded()) {
             return;
@@ -258,7 +255,7 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         reloadList();
 
         mLoadingLayout.setVisibility(View.GONE);
-        ivAdd.setVisibility(View.VISIBLE);
+
         if (mediaShareList.size() == 0) {
             mNoContentLayout.setVisibility(View.VISIBLE);
             mainRecyclerView.setVisibility(View.GONE);

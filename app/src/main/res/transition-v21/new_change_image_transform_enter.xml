@@ -2,8 +2,8 @@
 <transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
 
     <changeBounds
-        android:duration="200"
-        android:interpolator="@android:interpolator/linear">
+        android:duration="1000"
+        android:interpolator="@android:interpolator/fast_out_slow_in">
 
         <pathMotion
             class="com.winsun.fruitmix.util.EnterPatternPathMotion"
@@ -12,7 +12,7 @@
     </changeBounds>
 
     <changeImageTransform
-        android:duration="200"
-        android:interpolator="@android:interpolator/linear" />
+        android:duration="1000"
+        android:interpolator="@android:interpolator/fast_out_slow_in" />
 
 </transitionSet>

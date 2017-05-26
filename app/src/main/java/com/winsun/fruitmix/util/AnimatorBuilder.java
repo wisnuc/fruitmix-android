@@ -3,7 +3,9 @@ package com.winsun.fruitmix.util;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.TimeInterpolator;
 import android.content.Context;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 
 /**
  * Created by Administrator on 2017/5/25.
@@ -19,6 +21,14 @@ public class AnimatorBuilder {
 
         animator.setTarget(target);
 
+        animator.setInterpolator(new FastOutSlowInInterpolator());
+
+    }
+
+    public AnimatorBuilder setInterpolator(TimeInterpolator interpolator) {
+        animator.setInterpolator(interpolator);
+
+        return this;
     }
 
     public AnimatorBuilder setDuration(int duration) {
@@ -33,7 +43,7 @@ public class AnimatorBuilder {
         return this;
     }
 
-    public AnimatorBuilder setStartDelay(long startDelay){
+    public AnimatorBuilder setStartDelay(long startDelay) {
         animator.setStartDelay(startDelay);
 
         return this;

@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -90,6 +91,10 @@ public class UserManageActivity extends BaseActivity implements View.OnClickList
     }
 
     private void refreshView() {
+
+        if(LocalCache.RemoteUserMapKeyIsUUID == null){
+            Log.w(TAG, "refreshUserInNavigationView: RemoteUserMapKeyIsUUID", new NullPointerException());
+        }
 
         if (LocalCache.RemoteUserMapKeyIsUUID != null && !LocalCache.RemoteUserMapKeyIsUUID.isEmpty()) {
 
