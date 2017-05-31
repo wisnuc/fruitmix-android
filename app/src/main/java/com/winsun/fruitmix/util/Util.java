@@ -12,49 +12,36 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
-import android.transition.ArcMotion;
-import android.transition.PatternPathMotion;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
 
 import com.github.druk.rxdnssd.BonjourService;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.anim.EnterPatternPathMotion;
+import com.winsun.fruitmix.anim.GravityArcMotion;
+import com.winsun.fruitmix.anim.ReturnPatternPathMotion;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
-import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.security.MessageDigest;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -520,7 +507,11 @@ public class Util {
 
             int halfSpanCount = spanCount / 2;
 
-            if (spanCount % 2 == 0) {
+            if (spanCount % 2 != 0) {
+                GravityArcMotion.setLinePath(position == halfSpanCount);
+            }
+
+/*            if (spanCount % 2 == 0) {
 
                 if (position < halfSpanCount) {
 
@@ -551,7 +542,8 @@ public class Util {
                     ReturnPatternPathMotion.setMotion(false, false);
                 }
 
-            }
+
+            }*/
 
         }
 

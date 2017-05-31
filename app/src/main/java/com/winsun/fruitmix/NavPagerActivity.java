@@ -18,7 +18,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -28,20 +27,19 @@ import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.druk.rxdnssd.BonjourService;
-import com.github.druk.rxdnssd.RxDnssd;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.fragment.FileMainFragment;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
+import com.winsun.fruitmix.anim.imageloadpattern.AnimateColorMatrixUtil;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.Equipment;
@@ -68,10 +66,6 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 public class NavPagerActivity extends BaseActivity
         implements OnMainFragmentInteractionListener {
@@ -86,6 +80,8 @@ public class NavPagerActivity extends BaseActivity
     TextView versionName;
     @BindView(R.id.avatar)
     TextView mUserAvatar;
+    @BindView(R.id.left_drawer_head_layout)
+    RelativeLayout leftDrawerHeadLayout;
     @BindView(R.id.user_name_textview)
     TextView mUserNameTextView;
     @BindView(R.id.equipment_name)
@@ -313,6 +309,12 @@ public class NavPagerActivity extends BaseActivity
                 super.onDrawerOpened(drawerView);
 
                 calcAlreadyUploadMediaCount();
+
+//                final BitmapDrawable drawable = (BitmapDrawable) ContextCompat.getDrawable(mContext,R.drawable.navigation_header_bg);
+//
+//                leftDrawerHeadLayout.setBackground(drawable);
+//
+//                new AnimateColorMatrixUtil().startAnimation(drawable, 1500);
             }
 
             @Override

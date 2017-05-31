@@ -1,7 +1,5 @@
 package com.winsun.fruitmix;
 
-import android.animation.Animator;
-import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,8 +19,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.druk.rxdnssd.BonjourService;
-import com.github.druk.rxdnssd.RxDnssd;
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
@@ -31,7 +27,7 @@ import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.services.ButlerService;
-import com.winsun.fruitmix.util.AnimatorBuilder;
+import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -46,10 +42,6 @@ import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 public class EquipmentSearchActivity extends AppCompatActivity implements View.OnClickListener {
 

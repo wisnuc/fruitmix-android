@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.util;
+package com.winsun.fruitmix.anim;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -6,15 +6,18 @@ import android.graphics.Path;
 import android.os.Build;
 import android.transition.PatternPathMotion;
 import android.util.AttributeSet;
+import android.util.Log;
 
 /**
  * Created by Administrator on 2017/4/26.
  */
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-public class EnterPatternPathMotion extends PatternPathMotion {
+public class ReturnPatternPathMotion extends PatternPathMotion {
 
-    public EnterPatternPathMotion(Context context, AttributeSet attrs) {
+    public static final String TAG = ReturnPatternPathMotion.class.getSimpleName();
+
+    public ReturnPatternPathMotion(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -27,7 +30,6 @@ public class EnterPatternPathMotion extends PatternPathMotion {
         mLeftMotion = leftMotion;
 
         mRightMotion = rightMotion;
-
     }
 
     @Override
@@ -37,13 +39,15 @@ public class EnterPatternPathMotion extends PatternPathMotion {
 
         path.moveTo(0, 0);
 
+        Log.d(TAG, "getPath: leftMotion: " + mLeftMotion + " rightMotion: " + mRightMotion);
+
         if (mLeftMotion) {
 
-            path.quadTo(0, 50, 100, 100);
+            path.quadTo(50, 0, 100, 100);
 
         } else if (mRightMotion) {
 
-            path.quadTo(50, 0, 100, 100);
+            path.quadTo(0, 50, 100, 100);
 
         } else {
 

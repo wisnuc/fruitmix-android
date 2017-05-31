@@ -1,7 +1,5 @@
 package com.winsun.fruitmix.mediaModule.fragment;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,7 +22,6 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.daimajia.swipe.SimpleSwipeListener;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
-import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.mediaModule.AlbumPicContentActivity;
@@ -36,7 +33,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.User;
-import com.winsun.fruitmix.util.AnimatorBuilder;
+import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
@@ -150,8 +147,6 @@ public class AlbumList implements Page, IShowHideFragmentListener {
     @Override
     public void show() {
         //MobclickAgent.onPageStart("AlbumFragment");
-
-        //TODO:fix bug about show fab animator
 
         if (mLoadingLayout.getVisibility() != View.VISIBLE) {
 

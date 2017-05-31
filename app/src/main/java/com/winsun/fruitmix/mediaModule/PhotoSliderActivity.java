@@ -1,7 +1,6 @@
 package com.winsun.fruitmix.mediaModule;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +9,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.util.Pair;
 import android.support.v4.view.PagerAdapter;
@@ -26,7 +24,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -43,7 +40,6 @@ import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
-import com.winsun.fruitmix.component.GifTouchImageView;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
 import com.winsun.fruitmix.dialog.DialogFactory;
 import com.winsun.fruitmix.dialog.PhotoOperationAlertDialogFactory;
@@ -55,15 +51,13 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
-import com.winsun.fruitmix.util.CustomTransitionListener;
+import com.winsun.fruitmix.anim.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -96,7 +90,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private MyAdapter myAdapter;
 
-    private static List<Media> mediaList;
+    private static List<Media> mediaList = new ArrayList<>();
 
     private int initialPhotoPosition = 0;
     private int currentPhotoPosition = 0;
@@ -313,13 +307,13 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     protected void onDestroy() {
         super.onDestroy();
 
-        mediaList = null;
+        mediaList.clear();
 
         mContext = null;
     }
 
     public static void setMediaList(List<Media> mediaList) {
-        PhotoSliderActivity.mediaList = mediaList;
+        PhotoSliderActivity.mediaList.addAll(mediaList);
     }
 
     private void initViewPager() {
@@ -557,10 +551,13 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
         intent.putExtra(Util.CURRENT_PHOTO_POSITION, currentPhotoPosition);
 
-        Media media = mediaList.get(currentPhotoPosition);
+        if (mediaList != null) {
+            Media media = mediaList.get(currentPhotoPosition);
 
-        if (media != null)
-            intent.putExtra(Util.CURRENT_MEDIA_KEY, mediaList.get(currentPhotoPosition).getKey());
+            if (media != null)
+                intent.putExtra(Util.CURRENT_MEDIA_KEY, mediaList.get(currentPhotoPosition).getKey());
+
+        }
 
         intent.putExtra(Util.CURRENT_MEDIASHARE_TIME, getIntent().getStringExtra(Util.CURRENT_MEDIASHARE_TIME));
         setResult(RESULT_OK, intent);
@@ -731,6 +728,18 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private class MyAdapter extends PagerAdapter {
 
+        private List<Media> medias;
+
+        public MyAdapter() {
+
+            if (mediaList != null) {
+                medias = new ArrayList<>(mediaList);
+            } else {
+                medias = new ArrayList<>();
+            }
+
+        }
+
         @Override
         public CharSequence getPageTitle(int position) {
             return "选X项" + position;
@@ -747,9 +756,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view.findViewById(R.id.mainPic);
 
-            if (mediaList.size() > position && position > -1) {
+            if (medias.size() > position && position > -1) {
 
-                Media media = mediaList.get(position);
+                Media media = medias.get(position);
 
                 mCloudOff.setTag(media.getKey() + position);
 
@@ -1010,10 +1019,11 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         @Override
         public int getCount() {
-            if (mediaList == null || mediaList.size() == 0) {
+
+            if (medias == null || medias.size() == 0) {
                 return 0;
             } else {
-                return mediaList.size();
+                return medias.size();
             }
         }
 

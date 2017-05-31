@@ -1,7 +1,6 @@
 package com.winsun.fruitmix.fragment;
 
 import android.animation.Animator;
-import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -26,8 +25,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -35,7 +32,7 @@ import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.anim.BaseAnimationListener;
+import com.winsun.fruitmix.anim.SharpCurveInterpolator;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
 import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
@@ -56,8 +53,8 @@ import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.util.AnimatorBuilder;
-import com.winsun.fruitmix.util.CustomTransitionListener;
+import com.winsun.fruitmix.anim.AnimatorBuilder;
+import com.winsun.fruitmix.anim.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationResultType;
@@ -448,18 +445,31 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                         eventId = Util.SWITCH_MEDIA_SHARE_MODULE_UMENG_EVENT_ID;
 
                         viewPager.setCurrentItem(PAGE_SHARE);
+
+//                        ViewPagerTranslation.INSTANCE.animatePagerTransition(false, viewPager, 200, viewPager.getCurrentItem() - PAGE_SHARE);
+
                         break;
                     case R.id.photo:
 
                         eventId = Util.SWITCH_MEDIA_MODULE_UMENG_EVENT_ID;
 
                         viewPager.setCurrentItem(PAGE_PHOTO);
+
+//                        boolean forward = viewPager.getCurrentItem() < PAGE_PHOTO;
+//
+//                        int pageCount = forward ? PAGE_PHOTO - viewPager.getCurrentItem() : viewPager.getCurrentItem() - PAGE_PHOTO;
+//
+//                        ViewPagerTranslation.INSTANCE.animatePagerTransition(forward, viewPager, 200, pageCount);
+
                         break;
                     case R.id.album:
 
                         eventId = Util.SWITCH_ALBUM_MODULE_UMENG_EVENT_ID;
 
                         viewPager.setCurrentItem(PAGE_ALBUM);
+
+//                        ViewPagerTranslation.INSTANCE.animatePagerTransition(true, viewPager, 200, PAGE_ALBUM - viewPager.getCurrentItem());
+
                         break;
                 }
 
@@ -882,7 +892,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 fab.setVisibility(View.GONE);
             }
-        }).setInterpolator(new FastOutLinearInInterpolator()).startAnimator();
+        }).setInterpolator(SharpCurveInterpolator.getSharpCurveInterpolator()).startAnimator();
 
     }
 
@@ -916,7 +926,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 Util.setStatusBarColor(getActivity(), R.color.colorPrimaryDark);
             }
-        }).setInterpolator(new FastOutLinearInInterpolator()).startAnimator();
+        }).setInterpolator(SharpCurveInterpolator.getSharpCurveInterpolator()).startAnimator();
 
     }
 

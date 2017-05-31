@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.util;
+package com.winsun.fruitmix.anim;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
