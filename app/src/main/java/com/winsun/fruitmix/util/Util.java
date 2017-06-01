@@ -505,11 +505,13 @@ public class Util {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
-            int halfSpanCount = spanCount / 2;
+            GravityArcMotion.setLinePath(true);
+
+/*            int halfSpanCount = spanCount / 2;
 
             if (spanCount % 2 != 0) {
                 GravityArcMotion.setLinePath(position == halfSpanCount);
-            }
+            }*/
 
 /*            if (spanCount % 2 == 0) {
 

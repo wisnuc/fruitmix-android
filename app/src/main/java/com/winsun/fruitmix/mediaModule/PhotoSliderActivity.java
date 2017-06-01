@@ -47,6 +47,7 @@ import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
 import com.winsun.fruitmix.gif.GifLoader;
+import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.OperationTargetType;
@@ -90,7 +91,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private MyAdapter myAdapter;
 
-    private static List<Media> mediaList = new ArrayList<>();
+    private static List<Media> mediaList;
 
     private int initialPhotoPosition = 0;
     private int currentPhotoPosition = 0;
@@ -307,13 +308,13 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     protected void onDestroy() {
         super.onDestroy();
 
-        mediaList.clear();
-
         mContext = null;
+
+        NewPhotoList.mEnteringPhotoSlider = false;
     }
 
     public static void setMediaList(List<Media> mediaList) {
-        PhotoSliderActivity.mediaList.addAll(mediaList);
+        PhotoSliderActivity.mediaList = new ArrayList<>(mediaList);
     }
 
     private void initViewPager() {
@@ -732,6 +733,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         public MyAdapter() {
 
+            //TODO: check mediaList is null logic
+
             if (mediaList != null) {
                 medias = new ArrayList<>(mediaList);
             } else {
@@ -977,17 +980,17 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             Log.d(TAG, "setCloudOffPosition: mediaWidth: " + mediaWidth + " mediaHeight: " + mediaHeight + " screenWidth: " + screenWidth + " screenHeight: " + screenHeight);
 
+            int marginRight = isLandScape ? navigationBarHeight : 0;
+
             if (mediaWidth - mediaHeight >= screenWidth - screenHeight) {
                 actualWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
                 actualHeight = mediaHeight * actualWidth / mediaWidth;
 
-                int marginTop = (Util.calcScreenHeight(PhotoSliderActivity.this) - actualHeight) / 2 + systemUIHeight;
+                int marginTop = (screenHeight - actualHeight) / 2 + systemUIHeight;
 
-                layoutParams.setMargins(0, marginTop, 0, 0);
+                layoutParams.setMargins(0, marginTop, marginRight, 0);
 
             } else if (mediaWidth - mediaHeight < screenWidth - screenHeight) {
-
-                int marginRight = isLandScape ? navigationBarHeight : 0;
 
                 layoutParams.setMargins(0, systemUIHeight, marginRight, 0);
 

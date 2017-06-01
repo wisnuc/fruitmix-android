@@ -26,6 +26,7 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -39,7 +40,7 @@ import android.widget.Scroller;
 
 import pl.droidsonroids.gif.GifImageView;
 
-public class GifTouchImageView extends GifImageView {
+public class GifTouchImageView extends AppCompatImageView {
 
     private static final String TAG = GifTouchImageView.class.getSimpleName();
 
@@ -264,8 +265,6 @@ public class GifTouchImageView extends GifImageView {
     @Override
     public Parcelable onSaveInstanceState() {
 
-        Log.d(TAG, "onSaveInstanceState: ");
-
         Bundle bundle = new Bundle();
         bundle.putParcelable("instanceState", super.onSaveInstanceState());
         bundle.putFloat("saveScale", normalizedScale);
@@ -281,8 +280,6 @@ public class GifTouchImageView extends GifImageView {
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-
-        Log.d(TAG, "onRestoreInstanceState: ");
 
         if (state instanceof Bundle) {
             Bundle bundle = (Bundle) state;
@@ -860,6 +857,7 @@ public class GifTouchImageView extends GifImageView {
             Log.d(TAG, "onDoubleTapEvent: ");
 
             return doubleTapListener != null && doubleTapListener.onDoubleTapEvent(e);
+
         }
     }
 

@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -310,11 +311,11 @@ public class NavPagerActivity extends BaseActivity
 
                 calcAlreadyUploadMediaCount();
 
-//                final BitmapDrawable drawable = (BitmapDrawable) ContextCompat.getDrawable(mContext,R.drawable.navigation_header_bg);
+//                final BitmapDrawable drawable = (BitmapDrawable) ContextCompat.getDrawable(mContext, R.drawable.navigation_header_bg);
 //
 //                leftDrawerHeadLayout.setBackground(drawable);
 //
-//                new AnimateColorMatrixUtil().startAnimation(drawable, 1500);
+//                new AnimateColorMatrixUtil().startAnimation(drawable, 2000);
             }
 
             @Override

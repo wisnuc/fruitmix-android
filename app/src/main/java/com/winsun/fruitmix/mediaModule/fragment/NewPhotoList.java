@@ -12,6 +12,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.transition.ChangeBounds;
+import android.transition.ChangeClipBounds;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -123,6 +125,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     private Typeface mTypeface;
 
     private boolean mIsLoaded = false;
+
+    public static boolean mEnteringPhotoSlider = false;
 
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
@@ -810,7 +814,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             }
 
-
             mPhotoTitleLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -1080,6 +1083,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                     } else {
 
+                        if (mEnteringPhotoSlider)
+                            return;
+
                         int initialPhotoPosition;
 
                         int size = medias.size();
@@ -1099,6 +1105,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
                         PhotoSliderActivity.startPhotoSliderActivity(containerActivity, medias, intent, mediaInListPosition, mSpanCount, mPhotoIv, currentMedia);
+
+                        mEnteringPhotoSlider = true;
 
 /*                        if (mPhotoIv.isLoaded()) {
 
