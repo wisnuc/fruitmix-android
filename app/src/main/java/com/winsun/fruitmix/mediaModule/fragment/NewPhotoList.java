@@ -1230,6 +1230,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     private class NewPhotoListScrollListener extends RecyclerView.OnScrollListener {
 
         @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+
+            //fix bug#313,update scroll offset when scroll
+            mJumperCallback.invalidate();
+        }
+
+        @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
 

@@ -1048,6 +1048,10 @@ public class GifTouchImageView extends AppCompatImageView {
         private PointF startTouch;
         private PointF endTouch;
 
+        //add intrinsicWidth,intrinsicHeight for fix bug: getDrawable().getIntrinsicWidth() may change when photo slider load original media and replace thumb
+        private float intrinsicWidth;
+        private float intrinsicHeight;
+
         DoubleTapZoom(float targetZoom, float focusX, float focusY, boolean stretchImageToSuper) {
             setState(State.ANIMATE_ZOOM);
             startTime = System.currentTimeMillis();
@@ -1058,10 +1062,13 @@ public class GifTouchImageView extends AppCompatImageView {
             this.bitmapX = bitmapPoint.x;
             this.bitmapY = bitmapPoint.y;
 
+            intrinsicWidth = getDrawable().getIntrinsicWidth();
+            intrinsicHeight = getDrawable().getIntrinsicHeight();
+
             //
             // Used for translating image during scaling
             //
-            startTouch = transformCoordBitmapToTouch(bitmapX, bitmapY);
+            startTouch = transformCoordBitmapToTouch(bitmapX, bitmapY, intrinsicWidth, intrinsicHeight);
             endTouch = new PointF(viewWidth / 2, viewHeight / 2);
         }
 
@@ -1111,7 +1118,7 @@ public class GifTouchImageView extends AppCompatImageView {
         private void translateImageToCenterTouchPosition(float t) {
             float targetX = startTouch.x + t * (endTouch.x - startTouch.x);
             float targetY = startTouch.y + t * (endTouch.y - startTouch.y);
-            PointF curr = transformCoordBitmapToTouch(bitmapX, bitmapY);
+            PointF curr = transformCoordBitmapToTouch(bitmapX, bitmapY, intrinsicWidth, intrinsicHeight);
             matrix.postTranslate(targetX - curr.x, targetY - curr.y);
         }
 
@@ -1175,12 +1182,10 @@ public class GifTouchImageView extends AppCompatImageView {
      * @param by y-coordinate in original bitmap coordinate system
      * @return Coordinates of the point in the view's coordinate system.
      */
-    private PointF transformCoordBitmapToTouch(float bx, float by) {
+    private PointF transformCoordBitmapToTouch(float bx, float by, float instrinsicWidth, float instrinsicHeight) {
         matrix.getValues(m);
-        float origW = getDrawable().getIntrinsicWidth();
-        float origH = getDrawable().getIntrinsicHeight();
-        float px = bx / origW;
-        float py = by / origH;
+        float px = bx / instrinsicWidth;
+        float py = by / instrinsicHeight;
         float finalX = m[Matrix.MTRANS_X] + getImageWidth() * px;
         float finalY = m[Matrix.MTRANS_Y] + getImageHeight() * py;
         return new PointF(finalX, finalY);

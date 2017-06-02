@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.PointF;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -40,6 +42,7 @@ import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
+import com.winsun.fruitmix.component.GifTouchImageView;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
 import com.winsun.fruitmix.dialog.DialogFactory;
 import com.winsun.fruitmix.dialog.PhotoOperationAlertDialogFactory;
@@ -60,6 +63,7 @@ import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
