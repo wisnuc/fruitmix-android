@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/cover_img"
-        android:background="@drawable/album_mask_in_mediashare"
+        android:background="@drawable/mask_layout"
         android:orientation="horizontal">
 
         <ImageView

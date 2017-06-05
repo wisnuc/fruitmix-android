@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#FFFFFF</color>
-    <color name="colorPrimaryDark">#1F000000</color>
+    <color name="colorPrimaryDark">#42000000</color>
     <color name="colorAccent">#FF4081</color>
 
     <!-- begin add by liang.wu-->

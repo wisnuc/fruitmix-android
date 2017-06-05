@@ -76,6 +76,10 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     public static final String TAG = "PhotoSliderActivity";
 
+    @BindView(R.id.mask_layout)
+    View mMaskLayout;
+    @BindView(R.id.ic_cloud_off)
+    ImageView mCloudOff;
     @BindView(R.id.title)
     TextView mTitleTextView;
     @BindView(R.id.toolbar)
@@ -285,17 +289,17 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         commentImg.setImageResource(R.drawable.comment);
         mReturnResize.setImageResource(R.drawable.return_resize);
 
-        Media media = mediaList.get(currentPhotoPosition);
-
-        LinearLayout cloudOff = (LinearLayout) mViewPager.findViewWithTag(media.getKey() + currentPhotoPosition);
-
-        if (cloudOff.getVisibility() == View.VISIBLE) {
-
-            boolean isLandScape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
-
-            myAdapter.setCloudOffPosition(cloudOff, media, isLandScape);
-
-        }
+//        Media media = mediaList.get(currentPhotoPosition);
+//
+//        LinearLayout cloudOff = (LinearLayout) mViewPager.findViewWithTag(media.getKey() + currentPhotoPosition);
+//
+//        if (cloudOff.getVisibility() == View.VISIBLE) {
+//
+//            boolean isLandScape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
+//
+//            myAdapter.setCloudOffPosition(cloudOff, media, isLandScape);
+//
+//        }
 
     }
 
@@ -599,6 +603,12 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 mTitleTextView.setText(title);
             }
 
+            if (LocalCache.DeviceID != null && media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
+                mCloudOff.setVisibility(View.INVISIBLE);
+            } else {
+                mCloudOff.setVisibility(View.VISIBLE);
+            }
+
         }
 
     }
@@ -759,23 +769,11 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             view = LayoutInflater.from(mContext).inflate(R.layout.photo_slider_cell, null);
 
-            LinearLayout mCloudOff = (LinearLayout) view.findViewById(R.id.ic_cloud_off);
-
             GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view.findViewById(R.id.mainPic);
 
             if (medias.size() > position && position > -1) {
 
                 Media media = medias.get(position);
-
-                mCloudOff.setTag(media.getKey() + position);
-
-                if (LocalCache.DeviceID != null && media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
-                    mCloudOff.setVisibility(View.INVISIBLE);
-                } else {
-                    mCloudOff.setVisibility(View.VISIBLE);
-
-                    setCloudOffPosition(mCloudOff, media, false);
-                }
 
                 Log.d(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
 
@@ -871,8 +869,12 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             @Override
             public boolean onScaleBegin(ScaleGestureDetector detector) {
 
-                if (!mIsFullScreen) {
-                    setCloudOffVisibility(View.INVISIBLE);
+                if (mToolbar.getVisibility() == View.VISIBLE) {
+                    mToolbar.setVisibility(View.INVISIBLE);
+                    mMaskLayout.setVisibility(View.INVISIBLE);
+                }
+                if (rlPanelFooter.getVisibility() == View.VISIBLE) {
+                    rlPanelFooter.setVisibility(View.INVISIBLE);
                 }
 
                 return super.onScaleBegin(detector);
@@ -890,7 +892,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                mView.setNeedFitImageToView(false);
+
                 convertEditState();
                 toggleFullScreenState(getWindow().getDecorView());
 
@@ -906,8 +908,12 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             @Override
             public boolean onDoubleTap(MotionEvent e) {
 
-                if (!mIsFullScreen) {
-                    setCloudOffVisibility(View.INVISIBLE);
+                if (mToolbar.getVisibility() == View.VISIBLE) {
+                    mToolbar.setVisibility(View.INVISIBLE);
+                    mMaskLayout.setVisibility(View.INVISIBLE);
+                }
+                if (rlPanelFooter.getVisibility() == View.VISIBLE) {
+                    rlPanelFooter.setVisibility(View.INVISIBLE);
                 }
 
                 return false;
@@ -1042,35 +1048,16 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private void convertEditState() {
 
-        LinearLayout cloudOff = findCurrentCloudOff();
-
         sInEdit = !sInEdit;
         if (sInEdit) {
             mToolbar.setVisibility(View.VISIBLE);
+            mMaskLayout.setVisibility(View.VISIBLE);
             rlPanelFooter.setVisibility(View.VISIBLE);
-
-            if (cloudOff.getVisibility() != View.VISIBLE)
-                cloudOff.setVisibility(View.VISIBLE);
-
         } else {
             mToolbar.setVisibility(View.INVISIBLE);
+            mMaskLayout.setVisibility(View.INVISIBLE);
             rlPanelFooter.setVisibility(View.INVISIBLE);
-
-            if (cloudOff.getVisibility() != View.INVISIBLE)
-                cloudOff.setVisibility(View.INVISIBLE);
         }
-    }
-
-    private LinearLayout findCurrentCloudOff() {
-        Media media = mediaList.get(currentPhotoPosition);
-
-        return (LinearLayout) mViewPager.findViewWithTag(media.getKey() + currentPhotoPosition);
-    }
-
-    private void setCloudOffVisibility(int visibility) {
-        LinearLayout cloudOff = findCurrentCloudOff();
-
-        cloudOff.setVisibility(visibility);
     }
 
     private void toggleFullScreenState(View view) {

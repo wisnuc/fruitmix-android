@@ -11,21 +11,4 @@
         android:src="@drawable/new_placeholder"
         android:visibility="visible" />
 
-    <LinearLayout
-        android:id="@+id/ic_cloud_off"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@drawable/album_mask_in_mediashare"
-        android:gravity="center_vertical"
-        android:orientation="vertical">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:layout_marginRight="16dp"
-            android:src="@drawable/ic_cloud_off_white_24dp" />
-
-    </LinearLayout>
-
 </FrameLayout>

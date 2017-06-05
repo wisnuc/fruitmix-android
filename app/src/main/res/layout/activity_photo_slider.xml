@@ -38,12 +38,21 @@
                 android:textColor="@color/eighty_seven_percent_white"
                 android:textSize="18dp" />
 
+            <ImageView
+                android:id="@+id/ic_cloud_off"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginRight="16dp"
+                android:src="@drawable/ic_cloud_off_white_24dp" />
+
         </android.support.v7.widget.Toolbar>
 
         <View
+            android:id="@+id/mask_layout"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@drawable/album_mask_in_mediashare" />
+            android:background="@drawable/mask_layout" />
 
         <RelativeLayout
             android:id="@+id/panelFooter"
@@ -87,7 +96,7 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_gravity="bottom"
-            android:background="@drawable/album_mask_in_mediashare"
+            android:background="@drawable/mask_layout"
             android:visibility="gone" />
 
     </FrameLayout>
