@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.PointF;
-import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -20,7 +18,6 @@ import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -42,8 +39,8 @@ import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
-import com.winsun.fruitmix.component.GifTouchImageView;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
+import com.winsun.fruitmix.component.PinchImageView;
 import com.winsun.fruitmix.dialog.DialogFactory;
 import com.winsun.fruitmix.dialog.PhotoOperationAlertDialogFactory;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
@@ -63,7 +60,6 @@ import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -129,22 +125,32 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
 
             if (willReturn) {
+
+                Media media = mediaList.get(currentPhotoPosition);
+
+                String imageTag = media.getImageThumbUrl(mContext);
+
+                PinchImageView view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
+
+                if (view == null) {
+                    imageTag = media.getImageOriginalUrl(mContext);
+
+                    view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
+                }
+
+                view.setDoMatrixOnDraw(false);
+
+                view.setScaleTypeByUser(ImageView.ScaleType.CENTER_CROP);
+
                 if (initialPhotoPosition != currentPhotoPosition) {
 
                     names.clear();
                     sharedElements.clear();
 
-                    Media media = mediaList.get(currentPhotoPosition);
-
                     String imageKey = media.getKey();
                     names.add(imageKey);
 
-                    String imageTag;
-
-                    boolean isThumb = media.isLoaded();
-                    imageTag = getImageUrl(isThumb, media);
-
-                    sharedElements.put(imageKey, mViewPager.findViewWithTag(imageTag));
+                    sharedElements.put(imageKey, view);
 
                     Log.d(TAG, "onMapSharedElements: media key:" + imageKey + " imageTag:" + imageTag);
                 }
@@ -711,18 +717,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
     }
 
-    private String getImageUrl(boolean isThumb, Media media) {
-        String currentUrl;
-
-        if (isThumb) {
-            currentUrl = media.getImageThumbUrl(mContext);
-        } else {
-            currentUrl = media.getImageOriginalUrl(mContext);
-        }
-
-        return currentUrl;
-    }
-
     private void startLoadingOriginalPhoto(View view, Media media) {
 
         String remoteUrl = media.getImageOriginalUrl(mContext);
@@ -746,8 +740,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         private List<Media> medias;
 
         public MyAdapter() {
-
-            //TODO: check mediaList is null logic
 
             if (mediaList != null) {
                 medias = new ArrayList<>(mediaList);
@@ -774,6 +766,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             if (medias.size() > position && position > -1) {
 
                 Media media = medias.get(position);
+
+//                setMainPicScreenWidthHeight(mainPic, media);
 
                 Log.d(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
 
@@ -814,8 +808,16 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 }
 
-                mainPic.setOnTouchListener(new CustomTouchListener());
-                mainPic.setOnDoubleTapListener(new CustomTapListener(mainPic));
+                mainPic.setUserTouchListener(new CustomTouchListener());
+                mainPic.setUserDoubleTapListener(new CustomTapListener(mainPic));
+
+                mainPic.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        convertEditState();
+                        toggleFullScreenState(getWindow().getDecorView());
+                    }
+                });
 
                 mainPic.setUserScaleGestureListener(new CustomScaleListener(mainPic));
 
@@ -882,21 +884,12 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         }
 
-        private class CustomTapListener implements GestureDetector.OnDoubleTapListener {
+        private class CustomTapListener implements PinchImageView.UserDoubleTapListener {
 
             private GifTouchNetworkImageView mView;
 
             CustomTapListener(GifTouchNetworkImageView view) {
                 mView = view;
-            }
-
-            @Override
-            public boolean onSingleTapConfirmed(MotionEvent e) {
-
-                convertEditState();
-                toggleFullScreenState(getWindow().getDecorView());
-
-                return true;
             }
 
             /**
@@ -919,17 +912,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 return false;
             }
 
-            /**
-             * Notified when an event within a double-tap gesture occurs, including
-             * the down, move, and up events.
-             *
-             * @param e The motion event that occurred during the double-tap gesture.
-             * @return true if the event is consumed, else false
-             */
-            @Override
-            public boolean onDoubleTapEvent(MotionEvent e) {
-                return false;
-            }
         }
 
         private class CustomTouchListener implements View.OnTouchListener {
@@ -943,6 +925,10 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             }
 
             private void handleTouchEvent(MotionEvent event, GifTouchNetworkImageView view) {
+
+                if (view.getPinchMode() == PinchImageView.PINCH_MODE_SCALE)
+                    return;
+
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     x = event.getRawX();
                     y = event.getRawY();
@@ -961,8 +947,10 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                     if (lastY - y > Util.dip2px(mContext, 30)) {
 
-                        if (!view.isZoomed())
+                        if (!view.isZoomed()) {
                             finishActivity();
+                        }
+
                     } else {
 
                         if (!view.isZoomed())
@@ -1009,18 +997,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             view.setLayoutParams(layoutParams);
         }
 
-        private boolean mediaWidthEqualsHeight(int mediaWidth, int mediaHeight) {
-            return mediaWidth == mediaHeight;
-        }
-
-        private boolean mediaHeightLargerThanWidth(Media media, int mediaWidth, int mediaHeight) {
-            return (mediaWidth < mediaHeight && media.getOrientationNumber() <= 4) || (mediaWidth > mediaHeight && media.getOrientationNumber() > 4);
-        }
-
-        private boolean mediaWidthLargerThanHeight(Media media, int mediaWidth, int mediaHeight) {
-            return (mediaWidth > mediaHeight && media.getOrientationNumber() <= 4) || (mediaWidth < mediaHeight && media.getOrientationNumber() > 4);
-        }
-
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
 
@@ -1045,6 +1021,47 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             return arg0 == arg1;
         }
     }
+
+    private void setMainPicScreenWidthHeight(View mainPic, Media media) {
+
+        int mediaWidth = Integer.parseInt(media.getWidth());
+        int mediaHeight = Integer.parseInt(media.getHeight());
+
+        Log.d(TAG, "setMainPicScreenWidthHeight: media width: " + mediaWidth + " media height: " + mediaHeight);
+
+        int actualWidth = 0;
+        int actualHeight = 0;
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) mainPic.getLayoutParams();
+
+        if (mediaWidthLargerThanHeight(media, mediaWidth, mediaHeight)) {
+            actualWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
+            actualHeight = mediaHeight * actualWidth / mediaWidth;
+        } else if (mediaHeightLargerThanWidth(media, mediaWidth, mediaHeight)) {
+            actualHeight = Util.calcScreenHeight(PhotoSliderActivity.this);
+            actualWidth = mediaWidth * actualHeight / mediaHeight;
+        } else if (mediaWidthEqualsHeight(mediaWidth, mediaHeight)) {
+
+            actualWidth = actualHeight = Util.calcScreenWidth(PhotoSliderActivity.this);
+        }
+
+        layoutParams.width = actualWidth;
+        layoutParams.height = actualHeight;
+
+        mainPic.setLayoutParams(layoutParams);
+    }
+
+    private boolean mediaWidthEqualsHeight(int mediaWidth, int mediaHeight) {
+        return mediaWidth == mediaHeight;
+    }
+
+    private boolean mediaHeightLargerThanWidth(Media media, int mediaWidth, int mediaHeight) {
+        return (mediaWidth < mediaHeight && media.getOrientationNumber() <= 4) || (mediaWidth > mediaHeight && media.getOrientationNumber() > 4);
+    }
+
+    private boolean mediaWidthLargerThanHeight(Media media, int mediaWidth, int mediaHeight) {
+        return (mediaWidth > mediaHeight && media.getOrientationNumber() <= 4) || (mediaWidth < mediaHeight && media.getOrientationNumber() > 4);
+    }
+
 
     private void convertEditState() {
 

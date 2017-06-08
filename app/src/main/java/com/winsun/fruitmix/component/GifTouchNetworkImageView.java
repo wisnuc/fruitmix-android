@@ -40,7 +40,7 @@ import pl.droidsonroids.gif.GifDrawable;
  * Handles fetching an image from a URL as well as the life-cycle of the
  * associated request.
  */
-public class GifTouchNetworkImageView extends GifTouchImageView {
+public class GifTouchNetworkImageView extends PinchImageView {
 
     public static final String TAG = GifTouchNetworkImageView.class.getSimpleName();
 
@@ -88,6 +88,11 @@ public class GifTouchNetworkImageView extends GifTouchImageView {
 
     public GifTouchNetworkImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+    }
+
+    @Override
+    protected float getMaxScale() {
+        return 3f;
     }
 
     /**

@@ -73,6 +73,12 @@ public class CheckIpHttpUtil implements IHttpUtil {
 
     private boolean checkIp(String url) {
 
+        if (url.length() < 7)
+            return false;
+
+        if (url.indexOf(":", 7) == -1)
+            return false;
+
         String ip = url.substring(7, url.indexOf(":", 7));
 
         Log.d(TAG, "checkIp: " + ip);

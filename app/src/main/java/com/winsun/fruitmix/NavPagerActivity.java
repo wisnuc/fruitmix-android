@@ -805,7 +805,7 @@ public class NavPagerActivity extends BaseActivity
     public void onActivityReenter(int resultCode, Intent data) {
         super.onActivityReenter(resultCode, data);
 
-        if (currentPage == PAGE_MEDIA && mediaMainFragment.isResumed())
+        if (currentPage == PAGE_MEDIA)
             mediaMainFragment.onActivityReenter(resultCode, data);
 
     }

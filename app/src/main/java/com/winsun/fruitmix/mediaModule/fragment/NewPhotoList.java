@@ -546,9 +546,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (initialPhotoPosition != currentPhotoPosition) {
 
-                names.clear();
-                sharedElements.clear();
-
                 Media media = null;
                 Media currentMedia = null;
 
@@ -566,6 +563,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 if (newSharedElement == null)
                     newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageSmallThumbUrl(containerActivity));
+
+                names.clear();
+                sharedElements.clear();
 
                 String sharedElementName = currentMedia.getKey();
 

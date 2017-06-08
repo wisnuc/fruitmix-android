@@ -27,6 +27,7 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.widget.AppCompatImageView;
+import android.transition.ChangeBounds;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -239,8 +240,12 @@ public class GifTouchImageView extends AppCompatImageView {
         if (mScaleType == ScaleType.FIT_XY) {
             throw new UnsupportedOperationException("getZoomedRect() not supported with FIT_XY");
         }
-        PointF topLeft = transformCoordTouchToBitmap(0, 0, true);
-        PointF bottomRight = transformCoordTouchToBitmap(viewWidth, viewHeight, true);
+
+        float origW = getDrawable().getIntrinsicWidth();
+        float origH = getDrawable().getIntrinsicHeight();
+
+        PointF topLeft = transformCoordTouchToBitmap(0, 0, true, origW, origH);
+        PointF bottomRight = transformCoordTouchToBitmap(viewWidth, viewHeight, true, origW, origH);
 
         float w = getDrawable().getIntrinsicWidth();
         float h = getDrawable().getIntrinsicHeight();
@@ -421,7 +426,7 @@ public class GifTouchImageView extends AppCompatImageView {
             setScaleType(scaleType);
         }
         resetZoom();
-        scaleImage(scale, viewWidth / 2, viewHeight / 2, true);
+        scaleImage(scale, viewWidth / 2, viewHeight / 2, true, true);
         matrix.getValues(m);
         m[Matrix.MTRANS_X] = -((focusX * getImageWidth()) - (viewWidth * 0.5f));
         m[Matrix.MTRANS_Y] = -((focusY * getImageHeight()) - (viewHeight * 0.5f));
@@ -457,7 +462,7 @@ public class GifTouchImageView extends AppCompatImageView {
         int drawableWidth = drawable.getIntrinsicWidth();
         int drawableHeight = drawable.getIntrinsicHeight();
 
-        PointF point = transformCoordTouchToBitmap(viewWidth / 2, viewHeight / 2, true);
+        PointF point = transformCoordTouchToBitmap(viewWidth / 2, viewHeight / 2, true, drawableWidth, drawableHeight);
         point.x /= drawableWidth;
         point.y /= drawableHeight;
         return point;
@@ -840,7 +845,10 @@ public class GifTouchImageView extends AppCompatImageView {
             }
 
             if (state == State.NONE) {
-                float targetZoom = (normalizedScale == minScale) ? maxScale : minScale;
+//                float targetZoom = (normalizedScale == minScale) ? maxScale : minScale;
+
+                float targetZoom = (normalizedScale == minScale) ? 2 : minScale;
+
                 DoubleTapZoom doubleTap = new DoubleTapZoom(targetZoom, e.getX(), e.getY(), false);
 
                 compatPostOnAnimation(doubleTap);
@@ -962,7 +970,7 @@ public class GifTouchImageView extends AppCompatImageView {
 
             Log.d(TAG, "onScale: ");
 
-            scaleImage(detector.getScaleFactor(), detector.getFocusX(), detector.getFocusY(), true);
+            scaleImage(detector.getScaleFactor(), detector.getFocusX(), detector.getFocusY(), true, true);
 
             //
             // OnTouchImageViewListener is set: TouchImageView pinch zoomed by user.
@@ -1005,7 +1013,7 @@ public class GifTouchImageView extends AppCompatImageView {
         }
     }
 
-    private void scaleImage(double deltaScale, float focusX, float focusY, boolean stretchImageToSuper) {
+    private void scaleImage(double deltaScale, float focusX, float focusY, boolean stretchImageToSuper, boolean needFixScaleTrans) {
 
         float lowerScale, upperScale;
         if (stretchImageToSuper) {
@@ -1028,7 +1036,9 @@ public class GifTouchImageView extends AppCompatImageView {
         }
 
         matrix.postScale((float) deltaScale, (float) deltaScale, focusX, focusY);
-        fixScaleTrans();
+
+        if (needFixScaleTrans)
+            fixScaleTrans();
     }
 
     /**
@@ -1058,12 +1068,21 @@ public class GifTouchImageView extends AppCompatImageView {
             this.startZoom = normalizedScale;
             this.targetZoom = targetZoom;
             this.stretchImageToSuper = stretchImageToSuper;
-            PointF bitmapPoint = transformCoordTouchToBitmap(focusX, focusY, false);
-            this.bitmapX = bitmapPoint.x;
-            this.bitmapY = bitmapPoint.y;
 
             intrinsicWidth = getDrawable().getIntrinsicWidth();
             intrinsicHeight = getDrawable().getIntrinsicHeight();
+
+            Log.d(TAG, "DoubleTapZoom: getIntrinsicWidth: " + intrinsicWidth);
+            Log.d(TAG, "DoubleTapZoom: getIntrinsicHeight: " + intrinsicHeight);
+
+            Log.d(TAG, "DoubleTapZoom: getImageWidth: " + matchViewWidth);
+            Log.d(TAG, "DoubleTapZoom: getImageHeight: " + matchViewHeight);
+
+            //fix bug:uss matchViewWidth and matchViewHeight to avoid behaviour is strange cause of instrinsicWidth change when replace thumb by original photo
+
+            PointF bitmapPoint = transformCoordTouchToBitmap(focusX, focusY, false, matchViewWidth, matchViewHeight);
+            this.bitmapX = bitmapPoint.x;
+            this.bitmapY = bitmapPoint.y;
 
             //
             // Used for translating image during scaling
@@ -1077,9 +1096,12 @@ public class GifTouchImageView extends AppCompatImageView {
 
             float t = interpolate();
             double deltaScale = calculateDeltaScale(t);
-            scaleImage(deltaScale, bitmapX, bitmapY, stretchImageToSuper);
-            translateImageToCenterTouchPosition(t);
-            fixScaleTrans();
+
+            scaleImage(deltaScale, bitmapX, bitmapY, stretchImageToSuper, false);
+
+//            translateImageToCenterTouchPosition(t);
+
+//            fixScaleTrans();
             setImageMatrix(matrix);
 
 //            Log.d(TAG, "run: t: " + t + " deltaScale: " + deltaScale + " matrix: " + matrix);
@@ -1099,10 +1121,14 @@ public class GifTouchImageView extends AppCompatImageView {
                 compatPostOnAnimation(this);
 
             } else {
+
                 //
                 // Finished zooming
                 //
                 setState(State.NONE);
+
+                fixScaleTrans();
+                setImageMatrix(matrix);
 
             }
 
@@ -1157,10 +1183,12 @@ public class GifTouchImageView extends AppCompatImageView {
      *                     to the bounds of the bitmap size.
      * @return Coordinates of the point touched, in the coordinate system of the original drawable.
      */
-    private PointF transformCoordTouchToBitmap(float x, float y, boolean clipToBitmap) {
+    private PointF transformCoordTouchToBitmap(float x, float y, boolean clipToBitmap, float origW, float origH) {
         matrix.getValues(m);
-        float origW = getDrawable().getIntrinsicWidth();
-        float origH = getDrawable().getIntrinsicHeight();
+
+        Log.d(TAG, "transformCoordTouchToBitmap: oriW: " + origW);
+        Log.d(TAG, "transformCoordTouchToBitmap: oriH: " + origH);
+
         float transX = m[Matrix.MTRANS_X];
         float transY = m[Matrix.MTRANS_Y];
         float finalX = ((x - transX) * origW) / getImageWidth();
