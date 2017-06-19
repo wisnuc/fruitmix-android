@@ -92,8 +92,6 @@ public class RetrieveRemoteMediaService extends IntentService {
 
         sendEvent();
 
-        FNAS.retrieveRemoteMediaShare(this, true);
-
         try {
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: before load" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));

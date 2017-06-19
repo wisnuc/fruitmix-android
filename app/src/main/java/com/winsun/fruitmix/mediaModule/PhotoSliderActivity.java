@@ -53,7 +53,6 @@ import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -434,10 +433,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             @Override
             public void execute() {
 
-                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, false);
-
-                FNAS.createRemoteMediaShare(mContext, Util.createMediaShare(false, true, false, "", "", Collections.singletonList(media.getUuid())));
-
             }
 
             @Override
@@ -453,7 +448,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 if (originalPhotoPath.length() != 0) {
 
-                    Util.sendShare(mContext, Collections.singletonList(originalPhotoPath));
+                    Util.sendShareToOtherApp(mContext, Collections.singletonList(originalPhotoPath));
 
                 } else {
                     mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, true);
@@ -480,13 +475,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         Log.i(TAG, "handleOperationEvent: action:" + action);
 
         switch (action) {
-            case Util.REMOTE_MEDIA_SHARE_CREATED:
 
-                dismissDialog();
-
-                Toast.makeText(mContext, operationEvent.getOperationResult().getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-
-                break;
             case Util.SHARED_PHOTO_THUMB_RETRIEVED:
 
                 if (mDialog == null || !mDialog.isShowing()) {
@@ -500,7 +489,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 if (originalPhotoPath.isEmpty()) {
                     Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
                 } else {
-                    Util.sendShare(mContext, Collections.singletonList(originalPhotoPath));
+                    Util.sendShareToOtherApp(mContext, Collections.singletonList(originalPhotoPath));
                 }
 
                 break;

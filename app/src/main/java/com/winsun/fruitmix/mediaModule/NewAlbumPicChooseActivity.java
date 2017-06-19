@@ -89,24 +89,6 @@ public class NewAlbumPicChooseActivity extends BaseActivity implements IPhotoLis
         mEnterSelectMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                List<String> selectImageKeys = getSelectedImageUUIDs();
-
-                Intent intent = getIntent();
-
-                if (intent.getBooleanExtra(Util.EDIT_PHOTO, false)) {
-
-                    LocalCache.mediaUUIDsInCreateAlbum.addAll(selectImageKeys);
-                    mNewPhotoList.clearSelectedPhoto();
-
-                    setResult(RESULT_OK, intent);
-                    finish();
-
-                } else {
-                    mNewPhotoList.createAlbum(selectImageKeys);
-                }
-
-
             }
         });
 
@@ -139,15 +121,6 @@ public class NewAlbumPicChooseActivity extends BaseActivity implements IPhotoLis
         mNewPhotoList.removePhotoListListener(this);
 
     }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == Util.KEY_CREATE_ALBUM_REQUEST_CODE) {
-            setResult(resultCode);
-            finish();
-        }
-    }
-
 
     public List<String> getSelectedImageUUIDs() {
         return mNewPhotoList.getSelectedImageUUIDs();

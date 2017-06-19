@@ -45,6 +45,8 @@
     <color name="eighty_seven_percent_white">#DEFFFFFF</color>
     <color name="fifty_four_percent_white">#8AFFFFFF</color>
 
+    <color name="divide_bg">#1F000000</color>
+    
     <!-- finish add by liang.wu-->
 
 </resources>

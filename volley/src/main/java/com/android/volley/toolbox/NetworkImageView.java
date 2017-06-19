@@ -17,6 +17,7 @@ package com.android.volley.toolbox;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -279,8 +280,6 @@ public class NetworkImageView extends ImageView {
 
                             setImageBitmap(bitmap);
                             setBackgroundResource(0);
-
-                            Log.d(TAG, "onResponse: url:" + mUrl);
 
                             setLoaded(true);
 

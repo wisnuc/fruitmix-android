@@ -1,16 +1,19 @@
 package com.winsun.fruitmix.model;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
 import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.util.Util;
 
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
+
 
 /**
  * Created by Administrator on 2017/5/16.
@@ -18,11 +21,14 @@ import rx.schedulers.Schedulers;
 
 public class EquipmentSearchManager {
 
+    public static final String TAG = EquipmentSearchManager.class.getSimpleName();
+
     private RxDnssd mRxDnssd;
     private Subscription mSubscription;
 
     private static final String SERVICE_PORT = "_http._tcp";
     private static final String DEMAIN = "local.";
+
 
     public EquipmentSearchManager(Context context) {
 
@@ -52,7 +58,6 @@ public class EquipmentSearchManager {
                     }
                 });
 
-
     }
 
     public void stopDiscovery() {
@@ -60,7 +65,6 @@ public class EquipmentSearchManager {
             mSubscription.unsubscribe();
         }
     }
-
 
     public interface IEquipmentDiscoveryListener {
 

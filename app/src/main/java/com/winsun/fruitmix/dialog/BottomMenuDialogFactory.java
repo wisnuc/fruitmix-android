@@ -2,9 +2,11 @@ package com.winsun.fruitmix.dialog;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.BottomSheetDialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -39,7 +41,7 @@ public class BottomMenuDialogFactory implements DialogFactory {
 
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
 
-        View bottomSheetView = createBottomSheetView(context,bottomMenuItems);
+        View bottomSheetView = createBottomSheetView(context, bottomMenuItems);
 
         bottomSheetDialog.setContentView(bottomSheetView);
 
@@ -88,7 +90,7 @@ public class BottomMenuDialogFactory implements DialogFactory {
 
         @Override
         public void onBindViewHolder(BottomSheetRecyclerViewViewHolder holder, int position) {
-            holder.refreshView(bottomMenuItems.get(position));
+            holder.refreshView(bottomMenuItems.get(position), context);
         }
 
         @Override
@@ -116,8 +118,14 @@ public class BottomMenuDialogFactory implements DialogFactory {
             ButterKnife.bind(this, itemView);
         }
 
-        public void refreshView(final BottomMenuItem bottomMenuItem) {
+        public void refreshView(final BottomMenuItem bottomMenuItem, Context context) {
             itemTextView.setText(bottomMenuItem.getText());
+
+            if (bottomMenuItem.isDisable()) {
+                itemTextView.setTextColor(ContextCompat.getColor(context, R.color.fifty_four_percent_black));
+            } else {
+                itemTextView.setTextColor(ContextCompat.getColor(context, R.color.eighty_seven_percent_black));
+            }
 
             itemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override

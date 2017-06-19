@@ -14,7 +14,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -41,7 +43,8 @@ public class MainActivity extends Activity {
         MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL);
 
         Util.setRemoteMediaLoaded(false);
-        Util.setRemoteMediaShareLoaded(false);
+
+        FileDownloadManager.INSTANCE.initDBUtils(DBUtils.getInstance(getApplicationContext()));
 
         ButlerService.startButlerService(getApplicationContext());
 

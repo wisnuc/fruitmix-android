@@ -460,8 +460,6 @@ public class NavPagerActivity extends BaseActivity
                     mediaMainFragment.hide();
                     fileMainFragment.show();
 
-                    ButlerService.stopTimingRetrieveMediaShare();
-
                     mNavigationItemAdapter.notifyItemRangeChanged(0, 2);
                 }
 
@@ -943,8 +941,6 @@ public class NavPagerActivity extends BaseActivity
 
             mediaMainFragment.hide();
             fileMainFragment.show();
-
-            ButlerService.stopTimingRetrieveMediaShare();
 
         } else {
 

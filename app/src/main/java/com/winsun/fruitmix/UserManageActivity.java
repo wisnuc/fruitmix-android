@@ -2,6 +2,8 @@ package com.winsun.fruitmix;
 
 import android.content.Context;
 import android.content.Intent;
+import android.databinding.DataBindingComponent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.app.Activity;
 import android.support.design.widget.FloatingActionButton;

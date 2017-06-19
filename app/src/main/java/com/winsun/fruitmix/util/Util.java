@@ -24,11 +24,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.github.druk.rxdnssd.BonjourService;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.anim.EnterPatternPathMotion;
 import com.winsun.fruitmix.anim.GravityArcMotion;
-import com.winsun.fruitmix.anim.ReturnPatternPathMotion;
-import com.winsun.fruitmix.mediaModule.model.MediaShare;
-import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 
@@ -61,43 +57,20 @@ public class Util {
     public static final String JWT = "jwt";
     public static final String GATEWAY = "gateway";
     public static final String USER_UUID = "user_uuid";
-    public static final String MEDIASHARE_UUID = "mediashare_uuid";
-    public static final String EDIT_PHOTO = "edit_photo";
-    public static final String UPDATED_ALBUM_TITLE = "updated_album_title";
-    public static final String IMAGE_KEY = "image_key";
 
     public static final String CURRENT_UPLOAD_DEVICE_ID = "current_upload_device_id";
     public static final String AUTO_UPLOAD_OR_NOT = "auto_upload_or_not";
 
     public static final String REMOTE_USER_CREATED = "remote_user_created";
 
-    public static final String LOCAL_MEDIA_SHARE_CREATED = "local_share_created";
-    public static final String LOCAL_MEDIA_SHARE_MODIFIED = "local_share_modified";
-    public static final String LOCAL_MEDIA_SHARE_DELETED = "local_share_deleted";
-
-    public static final String REMOTE_MEDIA_SHARE_CREATED = "remote_share_created";
-    public static final String REMOTE_MEDIA_SHARE_MODIFIED = "remote_share_modified";
-    public static final String REMOTE_MEDIA_SHARE_DELETED = "remote_share_deleted";
-
     public static final String DOWNLOADED_FILE_DELETED = "downloaded_file_deleted";
 
     public static final String SHARED_PHOTO_THUMB_RETRIEVED = "shared_photo_thumb_retrieved";
-
-    public static final String LOCAL_COMMENT_CREATED = "local_comment_created";
-    public static final String REMOTE_COMMENT_CREATED = "remote_comment_created";
-    public static final String LOCAL_COMMENT_DELETED = "local_comment_deleted";
 
     public static final String NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED = "new_local_media_in_camera_retrieved";
 
     public static final String CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED = "calc_new_local_media_digest_finished";
 
-    public static final String PHOTO_IN_REMOTE_MEDIASHARE_MODIFIED = "photo_in_remote_media_share_modified";
-    public static final String PHOTO_IN_LOCAL_MEDIASHARE_MODIFIED = "photo_in_local_media_share_modified";
-
-    public static final String LOCAL_MEDIA_COMMENT_RETRIEVED = "local_media_comment_retrieved";
-    public static final String REMOTE_MEDIA_COMMENT_RETRIEVED = "remote_media_comment_retrieved";
-    public static final String REMOTE_MEDIA_SHARE_RETRIEVED = "remote_media_share_retrieved";
-    public static final String LOCAL_MEDIA_SHARE_RETRIEVED = "local_media_share_retrieved";
     public static final String LOCAL_MEDIA_RETRIEVED = "local_media_retrieved";
     public static final String REMOTE_MEDIA_RETRIEVED = "remote_media_retrieved";
     public static final String REMOTE_USER_RETRIEVED = "remote_user_retrieved";
@@ -110,13 +83,10 @@ public class Util {
 
     public static final String DOWNLOADED_FILE_RETRIEVED = "downloaded_file_retrieved";
 
-    public static final String LOCAL_PHOTO_UPLOAD_STATE_CHANGED = "local_photo_upload_state_changed";
-
     public static final String RECOMMEND_ALBUM_CREATED = "recommend_album_created";
 
     public static final String TOKEN_INVALID = "token_invalid";
 
-    public static final String NEED_SHOW_MENU = "need_show_menu";
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
     public static final String KEY_AUTHORIZATION = "Authorization";
     public static final String KEY_JWT_HEAD = "JWT ";
@@ -125,18 +95,13 @@ public class Util {
     public static final String ADD = "add";
     public static final String DELETE = "delete";
 
-    public static final int KEY_MODIFY_ALBUM_REQUEST_CODE = 100;
-    public static final int KEY_EDIT_PHOTO_REQUEST_CODE = 101;
     public static final int KEY_CHOOSE_PHOTO_REQUEST_CODE = 102;
     public static final int KEY_LOGIN_REQUEST_CODE = 103;
-    public static final int KEY_CREATE_ALBUM_REQUEST_CODE = 104;
-    public static final int KEY_ALBUM_CONTENT_REQUEST_CODE = 105;
-    public static final int KEY_CREATE_SHARE_REQUEST_CODE = 106;
+
     public static final int KEY_MANUAL_INPUT_IP_REQUEST_CODE = 107;
     public static final int KEY_CREATE_USER_REQUEST_CODE = 108;
 
     public static final String HTTP = "http://";
-    public static final String MEDIASHARE_PARAMETER = "/mediashare";
     public static final String MEDIA_PARAMETER = "/media";
     public static final String ADMIN_USER_PARAMETER = "/admin/users";
     public static final String ACCOUNT_PARAMETER = "/account";
@@ -165,19 +130,12 @@ public class Util {
     public static final String CURRENT_MEDIA_KEY = "current_media_key";
     public static final String CURRENT_MEDIASHARE_TIME = "current_mediashare_time";
 
-    public static final String ALBUM_SWITCH_SHARE_STATE_UMENG_EVENT_ID = "album_switch_share_state";
-    public static final String ALBUM_SWITCH_UN_SHARE_STATE_UMENG_EVENT_ID = "album_switch_un_share_state";
-    public static final String CRETAE_ALUBM_UMENG_EVENT_ID = "create_album";
-    public static final String CREATE_MEDIA_SHARE_UMENG_EVENT_ID = "create_media_share";
-    public static final String DELETE_ALBUM_UMENG_EVENT_ID = "delete_album";
     public static final String SWITCH_ALBUM_MODULE_UMENG_EVENT_ID = "switch_album_module";
     public static final String SWITCH_MEDIA_SHARE_MODULE_UMENG_EVENT_ID = "switch_media_share_module";
     public static final String SWITCH_MEDIA_MODULE_UMENG_EVENT_ID = "switch_media_module";
     public static final String SWITCH_ORIGINAL_MEDIA_UMENG_EVENT_ID = "switch_original_media";
 
     public static final String DEFAULT_DATE = "1916-01-01";
-
-    public static final String KEY_MEDIA_SHARE_UUID = "key_media_share_uuid";
 
     public static final String KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST = "key_already_selected_image_uuid_arraylist";
 
@@ -195,8 +153,6 @@ public class Util {
 
     public static final String NEED_SHOW_AUTO_UPLOAD_DIALOG = "need_show_auto_upload_dialog";
 
-    public static boolean startTimingRetrieveMediaShare = false;
-
     public static final long DEFAULT_REFRESH_MEDIA_SHARE_DELAY_TIME = 20 * 1000;
 
     public static long refreshMediaShareDelayTime = DEFAULT_REFRESH_MEDIA_SHARE_DELAY_TIME;
@@ -212,8 +168,6 @@ public class Util {
     private static boolean localMediaInDBLoaded = false;
 
     private static boolean remoteMediaLoaded = false;
-
-    private static boolean remoteMediaShareLoaded = false;
 
     public static boolean isRemoteMediaLoaded() {
         return remoteMediaLoaded;
@@ -237,14 +191,6 @@ public class Util {
 
     public static void setLocalMediaInDBLoaded(boolean localMediaInDBLoaded) {
         Util.localMediaInDBLoaded = localMediaInDBLoaded;
-    }
-
-    public static boolean isRemoteMediaShareLoaded() {
-        return remoteMediaShareLoaded;
-    }
-
-    public static void setRemoteMediaShareLoaded(boolean remoteMediaShareLoaded) {
-        Util.remoteMediaShareLoaded = remoteMediaShareLoaded;
     }
 
     /**
@@ -551,69 +497,7 @@ public class Util {
 
     }
 
-    public static MediaShare createMediaShare(boolean isAlbum, boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaUUIDs, boolean isRecommend,
-                                              String recommendPhotoTime) {
-
-        MediaShare mediaShare = createMediaShare(isAlbum, isPublic, otherMaintainer, title, desc, mediaUUIDs);
-
-        mediaShare.setRecommend(isRecommend);
-        mediaShare.setRecommendPhotoTime(recommendPhotoTime);
-
-        return mediaShare;
-    }
-
-    public static MediaShare createMediaShare(boolean isAlbum, boolean isPublic, boolean otherMaintainer, String title, String desc, List<String> mediaUUIDs) {
-
-        MediaShare mediaShare = new MediaShare();
-        mediaShare.setUuid(Util.createLocalUUid());
-
-        Log.i(TAG, "create album digest:" + mediaUUIDs);
-
-        List<MediaShareContent> mediaShareContents = new ArrayList<>();
-
-        for (String mediaKey : mediaUUIDs) {
-            MediaShareContent mediaShareContent = new MediaShareContent();
-            mediaShareContent.setMediaUUID(mediaKey);
-            mediaShareContent.setAuthor(FNAS.userUUID);
-            mediaShareContent.setTime(String.valueOf(System.currentTimeMillis()));
-            mediaShareContents.add(mediaShareContent);
-
-        }
-
-        mediaShare.initMediaShareContents(mediaShareContents);
-
-        mediaShare.setCoverImageUUID(mediaUUIDs.get(0));
-
-        mediaShare.setTitle(title);
-        mediaShare.setDesc(desc);
-
-        if (isPublic) {
-            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-                mediaShare.addViewer(userUUID);
-            }
-        } else mediaShare.clearViewers();
-
-        if (otherMaintainer) {
-            for (String userUUID : LocalCache.RemoteUserMapKeyIsUUID.keySet()) {
-                mediaShare.addMaintainer(userUUID);
-            }
-        } else {
-            mediaShare.clearMaintainers();
-            mediaShare.addMaintainer(FNAS.userUUID);
-        }
-
-        mediaShare.setCreatorUUID(FNAS.userUUID);
-        mediaShare.setTime(String.valueOf(System.currentTimeMillis()));
-        mediaShare.setAlbum(isAlbum);
-        mediaShare.setLocal(true);
-        mediaShare.setArchived(false);
-        mediaShare.setDate(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(mediaShare.getTime()))));
-
-        return mediaShare;
-
-    }
-
-    public static void sendShare(Context context, List<String> selectMediaOriginalPhotoPaths) {
+    public static void sendShareToOtherApp(Context context, List<String> selectMediaOriginalPhotoPaths) {
         ArrayList<Uri> uris = new ArrayList<>();
 
         for (String originalPhotoPath : selectMediaOriginalPhotoPaths) {
@@ -693,6 +577,9 @@ public class Util {
         return bonjourService.getInet4Address() != null;
 
     }
+
+
+
 
     public static boolean checkAutoUpload(Context context) {
         for (LoggedInUser loggedInUser : LocalCache.LocalLoggedInUsers) {

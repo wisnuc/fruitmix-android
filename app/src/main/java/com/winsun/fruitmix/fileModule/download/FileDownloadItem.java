@@ -1,10 +1,16 @@
 package com.winsun.fruitmix.fileModule.download;
 
+import android.util.Log;
+
+import java.util.concurrent.Future;
+
 /**
  * Created by Administrator on 2016/11/7.
  */
 
 public class FileDownloadItem {
+
+    public static final String TAG = FileDownloadItem.class.getSimpleName();
 
     private String fileName;
     private String fileUUID;
@@ -15,6 +21,8 @@ public class FileDownloadItem {
     private FileDownloadState fileDownloadState;
 
     private String parentFolderUUID;
+
+    private Future<Boolean> future;
 
     public FileDownloadItem(String fileName, long fileSize, String fileUUID) {
         this.fileName = fileName;
@@ -87,5 +95,24 @@ public class FileDownloadItem {
 
     public String getParentFolderUUID() {
         return parentFolderUUID;
+    }
+
+    public void setFuture(Future<Boolean> future) {
+        this.future = future;
+    }
+
+    public void cancelDownloadItem() {
+        if (future != null)
+            future.cancel(true);
+    }
+
+    public int getCurrentProgress(int max) {
+        Log.d(TAG, "refreshView: currentDownloadSize:" + getFileCurrentDownloadSize() + " fileSize:" + getFileSize());
+
+        float currentProgress = getFileCurrentDownloadSize() * max / getFileSize();
+
+        Log.d(TAG, "refreshView: currentProgress:" + currentProgress);
+
+        return (int) currentProgress;
     }
 }

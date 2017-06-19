@@ -20,7 +20,11 @@ public enum ExecutorServiceInstance {
 
     private ExecutorService generateThumbThreadPool;
 
+    private ExecutorService downloadFileThreadPool;
+
     private static final int THREAD_SIZE = 5;
+
+    private static final int DONWLOAD_THREAD_SIZE = 3;
 
     ExecutorServiceInstance() {
         cacheThreadPool = Executors.newCachedThreadPool();
@@ -42,7 +46,7 @@ public enum ExecutorServiceInstance {
         return updateMediaThreadPool.submit(callable);
     }
 
-    public void doOnTaskInUploadMediaThreadPool(Runnable runnable) {
+    public void doOneTaskInUploadMediaThreadPool(Runnable runnable) {
 
         if (updateMediaThreadPool == null || updateMediaThreadPool.isShutdown())
             startUploadMediaThreadPool();
@@ -54,19 +58,19 @@ public enum ExecutorServiceInstance {
         updateMediaThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
     }
 
-    public void doOnTaskInGenerateMiniThumbThreadPool(Runnable runnable) {
+    public void doOneTaskInGenerateMiniThumbThreadPool(Callable<Boolean> callable) {
 
         if (generateMiniThumbThreadPool == null || generateMiniThumbThreadPool.isShutdown())
             startGenerateMiniThumbThreadPool();
 
-        generateMiniThumbThreadPool.execute(runnable);
+        generateMiniThumbThreadPool.submit(callable);
     }
 
     private void startGenerateMiniThumbThreadPool() {
         generateMiniThumbThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
     }
 
-    public void doOnTaskInGenerateThumbThreadPool(Runnable runnable) {
+    public void doOneTaskInGenerateThumbThreadPool(Runnable runnable) {
 
         if (generateThumbThreadPool == null || generateThumbThreadPool.isShutdown())
             startGenerateThumbThreadPool();
@@ -78,6 +82,25 @@ public enum ExecutorServiceInstance {
         generateThumbThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
     }
 
+    public Future<Boolean> doOneTaskInDownloadFileThreadPool(Callable<Boolean> callable) {
+
+        if (downloadFileThreadPool == null || downloadFileThreadPool.isShutdown())
+            startDownloadFileThreadPool();
+
+        return downloadFileThreadPool.submit(callable);
+
+    }
+
+    private void startDownloadFileThreadPool() {
+        downloadFileThreadPool = Executors.newFixedThreadPool(DONWLOAD_THREAD_SIZE);
+    }
+
+    public void shutdownDownloadFileThreadPoolNow(){
+        if(downloadFileThreadPool != null && !downloadFileThreadPool.isShutdown()){
+            downloadFileThreadPool.shutdownNow();
+            downloadFileThreadPool = null;
+        }
+    }
 
     public void shutdownUploadMediaThreadPool() {
         if (updateMediaThreadPool != null && !updateMediaThreadPool.isShutdown()) {
@@ -106,5 +129,6 @@ public enum ExecutorServiceInstance {
             generateThumbThreadPool = null;
         }
     }
+
 
 }

@@ -14,15 +14,10 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
 import com.winsun.fruitmix.eventbus.DownloadFileEvent;
-import com.winsun.fruitmix.eventbus.EditPhotoInMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.LoggedInUserRequestEvent;
-import com.winsun.fruitmix.eventbus.MediaCommentRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaRequestEvent;
-import com.winsun.fruitmix.eventbus.MediaShareRequestEvent;
-import com.winsun.fruitmix.eventbus.ModifyMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
-import com.winsun.fruitmix.eventbus.RetrieveMediaShareRequestEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.eventbus.UserRequestEvent;
@@ -33,10 +28,7 @@ import com.winsun.fruitmix.executor.GenerateLocalMediaMiniThumbTask;
 import com.winsun.fruitmix.executor.GenerateLocalMediaThumbTask;
 import com.winsun.fruitmix.executor.RetrieveOriginalPhotoTask;
 import com.winsun.fruitmix.executor.UploadMediaTask;
-import com.winsun.fruitmix.http.OkHttpUtil;
-import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.OperationResultType;
@@ -54,6 +46,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Future;
 
 public class ButlerService extends Service {
 
@@ -72,7 +65,6 @@ public class ButlerService extends Service {
 
     private boolean mStopGenerateThumb = false;
 
-    private boolean mCreateRecommendAlbum = false;
 
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
@@ -83,25 +75,11 @@ public class ButlerService extends Service {
         context.stopService(new Intent(context, ButlerService.class));
     }
 
-    public static void stopTimingRetrieveMediaShare() {
-        if (Util.startTimingRetrieveMediaShare)
-            Util.startTimingRetrieveMediaShare = false;
-    }
-
-    public static void startTimingRetrieveMediaShare() {
-        if (!Util.startTimingRetrieveMediaShare)
-            Util.startTimingRetrieveMediaShare = true;
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
 
         EventBus.getDefault().register(this);
-
-        task = new TimingRetrieveMediaShareTask(this, getMainLooper());
-
-        task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_MEDIA_SHARE, 20 * 1000);
     }
 
 
@@ -119,12 +97,6 @@ public class ButlerService extends Service {
     @Override
     public void onDestroy() {
         EventBus.getDefault().unregister(this);
-
-        task.removeMessages(RETRIEVE_REMOTE_MEDIA_SHARE);
-
-        stopTimingRetrieveMediaShare();
-
-        OkHttpUtil.cancelAllNotFinishCall();
 
         task = null;
 
@@ -156,24 +128,11 @@ public class ButlerService extends Service {
 
                     ButlerService butlerService = weakReference.get();
 
-                    if (Util.startTimingRetrieveMediaShare)
-                        FNAS.retrieveRemoteMediaShare(butlerService, false);
-
                     task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_MEDIA_SHARE, Util.refreshMediaShareDelayTime);
 
                     break;
             }
         }
-    }
-
-
-    @Subscribe(threadMode = ThreadMode.POSTING)
-    public void handleEvent(DownloadFileEvent downloadFileEvent) {
-
-        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-        DownloadFileTask downloadFileTask = new DownloadFileTask(downloadFileEvent.getFileDownloadState(), DBUtils.getInstance(this));
-        instance.doOneTaskInUploadMediaThreadPool(downloadFileTask);
-
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -188,11 +147,6 @@ public class ButlerService extends Service {
 
         switch (action) {
             case Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED:
-
-                if (!mCreateRecommendAlbum) {
-                    CreateRecommendAlbumService.startActionCreateRecommendAlbum(this);
-                    mCreateRecommendAlbum = true;
-                }
 
                 startGenerateLocalPhotoThumbnail();
 
@@ -224,7 +178,7 @@ public class ButlerService extends Service {
 
                 EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
 
-                if (Util.loginType != LoginType.LOGIN)
+                if (operationResultType == OperationResultType.SUCCEED)
                     FNAS.retrieveRemoteMedia(this);
 
                 break;
@@ -298,7 +252,7 @@ public class ButlerService extends Service {
             if (media.getThumb().isEmpty()) {
 
                 GenerateLocalMediaThumbTask task = new GenerateLocalMediaThumbTask(media, dbUtils, mStopGenerateThumb);
-                instance.doOnTaskInGenerateThumbThreadPool(task);
+                instance.doOneTaskInGenerateThumbThreadPool(task);
             }
 
         }
@@ -332,7 +286,7 @@ public class ButlerService extends Service {
             if (media.getMiniThumbPath().isEmpty()) {
 
                 GenerateLocalMediaMiniThumbTask task = new GenerateLocalMediaMiniThumbTask(media, dbUtils, mStopGenerateMiniThumb);
-                instance.doOnTaskInGenerateMiniThumbThreadPool(task);
+                instance.doOneTaskInGenerateMiniThumbThreadPool(task);
             }
 
         }
@@ -419,23 +373,10 @@ public class ButlerService extends Service {
             Log.i(TAG, "handle create operation target type:" + targetType);
 
         String imageUUID;
-        Comment comment;
         Media media;
-        MediaShare mediaShare;
         ExecutorServiceInstance instance;
 
         switch (targetType) {
-            case LOCAL_MEDIA_SHARE:
-                mediaShare = ((MediaShareRequestEvent) requestEvent).getMediaShare();
-                CreateLocalMediaShareService.startActionCreateLocalShare(this, mediaShare);
-                break;
-            case LOCAL_MEDIA_COMMENT:
-                MediaCommentRequestEvent localMediaShareCommentOperationEvent = (MediaCommentRequestEvent) requestEvent;
-                imageUUID = localMediaShareCommentOperationEvent.getImageUUID();
-                comment = localMediaShareCommentOperationEvent.getComment();
-
-                CreateLocalCommentService.startActionCreateLocalComment(this, imageUUID, comment);
-                break;
 
             case REMOTE_MEDIA:
 
@@ -446,20 +387,7 @@ public class ButlerService extends Service {
                 instance.doOneTaskInUploadMediaThreadPool(task);
 
                 break;
-            case REMOTE_MEDIA_SHARE:
 
-                mediaShare = ((MediaShareRequestEvent) requestEvent).getMediaShare();
-
-                CreateRemoteMediaShareService.startActionCreateRemoteMediaShareTask(this, mediaShare);
-
-                break;
-            case REMOTE_MEDIA_COMMENT:
-                MediaCommentRequestEvent remoteMediaShareCommentOperationEvent = (MediaCommentRequestEvent) requestEvent;
-                imageUUID = remoteMediaShareCommentOperationEvent.getImageUUID();
-                comment = remoteMediaShareCommentOperationEvent.getComment();
-
-                CreateRemoteCommentService.startActionCreateRemoteCommentTask(this, comment, imageUUID);
-                break;
             case REMOTE_USER:
 
                 UserRequestEvent userRequestEvent = (UserRequestEvent) requestEvent;
@@ -480,49 +408,10 @@ public class ButlerService extends Service {
 
     private void handleModifyOperation(RequestEvent requestEvent) {
 
-        OperationTargetType targetType = requestEvent.getOperationTargetType();
-
-        Log.i(TAG, "handle modify operation target type:" + targetType);
-
-        MediaShare mediaShare;
-
-        switch (targetType) {
-            case LOCAL_MEDIA_SHARE:
-                mediaShare = ((MediaShareRequestEvent) requestEvent).getMediaShare();
-                ModifyLocalMediaShareService.startActionModifyLocalMediaShare(this, mediaShare);
-                break;
-            case REMOTE_MEDIA_SHARE:
-
-                ModifyMediaShareRequestEvent modifyMediaShareRequestEvent = (ModifyMediaShareRequestEvent) requestEvent;
-
-                mediaShare = modifyMediaShareRequestEvent.getMediaShare();
-                String requestData = modifyMediaShareRequestEvent.getRequestData();
-                ModifyRemoteMediaShareService.startActionModifyRemoteMediaShare(this, mediaShare, requestData);
-                break;
-
-        }
     }
 
     private void handleEditPhotoInMediaShareOperation(RequestEvent requestEvent) {
 
-        EditPhotoInMediaShareRequestEvent editPhotoInMediaShareRequestEvent = (EditPhotoInMediaShareRequestEvent) requestEvent;
-
-        MediaShare diffContentsInOriginalMediaShare = editPhotoInMediaShareRequestEvent.getDiffContentsInOriginalMediaShare();
-        MediaShare diffContentsInModifiedMediaShare = editPhotoInMediaShareRequestEvent.getDiffContentsInModifiedMediaShare();
-        MediaShare modifiedMediaShare = editPhotoInMediaShareRequestEvent.getModifiedMediaShare();
-
-        OperationTargetType targetType = requestEvent.getOperationTargetType();
-
-        Log.i(TAG, "handle modify operation target type:" + targetType);
-
-        switch (targetType) {
-            case REMOTE_MEDIA_SHARE:
-                ModifyMediaInRemoteMediaShareService.startActionModifyMediaInRemoteMediaShare(this, diffContentsInOriginalMediaShare, diffContentsInModifiedMediaShare, modifiedMediaShare);
-                break;
-            case LOCAL_MEDIA_SHARE:
-                ModifyMediaInLocalMediaShareService.startActionModifyMediaInLocalMediaShare(this, diffContentsInOriginalMediaShare, diffContentsInModifiedMediaShare, modifiedMediaShare);
-                break;
-        }
     }
 
     private void handleDeleteOperation(RequestEvent requestEvent) {
@@ -531,25 +420,8 @@ public class ButlerService extends Service {
 
         Log.i(TAG, "handle delete operation target type:" + targetType);
 
-        MediaShare mediaShare;
-        Comment comment;
-        String imageUUID;
-
         switch (targetType) {
-            case LOCAL_MEDIA_SHARE:
-                mediaShare = ((MediaShareRequestEvent) requestEvent).getMediaShare();
-                DeleteLocalMediaShareService.startActionDeleteLocalShare(this, mediaShare);
-                break;
-            case REMOTE_MEDIA_SHARE:
-                mediaShare = ((MediaShareRequestEvent) requestEvent).getMediaShare();
-                DeleteRemoteMediaShareService.startActionDeleteRemoteShare(this, mediaShare);
-                break;
-            case LOCAL_MEDIA_COMMENT:
-                MediaCommentRequestEvent remoteMediaShareCommentOperationEvent = (MediaCommentRequestEvent) requestEvent;
-                imageUUID = remoteMediaShareCommentOperationEvent.getImageUUID();
-                comment = remoteMediaShareCommentOperationEvent.getComment();
-                DeleteLocalCommentService.startActionDeleteLocalComment(this, comment, imageUUID);
-                break;
+
             case DOWNLOADED_FILE:
 
                 List<String> fileUUIDs = ((DeleteDownloadedRequestEvent) requestEvent).getFileUUIDs();
@@ -562,7 +434,6 @@ public class ButlerService extends Service {
                 break;
         }
     }
-
 
     private void handleGetOperation(RequestEvent requestEvent) {
 
@@ -577,30 +448,14 @@ public class ButlerService extends Service {
             case LOCAL_MEDIA:
                 RetrieveLocalMediaService.startActionRetrieveLocalMedia(this);
                 break;
-            case LOCAL_MEDIA_SHARE:
-                RetrieveLocalMediaShareService.startActionRetrieveMediaShare(this);
-                break;
-            case LOCAL_MEDIA_COMMENT:
-                RetrieveLocalMediaCommentService.startActionRetrieveLocalComment(this);
-                break;
+
             case REMOTE_USER:
                 RetrieveRemoteUserService.startActionRetrieveRemoteUser(this);
                 break;
             case REMOTE_MEDIA:
                 RetrieveRemoteMediaService.startActionRetrieveRemoteMedia(this);
                 break;
-            case REMOTE_MEDIA_SHARE:
 
-                boolean loadMediaShareInDBWhenExceptionOccur = ((RetrieveMediaShareRequestEvent) requestEvent).isLoadMediaShareInDBWhenExceptionOccur();
-
-                RetrieveRemoteMediaShareService.startActionRetrieveRemoteMediaShare(this, loadMediaShareInDBWhenExceptionOccur);
-                break;
-            case REMOTE_MEDIA_COMMENT:
-                MediaCommentRequestEvent remoteMediaShareCommentOperationEvent = (MediaCommentRequestEvent) requestEvent;
-                imageUUID = remoteMediaShareCommentOperationEvent.getImageUUID();
-
-                RetrieveRemoteMediaCommentService.startActionRetrieveRemoteMediaComment(this, imageUUID);
-                break;
             case REMOTE_DEVICE_ID:
                 RetrieveDeviceIdService.startActionRetrieveDeviceId(this);
                 break;

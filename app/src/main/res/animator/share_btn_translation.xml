@@ -3,6 +3,6 @@
 
     android:duration="200"
     android:propertyName="translationY"
-    android:valueFrom="224"
+    android:valueFrom="112"
     android:valueTo="0" />
 

@@ -2,6 +2,8 @@ package com.winsun.fruitmix.fileModule.fragment;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -30,15 +32,17 @@ import com.winsun.fruitmix.command.OpenFileCommand;
 import com.winsun.fruitmix.command.ShowSelectModeViewCommand;
 import com.winsun.fruitmix.command.ShowUnSelectModeViewCommand;
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
+import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
+import com.winsun.fruitmix.fileModule.download.DownloadState;
+import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fileModule.interfaces.OnFileInteractionListener;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
-import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationResultType;
@@ -59,7 +63,7 @@ import butterknife.ButterKnife;
  * Use the {@link FileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FileFragment extends Fragment implements OnViewSelectListener,IShowHideFragmentListener {
+public class FileFragment extends Fragment implements OnViewSelectListener, IShowHideFragmentListener {
 
     public static final String TAG = FileFragment.class.getSimpleName();
 
@@ -101,6 +105,14 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
     private AbstractCommand nullCommand;
 
     private String rootUUID;
+
+    private ProgressDialog progressDialog;
+
+    private int progressMax = 100;
+
+    private DownloadFileCommand mCurrentDownloadFileCommand;
+
+    private boolean cancelDownload = false;
 
     public FileFragment() {
         // Required empty public constructor
@@ -180,7 +192,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
                 retrievedFolderNameList.add(getString(R.string.file));
             }
 
-            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID,rootUUID);
+            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID, rootUUID);
         }
 
     }
@@ -198,13 +210,43 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
     }
 
     @Override
-    public void show(){
+    public void show() {
         MobclickAgent.onPageStart("FileFragment");
     }
 
     @Override
-    public void hide(){
+    public void hide() {
         MobclickAgent.onPageEnd("FileFragment");
+    }
+
+    public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
+
+        if (mCurrentDownloadFileCommand == null)
+            return;
+
+        DownloadState downloadState = downloadStateChangedEvent.getDownloadState();
+
+        FileDownloadItem fileDownloadItem = mCurrentDownloadFileCommand.getFileDownloadItem();
+
+        if (downloadState.equals(DownloadState.DOWNLOADING)) {
+            progressDialog.setProgress(fileDownloadItem.getCurrentProgress(progressMax));
+        } else {
+
+            progressDialog.dismiss();
+
+            if (downloadState.equals(DownloadState.FINISHED)) {
+                OpenFileCommand openFileCommand = new OpenFileCommand(getContext(), fileDownloadItem.getFileName());
+                openFileCommand.execute();
+            } else if (downloadState.equals(DownloadState.ERROR)) {
+
+                if (cancelDownload)
+                    cancelDownload = false;
+                else
+                    Toast.makeText(getContext(), getText(R.string.download_failed), Toast.LENGTH_SHORT).show();
+            }
+
+        }
+
     }
 
     public void handleTitle() {
@@ -228,7 +270,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
 
     }
 
-    public void handleOperationResult(OperationEvent operationEvent) {
+    public void handleOperationEvent(OperationEvent operationEvent) {
 
         String action = operationEvent.getAction();
         if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
@@ -292,7 +334,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
             retrievedFolderNameList.remove(retrievedFolderNameList.size() - 1);
             currentFolderName = retrievedFolderNameList.get(retrievedFolderUUIDList.size() - 1);
 
-            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID,rootUUID);
+            FNAS.retrieveRemoteFile(getActivity(), currentFolderUUID, rootUUID);
 
         } else {
             selectMode = false;
@@ -364,6 +406,9 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
 
             BottomMenuItem selectItem = new BottomMenuItem(getString(R.string.select_file), showSelectModeViewCommand);
 
+            if (abstractRemoteFiles.isEmpty())
+                selectItem.setDisable(true);
+
             bottomMenuItems.add(selectItem);
         }
 
@@ -391,20 +436,41 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Util.WRITE_EXTERNAL_STORAGE_REQUEST_CODE);
 
         } else {
-            downloadSelectedFiles();
+            openFileWhenOnClick();
         }
 
     }
 
-    private void downloadSelectedFiles() {
-        for (AbstractRemoteFile abstractRemoteFile : selectedFiles) {
+    private void openFileWhenOnClick() {
 
-            abstractRemoteFile.downloadFile();
-        }
+        mCurrentDownloadFileCommand = new DownloadFileCommand(selectedFiles.get(0));
 
-        onFileInteractionListener.changeFilePageToFileDownloadFragment();
+        mCurrentDownloadFileCommand.execute();
+
+        progressDialog = new ProgressDialog(getContext());
+
+        progressDialog.setTitle(getString(R.string.downloading));
+
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setIndeterminate(false);
+
+        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getText(R.string.cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mCurrentDownloadFileCommand.unExecute();
+
+                cancelDownload = true;
+
+                progressDialog.dismiss();
+            }
+        });
+
+        progressDialog.setMax(progressMax);
+
+        progressDialog.setCancelable(false);
+
+        progressDialog.show();
     }
-
 
     public void requestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
@@ -414,7 +480,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    downloadSelectedFiles();
+                    openFileWhenOnClick();
 
                 } else {
 
@@ -526,7 +592,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
 
                     loadingLayout.setVisibility(View.VISIBLE);
 
-                    abstractRemoteFile.openAbstractRemoteFile(getActivity(),rootUUID);
+                    abstractRemoteFile.openAbstractRemoteFile(getActivity(), rootUUID);
 
                     handleTitle();
                 }
@@ -548,10 +614,10 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
         TextView fileTime;
         @BindView(R.id.remote_file_item_layout)
         LinearLayout remoteFileItemLayout;
-        @BindView(R.id.item_menu)
-        ImageView itemMenu;
         @BindView(R.id.content_layout)
         RelativeLayout contentLayout;
+        @BindView(R.id.item_menu_layout)
+        ViewGroup itemMenuLayout;
 
         FileViewHolder(View view) {
             super(view);
@@ -577,7 +643,7 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
 
             if (selectMode) {
 
-                itemMenu.setVisibility(View.GONE);
+                itemMenuLayout.setVisibility(View.GONE);
                 fileIconBg.setVisibility(View.VISIBLE);
 
                 toggleFileIconBgResource(abstractRemoteFile);
@@ -596,12 +662,11 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
 
             } else {
 
-
-                itemMenu.setVisibility(View.VISIBLE);
+                itemMenuLayout.setVisibility(View.VISIBLE);
                 fileIconBg.setVisibility(View.INVISIBLE);
                 fileIcon.setVisibility(View.VISIBLE);
 
-                itemMenu.setOnClickListener(new View.OnClickListener() {
+                itemMenuLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
 
@@ -633,11 +698,13 @@ public class FileFragment extends Fragment implements OnViewSelectListener,IShow
                         FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
                         if (fileDownloadManager.checkIsDownloaded(abstractRemoteFile.getUuid())) {
 
-                            if (!abstractRemoteFile.openAbstractRemoteFile(getActivity(),rootUUID)) {
+                            if (!abstractRemoteFile.openAbstractRemoteFile(getActivity(), rootUUID)) {
                                 Toast.makeText(getActivity(), getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
                             }
 
                         } else {
+
+                            selectedFiles.clear();
                             selectedFiles.add(abstractRemoteFile);
 
                             checkWriteExternalStoragePermission();

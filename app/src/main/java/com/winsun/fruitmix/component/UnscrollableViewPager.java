@@ -9,12 +9,12 @@ import android.view.ViewPropertyAnimator;
 /**
  * Created by Administrator on 2016/4/26.
  */
-public class UnscrollableViewPager  extends ViewPager{
-    public UnscrollableViewPager(Context context) {
+public class UnScrollableViewPager extends ViewPager{
+    public UnScrollableViewPager(Context context) {
         super(context);
     }
 
-    public UnscrollableViewPager(Context context, AttributeSet attrs) {
+    public UnScrollableViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 

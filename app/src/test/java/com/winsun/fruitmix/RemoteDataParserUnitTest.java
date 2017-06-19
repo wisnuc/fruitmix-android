@@ -1,19 +1,14 @@
 package com.winsun.fruitmix;
 
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
-import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.parser.RemoteFileShareParser;
-import com.winsun.fruitmix.parser.RemoteMediaCommentParser;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
-import com.winsun.fruitmix.parser.RemoteMediaShareParser;
 import com.winsun.fruitmix.parser.RemoteUserParser;
-import com.winsun.fruitmix.util.Util;
 
 import static org.junit.Assert.*;
 
@@ -148,99 +143,6 @@ public class RemoteDataParserUnitTest {
     }
 
     @Test
-    public void parseRemoteShareTest() {
-        String json = "[\n" +
-                "  {\n" +
-                "    \"digest\": \"afd6d9f46d5284d5b9153e5807e6d2d7e07757a676515a78ce219aed0f09bdd7\",\n" +
-                "    \"doc\": {\n" +
-                "      \"doctype\": \"mediashare\",\n" +
-                "      \"docversion\": \"1.0\",\n" +
-                "      \"uuid\": \"0336459b-d541-45d3-8f54-26b64ba9e600\",\n" +
-                "      \"author\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
-                "      \"maintainers\": [],\n" +
-                "      \"viewers\": [\n" +
-                "        \"e5f23cb9-1852-475d-937d-162d2554e22c\"\n" +
-                "      ],\n" +
-                "      \"album\": {\n" +
-                "        \"title\": \"test\",\n" +
-                "        \"text\": \"text\"\n" +
-                "      },\n" +
-                "      \"sticky\": true,\n" +
-                "      \"ctime\": 1476242504219,\n" +
-                "      \"mtime\": 1476242504219,\n" +
-                "      \"contents\": [\n" +
-                "        {\n" +
-                "          \"author\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
-                "          \"digest\": \"ceeb92546f72b949f629995edeadf64ef5a4cf28aa3db451f3d82ed233e3ea16\",\n" +
-                "          \"time\": 1476242504219\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    }\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"digest\": \"81551c323de559e02219ea60246015efcb3b7f738378c7befc8a0d81180f2805\",\n" +
-                "    \"doc\": {\n" +
-                "      \"doctype\": \"mediashare\",\n" +
-                "      \"docversion\": \"1.0\",\n" +
-                "      \"uuid\": \"1ea4e86d-a136-46f5-bf7c-ae51a0e6493c\",\n" +
-                "      \"author\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
-                "      \"maintainers\": [],\n" +
-                "      \"viewers\": [],\n" +
-                "      \"album\": null,\n" +
-                "      \"sticky\": false,\n" +
-                "      \"ctime\": 1476181623560,\n" +
-                "      \"mtime\": 1476181623560,\n" +
-                "      \"contents\": [\n" +
-                "        {\n" +
-                "          \"author\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
-                "          \"digest\": \"7803e8fa1b804d40d412bcd28737e3ae027768ecc559b51a284fbcadcd0e21be\",\n" +
-                "          \"time\": 1476181623559\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    }\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"digest\": \"06eb37e9a96d401c32491b2e4af026ecd56e63554c3c86c7e7e207b48bab2c36\",\n" +
-                "    \"doc\": {\n" +
-                "      \"doctype\": \"mediashare\",\n" +
-                "      \"docversion\": \"1.0\",\n" +
-                "      \"uuid\": \"eba00fe9-2d26-4c35-9f40-3f3295f5690f\",\n" +
-                "      \"author\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
-                "      \"maintainers\": [],\n" +
-                "      \"viewers\": [],\n" +
-                "      \"album\": null,\n" +
-                "      \"sticky\": false,\n" +
-                "      \"ctime\": 1476236841293,\n" +
-                "      \"mtime\": 1476236841293,\n" +
-                "      \"contents\": [\n" +
-                "        {\n" +
-                "          \"author\": \"5da92303-33a1-4f79-8d8f-a7b6becde6c3\",\n" +
-                "          \"digest\": \"7803e8fa1b804d40d412bcd28737e3ae027768ecc559b51a284fbcadcd0e21be\",\n" +
-                "          \"time\": 1476236841293\n" +
-                "        }\n" +
-                "      ]\n" +
-                "    }\n" +
-                "  }\n" +
-                "]";
-
-        RemoteDataParser<MediaShare> shareParser = new RemoteMediaShareParser();
-
-        List<MediaShare> shares = new ArrayList<>();
-        try {
-            shares = shareParser.parse(json);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        assertFalse(shares.size() == 0);
-
-        MediaShare mediaShare = shares.get(0);
-        assertEquals(mediaShare.isSticky(), true);
-        assertEquals(mediaShare.getShareDigest(), "afd6d9f46d5284d5b9153e5807e6d2d7e07757a676515a78ce219aed0f09bdd7");
-
-    }
-
-    @Test
     public void parseRemoteUserTest() {
 
 /*        String json = "[\n" +
@@ -318,42 +220,6 @@ public class RemoteDataParserUnitTest {
         assertEquals(user.getLibrary(), "ed0aa850-3211-4dba-a75b-dc980a77545f");
         assertEquals(user.isAdmin(), false);
     }
-
-    @Test
-    public void parseRemoteMediaCommentTest() {
-        String json = "[\n" +
-                "  {\n" +
-                "    \"creator\": \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\",\n" +
-                "    \"datatime\": 1472438565983,\n" +
-                "    \"text\": \"梵蒂冈\",\n" +
-                "    \"shareid\": \"8fdbee30-8ade-4188-890b-04420ff8b00c\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"creator\": \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\",\n" +
-                "    \"datatime\": 1472438642033,\n" +
-                "    \"text\": \"梵蒂冈\",\n" +
-                "    \"shareid\": \"8fdbee30-8ade-4188-890b-04420ff8b00c\"\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"creator\": \"77c6abe4-f7cd-46b3-80c7-ff08aa37742e\",\n" +
-                "    \"datatime\": 1472438651423,\n" +
-                "    \"text\": \"梵蒂冈\",\n" +
-                "    \"shareid\": \"8fdbee30-8ade-4188-890b-04420ff8b00c\"\n" +
-                "  }\n" +
-                "]";
-
-        RemoteDataParser<Comment> remoteDataParser = new RemoteMediaCommentParser();
-
-        List<Comment> comments = new ArrayList<>();
-        try {
-            comments = remoteDataParser.parse(json);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        assertFalse(comments.size() == 0);
-    }
-
 
     @Test
     public void parseRemoteFileFolderTest() {

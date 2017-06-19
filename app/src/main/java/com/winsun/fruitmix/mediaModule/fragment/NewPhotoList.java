@@ -31,7 +31,6 @@ import android.widget.Toast;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
-import com.winsun.fruitmix.mediaModule.CreateAlbumActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
@@ -509,24 +508,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         }
 
         mSelectCount = selectCount;
-    }
-
-    public void createAlbum(List<String> selectKeys) {
-        Intent intent = new Intent();
-        intent.setClass(containerActivity, CreateAlbumActivity.class);
-
-        LocalCache.mediaUUIDsInCreateAlbum.addAll(selectKeys);
-
-        containerActivity.startActivityForResult(intent, Util.KEY_CREATE_ALBUM_REQUEST_CODE);
-
-        clearSelectedPhoto();
-    }
-
-    public void createShare(List<String> selectMediaUUIDs) {
-
-        FNAS.createRemoteMediaShare(containerActivity, Util.createMediaShare(false, true, false, "", "", selectMediaUUIDs));
-
-        clearSelectedPhoto();
     }
 
     @Override

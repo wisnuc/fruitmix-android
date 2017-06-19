@@ -17,4 +17,5 @@ public class DownloadStateChangedEvent {
     public DownloadState getDownloadState() {
         return downloadState;
     }
+
 }

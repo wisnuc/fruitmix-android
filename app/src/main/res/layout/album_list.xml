@@ -5,29 +5,8 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/mainRecylerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:visibility="gone" />
-
-    <include layout="@layout/no_content_layout" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/add_album"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="16dp"
-        android:scaleX="0"
-        android:scaleY="0"
-        android:src="@drawable/ic_add_white_24dp"
-        app:borderWidth="0dp"
-        app:fabSize="normal" />
-
-    <include layout="@layout/loading_layout" />
+    <include layout="@layout/no_content_layout"
+        android:visibility="visible"/>
 
     <!--
         <android.support.v4.widget.NestedScrollView

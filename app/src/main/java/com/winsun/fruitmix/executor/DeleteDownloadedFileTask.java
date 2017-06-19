@@ -38,7 +38,7 @@ public class DeleteDownloadedFileTask implements Callable<Boolean> {
      * implements {@code Runnable}.
      */
     @Override
-    public Boolean call() {
+    public Boolean call() throws Exception{
 
         for (String fileUUID : fileUUIDs) {
             dbUtils.deleteDownloadedFileByUUIDAndCreatorUUID(fileUUID, FNAS.userUUID);

@@ -4,33 +4,23 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.ImageView;
 
-import com.winsun.fruitmix.component.BigLittleImageView;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
-import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.User;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,12 +33,6 @@ public class LocalCache {
 
     private static final String TAG = LocalCache.class.getSimpleName();
 
-    private static String CacheRootPath;
-
-    public static ConcurrentMap<String, List<Comment>> RemoteMediaCommentMapKeyIsImageUUID = null;
-    public static ConcurrentMap<String, List<Comment>> LocalMediaCommentMapKeyIsImageUUID = null;
-    public static ConcurrentMap<String, MediaShare> RemoteMediaShareMapKeyIsUUID = null;
-    public static ConcurrentMap<String, MediaShare> LocalMediaShareMapKeyIsUUID = null;
     public static ConcurrentMap<String, User> RemoteUserMapKeyIsUUID = null;
     public static ConcurrentMap<String, Media> RemoteMediaMapKeyIsUUID = null;
     public static ConcurrentMap<String, Media> LocalMediaMapKeyIsOriginalPhotoPath = null;
@@ -61,27 +45,9 @@ public class LocalCache {
 
     public static List<LoggedInUser> LocalLoggedInUsers = null;
 
-    public static List<String> mediaUUIDsInCreateAlbum = null;
-
-    public static List<MediaShare> RecommendMediaShares = null;
-
     //optimize get media from db, modify send media info mode: use static list instead of put it into bundle
 
     // optimize photo list view refresh view when data is too large
-
-    public static boolean DeleteFile(File file) {
-        File[] files;
-        int i;
-
-        if (file.isDirectory()) {
-            files = file.listFiles();
-            for (i = 0; i < files.length; i++) {
-                if (file.isFile() || file.isDirectory()) DeleteFile(files[i]);
-            }
-        }
-
-        return file.delete();
-    }
 
     public static void CleanAll(final Context context) {
 
@@ -94,10 +60,7 @@ public class LocalCache {
             @Override
             public void run() {
                 DBUtils dbUtils = DBUtils.getInstance(context);
-                dbUtils.deleteAllLocalShare();
-                dbUtils.deleteAllLocalComment();
-                dbUtils.deleteAllRemoteComment();
-                dbUtils.deleteAllRemoteShare();
+
                 dbUtils.deleteAllRemoteUser();
                 dbUtils.deleteAllRemoteMedia();
             }
@@ -123,35 +86,12 @@ public class LocalCache {
 
         Log.d(TAG, "Init: ");
 
-        if (RemoteMediaCommentMapKeyIsImageUUID == null)
-            RemoteMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
-        else
-            RemoteMediaCommentMapKeyIsImageUUID.clear();
-
-        if (LocalMediaCommentMapKeyIsImageUUID == null)
-            LocalMediaCommentMapKeyIsImageUUID = new ConcurrentHashMap<>();
-        else
-            LocalMediaCommentMapKeyIsImageUUID.clear();
-
-        if (RemoteMediaShareMapKeyIsUUID == null)
-            RemoteMediaShareMapKeyIsUUID = new ConcurrentHashMap<>();
-        else
-            RemoteMediaShareMapKeyIsUUID.clear();
-
-        Log.d(TAG, "Init: RemoteMediaShareMapKeyIsUUID == null: " + (RemoteMediaShareMapKeyIsUUID == null ? "true" : "false"));
-
-        if (LocalMediaShareMapKeyIsUUID == null)
-            LocalMediaShareMapKeyIsUUID = new ConcurrentHashMap<>();
-        else
-            LocalMediaShareMapKeyIsUUID.clear();
-
         if (RemoteUserMapKeyIsUUID == null)
             RemoteUserMapKeyIsUUID = new ConcurrentHashMap<>();
         else
             RemoteUserMapKeyIsUUID.clear();
 
         Log.d(TAG, "Init: RemoteUserMapKeyIsUUID == null: " + (RemoteUserMapKeyIsUUID == null ? "true" : "false"));
-
 
         if (RemoteMediaMapKeyIsUUID == null)
             RemoteMediaMapKeyIsUUID = new ConcurrentHashMap<>();
@@ -168,11 +108,6 @@ public class LocalCache {
         else
             RemoteFileShareList.clear();
 
-        if (mediaUUIDsInCreateAlbum == null)
-            mediaUUIDsInCreateAlbum = new ArrayList<>();
-        else
-            mediaUUIDsInCreateAlbum.clear();
-
         if (LocalMediaMapKeyIsOriginalPhotoPath == null)
             LocalMediaMapKeyIsOriginalPhotoPath = new ConcurrentHashMap<>();
 
@@ -183,21 +118,7 @@ public class LocalCache {
         else
             LocalLoggedInUsers.clear();
 
-        if (RecommendMediaShares == null)
-            RecommendMediaShares = new ArrayList<>();
-        else
-            RecommendMediaShares.clear();
-
         return true;
-    }
-
-    public static ConcurrentMap<String, MediaShare> BuildMediaShareMapKeyIsUUID(List<MediaShare> mediaShares) {
-
-        ConcurrentMap<String, MediaShare> mediaShareConcurrentMap = new ConcurrentHashMap<>(mediaShares.size());
-        for (MediaShare mediaShare : mediaShares) {
-            mediaShareConcurrentMap.put(mediaShare.getUuid(), mediaShare);
-        }
-        return mediaShareConcurrentMap;
     }
 
     public static ConcurrentMap<String, User> BuildRemoteUserMapKeyIsUUID(List<User> users) {
@@ -227,15 +148,6 @@ public class LocalCache {
         return mediaConcurrentMap;
     }
 
-    public static ConcurrentMap<String, Comment> BuildRemoteMediaCommentsAboutOneMedia(List<Comment> comments, String mediaUUID) {
-
-        ConcurrentMap<String, Comment> commentConcurrentMap = new ConcurrentHashMap<>(comments.size());
-        for (Comment comment : comments) {
-            commentConcurrentMap.put(mediaUUID, comment);
-        }
-        return commentConcurrentMap;
-    }
-
     public static Media findMediaInLocalMediaMap(String key) {
 
         Collection<Media> collection = LocalMediaMapKeyIsOriginalPhotoPath.values();
@@ -246,257 +158,6 @@ public class LocalCache {
         }
 
         return null;
-    }
-
-    public static MediaShare findMediaShareInLocalCacheMap(String mediaShareUUID) {
-
-        MediaShare mediaShare = LocalMediaShareMapKeyIsUUID.get(mediaShareUUID);
-        if (mediaShare == null)
-            mediaShare = RemoteMediaShareMapKeyIsUUID.get(mediaShareUUID);
-
-        return mediaShare;
-    }
-
-    public static String GetInnerTempFile() {
-        return CacheRootPath + "/innerCache/" + ("" + Math.random()).replace(".", "");
-    }
-
-    public static boolean MoveTempFileToThumbCache(String tempFile, String key) {
-        new File(tempFile).renameTo(new File(CacheRootPath + "/thumbCache/" + key));
-
-        return true;
-    }
-
-    // get thumb bitmap
-    public static void LoadRemoteBitmapThumb(final String key, final int width, final int height, final ImageView iv) {
-
-        if (key == null) return;
-
-        try {
-            new AsyncTask<Object, Object, Bitmap>() {
-                @Override
-                protected Bitmap doInBackground(Object... params) {
-                    Bitmap bmp;
-                    String key1, path1;
-                    int sFind;
-
-
-                    key1 = CalcDegist(key + "?" + width + "X" + height);
-                    path1 = CacheRootPath + "/thumbCache/" + key1;
-                    if (!new File(path1).exists()) {
-                        sFind = FNAS.RetrieveFNASFile("/media/" + key + "?type=thumb&width=" + width + "&height=" + height, key1);
-                        if (sFind == 0) return null;
-                    }
-                    bmp = BitmapFactory.decodeFile(path1);
-
-                    return bmp;
-                }
-
-                @Override
-                protected void onPostExecute(Bitmap bmp) {
-                    try {
-                        if (bmp != null) {
-                            iv.setImageBitmap(bmp);
-                            if (iv instanceof BigLittleImageView)
-                                ((BigLittleImageView) iv).bigPic = bmp;
-                        }
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-        } catch (java.util.concurrent.RejectedExecutionException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    //get full size bitmap
-    public static void LoadRemoteBitmap(final String key, final BigLittleImageView iv) {
-
-        if (key == null) return;
-
-        new AsyncTask<Object, Object, Bitmap>() {
-            @Override
-            protected Bitmap doInBackground(Object... params) {
-                Bitmap bmp;
-                String path;
-                BitmapFactory.Options bmpOptions;
-                BigLittleImageView.HotView2 = iv;
-                path = CacheRootPath + "/thumbCache/" + key;
-                if (!new File(path).exists()) {
-                    FNAS.RetrieveFNASFile("/media/" + key + "?type=original", key);
-                }
-
-                if (BigLittleImageView.HotView2 == iv) {
-                    bmpOptions = new BitmapFactory.Options();
-                    bmpOptions.inJustDecodeBounds = true;
-                    bmp = BitmapFactory.decodeFile(path, bmpOptions);
-                    if (bmpOptions.outWidth > 4096 || bmpOptions.outHeight > 4096)
-                        bmpOptions.inSampleSize = 2;
-                    bmpOptions.inJustDecodeBounds = false;
-                    bmp = BitmapFactory.decodeFile(path, bmpOptions);
-                } else
-                    bmp = null;
-
-                return bmp;
-            }
-
-            @Override
-            protected void onPostExecute(Bitmap bmp) {
-                if (bmp == null) return;
-                if (BigLittleImageView.HotView2 != iv) {
-                    //bmp.recycle();
-                    bmp = null;
-                    return;
-                }
-                try {
-                    if (BigLittleImageView.HotView != null) {
-                        if (BigLittleImageView.HotView.bigPic != null) {
-                       /*     BigLittleImageView.HotView.bigPic.recycle();
-                            BigLittleImageView.HotView.bigPic=null;
-                            */
-                        }
-                        //BigLittleImageView.HotView.loadSmallPic();
-
-                        //BigLittleImageView.HotView.setImageResource(R.drawable.yesshou);
-                        System.gc();
-                        Log.d(TAG, "Recycled");
-                    }
-                    iv.setImageBitmap(bmp);
-
-                    iv.bigPic = bmp;
-                    BigLittleImageView.HotView = iv;
-
-                    if (iv.handler != null) iv.handler.sendEmptyMessage(100);
-
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-    }
-
-    public static String CalcDegist(String str) {
-        MessageDigest mdInst;
-        byte[] digest;
-        String result;
-        int i;
-        char hexDigits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-
-        try {
-            mdInst = MessageDigest.getInstance("MD5");
-            mdInst.update(str.getBytes());
-            digest = mdInst.digest();
-            result = "";
-            for (i = 0; i < 8; i++) {
-                result += hexDigits[(digest[i] >> 4) & 0xf];
-                result += hexDigits[digest[i] & 0xf];
-            }
-            return result;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
-    public static void LoadLocalBitmapThumb(final String path, final int width, final int height, final ImageView iv) {
-
-        new AsyncTask<Object, Object, Bitmap>() {
-            @Override
-            protected Bitmap doInBackground(Object... params) {
-                String key, path1, pathTemp;
-                Bitmap bmp;
-                BitmapFactory.Options bmpOptions;
-                int inSampleSize1, inSampleSize2;
-                FileOutputStream fout;
-
-                try {
-
-                    key = CalcDegist(path + "?" + width + "X" + height);
-                    path1 = CacheRootPath + "/thumbCache/" + key;
-                    if (!new File(path1).exists()) {
-                        bmpOptions = new BitmapFactory.Options();
-                        bmpOptions.inJustDecodeBounds = true;
-                        bmp = BitmapFactory.decodeFile(path, bmpOptions);
-                        inSampleSize1 = bmpOptions.outWidth / width / 2;
-                        inSampleSize2 = bmpOptions.outHeight / height / 2;
-                        bmpOptions.inSampleSize = inSampleSize1 > inSampleSize2 ? inSampleSize2 : inSampleSize1;
-                        bmpOptions.inJustDecodeBounds = false;
-                        bmp = BitmapFactory.decodeFile(path, bmpOptions);
-                        pathTemp = GetInnerTempFile();
-                        fout = new FileOutputStream(new File(pathTemp));
-                        bmp.compress(Bitmap.CompressFormat.JPEG, 80, fout);
-                        fout.flush();
-                        fout.close();
-                        MoveTempFileToThumbCache(pathTemp, key);
-                        return bmp;
-                    } else {
-//                        Log.d("winsun", "Cached!");
-                        return BitmapFactory.decodeFile(path1);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-
-            @Override
-            protected void onPostExecute(Bitmap bmp) {
-                try {
-                    if (bmp != null) {
-                        iv.setImageBitmap(bmp);
-                        if (iv instanceof BigLittleImageView)
-                            ((BigLittleImageView) iv).bigPic = bmp;
-                    }
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-
-    public static void LoadLocalBitmap(final String path, final BigLittleImageView iv) {
-
-        new AsyncTask<Object, Object, Bitmap>() {
-            @Override
-            protected Bitmap doInBackground(Object... params) {
-                Bitmap bmp;
-
-                try {
-                    bmp = BitmapFactory.decodeFile(path);
-                    return bmp;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Bitmap bmp) {
-                try {
-                    iv.setImageBitmap(bmp);
-                    iv.bigPic = bmp;
-                    BigLittleImageView.HotView = iv;
-
-                    if (iv.handler != null) iv.handler.sendEmptyMessage(100);
-
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
     }
 
     public static List<Media> PhotoList(Context context, String bucketName) {

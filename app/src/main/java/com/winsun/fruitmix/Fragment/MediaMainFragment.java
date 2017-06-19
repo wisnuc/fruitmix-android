@@ -15,7 +15,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.widget.Toolbar;
@@ -26,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,8 +33,6 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.SharpCurveInterpolator;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
-import com.winsun.fruitmix.eventbus.MediaShareCommentOperationEvent;
-import com.winsun.fruitmix.eventbus.MediaShareOperationEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
@@ -45,18 +41,13 @@ import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.fragment.AlbumList;
 import com.winsun.fruitmix.mediaModule.fragment.MediaShareList;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
-import com.winsun.fruitmix.mediaModule.interfaces.OnMediaFragmentInteractionListener;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
-import com.winsun.fruitmix.mediaModule.model.Comment;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.MediaShare;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
-import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 
@@ -74,7 +65,7 @@ import butterknife.ButterKnife;
 
 import static android.app.Activity.RESULT_OK;
 
-public class MediaMainFragment extends Fragment implements OnMediaFragmentInteractionListener, View.OnClickListener, IPhotoListListener {
+public class MediaMainFragment extends Fragment implements View.OnClickListener, IPhotoListListener {
 
     public static final String TAG = "MediaMainFragment";
 
@@ -88,10 +79,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     TextView lbRight;
     @BindView(R.id.viewPager)
     ViewPager viewPager;
-    @BindView(R.id.btmenu)
-    LinearLayout llBtMenu;
-    @BindView(R.id.bt_album)
-    ImageView ivBtAlbum;
+
     @BindView(R.id.bt_share)
     ImageView ivBtShare;
     @BindView(R.id.album_balloon)
@@ -128,7 +116,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     private OnMainFragmentInteractionListener mListener;
 
     private boolean mPhotoListRefresh = false;
-    private boolean mShareAlbumListRefresh = false;
 
     private IShowHideFragmentListener mCurrentFragment;
 
@@ -210,7 +197,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         viewPager.setCurrentItem(PAGE_PHOTO);
 
-        ivBtAlbum.setOnClickListener(this);
         ivBtShare.setOnClickListener(this);
         fab.setOnClickListener(this);
         lbRight.setOnClickListener(this);
@@ -251,13 +237,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
             photoList.refreshView();
 
             mPhotoListRefresh = true;
-        }
-
-        if (!mShareAlbumListRefresh && Util.isRemoteMediaShareLoaded()) {
-            shareList.refreshView();
-            albumList.refreshView();
-
-            mShareAlbumListRefresh = true;
         }
 
     }
@@ -409,16 +388,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if ((requestCode == Util.KEY_ALBUM_CONTENT_REQUEST_CODE || requestCode == Util.KEY_CREATE_ALBUM_REQUEST_CODE || requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE) && resultCode == RESULT_OK) {
+        if ((requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE) && resultCode == RESULT_OK) {
 
             viewPager.setCurrentItem(PAGE_ALBUM);
             onDidAppear(PAGE_ALBUM);
             pageList.get(PAGE_ALBUM).onDidAppear();
-            pageList.get(PAGE_SHARE).onDidAppear();
-        } else if (requestCode == Util.KEY_CREATE_SHARE_REQUEST_CODE && resultCode == RESULT_OK) {
-
-            viewPager.setCurrentItem(PAGE_SHARE);
-            onDidAppear(PAGE_SHARE);
             pageList.get(PAGE_SHARE).onDidAppear();
         }
     }
@@ -494,9 +468,9 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     }
 
     private void initPageList() {
-        shareList = new MediaShareList(getActivity(), this);
+        shareList = new MediaShareList(getActivity());
         photoList = new NewPhotoList(getActivity());
-        albumList = new AlbumList(getActivity(), this);
+        albumList = new AlbumList(getActivity());
         pageList = new ArrayList<Page>();
         pageList.add(shareList);
         pageList.add(photoList);
@@ -528,33 +502,8 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 resetBottomNavigationItemCheckState();
                 bottomNavigationView.getMenu().getItem(position).setChecked(true);
 
-                if (position == PAGE_ALBUM && mPhotoListRefresh) {
-                    albumList.showPhoto();
-                } else if (position == PAGE_SHARE && mPhotoListRefresh) {
-                    shareList.showPhoto();
-                }
             }
         });
-    }
-
-    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
-    public void handleStickyOperationEvent(OperationEvent operationEvent) {
-
-        String action = operationEvent.getAction();
-
-        Log.i(TAG, "handleStickyOperationEvent: action: " + action);
-
-        switch (action) {
-
-            case Util.RECOMMEND_ALBUM_CREATED:
-
-                EventBus.getDefault().removeStickyEvent(operationEvent);
-
-                albumList.refreshRecommendAlbum();
-
-                break;
-        }
-
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -565,40 +514,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         Log.i(TAG, "handleOperationEvent: action:" + action);
 
         switch (action) {
-            case Util.REMOTE_MEDIA_SHARE_CREATED:
-                if (handleRemoteShareOperated(operationEvent)) {
-                    handleRemoteShareCreated(operationEvent);
-                }
-                break;
-            case Util.REMOTE_MEDIA_SHARE_MODIFIED:
-                if (handleRemoteShareOperated(operationEvent)) {
-                    handleRemoteShareModified(operationEvent);
-                }
-                break;
-            case Util.REMOTE_MEDIA_SHARE_DELETED:
-                if (handleRemoteShareOperated(operationEvent)) {
-                    handleRemoteShareDeleted(operationEvent);
-                }
-                break;
-            case Util.REMOTE_COMMENT_CREATED:
-                handleRemoteCommentCreated(operationEvent);
-                break;
-            case Util.LOCAL_COMMENT_DELETED:
-                handleLocalCommentDeleted(operationEvent);
-                break;
-            case Util.LOCAL_MEDIA_COMMENT_RETRIEVED:
-                Log.i(TAG, "local media comment loaded");
-                ((MediaShareList) pageList.get(PAGE_SHARE)).refreshLocalComment();
-
-                doCreateRemoteMediaCommentInLocalMediaCommentMapFunction();
-                break;
-            case Util.REMOTE_MEDIA_COMMENT_RETRIEVED:
-
-                Log.i(TAG, "remote media comment loaded ");
-
-                ((MediaShareList) pageList.get(PAGE_SHARE)).refreshRemoteComment();
-
-                break;
 
             case Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED:
 
@@ -642,17 +557,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 break;
 
-            case Util.REMOTE_MEDIA_SHARE_RETRIEVED:
-
-                Log.i(TAG, "remote share loaded");
-
-                setShareAlbumListRefresh();
-
-                albumList.refreshView();
-                shareList.refreshView();
-
-                break;
-
             case Util.SHARED_PHOTO_THUMB_RETRIEVED:
 
                 if (mDialog == null || !mDialog.isShowing()) {
@@ -672,7 +576,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 if (mSelectMediaOriginalPhotoPaths.isEmpty()) {
                     Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
                 } else {
-                    Util.sendShare(getContext(), mSelectMediaOriginalPhotoPaths);
+                    Util.sendShareToOtherApp(getContext(), mSelectMediaOriginalPhotoPaths);
                 }
 
                 break;
@@ -685,92 +589,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
     public void setPhotoListRefresh() {
         if (Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && Util.isRemoteMediaLoaded())
             mPhotoListRefresh = true;
-    }
-
-    public void setShareAlbumListRefresh() {
-        if (Util.isRemoteMediaShareLoaded())
-            mShareAlbumListRefresh = true;
-    }
-
-    private void doCreateRemoteMediaCommentInLocalMediaCommentMapFunction() {
-
-        for (Map.Entry<String, List<Comment>> entry : LocalCache.LocalMediaCommentMapKeyIsImageUUID.entrySet()) {
-
-            for (Comment comment : entry.getValue()) {
-                FNAS.createRemoteMediaComment(mContext, entry.getKey(), comment);
-            }
-
-        }
-    }
-
-    private void handleLocalCommentDeleted(OperationEvent operationEvent) {
-        Log.i(TAG, "local comment changed");
-
-        OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
-
-        if (result == OperationResultType.SUCCEED) {
-            shareList.refreshView();
-        }
-    }
-
-    private void handleRemoteCommentCreated(OperationEvent operationEvent) {
-
-        OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
-
-        if (result == OperationResultType.SUCCEED) {
-            Log.i(TAG, "remote comment created");
-
-            Comment comment = ((MediaShareCommentOperationEvent) operationEvent).getComment();
-            String imageUUID = ((MediaShareCommentOperationEvent) operationEvent).getImageUUID();
-            FNAS.deleteLocalMediaComment(mContext, imageUUID, comment);
-        }
-    }
-
-    private void handleRemoteShareModified(OperationEvent operationEvent) {
-
-        MediaShare mediaShare = ((MediaShareOperationEvent) operationEvent).getMediaShare();
-        if (mediaShare.getViewersListSize() == 0) {
-            MobclickAgent.onEvent(mContext, Util.ALBUM_SWITCH_UN_SHARE_STATE_UMENG_EVENT_ID);
-        } else {
-            MobclickAgent.onEvent(mContext, Util.ALBUM_SWITCH_SHARE_STATE_UMENG_EVENT_ID);
-        }
-        albumList.refreshView();
-        shareList.refreshView();
-    }
-
-    private void handleRemoteShareDeleted(OperationEvent operationEvent) {
-
-        Log.d(TAG, "handleRemoteShareDeleted: ");
-
-        MobclickAgent.onEvent(mContext, Util.DELETE_ALBUM_UMENG_EVENT_ID);
-
-        albumList.refreshView();
-        shareList.refreshView();
-
-    }
-
-    private void handleRemoteShareCreated(OperationEvent operationEvent) {
-        MobclickAgent.onEvent(mContext, Util.CREATE_MEDIA_SHARE_UMENG_EVENT_ID);
-
-        viewPager.setCurrentItem(PAGE_SHARE);
-        onDidAppear(PAGE_SHARE);
-        pageList.get(PAGE_SHARE).onDidAppear();
-    }
-
-    private boolean handleRemoteShareOperated(OperationEvent operationEvent) {
-        OperationResult operationResult = operationEvent.getOperationResult();
-
-        dismissDialog();
-
-        Toast.makeText(mContext, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-
-        return operationResult.getOperationResultType() == OperationResultType.SUCCEED;
-
-    }
-
-    public void retrieveRemoteMediaComment(String mediaUUID) {
-
-        FNAS.retrieveRemoteMediaCommentMap(mContext, mediaUUID);
     }
 
     public void setSelectCountText(String text) {
@@ -1054,7 +872,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     @Override
     public void onClick(View v) {
-        List<String> selectMediaUUIDs;
+
         switch (v.getId()) {
             case R.id.bt_share:
 
@@ -1068,12 +886,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
                 AbstractCommand shareInAppCommand = new AbstractCommand() {
                     @Override
                     public void execute() {
-                        handleShareInApp();
-
-                        hideChooseHeader();
-                        showBottomNavAnim();
                     }
-
                     @Override
                     public void unExecute() {
                     }
@@ -1095,14 +908,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(mContext).show();
 
-                break;
-
-            case R.id.bt_album:
-                selectMediaUUIDs = photoList.getSelectedImageUUIDs();
-
-                photoList.createAlbum(selectMediaUUIDs);
-                hideChooseHeader();
-                showBottomNavAnim();
                 break;
 
             case R.id.fab:
@@ -1135,7 +940,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
         }
 
         if (mSelectMedias.size() == 0) {
-            Util.sendShare(getContext(), mSelectMediaOriginalPhotoPaths);
+            Util.sendShareToOtherApp(getContext(), mSelectMediaOriginalPhotoPaths);
         } else {
 
             mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, true);
@@ -1143,19 +948,6 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
             EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, mSelectMedias));
         }
-    }
-
-    private void handleShareInApp() {
-        List<String> selectMediaUUIDs = new ArrayList<>(mSelectMedias.size());
-
-        for (Media media : mSelectMedias) {
-            selectMediaUUIDs.add(media.getUuid());
-        }
-
-        mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, false);
-
-        photoList.createShare(selectMediaUUIDs);
-
     }
 
     private void refreshFabState() {
@@ -1172,15 +964,12 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
         new AnimatorBuilder(getContext(), R.animator.fab_remote_restore, fab).startAnimator();
 
-        new AnimatorBuilder(getContext(), R.animator.album_btn_restore, ivBtAlbum).startAnimator();
-
         new AnimatorBuilder(getContext(), R.animator.share_btn_restore, ivBtShare).addAdapter(new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
 
-                ivBtAlbum.setVisibility(View.GONE);
                 ivBtShare.setVisibility(View.GONE);
 
             }
@@ -1190,64 +979,11 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
     private void extendFab() {
 
-        ivBtAlbum.setVisibility(View.VISIBLE);
         ivBtShare.setVisibility(View.VISIBLE);
 
         new AnimatorBuilder(getContext(), R.animator.fab_remote, fab).startAnimator();
 
-        new AnimatorBuilder(getContext(), R.animator.album_btn_translation, ivBtAlbum).startAnimator();
-
         new AnimatorBuilder(getContext(), R.animator.share_btn_translation, ivBtShare).startAnimator();
-    }
-
-    @Override
-    public void modifyMediaShare(MediaShare mediaShare) {
-
-        if (Util.getNetworkState(mContext)) {
-
-            if (mediaShare.checkPermissionToOperate()) {
-
-                String operation;
-                if (mediaShare.getViewersListSize() == 0) {
-                    operation = String.format(getString(R.string.operating_title), getString(R.string.set_public));
-                } else {
-                    operation = String.format(getString(R.string.operating_title), getString(R.string.set_private));
-                }
-
-                mDialog = ProgressDialog.show(mContext, null, operation, true, false);
-
-                String requestData = mediaShare.createToggleShareStateRequestData();
-
-                FNAS.modifyRemoteMediaShare(mContext, mediaShare, requestData);
-            } else {
-                Toast.makeText(mContext, getString(R.string.no_operate_media_share_permission), Toast.LENGTH_SHORT).show();
-
-            }
-
-        } else {
-            Toast.makeText(mContext, mContext.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-    @Override
-    public void deleteMediaShare(MediaShare mediaShare) {
-
-        if (Util.getNetworkState(mContext)) {
-
-            if (mediaShare.checkPermissionToOperate()) {
-                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.delete_text)), true, false);
-
-                FNAS.deleteRemoteMediaShare(mContext, mediaShare);
-            } else {
-                Toast.makeText(mContext, getString(R.string.no_operate_media_share_permission), Toast.LENGTH_SHORT).show();
-
-            }
-
-        } else {
-            Toast.makeText(mContext, mContext.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-        }
-
     }
 
     private void onDidAppear(int position) {
@@ -1268,7 +1004,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 title.setText(getString(R.string.share_text));
                 fab.setVisibility(View.GONE);
-                ivBtAlbum.setVisibility(View.GONE);
+
                 ivBtShare.setVisibility(View.GONE);
                 lbRight.setVisibility(View.GONE);
                 break;
@@ -1286,7 +1022,7 @@ public class MediaMainFragment extends Fragment implements OnMediaFragmentIntera
 
                 title.setText(getString(R.string.album));
                 fab.setVisibility(View.GONE);
-                ivBtAlbum.setVisibility(View.GONE);
+
                 ivBtShare.setVisibility(View.GONE);
                 lbRight.setVisibility(View.GONE);
                 break;

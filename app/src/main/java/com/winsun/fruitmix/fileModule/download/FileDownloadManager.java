@@ -1,10 +1,14 @@
 package com.winsun.fruitmix.fileModule.download;
 
+import android.util.Log;
+
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.util.FileUtil;
 
 import java.io.File;
 import java.util.ArrayList;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,12 +20,20 @@ public enum FileDownloadManager {
 
     INSTANCE;
 
+    private static final String TAG = FileDownloadManager.class.getSimpleName();
+
     private List<FileDownloadItem> fileDownloadItems;
+
+    private DBUtils mDbUtils;
 
     private static int FILE_DOWNLOADING_MAX_NUM = 3;
 
     FileDownloadManager() {
         fileDownloadItems = new ArrayList<>();
+    }
+
+    public void initDBUtils(DBUtils dbUtils) {
+        mDbUtils = dbUtils;
     }
 
     public void addDownloadedFile(FileDownloadItem fileDownloadItem) {
@@ -45,12 +57,16 @@ public enum FileDownloadManager {
 
         } else {
 
-            fileDownloadState = new FileDownloadingState(fileDownloadItem);
+            fileDownloadState = new FileStartDownloadState(fileDownloadItem, mDbUtils);
         }
+
+        // must first add and then set,because setFileDownloadState will call notifyDownloadStateChanged,update ui using fileDownloadItems
+
+        fileDownloadItems.add(fileDownloadItem);
 
         fileDownloadItem.setFileDownloadState(fileDownloadState);
 
-        fileDownloadItems.add(fileDownloadItem);
+        Log.d(TAG, "handleEvent: addFileDownloadItem: " + getFileDownloadItems());
 
     }
 
@@ -74,7 +90,7 @@ public enum FileDownloadManager {
         int downloadingItem = 0;
 
         for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
-            if (fileDownloadItem.getDownloadState().equals(DownloadState.DOWNLOADING)) {
+            if (fileDownloadItem.getDownloadState().equals(DownloadState.DOWNLOADING) || fileDownloadItem.getDownloadState().equals(DownloadState.START_DOWNLOAD)) {
                 downloadingItem++;
             }
             if (downloadingItem == FILE_DOWNLOADING_MAX_NUM) {
@@ -91,7 +107,7 @@ public enum FileDownloadManager {
         List<FileDownloadItem> fileDownloadItems = getFileDownloadItems();
 
         for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
-            if (fileDownloadItem.getFileUUID().equals(fileUUID) && (fileDownloadItem.getDownloadState() == DownloadState.DOWNLOADING || fileDownloadItem.getDownloadState() == DownloadState.FINISHED)) {
+            if (fileDownloadItem.getFileUUID().equals(fileUUID) && (fileDownloadItem.getDownloadState() == DownloadState.START_DOWNLOAD || fileDownloadItem.getDownloadState() == DownloadState.DOWNLOADING || fileDownloadItem.getDownloadState() == DownloadState.FINISHED)) {
                 return true;
             }
         }
@@ -99,11 +115,11 @@ public enum FileDownloadManager {
         return false;
     }
 
-    public boolean checkIsDownloaded(String fileUUID){
+    public boolean checkIsDownloaded(String fileUUID) {
 
-        for (FileDownloadItem fileDownloadItem:fileDownloadItems){
+        for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
 
-            if(fileDownloadItem.getFileUUID().equals(fileUUID) && fileDownloadItem.getDownloadState() == DownloadState.FINISHED){
+            if (fileDownloadItem.getFileUUID().equals(fileUUID) && fileDownloadItem.getDownloadState() == DownloadState.FINISHED) {
                 return true;
             }
         }
@@ -116,12 +132,22 @@ public enum FileDownloadManager {
 
         for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
             if (fileDownloadItem.getDownloadState().equals(DownloadState.PENDING)) {
-                fileDownloadItem.setFileDownloadState(new FileDownloadingState(fileDownloadItem));
+
+                Log.d(TAG, "startPendingDownloadItem: " + fileDownloadItem.getFileName());
+
+                fileDownloadItem.setFileDownloadState(new FileStartDownloadState(fileDownloadItem, mDbUtils));
             }
         }
     }
 
     public List<FileDownloadItem> getFileDownloadItems() {
-        return fileDownloadItems;
+
+        return Collections.unmodifiableList(fileDownloadItems);
+    }
+
+    public void clearFileDownloadItems() {
+        if (fileDownloadItems != null) {
+            fileDownloadItems.clear();
+        }
     }
 }

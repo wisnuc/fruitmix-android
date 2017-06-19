@@ -14,6 +14,7 @@ import com.winsun.fruitmix.fileModule.download.FileDownloadErrorState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadFinishedState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadState;
+import com.winsun.fruitmix.fileModule.download.FileDownloadingState;
 import com.winsun.fruitmix.mediaModule.model.Media;
 
 import java.io.File;
@@ -110,7 +111,6 @@ public class FileUtil {
         return createFolder(getOldLocalPhotoThumbnailFolderPath() + File.separator + NO_MEDIA);
     }
 
-
     private static boolean createFolder(String path) {
         if (!checkExternalStorageState()) {
             Log.i(TAG, "create folder: External storage not mounted");
@@ -194,8 +194,11 @@ public class FileUtil {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            boolean result = file.delete();
+
+            Log.d(TAG, "writeBitmapToLocalPhotoMiniThumbnailFolder: io exception occur,delete file: " + result);
+
         } finally {
 
             bitmap = null;
@@ -266,6 +269,11 @@ public class FileUtil {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+
+            boolean result = file.delete();
+
+            Log.d(TAG, "writeBitmapToLocalPhotoThumbnailFolder: io exception occur,delete file: " + result);
+
         } finally {
 
             bitmap = null;
@@ -337,6 +345,11 @@ public class FileUtil {
             }
         } catch (IOException e) {
             e.printStackTrace();
+
+            boolean result = file.delete();
+
+            Log.d(TAG, "downloadMediaToOriginalPhotoFolder: io exception occur,delete file: " + result);
+
         } finally {
 
             try {
@@ -367,6 +380,10 @@ public class FileUtil {
 
         FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
 
+        FileDownloadState newFileDownloadState = new FileDownloadingState(fileDownloadItem);
+
+        fileDownloadItem.setFileDownloadState(newFileDownloadState);
+
         InputStream inputStream = null;
         OutputStream outputStream = null;
 
@@ -377,7 +394,7 @@ public class FileUtil {
             long contentLength = responseBody.contentLength();
 
             if (contentLength != 0) {
-                fileDownloadState.setFileSize(contentLength);
+                newFileDownloadState.setFileSize(contentLength);
             }
 
             long fileDownloadedSize = 0;
@@ -399,8 +416,11 @@ public class FileUtil {
 
                     fileDownloadedSize += read;
 
-                    fileDownloadState.setFileCurrentDownloadSize(fileDownloadedSize);
-                    fileDownloadState.notifyDownloadStateChanged();
+                    newFileDownloadState.setFileCurrentDownloadSize(fileDownloadedSize);
+
+                    Log.d(TAG, "writeResponseBodyToFolder: fileDownloadedSize: " + fileDownloadedSize);
+
+                    newFileDownloadState.notifyDownloadStateChanged();
                 }
 
                 outputStream.flush();
@@ -428,6 +448,10 @@ public class FileUtil {
 
             fileDownloadItem.setFileDownloadState(new FileDownloadErrorState(fileDownloadItem));
 
+            boolean result = downloadFile.delete();
+
+            Log.d(TAG, "writeResponseBodyToFolder: io exception occur,delete file: " + result);
+
             return false;
         } finally {
 
@@ -443,6 +467,7 @@ public class FileUtil {
                 if (outputStream != null) {
                     outputStream.close();
                 }
+
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

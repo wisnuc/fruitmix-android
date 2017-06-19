@@ -4,11 +4,13 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.FileUtil;
 
+import java.util.concurrent.Callable;
+
 /**
  * Created by Administrator on 2017/3/15.
  */
 
-public class GenerateLocalMediaMiniThumbTask implements Runnable {
+public class GenerateLocalMediaMiniThumbTask implements Callable<Boolean> {
 
     private DBUtils dbUtils;
     private Media media;
@@ -26,9 +28,9 @@ public class GenerateLocalMediaMiniThumbTask implements Runnable {
      * implements {@code Runnable}.
      */
     @Override
-    public void run() {
+    public Boolean call() throws Exception{
 
-        if (stopGenerateMiniThumb) return;
+        if (stopGenerateMiniThumb) return false;
 
         boolean result = FileUtil.writeBitmapToLocalPhotoMiniThumbnailFolder(media);
 
@@ -38,5 +40,6 @@ public class GenerateLocalMediaMiniThumbTask implements Runnable {
                 dbUtils.updateLocalMedia(media);
         }
 
+        return true;
     }
 }

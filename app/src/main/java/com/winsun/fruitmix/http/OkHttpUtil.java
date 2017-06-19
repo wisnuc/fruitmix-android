@@ -17,6 +17,7 @@ import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -41,8 +42,6 @@ public class OkHttpUtil implements IHttpUtil {
 
     private static OkHttpClient okHttpClient;
 
-    private static List<Call> calls;
-
     private static final String APPLICATION_JSON_STRING = "application/json";
     private static final String JPEG_STRING = "image/jpeg";
 
@@ -53,7 +52,6 @@ public class OkHttpUtil implements IHttpUtil {
     static {
         okHttpClient = new OkHttpClient.Builder().connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).addInterceptor(createHttpInterceptor()).build();
 
-        calls = new ArrayList<>();
     }
 
     private static Interceptor createHttpInterceptor() {
@@ -97,13 +95,13 @@ public class OkHttpUtil implements IHttpUtil {
 
         int responseCode = response.code();
 
-        if(handleResponseCode(response)){
-            body = response.body();
+        if (handleResponseCode(response)) {
 
             str = response.body().string();
 
-            body.close();
         }
+
+        response.close();
 
         Log.d(TAG, "remoteCallMethod: after read response body" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
@@ -118,13 +116,9 @@ public class OkHttpUtil implements IHttpUtil {
 
             Call call = okHttpClient.newCall(request);
 
-            calls.add(call);
-
             Response response = call.execute();
 
             Log.d(TAG, "remoteCallMethod: after execute " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-
-            calls.remove(call);
 
             return response;
 
@@ -150,9 +144,9 @@ public class OkHttpUtil implements IHttpUtil {
 
         Response response = executeRequest(request);
 
-        if(handleResponseCode(response)){
+        if (handleResponseCode(response)) {
             return response.body();
-        }else {
+        } else {
             throw new IOException();
         }
 
@@ -206,16 +200,11 @@ public class OkHttpUtil implements IHttpUtil {
             if (code == HttpURLConnection.HTTP_FORBIDDEN)
                 EventBus.getDefault().post(new OperationEvent(Util.TOKEN_INVALID, null));
 
+            response.close();
+
             return false;
         }
 
-    }
-
-    public static void cancelAllNotFinishCall() {
-        for (Call call : calls) {
-            if (call != null)
-                call.cancel();
-        }
     }
 
 }

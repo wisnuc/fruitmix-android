@@ -249,7 +249,7 @@ public class FileShareFragment extends Fragment implements IShowHideFragmentList
                         noContentLayout.setVisibility(View.GONE);
 
                         abstractRemoteFiles.clear();
-                        abstractRemoteFiles.addAll(LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent) operationEvent).getFolderUUID()).listChildAbstractRemoteFileList());
+                        abstractRemoteFiles.addAll(abstractRemoteFileList);
 
                         refreshRemoteUserMaps();
 

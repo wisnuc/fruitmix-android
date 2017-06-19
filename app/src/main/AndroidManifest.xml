@@ -39,33 +39,12 @@
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait" />
         <!-- android:theme="@style/Theme.AppCompat.Light.NoActionBar" -->
-        <!-- This meta-data tag is required to use Google Play Services. -->
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
 
-        <activity
-            android:name="com.google.android.gms.ads.AdActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
-            android:theme="@android:style/Theme.Translucent" />
         <activity
             android:name=".mediaModule.PhotoSliderActivity"
             android:configChanges="orientation|screenSize" />
         <activity
-            android:name=".mediaModule.CreateAlbumActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".mediaModule.ModifyAlbumActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".mediaModule.AlbumPicContentActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".SplashScreenActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".mediaModule.MediaShareCommentActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".mediaModule.NewAlbumPicChooseActivity"
@@ -84,70 +63,19 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateVisible|adjustPan" />
         <activity android:name=".GalleryTestActivity" />
-        <activity
-            android:name=".mediaModule.EditPhotoActivity"
-            android:screenOrientation="portrait" />
 
-        <service
-            android:name=".services.CreateRemoteMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.CreateRemoteCommentService"
-            android:exported="false" />
-
-        <activity
-            android:name=".mediaModule.MoreMediaActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait" />
-
-        <service
-            android:name=".services.CreateLocalMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.ModifyRemoteMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.DeleteRemoteMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.CreateLocalCommentService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveRemoteMediaShareService"
-            android:exported="false" />
         <service
             android:name=".services.ButlerService"
             android:enabled="true"
             android:exported="false" />
         <service
-            android:name=".services.ModifyMediaInRemoteMediaShareService"
-            android:exported="false" />
-        <service
             android:name=".services.RetrieveNewLocalMediaInCameraService"
-            android:exported="false" />
-        <service
-            android:name=".services.DeleteLocalMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.ModifyLocalMediaShareService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveLocalMediaCommentService"
-            android:exported="false" />
-        <service
-            android:name=".services.DeleteLocalCommentService"
             android:exported="false" />
         <service
             android:name=".services.RetrieveLocalMediaService"
             android:exported="false" />
         <service
-            android:name=".services.RetrieveLocalMediaShareService"
-            android:exported="false" />
-        <service
             android:name=".services.RetrieveRemoteMediaService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveRemoteMediaCommentService"
             android:exported="false" />
         <service
             android:name=".services.RetrieveRemoteUserService"
@@ -157,9 +85,6 @@
             android:exported="false" />
         <service
             android:name=".services.RetrieveDeviceIdService"
-            android:exported="false" />
-        <service
-            android:name=".services.ModifyMediaInLocalMediaShareService"
             android:exported="false" />
 
         <activity
@@ -202,9 +127,6 @@
             android:name=".TestPhotoListActivity"
             android:screenOrientation="portrait" />
 
-        <service
-            android:name=".services.CreateRecommendAlbumService"
-            android:exported="false" />
         <service
             android:name=".services.ReverseGeocodeService"
             android:exported="false" />

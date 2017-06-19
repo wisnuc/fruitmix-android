@@ -37,11 +37,6 @@ public class RemoteFolder extends AbstractRemoteFile {
     }
 
     @Override
-    public void downloadFile() {
-        throw new UnsupportedOperationException("folder can not do this operation");
-    }
-
-    @Override
     public List<AbstractRemoteFile> listChildAbstractRemoteFileList() {
         return Collections.unmodifiableList(abstractRemoteFiles);
     }

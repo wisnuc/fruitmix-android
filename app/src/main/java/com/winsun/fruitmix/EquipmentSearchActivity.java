@@ -33,8 +33,10 @@ import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,9 +62,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private EquipmentExpandableAdapter mAdapter;
 
-    private List<Equipment> mUserLoadedEquipments;
-
-    private List<Equipment> mFoundedEquipments;
+    private final List<Equipment> mUserLoadedEquipments = new ArrayList<>();
 
     private List<List<User>> mUserExpandableLists;
 
@@ -70,8 +70,12 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private static final int DATA_CHANGE = 0x0001;
 
+    private static final int RETRY_GET_USER = 0x0002;
+
     private static final String SYSTEM_PORT = "3000";
     private static final String IPALIASING = "/system/ipaliasing";
+
+    private static final int RETRY_DELAY_MILLSECOND = 20 * 1000;
 
     private boolean mStartAnimateArrow = false;
 
@@ -80,6 +84,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     private Random random;
 
     private int preAvatarBgColor = 0;
+
+    private ExecutorServiceInstance instance;
+
+    private boolean onPause = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,9 +103,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         Util.loginType = LoginType.LOGIN;
 
         mUserExpandableLists = new ArrayList<>();
-        mUserLoadedEquipments = new ArrayList<>();
-
-        mFoundedEquipments = new ArrayList<>();
 
         mHandler = new CustomHandler(this, getMainLooper());
 
@@ -204,6 +209,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         mTitleTextView.setText(getString(R.string.search_equipment));
 
         mEquipmentSearchManager = new EquipmentSearchManager(mContext);
+
+        instance = ExecutorServiceInstance.SINGLE_INSTANCE;
     }
 
     @Override
@@ -214,6 +221,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
 //        MobclickAgent.onPageStart(TAG);
 //        MobclickAgent.onResume(this);
+
+        onPause = false;
     }
 
     @Override
@@ -224,6 +233,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
 //        MobclickAgent.onPageEnd(TAG);
 //        MobclickAgent.onPause(this);
+
+        onPause = true;
+
+        mHandler.removeMessages(RETRY_GET_USER);
+        mHandler.removeMessages(DATA_CHANGE);
     }
 
     @Override
@@ -231,6 +245,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         super.onDestroy();
 
         mContext = null;
+
+        mHandler.removeMessages(RETRY_GET_USER);
+        mHandler.removeMessages(DATA_CHANGE);
+
+        mHandler = null;
     }
 
     @Override
@@ -510,14 +529,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         mEquipmentSearchManager.startDiscovery(new EquipmentSearchManager.IEquipmentDiscoveryListener() {
             @Override
             public void call(Equipment equipment) {
-                for (Equipment foundedEquipment : mFoundedEquipments) {
-                    if (foundedEquipment == null || foundedEquipment.getHosts().contains(equipment.getHosts().get(0))
-                            || foundedEquipment.getSerialNumber().equals(equipment.getSerialNumber())) {
-                        return;
-                    }
-                }
-
-                mFoundedEquipments.add(equipment);
 
                 getUserList(equipment);
             }
@@ -543,6 +554,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                 String str;
 
                 int length;
+
+                if (mHandler == null)
+                    return;
 
                 try {
 
@@ -590,27 +604,39 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                     if (itemList.isEmpty())
                         return;
 
-                    for (Equipment equipment1 : mUserLoadedEquipments) {
-                        if (equipment1.getHosts().contains(equipment.getHosts().get(0)))
-                            return;
+                    synchronized (mUserLoadedEquipments) {
+
+                        for (Equipment userLoadedEquipment : mUserLoadedEquipments) {
+                            if (userLoadedEquipment == null || userLoadedEquipment.getHosts().contains(equipment.getHosts().get(0))
+                                    || userLoadedEquipment.getSerialNumber().equals(equipment.getSerialNumber()))
+                                return;
+                        }
+
+                        mUserLoadedEquipments.add(equipment);
+                        mUserExpandableLists.add(itemList);
+
+                        Log.d(TAG, "EquipmentSearch: " + mUserExpandableLists.toString());
                     }
 
-                    mUserLoadedEquipments.add(equipment);
-                    mUserExpandableLists.add(itemList);
-
-                    Log.d(TAG, "EquipmentSearch: " + mUserExpandableLists.toString());
-
                     //update list
-                    mHandler.sendEmptyMessage(DATA_CHANGE);
+                    if (mHandler != null && !onPause)
+                        mHandler.sendEmptyMessage(DATA_CHANGE);
 
-                } catch (Exception e) {
+                } catch (IOException e) {
+                    e.printStackTrace();
+
+                    if (mHandler != null && !onPause) {
+                        Message message = Message.obtain(mHandler, RETRY_GET_USER, equipment);
+                        mHandler.sendMessageDelayed(message, RETRY_DELAY_MILLSECOND);
+                    }
+
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
             }
         };
 
-        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
         instance.doOneTaskInCachedThread(runnable);
 
     }
@@ -643,6 +669,15 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                     adapter.viewLruCache.evictAll();
                     adapter.notifyDataSetChanged();
                     break;
+
+                case RETRY_GET_USER:
+
+                    Equipment equipment = (Equipment) msg.obj;
+
+                    Log.d(TAG, "handleMessage: retry get user equipment host0: " + equipment.getHosts().get(0));
+
+                    getUserList(equipment);
+
                 default:
             }
         }

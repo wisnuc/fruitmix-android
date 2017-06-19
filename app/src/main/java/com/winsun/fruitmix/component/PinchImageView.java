@@ -2,6 +2,7 @@ package com.winsun.fruitmix.component;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PointF;
@@ -1941,5 +1942,12 @@ public class PinchImageView extends AppCompatImageView {
                 result.set(container);
             }
         }
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        reset();
     }
 }

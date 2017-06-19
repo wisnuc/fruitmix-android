@@ -14,12 +14,18 @@ public class BottomMenuItem {
     private AbstractCommand command;
     private Dialog dialog;
 
-    public BottomMenuItem(String text,AbstractCommand command) {
+    private boolean disable = false;
+
+    public BottomMenuItem(String text, AbstractCommand command) {
         this.text = text;
         this.command = command;
     }
 
-    public void handleOnClickEvent(){
+    public void handleOnClickEvent() {
+
+        if (disable)
+            return;
+
         command.execute();
 
         dialog.dismiss();
@@ -31,5 +37,13 @@ public class BottomMenuItem {
 
     public void setDialog(Dialog dialog) {
         this.dialog = dialog;
+    }
+
+    public boolean isDisable() {
+        return disable;
+    }
+
+    public void setDisable(boolean disable) {
+        this.disable = disable;
     }
 }

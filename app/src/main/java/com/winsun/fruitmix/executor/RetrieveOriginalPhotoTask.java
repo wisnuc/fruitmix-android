@@ -14,6 +14,7 @@ import com.winsun.fruitmix.util.Util;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -36,7 +37,7 @@ public class RetrieveOriginalPhotoTask implements Callable<Boolean> {
     }
 
     @Override
-    public Boolean call() {
+    public Boolean call() throws Exception{
 
         Log.d(TAG, "call: begin retrieve original photo task");
 

@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.component;
 
 import android.content.Context;
+import android.support.v7.widget.AppCompatEditText;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.widget.EditText;
@@ -9,7 +10,7 @@ import android.widget.EditText;
  * Created by Administrator on 2016/9/28.
  */
 
-public class EditTextPreIme extends EditText {
+public class EditTextPreIme extends AppCompatEditText {
 
     public EditTextPreIme(Context context) {
         super(context);

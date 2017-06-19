@@ -60,7 +60,7 @@
             app:itemTextColor="@drawable/bottom_navigation_text_bg"
             app:menu="@menu/file_bottom_menu" />
 
-        <com.winsun.fruitmix.component.UnscrollableViewPager
+        <com.winsun.fruitmix.component.UnScrollableViewPager
             android:id="@+id/file_main_viewpager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

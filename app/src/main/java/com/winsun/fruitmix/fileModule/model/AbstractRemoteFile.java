@@ -2,8 +2,6 @@ package com.winsun.fruitmix.fileModule.model;
 
 import android.content.Context;
 
-import com.winsun.fruitmix.mediaModule.model.MediaShareContent;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,8 +31,6 @@ public abstract class AbstractRemoteFile {
     public abstract boolean isFolder();
 
     public abstract boolean openAbstractRemoteFile(Context context,String rootUUID);
-
-    public abstract void downloadFile();
 
     public abstract List<AbstractRemoteFile> listChildAbstractRemoteFileList();
 

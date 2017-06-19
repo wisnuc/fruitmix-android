@@ -20,10 +20,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.umeng.analytics.MobclickAgent;
-import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.component.UnscrollableViewPager;
+import com.winsun.fruitmix.component.UnScrollableViewPager;
+import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.fileModule.download.DownloadState;
 import com.winsun.fruitmix.fileModule.fragment.FileDownloadFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileShareFragment;
@@ -53,7 +54,7 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
     @BindView(R.id.bottom_navigation_view)
     BottomNavigationView bottomNavigationView;
     @BindView(R.id.file_main_viewpager)
-    UnscrollableViewPager fileMainViewPager;
+    UnScrollableViewPager fileMainViewPager;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.file_main_menu)
@@ -118,9 +119,11 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
             @Override
             public void onClick(View view) {
 
-                if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
+                int currentItem = fileMainViewPager.getCurrentItem();
+
+                if (currentItem == PAGE_FILE) {
                     fileFragment.getBottomSheetDialog(fileFragment.getMainMenuItem()).show();
-                } else if (fileMainViewPager.getCurrentItem() == PAGE_FILE_DOWNLOAD) {
+                } else if (currentItem == PAGE_FILE_DOWNLOAD) {
                     fileDownloadFragment.getBottomSheetDialog(fileDownloadFragment.getMainMenuItem()).show();
                 }
 
@@ -306,17 +309,28 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
         String action = operationEvent.getAction();
         if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
 
-            if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
-                fileFragment.handleOperationResult(operationEvent);
-            } else if (fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE) {
-                fileShareFragment.handleOperationEvent(operationEvent);
-            }
+            //TODO: because file share is close,there is no remote file retrieve call,so we directly call fileFragment handleOperationEvent
+
+            fileFragment.handleOperationEvent(operationEvent);
+
         } else if (action.equals(Util.REMOTE_FILE_SHARE_RETRIEVED)) {
             fileShareFragment.handleOperationEvent(operationEvent);
+        } else if (action.equals(Util.DOWNLOADED_FILE_DELETED) || action.equals(Util.DOWNLOADED_FILE_RETRIEVED)) {
+            fileDownloadFragment.handleOperationEvent(operationEvent);
         }
 
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
+
+        if (!mIsResume)
+            return;
+
+        fileFragment.handleEvent(downloadStateChangedEvent);
+        fileDownloadFragment.handleEvent(downloadStateChangedEvent);
+
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -343,11 +357,13 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
 
     public void handleBackPressed() {
 
-        if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
+        int currentItem = fileMainViewPager.getCurrentItem();
+
+        if (currentItem == PAGE_FILE) {
             fileFragment.onBackPressed();
-        } else if (fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE) {
+        } else if (currentItem == PAGE_FILE_SHARE) {
             fileShareFragment.onBackPressed();
-        } else if (fileMainViewPager.getCurrentItem() == PAGE_FILE_DOWNLOAD) {
+        } else if (currentItem == PAGE_FILE_DOWNLOAD) {
             fileDownloadFragment.onBackPressed();
         }
 
@@ -355,13 +371,15 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
 
     public boolean handleBackPressedOrNot() {
 
-        if (fileMainViewPager.getCurrentItem() == PAGE_FILE) {
+        int currentItem = fileMainViewPager.getCurrentItem();
+
+        if (currentItem == PAGE_FILE) {
             return fileFragment.handleBackPressedOrNot();
         }
-        if (fileMainViewPager.getCurrentItem() == PAGE_FILE_SHARE) {
+        if (currentItem == PAGE_FILE_SHARE) {
             return fileShareFragment.handleBackPressedOrNot();
         }
-        if (fileMainViewPager.getCurrentItem() == PAGE_FILE_DOWNLOAD) {
+        if (currentItem == PAGE_FILE_DOWNLOAD) {
             return fileDownloadFragment.handleBackPressedOrNot();
         }
         return false;
