@@ -481,9 +481,6 @@ public class ButlerService extends Service {
                 String rootUUID = fileRequestEvent.getRootUUID();
                 RetrieveRemoteFileService.startActionRetrieveRemoteFile(this, folderUUID, rootUUID);
                 break;
-            case REMOTE_FILE_SHARE:
-                RetrieveRemoteFileShareService.startActionRetrieveRemoteFileShare(this);
-                break;
             case DOWNLOADED_FILE:
                 RetrieveDownloadedFileService.startActionRetrieveDownloadedFile(this);
                 break;

@@ -788,7 +788,7 @@ public class GifTouchImageView extends AppCompatImageView {
 
         return true;
 
-//        return isZoomed();
+//        return notZoomed();
 
     }
 

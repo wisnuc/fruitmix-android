@@ -234,7 +234,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         }
 
         if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && !mPhotoListRefresh) {
-            photoList.refreshView();
+            pageList.get(PAGE_PHOTO).refreshView();
 
             mPhotoListRefresh = true;
         }
@@ -273,7 +273,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         mDialog = null;
 
-        photoList.cancelPreLoadMediaMiniThumb();
+        pageList.get(PAGE_PHOTO).onDestroy();
 
         photoList.removePhotoListListener(this);
         shareList.removePhotoListListener(this);
@@ -353,11 +353,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         dismissToolbarBottomBarWhenSharedElementTransition();
 
-        if (viewPager.getCurrentItem() == PAGE_PHOTO) {
-            ((NewPhotoList) pageList.get(viewPager.getCurrentItem())).onActivityReenter(resultCode, data);
-        } else if (viewPager.getCurrentItem() == PAGE_SHARE) {
-            ((MediaShareList) pageList.get(viewPager.getCurrentItem())).onActivityReenter(resultCode, data);
-        }
+        pageList.get(viewPager.getCurrentItem()).onActivityReenter(resultCode, data);
+
     }
 
     private void dismissToolbarBottomBarWhenSharedElementTransition() {
@@ -392,18 +389,15 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
             viewPager.setCurrentItem(PAGE_ALBUM);
             onDidAppear(PAGE_ALBUM);
-            pageList.get(PAGE_ALBUM).onDidAppear();
-            pageList.get(PAGE_SHARE).onDidAppear();
+            pageList.get(PAGE_ALBUM).refreshView();
+            pageList.get(PAGE_SHARE).refreshView();
         }
     }
 
     public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
 
-        if (viewPager.getCurrentItem() == PAGE_PHOTO) {
-            ((NewPhotoList) pageList.get(viewPager.getCurrentItem())).onMapSharedElements(names, sharedElements);
-        } else if (viewPager.getCurrentItem() == PAGE_SHARE) {
-            ((MediaShareList) pageList.get(viewPager.getCurrentItem())).onMapSharedElements(names, sharedElements);
-        }
+        pageList.get(viewPager.getCurrentItem()).onMapSharedElements(names, sharedElements);
+
     }
 
     private void initNavigationView() {
@@ -887,6 +881,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                     @Override
                     public void execute() {
                     }
+
                     @Override
                     public void unExecute() {
                     }

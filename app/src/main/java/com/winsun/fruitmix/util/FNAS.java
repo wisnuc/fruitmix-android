@@ -135,10 +135,6 @@ public class FNAS {
         EventBus.getDefault().post(new AbstractFileRequestEvent(OperationType.GET, OperationTargetType.REMOTE_FILE, folderUUID, rootUUID));
     }
 
-    public static void retrieveRemoteFileShare() {
-        EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.REMOTE_FILE_SHARE));
-    }
-
     public static void retrieveDownloadedFile() {
         EventBus.getDefault().post(new RequestEvent(OperationType.GET, OperationTargetType.DOWNLOADED_FILE));
     }

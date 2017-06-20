@@ -78,11 +78,6 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
         //MobclickAgent.onPageEnd("MediaShareFragment");
     }
 
-    @Override
-    public void onDidAppear() {
-
-    }
-
     public View getView() {
         return view;
     }
@@ -92,11 +87,18 @@ public class MediaShareList implements Page, IShowHideFragmentListener {
 
     }
 
+    @Override
     public void onActivityReenter(int resultCode, Intent data) {
 
     }
 
+    @Override
     public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+
+    }
+
+    @Override
+    public void onDestroy() {
 
     }
 

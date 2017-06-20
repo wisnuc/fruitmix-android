@@ -929,20 +929,20 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                     //Log.i(TAG, "handleTouchEvent: action move lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
 
-                    if (!view.isZoomed() && lastY > y) {
+                    if (view.notZoomed() && lastY > y) {
                         view.setTranslationY(lastY - y);
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
 
                     if (lastY - y > Util.dip2px(mContext, 30)) {
 
-                        if (!view.isZoomed()) {
+                        if (view.notZoomed()) {
                             finishActivity();
                         }
 
                     } else {
 
-                        if (!view.isZoomed())
+                        if (view.notZoomed())
                             view.setTranslationY(0);
                     }
 

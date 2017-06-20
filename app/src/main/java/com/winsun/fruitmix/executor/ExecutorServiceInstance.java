@@ -22,9 +22,9 @@ public enum ExecutorServiceInstance {
 
     private ExecutorService downloadFileThreadPool;
 
-    private static final int THREAD_SIZE = 5;
+    private static final int THREAD_SIZE = 4;
 
-    private static final int DONWLOAD_THREAD_SIZE = 3;
+    private static final int DOWNLOAD_THREAD_SIZE = 3;
 
     ExecutorServiceInstance() {
         cacheThreadPool = Executors.newCachedThreadPool();
@@ -92,11 +92,11 @@ public enum ExecutorServiceInstance {
     }
 
     private void startDownloadFileThreadPool() {
-        downloadFileThreadPool = Executors.newFixedThreadPool(DONWLOAD_THREAD_SIZE);
+        downloadFileThreadPool = Executors.newFixedThreadPool(DOWNLOAD_THREAD_SIZE);
     }
 
-    public void shutdownDownloadFileThreadPoolNow(){
-        if(downloadFileThreadPool != null && !downloadFileThreadPool.isShutdown()){
+    public void shutdownDownloadFileThreadPoolNow() {
+        if (downloadFileThreadPool != null && !downloadFileThreadPool.isShutdown()) {
             downloadFileThreadPool.shutdownNow();
             downloadFileThreadPool = null;
         }

@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.mediaModule.fragment;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -14,6 +15,7 @@ import com.winsun.fruitmix.mediaModule.interfaces.Page;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -76,17 +78,27 @@ public class AlbumList implements Page, IShowHideFragmentListener {
 
     }
 
-    @Override
-    public void onDidAppear() {
-
-    }
-
     public View getView() {
         return view;
     }
 
     @Override
     public void refreshView() {
+
+    }
+
+    @Override
+    public void onActivityReenter(int resultCode, Intent data) {
+
+    }
+
+    @Override
+    public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+
+    }
+
+    @Override
+    public void onDestroy() {
 
     }
 

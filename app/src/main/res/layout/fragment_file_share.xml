@@ -4,16 +4,8 @@
              android:layout_height="match_parent"
              tools:context="com.winsun.fruitmix.fileModule.fragment.FileShareFragment">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/file_share_recyclerview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"/>
-
-    <include layout="@layout/loading_layout"/>
-
-    <include layout="@layout/no_content_layout"/>
-
+    <include layout="@layout/no_content_layout"
+        android:visibility="visible"/>
 
 
 </FrameLayout>

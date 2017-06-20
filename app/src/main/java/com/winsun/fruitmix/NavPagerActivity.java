@@ -645,8 +645,6 @@ public class NavPagerActivity extends BaseActivity
 
                 if (currentPage == PAGE_MEDIA) {
                     mediaMainFragment.refreshUser();
-                } else {
-                    fileMainFragment.refreshUser();
                 }
 
             }

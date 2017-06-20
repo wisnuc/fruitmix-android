@@ -511,12 +511,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     }
 
     @Override
-    public void onDidAppear() {
-
-        refreshView();
-
-    }
-
     public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
 
         if (reenterState != null) {
@@ -559,6 +553,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
+    @Override
+    public void onDestroy() {
+
+        cancelPreLoadMediaMiniThumb();
+
+    }
+
+    @Override
     public void onActivityReenter(int resultCode, Intent data) {
 
         reenterState = new Bundle(data.getExtras());

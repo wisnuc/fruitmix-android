@@ -164,6 +164,7 @@ public class PinchImageView extends AppCompatImageView {
         } else {
             matrix.set(mOuterMatrix);
         }
+
         return matrix;
     }
 
@@ -270,8 +271,8 @@ public class PinchImageView extends AppCompatImageView {
         return mPinchMode;
     }
 
-    public boolean isZoomed() {
-        return mPinchMode == PINCH_MODE_SCALE;
+    public boolean notZoomed() {
+        return mOuterMatrix.isIdentity();
     }
 
     /**
@@ -1120,7 +1121,6 @@ public class PinchImageView extends AppCompatImageView {
         if (drawable == null || drawable.getIntrinsicWidth() == 0 || drawable.getIntrinsicHeight() == 0) {
             return;
         }
-
 
         int drawableWidth = drawable.getIntrinsicWidth();
         int drawableHeight = drawable.getIntrinsicHeight();

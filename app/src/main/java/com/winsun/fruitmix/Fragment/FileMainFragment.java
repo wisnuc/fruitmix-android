@@ -235,11 +235,6 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
         });
     }
 
-    public void refreshUser() {
-
-        fileShareFragment.refreshUser();
-    }
-
     @Override
     public void onStart() {
         super.onStart();
@@ -313,8 +308,6 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
 
             fileFragment.handleOperationEvent(operationEvent);
 
-        } else if (action.equals(Util.REMOTE_FILE_SHARE_RETRIEVED)) {
-            fileShareFragment.handleOperationEvent(operationEvent);
         } else if (action.equals(Util.DOWNLOADED_FILE_DELETED) || action.equals(Util.DOWNLOADED_FILE_RETRIEVED)) {
             fileDownloadFragment.handleOperationEvent(operationEvent);
         }
@@ -361,8 +354,6 @@ public class FileMainFragment extends Fragment implements OnFileInteractionListe
 
         if (currentItem == PAGE_FILE) {
             fileFragment.onBackPressed();
-        } else if (currentItem == PAGE_FILE_SHARE) {
-            fileShareFragment.onBackPressed();
         } else if (currentItem == PAGE_FILE_DOWNLOAD) {
             fileDownloadFragment.onBackPressed();
         }

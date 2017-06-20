@@ -1,15 +1,24 @@
 package com.winsun.fruitmix.mediaModule.interfaces;
 
+import android.content.Intent;
 import android.view.View;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2016/11/2.
  */
 public interface Page {
-    void onDidAppear();
 
     View getView();
 
     void refreshView();
+
+    void onActivityReenter(int resultCode, Intent data);
+
+    void onMapSharedElements(List<String> names, Map<String, View> sharedElements);
+
+    void onDestroy();
 
 }
