@@ -2,8 +2,8 @@ package com.winsun.fruitmix;
 
 import android.content.Context;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -11,21 +11,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.account.manage.AccountManagePresenter;
+import com.winsun.fruitmix.account.manage.AccountManagePresenterImpl;
+import com.winsun.fruitmix.account.manage.AccountManageView;
+import com.winsun.fruitmix.databinding.AccountChildItemBinding;
+import com.winsun.fruitmix.databinding.AccountGroupItemBinding;
+import com.winsun.fruitmix.databinding.ActivityAccountManageBinding;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.model.LoggedInUser;
-import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.User;
-import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,18 +32,11 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class AccountManageActivity extends BaseActivity implements View.OnClickListener {
+public class AccountManageActivity extends BaseActivity implements AccountManageView {
 
     public static final String TAG = "AccountManageActivity";
 
-    @BindView(R.id.title)
-    TextView title;
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-    @BindView(R.id.account_expandable_list_view)
     ExpandableListView mAccountExpandableListView;
-    @BindView(R.id.add_account)
-    FloatingActionButton mAddAccountBtn;
 
     private List<String> mEquipmentNames;
     private List<List<LoggedInUser>> mUsers;
@@ -59,28 +51,22 @@ public class AccountManageActivity extends BaseActivity implements View.OnClickL
     private boolean mDeleteCurrentUser = false;
     private boolean mDeleteOtherUser = false;
 
+    private AccountManagePresenter presenter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_account_manage);
+        ActivityAccountManageBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_account_manage);
 
-        ButterKnife.bind(this);
+        mAccountExpandableListView = binding.accountExpandableListView;
+
+        presenter = new AccountManagePresenterImpl(this);
+
+        binding.setBaseView(this);
+
+        binding.setAccountManagePresenter(presenter);
 
         mContext = this;
-
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                handleBack();
-                finish();
-            }
-        });
-        title.setText(getString(R.string.account_manage));
-
-        mAddAccountBtn.setOnClickListener(this);
 
         mEquipmentNames = new ArrayList<>();
         mUsers = new ArrayList<>();
@@ -96,6 +82,12 @@ public class AccountManageActivity extends BaseActivity implements View.OnClickL
             mAccountExpandableListView.expandGroup(i);
         }
 
+    }
+
+    @Override
+    public void finishView() {
+        handleBack();
+        super.finishView();
     }
 
     @Override
@@ -123,6 +115,7 @@ public class AccountManageActivity extends BaseActivity implements View.OnClickL
 
         mContext = null;
 
+        presenter.onDestroy();
     }
 
     private void fillData() {
@@ -152,19 +145,6 @@ public class AccountManageActivity extends BaseActivity implements View.OnClickL
 
 
     @Override
-    public void onClick(View v) {
-
-        switch (v.getId()) {
-            case R.id.add_account:
-                Intent intent = new Intent(mContext, EquipmentSearchActivity.class);
-                intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE, false);
-                startActivityForResult(intent, START_EQUIPMENT_SEARCH);
-                break;
-        }
-
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -177,6 +157,13 @@ public class AccountManageActivity extends BaseActivity implements View.OnClickL
             finish();
         }
 
+    }
+
+    @Override
+    public void gotoEquipmentSearchActivity() {
+        Intent intent = new Intent(mContext, EquipmentSearchActivity.class);
+        intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE, false);
+        startActivityForResult(intent, START_EQUIPMENT_SEARCH);
     }
 
     private class AccountExpandableListViewAdapter extends BaseExpandableListAdapter {
@@ -198,7 +185,6 @@ public class AccountManageActivity extends BaseActivity implements View.OnClickL
         public int getChildrenCount(int groupPosition) {
             return users.get(groupPosition).size();
         }
-
 
         @Override
         public Object getGroup(int groupPosition) {
@@ -226,21 +212,22 @@ public class AccountManageActivity extends BaseActivity implements View.OnClickL
             return false;
         }
 
-
         @Override
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
-            AccountGroupHolder groupViewHolder;
-            if (convertView == null) {
-                convertView = LayoutInflater.from(mContext).inflate(R.layout.account_group_item, parent, false);
+            AccountGroupItemBinding binding;
 
-                groupViewHolder = new AccountGroupHolder(convertView);
-                convertView.setTag(groupViewHolder);
+            if (convertView == null) {
+
+                binding = AccountGroupItemBinding.inflate(LayoutInflater.from(mContext), parent, false);
+
+                convertView = binding.getRoot();
             } else {
-                groupViewHolder = (AccountGroupHolder) convertView.getTag();
+                binding = DataBindingUtil.getBinding(convertView);
             }
 
-            groupViewHolder.refreshView(equipmentNames.get(groupPosition));
+            binding.setEquipmentName(equipmentNames.get(groupPosition));
+            binding.executePendingBindings();
 
             return convertView;
 
@@ -249,17 +236,23 @@ public class AccountManageActivity extends BaseActivity implements View.OnClickL
 
         @Override
         public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-            AccountChildHolder childViewHolder;
-            if (convertView == null) {
-                convertView = LayoutInflater.from(mContext).inflate(R.layout.account_child_item, parent, false);
 
-                childViewHolder = new AccountChildHolder(convertView);
-                convertView.setTag(childViewHolder);
+            AccountChildItemBinding binding;
+
+            if (convertView == null) {
+
+                binding = AccountChildItemBinding.inflate(LayoutInflater.from(mContext), parent, false);
+
+                convertView = binding.getRoot();
+
             } else {
-                childViewHolder = (AccountChildHolder) convertView.getTag();
+                binding = DataBindingUtil.getBinding(convertView);
             }
 
-            childViewHolder.refreshView(mUsers, groupPosition, childPosition);
+            AccountChildViewModel model = new AccountChildViewModel(mUsers, groupPosition, childPosition);
+
+            binding.setAccountChildViewModel(model);
+            binding.executePendingBindings();
 
             return convertView;
         }
@@ -282,6 +275,57 @@ public class AccountManageActivity extends BaseActivity implements View.OnClickL
         public void refreshView(String equipmentName) {
             mGroupItemTextView.setText(equipmentName);
         }
+    }
+
+    public class AccountChildViewModel {
+
+        private LoggedInUser loggedInUser;
+
+        private User user;
+
+        private int groupPosition;
+        private int childPosition;
+        private List<List<LoggedInUser>> users;
+
+        public AccountChildViewModel(List<List<LoggedInUser>> users, int groupPosition, int childPosition) {
+            this.users = users;
+            this.groupPosition = groupPosition;
+            this.childPosition = childPosition;
+
+            loggedInUser = users.get(groupPosition).get(childPosition);
+            user = loggedInUser.getUser();
+        }
+
+        public String getAvatarName() {
+            return Util.getUserNameFirstLetter(user.getUserName());
+        }
+
+        public int getBackgroundResource() {
+            return user.getDefaultAvatarBgColorResourceId();
+        }
+
+        public String getUserName() {
+            return user.getUserName();
+        }
+
+        public void deleteUser() {
+
+            DBUtils.getInstance(mContext).deleteLoggerUserByUserUUID(user.getUuid());
+
+            users.get(groupPosition).remove(childPosition);
+
+            LocalCache.LocalLoggedInUsers.remove(loggedInUser);
+
+            mAdapter.notifyDataSetChanged();
+
+            if (user.getUuid().equals(FNAS.userUUID)) {
+                mDeleteCurrentUser = true;
+            } else {
+                mDeleteOtherUser = true;
+            }
+
+        }
+
     }
 
     class AccountChildHolder {

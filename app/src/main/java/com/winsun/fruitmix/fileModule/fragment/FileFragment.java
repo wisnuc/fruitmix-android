@@ -228,23 +228,45 @@ public class FileFragment extends Fragment implements OnViewSelectListener, ISho
 
         FileDownloadItem fileDownloadItem = mCurrentDownloadFileCommand.getFileDownloadItem();
 
-        if (downloadState.equals(DownloadState.DOWNLOADING)) {
-            progressDialog.setProgress(fileDownloadItem.getCurrentProgress(progressMax));
-        } else {
+        switch (downloadState) {
+            case START_DOWNLOAD:
+            case PENDING:
+                break;
+            case DOWNLOADING:
 
-            progressDialog.dismiss();
+                progressDialog.setProgress(fileDownloadItem.getCurrentProgress(progressMax));
 
-            if (downloadState.equals(DownloadState.FINISHED)) {
+                break;
+            case FINISHED:
+
+                mCurrentDownloadFileCommand = null;
+
+                progressDialog.dismiss();
+
                 OpenFileCommand openFileCommand = new OpenFileCommand(getContext(), fileDownloadItem.getFileName());
                 openFileCommand.execute();
-            } else if (downloadState.equals(DownloadState.ERROR)) {
+
+                break;
+            case ERROR:
+
+                mCurrentDownloadFileCommand = null;
+
+                progressDialog.dismiss();
 
                 if (cancelDownload)
                     cancelDownload = false;
                 else
                     Toast.makeText(getContext(), getText(R.string.download_failed), Toast.LENGTH_SHORT).show();
-            }
 
+                break;
+            case NO_ENOUGH_SPACE:
+
+                mCurrentDownloadFileCommand = null;
+
+                progressDialog.dismiss();
+
+                Toast.makeText(getActivity(), getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+                break;
         }
 
     }
@@ -458,6 +480,8 @@ public class FileFragment extends Fragment implements OnViewSelectListener, ISho
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mCurrentDownloadFileCommand.unExecute();
+
+                mCurrentDownloadFileCommand = null;
 
                 cancelDownload = true;
 

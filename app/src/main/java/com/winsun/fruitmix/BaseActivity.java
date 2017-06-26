@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
@@ -15,7 +16,7 @@ import org.greenrobot.eventbus.ThreadMode;
  * Created by Administrator on 2017/3/7.
  */
 
-public class BaseActivity extends AppCompatActivity {
+public class BaseActivity extends AppCompatActivity implements BaseView{
 
     protected String action;
 
@@ -62,4 +63,8 @@ public class BaseActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void finishView() {
+        finish();
+    }
 }

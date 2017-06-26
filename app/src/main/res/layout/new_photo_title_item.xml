@@ -32,7 +32,7 @@
             android:id="@+id/photo_title_container"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:translationX="-28dp"
+            android:translationX="-32dp"
             android:orientation="horizontal">
 
             <ImageView
@@ -40,7 +40,6 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginRight="8dp"
                 android:src="@drawable/photo_title_bg" />
 
             <TextView
@@ -51,6 +50,7 @@
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center"
                 android:text="2016-7-26"
+                android:layout_marginLeft="16dp"
                 android:textColor="@color/eighty_seven_percent_black"
                 android:textSize="14dp" />
 

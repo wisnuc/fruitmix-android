@@ -1,114 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_create_user"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context="com.winsun.fruitmix.CreateUserActivity">
 
-    <include layout="@layout/toolbar_layout" />
+    <data>
 
-    <!--<android.support.v7.widget.Toolbar-->
-    <!--android:id="@+id/toolbar"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="?attr/actionBarSize"-->
-    <!--android:background="@color/colorPrimary"-->
-    <!--android:theme="@style/AppTheme.AppBarOverlay"-->
-    <!--app:popupTheme="@style/AppTheme.PopupOverlay">-->
+        <variable
+            name="createUserViewModel"
+            type="com.winsun.fruitmix.CreateUserActivity.CreateUserViewModel" />
 
-    <!--<ImageView-->
-    <!--android:id="@+id/back"-->
-    <!--android:layout_width="24dp"-->
-    <!--android:layout_height="24dp"-->
-    <!--android:layout_centerVertical="true"-->
-    <!--android:layout_marginLeft="16dp"-->
-    <!--android:src="@drawable/ic_back_black" />-->
+        <variable
+            name="createUserPresenter"
+            type="com.winsun.fruitmix.create.user.CreateUserPresenter" />
 
-    <!--</android.support.v7.widget.Toolbar>-->
+        <variable
+            name="baseView"
+            type="com.winsun.fruitmix.interfaces.BaseView" />
 
+    </data>
 
-    <ImageView
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="40dp"
-        android:src="@drawable/head_portrait" />
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/user_name_layout"
+    <LinearLayout
+        android:id="@+id/activity_create_user"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="40dp"
-        app:counterEnabled="true"
-        app:counterMaxLength="20">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/user_name_edittext"
+        <include
+            android:id="@+id/toolbar_layout"
+            layout="@layout/toolbar_layout"
+            app:baseView="@{baseView}"
+            app:title="@{@string/create_user}" />
+
+        <!--<android.support.v7.widget.Toolbar-->
+        <!--android:id="@+id/toolbar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="?attr/actionBarSize"-->
+        <!--android:background="@color/colorPrimary"-->
+        <!--android:theme="@style/AppTheme.AppBarOverlay"-->
+        <!--app:popupTheme="@style/AppTheme.PopupOverlay">-->
+
+        <!--<ImageView-->
+        <!--android:id="@+id/back"-->
+        <!--android:layout_width="24dp"-->
+        <!--android:layout_height="24dp"-->
+        <!--android:layout_centerVertical="true"-->
+        <!--android:layout_marginLeft="16dp"-->
+        <!--android:src="@drawable/ic_back_black" />-->
+
+        <!--</android.support.v7.widget.Toolbar>-->
+
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="40dp"
+            android:src="@drawable/head_portrait" />
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/user_name_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/user_name"
-            android:inputType="text"
-            android:maxLength="20"
-            android:textColor="@color/eighty_seven_percent_black" />
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="40dp"
+            app:counterEnabled="true"
+            app:counterMaxLength="20"
+            app:error="@{createUserViewModel.userNameError}"
+            app:errorEnabled="@{createUserViewModel.userNameErrorEnable}">
 
-    </android.support.design.widget.TextInputLayout>
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/user_name_edittext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/user_name"
+                android:inputType="text"
+                android:maxLength="20"
+                android:text="@={createUserViewModel.userName}"
+                android:textColor="@color/eighty_seven_percent_black" />
 
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/user_password_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="40dp"
-        app:counterEnabled="true"
-        app:counterMaxLength="40">
+        </android.support.design.widget.TextInputLayout>
 
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/user_password_edittext"
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/user_password_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/password_text"
-            android:inputType="textPassword"
-            android:maxLength="40"
-            android:textColor="@color/eighty_seven_percent_black" />
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="40dp"
+            app:counterEnabled="true"
+            app:counterMaxLength="40">
 
-    </android.support.design.widget.TextInputLayout>
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/user_password_edittext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/password_text"
+                android:inputType="textPassword"
+                android:maxLength="40"
+                android:text="@={createUserViewModel.userPassword}"
+                android:textColor="@color/eighty_seven_percent_black" />
 
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/confirm_password_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="40dp"
-        app:counterEnabled="true"
-        app:counterMaxLength="40">
+        </android.support.design.widget.TextInputLayout>
 
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/confirm_password_edittext"
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/confirm_password_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/confirm_user_password"
-            android:inputType="textPassword"
-            android:maxLength="40"
-            android:textColor="@color/eighty_seven_percent_black" />
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="40dp"
+            app:counterEnabled="true"
+            app:counterMaxLength="40"
+            app:error="@{createUserViewModel.userConfirmPasswordError}"
+            app:errorEnabled="@{createUserViewModel.userConfirmPasswordErrorEnable}">
 
-    </android.support.design.widget.TextInputLayout>
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/confirm_password_edittext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/confirm_user_password"
+                android:inputType="textPassword"
+                android:maxLength="40"
+                android:text="@={createUserViewModel.userConfirmPassword}"
+                android:textColor="@color/eighty_seven_percent_black" />
 
-    <Button
-        android:id="@+id/create_user_button"
-        android:layout_width="120dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="40dp"
-        android:background="@drawable/rect_login"
-        android:text="@string/create_user"
-        android:textColor="@color/eighty_seven_percent_white"
-        android:textSize="16dp" />
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/create_user_button"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/rect_login"
+            android:onClick="@{()-> createUserPresenter.createUser(context,createUserViewModel)}"
+            android:text="@string/create_user"
+            android:textColor="@color/eighty_seven_percent_white"
+            android:textSize="16dp" />
 
 
-</LinearLayout>
+    </LinearLayout>
+
+
+</layout>
+

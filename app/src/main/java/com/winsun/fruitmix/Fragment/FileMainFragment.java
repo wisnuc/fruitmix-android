@@ -24,7 +24,6 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.UnScrollableViewPager;
 import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.fileModule.download.DownloadState;
 import com.winsun.fruitmix.fileModule.fragment.FileDownloadFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileFragment;
 import com.winsun.fruitmix.fileModule.fragment.FileShareFragment;

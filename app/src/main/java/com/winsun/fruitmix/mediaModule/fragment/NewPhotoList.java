@@ -2,6 +2,7 @@ package com.winsun.fruitmix.mediaModule.fragment;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -917,23 +918,37 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         private void showPhotoTitleSelectImgAnimator(boolean immediate) {
 
-            startPhotoTitleContainerAnimator(R.animator.photo_title_select_img_translation, immediate);
+            int valueFrom = Util.dip2px(containerActivity, -32);
+            int valueTo = 0;
+
+            ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(mPhotoTitleContainer, "translationX", valueFrom, valueTo);
+
+            startPhotoTitleContainerAnimator(objectAnimator, immediate);
+
+//            startPhotoTitleContainerAnimator(R.animator.photo_title_select_img_translation, immediate);
 
         }
 
         private void dismissPhotoTitleSelectImgAnimator(boolean immediate) {
 
-            startPhotoTitleContainerAnimator(R.animator.photo_title_select_img_translation_restore, immediate);
+            int valueFrom = 0;
+            int valueTo = Util.dip2px(containerActivity, -32);
+
+            ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(mPhotoTitleContainer, "translationX", valueFrom, valueTo);
+
+            startPhotoTitleContainerAnimator(objectAnimator, immediate);
+
+//            startPhotoTitleContainerAnimator(R.animator.photo_title_select_img_translation_restore, immediate);
         }
 
-        private void startPhotoTitleContainerAnimator(int animatorResID, boolean immediate) {
-
-            AnimatorBuilder animatorBuilder = new AnimatorBuilder(containerActivity, animatorResID, mPhotoTitleContainer);
+        private void startPhotoTitleContainerAnimator(ObjectAnimator objectAnimator, boolean immediate) {
 
             if (immediate)
-                animatorBuilder.setDuration(0);
+                objectAnimator.setDuration(0);
+            else
+                objectAnimator.setDuration(200);
 
-            animatorBuilder.startAnimator();
+            objectAnimator.start();
         }
 
     }

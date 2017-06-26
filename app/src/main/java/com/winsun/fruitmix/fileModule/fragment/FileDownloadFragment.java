@@ -68,6 +68,8 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
 
     private boolean selectMode = false;
 
+    private boolean mStartDownloadOrPending = false;
+
     private List<String> selectDownloadedItemUUID;
 
     private OnFileInteractionListener onFileInteractionListener;
@@ -235,7 +237,12 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
         DownloadState downloadState = downloadStateChangedEvent.getDownloadState();
 
         if (downloadState == DownloadState.FINISHED || downloadState == DownloadState.ERROR) {
-            customHandler.sendEmptyMessageDelayed(DOWNLOAD_STATE_CHANGED, DELAY_TIME_MILLISECOND);
+
+            if (mStartDownloadOrPending) {
+                mStartDownloadOrPending = false;
+                customHandler.sendEmptyMessageDelayed(DOWNLOAD_STATE_CHANGED, DELAY_TIME_MILLISECOND);
+            }
+
         } else if (downloadState == DownloadState.NO_ENOUGH_SPACE) {
 
             Toast.makeText(getActivity(), getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
@@ -243,6 +250,8 @@ public class FileDownloadFragment extends Fragment implements OnViewSelectListen
         } else if (downloadState == DownloadState.START_DOWNLOAD || downloadState == DownloadState.PENDING) {
 
             Log.d(TAG, "handleEvent: download state: START_DOWNLOAD,PENDING");
+
+            mStartDownloadOrPending = true;
 
             refreshView();
 

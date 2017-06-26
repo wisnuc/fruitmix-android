@@ -1,17 +1,21 @@
 package com.winsun.fruitmix;
 
 import android.app.ProgressDialog;
+import android.databinding.DataBindingUtil;
+import android.databinding.ObservableBoolean;
+import android.databinding.ObservableField;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.create.user.CreateUserPresenter;
+import com.winsun.fruitmix.create.user.CreateUserPresenterImpl;
+import com.winsun.fruitmix.create.user.CreateUserView;
+import com.winsun.fruitmix.databinding.ActivityCreateUserBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.User;
@@ -20,68 +24,34 @@ import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
-public class CreateUserActivity extends BaseActivity implements View.OnClickListener {
+public class CreateUserActivity extends BaseActivity implements CreateUserView {
 
     public static final String TAG = "CreateUserActivity";
 
-    @BindView(R.id.toolbar)
-    Toolbar mToolbar;
-    @BindView(R.id.user_name_layout)
-    TextInputLayout userNameInputLayout;
-    @BindView(R.id.user_name_edittext)
-    TextInputEditText userNameEditText;
-    @BindView(R.id.user_password_layout)
-    TextInputLayout userPasswordInputLayout;
-    @BindView(R.id.user_password_edittext)
-    TextInputEditText userPasswordEditText;
-    @BindView(R.id.confirm_password_layout)
-    TextInputLayout confirmPasswordLayout;
-    @BindView(R.id.confirm_password_edittext)
-    TextInputEditText confirmPasswordEditText;
-    @BindView(R.id.create_user_button)
-    Button createUserBtn;
+    private ProgressDialog mDialog;
 
-    ProgressDialog mDialog;
-
-    private List<String> remoteUserNames;
+    private CreateUserPresenter createUserPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_user);
 
-        ButterKnife.bind(this);
+        ActivityCreateUserBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_create_user);
 
-        int size = LocalCache.RemoteUserMapKeyIsUUID.size();
-        remoteUserNames = new ArrayList<>(size);
+        CreateUserViewModel createUserViewModel = new CreateUserViewModel();
 
-        final Collection<User> users = new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.values());
-        for (User user : users) {
-            remoteUserNames.add(user.getUserName());
-        }
+        createUserPresenter = new CreateUserPresenterImpl(this);
 
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        binding.setCreateUserViewModel(createUserViewModel);
 
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-        createUserBtn.setOnClickListener(this);
+        binding.setCreateUserPresenter(createUserPresenter);
 
+        binding.setBaseView(this);
 
     }
 
@@ -89,10 +59,10 @@ public class CreateUserActivity extends BaseActivity implements View.OnClickList
     protected void onDestroy() {
         super.onDestroy();
 
-        if (mDialog != null) {
-            mDialog.dismiss();
-            mDialog = null;
-        }
+        dismissDialog();
+        mDialog = null;
+
+        createUserPresenter.onDestroy();
     }
 
     @Override
@@ -105,15 +75,14 @@ public class CreateUserActivity extends BaseActivity implements View.OnClickList
         switch (action) {
             case Util.REMOTE_USER_CREATED: {
 
-                if (mDialog != null)
-                    mDialog.dismiss();
+                createUserPresenter.handleOperationEvent(operationEvent);
 
                 OperationResult operationResult = operationEvent.getOperationResult();
 
                 if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
                     handleCreateUser();
                 } else {
-                    Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
+                    showToast(operationResult.getResultMessage(this));
                 }
 
                 break;
@@ -129,65 +98,64 @@ public class CreateUserActivity extends BaseActivity implements View.OnClickList
     }
 
     @Override
-    public void onClick(View v) {
+    public void hideSoftInput() {
+        Util.hideSoftInput(this);
+    }
 
-        switch (v.getId()) {
-            case R.id.back:
-                finish();
-                break;
-            case R.id.create_user_button:
-
-                Util.hideSoftInput(this);
-
-                if (!Util.getNetworkState(this)) {
-                    Toast.makeText(this, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                String userName = userNameEditText.getText().toString();
-
-                if (remoteUserNames.contains(userName)) {
-
-                    userNameInputLayout.setErrorEnabled(true);
-                    userNameInputLayout.setError(getString(R.string.username_not_unique));
-
-                    return;
-
-                } else if (userName.isEmpty()) {
-
-                    userNameInputLayout.setErrorEnabled(true);
-                    userNameInputLayout.setError(getString(R.string.empty_username));
-
-                    return;
-
-                } else {
-                    userNameInputLayout.setErrorEnabled(false);
-                }
-
-                String password = userPasswordEditText.getText().toString();
-
-                String confirmPassword = confirmPasswordEditText.getText().toString();
-
-                if (!password.equals(confirmPassword)) {
-
-                    confirmPasswordLayout.setErrorEnabled(true);
-                    confirmPasswordLayout.setError(getString(R.string.not_same_password));
-
-                    return;
-
-                } else {
-
-                    confirmPasswordLayout.setErrorEnabled(false);
-
-                }
-
-                mDialog = ProgressDialog.show(CreateUserActivity.this, null, String.format(getString(R.string.operating_title), getString(R.string.create_user)), true, false);
-
-                FNAS.createRemoteUser(userName, password);
-
-                break;
-        }
+    @Override
+    public void showProgressDialog(String message) {
+        mDialog = ProgressDialog.show(CreateUserActivity.this, null, message, true, false);
 
     }
+
+    @Override
+    public void dismissDialog() {
+        if (mDialog != null)
+            mDialog.dismiss();
+    }
+
+    @Override
+    public void showToast(String text) {
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+    }
+
+    public class CreateUserViewModel {
+
+        private String userName;
+        private String userPassword;
+        private String userConfirmPassword;
+
+        public final ObservableBoolean userNameErrorEnable = new ObservableBoolean(false);
+        public final ObservableBoolean userConfirmPasswordErrorEnable = new ObservableBoolean(false);
+
+        public final ObservableField<String> userNameError = new ObservableField<>();
+        public final ObservableField<String> userConfirmPasswordError = new ObservableField<>();
+
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public void setUserName(String userName) {
+            this.userName = userName;
+        }
+
+        public String getUserPassword() {
+            return userPassword;
+        }
+
+        public void setUserPassword(String userPassword) {
+            this.userPassword = userPassword;
+        }
+
+        public String getUserConfirmPassword() {
+            return userConfirmPassword;
+        }
+
+        public void setUserConfirmPassword(String userConfirmPassword) {
+            this.userConfirmPassword = userConfirmPassword;
+        }
+    }
+
 
 }

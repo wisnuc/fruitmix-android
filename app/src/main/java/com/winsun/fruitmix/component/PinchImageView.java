@@ -271,10 +271,6 @@ public class PinchImageView extends AppCompatImageView {
         return mPinchMode;
     }
 
-    public boolean notZoomed() {
-        return mOuterMatrix.isIdentity();
-    }
-
     /**
      * 与ViewPager结合的时候使用
      *
@@ -885,6 +881,9 @@ public class PinchImageView extends AppCompatImageView {
             //如果之前是缩放模式,还需要触发一下缩放结束动画
             if (mPinchMode == PINCH_MODE_SCALE) {
                 scaleEnd();
+            }else {
+                if (userTouchListener != null)
+                    userTouchListener.onTouch(this, event);
             }
 
             mPinchMode = PINCH_MODE_FREE;
@@ -913,6 +912,9 @@ public class PinchImageView extends AppCompatImageView {
                 mPinchMode = PINCH_MODE_SCROLL;
                 //保存触发点用于move计算差值
                 mLastMovePoint.set(event.getX(), event.getY());
+
+                if (userTouchListener != null)
+                    userTouchListener.onTouch(this, event);
             }
             //非第一个点按下，关闭滚动模式，开启缩放模式，记录缩放模式的一些初始数据
         } else if (action == MotionEvent.ACTION_POINTER_DOWN) {
@@ -930,6 +932,10 @@ public class PinchImageView extends AppCompatImageView {
                     scrollBy(event.getX() - mLastMovePoint.x, event.getY() - mLastMovePoint.y);
                     //记录新的移动点
                     mLastMovePoint.set(event.getX(), event.getY());
+
+                    if (userTouchListener != null)
+                        userTouchListener.onTouch(this, event);
+
                     //在缩放模式下移动
                 } else if (mPinchMode == PINCH_MODE_SCALE && event.getPointerCount() > 1) {
                     //两个缩放点间的距离
@@ -946,9 +952,6 @@ public class PinchImageView extends AppCompatImageView {
         mGestureDetector.onTouchEvent(event);
 
         mScaleGestureDetector.onTouchEvent(event);
-
-        if (userTouchListener != null)
-            userTouchListener.onTouch(this, event);
 
         return true;
     }

@@ -1,15 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="16dp"
-    android:gravity="center_vertical"
-    android:orientation="vertical">
 
-    <View
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="navigationItemViewModel"
+            type="com.winsun.fruitmix.mainpage.MainPagePresenterImpl.NavigationDividerViewModel" />
+
+    </data>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="@color/divide_bg" />
+        android:layout_height="16dp"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="@color/divide_bg" />
 
 
-</LinearLayout>
+    </LinearLayout>
+
+</layout>
+
+
 

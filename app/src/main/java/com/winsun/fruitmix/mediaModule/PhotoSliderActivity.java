@@ -915,35 +915,36 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             private void handleTouchEvent(MotionEvent event, GifTouchNetworkImageView view) {
 
-                if (view.getPinchMode() == PinchImageView.PINCH_MODE_SCALE)
-                    return;
+                int action = event.getAction() & MotionEvent.ACTION_MASK;
 
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (action == MotionEvent.ACTION_DOWN) {
+
                     x = event.getRawX();
                     y = event.getRawY();
                     lastX = x;
                     lastY = y;
-                } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+
+                } else if (action == MotionEvent.ACTION_MOVE) {
+
                     lastX = event.getRawX();
                     lastY = event.getRawY();
 
                     //Log.i(TAG, "handleTouchEvent: action move lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
 
-                    if (view.notZoomed() && lastY > y) {
+                    if (lastY > y) {
                         view.setTranslationY(lastY - y);
                     }
-                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+
+                } else if (action == MotionEvent.ACTION_UP) {
 
                     if (lastY - y > Util.dip2px(mContext, 30)) {
 
-                        if (view.notZoomed()) {
-                            finishActivity();
-                        }
+                        finishActivity();
 
                     } else {
 
-                        if (view.notZoomed())
-                            view.setTranslationY(0);
+                        view.setTranslationY(0);
+
                     }
 
                 }

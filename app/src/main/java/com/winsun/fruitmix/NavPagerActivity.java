@@ -8,6 +8,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.databinding.BindingAdapter;
+import android.databinding.BindingMethod;
+import android.databinding.BindingMethods;
+import android.databinding.DataBindingUtil;
+import android.databinding.ObservableBoolean;
+import android.databinding.ObservableField;
+import android.databinding.ObservableInt;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -36,12 +43,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.fragment.FileMainFragment;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.anim.imageloadpattern.AnimateColorMatrixUtil;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
+import com.winsun.fruitmix.mainpage.MainPagePresenter;
+import com.winsun.fruitmix.mainpage.MainPagePresenterImpl;
+import com.winsun.fruitmix.mainpage.MainPageView;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.model.EquipmentSearchManager;
@@ -69,34 +80,108 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class NavPagerActivity extends BaseActivity
-        implements OnMainFragmentInteractionListener {
+        implements OnMainFragmentInteractionListener, MainPageView {
 
     public static final String TAG = NavPagerActivity.class.getSimpleName();
 
-    @BindView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
-    @BindView(R.id.frame_layout)
-    FrameLayout mFrameLayout;
-    @BindView(R.id.version_name)
-    TextView versionName;
-    @BindView(R.id.avatar)
-    TextView mUserAvatar;
-    @BindView(R.id.left_drawer_head_layout)
-    RelativeLayout leftDrawerHeadLayout;
-    @BindView(R.id.user_name_textview)
-    TextView mUserNameTextView;
-    @BindView(R.id.equipment_name)
-    TextView mEquipmentNameTextView;
-    @BindView(R.id.upload_percent_textview)
-    TextView mUploadMediaPercentTextView;
-    @BindView(R.id.upload_percent_progressbar)
-    ProgressBar mUploadPercentProgressBar;
-    @BindView(R.id.upload_count_textview)
-    TextView mUploadCountTextView;
-    @BindView(R.id.navigation_header_arrow_imageview)
+
     ImageButton mNavigationHeaderArrow;
-    @BindView(R.id.navigation_menu_recycler_view)
+
     RecyclerView mNavigationMenuRecyclerView;
+
+    @Override
+    public void gotoUserManageActivity() {
+        Util.startActivity(mContext, UserManageActivity.class);
+    }
+
+    @Override
+    public void gotoSettingActivity() {
+        Util.startActivity(mContext, SettingActivity.class);
+    }
+
+    @Override
+    public void gotoAccountManageActivity() {
+        Util.startActivity(mContext, AccountManageActivity.class);
+    }
+
+    @Override
+    public void loggedInUserItemOnClick(LoggedInUser loggedInUser) {
+        mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.change_user)), true, false);
+        startDiscovery(loggedInUser);
+        mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT_MESSAGE, DISCOVERY_TIMEOUT_TIME);
+    }
+
+    @Override
+    public void logout() {
+        handleLogoutOnClick();
+    }
+
+    @Override
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    @Override
+    public void setCurrentPage(int page) {
+        currentPage = page;
+    }
+
+    @Override
+    public void showMediaHideFile() {
+        fragmentManager.beginTransaction().hide(fileMainFragment).show(mediaMainFragment).commit();
+
+        fileMainFragment.hide();
+        mediaMainFragment.show();
+    }
+
+    @Override
+    public void showFileHideMedia() {
+        fragmentManager.beginTransaction().hide(mediaMainFragment).show(fileMainFragment).commit();
+
+        mediaMainFragment.hide();
+        fileMainFragment.show();
+    }
+
+    @Override
+    public void closeDrawer() {
+        mDrawerLayout.closeDrawer(GravityCompat.START);
+    }
+
+    @BindingMethods({
+            @BindingMethod(type = android.widget.TextView.class,
+                    attribute = "android:background",
+                    method = "setBackgroundResource"),
+
+            @BindingMethod(type = ImageView.class,
+                    attribute = "android:src",
+                    method = "setImageResource"),
+
+    })
+
+    public class NavPagerViewModel {
+
+        public final ObservableField<String> versionNameText = new ObservableField<>();
+
+        public final ObservableField<String> userAvatarText = new ObservableField<>();
+
+        public final ObservableInt userAvatarBackgroundResID = new ObservableInt();
+
+        public final ObservableField<String> userNameText = new ObservableField<>();
+
+        public final ObservableBoolean equipmentNameVisibility = new ObservableBoolean();
+
+        public final ObservableField<String> equipmentNameText = new ObservableField<>();
+
+        public final ObservableField<String> uploadMediaPercentText = new ObservableField<>();
+
+        public final ObservableInt uploadPercentProgress = new ObservableInt();
+
+        public final ObservableField<String> uploadCountText = new ObservableField<>();
+
+        public final ObservableInt headerArrowResID = new ObservableInt();
+
+    }
 
     private Context mContext;
 
@@ -105,10 +190,6 @@ public class NavPagerActivity extends BaseActivity
     private MediaMainFragment mediaMainFragment;
     private FileMainFragment fileMainFragment;
     private FragmentManager fragmentManager;
-
-    private NavigationItemAdapter mNavigationItemAdapter;
-
-    private boolean mNavigationHeaderArrowExpanded = false;
 
     private EquipmentSearchManager mEquipmentSearchManager;
 
@@ -123,9 +204,6 @@ public class NavPagerActivity extends BaseActivity
     public static final int RESULT_FINISH_ACTIVITY = 0x1003;
     public static final int RESULT_LOGOUT = 0x1004;
 
-    private static final int TIME_INTERNAL = 2 * 1000;
-    private long backPressedTimeMillis = 0;
-
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -134,115 +212,6 @@ public class NavPagerActivity extends BaseActivity
                 mediaMainFragment.onMapSharedElements(names, sharedElements);
         }
     };
-
-    private static final int NAVIGATION_ITEM_TYPE_MENU = 0;
-    private static final int NAVIGATION_ITEM_TYPE_LOGGED_IN_USER = 1;
-    private static final int NAVIGATION_ITEM_TYPE_DIVIDER = 2;
-    public static final int NAVIGATION_ITEM_TYPE_ACCOUNT_MANAGE = 3;
-
-
-    private interface NavigationItemType {
-        int getType();
-    }
-
-    private abstract class NavigationMenuItem implements NavigationItemType {
-
-        private int menuIconResID;
-        private String menuText;
-
-        private boolean selected;
-
-        void setSelected(boolean checked) {
-            this.selected = checked;
-        }
-
-        boolean isSelected() {
-            return selected;
-        }
-
-        @Override
-        public int getType() {
-            return NAVIGATION_ITEM_TYPE_MENU;
-        }
-
-        NavigationMenuItem(int menuIconResID, String menuText) {
-            this.menuIconResID = menuIconResID;
-            this.menuText = menuText;
-        }
-
-        void setMenuIconResID(int menuIconResID) {
-            this.menuIconResID = menuIconResID;
-        }
-
-        void setMenuText(String menuText) {
-            this.menuText = menuText;
-        }
-
-        int getMenuIconResID() {
-            return menuIconResID;
-        }
-
-        String getMenuText() {
-            return menuText;
-        }
-
-        public abstract void onClick();
-    }
-
-    private class NavigationLoggerInUserItem implements NavigationItemType {
-
-        private LoggedInUser loggedInUser;
-
-        @Override
-        public int getType() {
-            return NAVIGATION_ITEM_TYPE_LOGGED_IN_USER;
-        }
-
-        NavigationLoggerInUserItem(LoggedInUser loggedInUser) {
-            this.loggedInUser = loggedInUser;
-        }
-
-        LoggedInUser getLoggedInUser() {
-            return loggedInUser;
-        }
-
-        public void onClick() {
-
-            mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.change_user)), true, false);
-            startDiscovery(loggedInUser);
-            mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT_MESSAGE, DISCOVERY_TIMEOUT_TIME);
-        }
-
-    }
-
-    private class NavigationDividerItem implements NavigationItemType {
-
-        @Override
-        public int getType() {
-            return NAVIGATION_ITEM_TYPE_DIVIDER;
-        }
-    }
-
-    private class NavigationAccountManageItem implements NavigationItemType {
-
-        int getItemTextResID() {
-            return R.string.account_manage;
-        }
-
-        @Override
-        public int getType() {
-            return NAVIGATION_ITEM_TYPE_ACCOUNT_MANAGE;
-        }
-
-        public void onClick() {
-
-            startActivityForResult(new Intent(mContext, AccountManageActivity.class), START_ACCOUNT_MANAGE);
-        }
-
-    }
-
-    private List<NavigationItemType> mNavigationItemMenu;
-    private List<NavigationItemType> mNavigationItemLoggedInUser;
 
     public static final int DISCOVERY_TIMEOUT_MESSAGE = 0x1001;
 
@@ -279,28 +248,40 @@ public class NavPagerActivity extends BaseActivity
     private int mAlreadyUploadMediaCount = -1;
     private int mTotalLocalMediaCount = 0;
 
+    private NavPagerViewModel navPagerViewModel;
+
+    private MainPagePresenter mainPagePresenter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_nav_pager);
 
         mContext = this;
 
-        setExitSharedElementCallback(sharedElementCallback);
+        ActivityNavPagerBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_nav_pager);
 
-        ButterKnife.bind(NavPagerActivity.this);
+        mDrawerLayout = binding.drawerLayout;
+
+        mNavigationHeaderArrow = binding.leftDrawerHeadLayout.navigationHeaderArrowImageview;
+
+        mNavigationMenuRecyclerView = binding.navigationMenuRecyclerView;
+
+        navPagerViewModel = new NavPagerViewModel();
+
+        mainPagePresenter = new MainPagePresenterImpl(mContext, navPagerViewModel, this);
+
+        binding.setViewModel(navPagerViewModel);
+
+        binding.setPresenter(mainPagePresenter);
+
+        setExitSharedElementCallback(sharedElementCallback);
 
 /*        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.setDrawerListener(toggle);
         toggle.syncState();*/
 
-        mNavigationItemMenu = new ArrayList<>();
-        mNavigationItemLoggedInUser = new ArrayList<>();
-
         initNavigationMenuRecyclerView();
-
-        initNavigationItemMenu();
 
         refreshUserInNavigationView();
 
@@ -322,14 +303,13 @@ public class NavPagerActivity extends BaseActivity
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
 
-                switchToNavigationItemMenu();
+                mainPagePresenter.switchToNavigationItemMenu();
             }
         });
 
-        mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemMenu);
-        mNavigationItemAdapter.notifyDataSetChanged();
+        mainPagePresenter.switchToNavigationItemMenu();
 
-        versionName.setText(String.format(getString(R.string.android_version_name), Util.getVersionName(mContext)));
+        navPagerViewModel.versionNameText.set(String.format(getString(R.string.android_version_name), Util.getVersionName(mContext)));
 
         mediaMainFragment = MediaMainFragment.newInstance();
         fileMainFragment = FileMainFragment.newInstance();
@@ -338,8 +318,6 @@ public class NavPagerActivity extends BaseActivity
         fragmentManager.beginTransaction().add(R.id.frame_layout, mediaMainFragment).add(R.id.frame_layout, fileMainFragment).hide(fileMainFragment).commit();
 
         currentPage = PAGE_MEDIA;
-
-        ((NavigationMenuItem) mNavigationItemMenu.get(0)).setSelected(true);
 
         mCustomHandler = new CustomHandler(this);
 
@@ -389,22 +367,24 @@ public class NavPagerActivity extends BaseActivity
                 super.onPostExecute(aVoid);
 
                 if (mAlreadyUploadMediaCount == mTotalLocalMediaCount) {
-                    mUploadMediaPercentTextView.setText(getString(R.string.already_upload_finished));
 
-                    mUploadPercentProgressBar.setProgress(100);
+                    navPagerViewModel.uploadMediaPercentText.set(getString(R.string.already_upload_finished));
+
+                    navPagerViewModel.uploadPercentProgress.set(100);
 
                 } else {
 
                     float percent = mAlreadyUploadMediaCount * 100 / mTotalLocalMediaCount;
 
-                    mUploadPercentProgressBar.setProgress((int) percent);
-
                     String percentText = (int) percent + "%";
 
-                    mUploadMediaPercentTextView.setText(String.format(getString(R.string.already_upload_media_percent_text), percentText));
+                    navPagerViewModel.uploadMediaPercentText.set(String.format(getString(R.string.already_upload_media_percent_text), percentText));
+
+                    navPagerViewModel.uploadPercentProgress.set((int) percent);
+
                 }
 
-                mUploadCountTextView.setText(mAlreadyUploadMediaCount + "/" + mTotalLocalMediaCount);
+                navPagerViewModel.uploadCountText.set(mAlreadyUploadMediaCount + "/" + mTotalLocalMediaCount);
 
             }
         }.execute();
@@ -413,80 +393,12 @@ public class NavPagerActivity extends BaseActivity
 
 
     private void initNavigationMenuRecyclerView() {
-        mNavigationItemAdapter = new NavigationItemAdapter();
-        mNavigationMenuRecyclerView.setAdapter(mNavigationItemAdapter);
+
+        mNavigationMenuRecyclerView.setAdapter(mainPagePresenter.getNavigationItemAdapter());
+
         mNavigationMenuRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mNavigationMenuRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-    }
-
-    private void initNavigationItemMenu() {
-
-        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.navigation_photo_menu_bg, getString(R.string.my_photo)) {
-            @Override
-            public void onClick() {
-
-                if (currentPage != PAGE_MEDIA) {
-
-                    currentPage = PAGE_MEDIA;
-
-                    ((NavigationMenuItem) mNavigationItemMenu.get(0)).setSelected(true);
-                    ((NavigationMenuItem) mNavigationItemMenu.get(1)).setSelected(false);
-
-                    fragmentManager.beginTransaction().hide(fileMainFragment).show(mediaMainFragment).commit();
-
-                    fileMainFragment.hide();
-                    mediaMainFragment.show();
-
-                    mNavigationItemAdapter.notifyItemRangeChanged(0, 2);
-                }
-
-            }
-        });
-
-        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.navigation_file_menu_bg, getString(R.string.my_file)) {
-            @Override
-            public void onClick() {
-
-                if (currentPage != PAGE_FILE) {
-
-                    currentPage = PAGE_FILE;
-
-                    ((NavigationMenuItem) mNavigationItemMenu.get(0)).setSelected(false);
-                    ((NavigationMenuItem) mNavigationItemMenu.get(1)).setSelected(true);
-
-                    fragmentManager.beginTransaction().hide(mediaMainFragment).show(fileMainFragment).commit();
-
-                    mediaMainFragment.hide();
-                    fileMainFragment.show();
-
-                    mNavigationItemAdapter.notifyItemRangeChanged(0, 2);
-                }
-
-            }
-        });
-
-//        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_folder, getString(R.string.my_file)) {
-//            @Override
-//            public void onClick() {
-//                toggleFileOrMediaFragment(0);
-//            }
-//        });
-
-        mNavigationItemMenu.add(new NavigationDividerItem());
-        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_settings_black_24dp, getString(R.string.setting)) {
-            @Override
-            public void onClick() {
-                Intent intent = new Intent(NavPagerActivity.this, SettingActivity.class);
-                startActivity(intent);
-            }
-        });
-        mNavigationItemMenu.add(new NavigationMenuItem(R.drawable.ic_power_settings_new_black_24dp, getString(R.string.logout)) {
-            @Override
-            public void onClick() {
-                handleLogoutOnClick();
-            }
-        });
     }
 
     private void startDiscovery(final LoggedInUser loggedInUser) {
@@ -639,7 +551,6 @@ public class NavPagerActivity extends BaseActivity
             EventBus.getDefault().removeStickyEvent(operationEvent);
 
             refreshUserInNavigationView();
-            mNavigationItemAdapter.notifyDataSetChanged();
 
             if (operationEvent.getOperationResult().getOperationResultType() == OperationResultType.SUCCEED) {
 
@@ -668,111 +579,18 @@ public class NavPagerActivity extends BaseActivity
 
         String userName = user.getUserName();
 
-        mUserNameTextView.setText(userName);
+        navPagerViewModel.userNameText.set(userName);
 
-        mUserAvatar.setText(user.getDefaultAvatar());
-        mUserAvatar.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
+        navPagerViewModel.userAvatarText.set(user.getDefaultAvatar());
+        navPagerViewModel.userAvatarBackgroundResID.set(user.getDefaultAvatarBgColorResourceId());
 
-        toggleUserManageNavigationItem(user);
+        mainPagePresenter.refreshUserInNavigationView(mContext, user);
 
-        refreshLoggedInUserNavigationItem();
-
-    }
-
-    private void refreshLoggedInUserNavigationItem() {
-
-        if (LocalCache.LocalLoggedInUsers == null) return;
-
-        List<LoggedInUser> loggedInUsers = new ArrayList<>(LocalCache.LocalLoggedInUsers);
-
-        int loggedInUserListSize = loggedInUsers.size();
-
-        if (loggedInUserListSize == 1) {
-            mEquipmentNameTextView.setVisibility(View.GONE);
-        } else {
-            mEquipmentNameTextView.setVisibility(View.VISIBLE);
-        }
-
-        Iterator<LoggedInUser> iterator = loggedInUsers.iterator();
-        while (iterator.hasNext()) {
-            LoggedInUser loggedInUser = iterator.next();
-            if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
-
-                mEquipmentNameTextView.setText(loggedInUser.getEquipmentName());
-
-                iterator.remove();
-            }
-        }
-
-        if (loggedInUserListSize > 0) {
-
-            mNavigationItemLoggedInUser.clear();
-            for (LoggedInUser loggedInUser : loggedInUsers) {
-                mNavigationItemLoggedInUser.add(new NavigationLoggerInUserItem(loggedInUser));
-            }
-            mNavigationItemLoggedInUser.add(new NavigationAccountManageItem());
-
-        } else {
-
-            mNavigationItemLoggedInUser.clear();
-            mNavigationItemLoggedInUser.add(new NavigationAccountManageItem());
-        }
-
-        mNavigationHeaderArrow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mNavigationHeaderArrowExpanded = !mNavigationHeaderArrowExpanded;
-                refreshNavigationHeader();
-            }
-        });
+        mainPagePresenter.notifyAdapterDataSetChanged();
 
     }
 
-    private void refreshNavigationHeader() {
-        if (mNavigationHeaderArrowExpanded) {
 
-            switchToNavigationItemLoggedInUser();
-
-        } else {
-
-            switchToNavigationItemMenu();
-
-        }
-    }
-
-    private void switchToNavigationItemLoggedInUser() {
-        mNavigationHeaderArrow.setImageResource(R.drawable.navigation_header_arrow_up);
-
-        mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemLoggedInUser);
-        mNavigationItemAdapter.notifyDataSetChanged();
-    }
-
-    private void switchToNavigationItemMenu() {
-        mNavigationHeaderArrow.setImageResource(R.drawable.navigation_header_arrow_down);
-
-        mNavigationItemAdapter.setNavigationItemTypes(mNavigationItemMenu);
-        mNavigationItemAdapter.notifyDataSetChanged();
-    }
-
-    private void toggleUserManageNavigationItem(User user) {
-        if (user.isAdmin()) {
-
-            if (mNavigationItemMenu.get(2).getType() != NAVIGATION_ITEM_TYPE_MENU) {
-                mNavigationItemMenu.add(2, new NavigationMenuItem(R.drawable.ic_person_add_black_24dp, getString(R.string.user_manage)) {
-                    @Override
-                    public void onClick() {
-                        Intent intent = new Intent(NavPagerActivity.this, UserManageActivity.class);
-                        startActivity(intent);
-                    }
-                });
-            }
-
-        } else {
-
-            if (mNavigationItemMenu.get(2).getType() == NAVIGATION_ITEM_TYPE_MENU)
-                mNavigationItemMenu.remove(2);
-        }
-    }
 
     private void showExplanation(String title, String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -874,8 +692,10 @@ public class NavPagerActivity extends BaseActivity
             if (resultCode == RESULT_FINISH_ACTIVITY) {
                 finish();
             } else if (resultCode == RESULT_REFRESH_LOGGED_IN_USER) {
-                refreshLoggedInUserNavigationItem();
-                mNavigationItemAdapter.notifyDataSetChanged();
+
+                mainPagePresenter.refreshNavigationLoggedInUsers();
+                mainPagePresenter.notifyAdapterDataSetChanged();
+
             } else if (resultCode == RESULT_LOGOUT) {
                 handleLogoutOnClick();
             }
@@ -923,242 +743,4 @@ public class NavPagerActivity extends BaseActivity
         }.execute();
     }
 
-
-    private void toggleFileOrMediaFragment(int navigationItemMenuPosition) {
-
-        NavigationMenuItem item = (NavigationMenuItem) mNavigationItemMenu.get(0);
-
-        if (currentPage == PAGE_MEDIA) {
-
-            currentPage = PAGE_FILE;
-
-            item.setMenuText(getString(R.string.my_photo));
-            item.setMenuIconResID(R.drawable.ic_photo_black);
-
-            fragmentManager.beginTransaction().hide(mediaMainFragment).show(fileMainFragment).commit();
-
-            mediaMainFragment.hide();
-            fileMainFragment.show();
-
-        } else {
-
-            currentPage = PAGE_MEDIA;
-
-            item.setMenuText(getString(R.string.my_file));
-            item.setMenuIconResID(R.drawable.ic_folder);
-
-            fragmentManager.beginTransaction().hide(fileMainFragment).show(mediaMainFragment).commit();
-
-            fileMainFragment.hide();
-            mediaMainFragment.show();
-
-        }
-        mNavigationItemAdapter.notifyItemChanged(0);
-
-    }
-
-    private class NavigationItemAdapter extends RecyclerView.Adapter<BaseNavigationViewHolder> {
-
-
-        private List<NavigationItemType> mNavigationItemTypes;
-
-        public void setNavigationItemTypes(List<NavigationItemType> navigationItemTypes) {
-            mNavigationItemTypes = navigationItemTypes;
-        }
-
-        @Override
-        public BaseNavigationViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-            View view;
-
-            switch (viewType) {
-                case NAVIGATION_ITEM_TYPE_DIVIDER:
-
-                    view = LayoutInflater.from(mContext).inflate(R.layout.navigation_divider_item, parent, false);
-
-                    return new NavigationDividerViewHolder(view);
-
-                case NAVIGATION_ITEM_TYPE_LOGGED_IN_USER:
-
-                    view = LayoutInflater.from(mContext).inflate(R.layout.navigation_logged_in_user_item, parent, false);
-
-                    return new NavigationLoggedInUserViewHolder(view);
-
-                case NAVIGATION_ITEM_TYPE_MENU:
-                    view = LayoutInflater.from(mContext).inflate(R.layout.navigation_menu_item, parent, false);
-                    return new NavigationMenuViewHolder(view);
-
-                case NAVIGATION_ITEM_TYPE_ACCOUNT_MANAGE:
-                    view = LayoutInflater.from(mContext).inflate(R.layout.navigation_logged_in_user_item, parent, false);
-
-                    return new NavigationAccountItemViewHolder(view);
-            }
-
-            return null;
-        }
-
-
-        @Override
-        public void onBindViewHolder(BaseNavigationViewHolder holder, int position) {
-
-            holder.refreshView(mNavigationItemTypes.get(position));
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            return mNavigationItemTypes.get(position).getType();
-        }
-
-        @Override
-        public int getItemCount() {
-            return mNavigationItemTypes.size();
-        }
-    }
-
-    private abstract class BaseNavigationViewHolder extends RecyclerView.ViewHolder {
-
-        BaseNavigationViewHolder(View itemView) {
-            super(itemView);
-        }
-
-        public abstract void refreshView(NavigationItemType type);
-    }
-
-    class NavigationMenuViewHolder extends BaseNavigationViewHolder {
-
-        @BindView(R.id.menu_icon)
-        ImageView menuIcon;
-        @BindView(R.id.menu_text)
-        TextView menuTextView;
-        @BindView(R.id.menu_layout)
-        ViewGroup menuLayout;
-
-        NavigationMenuViewHolder(View itemView) {
-            super(itemView);
-
-            ButterKnife.bind(this, itemView);
-        }
-
-        @Override
-        public void refreshView(NavigationItemType type) {
-
-            final NavigationMenuItem item = (NavigationMenuItem) type;
-
-            menuIcon.setImageResource(item.getMenuIconResID());
-            menuTextView.setText(item.getMenuText());
-
-            menuIcon.setSelected(item.isSelected());
-
-            if (item.isSelected()) {
-                menuTextView.setTextColor(ContextCompat.getColor(mContext, R.color.checked_navigation_menu_item_text_color));
-            } else {
-                menuTextView.setTextColor(ContextCompat.getColor(mContext, R.color.navigation_menu_item_text_color));
-            }
-
-            menuLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    item.onClick();
-
-                    mDrawerLayout.closeDrawer(GravityCompat.START);
-                }
-            });
-        }
-    }
-
-    class NavigationLoggedInUserViewHolder extends BaseNavigationViewHolder {
-
-        @BindView(R.id.avatar)
-        TextView avatar;
-        @BindView(R.id.item_title)
-        TextView itemTitle;
-        @BindView(R.id.item_sub_title)
-        TextView itemSubTitle;
-        @BindView(R.id.logged_in_user_item_layout)
-        ViewGroup itemLayout;
-
-        NavigationLoggedInUserViewHolder(View itemView) {
-            super(itemView);
-
-            ButterKnife.bind(this, itemView);
-        }
-
-        @Override
-        public void refreshView(NavigationItemType type) {
-
-            final NavigationLoggerInUserItem loggerInUserItem = (NavigationLoggerInUserItem) type;
-
-            LoggedInUser loggedInUser = loggerInUserItem.getLoggedInUser();
-            User user = loggedInUser.getUser();
-            avatar.setText(user.getDefaultAvatar());
-            avatar.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
-            itemTitle.setText(user.getUserName());
-
-            itemSubTitle.setText(loggedInUser.getEquipmentName());
-
-            itemLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    loggerInUserItem.onClick();
-
-                    mDrawerLayout.closeDrawer(GravityCompat.START);
-                }
-            });
-        }
-    }
-
-    private class NavigationDividerViewHolder extends BaseNavigationViewHolder {
-
-        NavigationDividerViewHolder(View itemView) {
-            super(itemView);
-        }
-
-        @Override
-        public void refreshView(NavigationItemType type) {
-
-        }
-    }
-
-    class NavigationAccountItemViewHolder extends BaseNavigationViewHolder {
-
-        @BindView(R.id.avatar)
-        TextView avatarTextView;
-        @BindView(R.id.item_title)
-        TextView itemTitle;
-        @BindView(R.id.item_sub_title)
-        TextView itemSubTitle;
-        @BindView(R.id.logged_in_user_item_layout)
-        ViewGroup itemLayout;
-
-        NavigationAccountItemViewHolder(View itemView) {
-            super(itemView);
-
-            ButterKnife.bind(this, itemView);
-        }
-
-        @Override
-        public void refreshView(NavigationItemType type) {
-
-            final NavigationAccountManageItem item = (NavigationAccountManageItem) type;
-
-            String title = getString(item.getItemTextResID());
-
-            itemTitle.setText(title);
-
-            String avatar = title.substring(0, 1).toUpperCase();
-
-            avatarTextView.setText(avatar);
-
-            itemSubTitle.setVisibility(View.GONE);
-
-            itemLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    item.onClick();
-
-                    mDrawerLayout.closeDrawer(GravityCompat.START);
-                }
-            });
-        }
-    }
 }

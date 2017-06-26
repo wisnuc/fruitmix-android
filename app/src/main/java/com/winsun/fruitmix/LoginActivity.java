@@ -1,34 +1,24 @@
 package com.winsun.fruitmix;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.eventbus.LoggedInUserRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
-import com.winsun.fruitmix.model.OperationTargetType;
-import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;

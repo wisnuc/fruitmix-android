@@ -579,8 +579,6 @@ public class Util {
     }
 
 
-
-
     public static boolean checkAutoUpload(Context context) {
         for (LoggedInUser loggedInUser : LocalCache.LocalLoggedInUsers) {
 
@@ -635,5 +633,14 @@ public class Util {
 
         return false;
     }
+
+    public static void startActivity(Context context, Class target) {
+        context.startActivity(new Intent(context, target));
+    }
+
+    public static void startActivityForResult(Activity activity, Class target, int requestCode) {
+        activity.startActivityForResult(new Intent(activity, target), requestCode);
+    }
+
 
 }

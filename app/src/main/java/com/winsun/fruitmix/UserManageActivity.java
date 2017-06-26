@@ -2,31 +2,29 @@ package com.winsun.fruitmix;
 
 import android.content.Context;
 import android.content.Intent;
-import android.databinding.DataBindingComponent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.app.Activity;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.databinding.ActivityUserManageBinding;
+import com.winsun.fruitmix.databinding.UserManageItemBinding;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.user.manage.UserManagePresenterImpl;
+import com.winsun.fruitmix.user.manage.UserMangePresenter;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -35,23 +33,13 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class UserManageActivity extends BaseActivity implements View.OnClickListener {
+public class UserManageActivity extends BaseActivity {
 
     public static final String TAG = "UserManageActivity";
 
-    @BindView(R.id.toolbar)
-    Toolbar mToolbar;
-    @BindView(R.id.title)
-    TextView mTitleTextView;
-
-    @BindView(R.id.user_list)
     ListView mUserListView;
 
-    @BindView(R.id.user_list_empty)
     TextView mUserListEmpty;
-
-    @BindView(R.id.add_user)
-    FloatingActionButton mAddUserBtn;
 
     private List<User> mUserList;
 
@@ -59,28 +47,25 @@ public class UserManageActivity extends BaseActivity implements View.OnClickList
 
     private UserListAdapter mUserListAdapter;
 
+    private UserMangePresenter userMangePresenter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_manage);
 
-        ButterKnife.bind(this);
+        ActivityUserManageBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_user_manage);
+
+        mUserListView = binding.userList;
+
+        mUserListEmpty = binding.userListEmpty;
 
         mContext = this;
 
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        userMangePresenter = new UserManagePresenterImpl(this);
 
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        binding.setUserPresenter(userMangePresenter);
 
-        mTitleTextView.setText(getString(R.string.user_manage));
-
-        mAddUserBtn.setOnClickListener(this);
+        binding.setBaseView(this);
 
         refreshView();
     }
@@ -90,11 +75,13 @@ public class UserManageActivity extends BaseActivity implements View.OnClickList
         super.onDestroy();
 
         mContext = null;
+
+        userMangePresenter.onDestroy();
     }
 
     private void refreshView() {
 
-        if(LocalCache.RemoteUserMapKeyIsUUID == null){
+        if (LocalCache.RemoteUserMapKeyIsUUID == null) {
             Log.w(TAG, "refreshUserInNavigationView: RemoteUserMapKeyIsUUID", new NullPointerException());
         }
 
@@ -138,22 +125,6 @@ public class UserManageActivity extends BaseActivity implements View.OnClickList
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.back:
-                finish();
-                break;
-            case R.id.add_user:
-
-                Intent intent = new Intent(mContext, CreateUserActivity.class);
-                startActivityForResult(intent, Util.KEY_CREATE_USER_REQUEST_CODE);
-
-                break;
-            default:
-        }
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -180,17 +151,23 @@ public class UserManageActivity extends BaseActivity implements View.OnClickList
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            final ViewHolder viewHolder;
-            if (convertView == null) {
-                convertView = LayoutInflater.from(mContext).inflate(R.layout.user_manage_item, parent, false);
 
-                viewHolder = new ViewHolder(convertView);
-                convertView.setTag(viewHolder);
+            UserManageItemBinding binding;
+
+            if (convertView == null) {
+
+                binding = UserManageItemBinding.inflate(LayoutInflater.from(mContext), parent, false);
+
+                convertView = binding.getRoot();
+
             } else {
-                viewHolder = (ViewHolder) convertView.getTag();
+
+                binding = DataBindingUtil.getBinding(convertView);
             }
 
-            viewHolder.refreshView(mUserList.get(position));
+            binding.setUser(new UserManageWrap(mUserList.get(position)));
+            binding.executePendingBindings();
+
 
 /*            convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -206,6 +183,35 @@ public class UserManageActivity extends BaseActivity implements View.OnClickList
             return convertView;
         }
     }
+
+    public class UserManageWrap {
+
+        private User user;
+
+        public UserManageWrap(User user) {
+            this.user = user;
+        }
+
+        public String getUserName() {
+            String userName = user.getUserName();
+
+            if (userName.length() > 20) {
+                userName = userName.substring(0, 20);
+                userName += mContext.getString(R.string.android_ellipsize);
+            }
+
+            return userName;
+        }
+
+        public String getDefaultAvatar() {
+            return Util.getUserNameFirstLetter(user.getUserName());
+        }
+
+        public String getEmail() {
+            return user.getEmail();
+        }
+    }
+
 
     class ViewHolder {
         @BindView(R.id.user_default_portrait)

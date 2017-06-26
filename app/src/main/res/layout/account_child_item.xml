@@ -1,74 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="56dp"
-    android:background="@color/white">
 
-    <TextView
-        android:id="@+id/user_default_portrait"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_alignParentLeft="true"
-        android:layout_centerVertical="true"
-        android:background="@drawable/user_portrait_bg_green"
-        android:gravity="center"
-        android:textColor="@color/eighty_seven_percent_white"
-        android:textSize="16dp" />
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout
-        android:id="@+id/user_info_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="16dp"
-        android:layout_toRightOf="@id/user_default_portrait"
-        android:orientation="vertical">
+    <data>
+
+        <variable
+            name="accountChildViewModel"
+            type="com.winsun.fruitmix.AccountManageActivity.AccountChildViewModel" />
+
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/white">
 
         <TextView
-            android:id="@+id/user_name"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:gravity="center_vertical"
+            android:id="@+id/user_default_portrait"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/user_portrait_bg_green"
+            android:text="@{accountChildViewModel.avatarName}"
+            bind:backgroundResource="@{accountChildViewModel.backgroundResource}"
+            android:gravity="center"
+            android:textColor="@color/eighty_seven_percent_white"
             android:textSize="16dp" />
 
-        <TextView
-            android:id="@+id/user_email"
+        <LinearLayout
+            android:id="@+id/user_info_layout"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:textColor="@color/fifty_four_percent_black"
-            android:textSize="14dp"
-            android:visibility="gone" />
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:layout_toRightOf="@id/user_default_portrait"
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="@{accountChildViewModel.userName}"
+                android:gravity="center_vertical"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="16dp" />
 
-    <LinearLayout
-        android:id="@+id/del_user"
-        android:layout_width="40dp"
-        android:layout_height="50dp"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="visible">
+            <TextView
+                android:id="@+id/user_email"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:textColor="@color/fifty_four_percent_black"
+                android:textSize="14dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/del_user"
+            android:layout_width="40dp"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:clickable="true"
+            android:onClick="@{()->accountChildViewModel.deleteUser()}"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/del_user" />
+
+        </LinearLayout>
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/del_user" />
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignLeft="@id/user_info_layout"
+            android:layout_alignParentBottom="true"
+            android:background="#DEDEDE" />
 
-    </LinearLayout>
+    </RelativeLayout>
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_alignLeft="@id/user_info_layout"
-        android:layout_alignParentBottom="true"
-        android:background="#DEDEDE" />
+</layout>
 
-</RelativeLayout>
 
 

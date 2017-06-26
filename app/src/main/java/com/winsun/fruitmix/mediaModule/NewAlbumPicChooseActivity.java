@@ -1,9 +1,7 @@
 package com.winsun.fruitmix.mediaModule;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -13,7 +11,6 @@ import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.List;

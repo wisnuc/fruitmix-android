@@ -1,41 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:id="@+id/logged_in_user_item_layout"
-    android:layout_height="64dp"
-    android:gravity="center_vertical"
-    android:orientation="horizontal">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <TextView
-        android:id="@+id/avatar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginRight="16dp"
-        android:background="@drawable/share_portrait_bg"
-        android:gravity="center"
-        android:textColor="@color/eighty_seven_percent_white"
-        android:textSize="18dp" />
+    <data>
+
+        <variable
+            name="navigationItemViewModel"
+            type="com.winsun.fruitmix.mainpage.MainPagePresenterImpl.NavigationLoggedInUserViewModel" />
+
+        <import type="android.view.View"/>
+
+    </data>
+
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:id="@+id/logged_in_user_item_layout"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:clickable="true"
+        android:gravity="center_vertical"
+        android:onClick="@{()->navigationItemViewModel.onClick()}"
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/item_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#DE000000"
-            android:textSize="14dp" />
+            android:id="@+id/avatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="16dp"
+            android:background="@{navigationItemViewModel.avatarBackgroundResId,default=@drawable/share_portrait_bg}"
+            android:gravity="center"
+            android:text="@{navigationItemViewModel.avatarText}"
+            android:textColor="@color/eighty_seven_percent_white"
+            android:textSize="18dp" />
 
-        <TextView
-            android:id="@+id/item_sub_title"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#8A000000"
-            android:textSize="12dp"
-            android:visibility="visible" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/item_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{navigationItemViewModel.titleText}"
+                android:textColor="#DE000000"
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/item_sub_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{navigationItemViewModel.subTitleText}"
+                android:textColor="#8A000000"
+                android:textSize="12dp"
+                android:visibility="@{navigationItemViewModel.itemSubTitleVisibility?View.VISIBLE:View.GONE}" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</layout>
+

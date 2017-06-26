@@ -8,6 +8,7 @@
         android:id="@+id/mainPic"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
         android:src="@drawable/new_placeholder"
         android:visibility="visible" />
 
