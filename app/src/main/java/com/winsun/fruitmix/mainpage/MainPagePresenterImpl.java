@@ -1,46 +1,42 @@
 package com.winsun.fruitmix.mainpage;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
-import android.databinding.BindingAdapter;
+import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
-import android.databinding.ObservableBoolean;
-import android.databinding.ObservableField;
-import android.databinding.ObservableInt;
 import android.databinding.ViewDataBinding;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.winsun.fruitmix.AccountManageActivity;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.databinding.NavigationMenuItemBinding;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.http.IHttpUtil;
+import com.winsun.fruitmix.http.OkHttpUtil;
+import com.winsun.fruitmix.invitation.Invitation;
 import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by Administrator on 2017/6/23.
  */
 
 public class MainPagePresenterImpl implements MainPagePresenter {
+
+    public static final String TAG = MainPagePresenterImpl.class.getSimpleName();
 
     private static final int NAVIGATION_ITEM_TYPE_MENU = 0;
     private static final int NAVIGATION_ITEM_TYPE_LOGGED_IN_USER = 1;
@@ -56,9 +52,15 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     private NavigationLoggedInUserViewModel navigationAccountManageViewModel;
 
-    private boolean mNavigationHeaderArrowExpanded = false;
+    private boolean mNavigationHeaderArrowDown = true;
 
     private MainPageView mainPageView;
+
+    private ThreadManager threadManager;
+
+    private Invitation invitation;
+
+    private Resources resources;
 
     public MainPagePresenterImpl(Context context, NavPagerActivity.NavPagerViewModel navPagerViewModel, MainPageView mainPageView) {
 
@@ -75,6 +77,15 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         initNavigationMenuItems(context);
 
+        threadManager = ThreadManager.getInstance();
+
+        IHttpUtil iHttpUtil = new OkHttpUtil();
+
+        IWXAPI iwxapi = Util.registerToWX(context);
+
+        invitation = new Invitation(iHttpUtil, iwxapi);
+
+        resources = context.getResources();
 
     }
 
@@ -167,7 +178,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
     private void toggleUserManageNavigationItem(Context context, User user) {
         if (user.isAdmin()) {
 
-            if (mNavigationMenuItems.get(2).getType() != NAVIGATION_ITEM_TYPE_MENU) {
+            if (mNavigationMenuItems.size() == 4) {
 
                 NavigationMenuViewModel model = new NavigationMenuViewModel() {
                     @Override
@@ -184,7 +195,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         } else {
 
-            if (mNavigationMenuItems.get(2).getType() == NAVIGATION_ITEM_TYPE_MENU)
+            if (mNavigationMenuItems.size() == 5)
                 mNavigationMenuItems.remove(2);
         }
     }
@@ -198,47 +209,12 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
                 super.onClick();
 
-                if (mainPageView.getCurrentPage() != NavPagerActivity.PAGE_MEDIA) {
-
-                    mainPageView.setCurrentPage(NavPagerActivity.PAGE_MEDIA);
-
-                    ((NavigationMenuViewModel) mNavigationMenuItems.get(0)).setMenuIconSelect(true);
-                    ((NavigationMenuViewModel) mNavigationMenuItems.get(1)).setMenuIconSelect(false);
-
-                    navigationItemAdapter.notifyItemRangeChanged(0, 2);
-
-                    mainPageView.showMediaHideFile();
-                }
-            }
-        };
-        model.setMenuIconResId(R.drawable.navigation_photo_menu_bg);
-        model.setMenuText(context.getString(R.string.my_photo));
-        model.setMenuIconSelect(true);
-
-        mNavigationMenuItems.add(model);
-
-        model = new NavigationMenuViewModel() {
-            @Override
-            public void onClick() {
-
-                super.onClick();
-
-                if (mainPageView.getCurrentPage() != NavPagerActivity.PAGE_FILE) {
-
-                    mainPageView.setCurrentPage(NavPagerActivity.PAGE_FILE);
-
-                    ((NavigationMenuViewModel) mNavigationMenuItems.get(0)).setMenuIconSelect(false);
-                    ((NavigationMenuViewModel) mNavigationMenuItems.get(1)).setMenuIconSelect(true);
-
-                    navigationItemAdapter.notifyItemRangeChanged(0, 2);
-
-                    mainPageView.showFileHideMedia();
-                }
+                mainPageView.gotoFileDownloadActivity();
 
             }
         };
         model.setMenuIconResId(R.drawable.navigation_file_menu_bg);
-        model.setMenuText(context.getString(R.string.my_file));
+        model.setMenuText(context.getString(R.string.download_manage));
 
         mNavigationMenuItems.add(model);
 
@@ -269,10 +245,74 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         mNavigationMenuItems.add(model);
 
+        model = new NavigationMenuViewModel() {
+            @Override
+            public void onClick() {
+                super.onClick();
+
+                threadManager.runOnCacheThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        invitation.createTicket(new BaseOperateDataCallback<String>() {
+                            @Override
+                            public void onSucceed(final String data, OperationResult result) {
+
+                                Log.d(TAG, "onSucceed: data: " + data);
+
+                                threadManager.runOnMainThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        invitation.shareMiniWXApp(resources, data);
+                                    }
+                                });
+
+                            }
+
+                            @Override
+                            public void onFail(OperationResult result) {
+
+                                Log.d(TAG, "onFail: result: " + result);
+
+                                threadManager.runOnMainThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        invitation.shareMiniWXApp(resources, "");
+
+
+                                    }
+                                });
+
+                            }
+                        });
+
+                    }
+                });
+
+            }
+        };
+
+        model.setMenuIconResId(R.drawable.ic_settings_black_24dp);
+        model.setMenuText("发起邀请");
+        mNavigationMenuItems.add(model);
+
+    }
+
+    @Override
+    public void toggleNavigationHeaderArrow() {
+
+        if (mNavigationHeaderArrowDown) {
+            switchToNavigationItemLoggedInUsers();
+        } else {
+            switchToNavigationItemMenu();
+        }
     }
 
     @Override
     public void switchToNavigationItemMenu() {
+
+        mNavigationHeaderArrowDown = true;
+
         navPagerViewModel.headerArrowResID.set(R.drawable.navigation_header_arrow_down);
 
         navigationItemAdapter.setmNavigationItems(mNavigationMenuItems);
@@ -280,20 +320,13 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     }
 
-    @Override
-    public void toggleNavigationHeaderArrow() {
-        mNavigationHeaderArrowExpanded = !mNavigationHeaderArrowExpanded;
+    private void switchToNavigationItemLoggedInUsers() {
+        mNavigationHeaderArrowDown = false;
 
-        if (mNavigationHeaderArrowExpanded) {
+        navPagerViewModel.headerArrowResID.set(R.drawable.navigation_header_arrow_up);
 
-            navPagerViewModel.headerArrowResID.set(R.drawable.navigation_header_arrow_up);
-
-            navigationItemAdapter.setmNavigationItems(mNavigationMenuLoggedInUsers);
-            navigationItemAdapter.notifyDataSetChanged();
-
-        } else {
-            switchToNavigationItemMenu();
-        }
+        navigationItemAdapter.setmNavigationItems(mNavigationMenuLoggedInUsers);
+        navigationItemAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -304,7 +337,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
     }
 
 
-    private class NavigationItemAdapter extends RecyclerView.Adapter<BindingNavigationViewHolder> {
+    private class NavigationItemAdapter extends RecyclerView.Adapter<BindingViewHolder> {
 
         private List<BaseNavigationItemViewModel> mNavigationItems;
 
@@ -313,18 +346,17 @@ public class MainPagePresenterImpl implements MainPagePresenter {
         }
 
         @Override
-        public BindingNavigationViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public BindingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
             ViewDataBinding viewDataBinding =
                     DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), viewType, parent, false);
 
-            return new BindingNavigationViewHolder(viewDataBinding);
+            return new BindingViewHolder(viewDataBinding);
 
         }
 
-
         @Override
-        public void onBindViewHolder(BindingNavigationViewHolder holder, int position) {
+        public void onBindViewHolder(BindingViewHolder holder, int position) {
 
             holder.getViewDataBinding().setVariable(BR.navigationItemViewModel, mNavigationItems.get(position));
             holder.getViewDataBinding().executePendingBindings();
@@ -339,20 +371,6 @@ public class MainPagePresenterImpl implements MainPagePresenter {
         @Override
         public int getItemCount() {
             return mNavigationItems.size();
-        }
-    }
-
-    private class BindingNavigationViewHolder extends RecyclerView.ViewHolder {
-
-        private final ViewDataBinding viewDataBinding;
-
-        BindingNavigationViewHolder(ViewDataBinding viewDataBinding) {
-            super(viewDataBinding.getRoot());
-            this.viewDataBinding = viewDataBinding;
-        }
-
-        private ViewDataBinding getViewDataBinding() {
-            return viewDataBinding;
         }
     }
 

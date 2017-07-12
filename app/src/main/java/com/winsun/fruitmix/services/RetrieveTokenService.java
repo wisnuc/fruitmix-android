@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
@@ -93,8 +94,8 @@ public class RetrieveTokenService extends IntentService {
 
         try {
 
-            FNAS.Gateway = gateway;
-            FNAS.userUUID = userUUID;
+            FNAS.TEMPORARY_GATEWAY = gateway;
+            FNAS.TEMPORARY_USER_UUID = userUUID;
 
             httpResponse = FNAS.loadToken(this, gateway, userUUID, userPassword);
 
@@ -102,13 +103,23 @@ public class RetrieveTokenService extends IntentService {
 
             if (responseCode == 200) {
 
-                FNAS.JWT = new JSONObject(httpResponse.getResponseData()).getString("token");
+                FNAS.TEMPORARY_JWT = new JSONObject(httpResponse.getResponseData()).getString("token");
 
-                LocalCache.saveToken(this, FNAS.JWT);
+                //check clear file download item
+                if (Util.clearFileDownloadItem) {
+                    FileDownloadManager.INSTANCE.clearFileDownloadItems();
+                    Util.clearFileDownloadItem = false;
+                }
 
                 if (Util.loginType == LoginType.LOGIN) {
+
+                    FNAS.JWT = FNAS.TEMPORARY_JWT;
+                    FNAS.Gateway = FNAS.TEMPORARY_GATEWAY;
+                    FNAS.userUUID = FNAS.TEMPORARY_USER_UUID;
+
+                    LocalCache.saveToken(this, FNAS.JWT);
                     LocalCache.saveGateway(this, FNAS.Gateway);
-                    LocalCache.saveUserUUID(this, userUUID);
+                    LocalCache.saveUserUUID(this, FNAS.userUUID);
                 }
 
                 operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationSuccess(R.string.operate));

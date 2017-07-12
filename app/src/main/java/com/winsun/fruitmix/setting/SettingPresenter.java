@@ -10,6 +10,9 @@ import com.winsun.fruitmix.SettingActivity;
 
 public interface SettingPresenter {
 
+    void onCreate(Context context);
+
     void clearCache(Context context, SettingActivity.SettingViewModel settingViewModel);
 
+    void onDestroy(Context context);
 }

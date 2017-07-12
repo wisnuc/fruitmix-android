@@ -81,6 +81,7 @@
     <string name="logout">注销</string>
     <string name="my_file">我的文件</string>
     <string name="my_photo">我的照片</string>
+    <string name="download_manage">下载管理</string>
 
     <string name="account_manage">帐号管理</string>
 
@@ -204,5 +205,11 @@
 
     <string name="max_select_photo">已选最大数量</string>
 
+    <!-- wechat -->
+    <string name="errcode_success">发送成功</string>
+    <string name="errcode_cancel">发送取消</string>
+    <string name="errcode_deny">发送被拒绝</string>
+    <string name="errcode_unsupported">不支持错误</string>
+    <string name="errcode_unknown">发送返回</string>
 
 </resources>

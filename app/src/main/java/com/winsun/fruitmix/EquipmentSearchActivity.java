@@ -1,5 +1,6 @@
 package com.winsun.fruitmix;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,6 +21,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
+import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.model.EquipmentSearchManager;
@@ -39,6 +43,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -89,6 +94,13 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private boolean onPause = false;
 
+    public static void gotoEquipmentActivity(Activity activity, boolean shouldStopService) {
+        Intent intent = new Intent(activity, EquipmentSearchActivity.class);
+        intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE, shouldStopService);
+        activity.startActivity(intent);
+        activity.finish();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -128,6 +140,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                         FNAS.JWT = loggedInUser.getToken();
                         LocalCache.DeviceID = loggedInUser.getDeviceID();
 
+                        Log.d(TAG, "onChildClick: userUUID: " + FNAS.userUUID);
+
                         LocalCache.saveToken(mContext, FNAS.JWT);
                         LocalCache.saveGateway(mContext, FNAS.Gateway);
                         LocalCache.saveUserUUID(mContext, FNAS.userUUID);
@@ -137,10 +151,14 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
                             Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
                         }
 
+                        Util.clearFileDownloadItem = true;
+
                         FNAS.retrieveUser(mContext);
-                        startActivity(new Intent(mContext, NavPagerActivity.class));
+
                         setResult(RESULT_OK);
                         finish();
+
+                        startActivity(new Intent(mContext, NavPagerActivity.class));
 
                         return true;
                     }
@@ -211,6 +229,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         mEquipmentSearchManager = new EquipmentSearchManager(mContext);
 
         instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+
+        Equipment equipment = new Equipment("", Collections.singletonList("10.10.9.80"), 3000);
+        getUserList(equipment);
+
     }
 
     @Override
@@ -566,26 +588,38 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                     str = FNAS.RemoteCallWithUrl(ipaliasingUrl).getResponseData();
 
-                    json = new JSONArray(str);
+                    if (str != null && !str.isEmpty()) {
 
-                    length = json.length();
+                        json = new JSONArray(str);
 
-                    for (int i = 0; i < length; i++) {
-                        itemRaw = json.getJSONObject(i);
+                        length = json.length();
 
-                        String ip = itemRaw.getString("ipv4");
+                        for (int i = 0; i < length; i++) {
+                            itemRaw = json.getJSONObject(i);
 
-                        List<String> hosts = equipment.getHosts();
-                        if (!hosts.contains(ip)) {
-                            hosts.add(ip);
+                            String ip = itemRaw.getString("ipv4");
+
+                            List<String> hosts = equipment.getHosts();
+                            if (!hosts.contains(ip)) {
+                                hosts.add(ip);
+                            }
                         }
+
                     }
+
 
                     String url = Util.HTTP + equipment.getHosts().get(0) + ":" + FNAS.PORT + Util.LOGIN_PARAMETER;
 
                     Log.d(TAG, "login url:" + url);
 
-                    str = FNAS.RemoteCallWithUrl(url).getResponseData();
+                    HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
+
+                    HttpResponse httpResponse = new OkHttpUtil().remoteCall(httpRequest);
+
+                    if (httpResponse.getResponseCode() != 200)
+                        return;
+
+                    str = new OkHttpUtil().remoteCall(httpRequest).getResponseData();
 
                     json = new JSONArray(str);
                     itemList = new ArrayList<>();

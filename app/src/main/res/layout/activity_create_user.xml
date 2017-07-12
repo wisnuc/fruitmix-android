@@ -16,8 +16,8 @@
             type="com.winsun.fruitmix.create.user.CreateUserPresenter" />
 
         <variable
-            name="baseView"
-            type="com.winsun.fruitmix.interfaces.BaseView" />
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
     </data>
 
@@ -30,8 +30,7 @@
         <include
             android:id="@+id/toolbar_layout"
             layout="@layout/toolbar_layout"
-            app:baseView="@{baseView}"
-            app:title="@{@string/create_user}" />
+            app:toolbarViewModel="@{toolbarViewModel}"/>
 
         <!--<android.support.v7.widget.Toolbar-->
         <!--android:id="@+id/toolbar"-->

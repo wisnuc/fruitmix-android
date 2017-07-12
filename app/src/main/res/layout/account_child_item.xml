@@ -7,7 +7,7 @@
 
         <variable
             name="accountChildViewModel"
-            type="com.winsun.fruitmix.AccountManageActivity.AccountChildViewModel" />
+            type="com.winsun.fruitmix.account.manage.AccountManagePresenterImpl.AccountChildViewModel" />
 
     </data>
 
@@ -68,7 +68,7 @@
             android:layout_centerVertical="true"
             android:gravity="center"
             android:clickable="true"
-            android:onClick="@{()->accountChildViewModel.deleteUser()}"
+            android:onClick="@{()->accountChildViewModel.deleteUser(context)}"
             android:orientation="vertical"
             android:visibility="visible">
 

@@ -3,6 +3,7 @@ package com.winsun.fruitmix.parser;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.fileModule.model.RemoteFile;
 import com.winsun.fruitmix.fileModule.model.RemoteFolder;
+import com.winsun.fruitmix.util.FileUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,9 +33,14 @@ public class RemoteFileFolderParser implements RemoteDataParser<AbstractRemoteFi
 
             AbstractRemoteFile abstractRemoteFile;
 
+            String fileName = jsonObject.optString("name");
+
             String type = jsonObject.optString("type");
             if (type.equals("file")) {
                 abstractRemoteFile = new RemoteFile();
+
+                abstractRemoteFile.setFileTypeResID(FileUtil.getFileTypeResID(fileName));
+
             } else {
                 abstractRemoteFile = new RemoteFolder();
             }
@@ -47,7 +53,7 @@ public class RemoteFileFolderParser implements RemoteDataParser<AbstractRemoteFi
 
             abstractRemoteFile.setUuid(jsonObject.optString("uuid"));
 
-            abstractRemoteFile.setName(jsonObject.optString("name"));
+            abstractRemoteFile.setName(fileName);
 
 /*
             JSONArray ownerArray = jsonObject.getJSONArray("owner");

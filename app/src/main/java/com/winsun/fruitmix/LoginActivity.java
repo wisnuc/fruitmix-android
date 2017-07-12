@@ -149,7 +149,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
         String action = operationEvent.getAction();
@@ -189,6 +189,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     }
 
                 } else {
+
                     Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
                 }
 
@@ -253,7 +254,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
      */
     private void login() {
 
-        mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title),getString(R.string.login)), true, false);
+        mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.login)), true, false);
 
         FNAS.retrieveRemoteToken(mContext, mGateway, mUserUUid, mPwd);
 

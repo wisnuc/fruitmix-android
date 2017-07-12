@@ -1,5 +1,9 @@
 package com.winsun.fruitmix.mediaModule;
 
+import android.databinding.DataBindingUtil;
+import android.databinding.ObservableBoolean;
+import android.databinding.ObservableField;
+import android.databinding.ObservableInt;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
@@ -9,9 +13,11 @@ import android.widget.TextView;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.databinding.NewActivityAlbumPicChooseBinding;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
 
 import java.util.List;
 
@@ -25,21 +31,8 @@ public class NewAlbumPicChooseActivity extends BaseActivity implements IPhotoLis
 
     public static final String TAG = "NewAlbumPicChooseActivity";
 
-    @BindView(R.id.toolbar)
-    Toolbar mToolbar;
-    @BindView(R.id.title)
-    TextView mTitleTextView;
-    @BindView(R.id.right)
-    TextView rightTextView;
-
-    @BindView(R.id.reveal_toolbar)
     Toolbar revealToolbar;
-    @BindView(R.id.select_count_title)
-    TextView mSelectCountTitle;
-    @BindView(R.id.enter_select_mode)
-    TextView mEnterSelectMode;
 
-    @BindView(R.id.main_framelayout)
     FrameLayout mMainFrameLayout;
 
     private NewPhotoList mNewPhotoList;
@@ -48,13 +41,25 @@ public class NewAlbumPicChooseActivity extends BaseActivity implements IPhotoLis
 
     private int mAlreadySelectedImageKeyListSize = 0;
 
+    private RevealToolbarViewModel viewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.new_activity_album_pic_choose);
+        NewActivityAlbumPicChooseBinding binding = DataBindingUtil.setContentView(this, R.layout.new_activity_album_pic_choose);
 
-        ButterKnife.bind(this);
+        revealToolbar = binding.revealToolbarLayout.revealToolbar;
+
+        mMainFrameLayout = binding.mainFramelayout;
+
+        viewModel = new RevealToolbarViewModel();
+
+        viewModel.selectCountTitleText.set(getString(R.string.choose_text));
+
+        viewModel.setBaseView(this);
+
+        binding.setRevealToolbarViewModel(viewModel);
 
         mNewPhotoList = new NewPhotoList(this);
 
@@ -72,24 +77,7 @@ public class NewAlbumPicChooseActivity extends BaseActivity implements IPhotoLis
 
         Util.setStatusBarColor(this, R.color.fab_bg_color);
 
-        revealToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
-        setSelectCountText(getString(R.string.choose_text));
-
-        setEnterSelectModeVisibility(View.VISIBLE);
-
-        mEnterSelectMode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            }
-        });
-
-        mNewPhotoList.addPhotoListListener(this);
+        mNewPhotoList.setmPhotoListListener(this);
 
     }
 
@@ -111,14 +99,6 @@ public class NewAlbumPicChooseActivity extends BaseActivity implements IPhotoLis
         Util.setStatusBarColor(this, R.color.colorPrimaryDark);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        mNewPhotoList.removePhotoListListener(this);
-
-    }
-
     public List<String> getSelectedImageUUIDs() {
         return mNewPhotoList.getSelectedImageUUIDs();
     }
@@ -137,11 +117,11 @@ public class NewAlbumPicChooseActivity extends BaseActivity implements IPhotoLis
     }
 
     public void setSelectCountText(String text) {
-        mSelectCountTitle.setText(text);
+        viewModel.selectCountTitleText.set(text);
     }
 
     private void setEnterSelectModeVisibility(int visibility) {
-        mEnterSelectMode.setVisibility(visibility);
+        viewModel.enterSelectModeVisibility.set(visibility);
     }
 
     @Override
@@ -181,4 +161,8 @@ public class NewAlbumPicChooseActivity extends BaseActivity implements IPhotoLis
 
     }
 
+    @Override
+    public View getToolbar() {
+        return null;
+    }
 }

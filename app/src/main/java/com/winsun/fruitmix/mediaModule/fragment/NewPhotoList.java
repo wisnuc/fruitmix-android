@@ -5,6 +5,8 @@ import android.animation.AnimatorInflater;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
+import android.databinding.ObservableBoolean;
+import android.databinding.ViewDataBinding;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Process;
@@ -13,8 +15,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.transition.ChangeBounds;
-import android.transition.ChangeClipBounds;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -23,7 +23,6 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -31,6 +30,10 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.winsun.fruitmix.BR;
+import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
+import com.winsun.fruitmix.databinding.NewPhotoLayoutBinding;
+import com.winsun.fruitmix.databinding.NewPhotoTitleItemBinding;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
@@ -39,18 +42,16 @@ import com.winsun.fruitmix.mediaModule.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.anim.AnimatorBuilder;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.viewmodel.LoadingViewModel;
+import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import io.github.sin3hz.fastjumper.FastJumper;
 import io.github.sin3hz.fastjumper.callback.LinearScrollCalculator;
 import io.github.sin3hz.fastjumper.callback.SpannableCallback;
@@ -65,16 +66,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     private Activity containerActivity;
     private View view;
 
-    @BindView(R.id.photo_recyclerview)
-    RecyclerView mRecyclerView;
-    @BindView(R.id.loading_layout)
-    LinearLayout mLoadingLayout;
-    @BindView(R.id.no_content_layout)
-    LinearLayout mNoContentLayout;
-    @BindView(R.id.no_content_imageview)
-    ImageView noContentImageView;
-    @BindView(R.id.no_content_textview)
-    TextView noContentTextView;
+    private RecyclerView mRecyclerView;
 
     private int mSpanCount = 3;
 
@@ -101,7 +93,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private boolean mSelectMode = false;
 
-    private List<IPhotoListListener> mPhotoListListeners;
+    private IPhotoListListener mPhotoListListener;
 
     private int mSelectCount;
 
@@ -128,18 +120,29 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     public static boolean mEnteringPhotoSlider = false;
 
+    private NoContentViewModel noContentViewModel;
+    private LoadingViewModel loadingViewModel;
+
+    private Animator scaleAnimator;
+
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
-        view = LayoutInflater.from(containerActivity.getApplicationContext()).inflate(R.layout.new_photo_layout, null);
+        NewPhotoLayoutBinding binding = NewPhotoLayoutBinding.inflate(LayoutInflater.from(containerActivity.getApplicationContext()), null, false);
 
-        ButterKnife.bind(this, view);
+        view = binding.getRoot();
 
-        noContentImageView.setImageResource(R.drawable.no_photo);
+        noContentViewModel = new NoContentViewModel();
+        noContentViewModel.setNoContentImgResId(R.drawable.no_file);
+        noContentViewModel.setNoContentText(containerActivity.getString(R.string.no_photos));
 
-        noContentTextView.setText(containerActivity.getString(R.string.no_photos));
+        binding.setNoContentViewModel(noContentViewModel);
 
-        mPhotoListListeners = new ArrayList<>();
+        loadingViewModel = new LoadingViewModel();
+
+        binding.setLoadingViewModel(loadingViewModel);
+
+        mRecyclerView = binding.photoRecyclerview;
 
         calcScreenWidth();
 
@@ -185,13 +188,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
-    public void addPhotoListListener(IPhotoListListener listListener) {
-        mPhotoListListeners.add(listListener);
+    public void setmPhotoListListener(IPhotoListListener listListener) {
+        mPhotoListListener = listListener;
     }
 
-    public void removePhotoListListener(IPhotoListListener listListener) {
-        mPhotoListListeners.remove(listListener);
-    }
 
     public void setSelectMode(boolean selectMode) {
 
@@ -229,7 +229,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         } else {
 
-            mLoadingLayout.setVisibility(View.VISIBLE);
+            loadingViewModel.showLoading.set(true);
 
         }
 
@@ -250,22 +250,27 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
         medias = loader.getMedias();
 
-        mLoadingLayout.setVisibility(View.GONE);
+        loadingViewModel.showLoading.set(false);
+
         if (mPhotoDateGroups.size() == 0) {
-            mNoContentLayout.setVisibility(View.VISIBLE);
+
+            noContentViewModel.showNoContent.set(true);
+
             mRecyclerView.setVisibility(View.GONE);
 
-            for (IPhotoListListener listener : mPhotoListListeners)
-                listener.onNoPhotoItem(true);
+            if (mPhotoListListener != null)
+                mPhotoListListener.onNoPhotoItem(true);
 
         } else {
-            mNoContentLayout.setVisibility(View.GONE);
+
+            noContentViewModel.showNoContent.set(false);
+
             mRecyclerView.setVisibility(View.VISIBLE);
 
             mPhotoRecycleAdapter.notifyDataSetChanged();
 
-            for (IPhotoListListener listener : mPhotoListListeners)
-                listener.onNoPhotoItem(false);
+            if (mPhotoListListener != null)
+                mPhotoListListener.onNoPhotoItem(false);
 
             if (!mPreLoadPhoto) {
                 mPreLoadPhoto = true;
@@ -389,8 +394,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             }
         };
 
-
         calcPhotoItemWidth();
+
         GridLayoutManager glm = new GridLayoutManager(containerActivity, mSpanCount);
         glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
@@ -399,6 +404,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             }
         });
 
+        glm.getSpanSizeLookup().setSpanIndexCacheEnabled(true);
+
         mLayoutManager = glm;
         mScrollCalculator = mLinearScrollCalculator;
     }
@@ -406,8 +413,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     private void setupRecyclerView() {
         mFastJumper.attachToRecyclerView(null);
         setupGridLayoutManager();
-        mRecyclerView.setAdapter(mPhotoRecycleAdapter);
         mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mPhotoRecycleAdapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mJumperCallback.setScrollCalculator(mScrollCalculator);
         mFastJumper.attachToRecyclerView(mRecyclerView);
@@ -559,6 +566,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         cancelPreLoadMediaMiniThumb();
 
+        containerActivity = null;
     }
 
     @Override
@@ -603,7 +611,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
-    private class PhotoRecycleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private class PhotoRecycleAdapter extends RecyclerView.Adapter<BindingViewHolder> {
 
         private static final int VIEW_TYPE_HEAD = 0x1000;
         private static final int VIEW_TYPE_CONTENT = 0x1001;
@@ -615,7 +623,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         }
 
         @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(BindingViewHolder holder, int position) {
 
             if (holder instanceof PhotoGroupHolder) {
                 PhotoGroupHolder groupHolder = (PhotoGroupHolder) holder;
@@ -628,16 +636,19 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         }
 
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public BindingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             switch (viewType) {
                 case VIEW_TYPE_HEAD: {
-                    View view = LayoutInflater.from(containerActivity).inflate(R.layout.new_photo_title_item, parent, false);
 
-                    return new PhotoGroupHolder(view);
+                    NewPhotoTitleItemBinding binding = NewPhotoTitleItemBinding.inflate(LayoutInflater.from(containerActivity), parent, false);
+
+                    return new PhotoGroupHolder(binding);
                 }
                 case VIEW_TYPE_CONTENT: {
-                    View view = LayoutInflater.from(containerActivity).inflate(R.layout.new_photo_gridlayout_item, parent, false);
-                    return new PhotoHolder(view);
+
+                    NewPhotoGridlayoutItemBinding binding = NewPhotoGridlayoutItemBinding.inflate(LayoutInflater.from(containerActivity), parent, false);
+
+                    return new PhotoHolder(binding);
                 }
             }
 
@@ -645,18 +656,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         }
 
         @Override
-        public void onViewRecycled(RecyclerView.ViewHolder holder) {
-            super.onViewRecycled(holder);
-        }
-
-        @Override
         public long getItemId(int position) {
             return position;
-        }
-
-        @Override
-        public boolean onFailedToRecycleView(RecyclerView.ViewHolder holder) {
-            return super.onFailedToRecycleView(holder);
         }
 
         @Override
@@ -722,47 +723,136 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         }
     }
 
-    class PhotoGroupHolder extends RecyclerView.ViewHolder {
+    public class NewPhotoGroupViewModel {
 
-        @BindView(R.id.photo_group_tv)
+        private String photoTitle;
+
+        public final ObservableBoolean photoTitleSelect = new ObservableBoolean(false);
+
+        private boolean showSpacingSecondLayout = false;
+
+        private String date;
+
+        public String getPhotoTitle() {
+            return photoTitle;
+        }
+
+        public void setPhotoTitle(String photoTitle) {
+            this.photoTitle = photoTitle;
+        }
+
+        public boolean isShowSpacingSecondLayout() {
+            return showSpacingSecondLayout;
+        }
+
+        public void setShowSpacingSecondLayout(boolean showSpacingSecondLayout) {
+            this.showSpacingSecondLayout = showSpacingSecondLayout;
+        }
+
+        public void setDate(String date) {
+            this.date = date;
+        }
+
+        public void photoTitleOnClick(NewPhotoGroupViewModel newPhotoGroupViewModel) {
+
+            if (mSelectMode) {
+
+                List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
+
+                boolean selected = newPhotoGroupViewModel.photoTitleSelect.get();
+
+                int unSelectNumInList = 0;
+
+                for (Media media : mediaList) {
+                    if (!media.isSelected())
+                        unSelectNumInList++;
+                }
+
+                calcSelectedPhoto();
+
+                if (!selected && unSelectNumInList + mSelectCount > Util.MAX_PHOTO_SIZE) {
+                    Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
+
+                    int newSelectItemCount = 0;
+                    int newSelectItemTotalCount = Util.MAX_PHOTO_SIZE - mSelectCount;
+                    if (newSelectItemTotalCount != 0) {
+
+                        for (Media media : mediaList) {
+
+                            if (!media.isSelected()) {
+                                media.setSelected(true);
+                                newSelectItemCount++;
+                                if (newSelectItemCount == newSelectItemTotalCount)
+                                    break;
+                            }
+
+                        }
+                    }
+
+                } else {
+
+                    newPhotoGroupViewModel.photoTitleSelect.set(!selected);
+
+                    for (Media media : mediaList)
+                        media.setSelected(!selected);
+                }
+
+                mPhotoRecycleAdapter.notifyDataSetChanged();
+
+                calcSelectedPhoto();
+
+                onPhotoItemClick();
+            }
+
+        }
+
+    }
+
+    private void onPhotoItemClick() {
+
+        if (mPhotoListListener != null)
+            mPhotoListListener.onPhotoItemClick(mSelectCount);
+
+    }
+
+
+    class PhotoGroupHolder extends BindingViewHolder {
+
         TextView mPhotoTitle;
 
-        @BindView(R.id.photo_title_select_img)
-        ImageView mPhotoTitleSelectImg;
-
-        @BindView(R.id.photo_title_layout)
-        LinearLayout mPhotoTitleLayout;
-
-        @BindView(R.id.photo_title_container)
         LinearLayout mPhotoTitleContainer;
 
-        @BindView(R.id.spacing_layout)
-        View mSpacingLayout;
+        PhotoGroupHolder(ViewDataBinding viewDataBinding) {
+            super(viewDataBinding);
 
-        @BindView(R.id.spacing_second_layout)
-        View mSpacingSecondLayout;
+            NewPhotoTitleItemBinding binding = (NewPhotoTitleItemBinding) viewDataBinding;
 
-        PhotoGroupHolder(View view) {
-            super(view);
-            ButterKnife.bind(this, view);
+            mPhotoTitle = binding.photoGroupTv;
+
+            mPhotoTitleContainer = binding.photoTitleContainer;
+
         }
 
         public void refreshView(int groupPosition) {
 
-            final String date = mMapKeyIsPhotoPositionValueIsPhotoDate.get(groupPosition);
+            String date = mMapKeyIsPhotoPositionValueIsPhotoDate.get(groupPosition);
+
+            NewPhotoGroupViewModel newPhotoGroupViewModel = new NewPhotoGroupViewModel();
+
+            newPhotoGroupViewModel.setDate(date);
 
             if (groupPosition == 0) {
-                mSpacingSecondLayout.setVisibility(View.VISIBLE);
+                newPhotoGroupViewModel.setShowSpacingSecondLayout(true);
             } else {
-                mSpacingSecondLayout.setVisibility(View.GONE);
+                newPhotoGroupViewModel.setShowSpacingSecondLayout(false);
             }
 
             mPhotoTitle.setTypeface(mTypeface);
 
             if (date.equals(Util.DEFAULT_DATE)) {
-                mPhotoTitle.setText(containerActivity.getString(R.string.unknown_time));
+                newPhotoGroupViewModel.setPhotoTitle(containerActivity.getString(R.string.unknown_time));
             } else {
-                mPhotoTitle.setText(date);
+                newPhotoGroupViewModel.setPhotoTitle(date);
             }
 
             if (mSelectMode) {
@@ -781,9 +871,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                         selectNum++;
                 }
                 if (selectNum == mediaList.size())
-                    mPhotoTitleSelectImg.setSelected(true);
+                    newPhotoGroupViewModel.photoTitleSelect.set(true);
                 else
-                    mPhotoTitleSelectImg.setSelected(false);
+                    newPhotoGroupViewModel.photoTitleSelect.set(false);
 
             } else {
 
@@ -798,59 +888,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             }
 
-            mPhotoTitleLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mSelectMode) {
-
-                        List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
-                        boolean selected = mPhotoTitleSelectImg.isSelected();
-
-                        int unSelectNumInList = 0;
-
-                        for (Media media : mediaList) {
-                            if (!media.isSelected())
-                                unSelectNumInList++;
-                        }
-
-                        calcSelectedPhoto();
-
-                        if (!selected && unSelectNumInList + mSelectCount > Util.MAX_PHOTO_SIZE) {
-                            Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
-
-                            int newSelectItemCount = 0;
-                            int newSelectItemTotalCount = Util.MAX_PHOTO_SIZE - mSelectCount;
-                            if (newSelectItemTotalCount != 0) {
-
-                                for (Media media : mediaList) {
-
-                                    if (!media.isSelected()) {
-                                        media.setSelected(true);
-                                        newSelectItemCount++;
-                                        if (newSelectItemCount == newSelectItemTotalCount)
-                                            break;
-                                    }
-
-                                }
-                            }
-
-                        } else {
-                            mPhotoTitleSelectImg.setSelected(!selected);
-
-                            for (Media media : mediaList)
-                                media.setSelected(!selected);
-                        }
-
-                        mPhotoRecycleAdapter.notifyDataSetChanged();
-
-                        calcSelectedPhoto();
-
-                        for (IPhotoListListener listListener : mPhotoListListeners) {
-                            listListener.onPhotoItemClick(mSelectCount);
-                        }
-                    }
-                }
-            });
+            getViewDataBinding().setVariable(BR.newPhotoGroupViewModel, newPhotoGroupViewModel);
+            getViewDataBinding().executePendingBindings();
 
         }
 
@@ -953,20 +992,21 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
-    class PhotoHolder extends RecyclerView.ViewHolder {
+    class PhotoHolder extends BindingViewHolder {
 
-        @BindView(R.id.photo_iv)
         NetworkImageView mPhotoIv;
 
-        @BindView(R.id.photo_item_layout)
         RelativeLayout mImageLayout;
 
-        @BindView(R.id.photo_select_img)
-        ImageView mPhotoSelectedIv;
+        PhotoHolder(ViewDataBinding viewDataBinding) {
+            super(viewDataBinding);
 
-        PhotoHolder(View view) {
-            super(view);
-            ButterKnife.bind(this, view);
+            NewPhotoGridlayoutItemBinding binding = (NewPhotoGridlayoutItemBinding) viewDataBinding;
+
+            mPhotoIv = binding.photoIv;
+
+            mImageLayout = binding.photoItemLayout;
+
         }
 
         public void refreshView(int position) {
@@ -979,6 +1019,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getUuid()))
                 currentMedia.setSelected(true);
+
+            final ObservableBoolean showPhotoSelectImg = new ObservableBoolean(currentMedia.isSelected());
 
             mImageLoader.setTag(position);
 
@@ -1018,20 +1060,25 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (mSelectMode) {
                 boolean selected = currentMedia.isSelected();
-                if (selected && mPhotoSelectedIv.getVisibility() != View.VISIBLE) {
+                if (selected && mPhotoIv.getScaleX() == 1) {
                     scalePhoto(false);
-                    mPhotoSelectedIv.setVisibility(View.VISIBLE);
-                } else if (!selected && mPhotoSelectedIv.getVisibility() != View.GONE) {
+
+                    showPhotoSelectImg.set(true);
+
+                } else if (!selected && mPhotoIv.getScaleX() != 1) {
+
                     restorePhoto(false);
-                    mPhotoSelectedIv.setVisibility(View.GONE);
+
+                    showPhotoSelectImg.set(false);
+
                 }
             } else {
 
                 currentMedia.setSelected(false);
 
-                if (mPhotoSelectedIv.getVisibility() != View.GONE) {
+                if (mPhotoIv.getScaleX() != 1) {
                     restorePhoto(true);
-                    mPhotoSelectedIv.setVisibility(View.GONE);
+                    showPhotoSelectImg.set(false);
                 }
 
             }
@@ -1064,10 +1111,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                         if (selected) {
                             scalePhoto(false);
-                            mPhotoSelectedIv.setVisibility(View.VISIBLE);
+
+                            showPhotoSelectImg.set(true);
+
                         } else {
                             restorePhoto(false);
-                            mPhotoSelectedIv.setVisibility(View.GONE);
+
+                            showPhotoSelectImg.set(false);
+
                         }
 
                         currentMedia.setSelected(selected);
@@ -1075,9 +1126,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                         calcSelectedPhoto();
 
-                        for (IPhotoListListener listListener : mPhotoListListeners) {
-                            listListener.onPhotoItemClick(mSelectCount);
-                        }
+                        onPhotoItemClick();
 
                     } else {
 
@@ -1102,35 +1151,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity, medias, intent, mediaInListPosition, mSpanCount, mPhotoIv, currentMedia);
+                        PhotoSliderActivity.startPhotoSliderActivity(mPhotoListListener.getToolbar(), containerActivity, medias, intent, mediaInListPosition, mSpanCount, mPhotoIv, currentMedia);
 
                         mEnteringPhotoSlider = true;
-
-/*                        if (mPhotoIv.isLoaded()) {
-
-                            Util.setMotion(mediaInListPosition, mSpanCount);
-
-                            ViewCompat.setTransitionName(mPhotoIv, currentMedia.getKey());
-
-                            Pair mediaPair = new Pair<>((View) mPhotoIv, currentMedia.getKey());
-
-                            Pair[] pairs = Util.createSafeTransitionPairs(containerActivity, true, mediaPair);
-
-                            ActivityOptionsCompat options = ActivityOptionsCompat.
-                                    makeSceneTransitionAnimation(containerActivity, pairs);
-
-//                              ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(containerActivity, mPhotoIv, currentMedia.getKey());
-
-                            intent.putExtra(Util.KEY_NEED_TRANSITION,true);
-
-                            containerActivity.startActivity(intent, options.toBundle());
-
-                        } else {
-
-                            intent.putExtra(Util.KEY_NEED_TRANSITION, false);
-                            containerActivity.startActivity(intent);
-
-                        }*/
 
                     }
 
@@ -1145,20 +1168,23 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                     if (mSelectMode)
                         return true;
 
-                    for (IPhotoListListener listListener : mPhotoListListeners) {
-                        listListener.onPhotoItemLongClick();
-                    }
+                    if (mPhotoListListener != null)
+                        mPhotoListListener.onPhotoItemLongClick();
 
                     currentMedia.setSelected(true);
 
                     mSelectCount = 1;
 
                     scalePhoto(false);
-                    mPhotoSelectedIv.setVisibility(View.VISIBLE);
+
+                    showPhotoSelectImg.set(true);
 
                     return true;
                 }
             });
+
+            getViewDataBinding().setVariable(BR.showPhotoSelectImg, showPhotoSelectImg);
+            getViewDataBinding().executePendingBindings();
 
         }
 
@@ -1180,26 +1206,32 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         private void scalePhoto(boolean immediate) {
 
-            Animator animator = AnimatorInflater.loadAnimator(containerActivity, R.animator.photo_scale);
-            animator.setTarget(mPhotoIv);
+            if (scaleAnimator != null)
+                scaleAnimator.cancel();
+
+            scaleAnimator = AnimatorInflater.loadAnimator(containerActivity, R.animator.photo_scale);
+            scaleAnimator.setTarget(mPhotoIv);
 
             if (immediate) {
-                animator.setDuration(0);
+                scaleAnimator.setDuration(0);
             }
 
-            animator.start();
+            scaleAnimator.start();
         }
 
         private void restorePhoto(boolean immediate) {
 
-            Animator animator = AnimatorInflater.loadAnimator(containerActivity, R.animator.photo_restore);
-            animator.setTarget(mPhotoIv);
+            if (scaleAnimator != null)
+                scaleAnimator.cancel();
+
+            scaleAnimator = AnimatorInflater.loadAnimator(containerActivity, R.animator.photo_restore);
+            scaleAnimator.setTarget(mPhotoIv);
 
             if (immediate) {
-                animator.setDuration(0);
+                scaleAnimator.setDuration(0);
             }
 
-            animator.start();
+            scaleAnimator.start();
 
         }
 

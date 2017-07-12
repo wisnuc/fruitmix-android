@@ -22,6 +22,8 @@ public class RemoteFolder extends AbstractRemoteFile {
     public RemoteFolder() {
         super();
         abstractRemoteFiles = new ArrayList<>();
+
+        setFileTypeResID(R.drawable.folder_icon);
     }
 
     @Override

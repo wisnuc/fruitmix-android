@@ -45,7 +45,11 @@ public class FNAS {
     public static String JWT = null;
     public static String userUUID = null;
 
-    public static String PORT = "3721";
+    public static String TEMPORARY_GATEWAY = "";
+    public static String TEMPORARY_JWT = "";
+    public static String TEMPORARY_USER_UUID = "";
+
+    public static String PORT = "3000";
 
     public static HttpResponse loadFileInFolder(Context context, String folderUUID, String rootUUID) throws MalformedURLException, IOException, SocketTimeoutException {
 
@@ -148,7 +152,7 @@ public class FNAS {
         EventBus.getDefault().post(new MediaRequestEvent(OperationType.CREATE, OperationTargetType.REMOTE_MEDIA, media));
     }
 
-    private static String generateUrl(String req) {
+    public static String generateUrl(String req) {
         return Gateway + ":" + FNAS.PORT + req;
     }
 
@@ -193,7 +197,9 @@ public class FNAS {
             LocalCache.initCurrentEquipmentName();
         }
 
-        return new CheckIpHttpUtil(new OkHttpUtil(), LocalCache.currentEquipmentName, new EquipmentSearchManager(context)).remoteCall(httpRequest);
+        OkHttpUtil okHttpUtil = new OkHttpUtil();
+
+        return new CheckIpHttpUtil(okHttpUtil, LocalCache.currentEquipmentName, new EquipmentSearchManager(context)).remoteCall(httpRequest);
     }
 
     private static HttpResponse RemoteCallWithUrl(Context context, String url, String headerKey, String headerValue) throws MalformedURLException, IOException, SocketTimeoutException {
@@ -243,13 +249,6 @@ public class FNAS {
 
         Util.setRemoteMediaLoaded(false);
 
-    }
-
-    public static void gotoEquipmentActivity(Activity activity, boolean shouldStopService) {
-        Intent intent = new Intent(activity, EquipmentSearchActivity.class);
-        intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE, shouldStopService);
-        activity.startActivity(intent);
-        activity.finish();
     }
 
 }

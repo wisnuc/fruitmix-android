@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.fileModule.download.FileDownloadErrorState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadFinishedState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
@@ -250,6 +251,9 @@ public class FileUtil {
         decodeOptions.inJustDecodeBounds = false;
         decodeOptions.inSampleSize = findBestSampleSize(actualWidth, actualHeight, 200, 200);
         Bitmap bitmap = BitmapFactory.decodeFile(thumb, decodeOptions);
+
+        if (bitmap == null)
+            return false;
 
         FileOutputStream outputStream = null;
 
@@ -669,6 +673,33 @@ public class FileUtil {
 
         }
         return dir == null || dir.delete();
+    }
+
+    public static int getFileTypeResID(String fileName) {
+
+        int dotIndex = fileName.lastIndexOf(".");
+
+        if (dotIndex < 0)
+            return R.drawable.file_icon;
+
+        String end = fileName.substring(dotIndex, fileName.length()).toLowerCase();
+
+        if (end.isEmpty())
+            return R.drawable.file_icon;
+
+        if (end.startsWith(".xls"))
+            return R.drawable.excel;
+        else if (end.startsWith(".doc"))
+            return R.drawable.word;
+        else if (end.equals(".pdf"))
+            return R.drawable.pdf;
+        else if (end.startsWith(".ppt"))
+            return R.drawable.power_point;
+        else if (end.equals(".txt")) {
+            return R.drawable.txt;
+        } else
+            return R.drawable.file_icon;
+
     }
 
 }

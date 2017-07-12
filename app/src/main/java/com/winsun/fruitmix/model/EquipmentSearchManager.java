@@ -29,7 +29,6 @@ public class EquipmentSearchManager {
     private static final String SERVICE_PORT = "_http._tcp";
     private static final String DEMAIN = "local.";
 
-
     public EquipmentSearchManager(Context context) {
 
         mRxDnssd = CustomApplication.getRxDnssd(context);

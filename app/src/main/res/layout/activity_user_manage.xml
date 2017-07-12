@@ -11,8 +11,14 @@
             type="com.winsun.fruitmix.user.manage.UserMangePresenter" />
 
         <variable
-            name="baseView"
-            type="com.winsun.fruitmix.interfaces.BaseView" />
+            name="userManageViewModel"
+            type="com.winsun.fruitmix.UserManageActivity.UserManageViewModel" />
+
+        <variable
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
+
+        <import type="android.view.View" />
 
     </data>
 
@@ -30,8 +36,7 @@
             <include
                 android:id="@+id/toolbar_layout"
                 layout="@layout/toolbar_layout"
-                app:baseView="@{baseView}"
-                app:title="@{@string/user_manage}" />
+                app:toolbarViewModel="@{toolbarViewModel}"/>
 
             <!--        <android.support.v7.widget.Toolbar
                         android:layout_width="match_parent"
@@ -93,7 +98,8 @@
                 android:background="@color/white"
                 android:cacheColorHint="@color/white"
                 android:divider="@null"
-                android:fadingEdge="none" />
+                android:fadingEdge="none"
+                android:visibility="@{userManageViewModel.showUserListView?View.VISIBLE:View.GONE}" />
 
             <TextView
                 android:id="@+id/user_list_empty"
@@ -106,7 +112,7 @@
                 android:text="@string/no_user"
                 android:textColor="@color/fifty_four_percent_black"
                 android:textSize="24dp"
-                android:visibility="gone" />
+                android:visibility="@{userManageViewModel.showUserListEmpty?View.VISIBLE:View.GONE,default=gone}" />
 
         </LinearLayout>
 

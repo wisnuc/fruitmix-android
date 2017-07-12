@@ -16,8 +16,4 @@ public interface IHttpUtil {
 
     HttpResponse remoteCall(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException;
 
-    ResponseBody downloadFile(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException;
-
-    boolean uploadFile(HttpRequest httpRequest, Media media);
-
 }

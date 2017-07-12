@@ -6,6 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.databinding.DataBindingUtil;
+import android.databinding.ObservableBoolean;
+import android.databinding.ObservableField;
+import android.databinding.ObservableInt;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -41,6 +45,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
 import com.winsun.fruitmix.component.PinchImageView;
+import com.winsun.fruitmix.databinding.ActivityPhotoSliderBinding;
 import com.winsun.fruitmix.dialog.DialogFactory;
 import com.winsun.fruitmix.dialog.PhotoOperationAlertDialogFactory;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
@@ -71,28 +76,39 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     public static final String TAG = "PhotoSliderActivity";
 
-    @BindView(R.id.mask_layout)
-    View mMaskLayout;
-    @BindView(R.id.ic_cloud_off)
-    ImageView mCloudOff;
-    @BindView(R.id.title)
-    TextView mTitleTextView;
-    @BindView(R.id.toolbar)
-    Toolbar mToolbar;
-    @BindView(R.id.comment_layout)
     LinearLayout ivComment;
-    @BindView(R.id.comment)
+
     ImageView commentImg;
-    @BindView(R.id.panelFooter)
-    RelativeLayout rlPanelFooter;
-    @BindView(R.id.return_resize)
-    ImageView mReturnResize;
-    @BindView(R.id.viewPager)
+
     ViewPager mViewPager;
-    @BindView(R.id.share)
+
     ImageButton mShareBtn;
 
-    private MyAdapter myAdapter;
+    public class PhotoSliderViewModel {
+
+        public final ObservableBoolean showMaskLayout = new ObservableBoolean(true);
+
+        public final ObservableBoolean showCloudOff = new ObservableBoolean(true);
+
+        public final ObservableField<String> titleText = new ObservableField<>();
+
+        public final ObservableBoolean showReturnResize = new ObservableBoolean(false);
+
+        public final ObservableBoolean showToolbar = new ObservableBoolean(true);
+
+        public final ObservableInt returnResizeResId = new ObservableInt(R.drawable.return_resize);
+
+        public final ObservableInt toolbarIconResId = new ObservableInt(R.drawable.ic_back);
+
+        public final ObservableBoolean showPanelFooter = new ObservableBoolean(true);
+
+        public void dismissShowReturnResize() {
+            showReturnResize.set(false);
+        }
+
+    }
+
+    private PhotoSliderViewModel photoSliderViewModel;
 
     private static List<Media> mediaList;
 
@@ -158,11 +174,11 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
     };
 
-    public static void startPhotoSliderActivity(Activity activity, List<Media> transitionMedias, Intent intent, int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
+    public static void startPhotoSliderActivity(View toolbar,Activity activity, List<Media> transitionMedias, Intent intent, int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
         setMediaList(transitionMedias);
 
-        if (transitionView.isLoaded()) {
+        if (transitionView == null || transitionView.isLoaded()) {
 
             Util.setMotion(motionPosition, spanCount);
 
@@ -170,7 +186,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             Pair mediaPair = new Pair<>((View) transitionView, currentMedia.getKey());
 
-            Pair[] pairs = Util.createSafeTransitionPairs(activity, true, mediaPair);
+            Pair[] pairs = Util.createSafeTransitionPairs(toolbar,activity, true, mediaPair);
 
             ActivityOptionsCompat options = ActivityOptionsCompat.
                     makeSceneTransitionAnimation(activity, pairs);
@@ -190,16 +206,27 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_photo_slider);
+        ActivityPhotoSliderBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_photo_slider);
 
         mContext = this;
 
-        ButterKnife.bind(this);
+        ivComment = binding.commentLayout;
+
+        commentImg = binding.comment;
+
+        mViewPager = binding.viewPager;
+
+        mShareBtn = binding.share;
+
+        photoSliderViewModel = new PhotoSliderViewModel();
+
+        binding.setPhotoSliderViewModel(photoSliderViewModel);
+
+        binding.setBaseView(this);
 
         needTransition = getIntent().getBooleanExtra(Util.KEY_NEED_TRANSITION, false);
 
@@ -223,13 +250,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         refreshReturnResizeVisibility();
 
         Util.showSystemUI(getWindow().getDecorView());
-
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finishActivity();
-            }
-        });
 
         initCommentBtn(mShowCommentBtn);
 
@@ -290,9 +310,10 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        mToolbar.setNavigationIcon(R.drawable.ic_back);
+        photoSliderViewModel.toolbarIconResId.set(R.drawable.ic_back);
+        photoSliderViewModel.returnResizeResId.set(R.drawable.return_resize);
+
         commentImg.setImageResource(R.drawable.comment);
-        mReturnResize.setImageResource(R.drawable.return_resize);
 
 //        Media media = mediaList.get(currentPhotoPosition);
 //
@@ -326,12 +347,17 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         NewPhotoList.mEnteringPhotoSlider = false;
     }
 
+    @Override
+    public void finishView() {
+        finishActivity();
+    }
+
     public static void setMediaList(List<Media> mediaList) {
         PhotoSliderActivity.mediaList = new ArrayList<>(mediaList);
     }
 
     private void initViewPager() {
-        myAdapter = new MyAdapter();
+        MyAdapter myAdapter = new MyAdapter();
 
         mViewPager.setAdapter(myAdapter);
         mViewPager.setCurrentItem(initialPhotoPosition);
@@ -506,16 +532,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         if (getShowPhotoReturnTipsValue()) {
             setShowPhotoReturnTipsValue(false);
 
-            mReturnResize = (ImageView) findViewById(R.id.return_resize);
-            if (mReturnResize != null) {
-                mReturnResize.setVisibility(View.VISIBLE);
-                mReturnResize.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mReturnResize.setVisibility(View.GONE);
-                    }
-                });
-            }
+            photoSliderViewModel.showReturnResize.set(true);
+
         }
     }
 
@@ -593,15 +611,18 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             String title = media.getTime();
             if (title == null || title.contains(Util.DEFAULT_DATE)) {
-                mTitleTextView.setText(getString(R.string.unknown_time));
+
+                photoSliderViewModel.titleText.set(getString(R.string.unknown_time));
+
             } else {
-                mTitleTextView.setText(title);
+
+                photoSliderViewModel.titleText.set(title);
             }
 
             if (LocalCache.DeviceID != null && media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
-                mCloudOff.setVisibility(View.INVISIBLE);
+                photoSliderViewModel.showCloudOff.set(false);
             } else {
-                mCloudOff.setVisibility(View.VISIBLE);
+                photoSliderViewModel.showCloudOff.set(true);
             }
 
         }
@@ -860,17 +881,23 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             @Override
             public boolean onScaleBegin(ScaleGestureDetector detector) {
 
-                if (mToolbar.getVisibility() == View.VISIBLE) {
-                    mToolbar.setVisibility(View.INVISIBLE);
-                    mMaskLayout.setVisibility(View.INVISIBLE);
-                }
-                if (rlPanelFooter.getVisibility() == View.VISIBLE) {
-                    rlPanelFooter.setVisibility(View.INVISIBLE);
-                }
+                handleToolbarFooter();
 
                 return super.onScaleBegin(detector);
             }
 
+        }
+
+        private void handleToolbarFooter() {
+            if (photoSliderViewModel.showToolbar.get()) {
+                photoSliderViewModel.showToolbar.set(false);
+
+                photoSliderViewModel.showMaskLayout.set(false);
+            }
+
+            if (photoSliderViewModel.showPanelFooter.get()) {
+                photoSliderViewModel.showPanelFooter.set(false);
+            }
         }
 
         private class CustomTapListener implements PinchImageView.UserDoubleTapListener {
@@ -890,13 +917,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             @Override
             public boolean onDoubleTap(MotionEvent e) {
 
-                if (mToolbar.getVisibility() == View.VISIBLE) {
-                    mToolbar.setVisibility(View.INVISIBLE);
-                    mMaskLayout.setVisibility(View.INVISIBLE);
-                }
-                if (rlPanelFooter.getVisibility() == View.VISIBLE) {
-                    rlPanelFooter.setVisibility(View.INVISIBLE);
-                }
+                handleToolbarFooter();
 
                 return false;
             }
@@ -1057,13 +1078,13 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         sInEdit = !sInEdit;
         if (sInEdit) {
-            mToolbar.setVisibility(View.VISIBLE);
-            mMaskLayout.setVisibility(View.VISIBLE);
-            rlPanelFooter.setVisibility(View.VISIBLE);
+            photoSliderViewModel.showToolbar.set(true);
+            photoSliderViewModel.showMaskLayout.set(true);
+            photoSliderViewModel.showPanelFooter.set(true);
         } else {
-            mToolbar.setVisibility(View.INVISIBLE);
-            mMaskLayout.setVisibility(View.INVISIBLE);
-            rlPanelFooter.setVisibility(View.INVISIBLE);
+            photoSliderViewModel.showToolbar.set(false);
+            photoSliderViewModel.showMaskLayout.set(false);
+            photoSliderViewModel.showPanelFooter.set(false);
         }
     }
 

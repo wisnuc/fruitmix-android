@@ -4,11 +4,11 @@
 
     <data>
 
-        <import type="android.view.View"/>
+        <import type="android.view.View" />
 
         <variable
             name="user"
-            type="com.winsun.fruitmix.UserManageActivity.UserManageWrap" />
+            type="com.winsun.fruitmix.user.manage.UserManagePresenterImpl.UserManageWrap" />
 
 
     </data>
@@ -46,7 +46,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
-                android:text="@{user.userName}"
+                android:text="@{user.getUserName(context)}"
                 android:textColor="@color/eighty_seven_percent_black"
                 android:textSize="16dp" />
 

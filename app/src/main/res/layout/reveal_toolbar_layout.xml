@@ -1,38 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/reveal_toolbar"
-    android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize"
-    android:background="@color/fab_bg_color"
-    android:elevation="@dimen/appbar_elevation"
-    android:theme="@style/AppTheme.AppBarOverlay"
-    android:transitionName="@string/transition_toolbar"
-    app:navigationIcon="@drawable/ic_back"
-    android:visibility="gone"
-    app:popupTheme="@style/AppTheme.PopupOverlay">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <TextView
-        android:id="@+id/select_count_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="@string/choose_photo"
-        android:textColor="@color/eighty_seven_percent_white"
-        android:textSize="18dp" />
+    <data>
+
+        <variable
+            name="revealToolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.RevealToolbarViewModel" />
+
+        <import type="android.view.View" />
+
+    </data>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/reveal_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/fab_bg_color"
+        android:elevation="@dimen/appbar_elevation"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:transitionName="@string/transition_toolbar"
+        android:visibility="@{revealToolbarViewModel.showRevealToolbar?View.VISIBLE:View.GONE}"
+        app:navigationIcon="@drawable/ic_back"
+        app:navigationOnClickListener="@{()-> revealToolbarViewModel.navigationOnClick()}"
+        app:popupTheme="@style/AppTheme.PopupOverlay">
+
+        <TextView
+            android:id="@+id/select_count_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@{revealToolbarViewModel.selectCountTitleText,default=@string/choose_text}"
+            android:textColor="@color/eighty_seven_percent_white"
+            android:textSize="18dp" />
 
 
-    <TextView
-        android:id="@+id/enter_select_mode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|end"
-        android:layout_marginRight="15dp"
-        android:text="@string/choose_text"
-        android:textColor="@color/eighty_seven_percent_white"
-        android:textSize="16dp"
-        android:visibility="visible" />
+        <TextView
+            android:id="@+id/enter_select_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginRight="15dp"
+            android:text="@string/choose_text"
+            android:textColor="@color/eighty_seven_percent_white"
+            android:textSize="16dp"
+            android:visibility="@{revealToolbarViewModel.enterSelectModeVisibility,default=visible}" />
 
-</android.support.v7.widget.Toolbar>
+    </android.support.v7.widget.Toolbar>
+
+
+</layout>
+
+
 

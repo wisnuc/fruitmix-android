@@ -19,6 +19,11 @@ import java.util.List;
 
 public class RemoteFile extends AbstractRemoteFile {
 
+    public RemoteFile() {
+
+        setFileTypeResID(R.drawable.file_icon);
+    }
+
     @Override
     public boolean isFolder() {
         return false;

@@ -5,8 +5,19 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <include layout="@layout/no_content_layout"
-        android:visibility="visible"/>
+    <include
+        layout="@layout/no_content_layout"
+        android:visibility="visible" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add_white_24dp"
+        android:visibility="gone"
+        app:fabSize="normal" />
 
     <!--
         <android.support.v4.widget.NestedScrollView

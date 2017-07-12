@@ -2,7 +2,6 @@ package com.winsun.fruitmix;
 
 import android.support.v7.app.AppCompatActivity;
 
-import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.util.FNAS;
@@ -16,7 +15,7 @@ import org.greenrobot.eventbus.ThreadMode;
  * Created by Administrator on 2017/3/7.
  */
 
-public class BaseActivity extends AppCompatActivity implements BaseView{
+public class BaseActivity extends AppCompatActivity implements BaseView {
 
     protected String action;
 
@@ -58,7 +57,7 @@ public class BaseActivity extends AppCompatActivity implements BaseView{
 
         if (action.equals(Util.TOKEN_INVALID)) {
             FNAS.handleLogout();
-            FNAS.gotoEquipmentActivity(this, true);
+            EquipmentSearchActivity.gotoEquipmentActivity(this, true);
         }
 
     }
@@ -66,5 +65,10 @@ public class BaseActivity extends AppCompatActivity implements BaseView{
     @Override
     public void finishView() {
         finish();
+    }
+
+    @Override
+    public void setResultCode(int resultCode) {
+        setResult(resultCode);
     }
 }

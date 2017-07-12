@@ -17,8 +17,8 @@
             type="com.winsun.fruitmix.setting.SettingPresenter" />
 
         <variable
-            name="baseView"
-            type="com.winsun.fruitmix.interfaces.BaseView"/>
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
     </data>
 
@@ -32,8 +32,7 @@
         <include
             android:id="@+id/toolbar_layout"
             layout="@layout/toolbar_layout"
-            bind:title="@{@string/setting}"
-            bind:baseView="@{baseView}"/>
+            bind:toolbarViewModel="@{toolbarViewModel}"/>
 
         <!--    <android.support.v7.widget.Toolbar
                 android:layout_width="match_parent"
@@ -83,7 +82,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:checked="@{setting.autoUploadOrNot}" />
+                    android:checked="@={setting.autoUploadOrNot}" />
 
             </RelativeLayout>
 

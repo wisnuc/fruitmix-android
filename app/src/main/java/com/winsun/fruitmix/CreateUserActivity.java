@@ -23,6 +23,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,7 +52,13 @@ public class CreateUserActivity extends BaseActivity implements CreateUserView {
 
         binding.setCreateUserPresenter(createUserPresenter);
 
-        binding.setBaseView(this);
+        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
+
+        toolbarViewModel.titleText.set(getString(R.string.create_user));
+
+        toolbarViewModel.setBaseView(this);
+
+        binding.setToolbarViewModel(toolbarViewModel);
 
     }
 
@@ -60,6 +67,7 @@ public class CreateUserActivity extends BaseActivity implements CreateUserView {
         super.onDestroy();
 
         dismissDialog();
+
         mDialog = null;
 
         createUserPresenter.onDestroy();

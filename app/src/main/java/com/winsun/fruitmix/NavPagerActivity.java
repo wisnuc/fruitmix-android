@@ -8,14 +8,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.databinding.BindingAdapter;
 import android.databinding.BindingMethod;
 import android.databinding.BindingMethods;
 import android.databinding.DataBindingUtil;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,31 +22,24 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.SharedElementCallback;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
-import com.winsun.fruitmix.fragment.FileMainFragment;
+import com.winsun.fruitmix.fileModule.FileDownloadActivity;
+import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
-import com.winsun.fruitmix.anim.imageloadpattern.AnimateColorMatrixUtil;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.mainpage.MainPagePresenter;
 import com.winsun.fruitmix.mainpage.MainPagePresenterImpl;
@@ -70,14 +61,10 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class NavPagerActivity extends BaseActivity
         implements OnMainFragmentInteractionListener, MainPageView {
@@ -102,7 +89,12 @@ public class NavPagerActivity extends BaseActivity
 
     @Override
     public void gotoAccountManageActivity() {
-        Util.startActivity(mContext, AccountManageActivity.class);
+        startActivityForResult(new Intent(mContext,AccountManageActivity.class),START_ACCOUNT_MANAGE);
+    }
+
+    @Override
+    public void gotoFileDownloadActivity() {
+        Util.startActivity(mContext, FileDownloadActivity.class);
     }
 
     @Override
@@ -129,19 +121,11 @@ public class NavPagerActivity extends BaseActivity
 
     @Override
     public void showMediaHideFile() {
-        fragmentManager.beginTransaction().hide(fileMainFragment).show(mediaMainFragment).commit();
+        fragmentManager.beginTransaction().show(mediaMainFragment).commit();
 
-        fileMainFragment.hide();
         mediaMainFragment.show();
     }
 
-    @Override
-    public void showFileHideMedia() {
-        fragmentManager.beginTransaction().hide(mediaMainFragment).show(fileMainFragment).commit();
-
-        mediaMainFragment.hide();
-        fileMainFragment.show();
-    }
 
     @Override
     public void closeDrawer() {
@@ -188,7 +172,7 @@ public class NavPagerActivity extends BaseActivity
     private ProgressDialog mDialog;
 
     private MediaMainFragment mediaMainFragment;
-    private FileMainFragment fileMainFragment;
+
     private FragmentManager fragmentManager;
 
     private EquipmentSearchManager mEquipmentSearchManager;
@@ -312,10 +296,9 @@ public class NavPagerActivity extends BaseActivity
         navPagerViewModel.versionNameText.set(String.format(getString(R.string.android_version_name), Util.getVersionName(mContext)));
 
         mediaMainFragment = MediaMainFragment.newInstance();
-        fileMainFragment = FileMainFragment.newInstance();
 
         fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().add(R.id.frame_layout, mediaMainFragment).add(R.id.frame_layout, fileMainFragment).hide(fileMainFragment).commit();
+        fragmentManager.beginTransaction().add(R.id.frame_layout, mediaMainFragment).commit();
 
         currentPage = PAGE_MEDIA;
 
@@ -488,8 +471,6 @@ public class NavPagerActivity extends BaseActivity
 
         if (currentPage == PAGE_MEDIA) {
             mediaMainFragment.show();
-        } else {
-            fileMainFragment.show();
         }
     }
 
@@ -499,8 +480,6 @@ public class NavPagerActivity extends BaseActivity
 
         if (currentPage == PAGE_MEDIA) {
             mediaMainFragment.hide();
-        } else {
-            fileMainFragment.hide();
         }
     }
 
@@ -591,7 +570,6 @@ public class NavPagerActivity extends BaseActivity
     }
 
 
-
     private void showExplanation(String title, String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title)
@@ -610,8 +588,7 @@ public class NavPagerActivity extends BaseActivity
 
         Log.i(TAG, "onRequestPermissionsResult: " + (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED ? "true" : "false"));
 
-        if (currentPage == PAGE_FILE)
-            fileMainFragment.requestPermissionsResult(requestCode, permissions, grantResults);
+        mediaMainFragment.requestPermissionsResult(requestCode, permissions, grantResults);
 
     }
 
@@ -636,15 +613,7 @@ public class NavPagerActivity extends BaseActivity
     @Override
     public void onBackPressed() {
 
-        if (currentPage == PAGE_FILE) {
-            if (fileMainFragment.handleBackPressedOrNot()) {
-                fileMainFragment.handleBackPressed();
-            } else if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-                mDrawerLayout.closeDrawer(GravityCompat.START);
-            } else {
-                finishApp();
-            }
-        } else if (currentPage == PAGE_MEDIA) {
+        if (currentPage == PAGE_MEDIA) {
 
             if (mediaMainFragment.handleBackPressedOrNot()) {
                 mediaMainFragment.handleBackPressed();
@@ -727,6 +696,8 @@ public class NavPagerActivity extends BaseActivity
 
                 LocalCache.clearToken(mContext);
 
+                FileDownloadManager.INSTANCE.clearFileDownloadItems();
+
                 return null;
             }
 
@@ -736,7 +707,7 @@ public class NavPagerActivity extends BaseActivity
 
                 mDialog.dismiss();
 
-                FNAS.gotoEquipmentActivity((Activity) mContext, true);
+                EquipmentSearchActivity.gotoEquipmentActivity((Activity) mContext, true);
 
             }
 

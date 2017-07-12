@@ -22,11 +22,12 @@ import okhttp3.ResponseBody;
  * Created by Administrator on 2017/5/16.
  */
 
-public class CheckIpHttpUtil implements IHttpUtil {
+public class CheckIpHttpUtil implements IHttpUtil{
 
     public static final String TAG = CheckIpHttpUtil.class.getSimpleName();
 
     private IHttpUtil mIHttpUtil;
+
     private String mCurrentEquipmentName;
     private EquipmentSearchManager mEquipmentSearchManager;
 
@@ -62,6 +63,7 @@ public class CheckIpHttpUtil implements IHttpUtil {
     public CheckIpHttpUtil(IHttpUtil iHttpUtil, String currentEquipmentName, EquipmentSearchManager equipmentSearchManager) {
 
         mIHttpUtil = iHttpUtil;
+
         mCurrentEquipmentName = currentEquipmentName == null ? "" : currentEquipmentName;
         mEquipmentSearchManager = equipmentSearchManager;
 
@@ -200,13 +202,4 @@ public class CheckIpHttpUtil implements IHttpUtil {
 
     }
 
-    @Override
-    public ResponseBody downloadFile(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException {
-        return mIHttpUtil.downloadFile(httpRequest);
-    }
-
-    @Override
-    public boolean uploadFile(HttpRequest httpRequest, Media media) {
-        return mIHttpUtil.uploadFile(httpRequest, media);
-    }
 }

@@ -14,8 +14,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.databinding.library.baseAdapters.BR;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
+import com.winsun.fruitmix.databinding.PhotoOperationListItemBinding;
+import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import java.util.Collections;
 import java.util.List;
@@ -68,7 +71,7 @@ public class PhotoOperationAlertDialogFactory implements DialogFactory {
         return view;
     }
 
-    private class PhotoOperationRecyclerViewAdapter extends RecyclerView.Adapter<PhotoOperationRecyclerViewHolder> {
+    private class PhotoOperationRecyclerViewAdapter extends RecyclerView.Adapter<BindingViewHolder> {
 
         private Context context;
 
@@ -77,17 +80,18 @@ public class PhotoOperationAlertDialogFactory implements DialogFactory {
         }
 
         @Override
-        public PhotoOperationRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public BindingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-            View view = LayoutInflater.from(context).inflate(R.layout.photo_operation_list_item, parent, false);
+            PhotoOperationListItemBinding binding = PhotoOperationListItemBinding.inflate(LayoutInflater.from(context), parent, false);
 
-            return new PhotoOperationRecyclerViewHolder(view);
+            return new BindingViewHolder(binding);
         }
 
 
         @Override
-        public void onBindViewHolder(PhotoOperationRecyclerViewHolder holder, int position) {
-            holder.refreshView(position);
+        public void onBindViewHolder(BindingViewHolder holder, int position) {
+            holder.getViewDataBinding().setVariable(BR.photoSliderViewModel, new PhotoOperationViewModel(commandNames.get(position), commands.get(position)));
+            holder.getViewDataBinding().executePendingBindings();
         }
 
         /**
@@ -101,38 +105,27 @@ public class PhotoOperationAlertDialogFactory implements DialogFactory {
         }
     }
 
-    class PhotoOperationRecyclerViewHolder extends RecyclerView.ViewHolder {
+    public class PhotoOperationViewModel {
 
-        @BindView(R.id.item_textview)
-        TextView itemTextView;
-        @BindView(R.id.item_layout)
-        ViewGroup itemLayout;
+        private String commandName;
 
-        PhotoOperationRecyclerViewHolder(View itemView) {
-            super(itemView);
+        private AbstractCommand command;
 
-            ButterKnife.bind(this, itemView);
+        private PhotoOperationViewModel(String commandName, AbstractCommand command) {
+            this.commandName = commandName;
+            this.command = command;
         }
 
-        public void refreshView(int position) {
+        public String getCommandName() {
+            return commandName;
+        }
 
-            String commandName = commandNames.get(position);
+        public void executeCommand() {
+            command.execute();
 
-            final AbstractCommand command = commands.get(position);
-
-            itemTextView.setText(commandName);
-
-            itemLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    command.execute();
-
-                    dialog.dismiss();
-                }
-            });
+            dialog.dismiss();
         }
 
     }
-
 
 }

@@ -25,20 +25,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.SharpCurveInterpolator;
 import com.winsun.fruitmix.command.AbstractCommand;
+import com.winsun.fruitmix.databinding.NavPagerMainBinding;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
+import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
+import com.winsun.fruitmix.fileModule.fragment.FileFragment;
+import com.winsun.fruitmix.fileModule.interfaces.HandleTitleCallback;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
-import com.winsun.fruitmix.mediaModule.fragment.AlbumList;
 import com.winsun.fruitmix.mediaModule.fragment.MediaShareList;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
@@ -50,6 +52,8 @@ import com.winsun.fruitmix.anim.CustomTransitionListener;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
+import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -60,42 +64,28 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 import static android.app.Activity.RESULT_OK;
 
-public class MediaMainFragment extends Fragment implements View.OnClickListener, IPhotoListListener {
+public class MediaMainFragment extends Fragment implements View.OnClickListener, IPhotoListListener, HandleTitleCallback {
 
     public static final String TAG = "MediaMainFragment";
 
-    @BindView(R.id.title)
-    TextView title;
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
-    @BindView(R.id.fab)
+
+    Toolbar revealToolbar;
+
     FloatingActionButton fab;
-    @BindView(R.id.right)
-    TextView lbRight;
-    @BindView(R.id.viewPager)
+
     ViewPager viewPager;
 
-    @BindView(R.id.bt_share)
     ImageView ivBtShare;
-    @BindView(R.id.album_balloon)
+
     ImageView mAlbumBalloon;
-    @BindView(R.id.bottom_navigation_view)
+
     BottomNavigationView bottomNavigationView;
 
-    @BindView(R.id.reveal_toolbar)
-    Toolbar revealToolbar;
-    @BindView(R.id.select_count_title)
-    TextView mSelectCountTitle;
-    @BindView(R.id.enter_select_mode)
-    TextView mEnterSelectMode;
-
     private List<Page> pageList;
-    private AlbumList albumList;
+    private FileFragment fileFragment;
     private NewPhotoList photoList;
     private MediaShareList shareList;
 
@@ -107,7 +97,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private static final int PAGE_SHARE = 0;
     private static final int PAGE_PHOTO = 1;
-    private static final int PAGE_ALBUM = 2;
+    private static final int PAGE_FILE = 2;
 
     private boolean sInChooseMode = false;
 
@@ -124,6 +114,12 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     private List<Media> mSelectMedias;
 
     private List<String> mSelectMediaOriginalPhotoPaths;
+
+    private ToolbarViewModel toolbarViewModel;
+
+    private RevealToolbarViewModel revealToolbarViewModel;
+
+    private ToolbarViewModel.ToolbarNavigationOnClickListener defaultListener;
 
     public MediaMainFragment() {
         // Required empty public constructor
@@ -157,39 +153,25 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.nav_pager_main, container, false);
+        NavPagerMainBinding binding = NavPagerMainBinding.inflate(inflater, container, false);
 
-        ButterKnife.bind(this, view);
+        toolbar = binding.toolbarLayout.toolbar;
 
-        toolbar.setNavigationIcon(R.drawable.menu_black);
+        revealToolbar = binding.revealToolbarLayout.revealToolbar;
 
-        toolbar.setTitle("");
+        fab = binding.fab;
 
-//        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        viewPager = binding.viewPager;
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.switchDrawerOpenState();
-            }
-        });
+        ivBtShare = binding.btShare;
 
-        revealToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (sInChooseMode) {
-                    hideChooseHeader();
-                    showBottomNavAnim();
-                } else {
-                    mListener.onBackPress();
-                }
+        mAlbumBalloon = binding.albumBalloon;
 
-            }
-        });
+        bottomNavigationView = binding.bottomNavigationView;
 
-        lbRight.setVisibility(View.VISIBLE);
+        initToolbar(binding);
 
-        mEnterSelectMode.setVisibility(View.INVISIBLE);
+        initRevealToolbar(binding);
 
         initNavigationView();
 
@@ -199,15 +181,72 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         ivBtShare.setOnClickListener(this);
         fab.setOnClickListener(this);
-        lbRight.setOnClickListener(this);
 
-        photoList.addPhotoListListener(this);
+        photoList.setmPhotoListListener(this);
         shareList.addPhotoListListener(this);
-        albumList.addPhotoListListener(this);
 
         Log.d(TAG, "onCreateView: ");
 
-        return view;
+        return binding.getRoot();
+    }
+
+    private void initRevealToolbar(NavPagerMainBinding binding) {
+        revealToolbarViewModel = new RevealToolbarViewModel();
+
+        revealToolbarViewModel.selectCountTitleText.set(getString(R.string.choose_text));
+
+        revealToolbarViewModel.enterSelectModeVisibility.set(View.INVISIBLE);
+
+        revealToolbarViewModel.setRevealToolbarNavigationOnClickListener(new RevealToolbarViewModel.RevealToolbarNavigationOnClickListener() {
+            @Override
+            public void onClick() {
+                if (sInChooseMode) {
+                    hideChooseHeader();
+                    showBottomNavAnim();
+                } else {
+                    mListener.onBackPress();
+                }
+            }
+        });
+
+        binding.setRevealToolbarViewModel(revealToolbarViewModel);
+    }
+
+    private void initToolbar(NavPagerMainBinding binding) {
+        toolbarViewModel = new ToolbarViewModel();
+
+        toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
+
+        toolbarViewModel.titleText.set("");
+
+        defaultListener = new ToolbarViewModel.ToolbarNavigationOnClickListener() {
+            @Override
+            public void onClick() {
+                mListener.switchDrawerOpenState();
+            }
+        };
+
+        toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
+
+        toolbarViewModel.setToolbarSelectBtnOnClickListener(new ToolbarViewModel.ToolbarSelectBtnOnClickListener() {
+            @Override
+            public void onClick() {
+                showChooseHeader();
+                dismissBottomNavAnim();
+            }
+        });
+
+        toolbarViewModel.showSelect.set(true);
+
+        toolbarViewModel.setToolbarFileMainMenuBtnOnClickListener(new ToolbarViewModel.ToolbarFileMainMenuBtnOnClickListener() {
+            @Override
+            public void onClick() {
+                fileFragment.getBottomSheetDialog(fileFragment.getMainMenuItem()).show();
+            }
+        });
+
+        binding.setToolbarViewModel(toolbarViewModel);
+
     }
 
     @Override
@@ -275,9 +314,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         pageList.get(PAGE_PHOTO).onDestroy();
 
-        photoList.removePhotoListListener(this);
         shareList.removePhotoListListener(this);
-        albumList.removePhotoListListener(this);
 
         mContext = null;
 
@@ -365,7 +402,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 public void onTransitionStart(Transition transition) {
                     super.onTransitionStart(transition);
 
-                    toolbar.setVisibility(View.INVISIBLE);
+                    toolbarViewModel.showToolbar.set(false);
 
                     bottomNavigationView.setVisibility(View.INVISIBLE);
 
@@ -375,7 +412,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 public void onTransitionEnd(Transition transition) {
                     super.onTransitionEnd(transition);
 
-                    toolbar.setVisibility(View.VISIBLE);
+                    toolbarViewModel.showToolbar.set(true);
 
                     bottomNavigationView.setVisibility(View.VISIBLE);
                 }
@@ -387,9 +424,9 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if ((requestCode == Util.KEY_CHOOSE_PHOTO_REQUEST_CODE) && resultCode == RESULT_OK) {
 
-            viewPager.setCurrentItem(PAGE_ALBUM);
-            onDidAppear(PAGE_ALBUM);
-            pageList.get(PAGE_ALBUM).refreshView();
+            viewPager.setCurrentItem(PAGE_FILE);
+            onDidAppear(PAGE_FILE);
+            pageList.get(PAGE_FILE).refreshView();
             pageList.get(PAGE_SHARE).refreshView();
         }
     }
@@ -430,13 +467,13 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 //                        ViewPagerTranslation.INSTANCE.animatePagerTransition(forward, viewPager, 200, pageCount);
 
                         break;
-                    case R.id.album:
+                    case R.id.file:
 
                         eventId = Util.SWITCH_ALBUM_MODULE_UMENG_EVENT_ID;
 
-                        viewPager.setCurrentItem(PAGE_ALBUM);
+                        viewPager.setCurrentItem(PAGE_FILE);
 
-//                        ViewPagerTranslation.INSTANCE.animatePagerTransition(true, viewPager, 200, PAGE_ALBUM - viewPager.getCurrentItem());
+//                        ViewPagerTranslation.INSTANCE.animatePagerTransition(true, viewPager, 200, PAGE_FILE - viewPager.getCurrentItem());
 
                         break;
                 }
@@ -464,23 +501,22 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     private void initPageList() {
         shareList = new MediaShareList(getActivity());
         photoList = new NewPhotoList(getActivity());
-        albumList = new AlbumList(getActivity());
+        fileFragment = new FileFragment(getActivity(), this);
         pageList = new ArrayList<Page>();
         pageList.add(shareList);
         pageList.add(photoList);
-        pageList.add(albumList);
+        pageList.add(fileFragment);
     }
 
     public void refreshUser() {
 
         shareList.refreshView();
-        albumList.refreshView();
 
     }
 
     public void refreshAllViews() {
         shareList.refreshView();
-        albumList.refreshView();
+        fileFragment.refreshView();
         photoList.refreshView();
     }
 
@@ -498,6 +534,21 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
             }
         });
+    }
+
+    public void requestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        fileFragment.requestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
+
+        if (!mIsResume)
+            return;
+
+        fileFragment.handleEvent(downloadStateChangedEvent);
+
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -575,6 +626,11 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
                 break;
 
+            case Util.REMOTE_FILE_RETRIEVED:
+
+                fileFragment.handleOperationEvent(operationEvent);
+
+                break;
         }
 
     }
@@ -588,7 +644,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     public void setSelectCountText(String text) {
 //        title.setText(text);
 
-        mSelectCountTitle.setText(text);
+        revealToolbarViewModel.selectCountTitleText.set(text);
+
     }
 
     public void showTips() {
@@ -710,9 +767,9 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private void showRevealToolbarAnim() {
 
-        toolbar.setVisibility(View.GONE);
+        toolbarViewModel.showToolbar.set(false);
 
-        revealToolbar.setVisibility(View.VISIBLE);
+        revealToolbarViewModel.showRevealToolbar.set(true);
 
         new AnimatorBuilder(getContext(), R.animator.reveal_toolbar_translation, revealToolbar).addAdapter(new AnimatorListenerAdapter() {
             @Override
@@ -732,9 +789,9 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
 
-                revealToolbar.setVisibility(View.GONE);
+                revealToolbarViewModel.showRevealToolbar.set(false);
 
-                toolbar.setVisibility(View.VISIBLE);
+                toolbarViewModel.showToolbar.set(true);
 
                 Util.setStatusBarColor(getActivity(), R.color.colorPrimaryDark);
             }
@@ -779,15 +836,26 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     }
 
     public boolean handleBackPressedOrNot() {
-        return sInChooseMode;
+
+        int currentItem = viewPager.getCurrentItem();
+
+        if (currentItem == PAGE_FILE) {
+            return fileFragment.handleBackPressedOrNot();
+        } else
+            return currentItem == PAGE_PHOTO && sInChooseMode;
+
     }
 
     public void handleBackPressed() {
 
-//        Util.dismissViewWithReveal(mRevealToolbar);
+        int currentItem = viewPager.getCurrentItem();
 
-        hideChooseHeader();
-        showBottomNavAnim();
+        if (currentItem == PAGE_FILE) {
+            fileFragment.onBackPressed();
+        } else if (currentItem == PAGE_PHOTO) {
+            hideChooseHeader();
+            showBottomNavAnim();
+        }
 
     }
 
@@ -828,9 +896,13 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         int currentItem = viewPager.getCurrentItem();
 
         if (noPhotoItem && currentItem == PAGE_PHOTO) {
-            lbRight.setVisibility(View.GONE);
+
+            toolbarViewModel.showSelect.set(false);
+
         } else if (!noPhotoItem && currentItem == PAGE_PHOTO) {
-            lbRight.setVisibility(View.VISIBLE);
+
+            toolbarViewModel.showSelect.set(true);
+
         }
     }
 
@@ -862,6 +934,11 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         ViewCompat.setElevation(toolbar, Util.dip2px(mContext, 2f));
 
+    }
+
+    @Override
+    public Toolbar getToolbar() {
+        return toolbar;
     }
 
     @Override
@@ -908,13 +985,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             case R.id.fab:
                 refreshFabState();
                 break;
-            case R.id.right:
 
-//                Util.showViewWithReveal(mRevealToolbar);
-
-                showChooseHeader();
-                dismissBottomNavAnim();
-                break;
             default:
         }
     }
@@ -981,6 +1052,35 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         new AnimatorBuilder(getContext(), R.animator.share_btn_translation, ivBtShare).startAnimator();
     }
 
+    @Override
+    public void handleTitle(String currentFolderName) {
+
+        if (fileFragment.handleBackPressedOrNot()) {
+
+            toolbarViewModel.titleText.set(currentFolderName);
+            toolbarViewModel.navigationIconResId.set(R.drawable.ic_back_black);
+            toolbarViewModel.setToolbarNavigationOnClickListener(new ToolbarViewModel.ToolbarNavigationOnClickListener() {
+                @Override
+                public void onClick() {
+                    fileFragment.onBackPressed();
+                }
+            });
+
+            mListener.lockDrawer();
+
+        } else {
+
+            toolbarViewModel.titleText.set(getString(R.string.file));
+            toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
+
+            toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
+
+            mListener.unlockDrawer();
+
+        }
+
+    }
+
     private void onDidAppear(int position) {
 
         if (sInChooseMode) {
@@ -988,8 +1088,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             showBottomNav();
         }
 
-        if (toolbar.getVisibility() != View.VISIBLE) {
-            toolbar.setVisibility(View.VISIBLE);
+        if (!toolbarViewModel.showToolbar.get()) {
+            toolbarViewModel.showToolbar.set(true);
         }
 
         switch (position) {
@@ -997,29 +1097,54 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
                 setCurrentItem(shareList);
 
-                title.setText(getString(R.string.share_text));
-                fab.setVisibility(View.GONE);
+                toolbarViewModel.titleText.set(getString(R.string.share_text));
+                toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
+                toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
 
+                fab.setVisibility(View.GONE);
                 ivBtShare.setVisibility(View.GONE);
-                lbRight.setVisibility(View.GONE);
+
+                toolbarViewModel.showSelect.set(false);
+                toolbarViewModel.showFileMainMenu.set(false);
+
+                mListener.unlockDrawer();
+
                 break;
             case PAGE_PHOTO:
 
                 setCurrentItem(photoList);
 
-                title.setText(getString(R.string.photo));
-                lbRight.setVisibility(View.VISIBLE);
+                toolbarViewModel.titleText.set(getString(R.string.photo));
+                toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
+                toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
+
                 fab.setVisibility(View.GONE);
-                break;
-            case PAGE_ALBUM:
-
-                setCurrentItem(albumList);
-
-                title.setText(getString(R.string.album));
-                fab.setVisibility(View.GONE);
-
                 ivBtShare.setVisibility(View.GONE);
-                lbRight.setVisibility(View.GONE);
+
+                toolbarViewModel.showSelect.set(true);
+                toolbarViewModel.showFileMainMenu.set(false);
+
+                mListener.unlockDrawer();
+
+                break;
+            case PAGE_FILE:
+
+                setCurrentItem(fileFragment);
+
+                fab.setVisibility(View.GONE);
+                ivBtShare.setVisibility(View.GONE);
+
+                toolbarViewModel.showSelect.set(false);
+                toolbarViewModel.showFileMainMenu.set(true);
+
+                if (fileFragment != null && isResumed()) {
+
+                    String title = fileFragment.getCurrentFolderName();
+
+                    handleTitle(title);
+
+                }
+
                 break;
             default:
         }
@@ -1028,7 +1153,6 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     }
 
     private class MyAdapter extends PagerAdapter {
-
 
         @Override
         public CharSequence getPageTitle(int position) {

@@ -20,7 +20,7 @@ public class CreateNewEquipmentActivity extends AppCompatActivity implements Vie
     TextView mLayoutTitle;
     @BindView(R.id.toolbar)
     Toolbar mToolBar;
-    @BindView(R.id.right)
+    @BindView(R.id.select)
     TextView rightTextView;
 
     @BindView(R.id.ip_edit)
@@ -54,7 +54,7 @@ public class CreateNewEquipmentActivity extends AppCompatActivity implements Vie
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.right:
+            case R.id.select:
                 String ip = ipInputEditText.getText().toString();
 
                 if (ip.equals("")) {

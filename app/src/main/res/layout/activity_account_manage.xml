@@ -8,12 +8,12 @@
     <data>
 
         <variable
-            name="baseView"
-            type="com.winsun.fruitmix.interfaces.BaseView" />
-
-        <variable
             name="accountManagePresenter"
             type="com.winsun.fruitmix.account.manage.AccountManagePresenter" />
+
+        <variable
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
     </data>
 
@@ -29,8 +29,7 @@
 
             <include
                 layout="@layout/toolbar_layout"
-                app:baseView="@{baseView}"
-                app:title="@{@string/account_manage}" />
+                app:toolbarViewModel="@{toolbarViewModel}"/>
 
             <!--<android.support.v7.widget.Toolbar-->
             <!--android:layout_width="match_parent"-->

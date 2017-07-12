@@ -100,7 +100,11 @@ public class RetrieveRemoteMediaService extends IntentService {
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: load media finish" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
+            if(httpResponse.getResponseCode() != 200)
+                return;
+
             RemoteDataParser<Media> parser = new RemoteMediaParser();
+
             medias = parser.parse(httpResponse.getResponseData());
 
 //            medias = Collections.emptyList();

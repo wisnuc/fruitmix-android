@@ -21,6 +21,7 @@ import com.winsun.fruitmix.setting.SettingPresenter;
 import com.winsun.fruitmix.setting.SettingPresenterImpl;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -31,17 +32,7 @@ public class SettingActivity extends BaseActivity {
 
     public static final String TAG = "SettingActivity";
 
-    SwitchCompat mAutoUploadPhotosSwitch;
-
-    private boolean mAutoUploadOrNot = false;
-
-    private int mAlreadyUploadMediaCount = -1;
-
-    private int mTotalLocalMediaCount = 0;
-
-    private long mTotalCacheSize = 0;
-
-    private SettingViewModel settingViewModel;
+    private SettingPresenter settingPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,62 +40,23 @@ public class SettingActivity extends BaseActivity {
 
         ActivitySettingBinding binding = DataBindingUtil.setContentView(this,R.layout.activity_setting);
 
-        settingViewModel = new SettingViewModel();
+        SettingViewModel settingViewModel = new SettingViewModel();
 
-        SettingPresenter settingPresenter = new SettingPresenterImpl();
+        settingPresenter = new SettingPresenterImpl(settingViewModel);
 
         binding.setSettingPresenter(settingPresenter);
 
         binding.setSetting(settingViewModel);
 
-        binding.setBaseView(this);
+        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 
-        mAutoUploadPhotosSwitch = binding.autoUploadPhotosSwitch;
+        toolbarViewModel.titleText.set(getString(R.string.setting));
 
-        mAutoUploadOrNot = LocalCache.getAutoUploadOrNot(this);
-        settingViewModel.autoUploadOrNot.set(mAutoUploadOrNot);
+        toolbarViewModel.setBaseView(this);
 
-        calcAlreadyUploadMediaCountAndTotalCacheSize();
+        binding.setToolbarViewModel(toolbarViewModel);
 
-    }
-
-    private void calcAlreadyUploadMediaCountAndTotalCacheSize() {
-
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-
-                int alreadyUploadMediaCount = 0;
-                int totalUploadMediaCount = 0;
-
-                for (Media media : LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()) {
-
-                    if (media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
-                        alreadyUploadMediaCount++;
-                    }
-
-                    totalUploadMediaCount++;
-                }
-
-                mAlreadyUploadMediaCount = alreadyUploadMediaCount;
-                mTotalLocalMediaCount = totalUploadMediaCount;
-
-                mTotalCacheSize = FileUtil.getTotalCacheSize(SettingActivity.this);
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-
-                settingViewModel.alreadyUploadMediaCountTextViewVisibility.set(true);
-                settingViewModel.alreadyUploadMediaCountText.set(String.format(getString(R.string.already_upload_media_count_text), mAlreadyUploadMediaCount, mTotalLocalMediaCount));
-
-                settingViewModel.cacheSizeText.set(FileUtil.formatFileSize(mTotalCacheSize));
-
-            }
-        }.execute();
+        settingPresenter.onCreate(this);
 
     }
 
@@ -112,19 +64,7 @@ public class SettingActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        boolean isChecked = mAutoUploadPhotosSwitch.isChecked();
-
-        if (mAutoUploadOrNot != isChecked) {
-            LocalCache.setAutoUploadOrNot(this, isChecked);
-
-            if (isChecked) {
-                LocalCache.setCurrentUploadDeviceID(this, LocalCache.DeviceID);
-                EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
-            } else {
-                LocalCache.setCurrentUploadDeviceID(this, "");
-                EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
-            }
-        }
+        settingPresenter.onDestroy(this);
 
     }
 

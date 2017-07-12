@@ -8,4 +8,5 @@ public interface BaseView {
 
     void finishView();
 
+    void setResultCode(int resultCode);
 }

@@ -1,19 +1,42 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:orientation="vertical"
-             tools:context="com.winsun.fruitmix.fileModule.fragment.FileFragment">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/file_recyclerview"
+    <data>
+
+        <variable
+            name="loadingViewModel"
+            type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
+
+        <variable
+            name="noContentViewModel"
+            type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
+
+    </data>
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:orientation="vertical"
+        tools:context="com.winsun.fruitmix.fileModule.fragment.FileFragment">
 
-    <include layout="@layout/loading_layout"/>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/file_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
 
-    <include layout="@layout/no_content_layout"/>
+        <include
+            layout="@layout/new_loading_layout"
+            bind:loadingViewModel="@{loadingViewModel}" />
+
+        <include
+            layout="@layout/new_no_content_layout"
+            bind:noContentViewModel="@{noContentViewModel}" />
 
 
-</FrameLayout>
+    </FrameLayout>
+
+
+</layout>
+

@@ -33,6 +33,7 @@ import com.winsun.fruitmix.model.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationTargetType;
@@ -214,7 +215,10 @@ public class ButlerService extends Service {
                     LocalCache.CleanAll(this);
                     LocalCache.Init();
                 }
-                FNAS.retrieveUser(this);
+//                FNAS.retrieveUser(this);
+
+                EventBus.getDefault().postSticky(new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationSuccess(0)));
+
                 break;
             default:
 

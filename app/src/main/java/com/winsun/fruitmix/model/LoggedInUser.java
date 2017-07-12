@@ -11,7 +11,7 @@ public class LoggedInUser {
     private String token;
     private String deviceID;
 
-    public LoggedInUser(String deviceID, String token, String gateway, String equipmentName,User user) {
+    public LoggedInUser(String deviceID, String token, String gateway, String equipmentName, User user) {
         this.deviceID = deviceID;
         this.token = token;
         this.gateway = gateway;
@@ -20,6 +20,12 @@ public class LoggedInUser {
     }
 
     public LoggedInUser() {
+
+        user = new User();
+        setGateway("");
+        setEquipmentName("");
+        setToken("");
+        setDeviceID("");
     }
 
     public User getUser() {

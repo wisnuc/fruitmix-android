@@ -14,6 +14,10 @@ public interface MainPageView {
 
     void gotoAccountManageActivity();
 
+    void gotoFileDownloadActivity();
+
+
+
     void loggedInUserItemOnClick(LoggedInUser loggedInUser);
 
     void logout();
@@ -24,7 +28,6 @@ public interface MainPageView {
 
     void showMediaHideFile();
 
-    void showFileHideMedia();
-
     void closeDrawer();
+
 }

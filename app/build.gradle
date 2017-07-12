@@ -17,6 +17,8 @@ android {
             }
         }
 
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+
     }
     buildTypes {
 
@@ -53,23 +55,46 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile(name: 'android-gif-drawable-1.2.3', ext: 'aar')
     compile project(':volley')
-    compile 'com.jakewharton:butterknife:8.1.0'
     compile rootProject.ext.supportV4
     compile rootProject.ext.appcompatV7
     compile rootProject.ext.design
     compile rootProject.ext.cardviewV7
     compile rootProject.ext.recyclerviewV7
-    compile 'io.github.sin3hz.fastjumper:fastjumper:0.1.0'
-    compile 'org.greenrobot:eventbus:3.0.0'
+
     testCompile "junit:junit:$rootProject.ext.junitVersion"
     testCompile "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
+    testCompile "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
+
     testCompile "org.robolectric:robolectric:$rootProject.ext.robolectricVersion"
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.1.0'
+
+    androidTestCompile "com.android.support.test:runner:$rootProject.ext.runnerVersion"
+    androidTestCompile "com.android.support.test:rules:$rootProject.ext.rulesVersion"
+
+    androidTestCompile "junit:junit:$rootProject.ext.junitVersion"
+    androidTestCompile "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
+
+    // Resolve conflicts between main and test APK:
+    androidTestCompile rootProject.ext.supportV4
+    androidTestCompile rootProject.ext.recyclerviewV7
+    androidTestCompile rootProject.ext.appcompatV7
+    androidTestCompile rootProject.ext.design
+    androidTestCompile rootProject.ext.cardviewV7
+
     compile "com.squareup.okhttp3:logging-interceptor:$rootProject.ext.okhttpVersion"
-    annotationProcessor 'org.greenrobot:eventbus-annotation-processor:3.0.1'
+
+
+
+    compile 'com.jakewharton:butterknife:8.1.0'
+    compile 'io.github.sin3hz.fastjumper:fastjumper:0.1.0'
+    compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.daimajia.swipelayout:library:1.2.0@aar'
     compile 'com.github.andriydruk:rxdnssd:0.8.3'
     compile 'com.umeng.analytics:analytics:latest.integration'
-
+    compile 'com.android.support.constraint:constraint-layout:1.0.0'
+    compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:+'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.1.0'
+    annotationProcessor 'org.greenrobot:eventbus-annotation-processor:3.0.1'
 }
+
+
 

@@ -1,64 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
 
-    <View
-        android:id="@+id/spacing_layout"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/white"
-        android:visibility="gone" />
+    <data>
 
-    <View
-        android:id="@+id/spacing_second_layout"
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:background="@color/white"
-        android:visibility="gone" />
+        <variable
+            name="newPhotoGroupViewModel"
+            type="com.winsun.fruitmix.mediaModule.fragment.NewPhotoList.NewPhotoGroupViewModel" />
+
+        <import type="android.view.View" />
+
+    </data>
 
     <LinearLayout
-        android:id="@+id/photo_title_layout"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@color/white"
-        android:clickable="true"
-        android:orientation="horizontal"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <View
+            android:id="@+id/spacing_layout"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@color/white"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/spacing_second_layout"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="@color/white"
+            android:visibility="@{newPhotoGroupViewModel.showSpacingSecondLayout?View.VISIBLE:View.GONE,default=gone}" />
 
         <LinearLayout
-            android:id="@+id/photo_title_container"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:translationX="-32dp"
-            android:orientation="horizontal">
+            android:id="@+id/photo_title_layout"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@color/white"
+            android:clickable="true"
+            android:onClick="@{()->newPhotoGroupViewModel.photoTitleOnClick(newPhotoGroupViewModel)}"
+            android:orientation="horizontal"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
 
-            <ImageView
-                android:id="@+id/photo_title_select_img"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/photo_title_bg" />
-
-            <TextView
-                android:id="@+id/photo_group_tv"
+            <LinearLayout
+                android:id="@+id/photo_title_container"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:fontFamily="sans-serif-medium"
-                android:gravity="center"
-                android:text="2016-7-26"
-                android:layout_marginLeft="16dp"
-                android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="14dp" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:translationX="-32dp">
+
+                <ImageView
+                    android:id="@+id/photo_title_select_img"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/photo_title_bg"
+                    bind:selected="@{newPhotoGroupViewModel.photoTitleSelect}" />
+
+                <TextView
+                    android:id="@+id/photo_group_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="16dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
+                    android:text="@{newPhotoGroupViewModel.photoTitle}"
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="14dp" />
+
+            </LinearLayout>
+
 
         </LinearLayout>
 
 
     </LinearLayout>
 
+</layout>
 
-</LinearLayout>
 

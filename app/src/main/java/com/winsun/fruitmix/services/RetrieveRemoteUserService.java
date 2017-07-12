@@ -8,10 +8,13 @@ import android.util.Log;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteUserJSONObjectParser;
@@ -81,7 +84,7 @@ public class RetrieveRemoteUserService extends IntentService {
 
         HttpResponse httpResponse;
 
-        if(Util.loginType != LoginType.LOGIN){
+        if (Util.loginType != LoginType.LOGIN) {
 
             users = dbUtils.getAllRemoteUser();
 
@@ -91,7 +94,7 @@ public class RetrieveRemoteUserService extends IntentService {
 
             fillUserMap(userConcurrentMap);
 
-            sendEvent();
+            sendEvent(new OperationSuccess(R.string.operate));
 
         }
 
@@ -99,7 +102,7 @@ public class RetrieveRemoteUserService extends IntentService {
 
             httpResponse = FNAS.loadUser(this);
 
-            if(httpResponse.getResponseCode() != 200 && Util.loginType == LoginType.LOGIN){
+            if (httpResponse.getResponseCode() != 200 && Util.loginType == LoginType.LOGIN) {
                 OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()));
                 EventBus.getDefault().post(operationEvent);
                 return;
@@ -132,11 +135,16 @@ public class RetrieveRemoteUserService extends IntentService {
 
             fillUserMap(userConcurrentMap);
 
-            sendEvent();
+            sendEvent(new OperationSuccess(R.string.operate));
 
         } catch (Exception e) {
             e.printStackTrace();
 
+            if (Util.clearFileDownloadItem)
+                Util.clearFileDownloadItem = false;
+
+            if (Util.loginType == LoginType.LOGIN)
+                sendEvent(new OperationIOException());
         }
 
     }
@@ -147,8 +155,8 @@ public class RetrieveRemoteUserService extends IntentService {
         LocalCache.RemoteUserMapKeyIsUUID.putAll(userConcurrentMap);
     }
 
-    private void sendEvent() {
-        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationSuccess(R.string.operate));
+    private void sendEvent(OperationResult operationResult) {
+        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, operationResult);
         EventBus.getDefault().post(operationEvent);
     }
 

@@ -19,8 +19,12 @@ public class User {
 
     public User() {
 
+        setUserName("");
+        setUuid("");
         setAvatar("defaultAvatar.jpg");
         setEmail("");
+        setDefaultAvatar("");
+        setHome("");
         setLibrary("");
 
     }

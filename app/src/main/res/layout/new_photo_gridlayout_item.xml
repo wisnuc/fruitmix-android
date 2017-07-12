@@ -1,27 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/photo_item_layout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/white"
-    android:clickable="true">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.android.volley.toolbox.NetworkImageView
-        android:id="@+id/photo_iv"
+    <data>
+
+        <variable
+            name="showPhotoSelectImg"
+            type="android.databinding.ObservableBoolean"/>
+
+        <import type="android.view.View"/>
+
+    </data>
+
+    <RelativeLayout
+        android:id="@+id/photo_item_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/default_place_holder"
-        android:scaleType="centerCrop" />
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:clickable="true">
 
-    <ImageView
-        android:id="@+id/photo_select_img"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="10dp"
-        android:src="@drawable/select"
-        android:visibility="invisible" />
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/photo_iv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/default_place_holder"
+            android:scaleType="centerCrop" />
+
+        <ImageView
+            android:id="@+id/photo_select_img"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="10dp"
+            android:src="@drawable/select"
+            android:visibility="@{showPhotoSelectImg?View.VISIBLE:View.GONE,default=gone}" />
 
 
-</RelativeLayout>
+    </RelativeLayout>
+
+</layout>

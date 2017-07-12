@@ -2,6 +2,7 @@ package com.winsun.fruitmix.mediaModule.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.mediaModule.NewAlbumPicChooseActivity;
 import com.winsun.fruitmix.mediaModule.interfaces.Page;
 
 import java.util.ArrayList;
@@ -33,13 +35,15 @@ public class AlbumList implements Page, IShowHideFragmentListener {
     @BindView(R.id.no_content_layout)
     LinearLayout mNoContentLayout;
 
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
+
     @BindView(R.id.no_content_imageview)
     ImageView noContentImageView;
     @BindView(R.id.no_content_textview)
     TextView noContentTextView;
 
     private List<IPhotoListListener> mPhotoListListeners;
-
 
     public AlbumList(Activity activity_) {
 
@@ -48,6 +52,13 @@ public class AlbumList implements Page, IShowHideFragmentListener {
         view = LayoutInflater.from(containerActivity).inflate(R.layout.album_list, null);
 
         ButterKnife.bind(this, view);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                containerActivity.startActivity(new Intent(containerActivity, NewAlbumPicChooseActivity.class));
+            }
+        });
 
         noContentImageView.setImageResource(R.drawable.no_photo);
 

@@ -370,12 +370,8 @@ public class LocalCache {
     }
 
     public static void clearToken(Context context) {
-        SharedPreferences sp;
-        SharedPreferences.Editor editor;
-        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        editor = sp.edit();
-        editor.putString(Util.JWT, null);
-        editor.apply();
+
+        saveToken(context, null);
     }
 
     public static void saveToken(Context context, String jwt) {
@@ -394,6 +390,10 @@ public class LocalCache {
         return sp.getString(Util.JWT, null);
     }
 
+    public static void clearGateway(Context context) {
+        saveGateway(context, null);
+    }
+
     public static void saveGateway(Context context, String gateway) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
@@ -410,6 +410,9 @@ public class LocalCache {
         return sp.getString(Util.GATEWAY, null);
     }
 
+    public static void clearUserUUID(Context context) {
+        saveUserUUID(context, null);
+    }
 
     public static String getUserUUID(Context context) {
         SharedPreferences sp;

@@ -1,20 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/photo_recyclerview"
+    <data>
+
+        <variable
+            name="loadingViewModel"
+            type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
+
+        <variable
+            name="noContentViewModel"
+            type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
+
+    </data>
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
-        android:visibility="gone" />
+        android:layout_height="match_parent">
 
-    <include layout="@layout/loading_layout" />
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/photo_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:visibility="gone" />
 
-    <include layout="@layout/no_content_layout" />
+        <include
+            layout="@layout/new_loading_layout"
+            bind:loadingViewModel="@{loadingViewModel}" />
 
-</FrameLayout>
+        <include
+            layout="@layout/new_no_content_layout"
+            bind:noContentViewModel="@{noContentViewModel}" />
+
+    </FrameLayout>
+
+
+</layout>
+
 
 
 

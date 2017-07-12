@@ -3,6 +3,7 @@ package com.winsun.fruitmix.dialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.databinding.DataBindingUtil;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.BottomSheetDialogFragment;
@@ -15,8 +16,11 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.databinding.BottomSheetDialogItemBinding;
 import com.winsun.fruitmix.model.BottomMenuItem;
+import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +74,7 @@ public class BottomMenuDialogFactory implements DialogFactory {
         return bottomSheetView;
     }
 
-    private class BottomSheetRecyclerViewAdapter extends RecyclerView.Adapter<BottomSheetRecyclerViewViewHolder> {
+    private class BottomSheetRecyclerViewAdapter extends RecyclerView.Adapter<BindingViewHolder> {
 
         private List<BottomMenuItem> bottomMenuItems;
         private Context context;
@@ -81,16 +85,17 @@ public class BottomMenuDialogFactory implements DialogFactory {
         }
 
         @Override
-        public BottomSheetRecyclerViewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public BindingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-            View view = LayoutInflater.from(context).inflate(R.layout.bottom_sheet_dialog_item, parent, false);
+            BottomSheetDialogItemBinding binding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.bottom_sheet_dialog_item, parent, false);
 
-            return new BottomMenuDialogFactory.BottomSheetRecyclerViewViewHolder(view);
+            return new BindingViewHolder(binding);
         }
 
         @Override
-        public void onBindViewHolder(BottomSheetRecyclerViewViewHolder holder, int position) {
-            holder.refreshView(bottomMenuItems.get(position), context);
+        public void onBindViewHolder(BindingViewHolder holder, int position) {
+            holder.getViewDataBinding().setVariable(BR.bottomMenuItem, bottomMenuItems.get(position));
+            holder.getViewDataBinding().executePendingBindings();
         }
 
         @Override
@@ -104,35 +109,4 @@ public class BottomMenuDialogFactory implements DialogFactory {
         }
     }
 
-
-    class BottomSheetRecyclerViewViewHolder extends RecyclerView.ViewHolder {
-
-        @BindView(R.id.item_text)
-        TextView itemTextView;
-        @BindView(R.id.item_layout)
-        RelativeLayout itemLayout;
-
-        BottomSheetRecyclerViewViewHolder(View itemView) {
-            super(itemView);
-
-            ButterKnife.bind(this, itemView);
-        }
-
-        public void refreshView(final BottomMenuItem bottomMenuItem, Context context) {
-            itemTextView.setText(bottomMenuItem.getText());
-
-            if (bottomMenuItem.isDisable()) {
-                itemTextView.setTextColor(ContextCompat.getColor(context, R.color.fifty_four_percent_black));
-            } else {
-                itemTextView.setTextColor(ContextCompat.getColor(context, R.color.eighty_seven_percent_black));
-            }
-
-            itemLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    bottomMenuItem.handleOnClickEvent();
-                }
-            });
-        }
-    }
 }

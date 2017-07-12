@@ -292,14 +292,17 @@ public class BasicNetwork implements Network {
      * @param path file path
      * @return may return null cause exception
      */
-    private byte[] getBytesFromFile(String path) {
+    private byte[] getBytesFromFile(String path) throws VolleyError {
         File file = new File(path);
 
-        PoolingByteArrayOutputStream bytes = new PoolingByteArrayOutputStream(mPool, (int) file.length());
+        PoolingByteArrayOutputStream bytes = null;
         byte[] buffer = null;
         // 得到文件的输入流
         InputStream in = null;
         try {
+
+            bytes = new PoolingByteArrayOutputStream(mPool, (int) file.length());
+
             buffer = mPool.getBuf(1024);
             in = new FileInputStream(new File(path));
             int count;
@@ -309,7 +312,15 @@ public class BasicNetwork implements Network {
             return bytes.toByteArray();
         } catch (Exception ex) {
             ex.printStackTrace();
-            return null;
+
+            throw new VolleyError("get bytes from file cause exception");
+
+        } catch (OutOfMemoryError error) {
+
+            error.printStackTrace();
+
+            throw new VolleyError("get bytes from file cause out of memory error");
+
         } finally {
             if (in != null) {
                 try {
@@ -320,7 +331,8 @@ public class BasicNetwork implements Network {
             }
             mPool.returnBuf(buffer);
             try {
-                bytes.close();
+                if (bytes != null)
+                    bytes.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

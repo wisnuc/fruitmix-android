@@ -6,12 +6,10 @@
     <data>
 
         <variable
-            name="title"
-            type="String" />
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
-        <variable
-            name="baseView"
-            type="com.winsun.fruitmix.interfaces.BaseView" />
+        <import type="android.view.View" />
 
     </data>
 
@@ -23,31 +21,52 @@
         android:elevation="@dimen/appbar_elevation"
         android:theme="@style/AppTheme.AppBarOverlay"
         android:transitionName="@string/transition_toolbar"
-        app:navigationIcon="@drawable/ic_back_black"
-        app:navigationOnClickListener="@{()-> baseView.finishView()}"
+        android:visibility="@{toolbarViewModel.showToolbar?View.VISIBLE:View.GONE}"
+        app:navigationIcon="@{toolbarViewModel.navigationIconResId,default=@drawable/ic_back_black}"
+        app:navigationOnClickListener="@{()-> toolbarViewModel.toolbarNavigationOnClick()}"
         app:popupTheme="@style/AppTheme.PopupOverlay">
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@{title,default=@string/photo}"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="18dp" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/right"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|end"
-            android:layout_marginRight="15dp"
-            android:text="@string/choose_text"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="16dp"
-            android:visibility="gone" />
-        <!--android:textColor="#757575"-->
+            <TextView
+                android:id="@+id/select"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="15dp"
+                android:onClick="@{()->toolbarViewModel.toolbarSelectBtnOnClick()}"
+                android:text="@string/choose_text"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="16dp"
+                android:visibility="@{toolbarViewModel.showSelect?View.VISIBLE:View.GONE,default=gone}" />
+
+            <ImageView
+                android:id="@+id/file_main_menu"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="15dp"
+                android:onClick="@{()->toolbarViewModel.toolbarFileMainBtnOnClick()}"
+                android:src="@drawable/ic_more_vert_black"
+                android:visibility="@{toolbarViewModel.showFileMainMenu?View.VISIBLE:View.GONE,default=gone}" />
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@id/file_main_menu"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:text="@{toolbarViewModel.titleText,default=@string/photo}"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="18dp" />
+
+        </RelativeLayout>
+
 
     </android.support.v7.widget.Toolbar>
 

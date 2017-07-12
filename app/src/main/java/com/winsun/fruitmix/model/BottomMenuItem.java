@@ -10,13 +10,16 @@ import com.winsun.fruitmix.command.AbstractCommand;
 
 public class BottomMenuItem {
 
+    private int iconResID;
+
     private String text;
     private AbstractCommand command;
     private Dialog dialog;
 
     private boolean disable = false;
 
-    public BottomMenuItem(String text, AbstractCommand command) {
+    public BottomMenuItem(int iconResID,String text, AbstractCommand command) {
+        this.iconResID = iconResID;
         this.text = text;
         this.command = command;
     }
@@ -29,6 +32,10 @@ public class BottomMenuItem {
         command.execute();
 
         dialog.dismiss();
+    }
+
+    public int getIconResID() {
+        return iconResID;
     }
 
     public String getText() {

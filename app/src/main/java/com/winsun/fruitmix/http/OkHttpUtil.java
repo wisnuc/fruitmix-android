@@ -36,7 +36,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
  * Created by Administrator on 2016/12/22.
  */
 
-public class OkHttpUtil implements IHttpUtil {
+public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
     public static final String TAG = OkHttpUtil.class.getSimpleName();
 
@@ -50,7 +50,8 @@ public class OkHttpUtil implements IHttpUtil {
     private static final String FILE_STRING = "file";
 
     static {
-        okHttpClient = new OkHttpClient.Builder().connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).addInterceptor(createHttpInterceptor()).build();
+        okHttpClient = new OkHttpClient.Builder().connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
+                .readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).addInterceptor(createHttpInterceptor()).build();
 
     }
 
@@ -76,6 +77,7 @@ public class OkHttpUtil implements IHttpUtil {
                 request = builder.get().build();
                 break;
             case Util.HTTP_POST_METHOD:
+
                 requestBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_STRING), httpRequest.getBody());
                 request = builder.post(requestBody).build();
                 break;

@@ -50,7 +50,7 @@ public class RemoteUserJSONObjectParser {
 
         user.setAdmin(itemRaw.optBoolean("isAdmin"));
 
-        if (user.getDefaultAvatar() == null) {
+        if (user.getDefaultAvatar() == null || user.getDefaultAvatar().isEmpty()) {
             user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
         }
         if (user.getDefaultAvatarBgColor() == 0) {

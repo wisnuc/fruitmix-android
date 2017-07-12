@@ -87,6 +87,8 @@
     <string name="my_file">My Files</string>
     <string name="my_photo">My Photos</string>
 
+    <string name="download_manage">Manage Download</string>
+
     <string name="account_manage">Manage Account</string>
 
     <string name="already_upload_media_percent_text">Already upload %1$s</string>
@@ -224,5 +226,13 @@
     <string name="no_enough_space">No enough space</string>
 
     <string name="max_select_photo">An album could not contains more than 1000 photos.</string> <!-- not final version -->
+
+    <!-- wechat -->
+    <string name="errcode_success">Send succeed</string>
+    <string name="errcode_cancel">Send cancel</string>
+    <string name="errcode_deny">Send denied</string>
+    <string name="errcode_unsupported">UnSupported Error</string>
+    <string name="errcode_unknown">UnKnown Error</string>
+
 
 </resources>

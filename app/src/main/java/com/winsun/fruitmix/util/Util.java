@@ -23,6 +23,8 @@ import android.view.ViewAnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 
 import com.github.druk.rxdnssd.BonjourService;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.GravityArcMotion;
 import com.winsun.fruitmix.model.LoggedInUser;
@@ -46,6 +48,10 @@ import java.util.UUID;
 public class Util {
 
     public static final String TAG = Util.class.getSimpleName();
+
+    public static final String APP_ID = "wx99b54eb728323fe8";
+
+    public static final String PORT = "3721";
 
     public static final String SHOW_ALBUM_TIPS = "show_album_tips";
     public static final String SHOW_PHOTO_RETURN_TIPS = "show_photo_return_tips";
@@ -106,11 +112,12 @@ public class Util {
     public static final String ADMIN_USER_PARAMETER = "/admin/users";
     public static final String ACCOUNT_PARAMETER = "/account";
     public static final String TOKEN_PARAMETER = "/token";
-    public static final String LOGIN_PARAMETER = "/login";
+    public static final String LOGIN_PARAMETER = "/users";
     public static final String DEVICE_ID_PARAMETER = "/libraries";
     public static final String LIST_FILE_PARAMETER = "/files/fruitmix/list";
     public static final String DOWNLOAD_FILE_PARAMETER = "/files/fruitmix/download";
     public static final String FILE_SHARE_PARAMETER = "/share";
+    public static final String TICKETS_PARAMETER = "/station/tickets";
 
     public static final String FILE_SHARED_WITH_ME_PARAMETER = "/sharedWithMe";
     public static final String FILE_SHARED_WITH_OTHERS_PARAMETER = "/sharedWithOthers";
@@ -192,6 +199,18 @@ public class Util {
     public static void setLocalMediaInDBLoaded(boolean localMediaInDBLoaded) {
         Util.localMediaInDBLoaded = localMediaInDBLoaded;
     }
+
+    public static boolean clearFileDownloadItem = false;
+
+    public static IWXAPI registerToWX(Context context) {
+
+        IWXAPI iwxapi = WXAPIFactory.createWXAPI(context, APP_ID, true);
+
+        iwxapi.registerApp(Util.APP_ID);
+
+        return iwxapi;
+    }
+
 
     /**
      * 将dp转化为px
@@ -408,7 +427,7 @@ public class Util {
 
     }
 
-    public static Pair<View, String>[] createSafeTransitionPairs(Activity activity, boolean includeBottomNavigationView, Pair... otherPairs) {
+    public static Pair<View, String>[] createSafeTransitionPairs(View toolbar,Activity activity, boolean includeBottomNavigationView, Pair... otherPairs) {
 
         // Avoid system UI glitches as described here:
         // https://plus.google.com/+AlexLockwood/posts/RPtwZ5nNebb
@@ -428,8 +447,10 @@ public class Util {
             pairs.add(navBarPair);
         }
 
-        Pair toolbarPair = new Pair<>(decor.findViewById(R.id.toolbar), activity.getString(R.string.transition_toolbar));
-        pairs.add(toolbarPair);
+        if (toolbar != null) {
+            Pair toolbarPair = new Pair<>(toolbar, activity.getString(R.string.transition_toolbar));
+            pairs.add(toolbarPair);
+        }
 
         if (includeBottomNavigationView) {
             Pair bottomNavigationViewPair = new Pair<>(decor.findViewById(R.id.bottom_navigation_view),
@@ -637,10 +658,5 @@ public class Util {
     public static void startActivity(Context context, Class target) {
         context.startActivity(new Intent(context, target));
     }
-
-    public static void startActivityForResult(Activity activity, Class target, int requestCode) {
-        activity.startActivityForResult(new Intent(activity, target), requestCode);
-    }
-
 
 }

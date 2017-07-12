@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="noContentViewModel"
+            type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
+
+        <import type="android.view.View" />
+
+    </data>
+
+    <LinearLayout
+        android:id="@+id/no_content_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="@{noContentViewModel.showNoContent?View.VISIBLE:View.GONE,default=gone}">
+
+        <ImageView
+            android:id="@+id/no_content_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:src="@{noContentViewModel.noContentImgResId,default=@drawable/no_file}" />
+
+        <TextView
+            android:id="@+id/no_content_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@{noContentViewModel.noContentText,default=@string/no_photos}"
+            android:textColor="@color/fifty_four_percent_black"
+            android:textSize="20dp" />
+
+    </LinearLayout>
+
+
+</layout>
+
+

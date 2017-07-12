@@ -128,7 +128,7 @@ public class DBUtils {
         return contentValues;
     }
 
-    public long insertLoggedInUserInDB(List<LoggedInUser> loggedInUsers) {
+    public long insertLoggedInUserInDB(Collection<LoggedInUser> loggedInUsers) {
 
         openWritableDB();
 
@@ -283,6 +283,10 @@ public class DBUtils {
 
         return returnValue;
 
+    }
+
+    public long deleteAllLoggedInUser(){
+        return deleteAllDataInTable(DBHelper.LOGGED_IN_USER_TABLE_NAME);
     }
 
     public long deleteLoggerUserByUserUUID(String userUUID) {

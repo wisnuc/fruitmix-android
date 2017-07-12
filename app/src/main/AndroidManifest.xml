@@ -127,6 +127,12 @@
         <service
             android:name=".services.ReverseGeocodeService"
             android:exported="false" />
+
+        <activity android:name=".fileModule.FileDownloadActivity" />
+
+        <activity android:name=".wxapi.WXEntryActivity"
+            android:exported="true"/>
+
     </application>
 
 </manifest>

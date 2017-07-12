@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/remote_file_item_layout"
+    android:id="@+id/downloaded_file_item_layout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
@@ -20,7 +20,7 @@
             android:layout_marginRight="16dp">
 
             <ImageView
-                android:id="@+id/file_icon_bg"
+                android:id="@+id/select_file_icon_bg"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="@drawable/round_circle"

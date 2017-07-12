@@ -1,24 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/item_layout"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:clickable="true">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <TextView
-        android:id="@+id/item_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:text="fsdaf"
-        android:textColor="@color/eighty_seven_percent_black"
-        android:textSize="18dp"/>
+    <data>
 
-    <View
+        <variable
+            name="bottomMenuItem"
+            type="com.winsun.fruitmix.model.BottomMenuItem" />
+
+    </data>
+
+    <RelativeLayout
+        android:id="@+id/item_layout"
         android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_alignParentBottom="true"
-        android:background="@color/divide_bg"/>
+        android:layout_height="64dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:onClick="@{()->bottomMenuItem.handleOnClickEvent()}"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
 
-</RelativeLayout>
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:src="@{bottomMenuItem.iconResID}" />
+
+        <TextView
+            android:id="@+id/item_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="32dp"
+            android:layout_toRightOf="@id/icon"
+            android:enabled="@{!bottomMenuItem.disable}"
+            android:gravity="center"
+            android:text="@{bottomMenuItem.text}"
+            android:textColor="@color/bottom_item_color"
+            android:textSize="18dp" />
+
+    </RelativeLayout>
+
+</layout>
+
+
