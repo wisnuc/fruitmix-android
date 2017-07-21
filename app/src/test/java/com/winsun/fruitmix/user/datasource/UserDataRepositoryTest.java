@@ -1,15 +1,16 @@
 package com.winsun.fruitmix.user.datasource;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.user.datasource.UserDBDataSource;
-import com.winsun.fruitmix.user.datasource.UserRemoteDataSource;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -20,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
@@ -70,8 +70,13 @@ public class UserDataRepositoryTest {
 
         MockitoAnnotations.initMocks(this);
 
-        userDataRepository = new UserDataRepository(userDBDataSource, userRemoteDataSource);
+        userDataRepository = UserDataRepository.getInstance(userDBDataSource, userRemoteDataSource);
 
+    }
+
+    @After
+    public void clean() {
+        UserDataRepository.destroyInstance();
     }
 
     @Test
@@ -86,23 +91,13 @@ public class UserDataRepositoryTest {
     @Test
     public void insertUserToDBDataSource_WhenRemoteInsertSucceed() {
 
-        userDataRepository.insertUser(USER_NAME, USER_PWD, new BaseOperateDataCallback<User>() {
-            @Override
-            public void onSucceed(User data, OperationResult result) {
-
-            }
-
-            @Override
-            public void onFail(OperationResult result) {
-
-            }
-        });
+        userDataRepository.insertUser(USER_NAME, USER_PWD, new BaseOperateDataCallbackImpl<User>());
 
         verify(userRemoteDataSource).insertUser(anyString(), anyString(), operateDataCallbackArgumentCaptor.capture());
 
         User user = createUser();
 
-        operateDataCallbackArgumentCaptor.getValue().onSucceed(user, new OperationSuccess(0));
+        operateDataCallbackArgumentCaptor.getValue().onSucceed(user, new OperationSuccess());
 
         verify(userDBDataSource).insertUser(ArgumentMatchers.<User>anyCollection());
 
@@ -134,13 +129,37 @@ public class UserDataRepositoryTest {
     @Test
     public void getUser_RetrieveOrder() {
 
-        userDataRepository.getUsers(null);
+        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>());
 
         InOrder inOrder = inOrder(userDBDataSource, userRemoteDataSource);
 
         inOrder.verify(userDBDataSource).getUsers(any(BaseLoadDataCallback.class));
         inOrder.verify(userRemoteDataSource).getUsers(any(BaseLoadDataCallback.class));
 
+    }
+
+    @Test
+    public void getUserRetrieveWhenCacheDirty() {
+
+        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>());
+
+        ArgumentCaptor<BaseLoadDataCallback<User>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(userRemoteDataSource).getUsers(captor.capture());
+
+        captor.getValue().onSucceed(Collections.<User>emptyList(), new OperationSuccess());
+
+        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>());
+
+        verify(userDBDataSource, times(1)).getUsers(any(BaseLoadDataCallback.class));
+        verify(userRemoteDataSource, times(1)).getUsers(any(BaseLoadDataCallback.class));
+
+        userDataRepository.setCacheDirty();
+
+        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>());
+
+        verify(userDBDataSource, times(2)).getUsers(any(BaseLoadDataCallback.class));
+        verify(userRemoteDataSource, times(2)).getUsers(any(BaseLoadDataCallback.class));
     }
 
     @Test
@@ -152,9 +171,11 @@ public class UserDataRepositoryTest {
 
         loadDBDataCallbackArgumentCaptor.getValue().onFail(new OperationJSONException());
 
+        assertEquals(true, userDataRepository.cacheDirty);
+
         verify(userRemoteDataSource).getUsers(loadRemoteDataCallbackArgumentCaptor.capture());
 
-        loadRemoteDataCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(createUser()), new OperationSuccess(0));
+        loadRemoteDataCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(createUser()), new OperationSuccess());
 
         InOrder inOrder = inOrder(baseLoadDataCallback);
 
@@ -162,6 +183,8 @@ public class UserDataRepositoryTest {
         inOrder.verify(baseLoadDataCallback).onSucceed(ArgumentMatchers.<User>anyList(), any(OperationResult.class));
 
         assertEquals(USER_NAME, userDataRepository.cacheUsers.get(USER_UUID).getUserName());
+
+        assertEquals(false, userDataRepository.cacheDirty);
     }
 
     @Test
@@ -171,7 +194,9 @@ public class UserDataRepositoryTest {
 
         verify(userDBDataSource).getUsers(loadDBDataCallbackArgumentCaptor.capture());
 
-        loadDBDataCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(createUser()), new OperationSuccess(0));
+        loadDBDataCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(createUser()), new OperationSuccess());
+
+        assertEquals(true, userDataRepository.cacheDirty);
 
         verify(userRemoteDataSource).getUsers(loadRemoteDataCallbackArgumentCaptor.capture());
 
@@ -183,6 +208,8 @@ public class UserDataRepositoryTest {
         inOrder.verify(baseLoadDataCallback).onFail(any(OperationResult.class));
 
         assertEquals(USER_NAME, userDataRepository.cacheUsers.get(USER_UUID).getUserName());
+
+        assertEquals(false, userDataRepository.cacheDirty);
     }
 
     @Test
@@ -194,7 +221,7 @@ public class UserDataRepositoryTest {
 
         User user = createUser();
 
-        loadRemoteDataCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess(0));
+        loadRemoteDataCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess());
 
         InOrder inOrder = inOrder(userDBDataSource);
 

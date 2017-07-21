@@ -1,9 +1,8 @@
 package com.winsun.fruitmix.user.datasource;
 
-import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -28,7 +27,7 @@ public class UserDBDataSourceImpl implements UserDBDataSource {
 
         List<User> users = dbUtils.getAllRemoteUser();
 
-        callback.onSucceed(users, new OperationSuccess(0));
+        callback.onSucceed(users, new OperationSuccess());
     }
 
     @Override
@@ -37,7 +36,7 @@ public class UserDBDataSourceImpl implements UserDBDataSource {
         long result = dbUtils.insertRemoteUsers(users);
 
         if (result > 0)
-            return new OperationSuccess(0);
+            return new OperationSuccess();
         else
             return new OperationSQLException();
     }

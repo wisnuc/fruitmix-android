@@ -23,11 +23,9 @@ import android.view.ViewAnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 
 import com.github.druk.rxdnssd.BonjourService;
-import com.tencent.mm.opensdk.openapi.IWXAPI;
-import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.GravityArcMotion;
-import com.winsun.fruitmix.model.LoggedInUser;
+import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 
 import java.io.File;
@@ -48,8 +46,6 @@ import java.util.UUID;
 public class Util {
 
     public static final String TAG = Util.class.getSimpleName();
-
-    public static final String APP_ID = "wx99b54eb728323fe8";
 
     public static final String PORT = "3721";
 
@@ -84,6 +80,8 @@ public class Util {
     public static final String REMOTE_DEVICE_ID_RETRIEVED = "remote_device_id_retrieved";
     public static final String REMOTE_FILE_RETRIEVED = "remote_file_retrieved";
     public static final String REMOTE_FILE_SHARE_RETRIEVED = "remote_file_share_retrieved";
+
+    public static final String REMOTE_CONFIRM_INVITE_USER_RETRIEVED = "remote_confirm_invite_user_retrieved";
 
     public static final String REFRESH_VIEW_AFTER_DATA_RETRIEVED = "refresh_view_after_data_retrieved";
 
@@ -201,15 +199,6 @@ public class Util {
     }
 
     public static boolean clearFileDownloadItem = false;
-
-    public static IWXAPI registerToWX(Context context) {
-
-        IWXAPI iwxapi = WXAPIFactory.createWXAPI(context, APP_ID, true);
-
-        iwxapi.registerApp(Util.APP_ID);
-
-        return iwxapi;
-    }
 
 
     /**

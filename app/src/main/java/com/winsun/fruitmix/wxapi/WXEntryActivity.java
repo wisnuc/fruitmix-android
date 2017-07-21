@@ -19,7 +19,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wxentry);
 
-        IWXAPI iwxapi = Util.registerToWX(this);
+        IWXAPI iwxapi = MiniProgram.registerToWX(this);
 
         iwxapi.handleIntent(getIntent(), this);
 

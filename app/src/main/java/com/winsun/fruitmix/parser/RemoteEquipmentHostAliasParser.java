@@ -11,7 +11,7 @@ import java.util.List;
  * Created by Administrator on 2017/7/11.
  */
 
-public class RemoteEquipmentHostAliasParser implements RemoteDataParser<String> {
+public class RemoteEquipmentHostAliasParser implements RemoteDatasParser<String> {
 
     @Override
     public List<String> parse(String json) throws JSONException {

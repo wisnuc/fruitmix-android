@@ -16,7 +16,7 @@ import java.util.List;
  * Created by Administrator on 2016/10/25.
  */
 
-public class RemoteFileFolderParser implements RemoteDataParser<AbstractRemoteFile> {
+public class RemoteFileFolderParser implements RemoteDatasParser<AbstractRemoteFile> {
 
     public List<AbstractRemoteFile> parse(String json) throws JSONException {
 

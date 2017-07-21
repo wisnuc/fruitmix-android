@@ -14,6 +14,7 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+//        maven{url 'http://maven.aliyun.com/nexus/content/groups/public/'}
     }
 }
 
@@ -37,6 +38,7 @@ ext{
     design = "com.android.support:design:$supportLibraryVersion"
     cardviewV7 = "com.android.support:cardview-v7:$supportLibraryVersion"
     recyclerviewV7 = "com.android.support:recyclerview-v7:$supportLibraryVersion"
+    supportAnnotation = "com.android.support:support-annotations:$supportLibraryVersion"
 
     okhttpVersion = "3.4.1"
 

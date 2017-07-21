@@ -1,10 +1,7 @@
 package com.winsun.fruitmix.logged.in.user;
 
-import com.winsun.fruitmix.model.LoggedInUser;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * Created by Administrator on 2017/7/6.
@@ -12,17 +9,36 @@ import java.util.Collections;
 
 public class LoggedInUserRepository implements LoggedInUserDataSource {
 
+    private static LoggedInUserRepository instance;
+
     private Collection<LoggedInUser> cacheLoggedInUsers;
+
+    private LoggedInUser currentLoggedInUser;
 
     private LoggedInUserDataSource loggedInUserDBDataSource;
 
-    private boolean loadedFromDB = false;
+    private boolean loadedAllLoggedInUserFromDB = false;
 
-    public LoggedInUserRepository(LoggedInUserDataSource loggedInUserDBDataSource) {
+    private boolean loadedCurrentLoggedInUserFromDB = false;
+
+    private LoggedInUserRepository(LoggedInUserDataSource loggedInUserDBDataSource) {
         this.loggedInUserDBDataSource = loggedInUserDBDataSource;
 
         cacheLoggedInUsers = new ArrayList<>();
     }
+
+    public static LoggedInUserRepository getInstance(LoggedInUserDataSource loggedInUserDBDataSource) {
+
+        if (instance == null)
+            instance = new LoggedInUserRepository(loggedInUserDBDataSource);
+
+        return instance;
+    }
+
+    public static void destroyInstance(){
+        instance = null;
+    }
+
 
     Collection<LoggedInUser> getCacheLoggedInUsers() {
         return cacheLoggedInUsers;
@@ -57,16 +73,38 @@ public class LoggedInUserRepository implements LoggedInUserDataSource {
     @Override
     public Collection<LoggedInUser> getAllLoggedInUsers() {
 
-        if (!loadedFromDB) {
+        if (!loadedAllLoggedInUserFromDB) {
 
             Collection<LoggedInUser> loggedInUsers = loggedInUserDBDataSource.getAllLoggedInUsers();
 
             cacheLoggedInUsers.addAll(loggedInUsers);
 
-            loadedFromDB = true;
+            loadedAllLoggedInUserFromDB = true;
         }
 
         return cacheLoggedInUsers;
+    }
+
+    @Override
+    public LoggedInUser getCurrentLoggedInUser() {
+
+        if (!loadedCurrentLoggedInUserFromDB) {
+
+            currentLoggedInUser = loggedInUserDBDataSource.getCurrentLoggedInUser();
+
+            loadedCurrentLoggedInUserFromDB = true;
+        }
+
+        return currentLoggedInUser;
+    }
+
+    @Override
+    public void setCurrentLoggedInUser(LoggedInUser loggedInUser) {
+
+        currentLoggedInUser = loggedInUser;
+
+        loggedInUserDBDataSource.setCurrentLoggedInUser(loggedInUser);
+
     }
 
 

@@ -1,9 +1,7 @@
 package com.winsun.fruitmix.user.datasource;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.model.User;
-
-import java.util.List;
+import com.winsun.fruitmix.user.User;
 
 /**
  * Created by Administrator on 2017/7/7.

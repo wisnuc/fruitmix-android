@@ -19,7 +19,7 @@ public class ToolbarViewModel {
 
     public final ObservableBoolean showSelect = new ObservableBoolean(false);
 
-    public final ObservableBoolean showFileMainMenu = new ObservableBoolean(false);
+    public final ObservableBoolean showMenu = new ObservableBoolean(false);
 
     public final ObservableBoolean showToolbar = new ObservableBoolean(true);
 
@@ -61,18 +61,18 @@ public class ToolbarViewModel {
     }
 
 
-    public interface ToolbarFileMainMenuBtnOnClickListener {
+    public interface ToolbarMenuBtnOnClickListener {
         void onClick();
     }
 
-    private ToolbarFileMainMenuBtnOnClickListener toolbarFileMainMenuBtnOnClickListener;
+    private ToolbarMenuBtnOnClickListener toolbarMenuBtnOnClickListener;
 
-    public void setToolbarFileMainMenuBtnOnClickListener(ToolbarFileMainMenuBtnOnClickListener toolbarFileMainMenuBtnOnClickListener) {
-        this.toolbarFileMainMenuBtnOnClickListener = toolbarFileMainMenuBtnOnClickListener;
+    public void setToolbarMenuBtnOnClickListener(ToolbarMenuBtnOnClickListener toolbarMenuBtnOnClickListener) {
+        this.toolbarMenuBtnOnClickListener = toolbarMenuBtnOnClickListener;
     }
 
-    public void toolbarFileMainBtnOnClick() {
-        toolbarFileMainMenuBtnOnClickListener.onClick();
+    public void toolbarMenuBtnOnClick() {
+        toolbarMenuBtnOnClickListener.onClick();
     }
 
 }

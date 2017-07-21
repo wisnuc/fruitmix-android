@@ -12,7 +12,7 @@ import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.parser.RemoteDataParser;
+import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -21,7 +21,6 @@ import com.winsun.fruitmix.util.Util;
 import org.greenrobot.eventbus.EventBus;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
@@ -103,7 +102,7 @@ public class RetrieveRemoteMediaService extends IntentService {
             if(httpResponse.getResponseCode() != 200)
                 return;
 
-            RemoteDataParser<Media> parser = new RemoteMediaParser();
+            RemoteDatasParser<Media> parser = new RemoteMediaParser();
 
             medias = parser.parse(httpResponse.getResponseData());
 
@@ -128,7 +127,7 @@ public class RetrieveRemoteMediaService extends IntentService {
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: after delete all remote media" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-            long result = dbUtils.insertRemoteMedias(mediaConcurrentMap);
+            long result = dbUtils.insertRemoteMedias(mediaConcurrentMap.values());
 
             Log.i(TAG, "handleActionRetrieveRemoteMedia: insert all remote media result:" + result + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
@@ -144,7 +143,7 @@ public class RetrieveRemoteMediaService extends IntentService {
     }
 
     private void sendEvent() {
-        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_RETRIEVED, new OperationSuccess(R.string.operate));
+        OperationEvent operationEvent = new OperationEvent(Util.REMOTE_MEDIA_RETRIEVED, new OperationSuccess());
         EventBus.getDefault().post(operationEvent);
     }
 

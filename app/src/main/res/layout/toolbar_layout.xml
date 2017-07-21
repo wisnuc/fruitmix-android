@@ -49,9 +49,9 @@
                 android:layout_height="24dp"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="15dp"
-                android:onClick="@{()->toolbarViewModel.toolbarFileMainBtnOnClick()}"
+                android:onClick="@{()->toolbarViewModel.toolbarMenuBtnOnClick()}"
                 android:src="@drawable/ic_more_vert_black"
-                android:visibility="@{toolbarViewModel.showFileMainMenu?View.VISIBLE:View.GONE,default=gone}" />
+                android:visibility="@{toolbarViewModel.showMenu?View.VISIBLE:View.GONE,default=gone}" />
 
             <TextView
                 android:id="@+id/title"

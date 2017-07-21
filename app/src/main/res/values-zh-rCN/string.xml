@@ -212,4 +212,7 @@
     <string name="errcode_unsupported">不支持错误</string>
     <string name="errcode_unknown">发送返回</string>
 
+    <!-- group -->
+    <string name="group">"私友群"</string>
+
 </resources>

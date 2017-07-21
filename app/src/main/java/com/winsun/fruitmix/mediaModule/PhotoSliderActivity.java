@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.mediaModule;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -133,7 +134,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private boolean needTransition = true;
 
-    private ProgressDialog mDialog;
+    private Dialog mDialog;
 
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
@@ -477,7 +478,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                     Util.sendShareToOtherApp(mContext, Collections.singletonList(originalPhotoPath));
 
                 } else {
-                    mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, true);
+
+                    mDialog = showProgressDialog(String.format(getString(R.string.operating_title), getString(R.string.create_share)));
+
                     mDialog.setCanceledOnTouchOutside(false);
 
                     EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, Collections.singletonList(media)));
@@ -521,11 +524,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 break;
         }
 
-    }
-
-    private void dismissDialog() {
-        if (mDialog != null && mDialog.isShowing())
-            mDialog.dismiss();
     }
 
     private void refreshReturnResizeVisibility() {

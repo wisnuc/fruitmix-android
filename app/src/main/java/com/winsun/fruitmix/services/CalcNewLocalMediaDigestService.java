@@ -98,7 +98,7 @@ public class CalcNewLocalMediaDigestService extends IntentService {
 
             Log.i(TAG, "insert local media result:" + returnValue + " time:" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-            operationEvent = new OperationEvent(Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED, new OperationSuccess(R.string.operate));
+            operationEvent = new OperationEvent(Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED, new OperationSuccess());
         } else {
             operationEvent = new OperationEvent(Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED, new OperationNoChanged());
         }

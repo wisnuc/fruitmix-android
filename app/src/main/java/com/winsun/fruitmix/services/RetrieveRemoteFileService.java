@@ -101,7 +101,7 @@ public class RetrieveRemoteFileService extends IntentService {
 
                 LocalCache.RemoteFileMapKeyIsUUID.put(folderUUID, remoteFolder);
 
-                EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationSuccess(R.string.operate), folderUUID));
+                EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationSuccess(), folderUUID));
 
             } else {
                 EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()), folderUUID));

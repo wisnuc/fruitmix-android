@@ -9,17 +9,13 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.services.ButlerService;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.BufferedReader;
@@ -44,7 +40,9 @@ public class MainActivity extends Activity {
 
         Util.setRemoteMediaLoaded(false);
 
-        FileDownloadManager.INSTANCE.initDBUtils(DBUtils.getInstance(getApplicationContext()));
+        FileDownloadManager.getInstance().initDBUtils(DBUtils.getInstance(getApplicationContext()));
+
+        HttpRequestFactory.destroyInstance();
 
         ButlerService.startButlerService(getApplicationContext());
 

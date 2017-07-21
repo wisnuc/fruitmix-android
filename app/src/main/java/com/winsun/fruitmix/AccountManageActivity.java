@@ -3,35 +3,16 @@ package com.winsun.fruitmix;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.TextView;
 
 import com.winsun.fruitmix.account.manage.AccountManagePresenter;
 import com.winsun.fruitmix.account.manage.AccountManagePresenterImpl;
 import com.winsun.fruitmix.account.manage.AccountManageView;
-import com.winsun.fruitmix.databinding.AccountChildItemBinding;
-import com.winsun.fruitmix.databinding.AccountGroupItemBinding;
 import com.winsun.fruitmix.databinding.ActivityAccountManageBinding;
-import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.LoggedInUser;
-import com.winsun.fruitmix.model.User;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class AccountManageActivity extends BaseActivity implements AccountManageView {
 

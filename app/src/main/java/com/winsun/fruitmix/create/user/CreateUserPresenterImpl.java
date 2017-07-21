@@ -1,14 +1,11 @@
 package com.winsun.fruitmix.create.user;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.CreateUserActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;

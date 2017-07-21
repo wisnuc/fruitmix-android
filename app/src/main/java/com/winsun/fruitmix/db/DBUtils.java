@@ -10,8 +10,8 @@ import android.util.Log;
 
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.LoggedInUser;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.logged.in.user.LoggedInUser;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.parser.LocalDataParser;
 import com.winsun.fruitmix.parser.LocalMediaParser;
 import com.winsun.fruitmix.parser.LocalUserParser;
@@ -262,13 +262,13 @@ public class DBUtils {
         return returnValue;
     }
 
-    public long insertRemoteMedias(ConcurrentMap<String, Media> medias) {
+    public long insertRemoteMedias(Collection<Media> medias) {
 
-        return insertMedias(DBHelper.REMOTE_MEDIA_TABLE_NAME, medias.values());
+        return insertMedias(DBHelper.REMOTE_MEDIA_TABLE_NAME, medias);
 
     }
 
-    public long insertLocalMedias(List<Media> medias) {
+    public long insertLocalMedias(Collection<Media> medias) {
 
         return insertMedias(DBHelper.LOCAL_MEDIA_TABLE_NAME, medias);
 

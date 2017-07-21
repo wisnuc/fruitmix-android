@@ -38,12 +38,12 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
 import com.winsun.fruitmix.fileModule.fragment.FileFragment;
 import com.winsun.fruitmix.fileModule.interfaces.HandleTitleCallback;
+import com.winsun.fruitmix.group.view.GroupListPage;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
-import com.winsun.fruitmix.mediaModule.fragment.MediaShareList;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
-import com.winsun.fruitmix.mediaModule.interfaces.Page;
+import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
@@ -87,7 +87,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     private List<Page> pageList;
     private FileFragment fileFragment;
     private NewPhotoList photoList;
-    private MediaShareList shareList;
+    private GroupListPage groupListPage;
 
     private boolean sMenuUnfolding = false;
 
@@ -95,7 +95,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private ProgressDialog mDialog;
 
-    private static final int PAGE_SHARE = 0;
+    private static final int PAGE_GROUP = 0;
     private static final int PAGE_PHOTO = 1;
     private static final int PAGE_FILE = 2;
 
@@ -182,8 +182,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         ivBtShare.setOnClickListener(this);
         fab.setOnClickListener(this);
 
-        photoList.setmPhotoListListener(this);
-        shareList.addPhotoListListener(this);
+        photoList.setPhotoListListener(this);
+
 
         Log.d(TAG, "onCreateView: ");
 
@@ -238,7 +238,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         toolbarViewModel.showSelect.set(true);
 
-        toolbarViewModel.setToolbarFileMainMenuBtnOnClickListener(new ToolbarViewModel.ToolbarFileMainMenuBtnOnClickListener() {
+        toolbarViewModel.setToolbarMenuBtnOnClickListener(new ToolbarViewModel.ToolbarMenuBtnOnClickListener() {
             @Override
             public void onClick() {
                 fileFragment.getBottomSheetDialog(fileFragment.getMainMenuItem()).show();
@@ -312,9 +312,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         mDialog = null;
 
-        pageList.get(PAGE_PHOTO).onDestroy();
-
-        shareList.removePhotoListListener(this);
+        for (Page page : pageList)
+            page.onDestroy();
 
         mContext = null;
 
@@ -427,7 +426,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             viewPager.setCurrentItem(PAGE_FILE);
             onDidAppear(PAGE_FILE);
             pageList.get(PAGE_FILE).refreshView();
-            pageList.get(PAGE_SHARE).refreshView();
+            pageList.get(PAGE_GROUP).refreshView();
         }
     }
 
@@ -449,9 +448,9 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
                         eventId = Util.SWITCH_MEDIA_SHARE_MODULE_UMENG_EVENT_ID;
 
-                        viewPager.setCurrentItem(PAGE_SHARE);
+                        viewPager.setCurrentItem(PAGE_GROUP);
 
-//                        ViewPagerTranslation.INSTANCE.animatePagerTransition(false, viewPager, 200, viewPager.getCurrentItem() - PAGE_SHARE);
+//                        ViewPagerTranslation.INSTANCE.animatePagerTransition(false, viewPager, 200, viewPager.getCurrentItem() - PAGE_GROUP);
 
                         break;
                     case R.id.photo:
@@ -499,23 +498,23 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     }
 
     private void initPageList() {
-        shareList = new MediaShareList(getActivity());
+        groupListPage = new GroupListPage(getActivity());
         photoList = new NewPhotoList(getActivity());
         fileFragment = new FileFragment(getActivity(), this);
-        pageList = new ArrayList<Page>();
-        pageList.add(shareList);
+        pageList = new ArrayList<>();
+        pageList.add(groupListPage);
         pageList.add(photoList);
         pageList.add(fileFragment);
     }
 
     public void refreshUser() {
 
-        shareList.refreshView();
+        groupListPage.refreshView();
 
     }
 
     public void refreshAllViews() {
-        shareList.refreshView();
+        groupListPage.refreshView();
         fileFragment.refreshView();
         photoList.refreshView();
     }
@@ -1093,11 +1092,11 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         }
 
         switch (position) {
-            case PAGE_SHARE:
+            case PAGE_GROUP:
 
-                setCurrentItem(shareList);
+                setCurrentItem(groupListPage);
 
-                toolbarViewModel.titleText.set(getString(R.string.share_text));
+                toolbarViewModel.titleText.set(getString(R.string.group));
                 toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
                 toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
 
@@ -1105,7 +1104,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 ivBtShare.setVisibility(View.GONE);
 
                 toolbarViewModel.showSelect.set(false);
-                toolbarViewModel.showFileMainMenu.set(false);
+                toolbarViewModel.showMenu.set(false);
 
                 mListener.unlockDrawer();
 
@@ -1122,7 +1121,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 ivBtShare.setVisibility(View.GONE);
 
                 toolbarViewModel.showSelect.set(true);
-                toolbarViewModel.showFileMainMenu.set(false);
+                toolbarViewModel.showMenu.set(false);
 
                 mListener.unlockDrawer();
 
@@ -1135,7 +1134,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 ivBtShare.setVisibility(View.GONE);
 
                 toolbarViewModel.showSelect.set(false);
-                toolbarViewModel.showFileMainMenu.set(true);
+                toolbarViewModel.showMenu.set(true);
 
                 if (fileFragment != null && isResumed()) {
 

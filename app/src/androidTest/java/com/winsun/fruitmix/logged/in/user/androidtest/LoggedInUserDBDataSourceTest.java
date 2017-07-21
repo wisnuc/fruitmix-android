@@ -5,7 +5,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDBDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
-import com.winsun.fruitmix.model.LoggedInUser;
+import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 
 import org.junit.After;
 import org.junit.Before;

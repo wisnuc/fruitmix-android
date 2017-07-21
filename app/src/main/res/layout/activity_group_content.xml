@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.winsun.fruitmix.group.view.GroupContentActivity">
+
+    <data>
+
+        <variable
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
+
+
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/group_content_toolbar"
+            layout="@layout/group_content_toolbar"
+            app:toolbarViewModel="@{toolbarViewModel}" />
+
+        <FrameLayout
+            android:id="@+id/ping_layout"
+            android:layout_width="match_parent"
+            android:layout_height="87dp"
+            android:layout_below="@id/group_content_toolbar"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="16dp" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_alignParentBottom="true">
+
+            <ImageButton
+                android:id="@+id/add_voice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="8dp"
+                android:background="@null"
+                android:src="@drawable/ic_keyboard_voice_black_24dp" />
+
+            <ImageButton
+                android:id="@+id/add_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp"
+                android:background="@null"
+                android:src="@drawable/ic_add_circle_outline_black_24dp" />
+
+            <ImageButton
+                android:id="@+id/add_emoticon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
+                android:layout_toLeftOf="@id/add_button"
+                android:background="@null"
+                android:src="@drawable/ic_insert_emoticon_black_24dp" />
+
+
+            <EditText
+                android:id="@+id/edit_text"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
+                android:layout_toLeftOf="@id/add_emoticon"
+                android:layout_toRightOf="@id/add_voice" />
+
+        </RelativeLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/gray"
+            android:layout_below="@id/ping_layout"
+            android:layout_marginBottom="56dp">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/chat_recyclerview"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_gravity="right"
+                android:background="@drawable/comment_count_bg"
+                android:layout_marginTop="8dp"
+                android:textSize="12dp"
+                android:textColor="#4caf50"
+                tools:text="125条评论"
+                android:gravity="center_vertical"
+                android:layout_height="28dp" />
+
+
+        </FrameLayout>
+
+
+    </RelativeLayout>
+
+</layout>
+
+

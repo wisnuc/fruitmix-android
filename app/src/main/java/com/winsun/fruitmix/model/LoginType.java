@@ -8,6 +8,4 @@ public enum LoginType {
 
     LOGIN,SPLASH_SCREEN
 
-
-
 }

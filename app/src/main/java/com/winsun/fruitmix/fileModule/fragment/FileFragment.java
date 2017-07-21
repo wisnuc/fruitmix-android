@@ -43,7 +43,7 @@ import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fileModule.interfaces.HandleTitleCallback;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
-import com.winsun.fruitmix.mediaModule.interfaces.Page;
+import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
@@ -729,7 +729,7 @@ public class FileFragment implements Page, OnViewSelectListener, IShowHideFragme
                         List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
 
                         BottomMenuItem menuItem;
-                        if (FileDownloadManager.INSTANCE.checkIsDownloaded(abstractRemoteFile.getUuid())) {
+                        if (FileDownloadManager.getInstance().checkIsDownloaded(abstractRemoteFile.getUuid())) {
                             menuItem = new BottomMenuItem(R.drawable.file_icon,activity.getString(R.string.open_the_item), new OpenFileCommand(activity, abstractRemoteFile.getName()));
                         } else {
                             AbstractCommand macroCommand = new MacroCommand();
@@ -751,7 +751,7 @@ public class FileFragment implements Page, OnViewSelectListener, IShowHideFragme
                     @Override
                     public void onClick(View v) {
 
-                        FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
+                        FileDownloadManager fileDownloadManager = FileDownloadManager.getInstance();
                         if (fileDownloadManager.checkIsDownloaded(abstractRemoteFile.getUuid())) {
 
                             if (!abstractRemoteFile.openAbstractRemoteFile(activity, rootUUID)) {

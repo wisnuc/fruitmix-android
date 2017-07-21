@@ -13,7 +13,7 @@ import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.mediaModule.NewAlbumPicChooseActivity;
-import com.winsun.fruitmix.mediaModule.interfaces.Page;
+import com.winsun.fruitmix.interfaces.Page;
 
 import java.util.ArrayList;
 import java.util.List;

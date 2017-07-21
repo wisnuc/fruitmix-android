@@ -1,7 +1,5 @@
 package com.winsun.fruitmix.logged.in.user;
 
-import com.winsun.fruitmix.model.LoggedInUser;
-
 import java.util.Collection;
 
 /**
@@ -17,5 +15,9 @@ public interface LoggedInUserDataSource {
     boolean clear();
 
     Collection<LoggedInUser> getAllLoggedInUsers();
+
+    LoggedInUser getCurrentLoggedInUser();
+
+    void setCurrentLoggedInUser(LoggedInUser loggedInUser);
 
 }

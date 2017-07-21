@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
+
+        <variable
+            name="loadingViewModel"
+            type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
+
+        <variable
+            name="noContentViewModel"
+            type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
+
+    </data>
+
+    <LinearLayout
+        android:id="@+id/activity_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="com.winsun.ticket.ConfirmInviteUserActivity">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar_layout"
+            bind:toolbarViewModel="@{toolbarViewModel}" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/confirm_ticket_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <include
+                layout="@layout/new_loading_layout"
+                bind:loadingViewModel="@{loadingViewModel}" />
+
+            <include
+                layout="@layout/new_no_content_layout"
+                bind:noContentViewModel="@{noContentViewModel}" />
+
+        </FrameLayout>
+
+
+    </LinearLayout>
+
+</layout>

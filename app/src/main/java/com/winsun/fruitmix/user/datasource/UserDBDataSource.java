@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.user.datasource;
 
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 
 import java.util.Collection;

@@ -33,7 +33,7 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.fileModule.download.DownloadState;
 import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
-import com.winsun.fruitmix.mediaModule.interfaces.Page;
+import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
@@ -308,7 +308,7 @@ public class FileDownloadFragment implements Page,OnViewSelectListener, IShowHid
     }
 
     private void refreshData() {
-        filterFileDownloadItems(FileDownloadManager.INSTANCE.getFileDownloadItems());
+        filterFileDownloadItems(FileDownloadManager.getInstance().getFileDownloadItems());
     }
 
     private void filterFileDownloadItems(List<FileDownloadItem> fileDownloadItems) {

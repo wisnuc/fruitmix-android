@@ -8,15 +8,14 @@ import android.util.Log;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.LoginType;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.parser.RemoteDataParser;
+import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteUserJSONObjectParser;
 import com.winsun.fruitmix.parser.RemoteUserParser;
 import com.winsun.fruitmix.util.FNAS;
@@ -121,7 +120,7 @@ public class RetrieveRemoteUserService extends IntentService {
                 Log.d(TAG, "deviceID: " + LocalCache.getGlobalData(this, Util.DEVICE_ID_MAP_NAME));
             }
 
-            RemoteDataParser<User> parser = new RemoteUserParser();
+            RemoteDatasParser<User> parser = new RemoteUserParser();
             List<User> otherUsers = parser.parse(FNAS.loadOtherUsers(this).getResponseData());
 
             addDifferentUsers(users, otherUsers);

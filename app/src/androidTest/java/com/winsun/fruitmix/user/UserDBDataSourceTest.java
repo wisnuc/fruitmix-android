@@ -5,7 +5,6 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.user.datasource.UserDBDataSource;
 import com.winsun.fruitmix.user.datasource.UserDBDataSourceImpl;

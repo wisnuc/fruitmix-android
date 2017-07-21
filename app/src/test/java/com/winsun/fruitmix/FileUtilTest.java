@@ -3,6 +3,7 @@ package com.winsun.fruitmix;
 import com.winsun.fruitmix.util.FileUtil;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -13,7 +14,7 @@ import static org.junit.Assert.*;
 
 public class FileUtilTest {
 
-    @Test
+    @Ignore
     public void formatFileSizeTest() {
 
         String size = FileUtil.formatFileSize(32 * 1000 * 1024);
@@ -21,7 +22,7 @@ public class FileUtilTest {
         Assert.fail(size);
     }
 
-    @Test
+    @Ignore
     public void percentTest() {
 
         float percent = 400 * 100 / 7000;

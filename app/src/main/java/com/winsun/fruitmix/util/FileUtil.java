@@ -126,7 +126,7 @@ public class FileUtil {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator;
     }
 
-    static String getLocalPhotoThumbnailFolderPath() {
+    public static String getLocalPhotoThumbnailFolderPath() {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
     }
 
@@ -134,11 +134,11 @@ public class FileUtil {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME_200;
     }
 
-    static String getOldLocalPhotoThumbnailFolderPath() {
+    public static String getOldLocalPhotoThumbnailFolderPath() {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + OLD_LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
     }
 
-    static String getOriginalPhotoFolderPath() {
+    public static String getOriginalPhotoFolderPath() {
         return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + ORIGINAL_PHOTO_FOLDER_NAME;
     }
 

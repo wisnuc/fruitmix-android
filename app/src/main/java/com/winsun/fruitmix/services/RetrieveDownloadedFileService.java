@@ -65,7 +65,7 @@ public class RetrieveDownloadedFileService extends IntentService {
 
         DBUtils dbUtils = DBUtils.getInstance(this);
 
-        FileDownloadManager fileDownloadManager = FileDownloadManager.INSTANCE;
+        FileDownloadManager fileDownloadManager = FileDownloadManager.getInstance();
 
         List<FileDownloadItem> fileDownloadItems = dbUtils.getAllCurrentLoginUserDownloadedFile();
 

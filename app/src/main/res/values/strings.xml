@@ -234,5 +234,8 @@
     <string name="errcode_unsupported">UnSupported Error</string>
     <string name="errcode_unknown">UnKnown Error</string>
 
+    <!-- group -->
+    <string name="group">Group</string>
+
 
 </resources>

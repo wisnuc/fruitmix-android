@@ -1,11 +1,6 @@
 package com.winsun.fruitmix.logged.in.user;
 
-import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
-import com.winsun.fruitmix.model.LoggedInUser;
-
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -48,8 +43,13 @@ public class LoggedInUserRepositoryTest {
 
         MockitoAnnotations.initMocks(this);
 
-        loggedInUserRepository = new LoggedInUserRepository(loggedInUserDataSource);
+        loggedInUserRepository = LoggedInUserRepository.getInstance(loggedInUserDataSource);
 
+    }
+
+    @After
+    public void clean(){
+        LoggedInUserRepository.destroyInstance();
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.parser;
 
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONException;

@@ -2,11 +2,11 @@ package com.winsun.fruitmix.user.datasource;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,20 +18,46 @@ import java.util.concurrent.ConcurrentMap;
 
 public class UserDataRepository implements UserRemoteDataSource {
 
-    ConcurrentMap<String,User> cacheUsers;
+    private static UserDataRepository instance;
+
+    ConcurrentMap<String, User> cacheUsers;
 
     private UserDBDataSource userDBDataSource;
     private UserRemoteDataSource userRemoteDataSource;
 
-    public UserDataRepository(UserDBDataSource userDBDataSource, UserRemoteDataSource userRemoteDataSource) {
+    boolean cacheDirty = true;
+
+    private UserDataRepository(UserDBDataSource userDBDataSource, UserRemoteDataSource userRemoteDataSource) {
         this.userDBDataSource = userDBDataSource;
         this.userRemoteDataSource = userRemoteDataSource;
 
         cacheUsers = new ConcurrentHashMap<>();
     }
 
+    public static UserDataRepository getInstance(UserDBDataSource userDBDataSource, UserRemoteDataSource userRemoteDataSource) {
+
+        if (instance == null)
+            instance = new UserDataRepository(userDBDataSource, userRemoteDataSource);
+
+        return instance;
+    }
+
+    public static void destroyInstance() {
+        instance = null;
+    }
+
+    public void setCacheDirty() {
+        cacheDirty = true;
+    }
+
     @Override
     public void getUsers(final BaseLoadDataCallback<User> callback) {
+
+        if (!cacheDirty) {
+            callback.onSucceed(new ArrayList<>(cacheUsers.values()), new OperationSuccess());
+
+            return;
+        }
 
         userDBDataSource.getUsers(new BaseLoadDataCallback<User>() {
             @Override
@@ -61,6 +87,8 @@ public class UserDataRepository implements UserRemoteDataSource {
                 cacheUsers.clear();
                 cacheUsers.putAll(buildRemoteUserMapKeyIsUUID(data));
 
+                cacheDirty = false;
+
                 if (callback != null)
                     callback.onSucceed(data, operationResult);
             }
@@ -69,6 +97,8 @@ public class UserDataRepository implements UserRemoteDataSource {
             public void onFail(OperationResult operationResult) {
                 if (callback != null)
                     callback.onFail(operationResult);
+
+                cacheDirty = false;
             }
         });
 

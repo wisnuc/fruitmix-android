@@ -10,14 +10,12 @@ import java.util.List;
  * Created by Administrator on 2017/7/12.
  */
 
-public class RemoteTicketParser {
+public class RemoteTicketParser implements RemoteDataParser<String>{
 
-    public String parse(String json) throws JSONException {
+     public String parse(String json) throws JSONException {
 
-        JSONArray root = new JSONArray(json);
+        JSONObject root = new JSONObject(json);
 
-        JSONObject ticket = root.getJSONObject(0);
-
-        return ticket.optString("uuid");
+        return root.getString("url");
     }
 }

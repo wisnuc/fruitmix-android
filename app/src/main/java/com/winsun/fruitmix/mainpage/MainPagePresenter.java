@@ -3,7 +3,7 @@ package com.winsun.fruitmix.mainpage;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.user.User;
 
 /**
  * Created by Administrator on 2017/6/23.

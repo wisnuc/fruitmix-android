@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.fileModule;
 
+import android.app.Dialog;
 import android.databinding.DataBindingUtil;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -40,10 +41,10 @@ public class FileDownloadActivity extends AppCompatActivity implements BaseView 
 
         toolbarViewModel.titleText.set(getString(R.string.download_manage));
 
-        toolbarViewModel.showFileMainMenu.set(true);
+        toolbarViewModel.showMenu.set(true);
         toolbarViewModel.setBaseView(this);
 
-        toolbarViewModel.setToolbarFileMainMenuBtnOnClickListener(new ToolbarViewModel.ToolbarFileMainMenuBtnOnClickListener() {
+        toolbarViewModel.setToolbarMenuBtnOnClickListener(new ToolbarViewModel.ToolbarMenuBtnOnClickListener() {
             @Override
             public void onClick() {
                 fileDownloadFragment.getBottomSheetDialog(fileDownloadFragment.getMainMenuItem()).show();
@@ -94,6 +95,21 @@ public class FileDownloadActivity extends AppCompatActivity implements BaseView 
     @Override
     public void setResultCode(int resultCode) {
         setResult(resultCode);
+    }
+
+    @Override
+    public Dialog showProgressDialog(String message) {
+        return null;
+    }
+
+    @Override
+    public void dismissDialog() {
+
+    }
+
+    @Override
+    public void showToast(String text) {
+
     }
 
     @Override

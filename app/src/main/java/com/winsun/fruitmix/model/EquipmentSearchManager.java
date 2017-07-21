@@ -55,6 +55,11 @@ public class EquipmentSearchManager {
                         listener.call(createdEquipment);
 
                     }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.d(TAG, "call: " + throwable);
+                    }
                 });
 
     }

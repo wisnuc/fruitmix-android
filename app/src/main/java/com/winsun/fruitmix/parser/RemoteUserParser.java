@@ -1,7 +1,6 @@
 package com.winsun.fruitmix.parser;
 
-import com.winsun.fruitmix.model.User;
-import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.user.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -9,12 +8,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by Administrator on 2016/8/31.
  */
-public class RemoteUserParser implements RemoteDataParser<User> {
+public class RemoteUserParser implements RemoteDatasParser<User> {
 
     @Override
     public List<User> parse(String json) throws JSONException {

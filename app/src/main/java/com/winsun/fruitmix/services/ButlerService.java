@@ -10,26 +10,30 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
-import com.winsun.fruitmix.eventbus.DownloadFileEvent;
 import com.winsun.fruitmix.eventbus.LoggedInUserRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
+import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.eventbus.UserRequestEvent;
 import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
-import com.winsun.fruitmix.executor.DownloadFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.GenerateLocalMediaMiniThumbTask;
 import com.winsun.fruitmix.executor.GenerateLocalMediaThumbTask;
 import com.winsun.fruitmix.executor.RetrieveOriginalPhotoTask;
 import com.winsun.fruitmix.executor.UploadMediaTask;
+import com.winsun.fruitmix.http.OkHttpUtil;
+import com.winsun.fruitmix.inject.Inject;
+import com.winsun.fruitmix.invitation.ConfirmInviteUser;
+import com.winsun.fruitmix.invitation.InvitationRemoteDataSource;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.LoggedInUser;
+import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -45,17 +49,17 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Future;
 
 public class ButlerService extends Service {
 
     private static final String TAG = ButlerService.class.getSimpleName();
 
-    private static final int RETRIEVE_REMOTE_MEDIA_SHARE = 0x1003;
+    private static final int RETRIEVE_REMOTE_TICKETS = 0x1003;
 
-    private TimingRetrieveMediaShareTask task;
+    private TimingRetrieveTicketsTask task;
 
     private boolean mCalcNewLocalMediaDigestFinished = false;
     private boolean mRetrieveRemoteMediaFinished = false;
@@ -66,6 +70,7 @@ public class ButlerService extends Service {
 
     private boolean mStopGenerateThumb = false;
 
+    private InvitationRemoteDataSource invitationRemoteDataSource;
 
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
@@ -81,6 +86,18 @@ public class ButlerService extends Service {
         super.onCreate();
 
         EventBus.getDefault().register(this);
+
+//        task = new TimingRetrieveTicketsTask(this,getMainLooper());
+//
+//        task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS,20 * 1000);
+
+        initInvitationRemoteDataSource();
+    }
+
+    private void initInvitationRemoteDataSource() {
+
+        if (invitationRemoteDataSource == null)
+            invitationRemoteDataSource = new InvitationRemoteDataSource(Inject.provideIHttpUtil(this), Inject.provideHttpRequestFactory());
     }
 
 
@@ -99,6 +116,8 @@ public class ButlerService extends Service {
     public void onDestroy() {
         EventBus.getDefault().unregister(this);
 
+//        task.removeMessages(RETRIEVE_REMOTE_TICKETS);
+
         task = null;
 
         stopUpload();
@@ -111,11 +130,11 @@ public class ButlerService extends Service {
 
     }
 
-    private class TimingRetrieveMediaShareTask extends Handler {
+    private class TimingRetrieveTicketsTask extends Handler {
 
         WeakReference<ButlerService> weakReference = null;
 
-        TimingRetrieveMediaShareTask(ButlerService butlerService, Looper looper) {
+        TimingRetrieveTicketsTask(ButlerService butlerService, Looper looper) {
             super(looper);
             weakReference = new WeakReference<>(butlerService);
         }
@@ -125,11 +144,24 @@ public class ButlerService extends Service {
             super.handleMessage(msg);
 
             switch (msg.what) {
-                case RETRIEVE_REMOTE_MEDIA_SHARE:
+                case RETRIEVE_REMOTE_TICKETS:
 
                     ButlerService butlerService = weakReference.get();
 
-                    task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_MEDIA_SHARE, Util.refreshMediaShareDelayTime);
+                    //TODO: check token is exist when call getInvitation
+                    butlerService.initInvitationRemoteDataSource();
+
+                    butlerService.invitationRemoteDataSource.getInvitation(new BaseLoadDataCallbackImpl<ConfirmInviteUser>() {
+                        @Override
+                        public void onSucceed(List<ConfirmInviteUser> data, OperationResult operationResult) {
+                            super.onSucceed(data, operationResult);
+
+                            if (!data.isEmpty())
+                                EventBus.getDefault().post(new RetrieveTicketOperationEvent(Util.REMOTE_CONFIRM_INVITE_USER_RETRIEVED, new OperationSuccess(), new ArrayList<>(data)));
+                        }
+                    });
+
+                    task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshMediaShareDelayTime);
 
                     break;
             }
@@ -217,7 +249,7 @@ public class ButlerService extends Service {
                 }
 //                FNAS.retrieveUser(this);
 
-                EventBus.getDefault().postSticky(new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationSuccess(0)));
+                EventBus.getDefault().postSticky(new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationSuccess()));
 
                 break;
             default:

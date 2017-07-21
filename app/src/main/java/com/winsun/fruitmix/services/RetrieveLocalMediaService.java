@@ -90,7 +90,7 @@ public class RetrieveLocalMediaService extends IntentService {
         Util.setLocalMediaInDBLoaded(true);
         NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
 
-        EventBus.getDefault().post(new OperationEvent(Util.LOCAL_MEDIA_RETRIEVED, new OperationSuccess(R.string.operate)));
+        EventBus.getDefault().post(new OperationEvent(Util.LOCAL_MEDIA_RETRIEVED, new OperationSuccess()));
 
         RetrieveNewLocalMediaInCameraService.startActionRetrieveNewLocalMediaInCamera(this);
 

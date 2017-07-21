@@ -2,20 +2,21 @@ package com.winsun.fruitmix.user.datasource;
 
 import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.mock.MockApplication;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.user.datasource.UserRemoteDataSource;
-import com.winsun.fruitmix.user.datasource.UserRemoteDataSourceImpl;
 
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,12 +44,15 @@ public class UserRemoteDataSourceTest {
     @Mock
     private IHttpUtil iHttpUtil;
 
+    @Mock
+    private HttpRequestFactory httpRequestFactory;
+
     @Before
     public void init() {
 
         MockitoAnnotations.initMocks(this);
 
-        userRemoteDataSource = new UserRemoteDataSourceImpl(iHttpUtil);
+        userRemoteDataSource = new UserRemoteDataSourceImpl(iHttpUtil, httpRequestFactory);
 
     }
 
@@ -61,6 +65,8 @@ public class UserRemoteDataSourceTest {
         try {
 
             HttpResponse httpResponse = new HttpResponse(404, "");
+
+            when(httpRequestFactory.createHttpPostRequest(anyString(), anyString())).thenReturn(new HttpRequest("", ""));
 
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(httpResponse);
 
@@ -133,19 +139,6 @@ public class UserRemoteDataSourceTest {
     @Test
     public void getUserTest_firstCallSucceed_SecondCallFail() {
 
-        BaseLoadDataCallback<User> callback = new BaseLoadDataCallback<User>() {
-            @Override
-            public void onSucceed(List<User> data, OperationResult operationResult) {
-                assertTrue("can not enter here", false);
-            }
-
-            @Override
-            public void onFail(OperationResult operationResult) {
-
-                assertTrue(operationResult instanceof OperationJSONException);
-            }
-        };
-
         HttpResponse httpResponse = new HttpResponse(200, "{\n" +
                 "    \"type\": \"local\",\n" +
                 "    \"uuid\": \"ed51ee08-9bca-4e28-88b4-d39f47bbb933\",\n" +
@@ -166,11 +159,12 @@ public class UserRemoteDataSourceTest {
                 "    \"password\": \"$2a$10$1Luj4PA.Ta4nhVjPU..TOOii1m4PGyOvIzivoiKtygaTZg5AB46oW\"\n" +
                 "}");
 
+
         try {
 
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(httpResponse);
 
-            userRemoteDataSource.getUsers(callback);
+            userRemoteDataSource.getUsers(new BaseLoadDataCallbackImpl<User>());
 
             verify(iHttpUtil, times(2)).remoteCall(any(HttpRequest.class));
 

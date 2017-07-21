@@ -107,7 +107,7 @@ public class RetrieveTokenService extends IntentService {
 
                 //check clear file download item
                 if (Util.clearFileDownloadItem) {
-                    FileDownloadManager.INSTANCE.clearFileDownloadItems();
+                    FileDownloadManager.getInstance().clearFileDownloadItems();
                     Util.clearFileDownloadItem = false;
                 }
 
@@ -122,7 +122,7 @@ public class RetrieveTokenService extends IntentService {
                     LocalCache.saveUserUUID(this, FNAS.userUUID);
                 }
 
-                operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationSuccess(R.string.operate));
+                operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationSuccess());
 
             } else {
 

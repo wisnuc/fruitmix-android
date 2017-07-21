@@ -11,8 +11,8 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.LoggedInUser;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.logged.in.user.LoggedInUser;
+import com.winsun.fruitmix.user.User;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -130,7 +130,7 @@ public class LocalCache {
         return userConcurrentMap;
     }
 
-    public static ConcurrentMap<String, Media> BuildMediaMapKeyIsUUID(List<Media> medias) {
+    public static ConcurrentMap<String, Media> BuildMediaMapKeyIsUUID(Collection<Media> medias) {
 
         ConcurrentMap<String, Media> mediaConcurrentMap = new ConcurrentHashMap<>(medias.size());
         for (Media media : medias) {

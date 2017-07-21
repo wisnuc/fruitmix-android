@@ -18,6 +18,6 @@ public class FileDownloadErrorState extends FileDownloadState {
     @Override
     public void startWork() {
 
-        FileDownloadManager.INSTANCE.startPendingDownloadItem();
+        FileDownloadManager.getInstance().startPendingDownloadItem();
     }
 }

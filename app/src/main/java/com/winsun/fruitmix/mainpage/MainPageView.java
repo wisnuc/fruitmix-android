@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.mainpage;
 
-import com.winsun.fruitmix.model.LoggedInUser;
+import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 
 /**
  * Created by Administrator on 2017/6/26.
@@ -16,7 +16,7 @@ public interface MainPageView {
 
     void gotoFileDownloadActivity();
 
-
+    void gotoConfirmInviteUserActivity();
 
     void loggedInUserItemOnClick(LoggedInUser loggedInUser);
 

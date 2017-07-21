@@ -6,18 +6,20 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.LoginType;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.parser.RemoteDataParser;
+import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteUserJSONObjectParser;
 import com.winsun.fruitmix.parser.RemoteUserParser;
 import com.winsun.fruitmix.util.FNAS;
@@ -37,16 +39,17 @@ import java.util.List;
  * Created by Administrator on 2017/7/7.
  */
 
-public class UserRemoteDataSourceImpl implements UserRemoteDataSource {
+public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implements UserRemoteDataSource {
 
     public static final String TAG = UserRemoteDataSourceImpl.class.getSimpleName();
 
-    private IHttpUtil httpUtil;
+    public static final String ADMIN_USER_PARAMETER = "/admin/users";
+    public static final String ACCOUNT_PARAMETER = "/account";
+    public static final String LOGIN_PARAMETER = "/users";
 
-    public UserRemoteDataSourceImpl(IHttpUtil httpUtil) {
-        this.httpUtil = httpUtil;
+    public UserRemoteDataSourceImpl(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
+        super(iHttpUtil, httpRequestFactory);
     }
-
 
     @Override
     public void insertUser(String userName, String userPwd, BaseOperateDataCallback<User> callback) {
@@ -57,11 +60,9 @@ public class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
         try {
 
-            HttpRequest httpRequest = new HttpRequest(FNAS.generateUrl(Util.ADMIN_USER_PARAMETER), Util.HTTP_POST_METHOD);
-            httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-            httpRequest.setBody(body);
+            HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(ADMIN_USER_PARAMETER, body);
 
-            httpResponse = httpUtil.remoteCall(httpRequest);
+            httpResponse = iHttpUtil.remoteCall(httpRequest);
 
             if (httpResponse.getResponseCode() == 200) {
 
@@ -117,10 +118,10 @@ public class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
         try {
 
-            HttpRequest httpRequest = new HttpRequest(FNAS.generateUrl(Util.ACCOUNT_PARAMETER), Util.HTTP_GET_METHOD);
+            HttpRequest httpRequest = new HttpRequest(FNAS.generateUrl(ACCOUNT_PARAMETER), Util.HTTP_GET_METHOD);
             httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
 
-            httpResponse = httpUtil.remoteCall(httpRequest);
+            httpResponse = iHttpUtil.remoteCall(httpRequest);
 
             if (httpResponse.getResponseCode() != 200 && Util.loginType == LoginType.LOGIN) {
                 OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()));
@@ -133,15 +134,15 @@ public class UserRemoteDataSourceImpl implements UserRemoteDataSource {
             users = new ArrayList<>();
             users.add(user);
 
-            RemoteDataParser<User> parser = new RemoteUserParser();
+            RemoteDatasParser<User> parser = new RemoteUserParser();
 
-            httpRequest.setUrl(FNAS.generateUrl(Util.LOGIN_PARAMETER));
+            httpRequest.setUrl(FNAS.generateUrl(LOGIN_PARAMETER));
 
-            List<User> otherUsers = parser.parse(httpUtil.remoteCall(httpRequest).getResponseData());
+            List<User> otherUsers = parser.parse(iHttpUtil.remoteCall(httpRequest).getResponseData());
 
             addDifferentUsers(users, otherUsers);
 
-            callback.onSucceed(users, new OperationSuccess(R.string.operate));
+            callback.onSucceed(users, new OperationSuccess());
 
         } catch (MalformedURLException ex) {
             ex.printStackTrace();

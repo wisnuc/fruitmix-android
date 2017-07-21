@@ -1,21 +1,17 @@
 package com.winsun.fruitmix.user.manage;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.databinding.ObservableBoolean;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import com.winsun.fruitmix.CreateUserActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.UserManageActivity;
 import com.winsun.fruitmix.databinding.UserManageItemBinding;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
@@ -25,8 +21,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-
-import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by Administrator on 2017/6/21.

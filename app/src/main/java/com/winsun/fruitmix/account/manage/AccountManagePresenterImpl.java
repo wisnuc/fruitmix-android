@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.account.manage;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -10,13 +9,12 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 
 import com.winsun.fruitmix.AccountManageActivity;
-import com.winsun.fruitmix.EquipmentSearchActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.databinding.AccountChildItemBinding;
 import com.winsun.fruitmix.databinding.AccountGroupItemBinding;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.LoggedInUser;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.logged.in.user.LoggedInUser;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;

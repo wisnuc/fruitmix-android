@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/8/31.
  */
-public class RemoteMediaParser implements RemoteDataParser<Media> {
+public class RemoteMediaParser implements RemoteDatasParser<Media> {
 
     public static final String TAG = RemoteMediaParser.class.getSimpleName();
 

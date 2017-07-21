@@ -1,10 +1,8 @@
 package com.winsun.fruitmix.logged.in.user;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.model.LoggedInUser;
 
 import java.util.Collection;
 
@@ -52,5 +50,15 @@ public class LoggedInUserDBDataSource implements LoggedInUserDataSource {
     public Collection<LoggedInUser> getAllLoggedInUsers() {
 
         return dbUtils.getAllLoggedInUser();
+    }
+
+    @Override
+    public LoggedInUser getCurrentLoggedInUser() {
+        return null;
+    }
+
+    @Override
+    public void setCurrentLoggedInUser(LoggedInUser loggedInUser) {
+
     }
 }

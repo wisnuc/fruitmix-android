@@ -16,11 +16,11 @@ import java.util.List;
  * Created by Administrator on 2016/11/7.
  */
 
-public enum FileDownloadManager {
-
-    INSTANCE;
+public class FileDownloadManager {
 
     private static final String TAG = FileDownloadManager.class.getSimpleName();
+
+    private static FileDownloadManager instance;
 
     private List<FileDownloadItem> fileDownloadItems;
 
@@ -28,8 +28,16 @@ public enum FileDownloadManager {
 
     private static int FILE_DOWNLOADING_MAX_NUM = 3;
 
-    FileDownloadManager() {
+    private FileDownloadManager() {
         fileDownloadItems = new ArrayList<>();
+    }
+
+    public static FileDownloadManager getInstance() {
+
+        if (instance == null)
+            instance = new FileDownloadManager();
+
+        return instance;
     }
 
     public void initDBUtils(DBUtils dbUtils) {

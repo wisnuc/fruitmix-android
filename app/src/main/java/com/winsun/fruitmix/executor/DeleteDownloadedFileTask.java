@@ -44,7 +44,7 @@ public class DeleteDownloadedFileTask implements Callable<Boolean> {
             dbUtils.deleteDownloadedFileByUUIDAndCreatorUUID(fileUUID, FNAS.userUUID);
         }
 
-        FileDownloadManager.INSTANCE.deleteFileDownloadItem(fileUUIDs);
+        FileDownloadManager.getInstance().deleteFileDownloadItem(fileUUIDs);
 
         EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_DELETED, new OperationSuccess(R.string.delete_text)));
 

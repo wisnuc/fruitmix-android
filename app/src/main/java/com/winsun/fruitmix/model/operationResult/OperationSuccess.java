@@ -17,9 +17,21 @@ public class OperationSuccess extends OperationResult {
         mOperationResID = operationResID;
     }
 
+    public OperationSuccess() {
+    }
+
     @Override
     public String getResultMessage(Context context) {
-        return String.format(context.getString(R.string.success), context.getString(mOperationResID));
+
+        String message;
+
+        if (mOperationResID == 0) {
+            message = String.format(context.getString(R.string.success), context.getString(R.string.operate));
+        } else {
+            message = String.format(context.getString(R.string.success), context.getString(mOperationResID));
+        }
+
+        return message;
     }
 
     @Override

@@ -1,16 +1,9 @@
 package com.winsun.fruitmix;
 
-import android.app.ProgressDialog;
 import android.databinding.DataBindingUtil;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
-import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.create.user.CreateUserPresenter;
 import com.winsun.fruitmix.create.user.CreateUserPresenterImpl;
@@ -18,23 +11,14 @@ import com.winsun.fruitmix.create.user.CreateUserView;
 import com.winsun.fruitmix.databinding.ActivityCreateUserBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.model.OperationResultType;
-import com.winsun.fruitmix.model.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 
 public class CreateUserActivity extends BaseActivity implements CreateUserView {
 
     public static final String TAG = "CreateUserActivity";
-
-    private ProgressDialog mDialog;
 
     private CreateUserPresenter createUserPresenter;
 
@@ -65,10 +49,6 @@ public class CreateUserActivity extends BaseActivity implements CreateUserView {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        dismissDialog();
-
-        mDialog = null;
 
         createUserPresenter.onDestroy();
     }
@@ -108,23 +88,6 @@ public class CreateUserActivity extends BaseActivity implements CreateUserView {
     @Override
     public void hideSoftInput() {
         Util.hideSoftInput(this);
-    }
-
-    @Override
-    public void showProgressDialog(String message) {
-        mDialog = ProgressDialog.show(CreateUserActivity.this, null, message, true, false);
-
-    }
-
-    @Override
-    public void dismissDialog() {
-        if (mDialog != null)
-            mDialog.dismiss();
-    }
-
-    @Override
-    public void showToast(String text) {
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
     }
 
     public class CreateUserViewModel {

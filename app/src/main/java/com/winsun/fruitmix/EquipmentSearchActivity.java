@@ -27,9 +27,9 @@ import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.model.EquipmentSearchManager;
-import com.winsun.fruitmix.model.LoggedInUser;
+import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.util.FNAS;
@@ -231,6 +231,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         instance = ExecutorServiceInstance.SINGLE_INSTANCE;
 
         Equipment equipment = new Equipment("", Collections.singletonList("10.10.9.80"), 3000);
+        equipment.setModel("");
+        equipment.setSerialNumber("");
         getUserList(equipment);
 
     }

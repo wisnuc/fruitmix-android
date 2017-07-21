@@ -35,7 +35,7 @@ public class PinchImageView extends AppCompatImageView {
     /**
      * 图片缩放动画时间
      */
-    public static final int SCALE_ANIMATOR_DURATION = 200;
+    public static final int SCALE_ANIMATOR_DURATION = 300;
 
     /**
      * 惯性动画衰减参数

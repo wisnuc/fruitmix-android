@@ -38,7 +38,7 @@ import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
-import com.winsun.fruitmix.mediaModule.interfaces.Page;
+import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
@@ -188,10 +188,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
-    public void setmPhotoListListener(IPhotoListListener listListener) {
+    public void setPhotoListListener(IPhotoListListener listListener) {
         mPhotoListListener = listListener;
     }
-
 
     public void setSelectMode(boolean selectMode) {
 

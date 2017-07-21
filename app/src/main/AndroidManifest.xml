@@ -129,10 +129,9 @@
             android:exported="false" />
 
         <activity android:name=".fileModule.FileDownloadActivity" />
-
-        <activity android:name=".wxapi.WXEntryActivity"
-            android:exported="true"/>
-
+        <activity android:name=".wxapi.WXEntryActivity" />
+        <activity android:name=".invitation.ConfirmInviteUserActivity" />
+        <activity android:name=".group.view.GroupContentActivity"></activity>
     </application>
 
 </manifest>

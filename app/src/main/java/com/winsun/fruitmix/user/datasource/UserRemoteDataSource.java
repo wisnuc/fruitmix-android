@@ -1,8 +1,7 @@
 package com.winsun.fruitmix.user.datasource;
 
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.model.User;
-import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.user.User;
 
 /**
  * Created by Administrator on 2017/7/7.

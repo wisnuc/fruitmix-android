@@ -51,6 +51,12 @@ android {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        force rootProject.ext.supportAnnotation
+    }
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile(name: 'android-gif-drawable-1.2.3', ext: 'aar')
@@ -84,17 +90,21 @@ dependencies {
 
 
 
+
     compile 'com.jakewharton:butterknife:8.1.0'
     compile 'io.github.sin3hz.fastjumper:fastjumper:0.1.0'
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.daimajia.swipelayout:library:1.2.0@aar'
-    compile 'com.github.andriydruk:rxdnssd:0.8.3'
+    compile 'com.github.andriydruk:rxdnssd:0.8.4'
     compile 'com.umeng.analytics:analytics:latest.integration'
     compile 'com.android.support.constraint:constraint-layout:1.0.0'
-    compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:+'
+    compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:1.3.4'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.1.0'
     annotationProcessor 'org.greenrobot:eventbus-annotation-processor:3.0.1'
 }
+
+
+
 
 
 

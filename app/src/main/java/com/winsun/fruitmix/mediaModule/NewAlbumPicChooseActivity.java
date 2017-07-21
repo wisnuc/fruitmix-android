@@ -1,15 +1,11 @@
 package com.winsun.fruitmix.mediaModule;
 
 import android.databinding.DataBindingUtil;
-import android.databinding.ObservableBoolean;
-import android.databinding.ObservableField;
-import android.databinding.ObservableInt;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
@@ -20,9 +16,6 @@ import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by Administrator on 2016/5/9.
@@ -77,7 +70,7 @@ public class NewAlbumPicChooseActivity extends BaseActivity implements IPhotoLis
 
         Util.setStatusBarColor(this, R.color.fab_bg_color);
 
-        mNewPhotoList.setmPhotoListListener(this);
+        mNewPhotoList.setPhotoListListener(this);
 
     }
 

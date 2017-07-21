@@ -8,13 +8,12 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by Administrator on 2017/5/5.
  */
 
-public class RemoteMediaAddressParser implements RemoteDataParser<Address> {
+public class RemoteMediaAddressParser implements RemoteDatasParser<Address> {
 
     @Override
     public List<Address> parse(String json) throws JSONException {

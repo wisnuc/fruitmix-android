@@ -15,7 +15,7 @@ import java.util.List;
  * Created by Administrator on 2016/11/8.
  */
 
-public class RemoteFileShareParser implements RemoteDataParser<AbstractRemoteFile> {
+public class RemoteFileShareParser implements RemoteDatasParser<AbstractRemoteFile> {
 
     @Override
     public List<AbstractRemoteFile> parse(String json) throws JSONException {

@@ -2,7 +2,6 @@ package com.winsun.fruitmix;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,6 +40,7 @@ import com.winsun.fruitmix.fileModule.FileDownloadActivity;
 import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
+import com.winsun.fruitmix.invitation.ConfirmInviteUserActivity;
 import com.winsun.fruitmix.mainpage.MainPagePresenter;
 import com.winsun.fruitmix.mainpage.MainPagePresenterImpl;
 import com.winsun.fruitmix.mainpage.MainPageView;
@@ -48,10 +48,10 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.model.EquipmentSearchManager;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
-import com.winsun.fruitmix.model.LoggedInUser;
+import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.OperationType;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -61,7 +61,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
@@ -98,8 +97,16 @@ public class NavPagerActivity extends BaseActivity
     }
 
     @Override
+    public void gotoConfirmInviteUserActivity() {
+        Util.startActivity(mContext,ConfirmInviteUserActivity.class);
+    }
+
+    @Override
     public void loggedInUserItemOnClick(LoggedInUser loggedInUser) {
-        mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.change_user)), true, false);
+
+
+        showProgressDialog(String.format(getString(R.string.operating_title), getString(R.string.change_user)));
+
         startDiscovery(loggedInUser);
         mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT_MESSAGE, DISCOVERY_TIMEOUT_TIME);
     }
@@ -169,8 +176,6 @@ public class NavPagerActivity extends BaseActivity
 
     private Context mContext;
 
-    private ProgressDialog mDialog;
-
     private MediaMainFragment mediaMainFragment;
 
     private FragmentManager fragmentManager;
@@ -217,7 +222,7 @@ public class NavPagerActivity extends BaseActivity
                 case DISCOVERY_TIMEOUT_MESSAGE:
                     weakReference.get().stopDiscovery();
 
-                    weakReference.get().mDialog.dismiss();
+                    weakReference.get().dismissDialog();
 
                     Toast.makeText(weakReference.get(), weakReference.get().getString(R.string.search_equipment_failed), Toast.LENGTH_SHORT).show();
 
@@ -409,7 +414,7 @@ public class NavPagerActivity extends BaseActivity
 
         Log.i(TAG, "search equipment: hostAddress: " + hostAddress);
 
-        mDialog.dismiss();
+        dismissDialog();
         stopDiscovery();
 
         mCustomHandler.removeMessages(DISCOVERY_TIMEOUT_MESSAGE);
@@ -685,7 +690,7 @@ public class NavPagerActivity extends BaseActivity
             protected void onPreExecute() {
                 super.onPreExecute();
 
-                mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.logout)), true, false);
+                showProgressDialog( String.format(getString(R.string.operating_title), getString(R.string.logout)));
 
             }
 
@@ -696,7 +701,7 @@ public class NavPagerActivity extends BaseActivity
 
                 LocalCache.clearToken(mContext);
 
-                FileDownloadManager.INSTANCE.clearFileDownloadItems();
+                FileDownloadManager.getInstance().clearFileDownloadItems();
 
                 return null;
             }
@@ -705,7 +710,7 @@ public class NavPagerActivity extends BaseActivity
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
 
-                mDialog.dismiss();
+                dismissDialog();
 
                 EquipmentSearchActivity.gotoEquipmentActivity((Activity) mContext, true);
 

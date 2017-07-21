@@ -14,17 +14,19 @@ import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.http.OkHttpUtil;
-import com.winsun.fruitmix.invitation.Invitation;
-import com.winsun.fruitmix.model.LoggedInUser;
-import com.winsun.fruitmix.model.User;
+import com.winsun.fruitmix.inject.Inject;
+import com.winsun.fruitmix.invitation.InvitationRemoteDataSource;
+import com.winsun.fruitmix.logged.in.user.LoggedInUser;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
-import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.wxapi.MiniProgram;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -58,9 +60,11 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     private ThreadManager threadManager;
 
-    private Invitation invitation;
+    private InvitationRemoteDataSource invitationRemoteDataSource;
 
     private Resources resources;
+
+    private IWXAPI iwxapi;
 
     public MainPagePresenterImpl(Context context, NavPagerActivity.NavPagerViewModel navPagerViewModel, MainPageView mainPageView) {
 
@@ -79,11 +83,9 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         threadManager = ThreadManager.getInstance();
 
-        IHttpUtil iHttpUtil = new OkHttpUtil();
+        iwxapi = MiniProgram.registerToWX(context);
 
-        IWXAPI iwxapi = Util.registerToWX(context);
-
-        invitation = new Invitation(iHttpUtil, iwxapi);
+        invitationRemoteDataSource = new InvitationRemoteDataSource(Inject.provideIHttpUtil(context), Inject.provideHttpRequestFactory());
 
         resources = context.getResources();
 
@@ -178,7 +180,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
     private void toggleUserManageNavigationItem(Context context, User user) {
         if (user.isAdmin()) {
 
-            if (mNavigationMenuItems.size() == 4) {
+            if (((NavigationMenuViewModel) mNavigationMenuItems.get(2)).getMenuIconResId() != R.drawable.ic_person_add_black_24dp) {
 
                 NavigationMenuViewModel model = new NavigationMenuViewModel() {
                     @Override
@@ -195,7 +197,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         } else {
 
-            if (mNavigationMenuItems.size() == 5)
+            if (((NavigationMenuViewModel) mNavigationMenuItems.get(2)).getMenuIconResId() == R.drawable.ic_person_add_black_24dp)
                 mNavigationMenuItems.remove(2);
         }
     }
@@ -250,11 +252,13 @@ public class MainPagePresenterImpl implements MainPagePresenter {
             public void onClick() {
                 super.onClick();
 
+//                MiniProgram.shareMiniWXApp(iwxapi, resources, "https://13151693.qcloud.la/v1/tickets/a88d1e9f-543b-40b6-aac2-69418cd4d14f");
+
                 threadManager.runOnCacheThread(new Runnable() {
                     @Override
                     public void run() {
 
-                        invitation.createTicket(new BaseOperateDataCallback<String>() {
+                        invitationRemoteDataSource.createInvitation(new BaseOperateDataCallbackImpl<String>() {
                             @Override
                             public void onSucceed(final String data, OperationResult result) {
 
@@ -263,7 +267,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
                                 threadManager.runOnMainThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        invitation.shareMiniWXApp(resources, data);
+                                        MiniProgram.shareMiniWXApp(iwxapi,resources, data);
                                     }
                                 });
 
@@ -273,15 +277,6 @@ public class MainPagePresenterImpl implements MainPagePresenter {
                             public void onFail(OperationResult result) {
 
                                 Log.d(TAG, "onFail: result: " + result);
-
-                                threadManager.runOnMainThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        invitation.shareMiniWXApp(resources, "");
-
-
-                                    }
-                                });
 
                             }
                         });
@@ -294,6 +289,19 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         model.setMenuIconResId(R.drawable.ic_settings_black_24dp);
         model.setMenuText("发起邀请");
+        mNavigationMenuItems.add(model);
+
+        model = new NavigationMenuViewModel() {
+            @Override
+            public void onClick() {
+                super.onClick();
+
+                mainPageView.gotoConfirmInviteUserActivity();
+            }
+        };
+
+        model.setMenuIconResId(R.drawable.ic_settings_black_24dp);
+        model.setMenuText("确认邀请");
         mNavigationMenuItems.add(model);
 
     }
