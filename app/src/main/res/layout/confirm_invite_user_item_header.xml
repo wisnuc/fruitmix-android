@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="ticketID"
+            type="String" />
+
+        <variable
+            name="confirmInviteUserPresenter"
+            type="com.winsun.fruitmix.invitation.ConfirmInviteUserPresenter" />
+
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_margin="16dp"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/ticket_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:text="@{ticketID}"
+            android:textSize="16dp"
+            tools:text="测试ticket" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{()->confirmInviteUserPresenter.postOperation(ticketID)}"
+            android:text="提交"
+            android:textSize="16dp" />
+
+    </LinearLayout>
+
+</layout>

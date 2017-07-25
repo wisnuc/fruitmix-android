@@ -10,6 +10,15 @@
             name="toolbarViewModel"
             type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
+        <variable
+            name="pingToggleListener"
+            type="com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton.PingToggleListener" />
+
+        <variable
+            name="groupContentViewModel"
+            type="com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel" />
+
+        <import type="android.view.View" />
 
     </data>
 
@@ -20,6 +29,7 @@
         <include
             android:id="@+id/group_content_toolbar"
             layout="@layout/group_content_toolbar"
+            app:pingToggleListener="@{pingToggleListener}"
             app:toolbarViewModel="@{toolbarViewModel}" />
 
         <FrameLayout
@@ -28,7 +38,8 @@
             android:layout_height="87dp"
             android:layout_below="@id/group_content_toolbar"
             android:layout_marginBottom="16dp"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:visibility="@{groupContentViewModel.showPing?View.VISIBLE:View.GONE,default=visible}" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -81,28 +92,30 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/gray"
             android:layout_below="@id/ping_layout"
-            android:layout_marginBottom="56dp">
+            android:layout_marginBottom="56dp"
+            android:background="@color/gray">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/chat_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:paddingTop="16dp" />
 
             <TextView
+                android:id="@+id/new_comment__count_textview"
                 android:layout_width="wrap_content"
+                android:layout_height="28dp"
                 android:layout_gravity="right"
-                android:background="@drawable/comment_count_bg"
                 android:layout_marginTop="8dp"
-                android:textSize="12dp"
-                android:textColor="#4caf50"
-                tools:text="125条评论"
+                android:background="@drawable/comment_count_bg"
                 android:gravity="center_vertical"
-                android:layout_height="28dp" />
+                android:text="125条评论"
+                android:textColor="#4caf50"
+                android:textSize="12dp"
+                tools:text="125条评论" />
 
 
         </FrameLayout>

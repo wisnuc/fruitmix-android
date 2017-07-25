@@ -15,12 +15,27 @@ import java.util.List;
 
 public class FakeGroupDataSource implements GroupDataSource {
 
-
+    private static FakeGroupDataSource instance;
 
     private List<PrivateGroup> privateGroups;
 
-    public FakeGroupDataSource() {
+    public static final String AIMI_UUID = "aimi_uuid";
+    public static final String NAOMI_UUID = "naomi_uuid";
+    public static final String MYSELF_UUID = "myself_uuid";
+
+    private FakeGroupDataSource() {
         privateGroups = new ArrayList<>();
+    }
+
+    public static GroupDataSource getInstance() {
+
+        if (instance == null) {
+            instance = new FakeGroupDataSource();
+        }
+
+        instance.addTestData();
+
+        return instance;
     }
 
     public void addTestData() {
@@ -32,14 +47,17 @@ public class FakeGroupDataSource implements GroupDataSource {
 
         User aimi = new User();
         aimi.setUserName("Aimi");
+        aimi.setUuid(AIMI_UUID);
         users.add(aimi);
 
         User naomi = new User();
         naomi.setUserName("Naomi");
+        naomi.setUuid(NAOMI_UUID);
         users.add(naomi);
 
         User myself = new User();
         myself.setUserName("myself");
+        myself.setUuid(MYSELF_UUID);
         users.add(myself);
 
         List<UserComment> userComments = new ArrayList<>();
@@ -53,45 +71,46 @@ public class FakeGroupDataSource implements GroupDataSource {
         UserComment userComment3 = new TextComment(myself, 1497067200, "同学们速度快点");
         userComments.add(userComment3);
 
-
         String groupName1 = "大学同学";
 
-        PrivateGroup privateGroup1 = new PrivateGroup(groupName1, new ArrayList<>(users));
+        PrivateGroup privateGroup1 = new PrivateGroup("1", groupName1, new ArrayList<>(users));
         privateGroup1.addUserComments(userComments);
 
         privateGroups.add(privateGroup1);
 
         String groupName2 = "外卖小分队";
 
-        PrivateGroup privateGroup2 = new PrivateGroup(groupName2, new ArrayList<>(users));
+        PrivateGroup privateGroup2 = new PrivateGroup("2", groupName2, new ArrayList<>(users));
         privateGroup2.addUserComments(userComments);
 
         privateGroups.add(privateGroup2);
 
+        String groupUuid3 = "3";
         String groupName3 = "软件学院同学会";
 
-        PrivateGroup privateGroup3 = new PrivateGroup(groupName3, new ArrayList<>(users));
+        PrivateGroup privateGroup3 = new PrivateGroup("3", groupName3, new ArrayList<>(users));
         privateGroup3.addUserComments(userComments);
 
         privateGroups.add(privateGroup3);
 
+        String groupUuid4 = "4";
         String groupName4 = "吃货群";
 
-        PrivateGroup privateGroup4 = new PrivateGroup(groupName4, new ArrayList<>(users));
+        PrivateGroup privateGroup4 = new PrivateGroup(groupUuid4, groupName4, new ArrayList<>(users));
         privateGroup4.addUserComments(userComments);
 
         privateGroups.add(privateGroup4);
 
         String groupName5 = "校广播站";
 
-        PrivateGroup privateGroup5 = new PrivateGroup(groupName5, new ArrayList<>(users));
+        PrivateGroup privateGroup5 = new PrivateGroup("5", groupName5, new ArrayList<>(users));
         privateGroup5.addUserComments(userComments);
 
         privateGroups.add(privateGroup5);
 
         String groupName6 = "211宿舍派对";
 
-        PrivateGroup privateGroup6 = new PrivateGroup(groupName6, new ArrayList<>(users));
+        PrivateGroup privateGroup6 = new PrivateGroup("6", groupName6, new ArrayList<>(users));
         privateGroup6.addUserComments(userComments);
 
         privateGroups.add(privateGroup6);
@@ -107,5 +126,20 @@ public class FakeGroupDataSource implements GroupDataSource {
     @Override
     public List<PrivateGroup> getAllGroups() {
         return new ArrayList<>(privateGroups);
+    }
+
+    @Override
+    public void clearGroups() {
+        privateGroups.clear();
+    }
+
+    @Override
+    public PrivateGroup getGroupByUUID(String groupUUID) {
+        for (PrivateGroup privateGroup : privateGroups) {
+            if (privateGroup.getUUID().equals(groupUUID))
+                return privateGroup;
+        }
+
+        return null;
     }
 }

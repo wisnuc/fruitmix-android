@@ -2,6 +2,7 @@ package com.winsun.fruitmix.group.presenter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.winsun.fruitmix.BR;
@@ -12,6 +13,7 @@ import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.viewmodel.GroupListViewModel;
+import com.winsun.fruitmix.group.view.GroupListPageView;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
@@ -37,16 +39,24 @@ public class GroupListPresenter {
     private NoContentViewModel noContentViewModel;
     private GroupListViewModel groupListViewModel;
 
-    public GroupListPresenter(GroupRepository groupRepository, LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel, GroupListViewModel groupListViewModel) {
+    private GroupListPageView groupListPageView;
+
+    public GroupListPresenter(GroupListPageView groupListPageView, GroupRepository groupRepository, LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel, GroupListViewModel groupListViewModel) {
         this.groupRepository = groupRepository;
         this.loadingViewModel = loadingViewModel;
         this.noContentViewModel = noContentViewModel;
         this.groupListViewModel = groupListViewModel;
 
+        this.groupListPageView = groupListPageView;
+
         groupListAdapter = new GroupListAdapter();
 
         threadManager = ThreadManager.getInstance();
 
+    }
+
+    public void onDestroyView() {
+        groupListPageView = null;
     }
 
     public GroupListAdapter getGroupListAdapter() {
@@ -131,13 +141,22 @@ public class GroupListPresenter {
         @Override
         public void onBindViewHolder(BindingViewHolder holder, int position) {
 
-            PrivateGroup privateGroup = mPrivateGroups.get(position);
+            final PrivateGroup privateGroup = mPrivateGroups.get(position);
 
             holder.getViewDataBinding().setVariable(BR.privateGroup, privateGroup);
             holder.getViewDataBinding().executePendingBindings();
 
             GroupListItemBinding binding = (GroupListItemBinding) holder.getViewDataBinding();
             binding.lastCommentContent.setText(getLastCommentContent(privateGroup));
+
+            holder.getViewDataBinding().getRoot().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    groupListPageView.gotoGroupContentActivity(privateGroup.getUUID(), privateGroup.getName());
+
+                }
+            });
 
         }
 

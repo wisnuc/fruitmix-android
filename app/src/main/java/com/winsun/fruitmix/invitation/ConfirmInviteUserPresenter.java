@@ -16,6 +16,8 @@ public interface ConfirmInviteUserPresenter {
 
     void refuseInviteUser(ConfirmInviteUser confirmInviteUser);
 
+    void postOperation(String ticketID);
+
     void handleOperationEvent(OperationEvent operationEvent);
 
 }

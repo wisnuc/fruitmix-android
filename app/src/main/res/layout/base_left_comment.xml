@@ -8,21 +8,29 @@
             name="userComment"
             type="com.winsun.fruitmix.group.data.model.UserComment" />
 
+        <variable
+            name="userCommentShowStrategy"
+            type="com.winsun.fruitmix.group.data.model.UserCommentShowStrategy" />
+
+        <import type="android.view.View" />
+
     </data>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
         android:orientation="vertical">
 
         <ImageView
             android:id="@+id/user_avatar"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginRight="8dp"
-            android:src="@mipmap/launcher_logo" />
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="@{userCommentShowStrategy.showLeft?@dimen/zero:@dimen/eight,default=@dimen/zero}"
+            android:layout_marginRight="@{userCommentShowStrategy.showLeft?@dimen/eight:@dimen/zero,default=@dimen/eight}"
+            android:src="@mipmap/launcher_logo"
+            android:visibility="@{userCommentShowStrategy.showUserAvatar?View.VISIBLE:View.INVISIBLE}" />
 
         <LinearLayout
             android:id="@+id/user_info_layout"
@@ -37,7 +45,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@{userComment.creator.userName,default=test}"
-                android:textSize="12dp" />
+                android:textSize="12dp"
+                android:visibility="@{userCommentShowStrategy.showUserName?View.VISIBLE:View.GONE}" />
 
             <TextView
                 android:id="@+id/create_time"
@@ -45,14 +54,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
                 android:text="@{userComment.date,default=testDate}"
-                android:textSize="10dp" />
+                android:textSize="10dp"
+                android:visibility="@{userCommentShowStrategy.showTime?View.VISIBLE:View.GONE}" />
 
         </LinearLayout>
 
 
         <FrameLayout
             android:id="@+id/comment_content"
-            android:layout_width="wrap_content"
+            android:layout_width="260dp"
             android:layout_height="wrap_content"
             android:layout_below="@id/user_info_layout"
             android:layout_marginTop="6dp"

@@ -10,6 +10,12 @@ public class ConfirmInviteUser {
     private String userAvatar;
     private String station;
 
+    private String userUUID;
+
+    private String operateType = "pending";
+
+    private String ticketUUID;
+
     public String getUserName() {
         return userName;
     }
@@ -32,5 +38,29 @@ public class ConfirmInviteUser {
 
     public void setUserAvatar(String userAvatar) {
         this.userAvatar = userAvatar;
+    }
+
+    public String getUserUUID() {
+        return userUUID;
+    }
+
+    public void setUserUUID(String userUUID) {
+        this.userUUID = userUUID;
+    }
+
+    public String getTicketUUID() {
+        return ticketUUID;
+    }
+
+    public void setTicketUUID(String ticketUUID) {
+        this.ticketUUID = ticketUUID;
+    }
+
+    public String getOperateType() {
+        return operateType;
+    }
+
+    public void setOperateType(String operateType) {
+        this.operateType = operateType;
     }
 }

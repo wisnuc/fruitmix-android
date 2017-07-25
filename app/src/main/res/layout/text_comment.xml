@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="textCommentViewModel"
+            type="com.winsun.fruitmix.group.data.viewmodel.TextCommentViewModel" />
+
+    </data>
+
+    <LinearLayout
+        android:id="@+id/text_comment_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@{textCommentViewModel.isLeftMode?@drawable/left_text_comment_white_bg:@drawable/right_text_comment_bg,default=@drawable/left_text_comment_white_bg}"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_comment_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:gravity="center_vertical"
+            android:text="@{textCommentViewModel.text}"
+            android:textColor="@{textCommentViewModel.isLeftMode?@color/eighty_seven_percent_black:@color/eighty_seven_percent_white,default=@color/eighty_seven_percent_black}"
+            android:textSize="13dp"
+            tools:text="务必放进毕业十年聚" />
+
+    </LinearLayout>
+
+</layout>
+

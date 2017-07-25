@@ -14,6 +14,7 @@ import android.view.View;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.ActivityGroupListBinding;
 import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
+import com.winsun.fruitmix.group.data.source.GroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.viewmodel.GroupListViewModel;
 import com.winsun.fruitmix.group.presenter.GroupListPresenter;
@@ -25,15 +26,21 @@ import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import java.util.List;
 import java.util.Map;
 
-public class GroupListPage implements Page,IShowHideFragmentListener {
+public class GroupListPage implements Page, IShowHideFragmentListener, GroupListPageView {
 
     private View view;
 
     private RecyclerView recyclerView;
 
+    private GroupListPresenter groupListPresenter;
+
+    private Activity containerActivity;
+
     public GroupListPage(Activity activity) {
 
-        ActivityGroupListBinding binding = ActivityGroupListBinding.inflate(LayoutInflater.from(activity),null,false);
+        containerActivity = activity;
+
+        ActivityGroupListBinding binding = ActivityGroupListBinding.inflate(LayoutInflater.from(activity), null, false);
 
         LoadingViewModel loadingViewModel = new LoadingViewModel();
 
@@ -51,12 +58,11 @@ public class GroupListPage implements Page,IShowHideFragmentListener {
 
         view = binding.getRoot();
 
-        FakeGroupDataSource fakeGroupDataSource = new FakeGroupDataSource();
-        fakeGroupDataSource.addTestData();
+        GroupDataSource fakeGroupDataSource = FakeGroupDataSource.getInstance();
 
         GroupRepository groupRepository = GroupRepository.getInstance(fakeGroupDataSource);
 
-        GroupListPresenter groupListPresenter = new GroupListPresenter(groupRepository, loadingViewModel, noContentViewModel, groupListViewModel);
+        groupListPresenter = new GroupListPresenter(this, groupRepository, loadingViewModel, noContentViewModel, groupListViewModel);
 
         recyclerView = binding.groupRecyclerview;
 
@@ -90,7 +96,7 @@ public class GroupListPage implements Page,IShowHideFragmentListener {
 
     @Override
     public void onDestroy() {
-
+        groupListPresenter.onDestroyView();
     }
 
     @Override
@@ -100,6 +106,17 @@ public class GroupListPage implements Page,IShowHideFragmentListener {
 
     @Override
     public void hide() {
+
+    }
+
+    @Override
+    public void gotoGroupContentActivity(String groupUUID, String groupName) {
+
+        Intent intent = new Intent(containerActivity, GroupContentActivity.class);
+        intent.putExtra(GroupContentActivity.GROUP_UUID, groupUUID);
+        intent.putExtra(GroupContentActivity.GROUP_NAME, groupName);
+
+        containerActivity.startActivity(intent);
 
     }
 }

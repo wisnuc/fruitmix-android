@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
@@ -13,6 +14,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.databinding.ConfirmInviteUserItemBinding;
+import com.winsun.fruitmix.databinding.ConfirmInviteUserItemHeaderBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
 import com.winsun.fruitmix.interfaces.BaseView;
@@ -23,7 +25,10 @@ import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Andy on 2017/7/12.
@@ -37,8 +42,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     private ThreadManager threadManager;
 
-    private List<ConfirmInviteUser> mConfirmInviteUsers;
-
+    private Map<String, List<ConfirmInviteUser>> mConfirmInviteUserMaps;
     private ConfirmTicketAdapter adapter;
 
     private ImageLoader imageLoader;
@@ -61,12 +65,16 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         threadManager = ThreadManager.getInstance();
 
-        mConfirmInviteUsers = new ArrayList<>();
+        mConfirmInviteUserMaps = new HashMap<>();
 
-        createFakeConfirmInviteUser();
+//        createFakeConfirmInviteUser();
 
         adapter = new ConfirmTicketAdapter();
 
+    }
+
+    public ConfirmTicketAdapter getAdapter() {
+        return adapter;
     }
 
     @Override
@@ -93,7 +101,11 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
                         loadingViewModel.showLoading.set(false);
 
-                        adapter.setConfirmInviteUsers(data);
+                        noContentViewModel.showNoContent.set(false);
+
+                        createMap(data);
+
+                        adapter.setViewItems(createViewItems(mConfirmInviteUserMaps));
                         adapter.notifyDataSetChanged();
 
                     }
@@ -108,9 +120,9 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
                     @Override
                     public void run() {
 
-                        noContentViewModel.showNoContent.set(true);
                         loadingViewModel.showLoading.set(false);
 
+                        noContentViewModel.showNoContent.set(true);
 
                     }
                 });
@@ -119,8 +131,95 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
         });
     }
 
-    public ConfirmTicketAdapter getAdapter() {
-        return adapter;
+    private void createMap(List<ConfirmInviteUser> data) {
+
+        for (ConfirmInviteUser user : data) {
+
+            if (mConfirmInviteUserMaps.containsKey(user.getTicketUUID())) {
+
+                List<ConfirmInviteUser> users = mConfirmInviteUserMaps.get(user.getTicketUUID());
+
+                users.add(user);
+
+            } else {
+
+                List<ConfirmInviteUser> users = new ArrayList<>();
+                users.add(user);
+
+                mConfirmInviteUserMaps.put(user.getTicketUUID(), users);
+
+            }
+
+        }
+
+    }
+
+
+    @Override
+    public void postOperation(String ticketID) {
+
+        final List<ConfirmInviteUser> confirmInviteUsers = mConfirmInviteUserMaps.get(ticketID);
+
+        int operateCount = 0;
+
+        for (ConfirmInviteUser confirmInviteUser : confirmInviteUsers) {
+            if (!confirmInviteUser.getOperateType().equals("pending")) {
+                operateCount++;
+            } else {
+                break;
+            }
+        }
+
+        if (operateCount != confirmInviteUsers.size()) {
+
+            baseView.showToast("还有未确认的用户");
+
+            return;
+        }
+
+        threadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+
+                baseView.showProgressDialog("正在执行");
+
+                mInvitationRemoteDataSource.confirmInvitation(confirmInviteUsers, new BaseOperateDataCallback<String>() {
+                    @Override
+                    public void onSucceed(final String data, OperationResult result) {
+
+                        threadManager.runOnMainThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                baseView.dismissDialog();
+
+                                baseView.showToast("执行成功");
+
+                                handleOperateSucceed(data);
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult result) {
+
+                        threadManager.runOnMainThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                baseView.dismissDialog();
+
+                                baseView.showToast("执行失败");
+
+                            }
+                        });
+
+                    }
+                });
+
+            }
+        });
+
+
     }
 
     @Override
@@ -128,35 +227,8 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         Log.d(TAG, "acceptInviteUser: " + confirmInviteUser.getUserName());
 
-        threadManager.runOnCacheThread(new Runnable() {
-            @Override
-            public void run() {
+        confirmInviteUser.setOperateType("accept");
 
-                baseView.showProgressDialog("正在执行");
-
-                mInvitationRemoteDataSource.acceptInvitation(confirmInviteUser, new BaseOperateDataCallback<ConfirmInviteUser>() {
-                    @Override
-                    public void onSucceed(ConfirmInviteUser data, OperationResult result) {
-
-                        baseView.dismissDialog();
-
-                        baseView.showToast("执行成功");
-
-                        handleOperateSucceed(confirmInviteUser);
-                    }
-
-                    @Override
-                    public void onFail(OperationResult result) {
-
-                        baseView.dismissDialog();
-
-                        baseView.showToast("执行失败");
-
-                    }
-                });
-
-            }
-        });
     }
 
     @Override
@@ -164,46 +236,160 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         Log.d(TAG, "refuseInviteUser: " + confirmInviteUser.getUserName());
 
-        threadManager.runOnCacheThread(new Runnable() {
-            @Override
-            public void run() {
-
-                baseView.showProgressDialog("正在执行");
-
-                mInvitationRemoteDataSource.refuseInvitation(confirmInviteUser, new BaseOperateDataCallback<ConfirmInviteUser>() {
-                    @Override
-                    public void onSucceed(ConfirmInviteUser data, OperationResult result) {
-
-                        baseView.dismissDialog();
-
-                        baseView.showToast("执行成功");
-
-                        handleOperateSucceed(confirmInviteUser);
-                    }
-
-                    @Override
-                    public void onFail(OperationResult result) {
-
-                        baseView.dismissDialog();
-
-                        baseView.showToast("执行失败");
-                    }
-                });
-
-            }
-        });
+        confirmInviteUser.setOperateType("refuse");
 
     }
 
-    private void handleOperateSucceed(ConfirmInviteUser confirmInviteUser) {
+    private void handleOperateSucceed(String ticketID) {
 
-        int position = mConfirmInviteUsers.indexOf(confirmInviteUser);
+        if (mConfirmInviteUserMaps.containsKey(ticketID)) {
 
-        if (position != -1) {
-            mConfirmInviteUsers.remove(position);
+            mConfirmInviteUserMaps.remove(ticketID);
 
-            adapter.setConfirmInviteUsers(mConfirmInviteUsers);
-            adapter.notifyItemRemoved(position);
+            adapter.setViewItems(createViewItems(mConfirmInviteUserMaps));
+            adapter.notifyDataSetChanged();
+        }
+
+    }
+
+    private void createFakeConfirmInviteUser() {
+
+        for (int i = 0; i < 10; i++) {
+
+            ConfirmInviteUser confirmInviteUser = new ConfirmInviteUser();
+            confirmInviteUser.setStation("test station " + i);
+            confirmInviteUser.setUserName("test username " + i);
+
+            List<ConfirmInviteUser> users = new ArrayList<>();
+            users.add(confirmInviteUser);
+
+            mConfirmInviteUserMaps.put("test Ticket" + i, users);
+        }
+
+    }
+
+    private List<ViewItem> createViewItems(Map<String, List<ConfirmInviteUser>> map) {
+
+        List<ViewItem> viewItems = new ArrayList<>();
+
+        Set<String> tickets = map.keySet();
+
+        for (String ticket : tickets) {
+
+            ViewHeader viewHeader = new ViewHeader();
+            viewHeader.setTicketID(ticket);
+
+            viewItems.add(viewHeader);
+
+            List<ConfirmInviteUser> confirmInviteUsers = map.get(ticket);
+
+            for (ConfirmInviteUser confirmInviteUser : confirmInviteUsers) {
+                ViewContent viewContent = new ViewContent();
+                viewContent.setConfirmInviteUser(confirmInviteUser);
+                viewItems.add(viewContent);
+            }
+
+        }
+
+        return viewItems;
+
+    }
+
+
+    private class ConfirmTicketAdapter extends RecyclerView.Adapter<BindingViewHolder> {
+
+        private List<ViewItem> mViewItems;
+
+        ConfirmTicketAdapter() {
+            mViewItems = new ArrayList<>();
+        }
+
+        void setViewItems(List<ViewItem> viewItems) {
+            mViewItems.clear();
+            mViewItems.addAll(viewItems);
+        }
+
+        @Override
+        public BindingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            ViewDataBinding binding;
+
+            if (viewType == VIEW_HEAD) {
+
+                binding = ConfirmInviteUserItemHeaderBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+
+                return new BindingViewHolder(binding);
+
+            } else {
+                binding = ConfirmInviteUserItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+
+                return new ConfirmTicketContentViewHolder(binding);
+            }
+
+        }
+
+        @Override
+        public void onBindViewHolder(BindingViewHolder holder, int position) {
+
+            ViewDataBinding binding = holder.getViewDataBinding();
+
+            if (mViewItems.get(position).getViewType() == VIEW_HEAD) {
+
+                ViewHeader viewHeader = (ViewHeader) mViewItems.get(position);
+
+                binding.setVariable(BR.ticketID, viewHeader.getTicketID());
+                binding.setVariable(BR.confirmInviteUserPresenter, ConfirmInviteUserPresenterImpl.this);
+
+                binding.executePendingBindings();
+
+            } else {
+
+                ViewContent viewContent = (ViewContent) mViewItems.get(position);
+
+                ConfirmInviteUser confirmInviteUser = viewContent.getConfirmInviteUser();
+
+                binding.setVariable(BR.confirmInviteUser, confirmInviteUser);
+                binding.setVariable(BR.confirmInviteUserPresenter, ConfirmInviteUserPresenterImpl.this);
+
+                binding.executePendingBindings();
+
+                ConfirmTicketContentViewHolder viewHolder = (ConfirmTicketContentViewHolder) holder;
+
+                viewHolder.refreshView(confirmInviteUser);
+
+            }
+
+
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return mViewItems.get(position).getViewType();
+        }
+
+        @Override
+        public int getItemCount() {
+            return mViewItems.size();
+        }
+    }
+
+
+    private class ConfirmTicketContentViewHolder extends BindingViewHolder {
+
+//        NetworkImageView userAvatar;
+
+        public ConfirmTicketContentViewHolder(ViewDataBinding viewDataBinding) {
+            super(viewDataBinding);
+
+            ConfirmInviteUserItemBinding binding = (ConfirmInviteUserItemBinding) viewDataBinding;
+//            userAvatar = binding.userAvatar;
+
+        }
+
+        public void refreshView(final ConfirmInviteUser confirmInviteUser) {
+
+//            retrieveUserAvatar(confirmInviteUser.getUserAvatar(), userAvatar);
+
         }
 
     }
@@ -217,83 +403,6 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     }
 
-    private void createFakeConfirmInviteUser() {
-
-        for (int i = 0; i < 10; i++) {
-
-            ConfirmInviteUser confirmInviteUser = new ConfirmInviteUser();
-            confirmInviteUser.setStation("test station " + i);
-            confirmInviteUser.setUserName("test username " + i);
-            mConfirmInviteUsers.add(confirmInviteUser);
-        }
-
-    }
-
-
-    private class ConfirmTicketAdapter extends RecyclerView.Adapter<ConfirmTicketViewHolder> {
-
-        private List<ConfirmInviteUser> confirmInviteUsers;
-
-        public ConfirmTicketAdapter() {
-            confirmInviteUsers = new ArrayList<>();
-        }
-
-        public void setConfirmInviteUsers(List<ConfirmInviteUser> confirmInviteUsers) {
-            this.confirmInviteUsers.clear();
-            this.confirmInviteUsers.addAll(confirmInviteUsers);
-        }
-
-        @Override
-        public ConfirmTicketViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-            ConfirmInviteUserItemBinding binding = ConfirmInviteUserItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
-
-            return new ConfirmTicketViewHolder(binding);
-        }
-
-        @Override
-        public void onBindViewHolder(ConfirmTicketViewHolder holder, int position) {
-
-            ViewDataBinding binding = holder.getViewDataBinding();
-
-            ConfirmInviteUser confirmInviteUser = confirmInviteUsers.get(position);
-
-            binding.setVariable(BR.confirmInviteUser, confirmInviteUser);
-            binding.setVariable(BR.confirmInviteUserPresenter, ConfirmInviteUserPresenterImpl.this);
-
-            binding.executePendingBindings();
-
-            holder.refreshView(confirmInviteUser);
-
-        }
-
-        @Override
-        public int getItemCount() {
-            return confirmInviteUsers.size();
-        }
-    }
-
-    private class ConfirmTicketViewHolder extends BindingViewHolder {
-
-        NetworkImageView userAvatar;
-
-
-        public ConfirmTicketViewHolder(ViewDataBinding viewDataBinding) {
-            super(viewDataBinding);
-
-            ConfirmInviteUserItemBinding binding = (ConfirmInviteUserItemBinding) viewDataBinding;
-            userAvatar = binding.userAvatar;
-
-        }
-
-        public void refreshView(final ConfirmInviteUser confirmInviteUser) {
-
-            retrieveUserAvatar(confirmInviteUser.getUserAvatar(), userAvatar);
-
-        }
-
-    }
-
     @Override
     public void handleOperationEvent(OperationEvent operationEvent) {
 
@@ -301,14 +410,59 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         List<ConfirmInviteUser> confirmInviteUsers = ticketOperationEvent.getConfirmInviteUsers();
 
-        filterConfirmInviteUser(mConfirmInviteUsers, confirmInviteUsers);
+        filterConfirmInviteUser(confirmInviteUsers);
 
 
     }
 
-    public void filterConfirmInviteUser(List<ConfirmInviteUser> currentConfirmInviteUsers, List<ConfirmInviteUser> newConfirmInviteUsers) {
+    public void filterConfirmInviteUser(List<ConfirmInviteUser> newConfirmInviteUsers) {
 
 
+    }
+
+    public static final int VIEW_HEAD = 1;
+    public static final int VIEW_CONTENT = 2;
+
+    private interface ViewItem {
+
+        int getViewType();
+
+    }
+
+    private class ViewHeader implements ViewItem {
+
+        private String ticketID;
+
+        @Override
+        public int getViewType() {
+            return VIEW_HEAD;
+        }
+
+        public String getTicketID() {
+            return ticketID;
+        }
+
+        public void setTicketID(String ticketID) {
+            this.ticketID = ticketID;
+        }
+    }
+
+    private class ViewContent implements ViewItem {
+
+        private ConfirmInviteUser confirmInviteUser;
+
+        @Override
+        public int getViewType() {
+            return VIEW_CONTENT;
+        }
+
+        public ConfirmInviteUser getConfirmInviteUser() {
+            return confirmInviteUser;
+        }
+
+        public void setConfirmInviteUser(ConfirmInviteUser confirmInviteUser) {
+            this.confirmInviteUser = confirmInviteUser;
+        }
     }
 
 }

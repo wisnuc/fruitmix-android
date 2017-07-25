@@ -27,6 +27,14 @@ public class GroupRepository {
     public void getGroupList(BaseLoadDataCallback<PrivateGroup> callback){
 
         callback.onSucceed(groupDataSource.getAllGroups(),new OperationSuccess());
+
     }
+
+    public PrivateGroup getGroup(String groupUUID){
+
+        return groupDataSource.getGroupByUUID(groupUUID);
+
+    }
+
 
 }

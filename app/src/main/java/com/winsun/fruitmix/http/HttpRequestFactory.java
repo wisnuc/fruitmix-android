@@ -73,6 +73,22 @@ public class HttpRequestFactory {
         return httpRequest;
     }
 
+    public HttpRequest createHttpGetRequestWithFullUrlAndToken(String url, String token) {
+        HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, token);
+
+        return httpRequest;
+    }
+
+    public HttpRequest createHttpPostRequestWithFullUrlAndToken(String url, String token,String body) {
+        HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_POST_METHOD);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, token);
+
+        httpRequest.setBody(body);
+
+        return httpRequest;
+    }
+
 
     public HttpRequest createHttpGetTokenRequest(LoadTokenParam loadTokenParam) {
 

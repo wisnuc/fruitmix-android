@@ -8,6 +8,10 @@
             name="toolbarViewModel"
             type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
+        <variable
+            name="pingToggleListener"
+            type="com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton.PingToggleListener" />
+
     </data>
 
 
@@ -37,16 +41,16 @@
                 android:src="@drawable/ic_more_vert_black"
                 android:visibility="visible" />
 
-
-            <ImageButton
+            <com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton
                 android:id="@+id/toggle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="16dp"
                 android:layout_toLeftOf="@id/menu"
-                android:background="@color/black"
-                android:src="@drawable/navigation_header_arrow_down" />
+                android:background="@color/white"
+                android:src="@drawable/ic_arrow_drop_down_black_24dp"
+                app:pingToggleListener="@{pingToggleListener}" />
 
             <TextView
                 android:id="@+id/ping"
@@ -57,7 +61,6 @@
                 android:layout_toLeftOf="@id/toggle"
                 android:gravity="center_vertical"
                 android:text="置顶" />
-
 
             <TextView
                 android:id="@+id/title"

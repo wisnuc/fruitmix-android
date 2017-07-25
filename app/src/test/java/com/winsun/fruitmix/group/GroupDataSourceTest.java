@@ -24,16 +24,17 @@ public class GroupDataSourceTest {
     @Before
     public void setup() {
 
-        groupDataSource = new FakeGroupDataSource();
+        groupDataSource = FakeGroupDataSource.getInstance();
+        groupDataSource.clearGroups();
     }
 
+    private String testGroupUuid = "testGroupUuid";
+    private String testGroupName1 = "testGroupName1";
 
     @Test
     public void testAddGroup() {
 
-        final String testGroupName1 = "testGroupName1";
-
-        PrivateGroup privateGroup = new PrivateGroup(testGroupName1, Collections.<User>emptyList());
+        PrivateGroup privateGroup = new PrivateGroup(testGroupUuid, testGroupName1, Collections.<User>emptyList());
 
         groupDataSource.addGroup(Collections.singleton(privateGroup));
 
@@ -41,8 +42,21 @@ public class GroupDataSourceTest {
 
         assertEquals(1, data.size());
 
+        assertEquals(testGroupUuid, data.get(0).getUUID());
         assertEquals(testGroupName1, data.get(0).getName());
 
     }
+
+    @Test
+    public void testGetGroupByUUID(){
+
+        testAddGroup();
+
+        PrivateGroup group = groupDataSource.getGroupByUUID(testGroupUuid);
+
+        assertEquals(testGroupName1,group.getName());
+
+    }
+
 
 }

@@ -2,15 +2,16 @@ package com.winsun.fruitmix.invitation;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.http.BaseHttpCallWrapper;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.parser.RemoteConfirmInviteUsersParser;
+import com.winsun.fruitmix.parser.RemoteConfirmUserResultParser;
 import com.winsun.fruitmix.parser.RemoteTicketParser;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.Util;
+
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/7/12.
@@ -28,9 +29,7 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     public void createInvitation(BaseOperateDataCallback<String> callback) {
 
-//        callback.onFail(new OperationIOException());
-
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(TICKETS_PARAMETER, "{\"type\":1}");
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(TICKETS_PARAMETER, "{\"type\":\"invite\"}");
 
         wrapper.operateCall(httpRequest, callback, new RemoteTicketParser());
 
@@ -38,56 +37,37 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     public void getInvitation(final BaseLoadDataCallback<ConfirmInviteUser> callback) {
 
-        callback.onFail(new OperationIOException());
+        String url = "http://10.10.13.16:3000/station/tickets";
 
-/*        BaseHttpCallWrapper wrapper = new BaseHttpCallWrapper(iHttpUtil);
+        String token = "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOWY5M2RiNDMtMDJlNi00YjI2LThmYWUtN2Q2ZjUxZGExMmFmIn0.83z5kzghi7R8FGumxsKoXAtM6RlrthDFceI3_ryRPSs";
 
-        HttpRequest httpRequest = new HttpRequest(FNAS.generateUrl(TICKETS_PARAMETER), Util.HTTP_POST_METHOD);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-        httpRequest.setBody("{\"type\":1}");
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestWithFullUrlAndToken(url, token);
 
-        wrapper.loadCall(httpRequest, new BaseLoadDataCallback<ConfirmInviteUser>() {
-            @Override
-            public void onSucceed(List<ConfirmInviteUser> data, OperationResult operationResult) {
-
-                callback.onSucceed(data, operationResult);
-            }
-
-            @Override
-            public void onFail(OperationResult operationResult) {
-                callback.onFail(operationResult);
-            }
-        }, new RemoteConfirmInviteUsersParser());*/
+        wrapper.loadCall(httpRequest, callback, new RemoteConfirmInviteUsersParser());
 
     }
 
-    public void acceptInvitation(ConfirmInviteUser confirmInviteUser, BaseOperateDataCallback<ConfirmInviteUser> callback) {
+    public void confirmInvitation(List<ConfirmInviteUser> confirmInviteUsers, BaseOperateDataCallback<String> callback) {
 
-        callback.onFail(new OperationIOException());
+        ConfirmInviteUser confirmInviteUser = confirmInviteUsers.get(0);
 
-//        BaseHttpCallWrapper wrapper = new BaseHttpCallWrapper(iHttpUtil);
-//
-//        HttpRequest httpRequest = new HttpRequest(FNAS.generateUrl(TICKETS_PARAMETER), Util.HTTP_POST_METHOD);
-//        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-//        httpRequest.setBody("{\"type\":1}");
-//
-//        wrapper.operateCall(httpRequest, callback, new RemoteConfirmInviteUserParser());
+        String url = "http://10.10.13.16:3000/station/tickets/wechat/" + confirmInviteUser.getTicketUUID();
 
-    }
+        String token = "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOWY5M2RiNDMtMDJlNi00YjI2LThmYWUtN2Q2ZjUxZGExMmFmIn0.83z5kzghi7R8FGumxsKoXAtM6RlrthDFceI3_ryRPSs";
 
-    public void refuseInvitation(ConfirmInviteUser confirmInviteUser, BaseOperateDataCallback<ConfirmInviteUser> callback) {
+        boolean state;
 
-        callback.onFail(new OperationIOException());
+        state = confirmInviteUser.getOperateType().equals("accept");
 
-//        BaseHttpCallWrapper wrapper = new BaseHttpCallWrapper(iHttpUtil);
-//
-//        HttpRequest httpRequest = new HttpRequest(FNAS.generateUrl(TICKETS_PARAMETER), Util.HTTP_POST_METHOD);
-//        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-//        httpRequest.setBody("{\"type\":1}");
-//
-//        wrapper.operateCall(httpRequest, callback, new RemoteConfirmInviteUserParser());
+        String body = "{\n" +
+                "\t\"guid\":\"" + confirmInviteUser.getUserUUID() + "\",\n" +
+                "\t\"state\":" + state + "\n" +
+                "}";
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequestWithFullUrlAndToken(url, token, body);
+
+        wrapper.operateCall(httpRequest,callback,new RemoteConfirmUserResultParser());
 
     }
-
 
 }

@@ -2,8 +2,6 @@ package com.winsun.fruitmix.group.data.model;
 
 import com.winsun.fruitmix.user.User;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -14,18 +12,26 @@ import java.util.List;
 
 public class PrivateGroup {
 
+    private String uuid;
+
     private String name;
 
     private List<User> friends;
 
     private List<UserComment> userComments;
 
-    public PrivateGroup(String name, List<User> friends) {
+    public PrivateGroup(String uuid, String name, List<User> friends) {
+        this.uuid = uuid;
         this.name = name;
         this.friends = friends;
 
         userComments = new ArrayList<>();
     }
+
+    public String getUUID() {
+        return uuid;
+    }
+
 
     public String getName() {
         return name;

@@ -11,8 +11,12 @@ import java.util.List;
 
 public interface GroupDataSource {
 
-    public void addGroup(Collection<PrivateGroup> groups);
+    void addGroup(Collection<PrivateGroup> groups);
 
-    public List<PrivateGroup> getAllGroups();
+    List<PrivateGroup> getAllGroups();
+
+    void clearGroups();
+
+    PrivateGroup getGroupByUUID(String groupUUID);
 
 }

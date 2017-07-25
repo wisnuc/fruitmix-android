@@ -47,7 +47,9 @@
     <color name="fifty_four_percent_white">#8AFFFFFF</color>
 
     <color name="divide_bg">#1F000000</color>
-    
+
+    <color name="right_text_comment_bg_color">#03a9f4</color>
+
     <!-- finish add by liang.wu-->
 
 </resources>
