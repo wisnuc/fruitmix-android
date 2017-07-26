@@ -46,6 +46,13 @@ public class HttpRequestFactory {
         this.gateway = gateway;
     }
 
+    public String getGateway() {
+        return FNAS.Gateway;
+    }
+
+    public String getToken() {
+        return FNAS.JWT;
+    }
 
     public void setCurrentData(String token, String gateway) {
         setToken(token);
@@ -68,21 +75,21 @@ public class HttpRequestFactory {
 
     public HttpRequest createHttpGetRequestWithFullUrl(String url) {
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, token);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + getToken());
 
         return httpRequest;
     }
 
     public HttpRequest createHttpGetRequestWithFullUrlAndToken(String url, String token) {
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, token);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
 
         return httpRequest;
     }
 
     public HttpRequest createHttpPostRequestWithFullUrlAndToken(String url, String token,String body) {
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_POST_METHOD);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, token);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
 
         httpRequest.setBody(body);
 
@@ -121,7 +128,7 @@ public class HttpRequestFactory {
     }
 
     private String createUrl(String httpPath) {
-        return gateway + ":" + port + httpPath;
+        return getGateway() + ":" + port + httpPath;
     }
 
     //TODO: consider set token logic
@@ -129,7 +136,7 @@ public class HttpRequestFactory {
     private HttpRequest createHasBodyRequest(String url, String method, String body) {
 
         HttpRequest httpRequest = new HttpRequest(url, method);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + getToken());
         httpRequest.setBody(body);
 
         return httpRequest;

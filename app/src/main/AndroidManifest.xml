@@ -38,7 +38,6 @@
             android:name=".NavPagerActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait" />
-        <!-- android:theme="@style/Theme.AppCompat.Light.NoActionBar" -->
 
         <activity
             android:name=".mediaModule.PhotoSliderActivity"
@@ -128,10 +127,20 @@
             android:name=".services.ReverseGeocodeService"
             android:exported="false" />
 
-        <activity android:name=".fileModule.FileDownloadActivity" />
+        <activity
+            android:name=".fileModule.FileDownloadActivity"
+            android:screenOrientation="portrait" />
+
         <activity android:name=".wxapi.WXEntryActivity" />
-        <activity android:name=".invitation.ConfirmInviteUserActivity" />
-        <activity android:name=".group.view.GroupContentActivity"></activity>
+
+        <activity
+            android:name=".invitation.ConfirmInviteUserActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".group.view.GroupContentActivity"
+            android:screenOrientation="portrait" />
+
     </application>
 
 </manifest>

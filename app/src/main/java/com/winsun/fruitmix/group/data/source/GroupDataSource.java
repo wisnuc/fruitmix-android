@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.group.data.source;
 
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.UserComment;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,5 +19,7 @@ public interface GroupDataSource {
     void clearGroups();
 
     PrivateGroup getGroupByUUID(String groupUUID);
+
+    UserComment insertUserComment(String groupUUID,UserComment userComment);
 
 }

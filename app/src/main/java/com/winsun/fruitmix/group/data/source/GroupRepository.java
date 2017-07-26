@@ -1,7 +1,9 @@
 package com.winsun.fruitmix.group.data.source;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 
 /**
@@ -36,5 +38,10 @@ public class GroupRepository {
 
     }
 
+    public void insertUserComment(String groupUUID,UserComment userComment,BaseOperateDataCallback<UserComment> callback){
+
+        callback.onSucceed(groupDataSource.insertUserComment(groupUUID,userComment),new OperationSuccess());
+
+    }
 
 }

@@ -1,12 +1,19 @@
 package com.winsun.fruitmix.group.presenter;
 
-import android.databinding.BindingAdapter;
 import android.databinding.ViewDataBinding;
+import android.support.v4.view.PagerAdapter;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
+import com.winsun.fruitmix.BR;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
+import com.winsun.fruitmix.databinding.GroupPingItemBinding;
+import com.winsun.fruitmix.group.data.model.Ping;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.model.UserCommentShowStrategy;
 import com.winsun.fruitmix.group.data.model.UserCommentViewFactory;
@@ -15,7 +22,8 @@ import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
 import com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton;
 import com.winsun.fruitmix.group.view.customview.UserCommentView;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import java.util.ArrayList;
@@ -33,9 +41,13 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private GroupContentAdapter groupContentAdapter;
 
-    private String currentLoggedInUserUUID;
+    private PingViewPageAdapter pingViewPageAdapter;
+
+    private User currentLoggedInUser;
 
     private String groupUUID;
+
+    private PrivateGroup currentPrivateGroup;
 
     public GroupContentPresenter(String groupUUID, LoggedInUserDataSource loggedInUserDataSource, GroupRepository groupRepository, GroupContentViewModel groupContentViewModel) {
 
@@ -43,52 +55,61 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         this.groupRepository = groupRepository;
         this.groupContentViewModel = groupContentViewModel;
 
-        currentLoggedInUserUUID = loggedInUserDataSource.getCurrentLoggedInUser().getUser().getUuid();
+        currentLoggedInUser = loggedInUserDataSource.getCurrentLoggedInUser().getUser();
 
         groupContentAdapter = new GroupContentAdapter();
 
+        pingViewPageAdapter = new PingViewPageAdapter();
     }
 
     public GroupContentAdapter getGroupContentAdapter() {
         return groupContentAdapter;
     }
 
-    public void refreshGroup(){
+    public PingViewPageAdapter getPingViewPageAdapter() {
+        return pingViewPageAdapter;
+    }
 
-        PrivateGroup currentPrivateGroup = groupRepository.getGroup(groupUUID);
+    public void refreshGroup() {
+
+        currentPrivateGroup = groupRepository.getGroup(groupUUID);
 
         groupContentAdapter.setUserComments(currentPrivateGroup.getUserComments());
         groupContentAdapter.notifyDataSetChanged();
+
+        pingViewPageAdapter.setPings(currentPrivateGroup.getPings());
+        pingViewPageAdapter.notifyDataSetChanged();
+
     }
 
 
     @Override
     public void onPingToggleArrowToDown() {
 
-        groupContentViewModel.showPing.set(false);
+        groupContentViewModel.showPing.set(true);
 
     }
 
     @Override
     public void onPingToggleArrowToUp() {
 
-        groupContentViewModel.showPing.set(true);
+        groupContentViewModel.showPing.set(false);
 
     }
 
-    private class GroupContentAdapter extends RecyclerView.Adapter<UserCommentViewHolder>{
+    private class GroupContentAdapter extends RecyclerView.Adapter<UserCommentViewHolder> {
 
         private List<UserComment> mUserComments;
 
         private UserCommentViewFactory factory;
 
-        public GroupContentAdapter() {
+        GroupContentAdapter() {
             mUserComments = new ArrayList<>();
 
             factory = UserCommentViewFactory.getInstance();
         }
 
-        public void setUserComments(List<UserComment> userComments) {
+        void setUserComments(List<UserComment> userComments) {
             mUserComments.clear();
             mUserComments.addAll(userComments);
         }
@@ -100,7 +121,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
             ViewDataBinding viewDataBinding = userCommentView.getViewDataBinding(parent.getContext());
 
-            return new UserCommentViewHolder(viewDataBinding.getRoot(),userCommentView);
+            return new UserCommentViewHolder(viewDataBinding.getRoot(), userCommentView);
         }
 
 
@@ -110,16 +131,16 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
             UserComment preUserComment;
             UserComment currentUserComment;
 
-            if(position == 0)
+            if (position == 0)
                 preUserComment = null;
             else
                 preUserComment = mUserComments.get(position - 1);
 
             currentUserComment = mUserComments.get(position);
 
-            UserCommentShowStrategy userCommentShowStrategy = new UserCommentShowStrategy(preUserComment,currentUserComment,currentLoggedInUserUUID);
+            UserCommentShowStrategy userCommentShowStrategy = new UserCommentShowStrategy(preUserComment, currentUserComment, currentLoggedInUser.getUuid());
 
-            holder.userCommentView.refreshCommentView(userCommentShowStrategy,currentUserComment);
+            holder.userCommentView.refreshCommentView(userCommentShowStrategy, currentUserComment);
 
         }
 
@@ -137,15 +158,74 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
     }
 
 
-    private class UserCommentViewHolder extends RecyclerView.ViewHolder{
+    private class UserCommentViewHolder extends RecyclerView.ViewHolder {
 
         private UserCommentView userCommentView;
 
-        public UserCommentViewHolder(View itemView, UserCommentView userCommentView) {
+        UserCommentViewHolder(View itemView, UserCommentView userCommentView) {
             super(itemView);
             this.userCommentView = userCommentView;
         }
 
     }
+
+    private class PingViewPageAdapter extends RecyclerView.Adapter<BindingViewHolder> {
+
+        private List<Ping> mPings;
+
+        PingViewPageAdapter() {
+            mPings = new ArrayList<>();
+        }
+
+        void setPings(List<Ping> pings) {
+            mPings.clear();
+            mPings.addAll(pings);
+        }
+
+        @Override
+        public BindingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            GroupPingItemBinding binding = GroupPingItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+
+            return new BindingViewHolder(binding);
+        }
+
+
+        @Override
+        public void onBindViewHolder(BindingViewHolder holder, int position) {
+
+            holder.getViewDataBinding().setVariable(BR.ping, mPings.get(position));
+
+            holder.getViewDataBinding().executePendingBindings();
+
+        }
+
+        @Override
+        public int getItemCount() {
+            return mPings.size();
+        }
+
+    }
+
+
+    public void sendTxt(String text) {
+
+        TextComment textComment = new TextComment(currentLoggedInUser, System.currentTimeMillis(), text);
+
+        groupRepository.insertUserComment(groupUUID, textComment, new BaseOperateDataCallbackImpl<UserComment>() {
+            @Override
+            public void onSucceed(UserComment data, OperationResult result) {
+                super.onSucceed(data, result);
+
+                currentPrivateGroup.addUserComment(data);
+
+                List<UserComment> userComments = currentPrivateGroup.getUserComments();
+
+                groupContentAdapter.setUserComments(userComments);
+                groupContentAdapter.notifyItemInserted(userComments.size() - 1);
+            }
+        });
+    }
+
 
 }

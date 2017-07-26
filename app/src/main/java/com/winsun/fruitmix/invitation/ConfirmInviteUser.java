@@ -6,13 +6,18 @@ package com.winsun.fruitmix.invitation;
 
 public class ConfirmInviteUser {
 
+    public static final String OPERATE_TYPE_ACCEPT = "accept";
+    public static final String OPERATE_TYPE_REFUSE = "refuse";
+
+    public static final String OPERATE_TYPE_PENDING = "pending";
+
     private String userName;
     private String userAvatar;
     private String station;
 
     private String userUUID;
 
-    private String operateType = "pending";
+    private String operateType = OPERATE_TYPE_PENDING;
 
     private String ticketUUID;
 

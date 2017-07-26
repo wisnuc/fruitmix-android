@@ -41,31 +41,35 @@ public class CustomArrowToggleButton extends AppCompatImageButton {
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (arrowDown) {
-
-                    arrowDown = false;
-                    switchImageSource();
-
-                    if (pingToggleListener != null)
-                        pingToggleListener.onPingToggleArrowToUp();
-
-
-                } else {
-
-                    arrowDown = true;
-                    switchImageSource();
-
-                    if (pingToggleListener != null)
-                        pingToggleListener.onPingToggleArrowToDown();
-
-                }
-
-
+                onclick();
             }
         });
 
     }
+
+    public void onclick() {
+
+        if (arrowDown) {
+
+            arrowDown = false;
+            switchImageSource();
+
+            if (pingToggleListener != null)
+                pingToggleListener.onPingToggleArrowToUp();
+
+
+        } else {
+
+            arrowDown = true;
+            switchImageSource();
+
+            if (pingToggleListener != null)
+                pingToggleListener.onPingToggleArrowToDown();
+
+        }
+
+    }
+
 
     private void switchImageSource() {
         if (arrowDown)

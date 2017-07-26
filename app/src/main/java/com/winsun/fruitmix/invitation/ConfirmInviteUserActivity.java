@@ -11,8 +11,8 @@ import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.ActivityConfirmInviteUserBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.http.OkHttpUtil;
-import com.winsun.fruitmix.inject.Inject;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
@@ -49,7 +49,7 @@ public class ConfirmInviteUserActivity extends BaseActivity {
 
         binding.setNoContentViewModel(noContentViewModel);
 
-        InvitationRemoteDataSource invitationRemoteDataSource = new InvitationRemoteDataSource(Inject.provideIHttpUtil(this),Inject.provideHttpRequestFactory());
+        InvitationRemoteDataSource invitationRemoteDataSource = new InvitationRemoteDataSource(InjectHttp.provideIHttpUtil(this),InjectHttp.provideHttpRequestFactory());
 
         ImageLoader imageLoader = ImageGifLoaderInstance.INSTANCE.getImageLoader(this);
 

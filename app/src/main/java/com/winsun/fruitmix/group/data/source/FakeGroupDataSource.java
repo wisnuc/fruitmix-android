@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.group.data.source;
 
+import com.winsun.fruitmix.group.data.model.Ping;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
@@ -71,9 +72,34 @@ public class FakeGroupDataSource implements GroupDataSource {
         UserComment userComment3 = new TextComment(myself, 1497067200, "同学们速度快点");
         userComments.add(userComment3);
 
+        List<Ping> pings = new ArrayList<>();
+
+        Ping ping1 = new Ping();
+        ping1.name = "testPing1";
+
+        pings.add(ping1);
+
+        Ping ping2 = new Ping();
+        ping2.name = "testPing2";
+
+        pings.add(ping2);
+
+        Ping ping3 = new Ping();
+        ping3.name = "testPing3";
+
+        pings.add(ping3);
+
+        Ping ping4 = new Ping();
+        ping4.name = "testPing4";
+
+        pings.add(ping4);
+
         String groupName1 = "大学同学";
 
         PrivateGroup privateGroup1 = new PrivateGroup("1", groupName1, new ArrayList<>(users));
+
+        privateGroup1.addPings(pings);
+
         privateGroup1.addUserComments(userComments);
 
         privateGroups.add(privateGroup1);
@@ -85,7 +111,6 @@ public class FakeGroupDataSource implements GroupDataSource {
 
         privateGroups.add(privateGroup2);
 
-        String groupUuid3 = "3";
         String groupName3 = "软件学院同学会";
 
         PrivateGroup privateGroup3 = new PrivateGroup("3", groupName3, new ArrayList<>(users));
@@ -135,11 +160,48 @@ public class FakeGroupDataSource implements GroupDataSource {
 
     @Override
     public PrivateGroup getGroupByUUID(String groupUUID) {
+
         for (PrivateGroup privateGroup : privateGroups) {
             if (privateGroup.getUUID().equals(groupUUID))
                 return privateGroup;
         }
 
         return null;
+
+    }
+
+    private PrivateGroup getOriginalGroupByUUID(String groupUUID) {
+
+        PrivateGroup originalPrivateGroup = null;
+
+        for (PrivateGroup privateGroup : privateGroups) {
+            if (privateGroup.getUUID().equals(groupUUID))
+                originalPrivateGroup = privateGroup;
+        }
+
+        if (originalPrivateGroup != null) {
+
+            PrivateGroup privateGroup = new PrivateGroup(originalPrivateGroup.getUUID(), originalPrivateGroup.getName(), originalPrivateGroup.getFriends());
+
+            privateGroup.addUserComments(originalPrivateGroup.getUserComments());
+            privateGroup.addPings(originalPrivateGroup.getPings());
+
+            return privateGroup;
+        }
+
+        return null;
+
+    }
+
+
+    @Override
+    public UserComment insertUserComment(String groupUUID, UserComment userComment) {
+
+        PrivateGroup privateGroup = getOriginalGroupByUUID(groupUUID);
+
+        if (privateGroup != null)
+            privateGroup.addUserComment(userComment);
+
+        return userComment;
     }
 }

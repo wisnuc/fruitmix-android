@@ -28,8 +28,8 @@ import com.winsun.fruitmix.executor.GenerateLocalMediaMiniThumbTask;
 import com.winsun.fruitmix.executor.GenerateLocalMediaThumbTask;
 import com.winsun.fruitmix.executor.RetrieveOriginalPhotoTask;
 import com.winsun.fruitmix.executor.UploadMediaTask;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.http.OkHttpUtil;
-import com.winsun.fruitmix.inject.Inject;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
 import com.winsun.fruitmix.invitation.InvitationRemoteDataSource;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -97,7 +97,7 @@ public class ButlerService extends Service {
     private void initInvitationRemoteDataSource() {
 
         if (invitationRemoteDataSource == null)
-            invitationRemoteDataSource = new InvitationRemoteDataSource(Inject.provideIHttpUtil(this), Inject.provideHttpRequestFactory());
+            invitationRemoteDataSource = new InvitationRemoteDataSource(InjectHttp.provideIHttpUtil(this), InjectHttp.provideHttpRequestFactory());
     }
 
 

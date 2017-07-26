@@ -16,8 +16,8 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.http.IHttpUtil;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.http.OkHttpUtil;
-import com.winsun.fruitmix.inject.Inject;
 import com.winsun.fruitmix.invitation.InvitationRemoteDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.user.User;
@@ -85,7 +85,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         iwxapi = MiniProgram.registerToWX(context);
 
-        invitationRemoteDataSource = new InvitationRemoteDataSource(Inject.provideIHttpUtil(context), Inject.provideHttpRequestFactory());
+        invitationRemoteDataSource = new InvitationRemoteDataSource(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory());
 
         resources = context.getResources();
 

@@ -8,10 +8,6 @@
             name="ticketID"
             type="String" />
 
-        <variable
-            name="confirmInviteUserPresenter"
-            type="com.winsun.fruitmix.invitation.ConfirmInviteUserPresenter" />
-
 
     </data>
 
@@ -30,13 +26,6 @@
             android:text="@{ticketID}"
             android:textSize="16dp"
             tools:text="测试ticket" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="@{()->confirmInviteUserPresenter.postOperation(ticketID)}"
-            android:text="提交"
-            android:textSize="16dp" />
 
     </LinearLayout>
 

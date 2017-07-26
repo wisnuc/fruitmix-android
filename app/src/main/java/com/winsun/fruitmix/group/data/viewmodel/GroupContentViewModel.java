@@ -10,6 +10,7 @@ public class GroupContentViewModel {
 
     public final ObservableBoolean showPing = new ObservableBoolean(true);
 
+    public final ObservableBoolean showSendBtn = new ObservableBoolean(false);
 
 
 }

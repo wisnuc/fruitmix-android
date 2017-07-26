@@ -1,6 +1,8 @@
 package com.winsun.fruitmix.group;
 
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.TextComment;
+import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
 import com.winsun.fruitmix.user.User;
@@ -48,13 +50,38 @@ public class GroupDataSourceTest {
     }
 
     @Test
-    public void testGetGroupByUUID(){
+    public void testGetGroupByUUID() {
 
         testAddGroup();
 
         PrivateGroup group = groupDataSource.getGroupByUUID(testGroupUuid);
 
-        assertEquals(testGroupName1,group.getName());
+        assertEquals(testGroupName1, group.getName());
+
+    }
+
+    @Test
+    public void testAddTextComment() {
+
+        long time = System.currentTimeMillis();
+
+        String testText = "testAddTextComment";
+
+        testAddGroup();
+
+        UserComment userComment = new TextComment(new User(), time, testText);
+
+        groupDataSource.insertUserComment(testGroupUuid, userComment);
+
+        PrivateGroup group = groupDataSource.getGroupByUUID(testGroupUuid);
+
+        List<UserComment> userComments = group.getUserComments();
+
+        assertEquals(1, userComments.size());
+
+        TextComment result = (TextComment) userComments.get(0);
+
+        assertEquals(testText, result.getText());
 
     }
 

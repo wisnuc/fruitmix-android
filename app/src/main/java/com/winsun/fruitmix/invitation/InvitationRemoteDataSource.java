@@ -23,6 +23,8 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     public static final String TICKETS_PARAMETER = "/station/tickets";
 
+    public static final String CONFIRM_TICKET_PARAMETER = "/station/tickets/wechat/";
+
     public InvitationRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
         super(iHttpUtil, httpRequestFactory);
     }
@@ -37,36 +39,28 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     public void getInvitation(final BaseLoadDataCallback<ConfirmInviteUser> callback) {
 
-        String url = "http://10.10.13.16:3000/station/tickets";
-
-        String token = "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOWY5M2RiNDMtMDJlNi00YjI2LThmYWUtN2Q2ZjUxZGExMmFmIn0.83z5kzghi7R8FGumxsKoXAtM6RlrthDFceI3_ryRPSs";
-
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestWithFullUrlAndToken(url, token);
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(TICKETS_PARAMETER);
 
         wrapper.loadCall(httpRequest, callback, new RemoteConfirmInviteUsersParser());
 
     }
 
-    public void confirmInvitation(List<ConfirmInviteUser> confirmInviteUsers, BaseOperateDataCallback<String> callback) {
+    public void confirmInvitation(ConfirmInviteUser confirmInviteUser, BaseOperateDataCallback<String> callback) {
 
-        ConfirmInviteUser confirmInviteUser = confirmInviteUsers.get(0);
-
-        String url = "http://10.10.13.16:3000/station/tickets/wechat/" + confirmInviteUser.getTicketUUID();
-
-        String token = "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoiOWY5M2RiNDMtMDJlNi00YjI2LThmYWUtN2Q2ZjUxZGExMmFmIn0.83z5kzghi7R8FGumxsKoXAtM6RlrthDFceI3_ryRPSs";
+        String path = CONFIRM_TICKET_PARAMETER + confirmInviteUser.getTicketUUID();
 
         boolean state;
 
-        state = confirmInviteUser.getOperateType().equals("accept");
+        state = confirmInviteUser.getOperateType().equals(ConfirmInviteUser.OPERATE_TYPE_ACCEPT);
 
         String body = "{\n" +
                 "\t\"guid\":\"" + confirmInviteUser.getUserUUID() + "\",\n" +
                 "\t\"state\":" + state + "\n" +
                 "}";
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequestWithFullUrlAndToken(url, token, body);
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path, body);
 
-        wrapper.operateCall(httpRequest,callback,new RemoteConfirmUserResultParser());
+        wrapper.operateCall(httpRequest, callback, new RemoteConfirmUserResultParser());
 
     }
 

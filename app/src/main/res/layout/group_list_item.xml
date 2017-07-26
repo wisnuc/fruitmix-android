@@ -16,7 +16,7 @@
         android:layout_marginTop="8dp"
         android:clickable="true">
 
-        <com.winsun.fruitmix.group.view.customview.UserIconView
+        <com.winsun.fruitmix.group.view.customview.UserIconsView
             android:id="@+id/user_icon_view"
             android:layout_width="40dp"
             android:layout_height="40dp"

@@ -154,36 +154,15 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     }
 
+    private void postOperation(final ConfirmInviteUser confirmInviteUser) {
 
-    @Override
-    public void postOperation(String ticketID) {
-
-        final List<ConfirmInviteUser> confirmInviteUsers = mConfirmInviteUserMaps.get(ticketID);
-
-        int operateCount = 0;
-
-        for (ConfirmInviteUser confirmInviteUser : confirmInviteUsers) {
-            if (!confirmInviteUser.getOperateType().equals("pending")) {
-                operateCount++;
-            } else {
-                break;
-            }
-        }
-
-        if (operateCount != confirmInviteUsers.size()) {
-
-            baseView.showToast("还有未确认的用户");
-
-            return;
-        }
+        baseView.showProgressDialog("正在执行");
 
         threadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
 
-                baseView.showProgressDialog("正在执行");
-
-                mInvitationRemoteDataSource.confirmInvitation(confirmInviteUsers, new BaseOperateDataCallback<String>() {
+                mInvitationRemoteDataSource.confirmInvitation(confirmInviteUser, new BaseOperateDataCallback<String>() {
                     @Override
                     public void onSucceed(final String data, OperationResult result) {
 
@@ -227,7 +206,9 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         Log.d(TAG, "acceptInviteUser: " + confirmInviteUser.getUserName());
 
-        confirmInviteUser.setOperateType("accept");
+        confirmInviteUser.setOperateType(ConfirmInviteUser.OPERATE_TYPE_ACCEPT);
+
+        postOperation(confirmInviteUser);
 
     }
 
@@ -236,7 +217,9 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         Log.d(TAG, "refuseInviteUser: " + confirmInviteUser.getUserName());
 
-        confirmInviteUser.setOperateType("refuse");
+        confirmInviteUser.setOperateType(ConfirmInviteUser.OPERATE_TYPE_REFUSE);
+
+        postOperation(confirmInviteUser);
 
     }
 
@@ -338,7 +321,6 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
                 ViewHeader viewHeader = (ViewHeader) mViewItems.get(position);
 
                 binding.setVariable(BR.ticketID, viewHeader.getTicketID());
-                binding.setVariable(BR.confirmInviteUserPresenter, ConfirmInviteUserPresenterImpl.this);
 
                 binding.executePendingBindings();
 

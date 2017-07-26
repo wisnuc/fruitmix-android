@@ -8,17 +8,17 @@ import android.util.AttributeSet;
  * Created by Administrator on 2017/7/21.
  */
 
-public class UserIconView extends AppCompatImageView{
+public class UserIconsView extends AppCompatImageView{
 
-    public UserIconView(Context context) {
+    public UserIconsView(Context context) {
         super(context);
     }
 
-    public UserIconView(Context context, AttributeSet attrs) {
+    public UserIconsView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public UserIconView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public UserIconsView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 

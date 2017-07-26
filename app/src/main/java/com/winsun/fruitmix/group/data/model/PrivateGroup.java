@@ -20,18 +20,21 @@ public class PrivateGroup {
 
     private List<UserComment> userComments;
 
+    private List<Ping> pings;
+
     public PrivateGroup(String uuid, String name, List<User> friends) {
         this.uuid = uuid;
         this.name = name;
         this.friends = friends;
 
         userComments = new ArrayList<>();
+
+        pings = new ArrayList<>();
     }
 
     public String getUUID() {
         return uuid;
     }
-
 
     public String getName() {
         return name;
@@ -71,5 +74,16 @@ public class PrivateGroup {
 
     }
 
+    public List<Ping> getPings() {
+        return pings;
+    }
+
+    public void addPing(Ping ping) {
+        pings.add(ping);
+    }
+
+    public void addPings(List<Ping> newPings){
+        pings.addAll(newPings);
+    }
 
 }
