@@ -4,8 +4,8 @@ import android.content.Context;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.file.station.FileRepository;
-import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.station.FileRepository;
 import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;

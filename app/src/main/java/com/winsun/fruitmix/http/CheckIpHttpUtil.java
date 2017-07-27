@@ -4,19 +4,15 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.Equipment;
-import com.winsun.fruitmix.model.EquipmentSearchManager;
+import com.winsun.fruitmix.equipment.EquipmentSearchManager;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
-
-import okhttp3.ResponseBody;
 
 /**
  * Created by Administrator on 2017/5/16.

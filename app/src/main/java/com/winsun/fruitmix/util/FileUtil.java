@@ -11,11 +11,11 @@ import android.os.StatFs;
 import android.util.Log;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.fileModule.download.FileDownloadErrorState;
-import com.winsun.fruitmix.fileModule.download.FileDownloadFinishedState;
-import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
-import com.winsun.fruitmix.fileModule.download.FileDownloadState;
-import com.winsun.fruitmix.fileModule.download.FileDownloadingState;
+import com.winsun.fruitmix.file.data.download.FileDownloadErrorState;
+import com.winsun.fruitmix.file.data.download.FileDownloadFinishedState;
+import com.winsun.fruitmix.file.data.download.FileDownloadItem;
+import com.winsun.fruitmix.file.data.download.FileDownloadState;
+import com.winsun.fruitmix.file.data.download.FileDownloadingState;
 import com.winsun.fruitmix.mediaModule.model.Media;
 
 import java.io.File;

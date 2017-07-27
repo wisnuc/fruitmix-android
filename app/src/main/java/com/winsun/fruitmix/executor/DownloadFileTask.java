@@ -3,8 +3,8 @@ package com.winsun.fruitmix.executor;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
-import com.winsun.fruitmix.fileModule.download.FileDownloadState;
+import com.winsun.fruitmix.file.data.download.FileDownloadItem;
+import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.util.FNAS;

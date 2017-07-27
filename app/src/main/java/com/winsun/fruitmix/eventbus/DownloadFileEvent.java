@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.eventbus;
 
-import com.winsun.fruitmix.fileModule.download.FileDownloadState;
+
+import com.winsun.fruitmix.file.data.download.FileDownloadState;
 
 /**
  * Created by Administrator on 2016/11/7.

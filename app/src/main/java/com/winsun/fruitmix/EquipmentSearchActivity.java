@@ -21,12 +21,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
+import com.winsun.fruitmix.equipment.InjectEquipmentManger;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
-import com.winsun.fruitmix.model.EquipmentSearchManager;
+import com.winsun.fruitmix.equipment.EquipmentSearchManager;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.user.User;
@@ -226,11 +227,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         mTitleTextView.setText(getString(R.string.search_equipment));
 
-        mEquipmentSearchManager = new EquipmentSearchManager(mContext);
+        mEquipmentSearchManager = InjectEquipmentManger.provideEquipmentSearchManager(mContext);
 
         instance = ExecutorServiceInstance.SINGLE_INSTANCE;
 
-        Equipment equipment = new Equipment("", Collections.singletonList("10.10.9.80"), 3000);
+        Equipment equipment = new Equipment("", Collections.singletonList("10.10.9.108"), 3000);
         equipment.setModel("");
         equipment.setSerialNumber("");
         getUserList(equipment);

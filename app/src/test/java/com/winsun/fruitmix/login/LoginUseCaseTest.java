@@ -1,8 +1,7 @@
 package com.winsun.fruitmix.login;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
-import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
@@ -15,7 +14,6 @@ import com.winsun.fruitmix.token.TokenRemoteDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

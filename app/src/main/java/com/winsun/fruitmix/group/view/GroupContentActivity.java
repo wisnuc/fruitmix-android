@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
@@ -27,11 +28,15 @@ import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
-public class GroupContentActivity extends BaseActivity implements BaseView {
+public class GroupContentActivity extends BaseActivity implements GroupContentView {
 
     private RecyclerView chatRecyclerView;
 
     private RecyclerView pingRecyclerView;
+
+    private EditText editText;
+
+    private GroupContentPresenter groupContentPresenter;
 
     public static final String GROUP_UUID = "group_uuid";
     public static final String GROUP_NAME = "group_name";
@@ -42,7 +47,7 @@ public class GroupContentActivity extends BaseActivity implements BaseView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final ActivityGroupContentBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_group_content);
+        ActivityGroupContentBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_group_content);
 
         chatRecyclerView = binding.chatRecyclerview;
 
@@ -58,7 +63,7 @@ public class GroupContentActivity extends BaseActivity implements BaseView {
 
         LoggedInUserDataSource loggedInUserDataSource = InjectLoggedInUser.provideLoggedInUserRepository(this);
 
-        final GroupContentPresenter groupContentPresenter = new GroupContentPresenter(groupUUID, loggedInUserDataSource, groupRepository, groupContentViewModel);
+        groupContentPresenter = new GroupContentPresenter(this, groupUUID, loggedInUserDataSource, groupRepository, groupContentViewModel);
 
         final ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
         toolbarViewModel.setBaseView(this);
@@ -87,7 +92,7 @@ public class GroupContentActivity extends BaseActivity implements BaseView {
 
         groupContentPresenter.refreshGroup();
 
-        final EditText editText = binding.editText;
+        editText = binding.editText;
         editText.clearFocus();
 
         final CustomArrowToggleButton toggleButton = binding.groupContentToolbar.toggle;
@@ -100,6 +105,7 @@ public class GroupContentActivity extends BaseActivity implements BaseView {
 
             }
         });
+
 
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -136,8 +142,33 @@ public class GroupContentActivity extends BaseActivity implements BaseView {
             }
         });
 
+        LinearLayout toggleLayout = binding.groupContentToolbar.toggleLayout;
+        toggleLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                toggleButton.onclick();
+
+            }
+        });
+
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
+        groupContentPresenter.onDestroy();
+    }
+
+    @Override
+    public void smoothToChatListPosition(int position) {
+        chatRecyclerView.smoothScrollToPosition(position);
+    }
+
+    @Override
+    public void clearEditText() {
+        editText.getText().clear();
+    }
 }

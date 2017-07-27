@@ -4,10 +4,9 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 
-import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
-import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
-import com.winsun.fruitmix.fileModule.model.RemoteFolder;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.model.RemoteFolder;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationJSONException;

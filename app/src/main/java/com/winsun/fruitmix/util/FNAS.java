@@ -1,13 +1,9 @@
 package com.winsun.fruitmix.util;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Base64;
-import android.util.Log;
 
-import com.winsun.fruitmix.EquipmentSearchActivity;
-import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.equipment.InjectEquipmentManger;
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaRequestEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
@@ -18,21 +14,14 @@ import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.EquipmentSearchManager;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
-import java.net.URL;
 
 /**
  * Created by Administrator on 2016/4/22.
@@ -199,7 +188,7 @@ public class FNAS {
 
         OkHttpUtil okHttpUtil = new OkHttpUtil();
 
-        return new CheckIpHttpUtil(okHttpUtil, LocalCache.currentEquipmentName, new EquipmentSearchManager(context)).remoteCall(httpRequest);
+        return new CheckIpHttpUtil(okHttpUtil, LocalCache.currentEquipmentName, InjectEquipmentManger.provideEquipmentSearchManager(context)).remoteCall(httpRequest);
     }
 
     private static HttpResponse RemoteCallWithUrl(Context context, String url, String headerKey, String headerValue) throws MalformedURLException, IOException, SocketTimeoutException {

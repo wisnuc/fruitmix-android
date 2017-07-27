@@ -1,101 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/remote_file_item_layout"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
-    android:orientation="vertical"
-    android:paddingLeft="16dp">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <RelativeLayout
-        android:id="@+id/content_layout"
-        android:layout_width="match_parent"
-        android:layout_height="64dp">
+    <data>
 
-        <FrameLayout
-            android:id="@+id/file_icon_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="16dp">
+        <variable
+            name="file"
+            type="com.winsun.fruitmix.file.data.model.AbstractRemoteFile" />
 
-            <ImageView
-                android:id="@+id/select_file_icon_bg"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/round_circle"
+        <variable
+            name="fileItemViewModel"
+            type="com.winsun.fruitmix.file.view.viewmodel.FileItemViewModel" />
+
+        <import type="android.view.View" />
+
+    </data>
+
+    <LinearLayout
+        android:id="@+id/remote_file_item_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:paddingLeft="16dp">
+
+        <RelativeLayout
+            android:id="@+id/content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="64dp">
+
+            <FrameLayout
+                android:id="@+id/file_icon_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp">
+
+                <ImageView
+                    android:id="@+id/select_file_icon_bg"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/round_circle"
+                    android:visibility="@{fileItemViewModel.selectMode?View.VISIBLE:View.INVISIBLE,default=invisible}" />
+
+                <ImageView
+                    android:id="@+id/file_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@{file.fileTypeResID}"
+                    android:visibility="@{fileItemViewModel.showFileIcon?View.VISIBLE:View.INVISIBLE,default=visible}"
+                    tools:src="@drawable/file_icon" />
+
+            </FrameLayout>
+
+
+            <ImageButton
+                android:id="@+id/item_menu"
+                android:layout_width="52dp"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:clickable="true"
+                android:src="@drawable/ic_menu"
+                android:visibility="@{fileItemViewModel.selectMode?View.VISIBLE:View.GONE,default=visible}" />
+
+            <TextView
+                android:id="@+id/owner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp"
+                android:layout_toLeftOf="@id/item_menu"
+                android:text="owner"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="16dp"
                 android:visibility="invisible" />
 
-            <ImageView
-                android:id="@+id/file_icon"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@drawable/file_icon" />
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/owner"
+                android:layout_toRightOf="@id/file_icon_layout"
+                android:orientation="vertical">
 
-        </FrameLayout>
+                <TextView
+                    android:id="@+id/file_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@{file.name}"
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="16dp"
+                    tools:text="文件名" />
 
+                <TextView
+                    android:id="@+id/file_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{file.timeDateText}"
+                    android:textColor="@color/fifty_four_percent_black"
+                    android:textSize="12dp"
+                    tools:text="2016-7-14" />
 
-        <ImageButton
-            android:id="@+id/item_menu"
-            android:layout_width="52dp"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:src="@drawable/ic_menu"
-            android:visibility="visible" />
+            </LinearLayout>
 
-        <TextView
-            android:id="@+id/owner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="16dp"
-            android:layout_toLeftOf="@id/item_menu"
-            android:text="owner"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="16dp"
-            android:visibility="invisible" />
+        </RelativeLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@id/owner"
-            android:layout_toRightOf="@id/file_icon_layout"
-            android:orientation="vertical">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginLeft="56dp"
+            android:background="@color/divide_bg" />
 
-            <TextView
-                android:id="@+id/file_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="文件名"
-                android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="16dp" />
+    </LinearLayout>
 
-            <TextView
-                android:id="@+id/file_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="2016-7-14"
-                android:textColor="@color/fifty_four_percent_black"
-                android:textSize="12dp" />
-
-
-        </LinearLayout>
-
-    </RelativeLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_marginLeft="56dp"
-        android:background="@color/divide_bg" />
-
-</LinearLayout>
+</layout>

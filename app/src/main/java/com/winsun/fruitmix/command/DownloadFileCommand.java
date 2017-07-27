@@ -1,8 +1,8 @@
 package com.winsun.fruitmix.command;
 
-import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
-import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
-import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.download.FileDownloadItem;
+import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 
 import java.util.Collections;
 

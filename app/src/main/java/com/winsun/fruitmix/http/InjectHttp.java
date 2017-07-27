@@ -20,7 +20,7 @@ public class InjectHttp {
 
     public static HttpRequestFactory provideHttpRequestFactory() {
 
-        return HttpRequestFactory.getInstance(FNAS.JWT,FNAS.Gateway);
+        return HttpRequestFactory.getInstance();
     }
 
 }

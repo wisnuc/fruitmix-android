@@ -1,14 +1,11 @@
 package com.winsun.fruitmix.executor;
 
-import android.content.Context;
-
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;

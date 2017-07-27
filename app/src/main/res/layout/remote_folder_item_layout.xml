@@ -1,79 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/remote_folder_item_layout"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
-    android:orientation="vertical"
-    android:paddingLeft="16dp">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <RelativeLayout
-        android:id="@+id/content_layout"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_marginRight="16dp">
+    <data>
 
-        <FrameLayout
-            android:id="@+id/folder_icon_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
+        <variable
+            name="file"
+            type="com.winsun.fruitmix.file.data.model.AbstractRemoteFile" />
+
+        <variable
+            name="fileItemViewModel"
+            type="com.winsun.fruitmix.file.view.viewmodel.FileItemViewModel" />
+
+        <import type="android.view.View" />
+
+    </data>
+
+    <LinearLayout
+        android:id="@+id/remote_folder_item_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:paddingLeft="16dp">
+
+        <RelativeLayout
+            android:id="@+id/content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
             android:layout_marginRight="16dp">
 
-            <ImageView
-                android:id="@+id/folder_icon_bg"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/round_circle"
-                android:visibility="invisible" />
-
-            <ImageView
-                android:id="@+id/folder_icon"
+            <FrameLayout
+                android:id="@+id/folder_icon_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@drawable/folder_icon" />
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp">
 
-        </FrameLayout>
+                <ImageView
+                    android:id="@+id/folder_icon_bg"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/round_circle"
+                    android:visibility="@{fileItemViewModel.selectMode?View.VISIBLE:View.GONE,default=invisible}" />
 
-        <TextView
-            android:id="@+id/owner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:text="owner"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="16dp"
-            android:visibility="invisible" />
+                <ImageView
+                    android:id="@+id/folder_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/folder_icon" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@id/owner"
-            android:layout_toRightOf="@id/folder_icon_layout"
-            android:orientation="vertical">
+            </FrameLayout>
 
             <TextView
-                android:id="@+id/file_name"
+                android:id="@+id/owner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="文件名"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:text="owner"
                 android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="16dp" />
+                android:textSize="16dp"
+                android:visibility="invisible" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/owner"
+                android:layout_toRightOf="@id/folder_icon_layout"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/file_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@{file.name}"
+                    tools:text="文件名"
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="16dp" />
 
 
-        </LinearLayout>
+            </LinearLayout>
 
-    </RelativeLayout>
+        </RelativeLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_marginLeft="56dp"
-        android:background="@color/divide_bg" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginLeft="56dp"
+            android:background="@color/divide_bg" />
 
-</LinearLayout>
+    </LinearLayout>
+
+</layout>

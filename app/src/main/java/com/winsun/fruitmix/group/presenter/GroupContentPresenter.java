@@ -19,6 +19,7 @@ import com.winsun.fruitmix.group.data.model.UserCommentShowStrategy;
 import com.winsun.fruitmix.group.data.model.UserCommentViewFactory;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
+import com.winsun.fruitmix.group.view.GroupContentView;
 import com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton;
 import com.winsun.fruitmix.group.view.customview.UserCommentView;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
@@ -49,8 +50,11 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private PrivateGroup currentPrivateGroup;
 
-    public GroupContentPresenter(String groupUUID, LoggedInUserDataSource loggedInUserDataSource, GroupRepository groupRepository, GroupContentViewModel groupContentViewModel) {
+    private GroupContentView groupContentView;
 
+    public GroupContentPresenter(GroupContentView groupContentView, String groupUUID, LoggedInUserDataSource loggedInUserDataSource, GroupRepository groupRepository, GroupContentViewModel groupContentViewModel) {
+
+        this.groupContentView = groupContentView;
         this.groupUUID = groupUUID;
         this.groupRepository = groupRepository;
         this.groupContentViewModel = groupContentViewModel;
@@ -82,6 +86,11 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     }
 
+    public void onDestroy() {
+
+        groupContentView = null;
+
+    }
 
     @Override
     public void onPingToggleArrowToDown() {
@@ -221,10 +230,18 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
                 List<UserComment> userComments = currentPrivateGroup.getUserComments();
 
+                int lastPosition = userComments.size() - 1;
+
                 groupContentAdapter.setUserComments(userComments);
-                groupContentAdapter.notifyItemInserted(userComments.size() - 1);
+                groupContentAdapter.notifyItemInserted(lastPosition);
+
+                groupContentView.smoothToChatListPosition(lastPosition);
+
+                groupContentView.clearEditText();
+
             }
         });
+
     }
 
 

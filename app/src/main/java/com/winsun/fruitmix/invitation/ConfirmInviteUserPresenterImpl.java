@@ -173,7 +173,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
                                 baseView.showToast("执行成功");
 
-                                handleOperateSucceed(data);
+                                handleOperateSucceed(confirmInviteUser.getTicketUUID());
                             }
                         });
 

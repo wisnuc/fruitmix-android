@@ -12,15 +12,16 @@ import com.winsun.fruitmix.util.Util;
 
 public class HttpRequestFactory {
 
-    private static HttpRequestFactory instance;
+    public static HttpRequestFactory instance;
 
     private String token;
     private String gateway;
     private int port;
 
-    private HttpRequestFactory(String token, String gateway) {
-        setToken(token);
-        setGateway(gateway);
+    private HttpRequestFactory() {
+
+        token = "";
+        gateway = "";
 
         port = 3000;
 
@@ -30,10 +31,10 @@ public class HttpRequestFactory {
         instance = null;
     }
 
-    public static HttpRequestFactory getInstance(String token, String gateway) {
+    public static HttpRequestFactory getInstance() {
 
         if (instance == null)
-            instance = new HttpRequestFactory(token, gateway);
+            instance = new HttpRequestFactory();
 
         return instance;
     }
@@ -75,27 +76,10 @@ public class HttpRequestFactory {
 
     public HttpRequest createHttpGetRequestWithFullUrl(String url) {
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + getToken());
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, getTokenWithHead());
 
         return httpRequest;
     }
-
-    public HttpRequest createHttpGetRequestWithFullUrlAndToken(String url, String token) {
-        HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
-
-        return httpRequest;
-    }
-
-    public HttpRequest createHttpPostRequestWithFullUrlAndToken(String url, String token,String body) {
-        HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_POST_METHOD);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
-
-        httpRequest.setBody(body);
-
-        return httpRequest;
-    }
-
 
     public HttpRequest createHttpGetTokenRequest(LoadTokenParam loadTokenParam) {
 
@@ -136,10 +120,14 @@ public class HttpRequestFactory {
     private HttpRequest createHasBodyRequest(String url, String method, String body) {
 
         HttpRequest httpRequest = new HttpRequest(url, method);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + getToken());
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, getTokenWithHead());
         httpRequest.setBody(body);
 
         return httpRequest;
+    }
+
+    private String getTokenWithHead() {
+        return Util.KEY_JWT_HEAD + getToken();
     }
 
 

@@ -12,18 +12,24 @@
             name="noContentViewModel"
             type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
 
+        <variable
+            name="fileViewModel"
+            type="com.winsun.fruitmix.file.view.viewmodel.FileViewModel"/>
+
+        <import type="android.view.View"/>
+
     </data>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.winsun.fruitmix.fileModule.fragment.FileFragment">
+        tools:context=".file.view.fragment.FileFragment">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/file_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone" />
+            android:visibility="@{fileViewModel.showFileRecyclerView?View.VISIBLE:View.GONE,default=gone}" />
 
         <include
             layout="@layout/new_loading_layout"

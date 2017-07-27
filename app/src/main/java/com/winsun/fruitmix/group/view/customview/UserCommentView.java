@@ -94,22 +94,4 @@ public abstract class UserCommentView {
 
     protected abstract void refreshContent(UserComment data, boolean isLeftModel);
 
-
-    @BindingAdapter("android:layout_marginLeft")
-    public static void setLayoutMarginLeft(View view, float leftMargin) {
-        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
-        layoutParams.setMargins(Math.round(leftMargin), layoutParams.topMargin,
-                layoutParams.rightMargin, layoutParams.bottomMargin);
-        view.setLayoutParams(layoutParams);
-    }
-
-    @BindingAdapter("android:layout_marginRight")
-    public static void setLayoutMarginRight(View view, float rightMargin) {
-        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
-        layoutParams.setMargins(layoutParams.leftMargin, layoutParams.topMargin,
-                Math.round(rightMargin), layoutParams.bottomMargin);
-        view.setLayoutParams(layoutParams);
-    }
-
-
 }

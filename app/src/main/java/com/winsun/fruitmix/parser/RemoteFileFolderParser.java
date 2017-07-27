@@ -1,8 +1,8 @@
 package com.winsun.fruitmix.parser;
 
-import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
-import com.winsun.fruitmix.fileModule.model.RemoteFile;
-import com.winsun.fruitmix.fileModule.model.RemoteFolder;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.model.RemoteFile;
+import com.winsun.fruitmix.file.data.model.RemoteFolder;
 import com.winsun.fruitmix.util.FileUtil;
 
 import org.json.JSONArray;

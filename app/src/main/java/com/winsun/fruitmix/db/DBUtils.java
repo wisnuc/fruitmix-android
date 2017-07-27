@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.winsun.fruitmix.fileModule.download.FileDownloadItem;
+import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.user.User;
@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**

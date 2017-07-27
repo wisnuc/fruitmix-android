@@ -38,13 +38,6 @@ public class CustomArrowToggleButton extends AppCompatImageButton {
         setBackground(ContextCompat.getDrawable(context, R.color.white));
         switchImageSource();
 
-        setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onclick();
-            }
-        });
-
     }
 
     public void onclick() {

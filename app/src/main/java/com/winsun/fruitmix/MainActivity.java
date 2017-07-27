@@ -13,7 +13,7 @@ import android.text.TextUtils;
 
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.Util;

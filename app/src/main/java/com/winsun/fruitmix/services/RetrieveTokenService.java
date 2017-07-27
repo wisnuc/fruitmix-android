@@ -5,9 +5,8 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
-import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;

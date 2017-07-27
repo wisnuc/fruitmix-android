@@ -9,7 +9,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
-import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.user.User;

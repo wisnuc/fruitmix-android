@@ -1,6 +1,6 @@
 package com.winsun.fruitmix;
 
-import com.winsun.fruitmix.fileModule.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.parser.RemoteDatasParser;

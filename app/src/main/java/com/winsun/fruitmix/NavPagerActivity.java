@@ -34,10 +34,11 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
+import com.winsun.fruitmix.equipment.InjectEquipmentManger;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
-import com.winsun.fruitmix.fileModule.FileDownloadActivity;
-import com.winsun.fruitmix.fileModule.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.file.view.FileDownloadActivity;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.invitation.ConfirmInviteUserActivity;
@@ -46,7 +47,7 @@ import com.winsun.fruitmix.mainpage.MainPagePresenterImpl;
 import com.winsun.fruitmix.mainpage.MainPageView;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.Equipment;
-import com.winsun.fruitmix.model.EquipmentSearchManager;
+import com.winsun.fruitmix.equipment.EquipmentSearchManager;
 import com.winsun.fruitmix.model.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
@@ -138,17 +139,6 @@ public class NavPagerActivity extends BaseActivity
     public void closeDrawer() {
         mDrawerLayout.closeDrawer(GravityCompat.START);
     }
-
-    @BindingMethods({
-            @BindingMethod(type = android.widget.TextView.class,
-                    attribute = "android:background",
-                    method = "setBackgroundResource"),
-
-            @BindingMethod(type = ImageView.class,
-                    attribute = "android:src",
-                    method = "setImageResource"),
-
-    })
 
     public class NavPagerViewModel {
 
@@ -392,7 +382,7 @@ public class NavPagerActivity extends BaseActivity
     private void startDiscovery(final LoggedInUser loggedInUser) {
 
         if (mEquipmentSearchManager == null) {
-            mEquipmentSearchManager = new EquipmentSearchManager(mContext);
+            mEquipmentSearchManager = InjectEquipmentManger.provideEquipmentSearchManager(mContext);
         }
 
         mEquipmentSearchManager.startDiscovery(new EquipmentSearchManager.IEquipmentDiscoveryListener() {
