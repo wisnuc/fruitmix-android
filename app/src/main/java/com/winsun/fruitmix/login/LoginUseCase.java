@@ -2,16 +2,25 @@ package com.winsun.fruitmix.login;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
-import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
+import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationSQLException;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.token.TokenRemoteDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -23,9 +32,11 @@ import java.util.List;
 
 public class LoginUseCase {
 
+    //TODO: consider loginUserCase dependent abstract,and how to set equipment name to CheckIpUtil
+
     private static LoginUseCase instance;
 
-    private LoggedInUserRepository loggedInUserRepository;
+    private LoggedInUserDataSource loggedInUserDataSource;
 
     private TokenRemoteDataSource tokenRemoteDataSource;
 
@@ -33,28 +44,39 @@ public class LoginUseCase {
 
     private UserDataRepository userDataRepository;
 
-    private FileDownloadManager fileDownloadManager;
+    private StationFileRepository stationFileRepository;
 
     private SystemSettingDataSource systemSettingDataSource;
 
-    private LoginUseCase(LoggedInUserRepository loggedInUserRepository, TokenRemoteDataSource tokenRemoteDataSource,
+    private ImageGifLoaderInstance imageGifLoaderInstance;
+
+    private EventBus eventBus;
+
+    private ThreadManager threadManager;
+
+    private LoginUseCase(LoggedInUserDataSource loggedInUserDataSource, TokenRemoteDataSource tokenRemoteDataSource,
                          HttpRequestFactory httpRequestFactory, UserDataRepository userDataRepository,
-                         FileDownloadManager fileDownloadManager, SystemSettingDataSource systemSettingDataSource) {
-        this.loggedInUserRepository = loggedInUserRepository;
+                         StationFileRepository stationFileRepository, SystemSettingDataSource systemSettingDataSource,
+                         ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager) {
+        this.loggedInUserDataSource = loggedInUserDataSource;
         this.tokenRemoteDataSource = tokenRemoteDataSource;
         this.httpRequestFactory = httpRequestFactory;
         this.userDataRepository = userDataRepository;
-        this.fileDownloadManager = fileDownloadManager;
+        this.stationFileRepository = stationFileRepository;
         this.systemSettingDataSource = systemSettingDataSource;
+        this.imageGifLoaderInstance = imageGifLoaderInstance;
+        this.threadManager = threadManager;
+        this.eventBus = eventBus;
     }
 
-    public static LoginUseCase getInstance(LoggedInUserRepository loggedInUserRepository, TokenRemoteDataSource tokenRemoteDataSource,
+    public static LoginUseCase getInstance(LoggedInUserDataSource loggedInUserDataSource, TokenRemoteDataSource tokenRemoteDataSource,
                                            HttpRequestFactory httpRequestFactory, UserDataRepository userDataRepository,
-                                           FileDownloadManager fileDownloadManager, SystemSettingDataSource systemSettingDataSource) {
+                                           StationFileRepository stationFileRepository, SystemSettingDataSource systemSettingDataSource,
+                                           ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager) {
 
         if (instance == null)
-            instance = new LoginUseCase(loggedInUserRepository, tokenRemoteDataSource,
-                    httpRequestFactory, userDataRepository, fileDownloadManager, systemSettingDataSource);
+            instance = new LoginUseCase(loggedInUserDataSource, tokenRemoteDataSource,
+                    httpRequestFactory, userDataRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager);
 
         return instance;
     }
@@ -63,24 +85,32 @@ public class LoginUseCase {
         instance = null;
     }
 
-    public boolean loginWithNoParam() {
+    public void loginWithNoParam(BaseOperateDataCallback<Boolean> callback) {
 
-        LoggedInUser loggedInUser = loggedInUserRepository.getCurrentLoggedInUser();
+        LoggedInUser loggedInUser = loggedInUserDataSource.getCurrentLoggedInUser();
 
         if (loggedInUser == null)
-            return false;
+            callback.onFail(new OperationSQLException());
         else {
 
             httpRequestFactory.setCurrentData(loggedInUser.getToken(), loggedInUser.getGateway());
 
-            fileDownloadManager.clearFileDownloadItems();
+            imageGifLoaderInstance.setToken(loggedInUser.getToken());
 
-            userDataRepository.setCacheDirty();
-            userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>());
+            stationFileRepository.clearDownloadFileRecordInCache();
 
-            return true;
+            callback.onSucceed(true,new OperationSuccess());
+
+            getUsers();
 
         }
+    }
+
+    private void getUsers() {
+
+        userDataRepository.setCacheDirty();
+        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>());
+
     }
 
     public void loginWithLoadTokenParam(final LoadTokenParam loadTokenParam, final BaseLoadDataCallback<String> callback) {
@@ -93,7 +123,9 @@ public class LoginUseCase {
 
                 httpRequestFactory.setCurrentData(token, loadTokenParam.getGateway());
 
-                fileDownloadManager.clearFileDownloadItems();
+                imageGifLoaderInstance.setToken(token);
+
+                stationFileRepository.clearDownloadFileRecordInCache();
 
                 callback.onSucceed(data, operationResult);
 
@@ -108,7 +140,6 @@ public class LoginUseCase {
             }
         });
 
-
     }
 
     private void getUsers(final LoadTokenParam loadTokenParam, final String token) {
@@ -121,7 +152,7 @@ public class LoginUseCase {
                 for (User user : data) {
                     if (user.getUuid().equals(loadTokenParam.getUserUUID())) {
 
-                        Collection<LoggedInUser> loggedInUsers = loggedInUserRepository.getAllLoggedInUsers();
+                        Collection<LoggedInUser> loggedInUsers = loggedInUserDataSource.getAllLoggedInUsers();
 
                         if (loggedInUsers.isEmpty()) {
 
@@ -136,9 +167,11 @@ public class LoginUseCase {
 
                         LoggedInUser loggedInUser = new LoggedInUser(user.getLibrary(), token, loadTokenParam.getGateway(), loadTokenParam.getEquipmentName(), user);
 
-                        loggedInUserRepository.insertLoggedInUsers(Collections.singletonList(loggedInUser));
+                        loggedInUserDataSource.insertLoggedInUsers(Collections.singletonList(loggedInUser));
 
-                        loggedInUserRepository.setCurrentLoggedInUser(loggedInUser);
+                        loggedInUserDataSource.setCurrentLoggedInUser(loggedInUser);
+
+                        eventBus.postSticky(new OperationEvent(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN, new OperationSuccess()));
 
                     }
                 }
@@ -150,9 +183,9 @@ public class LoginUseCase {
     }
 
 
-    public boolean loginWithUser(User user) {
+    public void loginWithUser(User user,BaseOperateDataCallback<Boolean> callback) {
 
-        Collection<LoggedInUser> loggedInUsers = loggedInUserRepository.getAllLoggedInUsers();
+        Collection<LoggedInUser> loggedInUsers = loggedInUserDataSource.getAllLoggedInUsers();
 
         LoggedInUser currentLoggedInUser = null;
 
@@ -162,17 +195,23 @@ public class LoginUseCase {
 
         }
 
-        return currentLoggedInUser != null && loginWithLoggedInUser(currentLoggedInUser);
+        if(currentLoggedInUser == null)
+            callback.onFail(new OperationSQLException());
+        else
+            loginWithLoggedInUser(currentLoggedInUser,callback);
+
 
     }
 
-    public boolean loginWithLoggedInUser(LoggedInUser currentLoggedInUser) {
+    public void loginWithLoggedInUser(LoggedInUser currentLoggedInUser,BaseOperateDataCallback<Boolean> callback) {
 
         httpRequestFactory.setCurrentData(currentLoggedInUser.getToken(), currentLoggedInUser.getGateway());
 
-        loggedInUserRepository.setCurrentLoggedInUser(currentLoggedInUser);
+        imageGifLoaderInstance.setToken(currentLoggedInUser.getToken());
 
-        fileDownloadManager.clearFileDownloadItems();
+        loggedInUserDataSource.setCurrentLoggedInUser(currentLoggedInUser);
+
+        stationFileRepository.clearDownloadFileRecordInCache();
 
         String preDeviceID = systemSettingDataSource.getCurrentUploadDeviceID();
 
@@ -182,10 +221,9 @@ public class LoginUseCase {
             systemSettingDataSource.setAutoUploadOrNot(false);
         }
 
-        userDataRepository.setCacheDirty();
-        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>());
+        callback.onSucceed(true,new OperationSuccess());
 
-        return true;
+        getUsers();
 
     }
 

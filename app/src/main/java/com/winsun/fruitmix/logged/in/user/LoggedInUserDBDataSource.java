@@ -3,6 +3,7 @@ package com.winsun.fruitmix.logged.in.user;
 import android.content.Context;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 
 import java.util.Collection;
 
@@ -14,9 +15,23 @@ public class LoggedInUserDBDataSource implements LoggedInUserDataSource {
 
     private DBUtils dbUtils;
 
-    public LoggedInUserDBDataSource(Context context) {
+    private SystemSettingDataSource systemSettingDataSource;
+
+    private static LoggedInUserDataSource instance;
+
+    public static LoggedInUserDataSource getInstance(Context context) {
+
+        if (instance == null)
+            instance = new LoggedInUserDBDataSource(context);
+
+        return instance;
+    }
+
+    private LoggedInUserDBDataSource(Context context) {
 
         dbUtils = DBUtils.getInstance(context);
+
+        systemSettingDataSource = SystemSettingDataSource.getInstance(context);
 
     }
 
@@ -54,11 +69,23 @@ public class LoggedInUserDBDataSource implements LoggedInUserDataSource {
 
     @Override
     public LoggedInUser getCurrentLoggedInUser() {
-        return null;
+
+        return dbUtils.getCurrentLoggedInUser(systemSettingDataSource.getCurrentLoginUserUUID());
+
     }
 
     @Override
     public void setCurrentLoggedInUser(LoggedInUser loggedInUser) {
 
+        if (loggedInUser == null)
+            systemSettingDataSource.setCurrentLoginUserUUID("");
+        else
+            systemSettingDataSource.setCurrentLoginUserUUID(loggedInUser.getUser().getUuid());
+
+    }
+
+    @Override
+    public String getCurrentLoggedInUserUUID() {
+        return systemSettingDataSource.getCurrentLoginUserUUID();
     }
 }

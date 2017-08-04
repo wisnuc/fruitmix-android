@@ -42,6 +42,9 @@ import com.winsun.fruitmix.group.view.GroupListPage;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
+import com.winsun.fruitmix.media.InjectMedia;
+import com.winsun.fruitmix.media.MediaDataSourceRepository;
+import com.winsun.fruitmix.media.MediaDataSourceRepositoryImpl;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -184,7 +187,6 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         photoList.setPhotoListListener(this);
 
-
         Log.d(TAG, "onCreateView: ");
 
         return binding.getRoot();
@@ -266,17 +268,15 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         if (isHidden()) return;
 
-        if (!onResume) {
-            onResume = true;
-        } else {
-            FNAS.retrieveLocalMediaInCamera();
-        }
+        if(viewPager.getCurrentItem() == PAGE_PHOTO)
+            photoList.refreshView();
 
-        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && !mPhotoListRefresh) {
-            pageList.get(PAGE_PHOTO).refreshView();
 
-            mPhotoListRefresh = true;
-        }
+//        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && !mPhotoListRefresh) {
+//            pageList.get(PAGE_PHOTO).refreshView();
+//
+//            mPhotoListRefresh = true;
+//        }
 
     }
 

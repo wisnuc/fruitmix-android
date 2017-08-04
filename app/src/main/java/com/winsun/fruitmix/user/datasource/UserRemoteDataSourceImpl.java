@@ -1,37 +1,19 @@
 package com.winsun.fruitmix.user.datasource;
 
-import android.util.Log;
-
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpRequestFactory;
-import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpUtil;
-import com.winsun.fruitmix.model.LoginType;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.parser.RemoteCurrentUserParser;
+import com.winsun.fruitmix.parser.RemoteInsertUserParser;
 import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.model.operationResult.OperationIOException;
-import com.winsun.fruitmix.model.operationResult.OperationJSONException;
-import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
-import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
-import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.parser.RemoteDatasParser;
-import com.winsun.fruitmix.parser.RemoteUserJSONObjectParser;
-import com.winsun.fruitmix.parser.RemoteUserParser;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
 
-import org.greenrobot.eventbus.EventBus;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,123 +38,60 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
         String body = User.generateCreateRemoteUserBody(userName, userPwd);
 
-        HttpResponse httpResponse;
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(ADMIN_USER_PARAMETER, body);
 
-        try {
-
-            HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(ADMIN_USER_PARAMETER, body);
-
-            httpResponse = iHttpUtil.remoteCall(httpRequest);
-
-            if (httpResponse.getResponseCode() == 200) {
-
-                User user = new RemoteUserJSONObjectParser().getUser(new JSONObject(httpResponse.getResponseData()));
-
-                callback.onSucceed(user, new OperationSuccess(R.string.create_user));
-
-            } else {
-
-                callback.onFail(new OperationNetworkException(httpResponse.getResponseCode()));
-
-                Log.i(TAG, "insert remote user fail");
-
-            }
-
-        } catch (MalformedURLException ex) {
-            ex.printStackTrace();
-
-            callback.onFail(new OperationMalformedUrlException());
-
-            Log.i(TAG, "insert remote user fail");
-
-        } catch (SocketTimeoutException ex) {
-            ex.printStackTrace();
-
-            callback.onFail(new OperationSocketTimeoutException());
-
-            Log.i(TAG, "insert remote user fail");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            callback.onFail(new OperationIOException());
-
-            Log.i(TAG, "insert remote user fail");
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            callback.onFail(new OperationJSONException());
-
-            Log.i(TAG, "insert remote user fail");
-        }
+        wrapper.operateCall(httpRequest, callback, new RemoteInsertUserParser(), R.string.create_user);
 
     }
 
     @Override
-    public void getUsers(BaseLoadDataCallback<User> callback) {
+    public void getUsers(final BaseLoadDataCallback<User> callback) {
 
-        List<User> users;
+        final List<User> users = new ArrayList<>();
 
-        HttpResponse httpResponse;
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(ACCOUNT_PARAMETER);
 
-        try {
+        wrapper.loadCall(httpRequest, new BaseLoadDataCallback<User>() {
 
-            HttpRequest httpRequest = new HttpRequest(FNAS.generateUrl(ACCOUNT_PARAMETER), Util.HTTP_GET_METHOD);
-            httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
+            @Override
+            public void onSucceed(List<User> data, OperationResult operationResult) {
 
-            httpResponse = iHttpUtil.remoteCall(httpRequest);
+                users.addAll(data);
 
-            if (httpResponse.getResponseCode() != 200 && Util.loginType == LoginType.LOGIN) {
-                OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()));
-                EventBus.getDefault().post(operationEvent);
-                return;
+                getOtherUsers(users, callback);
+
             }
 
-            User user = new RemoteUserJSONObjectParser().getUser(new JSONObject(httpResponse.getResponseData()));
+            @Override
+            public void onFail(OperationResult operationResult) {
 
-            users = new ArrayList<>();
-            users.add(user);
+                getOtherUsers(users, callback);
 
-            RemoteDatasParser<User> parser = new RemoteUserParser();
+            }
+        }, new RemoteCurrentUserParser());
 
-            httpRequest.setUrl(FNAS.generateUrl(LOGIN_PARAMETER));
+    }
 
-            List<User> otherUsers = parser.parse(iHttpUtil.remoteCall(httpRequest).getResponseData());
+    private void getOtherUsers(final List<User> users, final BaseLoadDataCallback<User> callback) {
+        HttpRequest loginHttpRequest = httpRequestFactory.createGetRequestByPathWithoutToken(LOGIN_PARAMETER);
 
-            addDifferentUsers(users, otherUsers);
+        wrapper.loadCall(loginHttpRequest, new BaseLoadDataCallback<User>() {
 
-            callback.onSucceed(users, new OperationSuccess());
+            @Override
+            public void onSucceed(List<User> data, OperationResult operationResult) {
 
-        } catch (MalformedURLException ex) {
-            ex.printStackTrace();
+                addDifferentUsers(users, data);
 
-            callback.onFail(new OperationMalformedUrlException());
+                callback.onSucceed(users, operationResult);
+            }
 
-            Log.i(TAG, "insert remote user fail");
+            @Override
+            public void onFail(OperationResult operationResult) {
 
-        } catch (SocketTimeoutException ex) {
-            ex.printStackTrace();
+                callback.onSucceed(users, new OperationSuccess());
 
-            callback.onFail(new OperationSocketTimeoutException());
-
-            Log.i(TAG, "insert remote user fail");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            callback.onFail(new OperationIOException());
-
-            Log.i(TAG, "insert remote user fail");
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            callback.onFail(new OperationJSONException());
-
-            Log.i(TAG, "insert remote user fail");
-        }
-
+            }
+        }, new RemoteLoginUsersParser());
     }
 
 

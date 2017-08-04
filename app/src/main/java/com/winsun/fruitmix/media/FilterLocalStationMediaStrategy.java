@@ -1,10 +1,14 @@
 package com.winsun.fruitmix.media;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.LocalCache;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +19,8 @@ import java.util.Map;
 public class FilterLocalStationMediaStrategy {
 
     public static FilterLocalStationMediaStrategy instance;
+
+    public static final String TAG = FilterLocalStationMediaStrategy.class.getSimpleName();
 
     private FilterLocalStationMediaStrategy() {
     }
@@ -27,6 +33,8 @@ public class FilterLocalStationMediaStrategy {
 
     public List<Media> filter(Collection<Media> localMedias, Collection<Media> stationMedias) {
 
+        Log.i(TAG, "before filter :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
         List<Media> result = new ArrayList<>(localMedias);
 
         Map<String, Media> stationMediaMap = LocalCache.BuildMediaMapKeyIsUUID(stationMedias);
@@ -38,6 +46,9 @@ public class FilterLocalStationMediaStrategy {
             stationMediaMap.remove(mediaUUID);
 
         }
+
+        Log.i(TAG, "after filter : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
 
         result.addAll(stationMediaMap.values());
 

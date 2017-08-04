@@ -18,7 +18,7 @@ import java.net.SocketTimeoutException;
  * Created by Administrator on 2017/5/16.
  */
 
-public class CheckIpHttpUtil implements IHttpUtil{
+public class CheckIpHttpUtil implements IHttpUtil {
 
     public static final String TAG = CheckIpHttpUtil.class.getSimpleName();
 
@@ -55,17 +55,33 @@ public class CheckIpHttpUtil implements IHttpUtil{
         }
     }
 
+    private static CheckIpHttpUtil instance;
 
-    public CheckIpHttpUtil(IHttpUtil iHttpUtil, String currentEquipmentName, EquipmentSearchManager equipmentSearchManager) {
+    public static CheckIpHttpUtil getInstance(IHttpUtil iHttpUtil,EquipmentSearchManager equipmentSearchManager) {
+
+        if (instance == null)
+            instance = new CheckIpHttpUtil(iHttpUtil, equipmentSearchManager);
+
+        return instance;
+    }
+
+    private CheckIpHttpUtil(IHttpUtil iHttpUtil, EquipmentSearchManager equipmentSearchManager) {
 
         mIHttpUtil = iHttpUtil;
 
-        mCurrentEquipmentName = currentEquipmentName == null ? "" : currentEquipmentName;
+        mCurrentEquipmentName = "";
         mEquipmentSearchManager = equipmentSearchManager;
 
         threadControlObject = new Object();
 
         mRetryStrategy = new DefaultRetryStrategy();
+
+    }
+
+    public void setCurrentEquipmentName(String currentEquipmentName) {
+
+        if (currentEquipmentName != null && !mCurrentEquipmentName.equals(currentEquipmentName))
+            mCurrentEquipmentName = currentEquipmentName;
 
     }
 
@@ -130,6 +146,9 @@ public class CheckIpHttpUtil implements IHttpUtil{
 
 
     private void searchIpSync(final HttpRequest httpRequest) {
+
+        if (mCurrentEquipmentName.isEmpty())
+            return;
 
         synchronized (threadControlObject) {
 

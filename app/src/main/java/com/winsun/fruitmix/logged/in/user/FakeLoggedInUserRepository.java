@@ -48,4 +48,9 @@ public class FakeLoggedInUserRepository implements LoggedInUserDataSource{
     public void setCurrentLoggedInUser(LoggedInUser loggedInUser) {
 
     }
+
+    @Override
+    public String getCurrentLoggedInUserUUID() {
+        return FakeGroupDataSource.MYSELF_UUID;
+    }
 }

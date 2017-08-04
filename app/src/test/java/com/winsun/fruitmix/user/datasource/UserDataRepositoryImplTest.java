@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
  * Created by Administrator on 2017/7/11.
  */
 
-public class UserDataRepositoryTest {
+public class UserDataRepositoryImplTest {
 
     private static final String USER_PWD = "testPWD";
     private static final String USER_NAME = "testName";
@@ -41,7 +41,7 @@ public class UserDataRepositoryTest {
     @Mock
     private UserDBDataSource userDBDataSource;
 
-    private UserDataRepository userDataRepository;
+    private UserDataRepositoryImpl userDataRepositoryImpl;
 
     @Mock
     private BaseLoadDataCallback<User> baseLoadDataCallback;
@@ -70,19 +70,19 @@ public class UserDataRepositoryTest {
 
         MockitoAnnotations.initMocks(this);
 
-        userDataRepository = UserDataRepository.getInstance(userDBDataSource, userRemoteDataSource);
+        userDataRepositoryImpl = UserDataRepositoryImpl.getInstance(userDBDataSource, userRemoteDataSource);
 
     }
 
     @After
     public void clean() {
-        UserDataRepository.destroyInstance();
+        UserDataRepositoryImpl.destroyInstance();
     }
 
     @Test
     public void insertUserToRemoteDataSource() {
 
-        userDataRepository.insertUser(USER_NAME, USER_PWD, null);
+        userDataRepositoryImpl.insertUser(USER_NAME, USER_PWD, null);
 
         verify(userRemoteDataSource).insertUser(anyString(), anyString(), any(BaseOperateDataCallback.class));
 
@@ -91,7 +91,7 @@ public class UserDataRepositoryTest {
     @Test
     public void insertUserToDBDataSource_WhenRemoteInsertSucceed() {
 
-        userDataRepository.insertUser(USER_NAME, USER_PWD, new BaseOperateDataCallbackImpl<User>());
+        userDataRepositoryImpl.insertUser(USER_NAME, USER_PWD, new BaseOperateDataCallbackImpl<User>());
 
         verify(userRemoteDataSource).insertUser(anyString(), anyString(), operateDataCallbackArgumentCaptor.capture());
 
@@ -101,14 +101,14 @@ public class UserDataRepositoryTest {
 
         verify(userDBDataSource).insertUser(ArgumentMatchers.<User>anyCollection());
 
-        assertEquals(1, userDataRepository.cacheUsers.size());
+        assertEquals(1, userDataRepositoryImpl.cacheUsers.size());
 
     }
 
     @Test
     public void insertUserToRemoteDataSourceFail() {
 
-        userDataRepository.insertUser(USER_NAME, USER_PWD, new BaseOperateDataCallback<User>() {
+        userDataRepositoryImpl.insertUser(USER_NAME, USER_PWD, new BaseOperateDataCallback<User>() {
             @Override
             public void onSucceed(User data, OperationResult result) {
 
@@ -129,7 +129,7 @@ public class UserDataRepositoryTest {
     @Test
     public void getUser_RetrieveOrder() {
 
-        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>());
+        userDataRepositoryImpl.getUsers(new BaseLoadDataCallbackImpl<User>());
 
         InOrder inOrder = inOrder(userDBDataSource, userRemoteDataSource);
 
@@ -141,7 +141,7 @@ public class UserDataRepositoryTest {
     @Test
     public void getUserRetrieveWhenCacheDirty() {
 
-        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>());
+        userDataRepositoryImpl.getUsers(new BaseLoadDataCallbackImpl<User>());
 
         ArgumentCaptor<BaseLoadDataCallback<User>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -149,14 +149,14 @@ public class UserDataRepositoryTest {
 
         captor.getValue().onSucceed(Collections.<User>emptyList(), new OperationSuccess());
 
-        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>());
+        userDataRepositoryImpl.getUsers(new BaseLoadDataCallbackImpl<User>());
 
         verify(userDBDataSource, times(1)).getUsers(any(BaseLoadDataCallback.class));
         verify(userRemoteDataSource, times(1)).getUsers(any(BaseLoadDataCallback.class));
 
-        userDataRepository.setCacheDirty();
+        userDataRepositoryImpl.setCacheDirty();
 
-        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>());
+        userDataRepositoryImpl.getUsers(new BaseLoadDataCallbackImpl<User>());
 
         verify(userDBDataSource, times(2)).getUsers(any(BaseLoadDataCallback.class));
         verify(userRemoteDataSource, times(2)).getUsers(any(BaseLoadDataCallback.class));
@@ -165,13 +165,13 @@ public class UserDataRepositoryTest {
     @Test
     public void getUser_RetrieveFromDBFail_FromRemoteSucceed() {
 
-        userDataRepository.getUsers(baseLoadDataCallback);
+        userDataRepositoryImpl.getUsers(baseLoadDataCallback);
 
         verify(userDBDataSource).getUsers(loadDBDataCallbackArgumentCaptor.capture());
 
         loadDBDataCallbackArgumentCaptor.getValue().onFail(new OperationJSONException());
 
-        assertEquals(true, userDataRepository.cacheDirty);
+        assertEquals(true, userDataRepositoryImpl.cacheDirty);
 
         verify(userRemoteDataSource).getUsers(loadRemoteDataCallbackArgumentCaptor.capture());
 
@@ -182,21 +182,21 @@ public class UserDataRepositoryTest {
         inOrder.verify(baseLoadDataCallback).onFail(any(OperationResult.class));
         inOrder.verify(baseLoadDataCallback).onSucceed(ArgumentMatchers.<User>anyList(), any(OperationResult.class));
 
-        assertEquals(USER_NAME, userDataRepository.cacheUsers.get(USER_UUID).getUserName());
+        assertEquals(USER_NAME, userDataRepositoryImpl.cacheUsers.get(USER_UUID).getUserName());
 
-        assertEquals(false, userDataRepository.cacheDirty);
+        assertEquals(false, userDataRepositoryImpl.cacheDirty);
     }
 
     @Test
     public void getUser_RetrieveFromDBSucceed_FromRemoteFail() {
 
-        userDataRepository.getUsers(baseLoadDataCallback);
+        userDataRepositoryImpl.getUsers(baseLoadDataCallback);
 
         verify(userDBDataSource).getUsers(loadDBDataCallbackArgumentCaptor.capture());
 
         loadDBDataCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(createUser()), new OperationSuccess());
 
-        assertEquals(true, userDataRepository.cacheDirty);
+        assertEquals(true, userDataRepositoryImpl.cacheDirty);
 
         verify(userRemoteDataSource).getUsers(loadRemoteDataCallbackArgumentCaptor.capture());
 
@@ -207,15 +207,15 @@ public class UserDataRepositoryTest {
         inOrder.verify(baseLoadDataCallback).onSucceed(ArgumentMatchers.<User>anyList(), any(OperationResult.class));
         inOrder.verify(baseLoadDataCallback).onFail(any(OperationResult.class));
 
-        assertEquals(USER_NAME, userDataRepository.cacheUsers.get(USER_UUID).getUserName());
+        assertEquals(USER_NAME, userDataRepositoryImpl.cacheUsers.get(USER_UUID).getUserName());
 
-        assertEquals(false, userDataRepository.cacheDirty);
+        assertEquals(false, userDataRepositoryImpl.cacheDirty);
     }
 
     @Test
     public void getUser_RetrieveFromRemoteSucceed_deleteOldDataFromDB_InsertNewDataToDB() {
 
-        userDataRepository.getUsers(null);
+        userDataRepositoryImpl.getUsers(null);
 
         verify(userRemoteDataSource).getUsers(loadRemoteDataCallbackArgumentCaptor.capture());
 

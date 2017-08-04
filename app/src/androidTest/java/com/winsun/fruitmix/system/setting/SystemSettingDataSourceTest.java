@@ -3,6 +3,7 @@ package com.winsun.fruitmix.system.setting;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,8 +22,13 @@ public class SystemSettingDataSourceTest {
     @Before
     public void setup() {
 
-        systemSettingDataSource = new SystemSettingDataSource(InstrumentationRegistry.getTargetContext());
+        systemSettingDataSource = SystemSettingDataSource.getInstance(InstrumentationRegistry.getTargetContext());
 
+    }
+
+    @After
+    public void clean() {
+        systemSettingDataSource.destroyInstance();
     }
 
     @Test
@@ -49,13 +55,13 @@ public class SystemSettingDataSourceTest {
     }
 
     @Test
-    public void testSetShowAutoUploadDialog(){
+    public void testSetShowAutoUploadDialog() {
 
         systemSettingDataSource.setShowAutoUploadDialog(true);
 
         boolean result = systemSettingDataSource.getShowAutoUploadDialog();
 
-        assertEquals(result,true);
+        assertEquals(result, true);
 
     }
 

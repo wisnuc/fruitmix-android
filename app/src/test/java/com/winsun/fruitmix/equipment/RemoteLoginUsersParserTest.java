@@ -2,7 +2,7 @@ package com.winsun.fruitmix.equipment;
 
 import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.mock.MockApplication;
-import com.winsun.fruitmix.parser.RemoteUserParser;
+import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
 import com.winsun.fruitmix.user.User;
 
 import org.json.JSONException;
@@ -23,14 +23,14 @@ import static org.junit.Assert.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
-public class RemoteUserParserTest {
+public class RemoteLoginUsersParserTest {
 
-    private RemoteUserParser parser;
+    private RemoteLoginUsersParser parser;
 
     @Before
     public void setUp() {
 
-        parser = new RemoteUserParser();
+        parser = new RemoteLoginUsersParser();
 
     }
 

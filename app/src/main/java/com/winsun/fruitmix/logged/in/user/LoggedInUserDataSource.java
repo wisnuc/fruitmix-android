@@ -20,4 +20,6 @@ public interface LoggedInUserDataSource {
 
     void setCurrentLoggedInUser(LoggedInUser loggedInUser);
 
+    String getCurrentLoggedInUserUUID();
+
 }

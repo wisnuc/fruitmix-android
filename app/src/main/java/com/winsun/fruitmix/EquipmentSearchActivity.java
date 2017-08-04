@@ -20,16 +20,23 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
-import com.winsun.fruitmix.equipment.InjectEquipmentManger;
+import com.winsun.fruitmix.equipment.EquipmentRemoteDataSource;
+import com.winsun.fruitmix.equipment.InjectEquipment;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.OkHttpUtil;
+import com.winsun.fruitmix.login.InjectLoginUseCase;
+import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.equipment.EquipmentSearchManager;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
@@ -87,11 +94,15 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private EquipmentSearchManager mEquipmentSearchManager;
 
+    private EquipmentRemoteDataSource mEquipmentRemoteDataSource;
+
+    private LoginUseCase loginUseCase;
+
+    private ThreadManager threadManager;
+
     private Random random;
 
     private int preAvatarBgColor = 0;
-
-    private ExecutorServiceInstance instance;
 
     private boolean onPause = false;
 
@@ -126,58 +137,18 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         mEquipmentExpandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
-            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+            public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, int childPosition, long id) {
 
-                User user = mUserExpandableLists.get(groupPosition).get(childPosition);
+                final User user = mUserExpandableLists.get(groupPosition).get(childPosition);
 
-                for (LoggedInUser loggedInUser : LocalCache.LocalLoggedInUsers) {
-
-                    if (loggedInUser.getUser().getUuid().equals(user.getUuid())) {
-
-                        Util.loginType = LoginType.SPLASH_SCREEN;
-
-                        FNAS.Gateway = Util.HTTP + mUserLoadedEquipments.get(groupPosition).getHosts().get(0);
-                        FNAS.userUUID = loggedInUser.getUser().getUuid();
-                        FNAS.JWT = loggedInUser.getToken();
-                        LocalCache.DeviceID = loggedInUser.getDeviceID();
-
-                        Log.d(TAG, "onChildClick: userUUID: " + FNAS.userUUID);
-
-                        LocalCache.saveToken(mContext, FNAS.JWT);
-                        LocalCache.saveGateway(mContext, FNAS.Gateway);
-                        LocalCache.saveUserUUID(mContext, FNAS.userUUID);
-                        LocalCache.setGlobalData(mContext, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
-
-                        if (!Util.checkAutoUpload(mContext)) {
-                            Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
-                        }
-
-                        Util.clearFileDownloadItem = true;
-
-                        FNAS.retrieveUser(mContext);
-
-                        setResult(RESULT_OK);
-                        finish();
-
-                        startActivity(new Intent(mContext, NavPagerActivity.class));
-
-                        return true;
+                threadManager.runOnCacheThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        loginWithUserInThread(groupPosition, user);
                     }
+                });
 
-                }
-
-                Equipment equipment = mUserLoadedEquipments.get(groupPosition);
-
-                Intent intent = new Intent(mContext, LoginActivity.class);
-                intent.putExtra(Util.GATEWAY, "http://" + equipment.getHosts().get(0));
-                intent.putExtra(Util.USER_GROUP_NAME, equipment.getEquipmentName());
-                intent.putExtra(Util.USER_NAME, user.getUserName());
-                intent.putExtra(Util.USER_UUID, user.getUuid());
-                intent.putExtra(Util.USER_BG_COLOR, user.getDefaultAvatarBgColor());
-
-                startActivityForResult(intent, Util.KEY_LOGIN_REQUEST_CODE);
-
-                return false;
+                return true;
             }
         });
 
@@ -189,7 +160,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                 int count = mAdapter.getGroupCount();
                 for (int i = 0; i < count; i++) {
-
 
                     if (i == groupPosition) {
 
@@ -227,15 +197,71 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         mTitleTextView.setText(getString(R.string.search_equipment));
 
-        mEquipmentSearchManager = InjectEquipmentManger.provideEquipmentSearchManager(mContext);
+        mEquipmentSearchManager = InjectEquipment.provideEquipmentSearchManager(mContext);
 
-        instance = ExecutorServiceInstance.SINGLE_INSTANCE;
+        mEquipmentRemoteDataSource = InjectEquipment.provideEquipmentRemoteDataSource(mContext);
 
-        Equipment equipment = new Equipment("", Collections.singletonList("10.10.9.108"), 3000);
-        equipment.setModel("");
-        equipment.setSerialNumber("");
-        getUserList(equipment);
+        loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
 
+        threadManager = ThreadManager.getInstance();
+
+//        Equipment equipment = new Equipment("", Collections.singletonList("10.10.9.126"), 3000);
+//        equipment.setModel("");
+//        equipment.setSerialNumber("");
+//        getUserList(equipment);
+
+    }
+
+    private void loginWithUserInThread(final int groupPosition, final User user) {
+        loginUseCase.loginWithUser(user, new BaseOperateDataCallback<Boolean>() {
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
+
+                threadManager.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        handleLoginWithUserSucceed();
+                    }
+                });
+
+            }
+
+            @Override
+            public void onFail(OperationResult result) {
+
+                threadManager.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        handleLoginWithUserFail(groupPosition,user);
+                    }
+                });
+
+            }
+
+
+        });
+    }
+
+    private void handleLoginWithUserSucceed() {
+        Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
+
+        setResult(RESULT_OK);
+        finish();
+
+        startActivity(new Intent(mContext, NavPagerActivity.class));
+    }
+
+    private void handleLoginWithUserFail(int groupPosition,User user) {
+        Equipment equipment = mUserLoadedEquipments.get(groupPosition);
+
+        Intent intent = new Intent(mContext, LoginActivity.class);
+        intent.putExtra(Util.GATEWAY, "http://" + equipment.getHosts().get(0));
+        intent.putExtra(Util.USER_GROUP_NAME, equipment.getEquipmentName());
+        intent.putExtra(Util.USER_NAME, user.getUserName());
+        intent.putExtra(Util.USER_UUID, user.getUuid());
+        intent.putExtra(Util.USER_BG_COLOR, user.getDefaultAvatarBgColor());
+
+        startActivityForResult(intent, Util.KEY_LOGIN_REQUEST_CODE);
     }
 
     @Override
@@ -568,114 +594,94 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private void getUserList(final Equipment equipment) {
 
-        //get user list;
-        Runnable runnable = new Runnable() {
+        threadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                User user;
-                List<User> itemList;
-                JSONObject itemRaw;
-                JSONArray json;
-                String str;
 
-                int length;
+                mEquipmentRemoteDataSource.getEquipmentHostAlias(equipment, new BaseLoadDataCallback<String>() {
+                    @Override
+                    public void onSucceed(List<String> data, OperationResult operationResult) {
 
-                if (mHandler == null)
-                    return;
-
-                try {
-
-                    String ipaliasingUrl = Util.HTTP + equipment.getHosts().get(0) + ":" + SYSTEM_PORT + IPALIASING;
-
-                    Log.d(TAG, "login retrieve equipment alias:" + ipaliasingUrl);
-
-                    str = FNAS.RemoteCallWithUrl(ipaliasingUrl).getResponseData();
-
-                    if (str != null && !str.isEmpty()) {
-
-                        json = new JSONArray(str);
-
-                        length = json.length();
-
-                        for (int i = 0; i < length; i++) {
-                            itemRaw = json.getJSONObject(i);
-
-                            String ip = itemRaw.getString("ipv4");
+                        for (String alias:data){
 
                             List<String> hosts = equipment.getHosts();
-                            if (!hosts.contains(ip)) {
-                                hosts.add(ip);
+                            if (!hosts.contains(alias)) {
+                                hosts.add(alias);
                             }
+
                         }
 
+                        mEquipmentRemoteDataSource.getUsersInEquipment(equipment, new BaseLoadDataCallback<User>() {
+                            @Override
+                            public void onSucceed(List<User> data, OperationResult operationResult) {
+
+                                handleRetrieveUsers(data, equipment);
+
+                            }
+
+                            @Override
+                            public void onFail(OperationResult operationResult) {
+
+                                handleRetrieveUserFail(equipment);
+                            }
+                        });
+
                     }
 
+                    @Override
+                    public void onFail(OperationResult operationResult) {
 
-                    String url = Util.HTTP + equipment.getHosts().get(0) + ":" + FNAS.PORT + Util.LOGIN_PARAMETER;
+                        mEquipmentRemoteDataSource.getUsersInEquipment(equipment, new BaseLoadDataCallback<User>() {
+                            @Override
+                            public void onSucceed(List<User> data, OperationResult operationResult) {
 
-                    Log.d(TAG, "login url:" + url);
+                                handleRetrieveUsers(data,equipment);
+                            }
 
-                    HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
+                            @Override
+                            public void onFail(OperationResult operationResult) {
 
-                    HttpResponse httpResponse = new OkHttpUtil().remoteCall(httpRequest);
+                                handleRetrieveUserFail(equipment);
+                            }
+                        });
 
-                    if (httpResponse.getResponseCode() != 200)
-                        return;
-
-                    str = new OkHttpUtil().remoteCall(httpRequest).getResponseData();
-
-                    json = new JSONArray(str);
-                    itemList = new ArrayList<>();
-
-                    length = json.length();
-
-                    for (int i = 0; i < length; i++) {
-                        itemRaw = json.getJSONObject(i);
-                        user = new User();
-                        user.setUserName(itemRaw.getString("username"));
-                        user.setUuid(itemRaw.getString("uuid"));
-                        user.setAvatar(itemRaw.getString("avatar"));
-                        itemList.add(user);
                     }
-
-                    if (itemList.isEmpty())
-                        return;
-
-                    synchronized (mUserLoadedEquipments) {
-
-                        for (Equipment userLoadedEquipment : mUserLoadedEquipments) {
-                            if (userLoadedEquipment == null || userLoadedEquipment.getHosts().contains(equipment.getHosts().get(0))
-                                    || userLoadedEquipment.getSerialNumber().equals(equipment.getSerialNumber()))
-                                return;
-                        }
-
-                        mUserLoadedEquipments.add(equipment);
-                        mUserExpandableLists.add(itemList);
-
-                        Log.d(TAG, "EquipmentSearch: " + mUserExpandableLists.toString());
-                    }
-
-                    //update list
-                    if (mHandler != null && !onPause)
-                        mHandler.sendEmptyMessage(DATA_CHANGE);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-
-                    if (mHandler != null && !onPause) {
-                        Message message = Message.obtain(mHandler, RETRY_GET_USER, equipment);
-                        mHandler.sendMessageDelayed(message, RETRY_DELAY_MILLSECOND);
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                });
 
             }
-        };
+        });
 
-        instance.doOneTaskInCachedThread(runnable);
 
+    }
+
+    private void handleRetrieveUserFail(Equipment equipment) {
+        if (mHandler != null && !onPause) {
+            Message message = Message.obtain(mHandler, RETRY_GET_USER, equipment);
+            mHandler.sendMessageDelayed(message, RETRY_DELAY_MILLSECOND);
+        }
+    }
+
+    private void handleRetrieveUsers(List<User> data, Equipment equipment) {
+        if (data.isEmpty())
+            return;
+
+        synchronized (mUserLoadedEquipments) {
+
+            for (Equipment userLoadedEquipment : mUserLoadedEquipments) {
+                if (userLoadedEquipment == null || userLoadedEquipment.getHosts().contains(equipment.getHosts().get(0))
+                        || userLoadedEquipment.getSerialNumber().equals(equipment.getSerialNumber()))
+                    return;
+            }
+
+            mUserLoadedEquipments.add(equipment);
+            mUserExpandableLists.add(data);
+
+            Log.d(TAG, "EquipmentSearch: " + mUserExpandableLists.toString());
+        }
+
+        //update list
+        if (mHandler != null && !onPause)
+            mHandler.sendEmptyMessage(DATA_CHANGE);
     }
 
     private class CustomHandler extends Handler {

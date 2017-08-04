@@ -7,9 +7,11 @@ import android.content.Context;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.file.data.download.DownloadedItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
@@ -67,7 +69,7 @@ public class RetrieveDownloadedFileService extends IntentService {
 
         FileDownloadManager fileDownloadManager = FileDownloadManager.getInstance();
 
-        List<FileDownloadItem> fileDownloadItems = dbUtils.getAllCurrentLoginUserDownloadedFile();
+        List<DownloadedItem> downloadItems = dbUtils.getAllCurrentLoginUserDownloadedFile(FNAS.userUUID);
 
         String[] fileNames = new File(FileUtil.getDownloadFileStoreFolderPath()).list();
 
@@ -75,20 +77,20 @@ public class RetrieveDownloadedFileService extends IntentService {
 
             List<String> fileNameList = Arrays.asList(fileNames);
 
-            Iterator<FileDownloadItem> itemIterator = fileDownloadItems.iterator();
+            Iterator<DownloadedItem> itemIterator = downloadItems.iterator();
             while (itemIterator.hasNext()) {
-                FileDownloadItem fileDownloadItem = itemIterator.next();
+                DownloadedItem downloadedItem = itemIterator.next();
 
-                if (!fileNameList.contains(fileDownloadItem.getFileName())) {
+                if (!fileNameList.contains(downloadedItem.getFileName())) {
                     itemIterator.remove();
-                    dbUtils.deleteDownloadedFileByUUID(fileDownloadItem.getFileUUID());
+                    dbUtils.deleteDownloadedFileByUUID(downloadedItem.getFileUUID());
                 }
             }
 
         }
 
-        for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
-            fileDownloadManager.addDownloadedFile(fileDownloadItem);
+        for (DownloadedItem downloadedItem : downloadItems) {
+            fileDownloadManager.addDownloadedFile(downloadedItem.getFileDownloadItem());
         }
 
         EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_RETRIEVED, new OperationSuccess(R.string.download)));

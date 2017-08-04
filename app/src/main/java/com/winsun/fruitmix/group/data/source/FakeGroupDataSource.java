@@ -197,7 +197,7 @@ public class FakeGroupDataSource implements GroupDataSource {
     @Override
     public UserComment insertUserComment(String groupUUID, UserComment userComment) {
 
-        PrivateGroup privateGroup = getOriginalGroupByUUID(groupUUID);
+        PrivateGroup privateGroup = getGroupByUUID(groupUUID);
 
         if (privateGroup != null)
             privateGroup.addUserComment(userComment);

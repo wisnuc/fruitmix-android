@@ -10,8 +10,14 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.init.system.InitSystem;
+import com.winsun.fruitmix.login.InjectLoginUseCase;
+import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.LoginType;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
@@ -42,6 +48,8 @@ public class SplashScreenActivity extends AppCompatActivity {
 
     private CustomHandler mHandler;
 
+    private boolean loginWithNoParamResult = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,57 +60,21 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         LocalCache.Init();
 
-        boolean result = FileUtil.createDownloadFileStoreFolder();
+        InitSystem.initSystem(this);
 
-        if (!result) {
-            Log.i(TAG, "onCreate: Create download file store folder failed");
-        }
+        final LoginUseCase loginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
 
-        result = FileUtil.createLocalPhotoMiniThumbnailFolder();
+        ThreadManager.getInstance().runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                loginWithNoParamInThread(loginUseCase);
+            }
+        });
 
-        if (!result) {
-            Log.i(TAG, "onCreate: Create local photo mini thumbnail folder failed");
-        }
 
-        result = FileUtil.createLocalPhotoThumbnailFolder();
+//        FNAS.retrieveLocalMedia(mContext);
 
-        if (!result) {
-            Log.i(TAG, "onCreate: Create local photo thumbnail folder failed");
-        }
-
-        result = FileUtil.createOriginalPhotoFolder();
-
-        if (!result) {
-            Log.i(TAG, "onCreate: Create shared photo folder failed");
-        }
-
-/*        result = FileUtil.createOriginalPhotoFolderNoMedia();
-
-        if (!result) {
-            Log.i(TAG, "onCreate: Create shared photo folder no media failed");
-        }
-
-        result = FileUtil.createLocalPhotoThumbnailFolderNoMedia();
-
-        if (!result) {
-            Log.i(TAG, "onCreate: Create local photo thumbnail folder failed");
-        }
-
-        result = FileUtil.createLocalPhotoMiniThumbnailFolderNoMedia();
-
-        if (!result) {
-            Log.i(TAG, "onCreate: Create local photo mini thumbnail folder failed");
-        }
-
-        result = FileUtil.createOldLocalPhotoThumbnailFolderNoMedia();
-
-        if (!result) {
-            Log.i(TAG, "onCreate: Create old local photo thumbnail folder failed");
-        }*/
-
-        FNAS.retrieveLocalMedia(mContext);
-
-        DBUtils dbUtils = DBUtils.getInstance(this);
+/*        DBUtils dbUtils = DBUtils.getInstance(this);
         LocalCache.LocalLoggedInUsers.addAll(dbUtils.getAllLoggedInUser());
 
         Log.i(TAG, "onCreate: LocalLoggedInUsers size: " + LocalCache.LocalLoggedInUsers.size());
@@ -122,11 +94,27 @@ public class SplashScreenActivity extends AppCompatActivity {
             FNAS.userUUID = mUuid;
 
             FNAS.retrieveUser(this);
-        }
+        }*/
 
         mHandler = new CustomHandler(this);
         mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
 
+    }
+
+    private void loginWithNoParamInThread(LoginUseCase loginUseCase) {
+        loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>() {
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
+
+                loginWithNoParamResult = true;
+            }
+
+            @Override
+            public void onFail(OperationResult result) {
+
+                loginWithNoParamResult = false;
+            }
+        });
     }
 
     @Override
@@ -162,12 +150,13 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         Intent intent = new Intent();
 
-        if (mUuid != null && mGateway != null && mToken != null) {
+        if (loginWithNoParamResult) {
             intent.setClass(SplashScreenActivity.this, NavPagerActivity.class);
         } else {
             intent.setClass(SplashScreenActivity.this, EquipmentSearchActivity.class);
             intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE, true);
         }
+
         startActivity(intent);
         finish();
     }

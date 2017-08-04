@@ -20,6 +20,7 @@ import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.invitation.InvitationRemoteDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
+import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
@@ -66,16 +67,24 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     private IWXAPI iwxapi;
 
-    public MainPagePresenterImpl(Context context, NavPagerActivity.NavPagerViewModel navPagerViewModel, MainPageView mainPageView) {
+    private LoggedInUserDataSource loggedInUserDataSource;
+
+    private String currentUserUUID;
+
+    public MainPagePresenterImpl(Context context, LoggedInUserDataSource loggedInUserDataSource,NavPagerActivity.NavPagerViewModel navPagerViewModel, MainPageView mainPageView) {
 
         mNavigationMenuItems = new ArrayList<>();
         mNavigationMenuLoggedInUsers = new ArrayList<>();
 
         navigationItemAdapter = new NavigationItemAdapter();
 
+        this.loggedInUserDataSource = loggedInUserDataSource;
+
         this.navPagerViewModel = navPagerViewModel;
 
         this.mainPageView = mainPageView;
+
+        currentUserUUID = loggedInUserDataSource.getCurrentLoggedInUserUUID();
 
         initNavigationAccountManageViewModel(context);
 
@@ -122,9 +131,9 @@ public class MainPagePresenterImpl implements MainPagePresenter {
     @Override
     public void refreshNavigationLoggedInUsers() {
 
-        if (LocalCache.LocalLoggedInUsers == null) return;
+        if (loggedInUserDataSource == null) return;
 
-        List<LoggedInUser> loggedInUsers = new ArrayList<>(LocalCache.LocalLoggedInUsers);
+        List<LoggedInUser> loggedInUsers = new ArrayList<>(loggedInUserDataSource.getAllLoggedInUsers());
 
         int loggedInUserListSize = loggedInUsers.size();
 
@@ -133,7 +142,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
         Iterator<LoggedInUser> iterator = loggedInUsers.iterator();
         while (iterator.hasNext()) {
             LoggedInUser loggedInUser = iterator.next();
-            if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
+            if (loggedInUser.getUser().getUuid().equals(currentUserUUID)) {
 
                 navPagerViewModel.equipmentNameText.set(loggedInUser.getEquipmentName());
 
@@ -258,28 +267,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
                     @Override
                     public void run() {
 
-                        invitationRemoteDataSource.createInvitation(new BaseOperateDataCallbackImpl<String>() {
-                            @Override
-                            public void onSucceed(final String data, OperationResult result) {
-
-                                Log.d(TAG, "onSucceed: data: " + data);
-
-                                threadManager.runOnMainThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        MiniProgram.shareMiniWXApp(iwxapi,resources, data);
-                                    }
-                                });
-
-                            }
-
-                            @Override
-                            public void onFail(OperationResult result) {
-
-                                Log.d(TAG, "onFail: result: " + result);
-
-                            }
-                        });
+                        createInvitationInThread();
 
                     }
                 });
@@ -304,6 +292,25 @@ public class MainPagePresenterImpl implements MainPagePresenter {
         model.setMenuText("确认邀请");
         mNavigationMenuItems.add(model);
 
+    }
+
+    private void createInvitationInThread() {
+        invitationRemoteDataSource.createInvitation(new BaseOperateDataCallbackImpl<String>() {
+            @Override
+            public void onSucceed(final String data, OperationResult result) {
+
+                Log.d(TAG, "onSucceed: data: " + data);
+
+                threadManager.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MiniProgram.shareMiniWXApp(iwxapi,resources, data);
+                    }
+                });
+
+            }
+
+        });
     }
 
     @Override

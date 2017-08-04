@@ -1,8 +1,13 @@
 package com.winsun.fruitmix.media;
 
+import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mock.MockApplication;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +20,8 @@ import static org.junit.Assert.*;
  * Created by Administrator on 2017/7/19.
  */
 
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
 public class FilterLocalStationMediaStrategyTest {
 
     private FilterLocalStationMediaStrategy filterLocalStationMediaStrategy;

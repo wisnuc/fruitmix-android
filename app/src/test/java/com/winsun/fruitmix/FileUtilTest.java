@@ -6,6 +6,12 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 /**
@@ -13,8 +19,6 @@ import static org.junit.Assert.*;
  */
 
 public class FileUtilTest {
-
-
 
     @Ignore
     public void formatFileSizeTest() {
@@ -67,5 +71,45 @@ public class FileUtilTest {
 
         assertEquals(R.drawable.txt, resID);
     }
+
+    @Test
+    public void sortFile() {
+
+        Comparator<String> fileNameComparator = new Comparator<String>() {
+            @Override
+            public int compare(String lhs, String rhs) {
+
+                try {
+                    lhs = new String(lhs.getBytes("GBK"), "Unicode");
+
+                    rhs = new String(rhs.getBytes("GBK"), "Unicode");
+
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
+                return lhs.compareTo(rhs);
+
+            }
+        };
+
+        List<String> fileNames = new ArrayList<>();
+
+        fileNames.add("Alice");
+        fileNames.add("bob");
+
+        fileNames.add("测试");
+        fileNames.add("刘华");
+        fileNames.add("吴亮");
+        fileNames.add("JackYang");
+
+        Collections.sort(fileNames, fileNameComparator);
+
+        assertEquals("Alice", fileNames.get(0));
+
+        assertEquals(Collections.EMPTY_LIST, fileNames);
+
+    }
+
 
 }

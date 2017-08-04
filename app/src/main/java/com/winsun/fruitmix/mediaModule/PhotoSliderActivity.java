@@ -2,7 +2,6 @@ package com.winsun.fruitmix.mediaModule;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,7 +18,6 @@ import android.support.v4.util.Pair;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -33,8 +31,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
@@ -53,9 +49,10 @@ import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
 import com.winsun.fruitmix.gif.GifLoader;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.ImageGifLoaderInstance;
+import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
@@ -69,9 +66,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class PhotoSliderActivity extends BaseActivity implements IImageLoadListener {
 
@@ -536,7 +530,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     }
 
     private void initImageLoaderAndGifLoader() {
-        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
+        ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderIntance();
         mImageLoader = imageGifLoaderInstance.getImageLoader(mContext);
         mGifLoader = imageGifLoaderInstance.getGifLoader(mContext);
     }

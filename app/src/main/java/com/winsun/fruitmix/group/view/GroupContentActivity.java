@@ -20,6 +20,7 @@ import com.winsun.fruitmix.databinding.ActivityGroupContentBinding;
 import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
+import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
 import com.winsun.fruitmix.group.presenter.GroupContentPresenter;
 import com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton;
@@ -28,13 +29,15 @@ import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
-public class GroupContentActivity extends BaseActivity implements GroupContentView {
+public class GroupContentActivity extends BaseActivity implements GroupContentView, View.OnClickListener {
 
     private RecyclerView chatRecyclerView;
 
     private RecyclerView pingRecyclerView;
 
     private EditText editText;
+
+    private CustomArrowToggleButton toggleButton;
 
     private GroupContentPresenter groupContentPresenter;
 
@@ -59,7 +62,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         binding.setGroupContentViewModel(groupContentViewModel);
 
-        GroupRepository groupRepository = GroupRepository.getInstance(FakeGroupDataSource.getInstance());
+        GroupRepository groupRepository = InjectGroupDataSource.provideGroupRepository();
 
         LoggedInUserDataSource loggedInUserDataSource = InjectLoggedInUser.provideLoggedInUserRepository(this);
 
@@ -95,17 +98,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         editText = binding.editText;
         editText.clearFocus();
 
-        final CustomArrowToggleButton toggleButton = binding.groupContentToolbar.toggle;
-
-        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-
-                toggleButton.onclick();
-
-            }
-        });
-
+        toggleButton = binding.groupContentToolbar.toggle;
 
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -131,28 +124,23 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
             }
         });
 
+        editText.setOnClickListener(this);
+
         Button button = binding.sendButton;
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                groupContentPresenter.sendTxt(inputText);
-
-            }
-        });
+        button.setOnClickListener(this);
 
         LinearLayout toggleLayout = binding.groupContentToolbar.toggleLayout;
-        toggleLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                toggleButton.onclick();
+        toggleLayout.setOnClickListener(this);
 
-            }
-        });
+        binding.addVoice.setOnClickListener(this);
 
+        binding.addButton.setOnClickListener(this);
 
+        binding.addEmoticon.setOnClickListener(this);
+
+        binding.chatContentLayout.setOnClickListener(this);
     }
 
     @Override
@@ -170,5 +158,37 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
     @Override
     public void clearEditText() {
         editText.getText().clear();
+    }
+
+    /**
+     * Called when a view has been clicked.
+     *
+     * @param v The view that was clicked.
+     */
+    @Override
+    public void onClick(View v) {
+
+        switch (v.getId()) {
+
+            case R.id.edit_text:
+            case R.id.add_voice:
+            case R.id.add_button:
+            case R.id.add_emoticon:
+            case R.id.chat_content_layout:
+
+                if (toggleButton.isExpandPing())
+                    toggleButton.collapsePing();
+
+                break;
+
+            case R.id.send_button:
+                groupContentPresenter.sendTxt(inputText);
+                break;
+            case R.id.toggle_layout:
+                toggleButton.onclick();
+                break;
+
+        }
+
     }
 }

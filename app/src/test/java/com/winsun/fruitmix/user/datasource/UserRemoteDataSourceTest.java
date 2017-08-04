@@ -113,18 +113,23 @@ public class UserRemoteDataSourceTest {
         BaseLoadDataCallback<User> callback = new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
-                assertTrue("can not enter here", false);
+
+                assertTrue("get user always call onSucceed", data.isEmpty());
+
             }
 
             @Override
             public void onFail(OperationResult operationResult) {
-                assertTrue(operationResult instanceof OperationIOException);
+
             }
         };
 
         HttpResponse httpResponse = new HttpResponse(404, "");
 
         try {
+
+            prepareHttpRequest();
+
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(httpResponse);
 
             userRemoteDataSource.getUsers(callback);
@@ -133,6 +138,13 @@ public class UserRemoteDataSourceTest {
             e.printStackTrace();
         }
 
+    }
+
+    private void prepareHttpRequest() {
+        HttpRequest httpRequest = new HttpRequest("", "");
+
+        when(httpRequestFactory.createHttpGetRequest(anyString())).thenReturn(httpRequest);
+        when(httpRequestFactory.createGetRequestByPathWithoutToken(anyString())).thenReturn(httpRequest);
     }
 
 
@@ -162,7 +174,9 @@ public class UserRemoteDataSourceTest {
 
         try {
 
-            when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(httpResponse);
+            prepareHttpRequest();
+
+            when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(httpResponse).thenReturn(new HttpResponse(404, ""));
 
             userRemoteDataSource.getUsers(new BaseLoadDataCallbackImpl<User>());
 
@@ -229,6 +243,9 @@ public class UserRemoteDataSourceTest {
                 "]");
 
         try {
+
+            prepareHttpRequest();
+
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(firstResponse).thenReturn(secondResponse);
 
             userRemoteDataSource.getUsers(callback);
@@ -238,6 +255,5 @@ public class UserRemoteDataSourceTest {
         }
 
     }
-
 
 }

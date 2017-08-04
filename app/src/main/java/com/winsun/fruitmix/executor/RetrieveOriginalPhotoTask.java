@@ -54,7 +54,7 @@ public class RetrieveOriginalPhotoTask implements Callable<Boolean> {
 
             try {
 
-                ResponseBody responseBody = new OkHttpUtil().downloadFile(httpRequest);
+                ResponseBody responseBody = OkHttpUtil.getInstance().downloadFile(httpRequest);
 
                 result = FileUtil.downloadMediaToOriginalPhotoFolder(responseBody, media);
 

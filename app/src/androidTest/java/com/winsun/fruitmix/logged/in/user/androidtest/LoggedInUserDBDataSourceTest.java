@@ -6,6 +6,7 @@ import android.support.test.runner.AndroidJUnit4;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDBDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
+import com.winsun.fruitmix.user.User;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,7 +31,7 @@ public class LoggedInUserDBDataSourceTest {
     @Before
     public void init() {
 
-        loggedInUserDataSource = new LoggedInUserDBDataSource(InstrumentationRegistry.getTargetContext());
+        loggedInUserDataSource = LoggedInUserDBDataSource.getInstance(InstrumentationRegistry.getTargetContext());
 
     }
 
@@ -82,5 +83,25 @@ public class LoggedInUserDBDataSourceTest {
 
     }
 
+    @Test
+    public void testSetCurrentLoginUser() {
+
+        User user = new User();
+
+        String testUserUUID = "testUserUUID";
+
+        user.setUuid(testUserUUID);
+
+        LoggedInUser loggedInUser = new LoggedInUser("", "", "", "", user);
+
+        loggedInUserDataSource.insertLoggedInUsers(Collections.singletonList(loggedInUser));
+
+        loggedInUserDataSource.setCurrentLoggedInUser(loggedInUser);
+
+        LoggedInUser currentLoggedInUser = loggedInUserDataSource.getCurrentLoggedInUser();
+
+        assertEquals(testUserUUID, currentLoggedInUser.getUser().getUuid());
+
+    }
 
 }

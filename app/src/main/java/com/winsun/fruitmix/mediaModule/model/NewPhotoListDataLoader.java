@@ -86,7 +86,7 @@ public enum NewPhotoListDataLoader {
         void onDataLoadFinished();
     }
 
-    public void retrieveData(final OnPhotoListDataListener listener) {
+    public void retrieveData(final OnPhotoListDataListener listener, final List<Media> medias) {
 
         if (!needRefreshData) {
             listener.onDataLoadFinished();
@@ -97,7 +97,7 @@ public enum NewPhotoListDataLoader {
             @Override
             protected Void doInBackground(Void... params) {
 
-                reloadData();
+                reloadData(medias);
 
                 return null;
             }
@@ -114,7 +114,7 @@ public enum NewPhotoListDataLoader {
 
     }
 
-    private void reloadData() {
+    private void reloadData(List<Media> medias) {
 
         String date;
         List<Media> mediaList;
@@ -125,38 +125,8 @@ public enum NewPhotoListDataLoader {
         mMapKeyIsPhotoPositionValueIsPhotoDate.clear();
         mMapKeyIsPhotoPositionValueIsPhoto.clear();
 
-        Collection<Media> medias = LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values();
-        Map<String, Media> remoteMediaMap = new HashMap<>(LocalCache.RemoteMediaMapKeyIsUUID);
 
-        Log.i(TAG, "reloadData: before load local key is date value is photo list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-
-        for (Media media : medias) {
-
-            String mediaUUID = media.getUuid();
-            remoteMediaMap.remove(mediaUUID);
-
-            date = media.getTime().substring(0, 10);
-            if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
-                mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
-            } else {
-                mPhotoDateGroups.add(date);
-                mediaList = new ArrayList<>();
-                mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
-            }
-
-            media.setLocal(true);
-            media.setDate(date);
-            media.setSelected(false);
-
-            mediaList.add(media);
-
-        }
-
-        Log.i(TAG, "reloadData: after load local key is date value is photo list: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
-
-        medias = remoteMediaMap.values();
-
-        Log.i(TAG, "reloadData: remote media length:" + medias.size());
+        Log.i(TAG, "reloadData: before load list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         for (Media media : medias) {
 
@@ -169,7 +139,6 @@ public enum NewPhotoListDataLoader {
                 mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
             }
 
-            media.setLocal(false);
             media.setDate(date);
             media.setSelected(false);
 
@@ -177,7 +146,7 @@ public enum NewPhotoListDataLoader {
 
         }
 
-        Log.i(TAG, "reloadData: after load remote key is date value is photo list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "reloadData: after list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         Collections.sort(mPhotoDateGroups, new Comparator<String>() {
             @Override

@@ -60,7 +60,6 @@ public class Util {
     public static final String GATEWAY = "gateway";
     public static final String USER_UUID = "user_uuid";
 
-    public static final String CURRENT_UPLOAD_DEVICE_ID = "current_upload_device_id";
     public static final String AUTO_UPLOAD_OR_NOT = "auto_upload_or_not";
 
     public static final String REMOTE_USER_CREATED = "remote_user_created";
@@ -86,6 +85,8 @@ public class Util {
     public static final String REFRESH_VIEW_AFTER_DATA_RETRIEVED = "refresh_view_after_data_retrieved";
 
     public static final String DOWNLOADED_FILE_RETRIEVED = "downloaded_file_retrieved";
+
+    public static final String SET_CURRENT_LOGIN_USER_AFTER_LOGIN = "set_current_login_user_after_login";
 
     public static final String RECOMMEND_ALBUM_CREATED = "recommend_album_created";
 

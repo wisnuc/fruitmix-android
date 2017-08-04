@@ -11,6 +11,7 @@ import com.winsun.fruitmix.account.manage.AccountManagePresenter;
 import com.winsun.fruitmix.account.manage.AccountManagePresenterImpl;
 import com.winsun.fruitmix.account.manage.AccountManageView;
 import com.winsun.fruitmix.databinding.ActivityAccountManageBinding;
+import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
@@ -34,7 +35,7 @@ public class AccountManageActivity extends BaseActivity implements AccountManage
 
         mAccountExpandableListView = binding.accountExpandableListView;
 
-        presenter = new AccountManagePresenterImpl(this);
+        presenter = new AccountManagePresenterImpl(this, InjectLoggedInUser.provideLoggedInUserRepository(this));
 
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 

@@ -53,7 +53,7 @@ public class RemoteTicketParserTest {
         try {
             String ticket = parser.parse(data);
 
-            assertEquals("/v1/tickets/373e3985-1ebe-46a1-a67b-9b2c7924d35c", ticket);
+            assertEquals("373e3985-1ebe-46a1-a67b-9b2c7924d35c", ticket);
 
 
         } catch (JSONException e) {

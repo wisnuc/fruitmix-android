@@ -11,9 +11,9 @@ import com.winsun.fruitmix.http.InjectHttp;
 
 public class InjectUser {
 
-    public static UserDataRepository provideRepository(Context context) {
+    public static UserDataRepositoryImpl provideRepository(Context context) {
 
-        return UserDataRepository.getInstance(new UserDBDataSourceImpl(DBUtils.getInstance(context)),
+        return UserDataRepositoryImpl.getInstance(new UserDBDataSourceImpl(DBUtils.getInstance(context)),
                 new UserRemoteDataSourceImpl(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory()));
 
     }

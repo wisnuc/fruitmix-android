@@ -52,7 +52,19 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     static {
         okHttpClient = new OkHttpClient.Builder().connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
                 .readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).addInterceptor(createHttpInterceptor()).build();
+    }
 
+    private static OkHttpUtil instance;
+
+    private OkHttpUtil() {
+    }
+
+    public static OkHttpUtil getInstance() {
+
+        if (instance == null)
+            instance = new OkHttpUtil();
+
+        return instance;
     }
 
     private static Interceptor createHttpInterceptor() {
@@ -67,8 +79,6 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
         RequestBody requestBody;
 
         Request request = null;
-
-        ResponseBody body;
 
         Request.Builder builder = generateRequestBuilder(httpRequest);
 

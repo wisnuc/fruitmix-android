@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/8/31.
  */
-public class RemoteUserParser implements RemoteDatasParser<User> {
+public class RemoteLoginUsersParser implements RemoteDatasParser<User> {
 
     @Override
     public List<User> parse(String json) throws JSONException {

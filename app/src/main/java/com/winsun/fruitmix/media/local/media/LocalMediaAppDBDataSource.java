@@ -17,7 +17,17 @@ public class LocalMediaAppDBDataSource {
 
     private DBUtils dbUtils;
 
-    public LocalMediaAppDBDataSource(Context context) {
+    private static LocalMediaAppDBDataSource instance;
+
+    public static LocalMediaAppDBDataSource getInstance(Context context) {
+
+        if(instance == null)
+            instance =new LocalMediaAppDBDataSource(context);
+
+        return instance;
+    }
+
+    private LocalMediaAppDBDataSource(Context context) {
         dbUtils = DBUtils.getInstance(context);
     }
 

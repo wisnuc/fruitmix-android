@@ -17,6 +17,7 @@ import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.model.UserCommentShowStrategy;
 import com.winsun.fruitmix.group.data.model.UserCommentViewFactory;
+import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
 import com.winsun.fruitmix.group.view.GroupContentView;
@@ -59,7 +60,10 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         this.groupRepository = groupRepository;
         this.groupContentViewModel = groupContentViewModel;
 
-        currentLoggedInUser = loggedInUserDataSource.getCurrentLoggedInUser().getUser();
+//        currentLoggedInUser = loggedInUserDataSource.getCurrentLoggedInUser().getUser();
+
+        currentLoggedInUser = new User();
+        currentLoggedInUser.setUuid(FakeGroupDataSource.MYSELF_UUID);
 
         groupContentAdapter = new GroupContentAdapter();
 
@@ -225,8 +229,6 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
             @Override
             public void onSucceed(UserComment data, OperationResult result) {
                 super.onSucceed(data, result);
-
-                currentPrivateGroup.addUserComment(data);
 
                 List<UserComment> userComments = currentPrivateGroup.getUserComments();
 

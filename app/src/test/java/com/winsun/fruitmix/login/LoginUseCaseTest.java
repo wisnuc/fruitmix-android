@@ -1,19 +1,25 @@
 package com.winsun.fruitmix.login;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
+import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.token.TokenRemoteDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 
+import org.greenrobot.eventbus.EventBus;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -36,7 +42,7 @@ import static org.junit.Assert.*;
 public class LoginUseCaseTest {
 
     @Mock
-    private LoggedInUserRepository loggedInUserRepository;
+    private LoggedInUserDataSource loggedInUserDataSource;
 
     @Mock
     private TokenRemoteDataSource tokenRemoteDataSource;
@@ -48,12 +54,21 @@ public class LoginUseCaseTest {
     private UserDataRepository userDataRepository;
 
     @Mock
-    private FileDownloadManager fileDownloadManager;
+    private StationFileRepository stationFileRepository;
 
     @Mock
     private SystemSettingDataSource systemSettingDataSource;
 
     private LoginUseCase loginUseCase;
+
+    @Mock
+    private ImageGifLoaderInstance imageGifLoaderInstance;
+
+    @Mock
+    private EventBus eventBus;
+
+    @Mock
+    private ThreadManager threadManager;
 
     @Captor
     private ArgumentCaptor<BaseLoadDataCallback<String>> loadTokenCallbackArgumentCaptor;
@@ -68,37 +83,65 @@ public class LoginUseCaseTest {
 
         LoginUseCase.destroyInstance();
 
-        loginUseCase = LoginUseCase.getInstance(loggedInUserRepository, tokenRemoteDataSource,
-                httpRequestFactory, userDataRepository, fileDownloadManager, systemSettingDataSource);
+        loginUseCase = LoginUseCase.getInstance(loggedInUserDataSource, tokenRemoteDataSource,
+                httpRequestFactory, userDataRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager);
 
     }
 
     @Test
     public void loginWithNoParamFail() {
 
-        boolean result = loginUseCase.loginWithNoParam();
+        loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>(){
 
-        verify(loggedInUserRepository).getCurrentLoggedInUser();
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
 
-        assertEquals(false, result);
+                toastFail();
+            }
 
-        verify(fileDownloadManager, never()).clearFileDownloadItems();
+            @Override
+            public void onFail(OperationResult result) {
+
+                assertFalse(result instanceof OperationSuccess);
+            }
+        });
+
+        verify(loggedInUserDataSource).getCurrentLoggedInUser();
+
+        verify(stationFileRepository, never()).clearDownloadFileRecordInCache();
 
     }
 
     @Test
     public void loginWithNoParamSucceed() {
 
-        when(loggedInUserRepository.getCurrentLoggedInUser()).thenReturn(new LoggedInUser());
+        when(loggedInUserDataSource.getCurrentLoggedInUser()).thenReturn(new LoggedInUser());
 
-        loginUseCase.loginWithNoParam();
+        loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>() {
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
 
-        verify(loggedInUserRepository).getCurrentLoggedInUser();
+                assertTrue(data);
+            }
+
+            @Override
+            public void onFail(OperationResult result) {
+                toastFail();
+            }
+        });
+
+        verify(loggedInUserDataSource).getCurrentLoggedInUser();
 
         verify(httpRequestFactory).setCurrentData(anyString(), anyString());
 
-        verify(fileDownloadManager).clearFileDownloadItems();
+        verify(imageGifLoaderInstance).setToken(anyString());
 
+        verify(stationFileRepository).clearDownloadFileRecordInCache();
+
+    }
+
+    private void toastFail() {
+        fail("should not enter here");
     }
 
     private String testGateway = "testGateway";
@@ -123,7 +166,9 @@ public class LoginUseCaseTest {
 
         verify(httpRequestFactory).setCurrentData(anyString(), anyString());
 
-        verify(fileDownloadManager).clearFileDownloadItems();
+        verify(imageGifLoaderInstance).setToken(anyString());
+
+        verify(stationFileRepository).clearDownloadFileRecordInCache();
 
         verify(callback).onSucceed(ArgumentMatchers.<String>anyList(), any(OperationResult.class));
 
@@ -141,7 +186,13 @@ public class LoginUseCaseTest {
 
         loadUserCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess());
 
-        verify(loggedInUserRepository).getAllLoggedInUsers();
+        verify(loggedInUserDataSource).getAllLoggedInUsers();
+
+        verify(loggedInUserDataSource).setCurrentLoggedInUser(any(LoggedInUser.class));
+
+        verify(loggedInUserDataSource).insertLoggedInUsers(ArgumentMatchers.<LoggedInUser>anyCollection());
+
+        verify(eventBus).postSticky(ArgumentMatchers.any(OperationEvent.class));
 
 
     }
@@ -149,7 +200,7 @@ public class LoginUseCaseTest {
     @Test
     public void testLoggedInUserEmptyWhenLoadUserSuccessAfterLoginSuccess() {
 
-        when(loggedInUserRepository.getAllLoggedInUsers()).thenReturn(Collections.<LoggedInUser>emptyList());
+        when(loggedInUserDataSource.getAllLoggedInUsers()).thenReturn(Collections.<LoggedInUser>emptyList());
 
         testLoadUserSuccessAfterLoginSuccess();
 
@@ -158,23 +209,16 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).setShowAutoUploadDialog(true);
 
-        verify(loggedInUserRepository).setCurrentLoggedInUser(any(LoggedInUser.class));
-
-        verify(loggedInUserRepository).insertLoggedInUsers(ArgumentMatchers.<LoggedInUser>anyCollection());
     }
 
     @Test
     public void testLoggedInUserNotEmptyWhenLoadUserSuccessAfterLoginSuccess() {
 
-        when(loggedInUserRepository.getAllLoggedInUsers()).thenReturn(Collections.singletonList(new LoggedInUser()));
+        when(loggedInUserDataSource.getAllLoggedInUsers()).thenReturn(Collections.singletonList(new LoggedInUser()));
 
         testLoadUserSuccessAfterLoginSuccess();
 
         verify(systemSettingDataSource).setShowAutoUploadDialog(false);
-
-        verify(loggedInUserRepository).setCurrentLoggedInUser(any(LoggedInUser.class));
-
-        verify(loggedInUserRepository).insertLoggedInUsers(ArgumentMatchers.<LoggedInUser>anyCollection());
 
     }
 
@@ -213,11 +257,19 @@ public class LoginUseCaseTest {
 
         LoggedInUser loggedInUser = new LoggedInUser(testDeviceID, testToken, testGateway, "", user);
 
-        when(loggedInUserRepository.getAllLoggedInUsers()).thenReturn(Collections.singletonList(loggedInUser));
+        when(loggedInUserDataSource.getAllLoggedInUsers()).thenReturn(Collections.singletonList(loggedInUser));
 
-        boolean result = loginUseCase.loginWithUser(user);
+        loginUseCase.loginWithUser(user, new BaseOperateDataCallback<Boolean>() {
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
+                assertTrue(data);
+            }
 
-        assertEquals(true, result);
+            @Override
+            public void onFail(OperationResult result) {
+                toastFail();
+            }
+        });
 
     }
 
@@ -227,14 +279,15 @@ public class LoginUseCaseTest {
 
         verify(httpRequestFactory).setCurrentData(testToken, testGateway);
 
-        verify(loggedInUserRepository).setCurrentLoggedInUser(any(LoggedInUser.class));
+        verify(imageGifLoaderInstance).setToken(anyString());
 
-        verify(fileDownloadManager).clearFileDownloadItems();
+        verify(loggedInUserDataSource).setCurrentLoggedInUser(any(LoggedInUser.class));
+
+        verify(stationFileRepository).clearDownloadFileRecordInCache();
 
         verify(userDataRepository).getUsers(any(BaseLoadDataCallback.class));
 
         verify(systemSettingDataSource).getCurrentUploadDeviceID();
-
 
     }
 

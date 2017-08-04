@@ -29,7 +29,17 @@ public class LocalMediaSystemDBDataSource {
 
     private ContentResolver contentResolver;
 
-    public LocalMediaSystemDBDataSource(Context context) {
+    private static LocalMediaSystemDBDataSource instance;
+
+    public static LocalMediaSystemDBDataSource getInstance(Context context) {
+
+        if(instance == null)
+            instance = new LocalMediaSystemDBDataSource(context);
+
+        return instance;
+    }
+
+    private LocalMediaSystemDBDataSource(Context context) {
 
         contentResolver = context.getContentResolver();
 

@@ -17,7 +17,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteUserJSONObjectParser;
-import com.winsun.fruitmix.parser.RemoteUserParser;
+import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -120,7 +120,7 @@ public class RetrieveRemoteUserService extends IntentService {
                 Log.d(TAG, "deviceID: " + LocalCache.getGlobalData(this, Util.DEVICE_ID_MAP_NAME));
             }
 
-            RemoteDatasParser<User> parser = new RemoteUserParser();
+            RemoteDatasParser<User> parser = new RemoteLoginUsersParser();
             List<User> otherUsers = parser.parse(FNAS.loadOtherUsers(this).getResponseData());
 
             addDifferentUsers(users, otherUsers);

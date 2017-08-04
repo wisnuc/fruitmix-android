@@ -31,17 +31,23 @@ import android.widget.Toast;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.BR;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.NewPhotoLayoutBinding;
 import com.winsun.fruitmix.databinding.NewPhotoTitleItemBinding;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
+import com.winsun.fruitmix.media.InjectMedia;
+import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
-import com.winsun.fruitmix.model.ImageGifLoaderInstance;
+import com.winsun.fruitmix.http.ImageGifLoaderInstance;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.util.Util;
@@ -125,6 +131,12 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private Animator scaleAnimator;
 
+    private MediaDataSourceRepository mediaDataSourceRepository;
+
+    private ThreadManager threadManager;
+
+    //TODO: image load instance need token, check login use case logic, load file logic is not refactor
+
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
@@ -168,6 +180,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         mTypeface = Typeface.createFromAsset(containerActivity.getAssets(), "fonts/Roboto-Medium.ttf");
 
+        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(containerActivity);
+
+        threadManager = ThreadManager.getInstance();
     }
 
     @Override
@@ -183,7 +198,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private void initImageLoader() {
 
-        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
+        ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderIntance();
         mImageLoader = imageGifLoaderInstance.getImageLoader(containerActivity);
 
     }
@@ -211,26 +226,80 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     @Override
     public void refreshView() {
 
-        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded()) {
+        threadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
 
-            initImageLoader();
+                getMediaInThread();
 
-            final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
+            }
+        });
 
-            loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
-                @Override
-                public void onDataLoadFinished() {
-                    doAfterReloadData(loader);
 
-                    mIsLoaded = true;
-                }
-            });
+//        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded()) {
+//
+//            initImageLoader();
+//
+//            final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
+//
+//            loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
+//                @Override
+//                public void onDataLoadFinished() {
+//                    doAfterReloadData(loader);
+//
+//                    mIsLoaded = true;
+//                }
+//            });
+//
+//        } else {
+//
+//            loadingViewModel.showLoading.set(true);
+//
+//        }
 
-        } else {
+    }
 
-            loadingViewModel.showLoading.set(true);
+    private void getMediaInThread(){
 
-        }
+        mediaDataSourceRepository.getMedia(new BaseLoadDataCallback<Media>() {
+            @Override
+            public void onSucceed(final List<Media> data, OperationResult operationResult) {
+
+                threadManager.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        initImageLoader();
+
+                        final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
+
+                        loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
+                            @Override
+                            public void onDataLoadFinished() {
+                                doAfterReloadData(loader);
+
+                                mIsLoaded = true;
+                            }
+                        }, data);
+
+
+                    }
+                });
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                threadManager.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        loadingViewModel.showLoading.set(true);
+                    }
+                });
+
+            }
+        });
 
     }
 

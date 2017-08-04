@@ -3,6 +3,7 @@ package com.winsun.fruitmix.executor;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.file.data.download.DownloadedItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.http.HttpRequest;
@@ -42,7 +43,7 @@ public class DownloadFileTask implements Callable<Boolean> {
         HttpRequest httpRequest = new HttpRequest(downloadFileUrl, Util.HTTP_GET_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
 
-        ResponseBody responseBody = new OkHttpUtil().downloadFile(httpRequest);
+        ResponseBody responseBody = OkHttpUtil.getInstance().downloadFile(httpRequest);
 
         Log.d(TAG, "call: downloadFile");
 
@@ -54,9 +55,11 @@ public class DownloadFileTask implements Callable<Boolean> {
 
             FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
 
-            fileDownloadItem.setFileTime(System.currentTimeMillis());
-            fileDownloadItem.setFileCreatorUUID(FNAS.userUUID);
-            dbUtils.insertDownloadedFile(fileDownloadItem);
+            DownloadedItem downloadedItem = new DownloadedItem(fileDownloadItem);
+
+            downloadedItem.setFileTime(System.currentTimeMillis());
+            downloadedItem.setFileCreatorUUID(FNAS.userUUID);
+            dbUtils.insertDownloadedFile(downloadedItem);
         }
 
         return result;

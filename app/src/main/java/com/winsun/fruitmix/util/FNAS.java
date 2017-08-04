@@ -3,7 +3,7 @@ package com.winsun.fruitmix.util;
 import android.content.Context;
 import android.util.Base64;
 
-import com.winsun.fruitmix.equipment.InjectEquipmentManger;
+import com.winsun.fruitmix.equipment.InjectEquipment;
 import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaRequestEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
@@ -12,6 +12,7 @@ import com.winsun.fruitmix.eventbus.UserRequestEvent;
 import com.winsun.fruitmix.http.CheckIpHttpUtil;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationTargetType;
@@ -174,7 +175,7 @@ public class FNAS {
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
 
-        return new OkHttpUtil().remoteCall(httpRequest);
+        return OkHttpUtil.getInstance().remoteCall(httpRequest);
 
     }
 
@@ -186,9 +187,9 @@ public class FNAS {
             LocalCache.initCurrentEquipmentName();
         }
 
-        OkHttpUtil okHttpUtil = new OkHttpUtil();
+        CheckIpHttpUtil iHttpFileUtil = CheckIpHttpUtil.getInstance(OkHttpUtil.getInstance(),InjectEquipment.provideEquipmentSearchManager(context));
 
-        return new CheckIpHttpUtil(okHttpUtil, LocalCache.currentEquipmentName, InjectEquipmentManger.provideEquipmentSearchManager(context)).remoteCall(httpRequest);
+        return CheckIpHttpUtil.getInstance(OkHttpUtil.getInstance(), InjectEquipment.provideEquipmentSearchManager(context)).remoteCall(httpRequest);
     }
 
     private static HttpResponse RemoteCallWithUrl(Context context, String url, String headerKey, String headerValue) throws MalformedURLException, IOException, SocketTimeoutException {
@@ -196,7 +197,7 @@ public class FNAS {
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
         httpRequest.setHeader(headerKey, headerValue);
 
-        return new OkHttpUtil().remoteCall(httpRequest);
+        return OkHttpUtil.getInstance().remoteCall(httpRequest);
 
     }
 

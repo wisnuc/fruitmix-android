@@ -7,8 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.databinding.BindingMethod;
-import android.databinding.BindingMethods;
 import android.databinding.DataBindingUtil;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
@@ -30,28 +28,37 @@ import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
-import com.winsun.fruitmix.equipment.InjectEquipmentManger;
+import com.winsun.fruitmix.equipment.InjectEquipment;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
-import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.file.view.FileDownloadActivity;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.invitation.ConfirmInviteUserActivity;
+import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
+import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.login.InjectLoginUseCase;
+import com.winsun.fruitmix.login.LoginUseCase;
+import com.winsun.fruitmix.logout.InjectLogoutUseCase;
+import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.mainpage.MainPagePresenter;
 import com.winsun.fruitmix.mainpage.MainPagePresenterImpl;
 import com.winsun.fruitmix.mainpage.MainPageView;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.equipment.EquipmentSearchManager;
-import com.winsun.fruitmix.model.ImageGifLoaderInstance;
+import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.OperationType;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.FNAS;
@@ -89,7 +96,7 @@ public class NavPagerActivity extends BaseActivity
 
     @Override
     public void gotoAccountManageActivity() {
-        startActivityForResult(new Intent(mContext,AccountManageActivity.class),START_ACCOUNT_MANAGE);
+        startActivityForResult(new Intent(mContext, AccountManageActivity.class), START_ACCOUNT_MANAGE);
     }
 
     @Override
@@ -99,16 +106,16 @@ public class NavPagerActivity extends BaseActivity
 
     @Override
     public void gotoConfirmInviteUserActivity() {
-        Util.startActivity(mContext,ConfirmInviteUserActivity.class);
+        Util.startActivity(mContext, ConfirmInviteUserActivity.class);
     }
 
     @Override
     public void loggedInUserItemOnClick(LoggedInUser loggedInUser) {
 
-
         showProgressDialog(String.format(getString(R.string.operating_title), getString(R.string.change_user)));
 
         startDiscovery(loggedInUser);
+
         mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT_MESSAGE, DISCOVERY_TIMEOUT_TIME);
     }
 
@@ -231,6 +238,14 @@ public class NavPagerActivity extends BaseActivity
 
     private MainPagePresenter mainPagePresenter;
 
+    private SystemSettingDataSource systemSettingDataSource;
+
+    private LoginUseCase loginUseCase;
+
+    private LogoutUseCase logoutUseCase;
+
+    private LoggedInUserDataSource loggedInUserDataSource;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -247,7 +262,13 @@ public class NavPagerActivity extends BaseActivity
 
         navPagerViewModel = new NavPagerViewModel();
 
-        mainPagePresenter = new MainPagePresenterImpl(mContext, navPagerViewModel, this);
+        loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
+
+        logoutUseCase = InjectLogoutUseCase.provideLogoutUseCase(mContext);
+
+        loggedInUserDataSource = InjectLoggedInUser.provideLoggedInUserRepository(mContext);
+
+        mainPagePresenter = new MainPagePresenterImpl(mContext, loggedInUserDataSource, navPagerViewModel, this);
 
         binding.setViewModel(navPagerViewModel);
 
@@ -261,8 +282,6 @@ public class NavPagerActivity extends BaseActivity
         toggle.syncState();*/
 
         initNavigationMenuRecyclerView();
-
-        refreshUserInNavigationView();
 
         mDrawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
@@ -299,13 +318,19 @@ public class NavPagerActivity extends BaseActivity
 
         mCustomHandler = new CustomHandler(this);
 
-        boolean needShowAutoUploadDialog = getIntent().getBooleanExtra(Util.NEED_SHOW_AUTO_UPLOAD_DIALOG, false);
+        systemSettingDataSource = SystemSettingDataSource.getInstance(this);
 
-        if (needShowAutoUploadDialog) {
-            showNeedAutoUploadDialog();
-        }
+        checkShowAutoUploadDialog();
+
+        refreshUserInNavigationView();
 
         Log.d(TAG, "onCreate: ");
+    }
+
+    private void checkShowAutoUploadDialog() {
+        if (systemSettingDataSource.getShowAutoUploadDialog()) {
+            showNeedAutoUploadDialog();
+        }
     }
 
     private void calcAlreadyUploadMediaCount() {
@@ -382,7 +407,7 @@ public class NavPagerActivity extends BaseActivity
     private void startDiscovery(final LoggedInUser loggedInUser) {
 
         if (mEquipmentSearchManager == null) {
-            mEquipmentSearchManager = InjectEquipmentManger.provideEquipmentSearchManager(mContext);
+            mEquipmentSearchManager = InjectEquipment.provideEquipmentSearchManager(mContext);
         }
 
         mEquipmentSearchManager.startDiscovery(new EquipmentSearchManager.IEquipmentDiscoveryListener() {
@@ -394,41 +419,59 @@ public class NavPagerActivity extends BaseActivity
 
     }
 
-    private void handleFoundEquipment(Equipment createdEquipment, LoggedInUser loggedInUser) {
+    private void handleFoundEquipment(Equipment createdEquipment, final LoggedInUser loggedInUser) {
         Log.d(TAG, "search equipment: loggedinuser equipment name: " + loggedInUser.getEquipmentName() + " createEquipment equipment name: " + createdEquipment.getEquipmentName());
 
         if (!loggedInUser.getEquipmentName().equals(createdEquipment.getEquipmentName()))
             return;
 
-        String hostAddress = createdEquipment.getHosts().get(0);
-
-        Log.i(TAG, "search equipment: hostAddress: " + hostAddress);
+        FNAS.handleLogout();
 
         dismissDialog();
+
         stopDiscovery();
 
         mCustomHandler.removeMessages(DISCOVERY_TIMEOUT_MESSAGE);
 
-        FNAS.handleLogout();
+        ThreadManager.getInstance().runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
 
-        FNAS.Gateway = Util.HTTP + hostAddress;
-        FNAS.userUUID = loggedInUser.getUser().getUuid();
-        FNAS.JWT = loggedInUser.getToken();
-        LocalCache.DeviceID = loggedInUser.getDeviceID();
+                loginUseCase.loginWithLoggedInUser(loggedInUser, new BaseOperateDataCallback<Boolean>() {
+                    @Override
+                    public void onSucceed(Boolean data, OperationResult result) {
 
-        LocalCache.saveToken(mContext, FNAS.JWT);
-        LocalCache.saveGateway(mContext, FNAS.Gateway);
-        LocalCache.saveUserUUID(mContext, FNAS.userUUID);
-        LocalCache.setGlobalData(mContext, Util.DEVICE_ID_MAP_NAME, LocalCache.DeviceID);
+                        handleLoginWithLoggedInUserSucceed();
 
-        FNAS.retrieveUser(mContext);
+                    }
 
-        if (Util.checkAutoUpload(mContext)) {
-            Toast.makeText(mContext, String.format(getString(R.string.success), getString(R.string.change_user)), Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
-        }
+                    @Override
+                    public void onFail(OperationResult result) {
 
+                        handleLoginWithLoggedInUserFail();
+
+                    }
+                });
+
+            }
+        });
+
+
+    }
+
+    private void handleLoginWithLoggedInUserSucceed() {
+        Toast.makeText(mContext, String.format(getString(R.string.success), getString(R.string.change_user)), Toast.LENGTH_SHORT).show();
+
+        handleFinishLoginWithLoggedInUser();
+    }
+
+    private void handleLoginWithLoggedInUserFail() {
+        Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
+
+        handleFinishLoginWithLoggedInUser();
+    }
+
+    private void handleFinishLoginWithLoggedInUser() {
         mediaMainFragment.refreshAllViews();
 
         mDrawerLayout.closeDrawer(GravityCompat.START);
@@ -443,8 +486,11 @@ public class NavPagerActivity extends BaseActivity
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                LocalCache.setCurrentUploadDeviceID(mContext, LocalCache.DeviceID);
-                LocalCache.setAutoUploadOrNot(mContext, true);
+                systemSettingDataSource.setShowAutoUploadDialog(false);
+
+                systemSettingDataSource.setCurrentUploadDeviceID(loggedInUserDataSource.getCurrentLoggedInUser().getDeviceID());
+
+                systemSettingDataSource.setAutoUploadOrNot(true);
 
                 EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
 
@@ -453,8 +499,10 @@ public class NavPagerActivity extends BaseActivity
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                LocalCache.setCurrentUploadDeviceID(mContext, "");
-                LocalCache.setAutoUploadOrNot(mContext, false);
+                systemSettingDataSource.setShowAutoUploadDialog(false);
+
+                systemSettingDataSource.setCurrentUploadDeviceID("");
+                systemSettingDataSource.setAutoUploadOrNot(false);
 
             }
         }).setCancelable(false).create().show();
@@ -482,7 +530,7 @@ public class NavPagerActivity extends BaseActivity
     protected void onDestroy() {
         super.onDestroy();
 
-        ImageGifLoaderInstance.INSTANCE.getImageLoader(mContext).cancelAllPreLoadMedia();
+        InjectHttp.provideImageGifLoaderIntance().getImageLoader(mContext).cancelAllPreLoadMedia();
 
         mContext = null;
 
@@ -518,11 +566,13 @@ public class NavPagerActivity extends BaseActivity
 
         String action = operationEvent.getAction();
 
-        if (action.equals(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED)) {
+        if (action.equals(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN)) {
 
             Log.i(TAG, "handleOperationEvent: refreshUser");
 
             EventBus.getDefault().removeStickyEvent(operationEvent);
+
+            checkShowAutoUploadDialog();
 
             refreshUserInNavigationView();
 
@@ -539,17 +589,12 @@ public class NavPagerActivity extends BaseActivity
 
     private void refreshUserInNavigationView() {
 
-        User user;
+        LoggedInUser loggedInUser = loggedInUserDataSource.getCurrentLoggedInUser();
 
-        if (LocalCache.RemoteUserMapKeyIsUUID == null) {
-            Log.w(TAG, "refreshUserInNavigationView: RemoteUserMapKeyIsUUID", new NullPointerException());
-        }
+        if (loggedInUser == null)
+            return;
 
-        if (FNAS.userUUID != null && LocalCache.RemoteUserMapKeyIsUUID != null && LocalCache.RemoteUserMapKeyIsUUID.containsKey(FNAS.userUUID)) {
-            user = LocalCache.RemoteUserMapKeyIsUUID.get(FNAS.userUUID);
-        } else {
-            user = LocalCache.getUser(mContext);
-        }
+        User user = loggedInUser.getUser();
 
         String userName = user.getUserName();
 
@@ -680,7 +725,7 @@ public class NavPagerActivity extends BaseActivity
             protected void onPreExecute() {
                 super.onPreExecute();
 
-                showProgressDialog( String.format(getString(R.string.operating_title), getString(R.string.logout)));
+                showProgressDialog(String.format(getString(R.string.operating_title), getString(R.string.logout)));
 
             }
 
@@ -689,9 +734,11 @@ public class NavPagerActivity extends BaseActivity
 
                 FNAS.handleLogout();
 
-                LocalCache.clearToken(mContext);
+//                LocalCache.clearToken(mContext);
+//
+//                FileDownloadManager.getInstance().clearFileDownloadItems();
 
-                FileDownloadManager.getInstance().clearFileDownloadItems();
+                logoutUseCase.logout();
 
                 return null;
             }

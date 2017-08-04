@@ -288,7 +288,7 @@ public class Media implements Parcelable {
             HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_POST_METHOD);
             httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
 
-            uploaded = new OkHttpUtil().uploadFile(httpRequest, this);
+            uploaded = OkHttpUtil.getInstance().uploadFile(httpRequest, this);
 
         }
 

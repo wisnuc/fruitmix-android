@@ -1,27 +1,28 @@
 package com.winsun.fruitmix.media;
 
+import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -29,7 +30,9 @@ import static org.mockito.Mockito.*;
  * Created by Administrator on 2017/7/19.
  */
 
-public class MediaDataSourceRepositoryTest {
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
+public class MediaDataSourceRepositoryImplTest {
 
     @Mock
     private LocalMediaRepository localMediaRepository;
@@ -40,7 +43,7 @@ public class MediaDataSourceRepositoryTest {
     @Mock
     private CalcMediaDigestStrategy calcMediaDigestStrategy;
 
-    private MediaDataSourceRepository mediaDataSourceRepository;
+    private MediaDataSourceRepositoryImpl mediaDataSourceRepositoryImpl;
 
     @Mock
     private BaseLoadDataCallback<Media> callback;
@@ -56,19 +59,19 @@ public class MediaDataSourceRepositoryTest {
 
         MockitoAnnotations.initMocks(this);
 
-        mediaDataSourceRepository = MediaDataSourceRepository.getInstance(localMediaRepository, stationMediaRepository, calcMediaDigestStrategy);
+        mediaDataSourceRepositoryImpl = MediaDataSourceRepositoryImpl.getInstance(localMediaRepository, stationMediaRepository, calcMediaDigestStrategy);
 
     }
 
     @After
     public void clean() {
-        MediaDataSourceRepository.destroyInstance();
+        MediaDataSourceRepositoryImpl.destroyInstance();
     }
 
     @Test
     public void testGetMediaCallbackNotCall() {
 
-        mediaDataSourceRepository.getMedia(callback);
+        mediaDataSourceRepositoryImpl.getMedia(callback);
 
         verify(localMediaRepository).setCalcMediaDigestStrategy(any(CalcMediaDigestStrategy.class));
 
@@ -85,7 +88,7 @@ public class MediaDataSourceRepositoryTest {
     @Test
     public void testGetMediaCallbackCall() {
 
-        mediaDataSourceRepository.getMedia(callback);
+        mediaDataSourceRepositoryImpl.getMedia(callback);
 
         verify(localMediaRepository).getMedia(localMediaLoadCallbackCaptor.capture());
 
@@ -101,9 +104,9 @@ public class MediaDataSourceRepositoryTest {
     @Test
     public void testGetMediaTwice() {
 
-        mediaDataSourceRepository.getMedia(new BaseLoadDataCallbackImpl<Media>());
+        mediaDataSourceRepositoryImpl.getMedia(new BaseLoadDataCallbackImpl<Media>());
 
-        mediaDataSourceRepository.getMedia(new BaseLoadDataCallbackImpl<Media>());
+        mediaDataSourceRepositoryImpl.getMedia(new BaseLoadDataCallbackImpl<Media>());
 
         verify(localMediaRepository).setCalcMediaDigestStrategy(any(CalcMediaDigestStrategy.class));
 

@@ -15,6 +15,7 @@ import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.init.system.InitSystem;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.Util;
 
@@ -39,12 +40,6 @@ public class MainActivity extends Activity {
         MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL);
 
         Util.setRemoteMediaLoaded(false);
-
-        FileDownloadManager.getInstance().initDBUtils(DBUtils.getInstance(getApplicationContext()));
-
-        HttpRequestFactory.destroyInstance();
-
-        ButlerService.startButlerService(getApplicationContext());
 
         Intent intent = new Intent();
         intent.setClass(MainActivity.this, SplashScreenActivity.class);

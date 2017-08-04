@@ -17,7 +17,17 @@ public class StationMediaRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     public static final String MEDIA_PARAMETER = "/media";
 
-    public StationMediaRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
+    private static StationMediaRemoteDataSource instance;
+
+    public static StationMediaRemoteDataSource getInstance(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
+
+        if(instance == null)
+            instance = new StationMediaRemoteDataSource(iHttpUtil,httpRequestFactory);
+
+        return instance;
+    }
+
+    private StationMediaRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
         super(iHttpUtil, httpRequestFactory);
     }
 

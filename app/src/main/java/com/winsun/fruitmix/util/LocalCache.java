@@ -12,6 +12,7 @@ import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 
 import java.io.File;
@@ -469,7 +470,7 @@ public class LocalCache {
     public static String getCurrentUploadDeviceID(Context context) {
         SharedPreferences sp;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        return sp.getString(Util.CURRENT_UPLOAD_DEVICE_ID, "");
+        return sp.getString(SystemSettingDataSource.CURRENT_UPLOAD_DEVICE_ID, "");
     }
 
     public static void setCurrentUploadDeviceID(Context context, String currentUploadDeviceID) {
@@ -477,7 +478,7 @@ public class LocalCache {
         SharedPreferences.Editor editor;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
-        editor.putString(Util.CURRENT_UPLOAD_DEVICE_ID, currentUploadDeviceID);
+        editor.putString(SystemSettingDataSource.CURRENT_UPLOAD_DEVICE_ID, currentUploadDeviceID);
         editor.apply();
     }
 

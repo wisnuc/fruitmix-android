@@ -72,6 +72,8 @@ public class ButlerService extends Service {
 
     private InvitationRemoteDataSource invitationRemoteDataSource;
 
+    public static boolean startRetrieveTicketTask = false;
+
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
         context.startService(intent);
@@ -93,6 +95,12 @@ public class ButlerService extends Service {
 
         initInvitationRemoteDataSource();
     }
+
+    public static void startRetrieveTicketTask() {
+
+        startRetrieveTicketTask = true;
+    }
+
 
     private void initInvitationRemoteDataSource() {
 
@@ -147,6 +155,9 @@ public class ButlerService extends Service {
                 case RETRIEVE_REMOTE_TICKETS:
 
                     ButlerService butlerService = weakReference.get();
+
+                    if (!ButlerService.startRetrieveTicketTask)
+                        return;
 
                     //TODO: check token is exist when call getInvitation
                     butlerService.initInvitationRemoteDataSource();

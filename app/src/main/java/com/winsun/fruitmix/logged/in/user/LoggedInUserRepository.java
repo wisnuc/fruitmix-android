@@ -21,6 +21,8 @@ public class LoggedInUserRepository implements LoggedInUserDataSource {
 
     private boolean loadedCurrentLoggedInUserFromDB = false;
 
+    private String currentLoggedInUserUUID;
+
     private LoggedInUserRepository(LoggedInUserDataSource loggedInUserDBDataSource) {
         this.loggedInUserDBDataSource = loggedInUserDBDataSource;
 
@@ -35,7 +37,7 @@ public class LoggedInUserRepository implements LoggedInUserDataSource {
         return instance;
     }
 
-    public static void destroyInstance(){
+    public static void destroyInstance() {
         instance = null;
     }
 
@@ -107,5 +109,15 @@ public class LoggedInUserRepository implements LoggedInUserDataSource {
 
     }
 
+    @Override
+    public String getCurrentLoggedInUserUUID() {
 
+        if (currentLoggedInUserUUID == null) {
+
+            currentLoggedInUserUUID = loggedInUserDBDataSource.getCurrentLoggedInUserUUID();
+
+        }
+
+        return currentLoggedInUserUUID;
+    }
 }

@@ -14,12 +14,15 @@ import com.winsun.fruitmix.databinding.AccountChildItemBinding;
 import com.winsun.fruitmix.databinding.AccountGroupItemBinding;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
+import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
@@ -41,11 +44,18 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
 
     private AccountExpandableListViewAdapter mAdapter;
 
-    public AccountManagePresenterImpl(AccountManageView view) {
+    private List<LoggedInUser> loggedInUsers;
+
+    private String currentUserUUID;
+
+    public AccountManagePresenterImpl(AccountManageView view, LoggedInUserDataSource loggedInUserDataSource) {
         this.view = view;
 
         mEquipmentNames = new ArrayList<>();
         mUsers = new ArrayList<>();
+
+        loggedInUsers = new ArrayList<>(loggedInUserDataSource.getAllLoggedInUsers());
+        currentUserUUID = loggedInUserDataSource.getCurrentLoggedInUser().getUser().getUuid();
 
         fillData();
 
@@ -60,9 +70,10 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
     private void fillData() {
 
         LoggedInUser loggedInUser;
-        for (int i = 0; i < LocalCache.LocalLoggedInUsers.size(); i++) {
 
-            loggedInUser = LocalCache.LocalLoggedInUsers.get(i);
+        for (int i = 0; i < loggedInUsers.size(); i++) {
+
+            loggedInUser = loggedInUsers.get(i);
             String equipmentName = loggedInUser.getEquipmentName();
 
             if (mEquipmentNames.contains(equipmentName)) {
@@ -258,7 +269,7 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
 
             mAdapter.notifyDataSetChanged();
 
-            if (user.getUuid().equals(FNAS.userUUID)) {
+            if (user.getUuid().equals(currentUserUUID)) {
                 mDeleteCurrentUser = true;
             } else {
                 mDeleteOtherUser = true;

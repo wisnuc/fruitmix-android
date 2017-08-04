@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.command.ChangeToDownloadPageCommand;
 import com.winsun.fruitmix.command.DownloadFileCommand;
@@ -43,6 +44,7 @@ import com.winsun.fruitmix.file.data.download.DownloadState;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.view.FileDownloadActivity;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
 import com.winsun.fruitmix.file.view.interfaces.HandleTitleCallback;
@@ -51,6 +53,8 @@ import com.winsun.fruitmix.file.view.viewmodel.FileViewModel;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -119,13 +123,20 @@ public class FilePresenter implements OnViewSelectListener {
 
     private ChangeToDownloadPageCommand.ChangeToDownloadPageCallback changeToDownloadPageCallback;
 
-    public FilePresenter(Activity activity, NoContentViewModel noContentViewModel, LoadingViewModel loadingViewModel,FileViewModel fileViewModel,
+    private StationFileRepository stationFileRepository;
+
+    private ThreadManager threadManager;
+
+    public FilePresenter(Activity activity, StationFileRepository stationFileRepository, NoContentViewModel noContentViewModel, LoadingViewModel loadingViewModel, FileViewModel fileViewModel,
                          HandleTitleCallback handleTitleCallback) {
         this.activity = activity;
+        this.stationFileRepository = stationFileRepository;
         this.noContentViewModel = noContentViewModel;
         this.loadingViewModel = loadingViewModel;
         this.fileViewModel = fileViewModel;
         this.handleTitleCallback = handleTitleCallback;
+
+        threadManager = ThreadManager.getInstance();
 
         init();
     }
@@ -161,7 +172,7 @@ public class FilePresenter implements OnViewSelectListener {
 
         if (!remoteFileLoaded) {
 
-            String userHome = LocalCache.getUserHome(activity);
+            String userHome = "";
 
             currentFolderUUID = userHome;
             currentFolderName = activity.getString(R.string.file);
@@ -173,10 +184,57 @@ public class FilePresenter implements OnViewSelectListener {
                 retrievedFolderNameList.add(currentFolderName);
             }
 
-            FNAS.retrieveRemoteFile(activity, currentFolderUUID, rootUUID);
+            getFile();
+
+//            FNAS.retrieveRemoteFile(activity, currentFolderUUID, rootUUID);
         }
 
 
+    }
+
+    private void getFile() {
+
+        threadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+
+                getFileInThread();
+
+            }
+        });
+
+    }
+
+    private void getFileInThread() {
+        stationFileRepository.getFile(currentFolderUUID, rootUUID, new BaseLoadDataCallback<AbstractRemoteFile>() {
+            @Override
+            public void onSucceed(final List<AbstractRemoteFile> data, OperationResult operationResult) {
+
+                threadManager.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        handleGetFileSucceed(data);
+
+                    }
+                });
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                threadManager.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        handleGetFileFail();
+
+                    }
+                });
+
+            }
+        });
     }
 
     public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
@@ -242,39 +300,54 @@ public class FilePresenter implements OnViewSelectListener {
             switch (result) {
                 case SUCCEED:
 
-                    remoteFileLoaded = true;
+                    List<AbstractRemoteFile> files = LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent) operationEvent).getFolderUUID()).listChildAbstractRemoteFileList();
 
-                    List<AbstractRemoteFile> abstractRemoteFileList = LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent) operationEvent).getFolderUUID()).listChildAbstractRemoteFileList();
-
-                    if (abstractRemoteFileList.size() == 0) {
-
-                        noContentViewModel.showNoContent.set(true);
-
-                        fileViewModel.showFileRecyclerView.set(false);
-                    } else {
-
-                        noContentViewModel.showNoContent.set(false);
-
-                        fileViewModel.showFileRecyclerView.set(true);
-
-                        abstractRemoteFiles.clear();
-                        abstractRemoteFiles.addAll(abstractRemoteFileList);
-
-                        sortFile(abstractRemoteFiles);
-
-                        fileRecyclerViewAdapter.notifyDataSetChanged();
-                    }
+                    handleGetFileSucceed(files);
 
                     break;
                 default:
 
-                    noContentViewModel.showNoContent.set(true);
+                    handleGetFileFail();
 
                     break;
             }
 
         }
 
+    }
+
+    private void handleGetFileFail() {
+
+        loadingViewModel.showLoading.set(false);
+
+        noContentViewModel.showNoContent.set(true);
+    }
+
+
+    private void handleGetFileSucceed(List<AbstractRemoteFile> files) {
+
+        loadingViewModel.showLoading.set(false);
+
+        remoteFileLoaded = true;
+
+        if (files.size() == 0) {
+
+            noContentViewModel.showNoContent.set(true);
+
+            fileViewModel.showFileRecyclerView.set(false);
+        } else {
+
+            noContentViewModel.showNoContent.set(false);
+
+            fileViewModel.showFileRecyclerView.set(true);
+
+            abstractRemoteFiles.clear();
+            abstractRemoteFiles.addAll(files);
+
+            sortFile(abstractRemoteFiles);
+
+            fileRecyclerViewAdapter.notifyDataSetChanged();
+        }
     }
 
     private void sortFile(List<AbstractRemoteFile> abstractRemoteFiles) {

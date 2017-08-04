@@ -5,14 +5,14 @@ import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.file.data.download.FileDownloadManager;
-import com.winsun.fruitmix.file.data.station.FileRepository;
+import com.winsun.fruitmix.file.data.station.StationFileRepositoryImpl;
 import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
-import com.winsun.fruitmix.media.MediaDataSourceRepository;
+import com.winsun.fruitmix.media.MediaDataSourceRepositoryImpl;
 import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.services.ButlerService;
-import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.user.datasource.UserDataRepositoryImpl;
 import com.winsun.fruitmix.util.FileUtil;
 
 /**
@@ -31,15 +31,15 @@ public class InitSystem {
 
         ButlerService.startButlerService(context);
 
-        UserDataRepository.destroyInstance();
+        UserDataRepositoryImpl.destroyInstance();
 
         StationMediaRepository.destroyInstance();
 
         LocalMediaRepository.destroyInstance();
 
-        MediaDataSourceRepository.destroyInstance();
+        MediaDataSourceRepositoryImpl.destroyInstance();
 
-        FileRepository.destroyInstance();
+        StationFileRepositoryImpl.destroyInstance();
 
         LoggedInUserRepository.destroyInstance();
 

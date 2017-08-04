@@ -15,9 +15,14 @@ import android.widget.LinearLayout;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.media.InjectMedia;
+import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
-import com.winsun.fruitmix.model.ImageGifLoaderInstance;
+import com.winsun.fruitmix.http.ImageGifLoaderInstance;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -70,6 +75,8 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
     private PhotoRecycleAdapter mPhotoRecycleAdapter;
 
+    private MediaDataSourceRepository mediaDataSourceRepository;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,28 +97,37 @@ public class TestPhotoListActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mPhotoRecycleAdapter);
         setupLayoutManager();
 
+        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
+
         refreshView();
     }
 
     public void refreshView() {
 
-        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded()) {
+        mediaDataSourceRepository.getMedia(new BaseLoadDataCallback<Media>() {
+            @Override
+            public void onSucceed(List<Media> data, OperationResult operationResult) {
 
-            initImageLoader();
+                initImageLoader();
 
-            final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
+                final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
 
-            loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
-                @Override
-                public void onDataLoadFinished() {
-                    doAfterReloadData(loader);
-                }
-            });
-        } else {
+                loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
+                    @Override
+                    public void onDataLoadFinished() {
+                        doAfterReloadData(loader);
 
-            mLoadingLayout.setVisibility(View.VISIBLE);
 
-        }
+                    }
+                }, data);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+                mLoadingLayout.setVisibility(View.VISIBLE);
+            }
+        });
 
     }
 
@@ -147,7 +163,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
     private void initImageLoader() {
 
-        ImageGifLoaderInstance imageGifLoaderInstance = ImageGifLoaderInstance.INSTANCE;
+        ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderIntance();
         mImageLoader = imageGifLoaderInstance.getImageLoader(this);
 
     }

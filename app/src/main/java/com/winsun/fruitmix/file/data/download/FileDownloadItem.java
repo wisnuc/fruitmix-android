@@ -15,9 +15,9 @@ public class FileDownloadItem {
     private String fileName;
     private String fileUUID;
     private long fileSize;
-    private long fileTime;
+
     private long fileCurrentDownloadSize;
-    private String fileCreatorUUID;
+
     private FileDownloadState fileDownloadState;
 
     private String parentFolderUUID;
@@ -75,22 +75,6 @@ public class FileDownloadItem {
 
     public String getFileUUID() {
         return fileUUID;
-    }
-
-    public void setFileTime(long fileTime) {
-        this.fileTime = fileTime;
-    }
-
-    public long getFileTime() {
-        return fileTime;
-    }
-
-    public String getFileCreatorUUID() {
-        return fileCreatorUUID;
-    }
-
-    public void setFileCreatorUUID(String fileCreatorUUID) {
-        this.fileCreatorUUID = fileCreatorUUID;
     }
 
     public String getParentFolderUUID() {

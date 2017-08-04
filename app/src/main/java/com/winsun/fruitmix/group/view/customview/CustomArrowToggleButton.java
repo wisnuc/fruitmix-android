@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatImageButton;
 import android.util.AttributeSet;
-import android.view.View;
 
 import com.winsun.fruitmix.R;
 
@@ -44,23 +43,35 @@ public class CustomArrowToggleButton extends AppCompatImageButton {
 
         if (arrowDown) {
 
-            arrowDown = false;
-            switchImageSource();
-
-            if (pingToggleListener != null)
-                pingToggleListener.onPingToggleArrowToUp();
+            collapsePing();
 
 
         } else {
 
-            arrowDown = true;
-            switchImageSource();
-
-            if (pingToggleListener != null)
-                pingToggleListener.onPingToggleArrowToDown();
+            expandPing();
 
         }
 
+    }
+
+    public boolean isExpandPing(){
+        return arrowDown;
+    }
+
+    private void expandPing() {
+        arrowDown = true;
+        switchImageSource();
+
+        if (pingToggleListener != null)
+            pingToggleListener.onPingToggleArrowToDown();
+    }
+
+    public void collapsePing() {
+        arrowDown = false;
+        switchImageSource();
+
+        if (pingToggleListener != null)
+            pingToggleListener.onPingToggleArrowToUp();
     }
 
 

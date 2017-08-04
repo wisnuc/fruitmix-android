@@ -31,9 +31,13 @@ import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.download.DownloadState;
+import com.winsun.fruitmix.file.data.download.DownloadedItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.interfaces.Page;
+import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
@@ -49,7 +53,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class FileDownloadFragment implements Page,OnViewSelectListener, IShowHideFragmentListener {
+public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHideFragmentListener {
 
     public static final String TAG = FileDownloadFragment.class.getSimpleName();
 
@@ -83,11 +87,11 @@ public class FileDownloadFragment implements Page,OnViewSelectListener, IShowHid
     private ToolbarViewModel toolbarViewModel;
 
     private ToolbarViewModel.ToolbarNavigationOnClickListener defaultListener;
-    
+
     private View view;
 
     private Activity activity;
-    
+
     public static final int DOWNLOADING_GROUP = 0;
     public static final int DOWNLOADING_CHILD = 1;
     public static final int DOWNLOADED_GROUP = 2;
@@ -156,11 +160,11 @@ public class FileDownloadFragment implements Page,OnViewSelectListener, IShowHid
     public void setToolbarViewModel(ToolbarViewModel toolbarViewModel) {
         this.toolbarViewModel = toolbarViewModel;
     }
-    
-    public FileDownloadFragment(Activity activity,ToolbarViewModel toolbarViewModel, ToolbarViewModel.ToolbarNavigationOnClickListener defaultListener) {
+
+    public FileDownloadFragment(Activity activity, ToolbarViewModel toolbarViewModel, ToolbarViewModel.ToolbarNavigationOnClickListener defaultListener) {
 
         this.activity = activity;
-        
+
         setToolbarViewModel(toolbarViewModel);
         setDefaultListener(defaultListener);
 
@@ -181,11 +185,16 @@ public class FileDownloadFragment implements Page,OnViewSelectListener, IShowHid
 
         nullCommand = new NullCommand();
 
-        view = onCreateView(activity.getLayoutInflater(),null);
-        
-        FNAS.retrieveDownloadedFile();
+        view = onCreateView(activity.getLayoutInflater(), null);
+
+        StationFileRepository fileRepository = InjectStationFileRepository.provideStationFileRepository(activity);
+
+        fileRepository.getCurrentLoginUserDownloadedFileRecord(InjectLoggedInUser.provideLoggedInUserRepository(activity).getCurrentLoggedInUserUUID());
+
+        refreshView();
+
     }
-    
+
     private View onCreateView(LayoutInflater inflater, ViewGroup container) {
 
         FragmentFileDownloadBinding fragmentFileDownloadBinding = FragmentFileDownloadBinding.inflate(inflater, container, false);
@@ -371,7 +380,7 @@ public class FileDownloadFragment implements Page,OnViewSelectListener, IShowHid
 
         if (selectMode) {
 
-            BottomMenuItem clearSelectItem = new BottomMenuItem(R.drawable.cancel,activity.getString(R.string.clear_select_item), showUnSelectModeViewCommand);
+            BottomMenuItem clearSelectItem = new BottomMenuItem(R.drawable.cancel, activity.getString(R.string.clear_select_item), showUnSelectModeViewCommand);
 
             bottomMenuItems.add(clearSelectItem);
 
@@ -379,13 +388,13 @@ public class FileDownloadFragment implements Page,OnViewSelectListener, IShowHid
             macroCommand.addCommand(new DeleteDownloadedFileCommand(selectDownloadedItemUUID));
             macroCommand.addCommand(showUnSelectModeViewCommand);
 
-            BottomMenuItem deleteSelectItem = new BottomMenuItem(R.drawable.del_user,activity.getString(R.string.delete_text), macroCommand);
+            BottomMenuItem deleteSelectItem = new BottomMenuItem(R.drawable.del_user, activity.getString(R.string.delete_text), macroCommand);
 
             bottomMenuItems.add(deleteSelectItem);
 
         } else {
 
-            BottomMenuItem selectItem = new BottomMenuItem(R.drawable.check,activity.getString(R.string.choose_text), showSelectModeViewCommand);
+            BottomMenuItem selectItem = new BottomMenuItem(R.drawable.check, activity.getString(R.string.choose_text), showSelectModeViewCommand);
 
             if (downloadedItems.isEmpty())
                 selectItem.setDisable(true);
@@ -394,7 +403,7 @@ public class FileDownloadFragment implements Page,OnViewSelectListener, IShowHid
 
         }
 
-        BottomMenuItem cancelMenuItem = new BottomMenuItem(R.drawable.close,activity.getString(R.string.cancel), nullCommand);
+        BottomMenuItem cancelMenuItem = new BottomMenuItem(R.drawable.close, activity.getString(R.string.cancel), nullCommand);
 
         bottomMenuItems.add(cancelMenuItem);
 

@@ -48,20 +48,16 @@ public class HttpRequestFactory {
     }
 
     public String getGateway() {
-        return FNAS.Gateway;
+        return gateway;
     }
 
     public String getToken() {
-        return FNAS.JWT;
+        return token;
     }
 
     public void setCurrentData(String token, String gateway) {
         setToken(token);
         setGateway(gateway);
-    }
-
-    public void setPort(int port) {
-        this.port = port;
     }
 
     public int getPort() {
@@ -74,12 +70,17 @@ public class HttpRequestFactory {
 
     }
 
-    public HttpRequest createHttpGetRequestWithFullUrl(String url) {
+    public HttpRequest createGetRequestByPathWithoutToken(String httpPath) {
+        return new HttpRequest(createUrl(httpPath), Util.HTTP_GET_METHOD);
+    }
+
+    private HttpRequest createHttpGetRequestWithFullUrl(String url) {
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, getTokenWithHead());
 
         return httpRequest;
     }
+
 
     public HttpRequest createHttpGetTokenRequest(LoadTokenParam loadTokenParam) {
 

@@ -16,6 +16,7 @@ import com.winsun.fruitmix.databinding.ActivityGroupListBinding;
 import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
+import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.data.viewmodel.GroupListViewModel;
 import com.winsun.fruitmix.group.presenter.GroupListPresenter;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
@@ -58,9 +59,7 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         view = binding.getRoot();
 
-        GroupDataSource fakeGroupDataSource = FakeGroupDataSource.getInstance();
-
-        GroupRepository groupRepository = GroupRepository.getInstance(fakeGroupDataSource);
+        GroupRepository groupRepository = InjectGroupDataSource.provideGroupRepository();
 
         groupListPresenter = new GroupListPresenter(this, groupRepository, loadingViewModel, noContentViewModel, groupListViewModel);
 

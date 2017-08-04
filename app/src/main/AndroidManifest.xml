@@ -87,7 +87,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".fileModule.LocalFileActivity"
+            android:name=".file.view.LocalFileActivity"
             android:screenOrientation="portrait" />
 
         <service
@@ -128,7 +128,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".fileModule.FileDownloadActivity"
+            android:name=".file.view.FileDownloadActivity"
             android:screenOrientation="portrait" />
 
         <activity android:name=".wxapi.WXEntryActivity" />

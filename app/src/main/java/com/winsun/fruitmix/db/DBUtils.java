@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.winsun.fruitmix.file.data.download.DownloadedItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
@@ -149,25 +150,25 @@ public class DBUtils {
     }
 
 
-    private ContentValues createDownloadedFileContentValues(FileDownloadItem fileDownloadItem) {
+    private ContentValues createDownloadedFileContentValues(DownloadedItem downloadedItem) {
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.FILE_KEY_NAME, fileDownloadItem.getFileName());
-        contentValues.put(DBHelper.FILE_KEY_SIZE, fileDownloadItem.getFileSize());
-        contentValues.put(DBHelper.FILE_KEY_UUID, fileDownloadItem.getFileUUID());
-        contentValues.put(DBHelper.FILE_KEY_TIME, fileDownloadItem.getFileTime());
-        contentValues.put(DBHelper.FILE_KEY_CREATOR_UUID, fileDownloadItem.getFileCreatorUUID());
+        contentValues.put(DBHelper.FILE_KEY_NAME, downloadedItem.getFileName());
+        contentValues.put(DBHelper.FILE_KEY_SIZE, downloadedItem.getFileSize());
+        contentValues.put(DBHelper.FILE_KEY_UUID, downloadedItem.getFileUUID());
+        contentValues.put(DBHelper.FILE_KEY_TIME, downloadedItem.getFileTime());
+        contentValues.put(DBHelper.FILE_KEY_CREATOR_UUID, downloadedItem.getFileCreatorUUID());
 
         return contentValues;
     }
 
-    public long insertDownloadedFile(FileDownloadItem fileDownloadItem) {
+    public long insertDownloadedFile(DownloadedItem downloadedItem) {
 
         openWritableDB();
 
         long returnValue = 0;
 
-        returnValue = database.insert(DBHelper.DOWNLOADED_FILE_TABLE_NAME, null, createDownloadedFileContentValues(fileDownloadItem));
+        returnValue = database.insert(DBHelper.DOWNLOADED_FILE_TABLE_NAME, null, createDownloadedFileContentValues(downloadedItem));
 
         return returnValue;
     }
@@ -284,7 +285,7 @@ public class DBUtils {
 
     }
 
-    public long deleteAllLoggedInUser(){
+    public long deleteAllLoggedInUser() {
         return deleteAllDataInTable(DBHelper.LOGGED_IN_USER_TABLE_NAME);
     }
 
@@ -393,14 +394,47 @@ public class DBUtils {
         return loggedInUsers;
     }
 
+    public LoggedInUser getCurrentLoggedInUser(String currentLoginUserUUID) {
+        openReadableDB();
 
-    public List<FileDownloadItem> getAllCurrentLoginUserDownloadedFile() {
+        LoggedInUser loggedInUser = null;
+
+        User user;
+        String gateway;
+        String equipmentName;
+        String token;
+        String deviceID;
+        LocalDataParser<User> parser = new LocalUserParser();
+
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOGGED_IN_USER_TABLE_NAME + " where " + DBHelper.USER_KEY_UUID + " = ?", new String[]{currentLoginUserUUID});
+
+        if (!cursor.moveToFirst())
+            return null;
+
+        user = parser.parse(cursor);
+
+        gateway = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_GATEWAY));
+        equipmentName = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_EQUIPMENT_NAME));
+        token = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_TOKEN));
+        deviceID = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_DEVICE_ID));
+
+        loggedInUser = new LoggedInUser(deviceID, token, gateway, equipmentName, user);
+
+        cursor.close();
+
+        close();
+
+        return loggedInUser;
+    }
+
+
+    public List<DownloadedItem> getAllCurrentLoginUserDownloadedFile(String currentUserUUID) {
 
         openReadableDB();
 
-        List<FileDownloadItem> fileDownloadItems = new ArrayList<>();
+        List<DownloadedItem> fileDownloadItems = new ArrayList<>();
 
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.DOWNLOADED_FILE_TABLE_NAME + " where " + DBHelper.FILE_KEY_CREATOR_UUID + " = ?", new String[]{FNAS.userUUID});
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.DOWNLOADED_FILE_TABLE_NAME + " where " + DBHelper.FILE_KEY_CREATOR_UUID + " = ?", new String[]{currentUserUUID});
         while (cursor.moveToNext()) {
 
             String fileName = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_NAME));
@@ -410,16 +444,19 @@ public class DBUtils {
 
             String fileCreatorUUID;
             if (cursor.isNull(cursor.getColumnIndex(DBHelper.FILE_KEY_CREATOR_UUID))) {
-                fileCreatorUUID = FNAS.userUUID;
+                fileCreatorUUID = currentUserUUID;
             } else {
                 fileCreatorUUID = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_CREATOR_UUID));
             }
 
             FileDownloadItem fileDownloadItem = new FileDownloadItem(fileName, fileSize, fileUUID);
-            fileDownloadItem.setFileTime(fileTime);
-            fileDownloadItem.setFileCreatorUUID(fileCreatorUUID);
 
-            fileDownloadItems.add(fileDownloadItem);
+            DownloadedItem downloadedItem = new DownloadedItem(fileDownloadItem);
+
+            downloadedItem.setFileTime(fileTime);
+            downloadedItem.setFileCreatorUUID(fileCreatorUUID);
+
+            fileDownloadItems.add(downloadedItem);
         }
 
         cursor.close();

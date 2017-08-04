@@ -13,10 +13,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
+import com.winsun.fruitmix.login.InjectLoginUseCase;
+import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
@@ -28,6 +33,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Collections;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -65,6 +71,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private String mEquipmentGroupName;
 
     private ProgressDialog mDialog;
+
+    private LoginUseCase loginUseCase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,13 +113,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         user.setDefaultAvatarBgColor(color);
 
         mUserDefaultPortrait.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
+
+        loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        EventBus.getDefault().register(this);
+
     }
 
     @Override
@@ -132,7 +143,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     protected void onStop() {
-        EventBus.getDefault().unregister(this);
+
 
         super.onStop();
     }
@@ -143,81 +154,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         mContext = null;
 
-        if (mDialog != null) {
+        dismissDialog();
+        mDialog = null;
+    }
+
+    private void dismissDialog() {
+        if (mDialog != null)
             mDialog.dismiss();
-            mDialog = null;
-        }
     }
 
-    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(OperationEvent operationEvent) {
-
-        String action = operationEvent.getAction();
-
-        switch (action) {
-            case Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED: {
-
-                EventBus.getDefault().removeStickyEvent(operationEvent);
-
-                if (mDialog != null)
-                    mDialog.dismiss();
-
-                OperationResult operationResult = operationEvent.getOperationResult();
-
-                if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
-
-                    DBUtils dbUtils = DBUtils.getInstance(this);
-                    LocalCache.LocalLoggedInUsers.addAll(dbUtils.getAllLoggedInUser());
-
-                    Log.i(TAG, "LocalLoggedInUsers size: " + LocalCache.LocalLoggedInUsers.size());
-
-                    if (LocalCache.LocalLoggedInUsers.isEmpty()) {
-
-                        LocalCache.setCurrentUploadDeviceID(mContext, LocalCache.DeviceID);
-                        LocalCache.setAutoUploadOrNot(mContext, true);
-
-                        saveLoggedUser();
-
-                        startNavPagerActivity(false);
-
-                    } else {
-
-                        saveLoggedUser();
-
-                        startNavPagerActivity(true);
-
-                    }
-
-                } else {
-
-                    Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
-                }
-
-                break;
-            }
-        }
-
-    }
-
-    private void saveLoggedUser() {
-        User currentUser = LocalCache.getUser(this);
-
-        LoggedInUser loggedInUser = new LoggedInUser(LocalCache.DeviceID, FNAS.JWT, FNAS.Gateway, mEquipmentGroupName, currentUser);
-        long result = DBUtils.getInstance(this).insertLoggedInUserInDB(Collections.singletonList(loggedInUser));
-
-        Log.i(TAG, "saveLoggedUser: result:" + result);
-
-        LocalCache.LocalLoggedInUsers.add(loggedInUser);
-    }
-
-    private void startNavPagerActivity(boolean needShowAutoUploadDialog) {
+    private void startNavPagerActivity() {
         Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
-        jumpIntent.putExtra(Util.NEED_SHOW_AUTO_UPLOAD_DIALOG, needShowAutoUploadDialog);
         startActivity(jumpIntent);
         LoginActivity.this.setResult(RESULT_OK);
         finish();
     }
-
 
     @Override
     public void onClick(View v) {
@@ -256,8 +207,39 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.login)), true, false);
 
+        final LoadTokenParam loadTokenParam = new LoadTokenParam(mGateway, mUserUUid, mPwd, mEquipmentGroupName);
+
+        ThreadManager.getInstance().runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                loginInThread(loadTokenParam);
+            }
+        });
+
+
         FNAS.retrieveRemoteToken(mContext, mGateway, mUserUUid, mPwd);
 
+    }
+
+    private void loginInThread(LoadTokenParam loadTokenParam) {
+        loginUseCase.loginWithLoadTokenParam(loadTokenParam, new BaseLoadDataCallback<String>() {
+            @Override
+            public void onSucceed(List<String> data, OperationResult operationResult) {
+
+                dismissDialog();
+
+                startNavPagerActivity();
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                dismissDialog();
+
+                Toast.makeText(LoginActivity.this, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 

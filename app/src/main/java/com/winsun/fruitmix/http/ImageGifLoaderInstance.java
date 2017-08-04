@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.model;
+package com.winsun.fruitmix.http;
 
 import android.content.Context;
 import android.support.v4.util.ArrayMap;
@@ -9,6 +9,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.gif.GifLruCache;
+import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
@@ -18,9 +19,7 @@ import java.util.Map;
  * Created by Administrator on 2017/1/12.
  */
 
-public enum ImageGifLoaderInstance {
-
-    INSTANCE;
+public class ImageGifLoaderInstance {
 
     public static final String TAG = ImageGifLoaderInstance.class.getSimpleName();
 
@@ -29,6 +28,24 @@ public enum ImageGifLoaderInstance {
     private GifLoader mGifLoader;
 
     private Map<String, String> headers;
+
+    private static ImageGifLoaderInstance instance;
+
+    private String token;
+
+    public static ImageGifLoaderInstance getInstance() {
+
+        if (instance == null)
+            instance = new ImageGifLoaderInstance();
+
+        return instance;
+    }
+
+    public void setToken(String token) {
+
+        this.token = token;
+
+    }
 
     public ImageLoader getImageLoader(Context context) {
 
@@ -39,8 +56,8 @@ public enum ImageGifLoaderInstance {
 
             if (headers == null) {
                 headers = new ArrayMap<>();
-                headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-                Log.i(TAG, "FNAS JWT: " + FNAS.JWT);
+                headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
+                Log.i(TAG, "FNAS JWT: " + token);
             }
 
             mImageLoader.setHeaders(headers);
@@ -59,8 +76,8 @@ public enum ImageGifLoaderInstance {
 
             if (headers == null) {
                 headers = new ArrayMap<>();
-                headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-                Log.i(TAG, "FNAS JWT: " + FNAS.JWT);
+                headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
+                Log.i(TAG, "FNAS JWT: " + token);
             }
 
             mImageLoader.setHeaders(headers);
