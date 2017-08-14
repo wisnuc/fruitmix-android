@@ -259,7 +259,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
-    private void getMediaInThread(){
+    private void getMediaInThread() {
 
         mediaDataSourceRepository.getMedia(new BaseLoadDataCallback<Media>() {
             @Override
@@ -317,6 +317,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getMapKeyIsPhotoPositionValueIsPhotoDate();
         mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
         medias = loader.getMedias();
+
+        clearSelectedPhoto();
 
         loadingViewModel.showLoading.set(false);
 
@@ -525,37 +527,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         return selectedMedias;
     }
 
-    @NonNull
-    public List<String> getSelectedImageUUIDs() {
-
-        List<String> selectedImageUUIDs = new ArrayList<>();
-
-        for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
-            for (Media media : mediaList) {
-                if (media.isSelected()) {
-
-                    String mediaUUID = media.getUuid();
-                    if (mediaUUID.isEmpty()) {
-                        mediaUUID = Util.CalcSHA256OfFile(media.getOriginalPhotoPath());
-                        media.setUuid(mediaUUID);
-                    }
-
-                    selectedImageUUIDs.add(mediaUUID);
-                }
-            }
-        }
-
-        if (alreadySelectedImageKeyArrayList != null) {
-            for (String mediaUUID : alreadySelectedImageKeyArrayList) {
-                if (!selectedImageUUIDs.contains(mediaUUID)) {
-                    selectedImageUUIDs.add(mediaUUID);
-                }
-            }
-        }
-
-        return selectedImageUUIDs;
-    }
-
     public void clearSelectedPhoto() {
 
         if (mMapKeyIsPhotoPositionValueIsPhoto == null || mMapKeyIsPhotoPositionValueIsPhoto.size() == 0)
@@ -567,7 +538,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             media = mMapKeyIsPhotoPositionValueIsPhoto.get(mMapKeyIsPhotoPositionValueIsPhoto.keyAt(i));
 
-            media.setSelected(false);
+            if (media != null)
+                media.setSelected(false);
         }
 
     }
@@ -610,7 +582,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 if (currentMedia == null) return;
 
-                View newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageThumbUrl(containerActivity));
+                View newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageThumbUrl());
 
                 if (newSharedElement == null)
                     newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageSmallThumbUrl(containerActivity));
@@ -935,6 +907,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
                 int selectNum = 0;
                 for (Media media : mediaList) {
+
+                    if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(media.getKey()))
+                        media.setSelected(true);
+
                     if (media.isSelected())
                         selectNum++;
                 }
@@ -1083,9 +1059,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (currentMedia == null) return;
 
-            Log.d(TAG, "refreshView: media uuid: " + currentMedia.getUuid());
+            Log.d(TAG, "refreshView: media key: " + currentMedia.getKey());
 
-            if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getUuid()))
+            if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getKey()))
                 currentMedia.setSelected(true);
 
             final ObservableBoolean showPhotoSelectImg = new ObservableBoolean(currentMedia.isSelected());
@@ -1109,7 +1085,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (!mIsFling) {
 
-                imageUrl = currentMedia.getImageThumbUrl(containerActivity);
+                imageUrl = currentMedia.getImageThumbUrl();
 
             } else {
 
@@ -1159,7 +1135,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                         if (!currentMedia.isSharing()) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.photo_not_sharing), Toast.LENGTH_SHORT).show();
                             return;
-                        } else if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getUuid())) {
+                        } else if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getKey())) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
                             return;
                         }

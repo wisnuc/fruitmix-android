@@ -9,8 +9,7 @@ import android.databinding.ObservableField;
 
 public class TextCommentViewModel {
 
-    public final ObservableBoolean isLeftMode = new ObservableBoolean();
-
     public final ObservableField<String> text = new ObservableField<>();
 
+    public final ObservableBoolean isLeftMode = new ObservableBoolean();
 }

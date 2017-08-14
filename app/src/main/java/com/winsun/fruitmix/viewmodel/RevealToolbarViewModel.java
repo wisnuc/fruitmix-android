@@ -7,6 +7,9 @@ import android.view.View;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.BaseView;
+import com.winsun.fruitmix.mediaModule.model.Media;
+
+import java.util.Collection;
 
 /**
  * Created by Administrator on 2017/6/29.
@@ -18,7 +21,9 @@ public class RevealToolbarViewModel {
 
     public final ObservableField<String> selectCountTitleText = new ObservableField<>();
 
-    public final ObservableInt enterSelectModeVisibility = new ObservableInt(View.GONE);
+    public final ObservableInt rightTextVisibility = new ObservableInt(View.GONE);
+
+    public final ObservableField<String> enterSelectModeText = new ObservableField<>();
 
     private BaseView baseView;
 
@@ -30,10 +35,20 @@ public class RevealToolbarViewModel {
         void onClick();
     }
 
+    public interface RevealToolbarRightTextOnClickListener {
+        void onRightTextClick();
+    }
+
+    private RevealToolbarRightTextOnClickListener revealToolbarRightTextOnClickListener;
+
     private RevealToolbarNavigationOnClickListener revealToolbarNavigationOnClickListener;
 
     public void setRevealToolbarNavigationOnClickListener(RevealToolbarNavigationOnClickListener revealToolbarNavigationOnClickListener) {
         this.revealToolbarNavigationOnClickListener = revealToolbarNavigationOnClickListener;
+    }
+
+    public void setRevealToolbarRightTextOnClickListener(RevealToolbarRightTextOnClickListener revealToolbarRightTextOnClickListener) {
+        this.revealToolbarRightTextOnClickListener = revealToolbarRightTextOnClickListener;
     }
 
     public void navigationOnClick() {
@@ -45,4 +60,12 @@ public class RevealToolbarViewModel {
         }
 
     }
+
+    public void rightTextOnClick() {
+
+        if (revealToolbarRightTextOnClickListener != null)
+            revealToolbarRightTextOnClickListener.onRightTextClick();
+
+    }
+
 }

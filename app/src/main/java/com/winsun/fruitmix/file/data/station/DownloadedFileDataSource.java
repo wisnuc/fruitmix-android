@@ -17,7 +17,7 @@ public interface DownloadedFileDataSource {
 
     void insertDownloadedFileRecord(DownloadedItem downloadedItem);
 
-    void deleteDownloadedFileRecord(List<DownloadedItem> downloadedItems,String currentLoginUserUUID);
+    void deleteDownloadedFileRecord(List<String> fileUUIDs,String currentLoginUserUUID);
 
     void clearDownloadFileRecordInCache();
 

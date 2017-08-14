@@ -155,9 +155,9 @@ public class StationFileRepositoryImpl implements StationFileRepository {
     }
 
     @Override
-    public void deleteDownloadedFileRecord(List<DownloadedItem> downloadedItems, String currentLoginUserUUID) {
+    public void deleteDownloadedFileRecord(List<String> fileUUIDs, String currentLoginUserUUID) {
 
-        downloadedFileDataSource.deleteDownloadedFileRecord(downloadedItems, currentLoginUserUUID);
+        downloadedFileDataSource.deleteDownloadedFileRecord(fileUUIDs, currentLoginUserUUID);
 
     }
 

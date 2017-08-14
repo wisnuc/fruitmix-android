@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.logged.in.user;
 
+import com.winsun.fruitmix.user.User;
+
 import java.util.ArrayList;
 import java.util.Collection;
 

@@ -1,7 +1,10 @@
 package com.winsun.fruitmix.media;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -19,6 +22,9 @@ import java.util.List;
  */
 
 public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository {
+
+    public static final String TAG = MediaDataSourceRepositoryImpl.class.getSimpleName();
+
     private static MediaDataSourceRepositoryImpl ourInstance;
 
     private LocalMediaRepository localMediaRepository;
@@ -144,4 +150,24 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
             callback.onFail(new OperationNoChanged());
     }
 
+    @Override
+    public void downloadMedia(List<Media> medias, BaseOperateDataCallback<Boolean> callback) {
+
+        Log.d(TAG, "call: begin retrieve original photo task");
+
+        for (Media media : medias) {
+
+            Log.d(TAG, "call: media uuid:" + media.getUuid());
+
+            stationMediaRepository.downloadMedia(media);
+        }
+
+        Log.d(TAG, "call: finish retrieve original photo task");
+
+        callback.onSucceed(true,new OperationSuccess());
+
+//        EventBus.getDefault().post(new OperationEvent(Util.SHARED_PHOTO_THUMB_RETRIEVED, null));
+
+
+    }
 }

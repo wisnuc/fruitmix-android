@@ -3,6 +3,7 @@ package com.winsun.fruitmix.file.data.download;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.executor.DownloadFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.util.FileUtil;
 
 import java.util.concurrent.Future;
@@ -13,13 +14,17 @@ import java.util.concurrent.Future;
 
 public class FileStartDownloadState extends FileDownloadState {
 
-    private DBUtils dbUtils;
+    private StationFileRepository stationFileRepository;
+
+    private String currentUserUUID;
 
 
-    public FileStartDownloadState(FileDownloadItem fileDownloadItem,DBUtils dbUtils) {
+    public FileStartDownloadState(FileDownloadItem fileDownloadItem,StationFileRepository stationFileRepository,String currentUserUUID) {
         super(fileDownloadItem);
 
-        this.dbUtils = dbUtils;
+        this.stationFileRepository = stationFileRepository;
+
+        this.currentUserUUID = currentUserUUID;
 
     }
 
@@ -36,7 +41,7 @@ public class FileStartDownloadState extends FileDownloadState {
         } else {
 
             ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-            DownloadFileTask downloadFileTask = new DownloadFileTask(this, dbUtils);
+            DownloadFileTask downloadFileTask = new DownloadFileTask(this, stationFileRepository,currentUserUUID);
             Future<Boolean> future = instance.doOneTaskInDownloadFileThreadPool(downloadFileTask);
 
             getFileDownloadItem().setFuture(future);

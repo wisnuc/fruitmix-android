@@ -6,7 +6,11 @@
 
         <variable
             name="ping"
-            type="com.winsun.fruitmix.group.data.model.Ping" />
+            type="com.winsun.fruitmix.group.data.model.Pin" />
+
+        <variable
+            name="pingView"
+            type="com.winsun.fruitmix.group.presenter.GroupContentPresenter.PinView"/>
 
 
     </data>
@@ -14,9 +18,10 @@
     <LinearLayout
         android:layout_width="116dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingLeft="4dp"
         android:clickable="true"
+        android:orientation="vertical"
+        android:onClick="@{()->pingView.onClick()}"
+        android:paddingLeft="4dp"
         android:paddingRight="4dp">
 
         <ImageView

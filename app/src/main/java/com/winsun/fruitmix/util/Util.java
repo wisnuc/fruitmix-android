@@ -97,6 +97,8 @@ public class Util {
     public static final String KEY_JWT_HEAD = "JWT ";
     public static final String KEY_BASE_HEAD = "Basic ";
 
+    public static final String KEY_GROUP_UUID = "key_group_uuid";
+
     public static final String ADD = "add";
     public static final String DELETE = "delete";
 
@@ -143,7 +145,7 @@ public class Util {
 
     public static final String DEFAULT_DATE = "1916-01-01";
 
-    public static final String KEY_ALREADY_SELECTED_IMAGE_UUID_ARRAYLIST = "key_already_selected_image_uuid_arraylist";
+    public static final String KEY_ALREADY_SELECTED_IMAGE_KEY_ARRAYLIST = "key_already_selected_image_key_arraylist";
 
     public static final String KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB = "key_transition_photo_need_show_thumb";
 

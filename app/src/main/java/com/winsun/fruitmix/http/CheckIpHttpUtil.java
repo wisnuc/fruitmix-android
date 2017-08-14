@@ -22,6 +22,8 @@ public class CheckIpHttpUtil implements IHttpUtil {
 
     public static final String TAG = CheckIpHttpUtil.class.getSimpleName();
 
+    private HttpRequestFactory httpRequestFactory;
+
     private IHttpUtil mIHttpUtil;
 
     private String mCurrentEquipmentName;
@@ -57,7 +59,7 @@ public class CheckIpHttpUtil implements IHttpUtil {
 
     private static CheckIpHttpUtil instance;
 
-    public static CheckIpHttpUtil getInstance(IHttpUtil iHttpUtil,EquipmentSearchManager equipmentSearchManager) {
+    public static CheckIpHttpUtil getInstance(IHttpUtil iHttpUtil, EquipmentSearchManager equipmentSearchManager) {
 
         if (instance == null)
             instance = new CheckIpHttpUtil(iHttpUtil, equipmentSearchManager);
@@ -83,6 +85,10 @@ public class CheckIpHttpUtil implements IHttpUtil {
         if (currentEquipmentName != null && !mCurrentEquipmentName.equals(currentEquipmentName))
             mCurrentEquipmentName = currentEquipmentName;
 
+    }
+
+    public void setHttpRequestFactory(HttpRequestFactory httpRequestFactory) {
+        this.httpRequestFactory = httpRequestFactory;
     }
 
     private boolean checkIp(String url) {
@@ -196,11 +202,16 @@ public class CheckIpHttpUtil implements IHttpUtil {
 
             mEquipmentSearchManager.stopDiscovery();
 
-            FNAS.Gateway = Util.HTTP + ip;
+            String gateway = Util.HTTP + ip;
+
+            if (httpRequestFactory != null)
+                httpRequestFactory.setGateway(gateway);
+
+//            FNAS.Gateway = Util.HTTP + ip;
 
             String url = httpRequest.getUrl();
 
-            url = Util.HTTP + ip + url.substring(url.indexOf("/", 7));
+            url = gateway + url.substring(url.indexOf("/", 7));
 
             httpRequest.setUrl(url);
 

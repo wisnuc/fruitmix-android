@@ -2,6 +2,7 @@ package com.winsun.fruitmix.fragment;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -30,12 +31,12 @@ import android.widget.Toast;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.SharpCurveInterpolator;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.databinding.NavPagerMainBinding;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
 import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
 import com.winsun.fruitmix.file.view.interfaces.HandleTitleCallback;
 import com.winsun.fruitmix.group.view.GroupListPage;
@@ -44,15 +45,12 @@ import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
-import com.winsun.fruitmix.media.MediaDataSourceRepositoryImpl;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.OperationTargetType;
-import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
-import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
@@ -124,6 +122,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private ToolbarViewModel.ToolbarNavigationOnClickListener defaultListener;
 
+    private MediaDataSourceRepository mediaDataSourceRepository;
+
     public MediaMainFragment() {
         // Required empty public constructor
     }
@@ -146,6 +146,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         super.onCreate(savedInstanceState);
 
         mContext = getActivity();
+
+        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
 
         initPageList();
 
@@ -197,7 +199,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         revealToolbarViewModel.selectCountTitleText.set(getString(R.string.choose_text));
 
-        revealToolbarViewModel.enterSelectModeVisibility.set(View.INVISIBLE);
+        revealToolbarViewModel.rightTextVisibility.set(View.INVISIBLE);
 
         revealToolbarViewModel.setRevealToolbarNavigationOnClickListener(new RevealToolbarViewModel.RevealToolbarNavigationOnClickListener() {
             @Override
@@ -268,7 +270,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         if (isHidden()) return;
 
-        if(viewPager.getCurrentItem() == PAGE_PHOTO)
+        if (viewPager.getCurrentItem() == PAGE_PHOTO)
             photoList.refreshView();
 
 
@@ -603,25 +605,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
             case Util.SHARED_PHOTO_THUMB_RETRIEVED:
 
-                if (mDialog == null || !mDialog.isShowing()) {
-                    return;
-                }
-
-                dismissDialog();
-
-                String path;
-                for (Media media : mSelectMedias) {
-                    path = media.getOriginalPhotoPath();
-
-                    if (!path.isEmpty())
-                        mSelectMediaOriginalPhotoPaths.add(path);
-                }
-
-                if (mSelectMediaOriginalPhotoPaths.isEmpty()) {
-                    Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
-                } else {
-                    Util.sendShareToOtherApp(getContext(), mSelectMediaOriginalPhotoPaths);
-                }
+                handleDownloadMedia();
 
                 break;
 
@@ -632,6 +616,28 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 break;
         }
 
+    }
+
+    private void handleDownloadMedia() {
+        if (mDialog == null || !mDialog.isShowing()) {
+            return;
+        }
+
+        dismissDialog();
+
+        String path;
+        for (Media media : mSelectMedias) {
+            path = media.getOriginalPhotoPath();
+
+            if (!path.isEmpty())
+                mSelectMediaOriginalPhotoPaths.add(path);
+        }
+
+        if (mSelectMediaOriginalPhotoPaths.isEmpty()) {
+            Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
+        } else {
+            Util.sendShareToOtherApp(getContext(), mSelectMediaOriginalPhotoPaths);
+        }
     }
 
 
@@ -801,23 +807,34 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private void showBottomNavAnim() {
 
-        new AnimatorBuilder(getContext(), R.animator.bottom_nav_translation_restore, bottomNavigationView)
-                .addAdapter(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
+        final int marginValue = Util.dip2px(getContext(), 56f);
 
-                        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
-                        lp.bottomMargin = Util.dip2px(getActivity(), 56.0f);
+        ObjectAnimator animator = ObjectAnimator.ofFloat(bottomNavigationView, "translationY", marginValue, 0)
+                .setDuration(200);
 
-                        viewPager.setLayoutParams(lp);
-                    }
-                }).setInterpolator(new FastOutSlowInInterpolator()).startAnimator();
+        animator.setInterpolator(new FastOutSlowInInterpolator());
+
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) viewPager.getLayoutParams();
+                lp.bottomMargin = marginValue;
+
+                viewPager.setLayoutParams(lp);
+            }
+        });
+
+        animator.start();
+
+//        new AnimatorBuilder(getContext(), R.animator.bottom_nav_translation_restore, bottomNavigationView)
+//                .addAdapter().setInterpolator(new FastOutSlowInInterpolator()).startAnimator();
 
     }
 
     private void showBottomNav() {
-        bottomNavigationView.setTranslationX(0);
+        bottomNavigationView.setTranslationY(0);
     }
 
     private void dismissBottomNavAnim() {
@@ -826,12 +843,19 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         lp.bottomMargin = 0;
         viewPager.setLayoutParams(lp);
 
-        new AnimatorBuilder(getContext(), R.animator.bottom_nav_translation, bottomNavigationView)
-                .setInterpolator(new FastOutSlowInInterpolator()).startAnimator();
+        ObjectAnimator animator = ObjectAnimator.ofFloat(bottomNavigationView, "translationY", 0, Util.dip2px(getContext(), 56f))
+                .setDuration(200);
+
+        animator.setInterpolator(new FastOutSlowInInterpolator());
+        animator.start();
+
+
+//        new AnimatorBuilder(getContext(), R.animator.bottom_nav_translation, bottomNavigationView)
+//                .setInterpolator(new FastOutSlowInInterpolator()).startAnimator();
     }
 
     private void dismissBottomNav() {
-        bottomNavigationView.setTranslationX(168);
+        bottomNavigationView.setTranslationY(168);
     }
 
     public boolean handleBackPressedOrNot() {
@@ -1011,7 +1035,17 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, true);
             mDialog.setCanceledOnTouchOutside(false);
 
-            EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, mSelectMedias));
+            mediaDataSourceRepository.downloadMedia(mSelectMedias,new BaseOperateDataCallbackImpl<Boolean>(){
+                @Override
+                public void onSucceed(Boolean data, OperationResult result) {
+                    super.onSucceed(data, result);
+
+                    handleDownloadMedia();
+                }
+            });
+
+//            EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, mSelectMedias));
+
         }
     }
 

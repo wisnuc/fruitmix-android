@@ -7,6 +7,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -97,6 +98,23 @@ public class StationMediaRepository {
 
             }
         });
+    }
+
+
+    public void downloadMedia(Media media) {
+
+        boolean result = false;
+
+        try {
+            result = stationMediaRemoteDataSource.downloadMedia(media);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (result)
+            stationMediaDBDataSource.updateMedia(media);
+
     }
 
 }

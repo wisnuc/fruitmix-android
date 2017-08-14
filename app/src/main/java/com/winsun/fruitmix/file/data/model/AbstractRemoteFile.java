@@ -12,19 +12,15 @@ import java.util.List;
  * Created by Administrator on 2016/10/25.
  */
 
-public abstract class AbstractRemoteFile {
+public abstract class AbstractRemoteFile extends AbstractFile{
 
     private String uuid;
-    private String name;
     private List<String> owners;
     private List<String> writeList;
     private List<String> readList;
-    private String time;
     private String size;
 
     private String parentFolderUUID;
-
-    private int fileTypeResID;
 
     AbstractRemoteFile() {
         owners = new ArrayList<>();
@@ -34,31 +30,11 @@ public abstract class AbstractRemoteFile {
         setFileTypeResID(R.drawable.file_icon);
     }
 
-    public abstract boolean isFolder();
-
-    public int getFileTypeResID() {
-        return fileTypeResID;
-    }
-
-    public void setFileTypeResID(int fileTypeResID) {
-        this.fileTypeResID = fileTypeResID;
-    }
-
     public abstract boolean openAbstractRemoteFile(Context context, String rootUUID);
 
     public abstract List<AbstractRemoteFile> listChildAbstractRemoteFileList();
 
     public abstract void initChildAbstractRemoteFileList(List<AbstractRemoteFile> abstractRemoteFiles);
-
-    public abstract String getTimeDateText();
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getUuid() {
         return uuid;
@@ -94,14 +70,6 @@ public abstract class AbstractRemoteFile {
 
     public List<String> getWriteList() {
         return Collections.unmodifiableList(writeList);
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
     }
 
     public String getSize() {

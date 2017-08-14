@@ -38,7 +38,6 @@
             android:name=".NavPagerActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".mediaModule.PhotoSliderActivity"
             android:configChanges="orientation|screenSize" />
@@ -46,7 +45,7 @@
             android:name=".SplashScreenActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".mediaModule.NewAlbumPicChooseActivity"
+            android:name=".mediaModule.NewPicChooseActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".PersonInfoActivity"
@@ -85,11 +84,6 @@
         <service
             android:name=".services.RetrieveDeviceIdService"
             android:exported="false" />
-
-        <activity
-            android:name=".file.view.LocalFileActivity"
-            android:screenOrientation="portrait" />
-
         <service
             android:name=".services.RetrieveRemoteFileService"
             android:exported="false" />
@@ -130,15 +124,28 @@
         <activity
             android:name=".file.view.FileDownloadActivity"
             android:screenOrientation="portrait" />
-
         <activity android:name=".wxapi.WXEntryActivity" />
-
         <activity
             android:name=".invitation.ConfirmInviteUserActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".group.view.GroupContentActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".group.view.CreateGroupActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".group.view.OperatePinActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".group.view.AddFriendActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".group.view.PinContentActivity"
             android:screenOrientation="portrait" />
 
     </application>

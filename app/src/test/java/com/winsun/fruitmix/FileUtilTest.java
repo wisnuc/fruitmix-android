@@ -72,7 +72,7 @@ public class FileUtilTest {
         assertEquals(R.drawable.txt, resID);
     }
 
-    @Test
+    @Ignore
     public void sortFile() {
 
         Comparator<String> fileNameComparator = new Comparator<String>() {

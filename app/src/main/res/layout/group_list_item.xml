@@ -62,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:text="@{privateGroup.lastCommentDate,default=刚刚}"
+                android:text="@{privateGroup.getLastCommentDate(context),default=刚刚}"
                 android:textColor="@color/thirty_eight_percent_black"
                 android:textSize="12dp" />
 

@@ -1,9 +1,12 @@
 package com.winsun.fruitmix.group.data.model;
 
+import android.content.Context;
+
 import com.winsun.fruitmix.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -16,20 +19,20 @@ public class PrivateGroup {
 
     private String name;
 
-    private List<User> friends;
+    private List<User> users;
 
     private List<UserComment> userComments;
 
-    private List<Ping> pings;
+    private List<Pin> pins;
 
-    public PrivateGroup(String uuid, String name, List<User> friends) {
+    public PrivateGroup(String uuid, String name, List<User> users) {
         this.uuid = uuid;
         this.name = name;
-        this.friends = friends;
+        this.users = users;
 
         userComments = new ArrayList<>();
 
-        pings = new ArrayList<>();
+        pins = new ArrayList<>();
     }
 
     public String getUUID() {
@@ -44,12 +47,12 @@ public class PrivateGroup {
         this.name = name;
     }
 
-    public List<User> getFriends() {
-        return friends;
+    public List<User> getUsers() {
+        return users;
     }
 
-    public void addFriend(User user) {
-        friends.add(user);
+    public void addUser(User user) {
+        users.add(user);
     }
 
     public List<UserComment> getUserComments() {
@@ -68,22 +71,65 @@ public class PrivateGroup {
         return userComments.get(userComments.size() - 1);
     }
 
-    public String getLastCommentDate() {
+    public String getLastCommentDate(Context context) {
 
-        return getLastComment().getDate();
+        return getLastComment().getDate(context);
 
     }
 
-    public List<Ping> getPings() {
-        return pings;
+    public List<Pin> getPins() {
+        return pins;
     }
 
-    public void addPing(Ping ping) {
-        pings.add(ping);
+    public void addPin(Pin pin) {
+        pins.add(pin);
     }
 
-    public void addPings(List<Ping> newPings){
-        pings.addAll(newPings);
+    public void addPins(List<Pin> newPins) {
+        pins.addAll(newPins);
     }
+
+    public Pin getPin(String pinUUID) {
+
+        List<Pin> pins = getPins();
+
+        for (Pin pin : pins) {
+            if (pin.getUuid().equals(pinUUID))
+                return pin;
+        }
+
+        return null;
+    }
+
+    public boolean deletePin(String pinUUID) {
+
+        List<Pin> pins = getPins();
+
+        Iterator<Pin> iterator = pins.iterator();
+
+        while (iterator.hasNext()) {
+            if (iterator.next().getUuid().equals(pinUUID)) {
+                iterator.remove();
+                return true;
+            }
+
+        }
+
+        return false;
+    }
+
+    public PrivateGroup cloneSelf() {
+
+        PrivateGroup privateGroup = new PrivateGroup(getUUID(), getName(), new ArrayList<>(getUsers()));
+
+        privateGroup.addUserComments(getUserComments());
+
+        for (Pin pin : getPins()) {
+            privateGroup.addPin(pin.cloneSelf());
+        }
+
+        return privateGroup;
+    }
+
 
 }

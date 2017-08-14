@@ -6,7 +6,7 @@
 
         <variable
             name="file"
-            type="com.winsun.fruitmix.file.data.model.AbstractRemoteFile" />
+            type="com.winsun.fruitmix.file.data.model.AbstractFile" />
 
         <variable
             name="fileItemViewModel"

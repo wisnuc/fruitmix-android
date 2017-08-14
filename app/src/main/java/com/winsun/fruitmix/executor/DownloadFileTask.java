@@ -2,10 +2,12 @@ package com.winsun.fruitmix.executor;
 
 import android.util.Log;
 
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.file.data.download.DownloadedItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.util.FNAS;
@@ -26,11 +28,15 @@ public class DownloadFileTask implements Callable<Boolean> {
 
     private FileDownloadState fileDownloadState;
 
-    private DBUtils dbUtils;
+    private StationFileRepository stationFileRepository;
 
-    public DownloadFileTask(FileDownloadState fileDownloadState, DBUtils dbUtils) {
+    private String currentUserUUID;
+
+    public DownloadFileTask(FileDownloadState fileDownloadState, StationFileRepository stationFileRepository,String currentUserUUID) {
         this.fileDownloadState = fileDownloadState;
-        this.dbUtils = dbUtils;
+        this.stationFileRepository = stationFileRepository;
+
+        this.currentUserUUID = currentUserUUID;
     }
 
     @Override
@@ -38,7 +44,11 @@ public class DownloadFileTask implements Callable<Boolean> {
 
         //TODO:add file state(downloading,pending,finishing.etc) and scheduler,use state mode and do function:1.log child node 2.log parent node 3.find node and return
 
-        String downloadFileUrl = FNAS.getDownloadFileUrl(fileDownloadState.getFileUUID(), fileDownloadState.getParentFolderUUID());
+        stationFileRepository.downloadFile(currentUserUUID,fileDownloadState,new BaseOperateDataCallbackImpl<FileDownloadItem>());
+
+        return true;
+
+/*        String downloadFileUrl = FNAS.getDownloadFileUrl(fileDownloadState.getFileUUID(), fileDownloadState.getParentFolderUUID());
 
         HttpRequest httpRequest = new HttpRequest(downloadFileUrl, Util.HTTP_GET_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
@@ -62,7 +72,7 @@ public class DownloadFileTask implements Callable<Boolean> {
             dbUtils.insertDownloadedFile(downloadedItem);
         }
 
-        return result;
+        return result;*/
     }
 
 }

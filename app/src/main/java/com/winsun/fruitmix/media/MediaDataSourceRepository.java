@@ -1,7 +1,10 @@
 package com.winsun.fruitmix.media;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.mediaModule.model.Media;
+
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/7/28.
@@ -9,6 +12,8 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 
 public interface MediaDataSourceRepository {
 
-    void getMedia(final BaseLoadDataCallback<Media> callback);
+    void getMedia(BaseLoadDataCallback<Media> callback);
+
+    void downloadMedia(List<Media> medias, BaseOperateDataCallback<Boolean> callback);
 
 }

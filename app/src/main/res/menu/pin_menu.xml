@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/add_media"
+        android:title="添加照片"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/add_file"
+        android:title="添加文件"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/modify_pin"
+        android:title="编辑置顶属性"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/modify_pin_content"
+        android:title="编辑置顶内容"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/delete_pin"
+        android:title="删除该置顶"
+        app:showAsAction="never" />
+
+</menu>

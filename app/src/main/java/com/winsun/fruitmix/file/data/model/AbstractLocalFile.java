@@ -4,18 +4,9 @@ package com.winsun.fruitmix.file.data.model;
  * Created by Administrator on 2016/10/25.
  */
 
-public abstract class AbstractLocalFile {
+public abstract class AbstractLocalFile extends AbstractFile{
 
-    private String name;
     private String path;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getPath() {
         return path;
@@ -25,6 +16,6 @@ public abstract class AbstractLocalFile {
         this.path = path;
     }
 
-    public abstract boolean isFolder();
+
 
 }

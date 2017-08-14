@@ -4,10 +4,18 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+
+import okhttp3.ResponseBody;
 
 /**
  * Created by Administrator on 2017/7/18.
@@ -19,16 +27,19 @@ public class StationMediaRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     private static StationMediaRemoteDataSource instance;
 
-    public static StationMediaRemoteDataSource getInstance(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
+    private IHttpFileUtil iHttpFileUtil;
+
+    public static StationMediaRemoteDataSource getInstance(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory,IHttpFileUtil iHttpFileUtil) {
 
         if(instance == null)
-            instance = new StationMediaRemoteDataSource(iHttpUtil,httpRequestFactory);
+            instance = new StationMediaRemoteDataSource(iHttpUtil,httpRequestFactory,iHttpFileUtil);
 
         return instance;
     }
 
-    private StationMediaRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
+    private StationMediaRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory,IHttpFileUtil iHttpFileUtil) {
         super(iHttpUtil, httpRequestFactory);
+        this.iHttpFileUtil = iHttpFileUtil;
     }
 
     public void getMedia(BaseLoadDataCallback<Media> callback) {
@@ -38,5 +49,16 @@ public class StationMediaRemoteDataSource extends BaseRemoteDataSourceImpl {
         wrapper.loadCall(httpRequest, callback, new RemoteMediaParser());
 
     }
+
+    boolean downloadMedia(Media media) throws MalformedURLException, IOException, SocketTimeoutException {
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(MEDIA_PARAMETER + "/" + media.getUuid() + "/download");
+
+        ResponseBody responseBody = iHttpFileUtil.downloadFile(httpRequest);
+
+        return FileUtil.downloadMediaToOriginalPhotoFolder(responseBody,media);
+
+    }
+
 
 }

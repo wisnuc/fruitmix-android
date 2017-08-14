@@ -50,6 +50,7 @@ import com.winsun.fruitmix.file.view.interfaces.HandleTitleCallback;
 import com.winsun.fruitmix.file.view.viewmodel.FileItemViewModel;
 import com.winsun.fruitmix.file.view.viewmodel.FileViewModel;
 import com.winsun.fruitmix.interfaces.Page;
+import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
@@ -94,7 +95,9 @@ public class FileFragment implements Page, IShowHideFragmentListener {
 
         view = onCreateView();
 
-        filePresenter = new FilePresenter(activity, InjectStationFileRepository.provideStationFileRepository(activity), noContentViewModel, loadingViewModel, fileViewModel, handleTitleCallback);
+        filePresenter = new FilePresenter(activity, InjectStationFileRepository.provideStationFileRepository(activity),
+                noContentViewModel, loadingViewModel, fileViewModel, handleTitleCallback,
+                InjectLoggedInUser.provideLoggedInUserRepository(activity).getCurrentLoggedInUserUUID());
 
         fileRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
         fileRecyclerView.setItemAnimator(new DefaultItemAnimator());

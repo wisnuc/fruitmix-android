@@ -38,7 +38,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="15dp"
                 android:onClick="@{()->toolbarViewModel.toolbarSelectBtnOnClick()}"
-                android:text="@string/choose_text"
+                android:text="@{toolbarViewModel.selectTextResID,default=@string/choose_text}"
                 android:textColor="@color/eighty_seven_percent_black"
                 android:textSize="16dp"
                 android:visibility="@{toolbarViewModel.showSelect?View.VISIBLE:View.GONE,default=gone}" />

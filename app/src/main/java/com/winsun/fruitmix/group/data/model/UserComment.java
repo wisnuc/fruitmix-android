@@ -31,16 +31,19 @@ public class UserComment {
         return creator;
     }
 
-    public String getDate() {
+    public String getDate(Context context) {
 
-        return formatTime(time);
+        return formatTime(context,time);
 
     }
 
-    private String formatTime(long time) {
+    private String formatTime(Context context,long time) {
 
         if (date == null) {
-            return "刚刚";
+
+            date = Util.formatTime(context,time);
+
+            return date;
         } else
             return date;
 

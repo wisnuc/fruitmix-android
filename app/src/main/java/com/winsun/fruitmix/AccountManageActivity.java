@@ -27,7 +27,6 @@ public class AccountManageActivity extends BaseActivity implements AccountManage
 
     public static final int START_EQUIPMENT_SEARCH = 0x1001;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

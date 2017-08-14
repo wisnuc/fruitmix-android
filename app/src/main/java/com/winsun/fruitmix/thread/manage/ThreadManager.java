@@ -5,6 +5,8 @@ import android.os.Looper;
 
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 
+import java.util.concurrent.Callable;
+
 /**
  * Created by Administrator on 2017/7/12.
  */
@@ -37,6 +39,12 @@ public class ThreadManager {
         executorServiceInstance.doOneTaskInCachedThread(runnable);
 
     }
+
+    public void runOnCacheThread(Callable<Boolean> callable){
+
+        executorServiceInstance.doOneTaskInCachedThreadUsingCallable(callable);
+    }
+
 
     public void runOnMainThread(Runnable runnable) {
 

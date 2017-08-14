@@ -24,7 +24,8 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#F5F5F5">
 
         <include
             android:id="@+id/group_content_toolbar"
@@ -37,73 +38,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/group_content_toolbar"
-            android:layout_marginBottom="16dp"
-            android:layout_marginTop="16dp"
+            android:background="@color/white"
+            android:paddingBottom="16dp"
+            android:paddingTop="16dp"
             android:visibility="@{groupContentViewModel.showPing?View.VISIBLE:View.GONE,default=visible}" />
 
-        <RelativeLayout
+        <com.winsun.fruitmix.group.view.customview.InputChatLayout
+            android:id="@+id/input_chat_layout"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_alignParentBottom="true">
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true" />
 
-            <ImageButton
-                android:id="@+id/add_voice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="8dp"
-                android:background="@null"
-                android:src="@drawable/ic_keyboard_voice_black_24dp" />
-
-            <ImageButton
-                android:id="@+id/add_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="16dp"
-                android:background="@null"
-                android:src="@drawable/ic_add_circle_outline_black_24dp" />
-
-            <Button
-                android:id="@+id/send_button"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_alignParentRight="true"
-                android:text="发送"
-                android:visibility="@{groupContentViewModel.showSendBtn?View.VISIBLE:View.GONE,default=gone}" />
-
-            <ImageButton
-                android:id="@+id/add_emoticon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="8dp"
-                android:layout_toLeftOf="@id/add_button"
-                android:background="@null"
-                android:src="@drawable/ic_insert_emoticon_black_24dp" />
-
-
-            <EditText
-                android:id="@+id/edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="8dp"
-                android:layout_toLeftOf="@id/add_emoticon"
-                android:layout_toRightOf="@id/add_voice" />
-
-        </RelativeLayout>
 
         <FrameLayout
             android:id="@+id/chat_content_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/ping_recyclerview"
-            android:layout_marginBottom="56dp"
-            android:background="@color/gray">
+            android:layout_above="@id/input_chat_layout"
+            android:layout_below="@id/ping_recyclerview">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/chat_recyclerview"
@@ -111,6 +63,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
+                android:paddingBottom="16dp"
                 android:paddingTop="16dp" />
 
             <TextView
@@ -128,7 +81,6 @@
 
 
         </FrameLayout>
-
 
     </RelativeLayout>
 

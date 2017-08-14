@@ -409,7 +409,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
             if (!mIsFling) {
 
-                imageUrl = currentMedia.getImageThumbUrl(mContext);
+                imageUrl = currentMedia.getImageThumbUrl();
 
             } else {
 

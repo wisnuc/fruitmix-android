@@ -1,0 +1,126 @@
+package com.winsun.fruitmix.group.view.customview;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.FrameLayout;
+
+import com.android.volley.toolbox.ImageLoader;
+import com.winsun.fruitmix.databinding.MultiFileCommentBinding;
+import com.winsun.fruitmix.databinding.SingleFileBinding;
+import com.winsun.fruitmix.databinding.SinglePhotoBinding;
+import com.winsun.fruitmix.file.data.model.AbstractFile;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
+import com.winsun.fruitmix.group.data.model.MultiPhotoComment;
+import com.winsun.fruitmix.group.data.model.MultiFileComment;
+import com.winsun.fruitmix.group.data.model.UserComment;
+import com.winsun.fruitmix.mediaModule.model.Media;
+
+import java.util.List;
+
+/**
+ * Created by Administrator on 2017/8/8.
+ */
+
+public class MultiFileCommentView extends UserCommentView {
+
+    private MultiFileCommentBinding binding;
+
+    private ImageLoader imageLoader;
+
+    public MultiFileCommentView(ImageLoader imageLoader) {
+        this.imageLoader = imageLoader;
+    }
+
+    @Override
+    protected View generateContentView(Context context) {
+
+        binding = MultiFileCommentBinding.inflate(LayoutInflater.from(context), null, false);
+
+        return binding.getRoot();
+    }
+
+    @Override
+    protected void refreshContent(Context context, UserComment data, boolean isLeftModel) {
+
+        FrameLayout[] frameLayouts = {binding.pic0, binding.pic1, binding.pic2, binding.pic3, binding.pic4, binding.pic5};
+
+        int size;
+
+        if (data instanceof MultiPhotoComment) {
+
+            MultiPhotoComment comment = (MultiPhotoComment) data;
+
+            List<Media> medias = comment.getMedias();
+
+            size = medias.size();
+
+            hideItem(frameLayouts, size);
+
+            for (int i = 0; i < medias.size(); i++) {
+
+                Media media = medias.get(i);
+
+                String url = media.getImageThumbUrl();
+
+                SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), null, false);
+
+                frameLayouts[i].addView(singlePhotoBinding.getRoot());
+
+                media.setImageUrl(singlePhotoBinding.coverImg, url, imageLoader);
+
+            }
+
+        } else if (data instanceof MultiFileComment) {
+
+            MultiFileComment comment = (MultiFileComment) data;
+
+            List<AbstractFile> files = comment.getFiles();
+
+            size = files.size();
+
+            hideItem(frameLayouts, size);
+
+            for (int i = 0; i < files.size(); i++) {
+
+                AbstractFile file = files.get(i);
+
+                SingleFileBinding singleFileBinding = SingleFileBinding.inflate(LayoutInflater.from(context), null, false);
+
+                singleFileBinding.setFile(file);
+
+                frameLayouts[i].addView(singleFileBinding.getRoot());
+
+            }
+
+        }
+
+
+    }
+
+    private void hideItem(FrameLayout[] frameLayouts, int size) {
+        if (size < 3) {
+
+            binding.picRow2.setVisibility(View.GONE);
+
+            int hideItemCount = 3 - size;
+
+            for (int i = 0; i < hideItemCount; i++) {
+
+                frameLayouts[2 - i].setVisibility(View.GONE);
+
+            }
+
+        } else if (size < 6) {
+
+            int hideItemCount = 6 - size;
+
+            for (int i = 0; i < hideItemCount; i++) {
+
+                frameLayouts[5 - i].setVisibility(View.GONE);
+
+            }
+
+        }
+    }
+}

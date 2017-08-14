@@ -11,8 +11,10 @@ import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.eventbus.UserRequestEvent;
 import com.winsun.fruitmix.http.CheckIpHttpUtil;
 import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpFileUtil;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationTargetType;
@@ -143,11 +145,10 @@ public class FNAS {
     }
 
     public static String generateUrl(String req) {
-        return Gateway + ":" + FNAS.PORT + req;
-    }
 
-    public static String getUploadMediaUrl(Media media) {
-        return generateUrl(Util.MEDIA_PARAMETER + "/" + media.getUuid());
+        HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory();
+
+        return httpRequestFactory.getGateway() + ":" + httpRequestFactory.getPort() + req;
     }
 
     public static String getDownloadOriginalMediaUrl(Media media) {

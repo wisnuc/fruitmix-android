@@ -25,8 +25,6 @@ public class InitSystem {
 
     public static void initSystem(Context context) {
 
-        FileDownloadManager.getInstance().initDBUtils(DBUtils.getInstance(context));
-
         HttpRequestFactory.destroyInstance();
 
         ButlerService.startButlerService(context);

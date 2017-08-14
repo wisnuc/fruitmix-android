@@ -8,11 +8,12 @@
             name="textCommentViewModel"
             type="com.winsun.fruitmix.group.data.viewmodel.TextCommentViewModel" />
 
+
     </data>
 
     <LinearLayout
         android:id="@+id/text_comment_layout"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@{textCommentViewModel.isLeftMode?@drawable/left_text_comment_white_bg:@drawable/right_text_comment_bg,default=@drawable/left_text_comment_white_bg}"
         android:orientation="vertical">
@@ -23,10 +24,11 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:gravity="center_vertical"
+            android:maxWidth="260dp"
             android:text="@{textCommentViewModel.text}"
             android:textColor="@{textCommentViewModel.isLeftMode?@color/eighty_seven_percent_black:@color/eighty_seven_percent_white,default=@color/eighty_seven_percent_black}"
             android:textSize="13dp"
-            tools:text="务必放进毕业十年聚" />
+            tools:text="照片扔进毕业十年聚,请务必放进毕业十年聚，别忘啦" />
 
     </LinearLayout>
 

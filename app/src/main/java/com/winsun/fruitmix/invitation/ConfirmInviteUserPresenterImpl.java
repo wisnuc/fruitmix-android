@@ -380,8 +380,13 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         imageView.setDefaultImageResId(R.drawable.default_place_holder);
 
-        if (userAvatarUrl != null && !userAvatarUrl.isEmpty())
+        if (userAvatarUrl != null && !userAvatarUrl.isEmpty()){
+
+            imageView.setTag(userAvatarUrl);
+
             imageView.setImageUrl(userAvatarUrl, imageLoader);
+        }
+
 
     }
 

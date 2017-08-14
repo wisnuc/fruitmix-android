@@ -17,6 +17,8 @@ public class ToolbarViewModel {
 
     public final ObservableField<String> titleText = new ObservableField<>();
 
+    public final ObservableField<Integer> selectTextResID = new ObservableField<>(R.string.choose_text);
+
     public final ObservableBoolean showSelect = new ObservableBoolean(false);
 
     public final ObservableBoolean showMenu = new ObservableBoolean(false);

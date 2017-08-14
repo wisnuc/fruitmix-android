@@ -3,6 +3,7 @@ package com.winsun.fruitmix.file.data.download;
 import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 
 import java.util.ArrayList;
 
@@ -22,8 +23,6 @@ public class FileDownloadManager {
 
     private List<FileDownloadItem> fileDownloadItems;
 
-    private DBUtils mDbUtils;
-
     private static int FILE_DOWNLOADING_MAX_NUM = 3;
 
     private FileDownloadManager() {
@@ -38,10 +37,6 @@ public class FileDownloadManager {
         return instance;
     }
 
-    public void initDBUtils(DBUtils dbUtils) {
-        mDbUtils = dbUtils;
-    }
-
     public void addDownloadedFile(FileDownloadItem fileDownloadItem) {
 
         if (checkIsAlreadyDownloadingStateOrDownloadedState(fileDownloadItem.getFileUUID())) return;
@@ -51,7 +46,7 @@ public class FileDownloadManager {
 
     }
 
-    public void addFileDownloadItem(FileDownloadItem fileDownloadItem) {
+    public void addFileDownloadItem(FileDownloadItem fileDownloadItem, StationFileRepository stationFileRepository,String currentUserUUID) {
 
         if (checkIsAlreadyDownloadingStateOrDownloadedState(fileDownloadItem.getFileUUID())) return;
 
@@ -59,11 +54,11 @@ public class FileDownloadManager {
 
         if (checkDownloadingItemIsMax()) {
 
-            fileDownloadState = new FileDownloadPendingState(fileDownloadItem);
+            fileDownloadState = new FileDownloadPendingState(fileDownloadItem,stationFileRepository,currentUserUUID);
 
         } else {
 
-            fileDownloadState = new FileStartDownloadState(fileDownloadItem, mDbUtils);
+            fileDownloadState = new FileStartDownloadState(fileDownloadItem, stationFileRepository,currentUserUUID);
         }
 
         // must first add and then set,because setFileDownloadState will call notifyDownloadStateChanged,update ui using fileDownloadItems
@@ -137,11 +132,14 @@ public class FileDownloadManager {
     void startPendingDownloadItem() {
 
         for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
-            if (fileDownloadItem.getDownloadState().equals(DownloadState.PENDING)) {
+
+            if (!checkDownloadingItemIsMax() && fileDownloadItem.getDownloadState().equals(DownloadState.PENDING)) {
+
+                FileDownloadPendingState state = (FileDownloadPendingState) fileDownloadItem.getFileDownloadState();
 
                 Log.d(TAG, "startPendingDownloadItem: " + fileDownloadItem.getFileName());
 
-                fileDownloadItem.setFileDownloadState(new FileStartDownloadState(fileDownloadItem, mDbUtils));
+                fileDownloadItem.setFileDownloadState(new FileStartDownloadState(fileDownloadItem, state.getStationFileRepository(), state.getCurrentUserUUID()));
             }
         }
     }

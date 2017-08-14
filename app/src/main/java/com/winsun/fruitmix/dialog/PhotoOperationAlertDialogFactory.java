@@ -61,28 +61,21 @@ public class PhotoOperationAlertDialogFactory implements DialogFactory {
 
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview);
 
-        PhotoOperationRecyclerViewAdapter adapter = new PhotoOperationRecyclerViewAdapter(context);
+        PhotoOperationRecyclerViewAdapter adapter = new PhotoOperationRecyclerViewAdapter();
 
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
 
         return view;
     }
 
     private class PhotoOperationRecyclerViewAdapter extends RecyclerView.Adapter<BindingViewHolder> {
 
-        private Context context;
-
-        public PhotoOperationRecyclerViewAdapter(Context context) {
-            this.context = context;
-        }
-
         @Override
         public BindingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-            PhotoOperationListItemBinding binding = PhotoOperationListItemBinding.inflate(LayoutInflater.from(context), parent, false);
+            PhotoOperationListItemBinding binding = PhotoOperationListItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
 
             return new BindingViewHolder(binding);
         }
@@ -90,7 +83,7 @@ public class PhotoOperationAlertDialogFactory implements DialogFactory {
 
         @Override
         public void onBindViewHolder(BindingViewHolder holder, int position) {
-            holder.getViewDataBinding().setVariable(BR.photoSliderViewModel, new PhotoOperationViewModel(commandNames.get(position), commands.get(position)));
+            holder.getViewDataBinding().setVariable(BR.photoOperationViewModel, new PhotoOperationViewModel(commandNames.get(position), commands.get(position)));
             holder.getViewDataBinding().executePendingBindings();
         }
 

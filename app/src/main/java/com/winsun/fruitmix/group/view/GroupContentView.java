@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.group.view;
 
+import android.content.Context;
+
 import com.winsun.fruitmix.interfaces.BaseView;
 
 /**
@@ -10,6 +12,10 @@ public interface GroupContentView extends BaseView {
 
     void smoothToChatListPosition(int position);
 
-    void clearEditText();
+    Context getContext();
+
+    void showCreatePing();
+
+    void showPinContent(String groupUUID,String pinUUID);
 
 }

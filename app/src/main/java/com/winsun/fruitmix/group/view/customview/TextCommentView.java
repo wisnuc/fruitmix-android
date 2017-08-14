@@ -19,24 +19,21 @@ import com.winsun.fruitmix.user.User;
 
 public class TextCommentView extends UserCommentView {
 
-    private View view;
+    private TextCommentBinding binding;
 
     @Override
     protected View generateContentView(Context context) {
 
-        TextCommentBinding binding = TextCommentBinding.inflate(LayoutInflater.from(context), null, false);
+        binding = TextCommentBinding.inflate(LayoutInflater.from(context), null, false);
 
-        view = binding.getRoot();
+        return binding.getRoot();
 
-        return view;
     }
 
     @Override
-    protected void refreshContent(UserComment userComment, boolean isLeftMode) {
+    protected void refreshContent(Context context,UserComment userComment, boolean isLeftModel) {
 
         TextComment textComment = (TextComment) userComment;
-
-        TextCommentBinding binding = DataBindingUtil.findBinding(view);
 
         TextCommentViewModel viewModel = binding.getTextCommentViewModel();
 
@@ -45,7 +42,7 @@ public class TextCommentView extends UserCommentView {
             binding.setTextCommentViewModel(viewModel);
         }
 
-        viewModel.isLeftMode.set(isLeftMode);
+        viewModel.isLeftMode.set(isLeftModel);
         viewModel.text.set(textComment.getText());
 
         binding.executePendingBindings();

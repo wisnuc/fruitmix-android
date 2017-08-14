@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="4dp"
                 android:gravity="center"
-                android:text="@{userComment.date,default=testDate}"
+                android:text="@{userComment.getDate(context),default=testDate}"
                 android:textSize="10dp"
                 android:visibility="@{userCommentShowStrategy.showTime?View.VISIBLE:View.GONE}" />
 

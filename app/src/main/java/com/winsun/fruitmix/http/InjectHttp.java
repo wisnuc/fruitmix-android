@@ -16,7 +16,8 @@ public class InjectHttp {
 //                InjectEquipmentManger.provideEquipmentSearchManager(context));
 //
 //        checkIpHttpUtil.setCurrentEquipmentName( InjectLoggedInUser.provideLoggedInUserRepository(context).getCurrentLoggedInUser().getEquipmentName());
-
+//
+//        checkIpHttpUtil.setHttpRequestFactory(InjectHttp.provideHttpRequestFactory());
 
     }
 

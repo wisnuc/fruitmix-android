@@ -5,9 +5,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -19,6 +23,8 @@ import com.winsun.fruitmix.util.Util;
 public class Media implements Parcelable {
 
     private static final String TAG = Media.class.getSimpleName();
+
+    public static final String thumbPhotoUrl = "%1$s/thumbnail?width=%2$s&amp;height=%3$s&amp;autoOrient=true&amp;modifier=caret";
 
     private String uuid;
     private String thumb;
@@ -281,7 +287,7 @@ public class Media implements Parcelable {
 
             Log.i(TAG, "original path: " + getOriginalPhotoPath() + "hash:" + getUuid());
 
-            String url = FNAS.getUploadMediaUrl(this);
+            String url = getMediaUrl();
 
             Log.i(TAG, "uploadIfNotDone: url: " + url);
 
@@ -321,7 +327,7 @@ public class Media implements Parcelable {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            imageUrl = String.format(context.getString(R.string.android_thumb_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid(),
+            imageUrl = String.format(thumbPhotoUrl,getMediaUrl(),
                     String.valueOf(64), String.valueOf(64));
 
         }
@@ -329,7 +335,7 @@ public class Media implements Parcelable {
 
     }
 
-    public String getImageThumbUrl(Context context) {
+    public String getImageThumbUrl() {
 
         String imageUrl;
         if (isLocal()) {
@@ -343,12 +349,17 @@ public class Media implements Parcelable {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            imageUrl = String.format(context.getString(R.string.android_thumb_photo_url), FNAS.Gateway + ":" + FNAS.PORT + Util.MEDIA_PARAMETER + "/" + getUuid(),
+            imageUrl = String.format(thumbPhotoUrl, getMediaUrl(),
                     String.valueOf(200), String.valueOf(200));
 
         }
         return imageUrl;
 
+    }
+
+    private String getMediaUrl(){
+
+        return FNAS.generateUrl(Util.MEDIA_PARAMETER + "/" + getUuid());
     }
 
     public String getImageOriginalUrl(Context context) {
@@ -368,4 +379,17 @@ public class Media implements Parcelable {
         else
             return getUuid();
     }
+
+    public void setImageUrl(NetworkImageView networkImageView,String url, ImageLoader imageLoader){
+
+        imageLoader.setShouldCache(!isLocal());
+
+        if (isLocal())
+            networkImageView.setOrientationNumber(getOrientationNumber());
+
+        networkImageView.setTag(url);
+
+        networkImageView.setImageUrl(url,imageLoader);
+    }
+
 }

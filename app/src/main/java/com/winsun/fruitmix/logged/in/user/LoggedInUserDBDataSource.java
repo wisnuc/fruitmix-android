@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.user.User;
 
 import java.util.Collection;
 

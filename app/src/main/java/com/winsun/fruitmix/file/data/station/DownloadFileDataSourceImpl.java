@@ -77,14 +77,11 @@ public class DownloadFileDataSourceImpl implements DownloadedFileDataSource {
     }
 
     @Override
-    public void deleteDownloadedFileRecord(List<DownloadedItem> downloadedItems, String currentLoginUserUUID) {
+    public void deleteDownloadedFileRecord(List<String> fileUUIDs, String currentLoginUserUUID) {
 
-        List<String> fileUUIDs = new ArrayList<>(downloadedItems.size());
+        for (String fileUUID:fileUUIDs) {
+            dbUtils.deleteDownloadedFileByUUIDAndCreatorUUID(fileUUID, currentLoginUserUUID);
 
-        for (DownloadedItem downloadedItem : downloadedItems) {
-            dbUtils.deleteDownloadedFileByUUIDAndCreatorUUID(downloadedItem.getFileUUID(), currentLoginUserUUID);
-
-            fileUUIDs.add(downloadedItem.getFileUUID());
         }
 
         fileDownloadManager.deleteFileDownloadItem(fileUUIDs);

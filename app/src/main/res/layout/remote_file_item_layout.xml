@@ -6,7 +6,7 @@
 
         <variable
             name="file"
-            type="com.winsun.fruitmix.file.data.model.AbstractRemoteFile" />
+            type="com.winsun.fruitmix.file.data.model.AbstractFile" />
 
         <variable
             name="fileItemViewModel"
@@ -40,7 +40,7 @@
                     android:id="@+id/select_file_icon_bg"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:background="@drawable/round_circle"
+                    android:background="@{fileItemViewModel.fileIconBg,default=@drawable/round_circle}"
                     android:visibility="@{fileItemViewModel.selectMode?View.VISIBLE:View.INVISIBLE,default=invisible}" />
 
                 <ImageView
@@ -59,9 +59,9 @@
                 android:id="@+id/item_menu"
                 android:layout_width="52dp"
                 android:layout_height="match_parent"
-                android:background="?attr/selectableItemBackgroundBorderless"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:src="@drawable/ic_menu"
                 android:visibility="@{fileItemViewModel.selectMode?View.VISIBLE:View.GONE,default=visible}" />

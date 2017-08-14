@@ -1,23 +1,22 @@
 package com.winsun.fruitmix.group.presenter;
 
 import android.databinding.ViewDataBinding;
-import android.support.v4.view.PagerAdapter;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
+import com.winsun.fruitmix.databinding.GroupAddPingItemBinding;
 import com.winsun.fruitmix.databinding.GroupPingItemBinding;
-import com.winsun.fruitmix.group.data.model.Ping;
+import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.model.UserCommentShowStrategy;
 import com.winsun.fruitmix.group.data.model.UserCommentViewFactory;
-import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
 import com.winsun.fruitmix.group.view.GroupContentView;
@@ -37,6 +36,8 @@ import java.util.List;
 
 public class GroupContentPresenter implements CustomArrowToggleButton.PingToggleListener {
 
+    private ImageLoader imageLoader;
+
     private GroupRepository groupRepository;
 
     private GroupContentViewModel groupContentViewModel;
@@ -53,21 +54,28 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private GroupContentView groupContentView;
 
-    public GroupContentPresenter(GroupContentView groupContentView, String groupUUID, LoggedInUserDataSource loggedInUserDataSource, GroupRepository groupRepository, GroupContentViewModel groupContentViewModel) {
+    private List<UserComment> userComments;
 
+    public GroupContentPresenter(GroupContentView groupContentView, String groupUUID,
+                                 LoggedInUserDataSource loggedInUserDataSource,
+                                 GroupRepository groupRepository, GroupContentViewModel groupContentViewModel,
+                                 ImageLoader imageLoader) {
+
+        this.imageLoader = imageLoader;
         this.groupContentView = groupContentView;
         this.groupUUID = groupUUID;
         this.groupRepository = groupRepository;
         this.groupContentViewModel = groupContentViewModel;
 
-//        currentLoggedInUser = loggedInUserDataSource.getCurrentLoggedInUser().getUser();
+        currentLoggedInUser = loggedInUserDataSource.getCurrentLoggedInUser().getUser();
 
-        currentLoggedInUser = new User();
-        currentLoggedInUser.setUuid(FakeGroupDataSource.MYSELF_UUID);
+//        currentLoggedInUser = new User();
+//        currentLoggedInUser.setUuid(FakeGroupDataSource.MYSELF_UUID);
 
         groupContentAdapter = new GroupContentAdapter();
 
         pingViewPageAdapter = new PingViewPageAdapter();
+
     }
 
     public GroupContentAdapter getGroupContentAdapter() {
@@ -78,14 +86,50 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         return pingViewPageAdapter;
     }
 
-    public void refreshGroup() {
+    public void refreshView() {
 
+        refreshGroup();
+
+        refreshUserComment();
+
+        refreshPinView();
+
+    }
+
+    private void refreshGroup() {
         currentPrivateGroup = groupRepository.getGroup(groupUUID);
+    }
 
-        groupContentAdapter.setUserComments(currentPrivateGroup.getUserComments());
+    private void refreshUserComment() {
+        userComments = currentPrivateGroup.getUserComments();
+
+        groupContentAdapter.setUserComments(userComments);
         groupContentAdapter.notifyDataSetChanged();
 
-        pingViewPageAdapter.setPings(currentPrivateGroup.getPings());
+        smoothToChatListEnd();
+    }
+
+    public void refreshPin() {
+
+        refreshGroup();
+
+        refreshPinView();
+
+    }
+
+    private void refreshPinView() {
+
+        List<Pin> pins = currentPrivateGroup.getPins();
+
+        List<PinView> pinViews = new ArrayList<>(pins.size() + 1);
+
+        for (Pin pin : pins) {
+            PinView pinView = new PinContentView(pin);
+            pinViews.add(pinView);
+        }
+        pinViews.add(new AddPinView());
+
+        pingViewPageAdapter.setPingViews(pinViews);
         pingViewPageAdapter.notifyDataSetChanged();
 
     }
@@ -119,12 +163,13 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         GroupContentAdapter() {
             mUserComments = new ArrayList<>();
 
-            factory = UserCommentViewFactory.getInstance();
+            factory = UserCommentViewFactory.getInstance(imageLoader);
         }
 
         void setUserComments(List<UserComment> userComments) {
             mUserComments.clear();
             mUserComments.addAll(userComments);
+
         }
 
         @Override
@@ -153,7 +198,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
             UserCommentShowStrategy userCommentShowStrategy = new UserCommentShowStrategy(preUserComment, currentUserComment, currentLoggedInUser.getUuid());
 
-            holder.userCommentView.refreshCommentView(userCommentShowStrategy, currentUserComment);
+            holder.userCommentView.refreshCommentView(groupContentView.getContext(), userCommentShowStrategy, currentUserComment);
 
         }
 
@@ -168,6 +213,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
             return factory.getUserCommentViewType(mUserComments.get(position));
 
         }
+
     }
 
 
@@ -182,48 +228,12 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     }
 
-    private class PingViewPageAdapter extends RecyclerView.Adapter<BindingViewHolder> {
-
-        private List<Ping> mPings;
-
-        PingViewPageAdapter() {
-            mPings = new ArrayList<>();
-        }
-
-        void setPings(List<Ping> pings) {
-            mPings.clear();
-            mPings.addAll(pings);
-        }
-
-        @Override
-        public BindingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-            GroupPingItemBinding binding = GroupPingItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
-
-            return new BindingViewHolder(binding);
-        }
-
-
-        @Override
-        public void onBindViewHolder(BindingViewHolder holder, int position) {
-
-            holder.getViewDataBinding().setVariable(BR.ping, mPings.get(position));
-
-            holder.getViewDataBinding().executePendingBindings();
-
-        }
-
-        @Override
-        public int getItemCount() {
-            return mPings.size();
-        }
-
-    }
-
 
     public void sendTxt(String text) {
 
         TextComment textComment = new TextComment(currentLoggedInUser, System.currentTimeMillis(), text);
+
+        currentPrivateGroup.addUserComment(textComment);
 
         groupRepository.insertUserComment(groupUUID, textComment, new BaseOperateDataCallbackImpl<UserComment>() {
             @Override
@@ -235,15 +245,133 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
                 int lastPosition = userComments.size() - 1;
 
                 groupContentAdapter.setUserComments(userComments);
+
                 groupContentAdapter.notifyItemInserted(lastPosition);
 
                 groupContentView.smoothToChatListPosition(lastPosition);
 
-                groupContentView.clearEditText();
 
             }
         });
 
+    }
+
+    public void smoothToChatListEnd() {
+        groupContentView.smoothToChatListPosition(userComments.size() - 1);
+    }
+
+
+    private class PingViewPageAdapter extends RecyclerView.Adapter<BindingViewHolder> {
+
+        private List<PinView> mPinViews;
+
+        PingViewPageAdapter() {
+            mPinViews = new ArrayList<>();
+        }
+
+        public void setPingViews(List<PinView> pinViews) {
+            mPinViews.clear();
+            mPinViews.addAll(pinViews);
+        }
+
+        @Override
+        public BindingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            ViewDataBinding binding;
+
+            if (viewType == PinView.TYPE_PING) {
+                binding = GroupPingItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+            } else
+                binding = GroupAddPingItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+
+            return new BindingViewHolder(binding);
+        }
+
+
+        @Override
+        public void onBindViewHolder(BindingViewHolder holder, int position) {
+
+            mPinViews.get(position).bindView(holder.getViewDataBinding());
+
+        }
+
+        @Override
+        public int getItemCount() {
+            return mPinViews.size();
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return mPinViews.get(position).getViewType();
+        }
+    }
+
+    public interface PinView {
+
+        int TYPE_PING = 0;
+        int TYPE_ADD_PING = 1;
+
+        int getViewType();
+
+        void bindView(ViewDataBinding viewDataBinding);
+
+        void onClick();
+
+    }
+
+    private class PinContentView implements PinView {
+
+        private Pin pin;
+
+        public PinContentView(Pin pin) {
+            this.pin = pin;
+        }
+
+        @Override
+        public int getViewType() {
+            return TYPE_PING;
+        }
+
+        @Override
+        public void bindView(ViewDataBinding viewDataBinding) {
+
+            viewDataBinding.setVariable(BR.ping, pin);
+
+            viewDataBinding.setVariable(BR.pingView, this);
+
+            viewDataBinding.executePendingBindings();
+
+        }
+
+        @Override
+        public void onClick() {
+
+            groupContentView.showPinContent(groupUUID, pin.getUuid());
+
+        }
+    }
+
+    private class AddPinView implements PinView {
+
+        @Override
+        public int getViewType() {
+            return TYPE_ADD_PING;
+        }
+
+        @Override
+        public void bindView(ViewDataBinding viewDataBinding) {
+
+            viewDataBinding.setVariable(BR.pingView, this);
+
+            viewDataBinding.executePendingBindings();
+
+        }
+
+        @Override
+        public void onClick() {
+
+            groupContentView.showCreatePing();
+        }
     }
 
 

@@ -49,6 +49,10 @@ public class FileDownloadItem {
         fileDownloadState.notifyDownloadStateChanged();
     }
 
+    public FileDownloadState getFileDownloadState() {
+        return fileDownloadState;
+    }
+
     void setFileSize(long fileSize) {
         this.fileSize = fileSize;
     }

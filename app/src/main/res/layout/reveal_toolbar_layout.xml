@@ -42,10 +42,12 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|end"
             android:layout_marginRight="15dp"
-            android:text="@string/choose_text"
+            android:clickable="true"
+            android:onClick="@{()->revealToolbarViewModel.rightTextOnClick()}"
+            android:text="@{revealToolbarViewModel.enterSelectModeText,default=@string/choose_text}"
             android:textColor="@color/eighty_seven_percent_white"
             android:textSize="16dp"
-            android:visibility="@{revealToolbarViewModel.enterSelectModeVisibility,default=visible}" />
+            android:visibility="@{revealToolbarViewModel.rightTextVisibility,default=visible}" />
 
     </android.support.v7.widget.Toolbar>
 

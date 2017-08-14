@@ -39,6 +39,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
 import com.winsun.fruitmix.component.PinchImageView;
@@ -50,12 +51,15 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.media.InjectMedia;
+import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -71,13 +75,13 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     public static final String TAG = "PhotoSliderActivity";
 
-    LinearLayout ivComment;
+    private LinearLayout ivComment;
 
-    ImageView commentImg;
+    private ImageView commentImg;
 
-    ViewPager mViewPager;
+    private ViewPager mViewPager;
 
-    ImageButton mShareBtn;
+    private ImageButton mShareBtn;
 
     public class PhotoSliderViewModel {
 
@@ -130,6 +134,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private Dialog mDialog;
 
+    private MediaDataSourceRepository mediaDataSourceRepository;
+
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -138,7 +144,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 Media media = mediaList.get(currentPhotoPosition);
 
-                String imageTag = media.getImageThumbUrl(mContext);
+                String imageTag = media.getImageThumbUrl();
 
                 PinchImageView view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
 
@@ -169,7 +175,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
     };
 
-    public static void startPhotoSliderActivity(View toolbar,Activity activity, List<Media> transitionMedias, Intent intent, int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
+    public static void startPhotoSliderActivity(View toolbar, Activity activity, List<Media> transitionMedias, Intent intent, int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
         setMediaList(transitionMedias);
 
@@ -181,7 +187,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             Pair mediaPair = new Pair<>((View) transitionView, currentMedia.getKey());
 
-            Pair[] pairs = Util.createSafeTransitionPairs(toolbar,activity, true, mediaPair);
+            Pair[] pairs = Util.createSafeTransitionPairs(toolbar, activity, true, mediaPair);
 
             ActivityOptionsCompat options = ActivityOptionsCompat.
                     makeSceneTransitionAnimation(activity, pairs);
@@ -278,6 +284,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 }
             }
         });
+
+        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
 
 //        initShareBtn();
 
@@ -477,7 +485,16 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                     mDialog.setCanceledOnTouchOutside(false);
 
-                    EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, Collections.singletonList(media)));
+                    mediaDataSourceRepository.downloadMedia(Collections.singletonList(media), new BaseOperateDataCallbackImpl<Boolean>() {
+                        @Override
+                        public void onSucceed(Boolean data, OperationResult result) {
+                            super.onSucceed(data, result);
+
+                            handleDownloadMedia();
+                        }
+                    });
+
+//                    EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, Collections.singletonList(media)));
                 }
 
             }
@@ -501,23 +518,27 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             case Util.SHARED_PHOTO_THUMB_RETRIEVED:
 
-                if (mDialog == null || !mDialog.isShowing()) {
-                    return;
-                }
-
-                dismissDialog();
-
-                String originalPhotoPath = mediaList.get(currentPhotoPosition).getOriginalPhotoPath();
-
-                if (originalPhotoPath.isEmpty()) {
-                    Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
-                } else {
-                    Util.sendShareToOtherApp(mContext, Collections.singletonList(originalPhotoPath));
-                }
+                handleDownloadMedia();
 
                 break;
         }
 
+    }
+
+    private void handleDownloadMedia() {
+        if (mDialog == null || !mDialog.isShowing()) {
+            return;
+        }
+
+        dismissDialog();
+
+        String originalPhotoPath = mediaList.get(currentPhotoPosition).getOriginalPhotoPath();
+
+        if (originalPhotoPath.isEmpty()) {
+            Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
+        } else {
+            Util.sendShareToOtherApp(mContext, Collections.singletonList(originalPhotoPath));
+        }
     }
 
     private void refreshReturnResizeVisibility() {
@@ -787,7 +808,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                     if (position == initialPhotoPosition)
                         ViewCompat.setTransitionName(mainPic, media.getKey());
 
-                    String thumbImageUrl = media.getImageThumbUrl(mContext);
+                    String thumbImageUrl = media.getImageThumbUrl();
                     mainPic.setTag(thumbImageUrl);
 
                     mainPic.setImageUrl(thumbImageUrl, mImageLoader);
@@ -799,7 +820,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                     mainPic.setOrientationNumber(media.getOrientationNumber());
 
-                    String imageThumbUrl = media.getImageThumbUrl(mContext);
+                    String imageThumbUrl = media.getImageThumbUrl();
                     mainPic.setTag(imageThumbUrl);
 
                     if (imageThumbUrl.endsWith(".gif")) {

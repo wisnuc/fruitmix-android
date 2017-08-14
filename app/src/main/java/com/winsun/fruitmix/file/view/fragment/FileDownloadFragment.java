@@ -92,6 +92,10 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     private Activity activity;
 
+    private StationFileRepository stationFileRepository;
+
+    private String currentUserUUID;
+
     public static final int DOWNLOADING_GROUP = 0;
     public static final int DOWNLOADING_CHILD = 1;
     public static final int DOWNLOADED_GROUP = 2;
@@ -187,9 +191,11 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
         view = onCreateView(activity.getLayoutInflater(), null);
 
-        StationFileRepository fileRepository = InjectStationFileRepository.provideStationFileRepository(activity);
+        currentUserUUID = InjectLoggedInUser.provideLoggedInUserRepository(activity).getCurrentLoggedInUserUUID();
 
-        fileRepository.getCurrentLoginUserDownloadedFileRecord(InjectLoggedInUser.provideLoggedInUserRepository(activity).getCurrentLoggedInUserUUID());
+        stationFileRepository = InjectStationFileRepository.provideStationFileRepository(activity);
+
+        stationFileRepository.getCurrentLoginUserDownloadedFileRecord(currentUserUUID);
 
         refreshView();
 
@@ -385,7 +391,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
             bottomMenuItems.add(clearSelectItem);
 
             AbstractCommand macroCommand = new MacroCommand();
-            macroCommand.addCommand(new DeleteDownloadedFileCommand(selectDownloadedItemUUID));
+            macroCommand.addCommand(new DeleteDownloadedFileCommand(selectDownloadedItemUUID,currentUserUUID,stationFileRepository));
             macroCommand.addCommand(showUnSelectModeViewCommand);
 
             BottomMenuItem deleteSelectItem = new BottomMenuItem(R.drawable.del_user, activity.getString(R.string.delete_text), macroCommand);

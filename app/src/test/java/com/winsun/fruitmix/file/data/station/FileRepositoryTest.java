@@ -156,8 +156,10 @@ public class FileRepositoryTest {
 
         FileDownloadItem fileDownloadItem = new FileDownloadItem("", 0, "");
 
+        String currentUserUUID = "";
+
         try {
-            fileRepository.downloadFile("", new FileDownloadPendingState(fileDownloadItem), new BaseOperateDataCallbackImpl<FileDownloadItem>());
+            fileRepository.downloadFile("", new FileDownloadPendingState(fileDownloadItem,fileRepository,currentUserUUID), new BaseOperateDataCallbackImpl<FileDownloadItem>());
 
             verify(stationFileDataSource).downloadFile(any(FileDownloadState.class), captor.capture());
 

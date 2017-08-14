@@ -53,4 +53,11 @@ public class StationMediaDBDataSource {
         dbUtils.insertRemoteMedias(medias);
 
     }
+
+    public void updateMedia(Media media){
+        dbUtils.updateRemoteMedia(media);
+    }
+
+
+
 }

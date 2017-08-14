@@ -1,12 +1,9 @@
 package com.winsun.fruitmix.group.view.customview;
 
 import android.content.Context;
-import android.databinding.BindingAdapter;
-import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -15,10 +12,8 @@ import android.widget.RelativeLayout;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.BaseLeftCommentBinding;
-import com.winsun.fruitmix.databinding.BaseRightCommentBinding;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.model.UserCommentShowStrategy;
-import com.winsun.fruitmix.util.Util;
 
 /**
  * Created by Administrator on 2017/7/20.
@@ -44,7 +39,7 @@ public abstract class UserCommentView {
 
     protected abstract View generateContentView(Context context);
 
-    public void refreshCommentView(UserCommentShowStrategy strategy, UserComment data) {
+    public void refreshCommentView(Context context,UserCommentShowStrategy strategy, UserComment data) {
 
         viewDataBinding.setVariable(BR.userComment, data);
         viewDataBinding.setVariable(BR.userCommentShowStrategy, strategy);
@@ -68,7 +63,7 @@ public abstract class UserCommentView {
             userAvatarLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
             userAvatarLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
 
-            userAvatarLayoutParams.addRule(RelativeLayout.RIGHT_OF, R.id.user_avatar);
+            userInfoLayoutLayoutParams.addRule(RelativeLayout.RIGHT_OF, R.id.user_avatar);
             userInfoLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, 0);
 
             commentContentLayoutLayoutParams.addRule(RelativeLayout.RIGHT_OF, R.id.user_avatar);
@@ -79,7 +74,7 @@ public abstract class UserCommentView {
             userAvatarLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
             userAvatarLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
-            userAvatarLayoutParams.addRule(RelativeLayout.RIGHT_OF, 0);
+            userInfoLayoutLayoutParams.addRule(RelativeLayout.RIGHT_OF, 0);
             userInfoLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, R.id.user_avatar);
 
             commentContentLayoutLayoutParams.addRule(RelativeLayout.RIGHT_OF, 0);
@@ -88,10 +83,10 @@ public abstract class UserCommentView {
         }
 
 
-        refreshContent(data, strategy.isShowLeft());
+        refreshContent(context,data, strategy.isShowLeft());
 
     }
 
-    protected abstract void refreshContent(UserComment data, boolean isLeftModel);
+    protected abstract void refreshContent(Context context,UserComment data, boolean isLeftModel);
 
 }

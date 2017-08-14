@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
@@ -19,8 +18,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="8dp">
 
         <ImageView
             android:id="@+id/user_avatar"
@@ -53,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
-                android:text="@{userComment.date,default=testDate}"
+                android:text="@{userComment.getDate(context),default=testDate}"
                 android:textSize="10dp"
                 android:visibility="@{userCommentShowStrategy.showTime?View.VISIBLE:View.GONE}" />
 
@@ -62,7 +61,7 @@
 
         <FrameLayout
             android:id="@+id/comment_content"
-            android:layout_width="260dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/user_info_layout"
             android:layout_marginTop="6dp"
