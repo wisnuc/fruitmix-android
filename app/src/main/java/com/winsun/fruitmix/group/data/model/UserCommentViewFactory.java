@@ -1,6 +1,8 @@
 package com.winsun.fruitmix.group.data.model;
 
 import com.android.volley.toolbox.ImageLoader;
+import com.winsun.fruitmix.group.usecase.PlayAudioUseCase;
+import com.winsun.fruitmix.group.view.customview.AudioCommentView;
 import com.winsun.fruitmix.group.view.customview.MultiFileCommentView;
 import com.winsun.fruitmix.group.view.customview.SingleFileCommentView;
 import com.winsun.fruitmix.group.view.customview.TextCommentView;
@@ -16,14 +18,17 @@ public class UserCommentViewFactory {
 
     private ImageLoader imageLoader;
 
-    private UserCommentViewFactory(ImageLoader imageLoader) {
+    private PlayAudioUseCase playAudioUseCase;
+
+    private UserCommentViewFactory(ImageLoader imageLoader,PlayAudioUseCase playAudioUseCase) {
         this.imageLoader = imageLoader;
+        this.playAudioUseCase = playAudioUseCase;
     }
 
-    public static UserCommentViewFactory getInstance(ImageLoader imageLoader) {
+    public static UserCommentViewFactory getInstance(ImageLoader imageLoader,PlayAudioUseCase playAudioUseCase) {
 
         if (instance == null)
-            instance = new UserCommentViewFactory(imageLoader);
+            instance = new UserCommentViewFactory(imageLoader,playAudioUseCase);
 
         return instance;
     }
@@ -39,6 +44,8 @@ public class UserCommentViewFactory {
 
         if (userComment instanceof TextComment)
             return TYPE_TEXT;
+        else if(userComment instanceof AudioComment)
+            return TYPE_VOICE;
         else if (userComment instanceof MultiPhotoComment || userComment instanceof MultiFileComment)
             return TYPE_MULTIPLE_FILE;
         else if (userComment instanceof SinglePhotoComment || userComment instanceof SingleFileComment)
@@ -52,6 +59,8 @@ public class UserCommentViewFactory {
 
         if (type == TYPE_TEXT)
             return new TextCommentView();
+        else if(type == TYPE_VOICE)
+            return new AudioCommentView(playAudioUseCase);
         else if (type == TYPE_MULTIPLE_FILE)
             return new MultiFileCommentView(imageLoader);
         else if (type == TYPE_SINGLE_FILE)

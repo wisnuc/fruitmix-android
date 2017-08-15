@@ -1,65 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#DEDEDE"
-    android:orientation="vertical"
-    tools:context="com.winsun.fruitmix.EquipmentSearchActivity">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:stateListAnimator="@animator/appbar_elevation">
+    <data>
 
-        <include layout="@layout/toolbar_layout" />
+        <variable
+            name="loadingViewModel"
+            type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
 
-        <!--<android.support.v7.widget.Toolbar-->
-        <!--android:id="@+id/toolbar"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="?attr/actionBarSize"-->
-        <!--android:background="@color/colorPrimary"-->
-        <!--android:theme="@style/AppTheme.AppBarOverlay"-->
-        <!--app:popupTheme="@style/AppTheme.PopupOverlay">-->
+        <variable
+            name="wechatLoginListener"
+            type="com.winsun.fruitmix.equipment.WeChatLoginListener" />
 
-        <!--<ImageView-->
-        <!--android:id="@+id/back"-->
-        <!--android:layout_width="24dp"-->
-        <!--android:layout_height="24dp"-->
-        <!--android:layout_centerVertical="true"-->
-        <!--android:layout_marginLeft="16dp"-->
-        <!--android:src="@drawable/ic_back_black" />-->
 
-        <!--<TextView-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginLeft="30dp"-->
-        <!--android:text="@string/search_equipment"-->
-        <!--android:textColor="@color/toolbar_title"-->
-        <!--android:textSize="18dp" />-->
+    </data>
 
-        <!--</android.support.v7.widget.Toolbar>-->
-
-    </android.support.design.widget.AppBarLayout>
-
-    <FrameLayout
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:background="#DEDEDE"
+        android:orientation="vertical"
+        tools:context="com.winsun.fruitmix.EquipmentSearchActivity">
 
-        <com.winsun.fruitmix.component.AnimatedExpandableListView
-            android:id="@+id/equipment_expandablelist"
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/equipment_ui_blue"
+                android:theme="@style/AppTheme.AppBarOverlay"
+                app:popupTheme="@style/AppTheme.PopupOverlay">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="16dp"
+                    android:src="@drawable/equipment_search_logo" />
+
+            </android.support.v7.widget.Toolbar>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginBottom="48dp"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:background="#FAFAFA">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="224dp"
+                    android:background="@color/equipment_ui_blue">
+
+                    <android.support.v4.view.ViewPager
+                        android:id="@+id/equipment_viewpager"
+                        android:layout_width="match_parent"
+                        android:layout_height="166dp"
+                        android:layout_centerVertical="true" />
+
+                    <me.relex.circleindicator.CircleIndicator
+                        android:id="@+id/viewpager_indicator"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_below="@id/equipment_viewpager"
+                        android:layout_marginTop="8dp"
+                        app:ci_drawable="@drawable/viewpager_indicator_select_item_bg"
+                        app:ci_drawable_unselected="@drawable/viewpager_indicator_unselect_item_bg"
+                        app:ci_height="5dp"
+                        app:ci_margin="8dp"
+                        app:ci_width="5dp" />
+
+                </RelativeLayout>
+
+
+                <TextView
+                    android:id="@+id/equipment_user_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="16dp"
+                    android:text="用户"
+                    android:textColor="@color/fifty_four_percent_black"
+                    android:textSize="18dp" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/equipment_user_recyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="16dp" />
+
+            </LinearLayout>
+
+            <include
+                layout="@layout/new_loading_layout"
+                android:visibility="gone"
+                app:loadingViewModel="@{loadingViewModel}" />
+
+        </FrameLayout>
+
+
+        <LinearLayout
+            android:id="@+id/wechat_login_layout"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_gravity="bottom"
             android:background="@color/white"
-            android:cacheColorHint="@color/white"
-            android:divider="@null"
-            android:fadingEdge="none"
-            android:visibility="gone" />
+            android:clickable="true"
+            android:gravity="center"
+            android:onClick="@{()->wechatLoginListener.wechatLogin()}"
+            android:orientation="horizontal">
 
-        <include layout="@layout/loading_layout" />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:src="@drawable/wechat" />
 
-    </FrameLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="微信登录"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="14dp" />
 
-</android.support.design.widget.CoordinatorLayout>
+        </LinearLayout>
+
+
+    </android.support.design.widget.CoordinatorLayout>
+
+
+</layout>

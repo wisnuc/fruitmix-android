@@ -91,7 +91,7 @@ public class LoginUseCaseTest {
     @Test
     public void loginWithNoParamFail() {
 
-        loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>(){
+        loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>() {
 
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
@@ -310,6 +310,28 @@ public class LoginUseCaseTest {
         testLoginWithLoggedInUser();
 
         verify(systemSettingDataSource).setAutoUploadOrNot(true);
+
+    }
+
+    @Test
+    public void testLoginWithWeChatCode_succeed() {
+
+        BaseOperateDataCallback<Boolean> callback = Mockito.mock(BaseOperateDataCallback.class);
+
+        loginUseCase.loginWithWeChatCode("", callback);
+
+        verify(tokenRemoteDataSource).getToken(anyString(), loadTokenCallbackArgumentCaptor.capture());
+
+        loadTokenCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(testToken), new OperationSuccess());
+
+        verify(httpRequestFactory).setCurrentData(anyString(), anyString());
+
+        verify(imageGifLoaderInstance).setToken(anyString());
+
+        verify(stationFileRepository).clearDownloadFileRecordInCache();
+
+        verify(callback).onSucceed(anyBoolean(), any(OperationResult.class));
+
 
     }
 

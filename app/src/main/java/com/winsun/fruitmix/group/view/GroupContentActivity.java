@@ -13,11 +13,13 @@ import android.widget.LinearLayout;
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.ActivityGroupContentBinding;
+import com.winsun.fruitmix.group.data.model.AudioComment;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
 import com.winsun.fruitmix.group.presenter.GroupContentPresenter;
-import com.winsun.fruitmix.group.presenter.InputChatMenuUseCase;
+import com.winsun.fruitmix.group.usecase.InputChatMenuUseCase;
+import com.winsun.fruitmix.group.usecase.PlayAudioUseCaseImpl;
 import com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton;
 import com.winsun.fruitmix.group.view.customview.InputChatLayout;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
@@ -29,7 +31,7 @@ import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 public class GroupContentActivity extends BaseActivity implements GroupContentView, View.OnClickListener
         , InputChatLayout.ChatLayoutOnClickListener, InputChatLayout.EditTextFocusChangeListener, InputChatLayout.SendTextChatListener
-        , InputChatMenuUseCase, InputChatLayout.AddBtnOnClickListener {
+        , InputChatMenuUseCase, InputChatLayout.AddBtnOnClickListener, InputChatLayout.SendAudioChatListener {
 
     public static final int REQUEST_NEW_PIC_CHOOSE_ACTIVITY = 0x1001;
 
@@ -100,6 +102,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         inputChatLayout.setChatLayoutOnClickListener(this);
         inputChatLayout.setInputChatMenuUseCase(this);
         inputChatLayout.setAddBtnOnClickListener(this);
+        inputChatLayout.setSendAudioChatListener(this);
     }
 
     private void initChatRecyclerView() {
@@ -153,7 +156,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         LoggedInUserDataSource loggedInUserDataSource = InjectLoggedInUser.provideLoggedInUserRepository(this);
 
         groupContentPresenter = new GroupContentPresenter(this, groupUUID, loggedInUserDataSource,
-                groupRepository, groupContentViewModel, ImageGifLoaderInstance.getInstance().getImageLoader(this));
+                groupRepository, groupContentViewModel, ImageGifLoaderInstance.getInstance().getImageLoader(this), PlayAudioUseCaseImpl.getInstance());
     }
 
     @Override
@@ -297,5 +300,13 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         intent.putExtra(PinContentActivity.KEY_PIN_UUID, pinUUID);
         startActivityForResult(intent, REQUEST_PIN_CONTENT);
 
+    }
+
+    @Override
+    public boolean onSendAudioChat(String filePath, long audioRecordTime) {
+
+        groupContentPresenter.sendAudio(filePath, audioRecordTime);
+
+        return true;
     }
 }

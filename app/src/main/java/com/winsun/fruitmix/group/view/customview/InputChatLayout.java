@@ -1,7 +1,6 @@
 package com.winsun.fruitmix.group.view.customview;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -10,13 +9,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.InputChatLayoutBinding;
 import com.winsun.fruitmix.group.data.viewmodel.InputChatMenuViewModel;
 import com.winsun.fruitmix.group.data.viewmodel.InputChatViewModel;
-import com.winsun.fruitmix.group.presenter.InputChatMenuUseCase;
+import com.winsun.fruitmix.group.usecase.RecordAudioUseCase;
+import com.winsun.fruitmix.group.usecase.RecordAudioUseCaseImpl;
+import com.winsun.fruitmix.group.usecase.InputChatMenuUseCase;
 
 /**
  * Created by Administrator on 2017/8/7.
@@ -34,11 +34,17 @@ public class InputChatLayout extends FrameLayout implements TextWatcher, View.On
     private EditTextFocusChangeListener editTextFocusChangeListener;
     private ChatLayoutOnClickListener chatLayoutOnClickListener;
 
+    private SendAudioChatListener sendAudioChatListener;
+
     private InputChatMenuViewModel inputChatMenuViewModel;
 
     private InputChatLayoutBinding binding;
 
     private AddBtnOnClickListener addBtnOnClickListener;
+
+    private RecordAudioUseCase recordAudioUseCase;
+
+    private boolean isRecordingAudio = false;
 
     public InputChatLayout(Context context) {
         super(context);
@@ -91,6 +97,9 @@ public class InputChatLayout extends FrameLayout implements TextWatcher, View.On
 
         binding.addEmoticon.setOnClickListener(this);
 
+        binding.addVoiceBtn.setOnClickListener(this);
+
+        recordAudioUseCase = RecordAudioUseCaseImpl.getInstance();
 
     }
 
@@ -131,6 +140,10 @@ public class InputChatLayout extends FrameLayout implements TextWatcher, View.On
         this.sendTextChatListener = sendTextChatListener;
     }
 
+    public void setSendAudioChatListener(SendAudioChatListener sendAudioChatListener) {
+        this.sendAudioChatListener = sendAudioChatListener;
+    }
+
     public void setChatLayoutOnClickListener(ChatLayoutOnClickListener chatLayoutOnClickListener) {
         this.chatLayoutOnClickListener = chatLayoutOnClickListener;
     }
@@ -167,6 +180,29 @@ public class InputChatLayout extends FrameLayout implements TextWatcher, View.On
     public void onClick(View v) {
 
         switch (v.getId()) {
+
+            case R.id.add_voice_btn:
+
+                if (isRecordingAudio) {
+
+                    isRecordingAudio = false;
+
+                    recordAudioUseCase.stopAudioRecord();
+
+                    if (onSendAudioChat(recordAudioUseCase.getAudioRecordFilePath(), recordAudioUseCase.getAudioRecordTime()))
+                        inputChatViewModel.showAddVoiceLayout.set(false);
+
+
+                } else {
+
+                    isRecordingAudio = true;
+
+                    recordAudioUseCase.startAudioRecord();
+
+                    binding.addVoiceBtn.setText("结束录音");
+                }
+
+                break;
             case R.id.edit_text:
             case R.id.add_voice:
 
@@ -174,6 +210,8 @@ public class InputChatLayout extends FrameLayout implements TextWatcher, View.On
                     chatLayoutOnClickListener.onChatLayoutClick();
 
                 inputChatMenuViewModel.showChatMenu.set(false);
+
+                inputChatViewModel.showAddVoiceLayout.set(true);
 
                 break;
 
@@ -185,6 +223,8 @@ public class InputChatLayout extends FrameLayout implements TextWatcher, View.On
                 if (addBtnOnClickListener != null)
                     addBtnOnClickListener.onAddBtnClick();
 
+                inputChatViewModel.showAddVoiceLayout.set(false);
+
                 inputChatMenuViewModel.showChatMenu.set(true);
 
                 break;
@@ -193,6 +233,8 @@ public class InputChatLayout extends FrameLayout implements TextWatcher, View.On
 
                 if (chatLayoutOnClickListener != null)
                     chatLayoutOnClickListener.onChatLayoutClick();
+
+                inputChatViewModel.showAddVoiceLayout.set(false);
 
                 inputChatMenuViewModel.showChatMenu.set(false);
 
@@ -212,6 +254,10 @@ public class InputChatLayout extends FrameLayout implements TextWatcher, View.On
     private boolean onSendTextChat() {
 
         return sendTextChatListener != null && sendTextChatListener.onSendTextChat(inputText);
+    }
+
+    private boolean onSendAudioChat(String filePath, long audioRecordTime) {
+        return sendAudioChatListener != null && sendAudioChatListener.onSendAudioChat(filePath, audioRecordTime);
     }
 
     /**
@@ -249,6 +295,12 @@ public class InputChatLayout extends FrameLayout implements TextWatcher, View.On
     public interface AddBtnOnClickListener {
 
         void onAddBtnClick();
+
+    }
+
+    public interface SendAudioChatListener {
+
+        boolean onSendAudioChat(String filePath, long audioRecordTime);
 
     }
 

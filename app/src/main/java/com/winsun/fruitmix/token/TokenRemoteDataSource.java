@@ -6,6 +6,7 @@ import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.parser.RemoteTokenParser;
+import com.winsun.fruitmix.parser.RemoteWeChatTokenParser;
 
 /**
  * Created by Administrator on 2017/7/13.
@@ -22,6 +23,16 @@ public class TokenRemoteDataSource extends BaseRemoteDataSourceImpl {
         HttpRequest httpRequest = httpRequestFactory.createHttpGetTokenRequest(loadTokenParam);
 
         wrapper.loadCall(httpRequest, callback, new RemoteTokenParser());
+
+    }
+
+    public void getToken(String wechatCode, BaseLoadDataCallback<String> callback) {
+
+        String url = "http://10.10.9.59:5757/v1/test/oauth2?code" + wechatCode + "&platform=mobile";
+
+        HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(url);
+
+        wrapper.loadCall(httpRequest, callback, new RemoteWeChatTokenParser());
 
     }
 

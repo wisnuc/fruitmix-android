@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.group.presenter;
+package com.winsun.fruitmix.group.usecase;
 
 /**
  * Created by Administrator on 2017/8/9.

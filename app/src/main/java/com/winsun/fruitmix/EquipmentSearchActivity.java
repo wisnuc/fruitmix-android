@@ -3,11 +3,16 @@ package com.winsun.fruitmix;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.LruCache;
@@ -23,88 +28,48 @@ import android.widget.Toast;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
+import com.winsun.fruitmix.databinding.ActivityEquipmentSearchBinding;
+import com.winsun.fruitmix.equipment.EquipmentPresenter;
 import com.winsun.fruitmix.equipment.EquipmentRemoteDataSource;
+import com.winsun.fruitmix.equipment.EquipmentSearchView;
 import com.winsun.fruitmix.equipment.InjectEquipment;
-import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.HttpResponse;
-import com.winsun.fruitmix.http.OkHttpUtil;
+import com.winsun.fruitmix.equipment.WeChatLoginListener;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.Equipment;
-import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.equipment.EquipmentSearchManager;
-import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewmodel.LoadingViewModel;
+import com.winsun.fruitmix.viewmodel.NoContentViewModel;
+import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import me.relex.circleindicator.CircleIndicator;
 
-public class EquipmentSearchActivity extends AppCompatActivity implements View.OnClickListener {
+public class EquipmentSearchActivity extends AppCompatActivity implements View.OnClickListener, EquipmentSearchView, WeChatLoginListener {
 
     public static final String TAG = "EquipmentSearchActivity";
 
-    @BindView(R.id.title)
-    TextView mTitleTextView;
-    @BindView(R.id.toolbar)
-    Toolbar mToolBar;
-    @BindView(R.id.equipment_expandablelist)
-    AnimatedExpandableListView mEquipmentExpandableListView;
-    @BindView(R.id.loading_layout)
-    LinearLayout mLoadingLayout;
-
     private Context mContext;
 
-    private EquipmentExpandableAdapter mAdapter;
+    private ViewPager equipmentViewPager;
+    private RecyclerView equipmentUserRecyclerView;
 
-    private final List<Equipment> mUserLoadedEquipments = new ArrayList<>();
+    private EquipmentPresenter equipmentPresenter;
 
-    private List<List<User>> mUserExpandableLists;
-
-    private CustomHandler mHandler;
-
-    private static final int DATA_CHANGE = 0x0001;
-
-    private static final int RETRY_GET_USER = 0x0002;
-
-    private static final String SYSTEM_PORT = "3000";
-    private static final String IPALIASING = "/system/ipaliasing";
-
-    private static final int RETRY_DELAY_MILLSECOND = 20 * 1000;
-
-    private boolean mStartAnimateArrow = false;
-
-    private EquipmentSearchManager mEquipmentSearchManager;
-
-    private EquipmentRemoteDataSource mEquipmentRemoteDataSource;
-
-    private LoginUseCase loginUseCase;
-
-    private ThreadManager threadManager;
-
-    private Random random;
-
-    private int preAvatarBgColor = 0;
-
-    private boolean onPause = false;
+    public static final int REQUEST_WXENTRY_ACTIVITY = 0x1006;
 
     public static void gotoEquipmentActivity(Activity activity, boolean shouldStopService) {
         Intent intent = new Intent(activity, EquipmentSearchActivity.class);
@@ -116,94 +81,56 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_equipment_search);
+        ActivityEquipmentSearchBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_equipment_search);
 
-        ButterKnife.bind(this);
+        Util.setStatusBarColor(this, R.color.equipment_ui_blue);
+
+        LoadingViewModel loadingViewModel = new LoadingViewModel();
+
+        binding.setLoadingViewModel(loadingViewModel);
+
+        equipmentViewPager = binding.equipmentViewpager;
+
+        equipmentUserRecyclerView = binding.equipmentUserRecyclerview;
 
         mContext = this;
 
-        random = new Random();
-
-        Util.loginType = LoginType.LOGIN;
-
-        mUserExpandableLists = new ArrayList<>();
-
-        mHandler = new CustomHandler(this, getMainLooper());
-
-        mAdapter = new EquipmentExpandableAdapter();
-        mEquipmentExpandableListView.setAdapter(mAdapter);
-
-        mEquipmentExpandableListView.setGroupIndicator(null);
-
-        mEquipmentExpandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v, final int groupPosition, int childPosition, long id) {
-
-                final User user = mUserExpandableLists.get(groupPosition).get(childPosition);
-
-                threadManager.runOnCacheThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        loginWithUserInThread(groupPosition, user);
-                    }
-                });
-
-                return true;
-            }
-        });
-
-        mEquipmentExpandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-
-                mStartAnimateArrow = true;
-
-                int count = mAdapter.getGroupCount();
-                for (int i = 0; i < count; i++) {
-
-                    if (i == groupPosition) {
-
-                        if (mEquipmentExpandableListView.isGroupExpanded(i)) {
-                            mEquipmentExpandableListView.collapseGroupWithAnimation(i);
-                        } else {
-                            mEquipmentExpandableListView.expandGroup(i, true);
-                        }
-
-                    } else {
-
-                        if (mEquipmentExpandableListView.isGroupExpanded(i)) {
-                            mEquipmentExpandableListView.collapseGroupWithAnimation(i);
-                        }
-
-                    }
-                }
-
-                return true;
-            }
-        });
-
-        setSupportActionBar(mToolBar);
+        setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getIntent().getBooleanExtra(Util.KEY_SHOULD_STOP_SERVICE, true))
-                    ButlerService.stopButlerService(mContext);
+        EquipmentSearchManager mEquipmentSearchManager = InjectEquipment.provideEquipmentSearchManager(mContext);
 
-                finish();
+        EquipmentRemoteDataSource mEquipmentRemoteDataSource = InjectEquipment.provideEquipmentRemoteDataSource(mContext);
+
+        LoginUseCase loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
+
+        ThreadManager threadManager = ThreadManager.getInstance();
+
+        equipmentPresenter = new EquipmentPresenter(loadingViewModel, this,
+                mEquipmentSearchManager, mEquipmentRemoteDataSource, loginUseCase, threadManager);
+
+        binding.setWechatLoginListener(this);
+
+        equipmentViewPager.setAdapter(equipmentPresenter.getEquipmentViewPagerAdapter());
+
+        CircleIndicator circleIndicator = binding.viewpagerIndicator;
+
+        circleIndicator.setViewPager(equipmentViewPager);
+
+        equipmentViewPager.getAdapter().registerDataSetObserver(circleIndicator.getDataSetObserver());
+
+        equipmentUserRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        equipmentUserRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        equipmentUserRecyclerView.setAdapter(equipmentPresenter.getEquipmentUserRecyclerViewAdapter());
+
+        equipmentViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+
+                equipmentPresenter.refreshEquipment(position);
             }
         });
-
-        mTitleTextView.setText(getString(R.string.search_equipment));
-
-        mEquipmentSearchManager = InjectEquipment.provideEquipmentSearchManager(mContext);
-
-        mEquipmentRemoteDataSource = InjectEquipment.provideEquipmentRemoteDataSource(mContext);
-
-        loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
-
-        threadManager = ThreadManager.getInstance();
 
 //        Equipment equipment = new Equipment("", Collections.singletonList("10.10.9.126"), 3000);
 //        equipment.setModel("");
@@ -212,37 +139,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     }
 
-    private void loginWithUserInThread(final int groupPosition, final User user) {
-        loginUseCase.loginWithUser(user, new BaseOperateDataCallback<Boolean>() {
-            @Override
-            public void onSucceed(Boolean data, OperationResult result) {
-
-                threadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        handleLoginWithUserSucceed();
-                    }
-                });
-
-            }
-
-            @Override
-            public void onFail(OperationResult result) {
-
-                threadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        handleLoginWithUserFail(groupPosition,user);
-                    }
-                });
-
-            }
-
-
-        });
-    }
-
-    private void handleLoginWithUserSucceed() {
+    @Override
+    public void handleLoginWithUserSucceed() {
         Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
 
         setResult(RESULT_OK);
@@ -251,11 +149,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         startActivity(new Intent(mContext, NavPagerActivity.class));
     }
 
-    private void handleLoginWithUserFail(int groupPosition,User user) {
-        Equipment equipment = mUserLoadedEquipments.get(groupPosition);
+    @Override
+    public void handleLoginWithUserFail(Equipment equipment, User user) {
 
         Intent intent = new Intent(mContext, LoginActivity.class);
-        intent.putExtra(Util.GATEWAY, "http://" + equipment.getHosts().get(0));
+        intent.putExtra(Util.GATEWAY, Util.HTTP + equipment.getHosts().get(0));
         intent.putExtra(Util.USER_GROUP_NAME, equipment.getEquipmentName());
         intent.putExtra(Util.USER_NAME, user.getUserName());
         intent.putExtra(Util.USER_UUID, user.getUuid());
@@ -268,27 +166,22 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     protected void onResume() {
         super.onResume();
 
-        startDiscovery();
+        equipmentPresenter.onResume();
 
 //        MobclickAgent.onPageStart(TAG);
 //        MobclickAgent.onResume(this);
 
-        onPause = false;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
 
-        stopDiscovery();
+        equipmentPresenter.onPause();
 
 //        MobclickAgent.onPageEnd(TAG);
 //        MobclickAgent.onPause(this);
 
-        onPause = true;
-
-        mHandler.removeMessages(RETRY_GET_USER);
-        mHandler.removeMessages(DATA_CHANGE);
     }
 
     @Override
@@ -297,10 +190,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         mContext = null;
 
-        mHandler.removeMessages(RETRY_GET_USER);
-        mHandler.removeMessages(DATA_CHANGE);
+        equipmentPresenter.onDestroy();
 
-        mHandler = null;
     }
 
     @Override
@@ -312,12 +203,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         } else if (requestCode == Util.KEY_MANUAL_INPUT_IP_REQUEST_CODE && resultCode == RESULT_OK) {
 
             String ip = data.getStringExtra(Util.KEY_MANUAL_INPUT_IP);
-
-            List<String> hosts = new ArrayList<>();
-            hosts.add(ip);
-
-            Equipment equipment = new Equipment("Winsuc Appliction " + ip, hosts, 6666);
-            getUserList(equipment);
+            equipmentPresenter.handleInputIpbyByUser(ip);
+        } else if (requestCode == REQUEST_WXENTRY_ACTIVITY && resultCode == RESULT_OK) {
+            finish();
         }
     }
 
@@ -341,389 +229,12 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     }
 
-    class EquipmentExpandableAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter {
+    @Override
+    public void wechatLogin() {
 
-        List<Equipment> equipmentList;
-        List<List<User>> mapList;
-        LruCache<Long, View> viewLruCache;
+        Intent intent = new Intent(this, WXEntryActivity.class);
+        startActivityForResult(intent, REQUEST_WXENTRY_ACTIVITY);
 
-        EquipmentExpandableAdapter() {
-            equipmentList = new ArrayList<>();
-            mapList = new ArrayList<>();
-
-            viewLruCache = new LruCache<>(5);
-        }
-
-        @Override
-        public int getGroupCount() {
-            return equipmentList.size();
-        }
-
-        @Override
-        public int getRealChildrenCount(int groupPosition) {
-
-            List<User> list = mapList.get(groupPosition);
-
-            return list == null ? 0 : list.size();
-        }
-
-        @Override
-        public Object getGroup(int groupPosition) {
-            return equipmentList.get(groupPosition);
-        }
-
-        @Override
-        public Object getChild(int groupPosition, int childPosition) {
-            return mapList.get(groupPosition).get(childPosition);
-        }
-
-        @Override
-        public long getGroupId(int groupPosition) {
-            return groupPosition;
-        }
-
-        @Override
-        public long getChildId(int groupPosition, int childPosition) {
-            return childPosition;
-        }
-
-        @Override
-        public boolean isChildSelectable(int groupPosition, int childPosition) {
-            return true;
-        }
-
-        @Override
-        public boolean hasStableIds() {
-            return true;
-        }
-
-        @Override
-        public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-
-            GroupViewHolder groupViewHolder;
-            if (convertView == null) {
-                convertView = LayoutInflater.from(mContext).inflate(R.layout.equipment_group_item, parent, false);
-
-                groupViewHolder = new GroupViewHolder(convertView);
-                convertView.setTag(groupViewHolder);
-            } else {
-                groupViewHolder = (GroupViewHolder) convertView.getTag();
-            }
-
-            groupViewHolder.refreshView(groupPosition, isExpanded);
-
-            return convertView;
-        }
-
-        @Override
-        public View getRealChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-
-            ChildViewHolder childViewHolder;
-            if (convertView == null) {
-
-                Long key = ((long) groupPosition << 32) + childPosition;
-                View view = viewLruCache.get(key);
-                if (view != null && view.getTag() != null) {
-
-                    convertView = view;
-                    childViewHolder = (ChildViewHolder) convertView.getTag();
-
-                } else {
-                    convertView = LayoutInflater.from(mContext).inflate(R.layout.equipment_child_item, parent, false);
-                    childViewHolder = new ChildViewHolder(convertView);
-                    convertView.setTag(childViewHolder);
-
-                    viewLruCache.put(key, convertView);
-                }
-
-            } else {
-                childViewHolder = (ChildViewHolder) convertView.getTag();
-            }
-
-            childViewHolder.refreshView(groupPosition, childPosition);
-
-            return convertView;
-        }
 
     }
-
-    class GroupViewHolder {
-
-        @BindView(R.id.arrow)
-        ImageView mArrow;
-
-        @BindView(R.id.equipment_group_name)
-        TextView mGroupName;
-        @BindView(R.id.equipment_ip_tv)
-        TextView mEquipmentIpTV;
-
-        GroupViewHolder(View view) {
-            ButterKnife.bind(this, view);
-        }
-
-        public void refreshView(int groupPosition, boolean isExpanded) {
-            Equipment equipment = mAdapter.equipmentList.get(groupPosition);
-            if (equipment == null) {
-                return;
-            }
-
-            mGroupName.setText(equipment.getModel() + "-" + equipment.getSerialNumber());
-
-            List<String> hosts = equipment.getHosts();
-
-            String and = getString(R.string.and);
-
-            StringBuilder builder = new StringBuilder();
-            for (String host : hosts) {
-                builder.append(and);
-                builder.append(host);
-            }
-
-            mEquipmentIpTV.setText(builder.substring(1));
-
-            if (mStartAnimateArrow) {
-
-                AnimatorBuilder animatorBuilder;
-
-                Boolean preIsExpanded = (Boolean) mArrow.getTag();
-                if (preIsExpanded != null && preIsExpanded == isExpanded) return;
-
-                if (isExpanded) {
-
-                    animatorBuilder = new AnimatorBuilder(mContext, R.animator.ic_back_remote, mArrow);
-
-                } else {
-
-                    animatorBuilder = new AnimatorBuilder(mContext, R.animator.ic_back_restore, mArrow);
-
-                }
-
-                animatorBuilder.startAnimator();
-
-                mArrow.setTag(isExpanded);
-
-                Log.d(TAG, "refreshView: groupPosition:" + groupPosition + " preIsExpanded:" + preIsExpanded + " isExpanded:" + isExpanded);
-            }
-
-        }
-    }
-
-    class ChildViewHolder {
-
-        @BindView(R.id.user_default_portrait)
-        TextView mUserDefaultPortrait;
-        @BindView(R.id.equipment_child_name)
-        TextView mChildName;
-
-        ChildViewHolder(View view) {
-            ButterKnife.bind(this, view);
-        }
-
-        public void refreshView(int groupPosition, int childPosition) {
-
-            if (mAdapter.mapList.get(groupPosition) == null || mAdapter.mapList.get(groupPosition).size() == 0)
-                return;
-
-            User user = mAdapter.mapList.get(groupPosition).get(childPosition);
-
-            String childName = user.getUserName();
-
-            if (childName.length() > 20) {
-                childName = childName.substring(0, 20);
-                childName += mContext.getString(R.string.android_ellipsize);
-            }
-
-            mChildName.setText(childName);
-
-            String firstLetter = Util.getUserNameFirstLetter(childName);
-            mUserDefaultPortrait.setText(firstLetter);
-
-            if (user.getDefaultAvatarBgColor() == 0) {
-
-                int avatarBgColor = random.nextInt(3) + 1;
-
-                if (preAvatarBgColor != 0) {
-
-                    if (avatarBgColor == preAvatarBgColor) {
-                        if (avatarBgColor == 3) {
-                            avatarBgColor--;
-                        } else if (avatarBgColor == 1) {
-                            avatarBgColor++;
-                        } else {
-
-                            if (random.nextBoolean()) {
-                                avatarBgColor++;
-                            } else {
-                                avatarBgColor--;
-                            }
-
-                        }
-                    }
-
-                    preAvatarBgColor = avatarBgColor;
-
-                } else {
-                    preAvatarBgColor = avatarBgColor;
-                }
-
-
-                user.setDefaultAvatarBgColor(avatarBgColor);
-            }
-
-            mUserDefaultPortrait.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
-
-        }
-    }
-
-    private void startDiscovery() {
-
-        mEquipmentSearchManager.startDiscovery(new EquipmentSearchManager.IEquipmentDiscoveryListener() {
-            @Override
-            public void call(Equipment equipment) {
-
-                getUserList(equipment);
-            }
-        });
-
-    }
-
-    private void stopDiscovery() {
-
-        mEquipmentSearchManager.stopDiscovery();
-    }
-
-    private void getUserList(final Equipment equipment) {
-
-        threadManager.runOnCacheThread(new Runnable() {
-            @Override
-            public void run() {
-
-                mEquipmentRemoteDataSource.getEquipmentHostAlias(equipment, new BaseLoadDataCallback<String>() {
-                    @Override
-                    public void onSucceed(List<String> data, OperationResult operationResult) {
-
-                        for (String alias:data){
-
-                            List<String> hosts = equipment.getHosts();
-                            if (!hosts.contains(alias)) {
-                                hosts.add(alias);
-                            }
-
-                        }
-
-                        mEquipmentRemoteDataSource.getUsersInEquipment(equipment, new BaseLoadDataCallback<User>() {
-                            @Override
-                            public void onSucceed(List<User> data, OperationResult operationResult) {
-
-                                handleRetrieveUsers(data, equipment);
-
-                            }
-
-                            @Override
-                            public void onFail(OperationResult operationResult) {
-
-                                handleRetrieveUserFail(equipment);
-                            }
-                        });
-
-                    }
-
-                    @Override
-                    public void onFail(OperationResult operationResult) {
-
-                        mEquipmentRemoteDataSource.getUsersInEquipment(equipment, new BaseLoadDataCallback<User>() {
-                            @Override
-                            public void onSucceed(List<User> data, OperationResult operationResult) {
-
-                                handleRetrieveUsers(data,equipment);
-                            }
-
-                            @Override
-                            public void onFail(OperationResult operationResult) {
-
-                                handleRetrieveUserFail(equipment);
-                            }
-                        });
-
-                    }
-                });
-
-            }
-        });
-
-
-    }
-
-    private void handleRetrieveUserFail(Equipment equipment) {
-        if (mHandler != null && !onPause) {
-            Message message = Message.obtain(mHandler, RETRY_GET_USER, equipment);
-            mHandler.sendMessageDelayed(message, RETRY_DELAY_MILLSECOND);
-        }
-    }
-
-    private void handleRetrieveUsers(List<User> data, Equipment equipment) {
-        if (data.isEmpty())
-            return;
-
-        synchronized (mUserLoadedEquipments) {
-
-            for (Equipment userLoadedEquipment : mUserLoadedEquipments) {
-                if (userLoadedEquipment == null || userLoadedEquipment.getHosts().contains(equipment.getHosts().get(0))
-                        || userLoadedEquipment.getSerialNumber().equals(equipment.getSerialNumber()))
-                    return;
-            }
-
-            mUserLoadedEquipments.add(equipment);
-            mUserExpandableLists.add(data);
-
-            Log.d(TAG, "EquipmentSearch: " + mUserExpandableLists.toString());
-        }
-
-        //update list
-        if (mHandler != null && !onPause)
-            mHandler.sendEmptyMessage(DATA_CHANGE);
-    }
-
-    private class CustomHandler extends Handler {
-
-        WeakReference<EquipmentSearchActivity> weakReference = null;
-
-        CustomHandler(EquipmentSearchActivity activity, Looper looper) {
-            super(looper);
-            weakReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case DATA_CHANGE:
-
-                    if (mEquipmentExpandableListView.getVisibility() == View.GONE) {
-                        mEquipmentExpandableListView.setVisibility(View.VISIBLE);
-                        mLoadingLayout.setVisibility(View.GONE);
-                    }
-
-                    EquipmentExpandableAdapter adapter = weakReference.get().mAdapter;
-
-                    adapter.equipmentList.clear();
-                    adapter.mapList.clear();
-                    adapter.equipmentList.addAll(mUserLoadedEquipments);
-                    adapter.mapList.addAll(mUserExpandableLists);
-                    adapter.viewLruCache.evictAll();
-                    adapter.notifyDataSetChanged();
-                    break;
-
-                case RETRY_GET_USER:
-
-                    Equipment equipment = (Equipment) msg.obj;
-
-                    Log.d(TAG, "handleMessage: retry get user equipment host0: " + equipment.getHosts().get(0));
-
-                    getUserList(equipment);
-
-                default:
-            }
-        }
-    }
-
 }

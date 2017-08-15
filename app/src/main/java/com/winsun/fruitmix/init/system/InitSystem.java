@@ -65,5 +65,10 @@ public class InitSystem {
             Log.i(TAG, "onCreate: Create shared photo folder failed");
         }
 
+        result = FileUtil.createAudioRecordFolder();
+
+        if (!result) {
+            Log.i(TAG, "onCreate: Create audio record folder failed");
+        }
     }
 }

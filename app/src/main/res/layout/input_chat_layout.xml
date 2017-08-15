@@ -14,7 +14,7 @@
 
         <variable
             name="inputChatMenuUseCase"
-            type="com.winsun.fruitmix.group.presenter.InputChatMenuUseCase" />
+            type="com.winsun.fruitmix.group.usecase.InputChatMenuUseCase" />
 
         <import type="android.view.View" />
 
@@ -87,10 +87,38 @@
             android:layout_height="1px"
             android:background="@color/divide_bg" />
 
-        <include
-            layout="@layout/input_chat_menu_layout"
-            bind:inputChatMenuUseCase="@{inputChatMenuUseCase}"
-            bind:inputChatMenuViewModel="@{inputChatMenuViewModel}" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <include
+                layout="@layout/input_chat_menu_layout"
+                android:visibility="gone"
+                bind:inputChatMenuUseCase="@{inputChatMenuUseCase}"
+                bind:inputChatMenuViewModel="@{inputChatMenuViewModel}" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:gravity="center"
+                android:visibility="@{inputChatViewModel.showAddVoiceLayout?View.VISIBLE:View.GONE,default=gone}">
+
+                <Button
+                    android:id="@+id/add_voice_btn"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:background="@drawable/round_circle"
+                    android:gravity="center"
+                    android:text="按下录音"
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="18dp" />
+
+
+            </LinearLayout>
+
+
+        </FrameLayout>
+
 
     </LinearLayout>
 

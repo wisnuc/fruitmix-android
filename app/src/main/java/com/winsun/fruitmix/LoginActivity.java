@@ -3,7 +3,9 @@ package com.winsun.fruitmix;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -14,11 +16,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.databinding.ActivityLoginBinding;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
+import com.winsun.fruitmix.login.LoginPresenter;
 import com.winsun.fruitmix.login.LoginUseCase;
+import com.winsun.fruitmix.login.LoginViewModel;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.token.LoadTokenParam;
@@ -27,6 +32,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -38,34 +44,15 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener, EditText.OnFocusChangeListener {
+public class LoginActivity extends AppCompatActivity implements LoginPresenter {
 
     public static final String TAG = "LoginActivity";
 
-    @BindView(R.id.title)
-    TextView mTitleTextView;
-    @BindView(R.id.toolbar)
     Toolbar mToolbar;
-
-    @BindView(R.id.equipment_group_name)
-    TextView mEquipmentGroupNameTextView;
-
-    @BindView(R.id.equipment_child_name)
-    TextView mEquipmentChildNameTextView;
-
-    @BindView(R.id.pwd_edit)
-    EditText mPwdEdit;
-
-    @BindView(R.id.login_btn)
-    Button mLoginBtn;
-
-    @BindView(R.id.user_default_portrait)
-    TextView mUserDefaultPortrait;
 
     private Context mContext;
 
     private String mUserUUid;
-    private String mPwd;
     private String mGateway;
 
     private String mEquipmentGroupName;
@@ -74,45 +61,49 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private LoginUseCase loginUseCase;
 
+    private LoginViewModel loginViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-
-        ButterKnife.bind(this);
+        ActivityLoginBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
 
         mContext = this;
 
-        mTitleTextView.setText(getString(R.string.login));
+        mToolbar = binding.toolbarLayout.toolbar;
 
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
+        toolbarViewModel.setToolbarNavigationOnClickListener(new ToolbarViewModel.ToolbarNavigationOnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick() {
                 finish();
             }
         });
-        mPwdEdit.setOnFocusChangeListener(this);
-        mLoginBtn.setOnClickListener(this);
+
+        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
+
+        binding.setToolbarViewModel(toolbarViewModel);
+
+        mToolbar.setBackgroundColor(ContextCompat.getColor(mContext, R.color.login_ui_blue));
+
+        Util.setStatusBarColor(this, R.color.login_ui_blue);
+
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         Intent intent = getIntent();
         mEquipmentGroupName = intent.getStringExtra(Util.USER_GROUP_NAME);
         String mEquipmentChildName = intent.getStringExtra(Util.USER_NAME);
         mUserUUid = intent.getStringExtra(Util.USER_UUID);
         mGateway = intent.getStringExtra(Util.GATEWAY);
-        int color = intent.getIntExtra(Util.USER_BG_COLOR, 0);
 
-        mEquipmentGroupNameTextView.setText(mEquipmentGroupName);
-        mEquipmentChildNameTextView.setText(mEquipmentChildName);
+        loginViewModel = new LoginViewModel();
+        loginViewModel.userName.set(mEquipmentChildName);
+        loginViewModel.userNameFirstLetter.set(Util.getUserNameFirstLetter(mEquipmentChildName));
 
-        mUserDefaultPortrait.setText(Util.getUserNameFirstLetter(mEquipmentChildName));
+        binding.setLoginViewModel(loginViewModel);
 
-        User user = new User();
-        user.setDefaultAvatarBgColor(color);
-
-        mUserDefaultPortrait.setBackgroundResource(user.getDefaultAvatarBgColorResourceId());
+        binding.setLoginPresenter(this);
 
         loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
 
@@ -144,7 +135,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStop() {
 
-
         super.onStop();
     }
 
@@ -170,40 +160,20 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         finish();
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.back:
-                finish();
-                break;
-            case R.id.login_btn:
-                Util.hideSoftInput(LoginActivity.this);
-
-                if (!Util.getNetworkState(mContext)) {
-                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                mPwd = mPwdEdit.getText().toString();
-                login();
-                break;
-            default:
-        }
-    }
-
-    @Override
-    public void onFocusChange(View v, boolean hasFocus) {
-        if (hasFocus) {
-            mPwdEdit.setHint("");
-        } else {
-            mPwdEdit.setHint(getString(R.string.password_text));
-        }
-    }
-
     /**
      * use uuid and password to login
      */
-    private void login() {
+    @Override
+    public void login() {
+
+        Util.hideSoftInput(LoginActivity.this);
+
+        if (!Util.getNetworkState(mContext)) {
+            Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String mPwd = loginViewModel.getPassword();
 
         mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.login)), true, false);
 
@@ -216,8 +186,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             }
         });
 
-
-        FNAS.retrieveRemoteToken(mContext, mGateway, mUserUUid, mPwd);
 
     }
 

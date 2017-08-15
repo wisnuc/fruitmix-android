@@ -50,6 +50,10 @@
 
     <color name="right_text_comment_bg_color">#03a9f4</color>
 
+    <color name="login_ui_blue">#03a9f4</color>
+
+    <color name="equipment_ui_blue">#0288d1</color>
+
     <!-- finish add by liang.wu-->
 
 </resources>

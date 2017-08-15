@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
 import com.tencent.mm.opensdk.modelmsg.WXMiniProgramObject;
@@ -26,6 +27,19 @@ public class MiniProgram {
     private static final int THUMB_SIZE = 150;
 
     public static final String TAG = MiniProgram.class.getSimpleName();
+
+    private static final String REQ_SCORE = "snsapi_userinfo";
+
+
+    static void sendAuthRequest(IWXAPI iwxapi) {
+
+        SendAuth.Req req = new SendAuth.Req();
+
+        req.scope = REQ_SCORE;
+
+        iwxapi.sendReq(req);
+
+    }
 
     public static IWXAPI registerToWX(Context context) {
 

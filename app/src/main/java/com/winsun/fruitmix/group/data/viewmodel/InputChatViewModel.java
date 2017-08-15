@@ -10,5 +10,7 @@ public class InputChatViewModel {
 
     public final ObservableBoolean showSendBtn = new ObservableBoolean(false);
 
+    public final ObservableBoolean showAddVoiceLayout = new ObservableBoolean(false);
+
 
 }

@@ -10,7 +10,7 @@
 
         <variable
             name="inputChatMenuUseCase"
-            type="com.winsun.fruitmix.group.presenter.InputChatMenuUseCase" />
+            type="com.winsun.fruitmix.group.usecase.InputChatMenuUseCase" />
 
         <import type="android.view.View" />
 

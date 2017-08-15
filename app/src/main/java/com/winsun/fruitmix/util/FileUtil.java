@@ -46,6 +46,8 @@ public class FileUtil {
 
     private static final String ORIGINAL_PHOTO_FOLDER_NAME = "originalPhoto";
 
+    private static final String AUDIO_RECORD_FOLDER_NAME = "audioRecord";
+
     private static final String NO_MEDIA = ".nomedia";
 
     public static boolean checkExternalStorageState() {
@@ -112,6 +114,10 @@ public class FileUtil {
         return createFolder(getOldLocalPhotoThumbnailFolderPath() + File.separator + NO_MEDIA);
     }
 
+    public static boolean createAudioRecordFolder(){
+        return createFolder(getAudioRecordFolderPath());
+    }
+
     private static boolean createFolder(String path) {
         if (!checkExternalStorageState()) {
             Log.i(TAG, "create folder: External storage not mounted");
@@ -127,19 +133,23 @@ public class FileUtil {
     }
 
     public static String getLocalPhotoThumbnailFolderPath() {
-        return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
+        return getDownloadFileStoreFolderPath() + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
     }
 
     public static String getFolderPathForLocalPhotoThumbnailFolderName200() {
-        return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME_200;
+        return getDownloadFileStoreFolderPath() + LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME_200;
     }
 
     public static String getOldLocalPhotoThumbnailFolderPath() {
-        return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + OLD_LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
+        return getDownloadFileStoreFolderPath() + OLD_LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME;
     }
 
     public static String getOriginalPhotoFolderPath() {
-        return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator + ORIGINAL_PHOTO_FOLDER_NAME;
+        return getDownloadFileStoreFolderPath() + ORIGINAL_PHOTO_FOLDER_NAME;
+    }
+
+    public static String getAudioRecordFolderPath(){
+        return getDownloadFileStoreFolderPath() + AUDIO_RECORD_FOLDER_NAME;
     }
 
     public static boolean writeBitmapToLocalPhotoMiniThumbnailFolder(Media media) {

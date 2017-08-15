@@ -1,117 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#DEDEDE"
-    android:orientation="vertical"
-    tools:context="com.winsun.fruitmix.LoginActivity">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <include layout="@layout/toolbar_layout" />
+    <data>
 
-    <!--<android.support.v7.widget.Toolbar-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="60dp"-->
-    <!--android:background="@color/colorPrimary"-->
-    <!--android:elevation="@dimen/appbar_elevation">-->
+        <variable
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
-    <!--<ImageView-->
-    <!--android:id="@+id/back"-->
-    <!--android:layout_width="24dp"-->
-    <!--android:layout_height="24dp"-->
-    <!--android:layout_centerVertical="true"-->
-    <!--android:layout_marginLeft="16dp"-->
-    <!--android:src="@drawable/ic_back_black"/>-->
+        <variable
+            name="loginViewModel"
+            type="com.winsun.fruitmix.login.LoginViewModel" />
 
-    <!--<TextView-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_marginLeft="30dp"-->
-    <!--android:text="@string/login"-->
-    <!--android:textColor="@color/toolbar_title"-->
-    <!--android:textSize="24dp"/>-->
+        <variable
+            name="loginPresenter"
+            type="com.winsun.fruitmix.login.LoginPresenter" />
 
-    <!--</android.support.v7.widget.Toolbar>-->
+    </data>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="@color/white"
-        android:orientation="horizontal"
-        android:paddingLeft="16dp">
-
-        <TextView
-            android:id="@+id/equipment_group_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="WinSun"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="18dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@color/white"
+        android:layout_height="match_parent"
+        android:background="#DEDEDE"
         android:orientation="vertical"
-        android:paddingLeft="16dp">
+        tools:context="com.winsun.fruitmix.LoginActivity">
 
-        <RelativeLayout
+        <include
+            android:id="@+id/toolbar_layout"
+            layout="@layout/toolbar_layout"
+            app:toolbarViewModel="@{toolbarViewModel}" />
+
+        <!--<android.support.v7.widget.Toolbar-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="60dp"-->
+        <!--android:background="@color/colorPrimary"-->
+        <!--android:elevation="@dimen/appbar_elevation">-->
+
+        <!--<ImageView-->
+        <!--android:id="@+id/back"-->
+        <!--android:layout_width="24dp"-->
+        <!--android:layout_height="24dp"-->
+        <!--android:layout_centerVertical="true"-->
+        <!--android:layout_marginLeft="16dp"-->
+        <!--android:src="@drawable/ic_back_black"/>-->
+
+        <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginLeft="30dp"-->
+        <!--android:text="@string/login"-->
+        <!--android:textColor="@color/toolbar_title"-->
+        <!--android:textSize="24dp"/>-->
+
+        <!--</android.support.v7.widget.Toolbar>-->
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_marginLeft="2dp">
+            android:layout_height="160dp"
+            android:background="@color/login_ui_blue"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/user_default_portrait"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/user_portrait_bg_green"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/user_login_avatar"
                 android:gravity="center"
-                android:textColor="@color/eighty_seven_percent_white"
-                android:textSize="18dp" />
+                android:text="@{loginViewModel.userNameFirstLetter}"
+                android:textColor="@color/login_ui_blue"
+                android:textSize="56dp"
+                tools:text="A" />
 
             <TextView
                 android:id="@+id/equipment_child_name"
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="16dp"
-                android:layout_toRightOf="@id/user_default_portrait"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="17dp" />
+                android:text="@{loginViewModel.userName}"
+                android:textColor="@color/eighty_seven_percent_white"
+                android:textSize="17dp"
+                tools:text="admin" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="16dp"
+                    android:src="@drawable/login_key" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:passwordToggleDrawable="@drawable/password_toggle_background"
+                    app:passwordToggleEnabled="true">
+
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/pwd_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/password_text"
+                        android:inputType="textPassword"
+                        android:text="@={loginViewModel.password}"
+                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textColorHint="@color/eighty_seven_percent_black"
+                        android:textSize="16dp" />
+
+                </android.support.design.widget.TextInputLayout>
+
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/login_btn"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/login_ui_blue"
+                android:onClick="@{()->loginPresenter.login()}"
+                android:text="确定"
+                android:textColor="#FFF"
+                android:textSize="16dp" />
 
         </RelativeLayout>
 
-        <EditText
-            android:id="@+id/pwd_edit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/password_text"
-            android:inputType="textPassword"
-            android:textColorHint="@color/eighty_seven_percent_black"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="17dp" />
-
-        <Button
-            android:id="@+id/login_btn"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:layout_marginRight="16dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/rect_login"
-            android:text="@string/login"
-            android:textColor="@color/eighty_seven_percent_white"
-            android:textSize="16dp" />
-
     </LinearLayout>
 
-</LinearLayout>
+
+</layout>
+

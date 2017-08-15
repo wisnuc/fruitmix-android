@@ -11,6 +11,7 @@ import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.databinding.GroupAddPingItemBinding;
 import com.winsun.fruitmix.databinding.GroupPingItemBinding;
+import com.winsun.fruitmix.group.data.model.AudioComment;
 import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.TextComment;
@@ -19,6 +20,7 @@ import com.winsun.fruitmix.group.data.model.UserCommentShowStrategy;
 import com.winsun.fruitmix.group.data.model.UserCommentViewFactory;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
+import com.winsun.fruitmix.group.usecase.PlayAudioUseCase;
 import com.winsun.fruitmix.group.view.GroupContentView;
 import com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton;
 import com.winsun.fruitmix.group.view.customview.UserCommentView;
@@ -35,6 +37,8 @@ import java.util.List;
  */
 
 public class GroupContentPresenter implements CustomArrowToggleButton.PingToggleListener {
+
+    private PlayAudioUseCase playAudioUseCase;
 
     private ImageLoader imageLoader;
 
@@ -59,8 +63,9 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
     public GroupContentPresenter(GroupContentView groupContentView, String groupUUID,
                                  LoggedInUserDataSource loggedInUserDataSource,
                                  GroupRepository groupRepository, GroupContentViewModel groupContentViewModel,
-                                 ImageLoader imageLoader) {
+                                 ImageLoader imageLoader,PlayAudioUseCase playAudioUseCase) {
 
+        this.playAudioUseCase = playAudioUseCase;
         this.imageLoader = imageLoader;
         this.groupContentView = groupContentView;
         this.groupUUID = groupUUID;
@@ -163,7 +168,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         GroupContentAdapter() {
             mUserComments = new ArrayList<>();
 
-            factory = UserCommentViewFactory.getInstance(imageLoader);
+            factory = UserCommentViewFactory.getInstance(imageLoader,playAudioUseCase);
         }
 
         void setUserComments(List<UserComment> userComments) {
@@ -233,9 +238,22 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
         TextComment textComment = new TextComment(currentLoggedInUser, System.currentTimeMillis(), text);
 
-        currentPrivateGroup.addUserComment(textComment);
+        insertUserComment(textComment);
 
-        groupRepository.insertUserComment(groupUUID, textComment, new BaseOperateDataCallbackImpl<UserComment>() {
+    }
+
+    public void sendAudio(String filePath, long audioRecordTime) {
+
+        AudioComment audioComment = new AudioComment(currentLoggedInUser, System.currentTimeMillis(), filePath, audioRecordTime);
+
+        insertUserComment(audioComment);
+
+    }
+
+    private void insertUserComment(UserComment userComment) {
+        currentPrivateGroup.addUserComment(userComment);
+
+        groupRepository.insertUserComment(groupUUID, userComment, new BaseOperateDataCallbackImpl<UserComment>() {
             @Override
             public void onSucceed(UserComment data, OperationResult result) {
                 super.onSucceed(data, result);
@@ -253,8 +271,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
             }
         });
-
     }
+
 
     public void smoothToChatListEnd() {
         groupContentView.smoothToChatListPosition(userComments.size() - 1);
@@ -269,7 +287,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
             mPinViews = new ArrayList<>();
         }
 
-        public void setPingViews(List<PinView> pinViews) {
+        void setPingViews(List<PinView> pinViews) {
             mPinViews.clear();
             mPinViews.addAll(pinViews);
         }
@@ -323,7 +341,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
         private Pin pin;
 
-        public PinContentView(Pin pin) {
+        PinContentView(Pin pin) {
             this.pin = pin;
         }
 

@@ -99,7 +99,7 @@ public class LoginUseCase {
 
             stationFileRepository.clearDownloadFileRecordInCache();
 
-            callback.onSucceed(true,new OperationSuccess());
+            callback.onSucceed(true, new OperationSuccess());
 
             getUsers();
 
@@ -183,7 +183,7 @@ public class LoginUseCase {
     }
 
 
-    public void loginWithUser(User user,BaseOperateDataCallback<Boolean> callback) {
+    public void loginWithUser(User user, BaseOperateDataCallback<Boolean> callback) {
 
         Collection<LoggedInUser> loggedInUsers = loggedInUserDataSource.getAllLoggedInUsers();
 
@@ -195,15 +195,15 @@ public class LoginUseCase {
 
         }
 
-        if(currentLoggedInUser == null)
+        if (currentLoggedInUser == null)
             callback.onFail(new OperationSQLException());
         else
-            loginWithLoggedInUser(currentLoggedInUser,callback);
+            loginWithLoggedInUser(currentLoggedInUser, callback);
 
 
     }
 
-    public void loginWithLoggedInUser(LoggedInUser currentLoggedInUser,BaseOperateDataCallback<Boolean> callback) {
+    public void loginWithLoggedInUser(LoggedInUser currentLoggedInUser, BaseOperateDataCallback<Boolean> callback) {
 
         httpRequestFactory.setCurrentData(currentLoggedInUser.getToken(), currentLoggedInUser.getGateway());
 
@@ -221,9 +221,48 @@ public class LoginUseCase {
             systemSettingDataSource.setAutoUploadOrNot(false);
         }
 
-        callback.onSucceed(true,new OperationSuccess());
+        callback.onSucceed(true, new OperationSuccess());
 
         getUsers();
+
+    }
+
+
+    public void loginWithWeChatCode(String code, final BaseOperateDataCallback<Boolean> callback) {
+
+        tokenRemoteDataSource.getToken(code, new BaseLoadDataCallback<String>() {
+            @Override
+            public void onSucceed(List<String> data, OperationResult operationResult) {
+
+                String token = data.get(0);
+
+                //TODO: check get gateway and user when login by wechat code
+
+                httpRequestFactory.setCurrentData(token, "10.10.9.49");
+
+                imageGifLoaderInstance.setToken(token);
+
+                stationFileRepository.clearDownloadFileRecordInCache();
+
+                callback.onSucceed(true, operationResult);
+
+                getUsers(token);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                callback.onFail(operationResult);
+
+            }
+        });
+
+
+    }
+
+    private void getUsers(String token) {
+
 
     }
 
