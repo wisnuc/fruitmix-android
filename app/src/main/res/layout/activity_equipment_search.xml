@@ -19,32 +19,25 @@
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#DEDEDE"
         android:orientation="vertical"
         tools:context="com.winsun.fruitmix.EquipmentSearchActivity">
 
-        <android.support.design.widget.AppBarLayout
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/equipment_ui_blue"
+            android:theme="@style/AppTheme.AppBarOverlay"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@color/equipment_ui_blue"
-                android:theme="@style/AppTheme.AppBarOverlay"
-                app:popupTheme="@style/AppTheme.PopupOverlay">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:src="@drawable/equipment_search_logo" />
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="16dp"
-                    android:src="@drawable/equipment_search_logo" />
-
-            </android.support.v7.widget.Toolbar>
-
-        </android.support.design.widget.AppBarLayout>
+        </android.support.v7.widget.Toolbar>
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -88,7 +81,7 @@
                     android:id="@+id/equipment_user_title"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
-                    android:layout_marginTop="8dp"
+                    android:background="#FAFAFA"
                     android:gravity="center_vertical"
                     android:paddingLeft="16dp"
                     android:text="用户"
@@ -98,8 +91,7 @@
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/equipment_user_recyclerview"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingLeft="16dp" />
+                    android:layout_height="match_parent" />
 
             </LinearLayout>
 
@@ -116,24 +108,37 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_gravity="bottom"
-            android:background="@color/white"
+            android:background="?attr/selectableItemBackground"
             android:clickable="true"
-            android:gravity="center"
             android:onClick="@{()->wechatLoginListener.wechatLogin()}"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="8dp"
-                android:src="@drawable/wechat" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="#1F000000" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="微信登录"
-                android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="14dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="8dp"
+                    android:src="@drawable/wechat" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="微信登录"
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="14dp" />
+
+            </LinearLayout>
+
 
         </LinearLayout>
 

@@ -14,6 +14,7 @@ import com.tencent.mm.opensdk.modelbase.BaseResp;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
+import com.winsun.fruitmix.EquipmentSearchActivity;
 import com.winsun.fruitmix.LoginActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
@@ -34,19 +35,33 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
     private Context mContext;
 
+    public interface WXEntryCallback {
+
+        void loginSucceed();
+
+        void loginFail();
+
+    }
+
+    private static WXEntryCallback wxEntryCallback;
+
+    public static void setWxEntryCallback(WXEntryCallback wxEntryCallback) {
+        WXEntryActivity.wxEntryCallback = wxEntryCallback;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mContext = this;
 
+        loginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
+
+        Log.d(TAG, "onCreate: ");
+
         IWXAPI iwxapi = MiniProgram.registerToWX(this);
 
         iwxapi.handleIntent(getIntent(), this);
-
-        MiniProgram.sendAuthRequest(iwxapi);
-
-        loginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
 
     }
 
@@ -57,7 +72,9 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
         mContext = null;
 
         dismissDialog();
+
         dialog = null;
+
     }
 
     @Override
@@ -96,25 +113,25 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             case BaseResp.ErrCode.ERR_USER_CANCEL:
                 result = R.string.errcode_cancel;
 
-                finish();
+                finishWhenLoginFail();
 
                 break;
             case BaseResp.ErrCode.ERR_AUTH_DENIED:
                 result = R.string.errcode_deny;
 
-                finish();
+                finishWhenLoginFail();
 
                 break;
             case BaseResp.ErrCode.ERR_UNSUPPORT:
                 result = R.string.errcode_unsupported;
 
-                finish();
+                finishWhenLoginFail();
 
                 break;
             default:
                 result = R.string.errcode_unknown;
 
-                finish();
+                finishWhenLoginFail();
 
                 break;
 
@@ -129,20 +146,35 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
 
-                dismissDialog();
+                ThreadManager.getInstance().runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-                startNavPagerActivity();
+                        dismissDialog();
+
+                        startNavPagerActivity();
+
+                    }
+                });
 
             }
 
             @Override
-            public void onFail(OperationResult result) {
+            public void onFail(final OperationResult result) {
 
-                dismissDialog();
+                ThreadManager.getInstance().runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-                finish();
+                        dismissDialog();
 
-                Toast.makeText(WXEntryActivity.this, result.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+                        finishWhenLoginFail();
+
+                        Toast.makeText(WXEntryActivity.this, result.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+
             }
         });
     }
@@ -150,8 +182,21 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
     private void startNavPagerActivity() {
         Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
         startActivity(jumpIntent);
-        WXEntryActivity.this.setResult(RESULT_OK);
+
         finish();
+
+        if (wxEntryCallback != null)
+            wxEntryCallback.loginSucceed();
+
+    }
+
+    private void finishWhenLoginFail() {
+
+        finish();
+
+        if (wxEntryCallback != null)
+            wxEntryCallback.loginFail();
+
     }
 
     private void dismissDialog() {

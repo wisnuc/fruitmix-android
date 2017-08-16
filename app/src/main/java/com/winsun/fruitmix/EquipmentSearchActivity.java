@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -25,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.component.AnimatedExpandableListView;
@@ -47,6 +49,7 @@ import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
+import com.winsun.fruitmix.wxapi.MiniProgram;
 import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
 import java.lang.ref.WeakReference;
@@ -68,8 +71,6 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     private RecyclerView equipmentUserRecyclerView;
 
     private EquipmentPresenter equipmentPresenter;
-
-    public static final int REQUEST_WXENTRY_ACTIVITY = 0x1006;
 
     public static void gotoEquipmentActivity(Activity activity, boolean shouldStopService) {
         Intent intent = new Intent(activity, EquipmentSearchActivity.class);
@@ -132,12 +133,29 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             }
         });
 
+        final TextView equipmentUserTitle = binding.equipmentUserTitle;
+
+        equipmentUserRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                if (newState == RecyclerView.SCROLL_STATE_IDLE)
+                    ViewCompat.setElevation(equipmentUserTitle, Util.dip2px(mContext, 0f));
+                else
+                    ViewCompat.setElevation(equipmentUserTitle, Util.dip2px(mContext, 2f));
+
+            }
+        });
+
 //        Equipment equipment = new Equipment("", Collections.singletonList("10.10.9.126"), 3000);
 //        equipment.setModel("");
 //        equipment.setSerialNumber("");
 //        getUserList(equipment);
 
     }
+
 
     @Override
     public void handleLoginWithUserSucceed() {
@@ -204,9 +222,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
             String ip = data.getStringExtra(Util.KEY_MANUAL_INPUT_IP);
             equipmentPresenter.handleInputIpbyByUser(ip);
-        } else if (requestCode == REQUEST_WXENTRY_ACTIVITY && resultCode == RESULT_OK) {
-            finish();
         }
+
     }
 
     @Override
@@ -232,9 +249,27 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     @Override
     public void wechatLogin() {
 
-        Intent intent = new Intent(this, WXEntryActivity.class);
-        startActivityForResult(intent, REQUEST_WXENTRY_ACTIVITY);
+        WXEntryActivity.setWxEntryCallback(new WXEntryActivity.WXEntryCallback() {
+            @Override
+            public void loginSucceed() {
 
+                Log.d(TAG, "loginSucceed: ");
+
+                finish();
+            }
+
+            @Override
+            public void loginFail() {
+
+                Log.d(TAG, "loginFail: ");
+            }
+        });
+
+
+        IWXAPI iwxapi = MiniProgram.registerToWX(this);
+
+        MiniProgram.sendAuthRequest(iwxapi);
 
     }
+
 }

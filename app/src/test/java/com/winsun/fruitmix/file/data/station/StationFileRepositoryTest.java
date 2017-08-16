@@ -4,12 +4,14 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
+import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
 import com.winsun.fruitmix.file.data.download.DownloadedItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadPendingState;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.RemoteFolder;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 
 import org.junit.After;
@@ -18,10 +20,13 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 
 import static org.mockito.Mockito.*;
@@ -31,7 +36,7 @@ import static org.junit.Assert.*;
  * Created by Administrator on 2017/7/19.
  */
 
-public class FileRepositoryTest {
+public class StationFileRepositoryTest {
 
     private StationFileRepositoryImpl fileRepository;
 
@@ -106,7 +111,7 @@ public class FileRepositoryTest {
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(stationFileDataSource).getFile(anyString(),anyString(), captor.capture());
+        verify(stationFileDataSource).getFile(anyString(), anyString(), captor.capture());
 
         captor.getValue().onSucceed(Collections.<AbstractRemoteFile>emptyList(), new OperationSuccess());
 
@@ -114,7 +119,7 @@ public class FileRepositoryTest {
 
         fileRepository.getFile(secondFolderUUID, rootUUID, callback);
 
-        verify(stationFileDataSource,times(2)).getFile(anyString(),anyString(), captor.capture());
+        verify(stationFileDataSource, times(2)).getFile(anyString(), anyString(), captor.capture());
 
         assertTrue(fileRepository.cacheDirty);
 
@@ -159,7 +164,7 @@ public class FileRepositoryTest {
         String currentUserUUID = "";
 
         try {
-            fileRepository.downloadFile("", new FileDownloadPendingState(fileDownloadItem,fileRepository,currentUserUUID), new BaseOperateDataCallbackImpl<FileDownloadItem>());
+            fileRepository.downloadFile("", new FileDownloadPendingState(fileDownloadItem, fileRepository, currentUserUUID), new BaseOperateDataCallbackImpl<FileDownloadItem>());
 
             verify(stationFileDataSource).downloadFile(any(FileDownloadState.class), captor.capture());
 
@@ -171,6 +176,59 @@ public class FileRepositoryTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+    @Test
+    public void testDeleteDownloadedFileSucceed() {
+
+        Collection<DownloadedFileWrapper> downloadedFileWrappers = new ArrayList<>();
+
+        downloadedFileWrappers.add(new DownloadedFileWrapper("testUUID1", "testName1"));
+        downloadedFileWrappers.add(new DownloadedFileWrapper("testUUID2", "testName2"));
+
+        when(downloadedFileDataSource.deleteDownloadedFile(anyString())).thenReturn(true);
+
+        fileRepository.deleteDownloadedFile(downloadedFileWrappers, "", new BaseOperateDataCallbackImpl<Void>());
+
+        InOrder inOrder = inOrder(downloadedFileDataSource);
+
+        inOrder.verify(downloadedFileDataSource).deleteDownloadedFile(anyString());
+
+        inOrder.verify(downloadedFileDataSource).deleteDownloadedFileRecord(anyString(), anyString());
+
+        inOrder.verify(downloadedFileDataSource).deleteDownloadedFile(anyString());
+
+        inOrder.verify(downloadedFileDataSource).deleteDownloadedFileRecord(anyString(), anyString());
+
+    }
+
+
+    @Test
+    public void testDeleteDownloadedFileFail() {
+
+        Collection<DownloadedFileWrapper> downloadedFileWrappers = new ArrayList<>();
+
+        downloadedFileWrappers.add(new DownloadedFileWrapper("testUUID1", "testName1"));
+        downloadedFileWrappers.add(new DownloadedFileWrapper("testUUID2", "testName2"));
+
+        when(downloadedFileDataSource.deleteDownloadedFile(anyString())).thenReturn(false);
+
+        fileRepository.deleteDownloadedFile(downloadedFileWrappers, "", new BaseOperateDataCallback<Void>() {
+            @Override
+            public void onSucceed(Void data, OperationResult result) {
+
+            }
+
+            @Override
+            public void onFail(OperationResult result) {
+
+            }
+        });
+
+        verify(downloadedFileDataSource, times(2)).deleteDownloadedFile(anyString());
+
+        verify(downloadedFileDataSource, never()).deleteDownloadedFileRecord(anyString(), anyString());
 
     }
 

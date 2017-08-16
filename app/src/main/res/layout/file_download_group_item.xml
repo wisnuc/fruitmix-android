@@ -1,23 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="48dp">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
-        android:id="@+id/file_download_group_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="16dp"
-        android:text="@string/downloading"
-        android:textColor="@color/eighty_seven_percent_black"
-        android:textSize="18dp" />
+    <data>
 
-    <View
+        <variable
+            name="fileDownloadGroupItemViewModel"
+            type="com.winsun.fruitmix.file.view.viewmodel.FileDownloadGroupItemViewModel" />
+
+    </data>
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_alignParentBottom="true"
-        android:background="@color/eighty_seven_percent_black" />
+        android:layout_height="48dp">
+
+        <TextView
+            android:id="@+id/file_download_group_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:text="@{fileDownloadGroupItemViewModel.groupTitle}"
+            android:textColor="@color/eighty_seven_percent_black"
+            android:textSize="18dp"
+            tools:text="@string/downloading" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_alignParentBottom="true"
+            android:background="@color/eighty_seven_percent_black" />
 
 
-</RelativeLayout>
+    </RelativeLayout>
+
+</layout>

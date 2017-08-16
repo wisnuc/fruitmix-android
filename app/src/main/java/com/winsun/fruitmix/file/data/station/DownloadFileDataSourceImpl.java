@@ -10,6 +10,7 @@ import com.winsun.fruitmix.util.FileUtil;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -70,22 +71,18 @@ public class DownloadFileDataSourceImpl implements DownloadedFileDataSource {
     }
 
     @Override
-    public void insertDownloadedFileRecord(DownloadedItem downloadedItem) {
+    public boolean insertDownloadedFileRecord(DownloadedItem downloadedItem) {
 
-        dbUtils.insertDownloadedFile(downloadedItem);
+        return dbUtils.insertDownloadedFile(downloadedItem) > 0;
 
     }
 
     @Override
-    public void deleteDownloadedFileRecord(List<String> fileUUIDs, String currentLoginUserUUID) {
+    public void deleteDownloadedFileRecord(String fileUUID, String currentLoginUserUUID) {
 
-        for (String fileUUID:fileUUIDs) {
-            dbUtils.deleteDownloadedFileByUUIDAndCreatorUUID(fileUUID, currentLoginUserUUID);
+        dbUtils.deleteDownloadedFileByUUIDAndCreatorUUID(fileUUID, currentLoginUserUUID);
 
-        }
-
-        fileDownloadManager.deleteFileDownloadItem(fileUUIDs);
-
+        fileDownloadManager.deleteFileDownloadItem(Collections.singletonList(fileUUID));
     }
 
     @Override
@@ -96,10 +93,10 @@ public class DownloadFileDataSourceImpl implements DownloadedFileDataSource {
     }
 
     @Override
-    public void deleteDownloadedFile(String fileName) {
+    public boolean deleteDownloadedFile(String fileName) {
 
         //TODO: delete to real downloaded file
 
-
+        return true;
     }
 }

@@ -3,18 +3,22 @@ package com.winsun.fruitmix.file.data.station;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
 import com.winsun.fruitmix.file.data.download.DownloadedItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
+import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.RemoteFolder;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -141,30 +145,29 @@ public class StationFileRepositoryImpl implements StationFileRepository {
     }
 
     @Override
-    public void deleteDownloadedFile(String fileName) {
-
-        downloadedFileDataSource.deleteDownloadedFile(fileName);
-
-    }
-
-    @Override
-    public void insertDownloadedFileRecord(DownloadedItem downloadedItem) {
-
-        downloadedFileDataSource.insertDownloadedFileRecord(downloadedItem);
-
-    }
-
-    @Override
-    public void deleteDownloadedFileRecord(List<String> fileUUIDs, String currentLoginUserUUID) {
-
-        downloadedFileDataSource.deleteDownloadedFileRecord(fileUUIDs, currentLoginUserUUID);
-
-    }
-
-    @Override
     public void clearDownloadFileRecordInCache() {
 
         downloadedFileDataSource.clearDownloadFileRecordInCache();
+
+    }
+
+    @Override
+    public void deleteDownloadedFile(Collection<DownloadedFileWrapper> downloadedFileWrappers, String currentLoginUserUUID, BaseOperateDataCallback<Void> callback) {
+
+        boolean result = false;
+
+        for (DownloadedFileWrapper downloadedFileWrapper : downloadedFileWrappers) {
+
+            result = downloadedFileDataSource.deleteDownloadedFile(downloadedFileWrapper.getFileName());
+
+            if (result)
+                downloadedFileDataSource.deleteDownloadedFileRecord(downloadedFileWrapper.getFileUUID(), currentLoginUserUUID);
+        }
+
+        if (result)
+            callback.onSucceed(null, new OperationSuccess());
+        else
+            callback.onFail(new OperationSQLException());
 
     }
 }

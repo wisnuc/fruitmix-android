@@ -1,46 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/downloading_file_item_layout"
-    android:layout_width="match_parent"
-    android:layout_height="64dp"
-    android:orientation="vertical"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <ImageView
-        android:id="@+id/file_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="16dp"
-        android:src="@drawable/file_icon" />
+    <data>
 
-    <LinearLayout
-        android:id="@+id/content"
+        <variable
+            name="fileDownloadingItemViewModel"
+            type="com.winsun.fruitmix.file.view.viewmodel.FileDownloadingItemViewModel" />
+
+    </data>
+
+    <RelativeLayout
+        android:id="@+id/downloading_file_item_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@id/file_icon"
-        android:orientation="vertical">
+        android:layout_height="64dp"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
 
-        <TextView
-            android:id="@+id/file_name"
+        <ImageView
+            android:id="@+id/file_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="文件名"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="16dp" />
+            android:layout_centerVertical="true"
+            android:layout_marginRight="16dp"
+            android:src="@drawable/file_icon" />
 
-        <ProgressBar
-            android:id="@+id/downloading_progressbar"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        <LinearLayout
+            android:id="@+id/content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/file_icon"
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/file_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@{fileDownloadingItemViewModel.fileName}"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="16dp"
+                tools:text="文件名" />
+
+            <ProgressBar
+                android:id="@+id/downloading_progressbar"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="@{fileDownloadingItemViewModel.maxProgress}"
+                android:progress="@{fileDownloadingItemViewModel.currentProgress}" />
+
+        </LinearLayout>
 
 
-</RelativeLayout>
+    </RelativeLayout>
+
+</layout>

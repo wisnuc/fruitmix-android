@@ -15,12 +15,12 @@ public interface DownloadedFileDataSource {
 
     List<DownloadedItem> getCurrentLoginUserDownloadedFileRecord(String currentLoginUserUUID);
 
-    void insertDownloadedFileRecord(DownloadedItem downloadedItem);
+    boolean insertDownloadedFileRecord(DownloadedItem downloadedItem);
 
-    void deleteDownloadedFileRecord(List<String> fileUUIDs,String currentLoginUserUUID);
+    void deleteDownloadedFileRecord(String fileUUID,String currentLoginUserUUID);
 
     void clearDownloadFileRecordInCache();
 
-    void deleteDownloadedFile(String fileName);
+    boolean deleteDownloadedFile(String fileName);
 
 }

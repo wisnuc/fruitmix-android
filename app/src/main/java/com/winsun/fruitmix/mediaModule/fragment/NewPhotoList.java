@@ -135,8 +135,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private ThreadManager threadManager;
 
-    //TODO: image load instance need token, check login use case logic, load file logic is not refactor
-
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 

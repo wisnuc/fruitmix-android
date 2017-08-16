@@ -116,8 +116,6 @@ public class HttpRequestFactory {
         return getGateway() + ":" + port + httpPath;
     }
 
-    //TODO: consider set token logic
-
     private HttpRequest createHasBodyRequest(String url, String method, String body) {
 
         HttpRequest httpRequest = new HttpRequest(url, method);

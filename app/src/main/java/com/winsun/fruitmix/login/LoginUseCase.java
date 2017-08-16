@@ -32,8 +32,6 @@ import java.util.List;
 
 public class LoginUseCase {
 
-    //TODO: consider loginUserCase dependent abstract,and how to set equipment name to CheckIpUtil
-
     private static LoginUseCase instance;
 
     private LoggedInUserDataSource loggedInUserDataSource;

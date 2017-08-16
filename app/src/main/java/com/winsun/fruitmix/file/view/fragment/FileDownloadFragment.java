@@ -3,6 +3,7 @@ package com.winsun.fruitmix.file.view.fragment;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.databinding.ViewDataBinding;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -26,27 +27,39 @@ import com.winsun.fruitmix.command.NullCommand;
 import com.winsun.fruitmix.command.MacroCommand;
 import com.winsun.fruitmix.command.ShowSelectModeViewCommand;
 import com.winsun.fruitmix.command.ShowUnSelectModeViewCommand;
+import com.winsun.fruitmix.databinding.DownloadedFileItemBinding;
+import com.winsun.fruitmix.databinding.DownloadingFileItemBinding;
+import com.winsun.fruitmix.databinding.FileDownloadGroupItemBinding;
 import com.winsun.fruitmix.databinding.FragmentFileDownloadBinding;
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.download.DownloadState;
+import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
 import com.winsun.fruitmix.file.data.download.DownloadedItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
+import com.winsun.fruitmix.file.view.viewmodel.FileDownloadGroupItemViewModel;
+import com.winsun.fruitmix.file.view.viewmodel.FileDownloadedItemViewModel;
+import com.winsun.fruitmix.file.view.viewmodel.FileDownloadingItemViewModel;
 import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
+import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,7 +89,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     private boolean mStartDownloadOrPending = false;
 
-    private List<String> selectDownloadedItemUUID;
+    private Map<String, DownloadedFileWrapper> selectDownloadedItemMap;
 
     private AbstractCommand showUnSelectModeViewCommand;
 
@@ -96,10 +109,10 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     private String currentUserUUID;
 
-    public static final int DOWNLOADING_GROUP = 0;
-    public static final int DOWNLOADING_CHILD = 1;
-    public static final int DOWNLOADED_GROUP = 2;
-    public static final int DOWNLOADED_CHILD = 3;
+    private static final int DOWNLOADING_GROUP = 0;
+    private static final int DOWNLOADING_CHILD = 1;
+    private static final int DOWNLOADED_GROUP = 2;
+    private static final int DOWNLOADED_CHILD = 3;
 
     private interface IDownloadItem {
 
@@ -181,7 +194,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
         customHandler = new CustomHandler(this);
 
-        selectDownloadedItemUUID = new ArrayList<>();
+        selectDownloadedItemMap = new HashMap<>();
 
         showUnSelectModeViewCommand = new ShowUnSelectModeViewCommand(this);
 
@@ -189,7 +202,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
         nullCommand = new NullCommand();
 
-        view = onCreateView(activity.getLayoutInflater(), null);
+        view = onCreateView(activity.getLayoutInflater());
 
         currentUserUUID = InjectLoggedInUser.provideLoggedInUserRepository(activity).getCurrentLoggedInUserUUID();
 
@@ -201,9 +214,9 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     }
 
-    private View onCreateView(LayoutInflater inflater, ViewGroup container) {
+    private View onCreateView(LayoutInflater inflater) {
 
-        FragmentFileDownloadBinding fragmentFileDownloadBinding = FragmentFileDownloadBinding.inflate(inflater, container, false);
+        FragmentFileDownloadBinding fragmentFileDownloadBinding = FragmentFileDownloadBinding.inflate(inflater, null, false);
 
         fileDownloadRecyclerView = fragmentFileDownloadBinding.fileDownloadRecyclerView;
 
@@ -273,7 +286,12 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
         Log.i(TAG, "handleOperationEvent: action:" + action);
 
-        refreshView();
+        OperationResult result = operationEvent.getOperationResult();
+
+        if (result.getOperationResultType() == OperationResultType.SUCCEED)
+            refreshView();
+        else
+            Toast.makeText(activity, result.getResultMessage(activity), Toast.LENGTH_SHORT).show();
 
     }
 
@@ -391,7 +409,8 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
             bottomMenuItems.add(clearSelectItem);
 
             AbstractCommand macroCommand = new MacroCommand();
-            macroCommand.addCommand(new DeleteDownloadedFileCommand(selectDownloadedItemUUID,currentUserUUID,stationFileRepository));
+
+            macroCommand.addCommand(new DeleteDownloadedFileCommand(selectDownloadedItemMap.values(), currentUserUUID, stationFileRepository));
             macroCommand.addCommand(showUnSelectModeViewCommand);
 
             BottomMenuItem deleteSelectItem = new BottomMenuItem(R.drawable.del_user, activity.getString(R.string.delete_text), macroCommand);
@@ -420,7 +439,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
         this.selectMode = selectMode;
 
         if (!selectMode) {
-            selectDownloadedItemUUID.clear();
+            selectDownloadedItemMap.clear();
         }
 
         mAdapter.notifyDataSetChanged();
@@ -467,7 +486,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
         @Override
         public FileDownloadViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-            View view;
+            ViewDataBinding viewDataBinding;
 
             FileDownloadViewHolder fileDownloadViewHolder = null;
 
@@ -475,24 +494,24 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
                 case DOWNLOADING_GROUP:
                 case DOWNLOADED_GROUP:
 
-                    view = LayoutInflater.from(activity).inflate(R.layout.file_download_group_item, parent, false);
+                    viewDataBinding = FileDownloadGroupItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
 
-                    fileDownloadViewHolder = new FileDownloadGroupHolder(view);
+                    fileDownloadViewHolder = new FileDownloadGroupHolder(viewDataBinding);
 
                     break;
 
                 case DOWNLOADING_CHILD:
 
-                    view = LayoutInflater.from(activity).inflate(R.layout.downloading_file_item, parent, false);
+                    viewDataBinding = DownloadingFileItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
 
-                    fileDownloadViewHolder = new FileDownloadingItemHolder(view);
+                    fileDownloadViewHolder = new FileDownloadingItemHolder(viewDataBinding);
 
                     break;
                 case DOWNLOADED_CHILD:
 
-                    view = LayoutInflater.from(activity).inflate(R.layout.downloaded_file_item, parent, false);
+                    viewDataBinding = DownloadedFileItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
 
-                    fileDownloadViewHolder = new FileDownloadedItemHolder(view);
+                    fileDownloadViewHolder = new FileDownloadedItemHolder(viewDataBinding);
 
                     break;
             }
@@ -518,12 +537,10 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     }
 
-    abstract class FileDownloadViewHolder extends RecyclerView.ViewHolder {
+    abstract class FileDownloadViewHolder extends BindingViewHolder {
 
-        public FileDownloadViewHolder(View itemView) {
-            super(itemView);
-
-            ButterKnife.bind(this, itemView);
+        public FileDownloadViewHolder(ViewDataBinding viewDataBinding) {
+            super(viewDataBinding);
         }
 
         public abstract void refreshView(IDownloadItem downloadItem);
@@ -531,20 +548,28 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     class FileDownloadGroupHolder extends FileDownloadViewHolder {
 
-        @BindView(R.id.file_download_group_text_view)
-        TextView mFileDownloadGroupTextView;
+        private FileDownloadGroupItemBinding binding;
 
-        FileDownloadGroupHolder(View view) {
-            super(view);
+        FileDownloadGroupHolder(ViewDataBinding viewDataBinding) {
+            super(viewDataBinding);
+
+            binding = (FileDownloadGroupItemBinding) viewDataBinding;
         }
 
         @Override
         public void refreshView(IDownloadItem downloadItem) {
 
+            FileDownloadGroupItemViewModel fileDownloadGroupItemViewModel = binding.getFileDownloadGroupItemViewModel();
+
+            if (fileDownloadGroupItemViewModel == null) {
+                fileDownloadGroupItemViewModel = new FileDownloadGroupItemViewModel();
+                binding.setFileDownloadGroupItemViewModel(fileDownloadGroupItemViewModel);
+            }
+
             if (downloadItem instanceof DownloadingGroupItem) {
-                mFileDownloadGroupTextView.setText(R.string.downloading);
+                fileDownloadGroupItemViewModel.groupTitle.set(activity.getString(R.string.downloading));
             } else if (downloadItem instanceof DownloadedGroupItem) {
-                mFileDownloadGroupTextView.setText(R.string.downloaded);
+                fileDownloadGroupItemViewModel.groupTitle.set(activity.getString(R.string.downloaded));
             }
 
         }
@@ -552,45 +577,51 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     class FileDownloadingItemHolder extends FileDownloadViewHolder {
 
-        @BindView(R.id.file_name)
-        TextView fileName;
-        @BindView(R.id.downloading_progressbar)
-        ProgressBar downloadingProgressBar;
-
         private int max = 100;
 
-        FileDownloadingItemHolder(View view) {
-            super(view);
+        private DownloadingFileItemBinding binding;
 
-            downloadingProgressBar.setMax(max);
+        public FileDownloadingItemHolder(ViewDataBinding viewDataBinding) {
+            super(viewDataBinding);
+
+            binding = (DownloadingFileItemBinding) viewDataBinding;
+
         }
 
         @Override
         public void refreshView(IDownloadItem downloadItem) {
 
+            FileDownloadingItemViewModel fileDownloadingItemViewModel = binding.getFileDownloadingItemViewModel();
+
+            if (fileDownloadingItemViewModel == null) {
+                fileDownloadingItemViewModel = new FileDownloadingItemViewModel();
+                binding.setFileDownloadingItemViewModel(fileDownloadingItemViewModel);
+            }
+
             FileDownloadItem fileDownloadItem = ((DownloadingChildItem) downloadItem).getFileDownloadItem();
 
-            fileName.setText(fileDownloadItem.getFileName());
+            fileDownloadingItemViewModel.fileName.set(fileDownloadItem.getFileName());
+            fileDownloadingItemViewModel.maxProgress.set(max);
 
-            downloadingProgressBar.setProgress(fileDownloadItem.getCurrentProgress(max));
+            fileDownloadingItemViewModel.currentProgress.set(fileDownloadItem.getCurrentProgress(max));
+
         }
     }
 
     class FileDownloadedItemHolder extends FileDownloadViewHolder {
 
-        @BindView(R.id.select_file_icon_bg)
-        ImageView fileIconBg;
-        @BindView(R.id.file_icon)
-        ImageView fileIcon;
-        @BindView(R.id.file_name)
-        TextView fileName;
-        @BindView(R.id.file_size)
-        TextView fileSize;
-        @BindView(R.id.downloaded_file_item_layout)
         LinearLayout downloadedItemLayout;
 
-        FileDownloadedItemHolder(View view) {
-            super(view);
+        private DownloadedFileItemBinding binding;
+
+        private FileDownloadedItemViewModel fileDownloadedItemViewModel;
+
+        public FileDownloadedItemHolder(ViewDataBinding viewDataBinding) {
+            super(viewDataBinding);
+
+            binding = (DownloadedFileItemBinding) viewDataBinding;
+
+            downloadedItemLayout = binding.downloadedFileItemLayout;
         }
 
         @Override
@@ -599,29 +630,42 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
             final DownloadState downloadState = fileDownloadItem.getDownloadState();
 
-            fileName.setText(fileDownloadItem.getFileName());
+            fileDownloadedItemViewModel = binding.getFileDownloadedItemViewModel();
 
-            if (downloadState.equals(DownloadState.FINISHED)) {
-                fileSize.setText(FileUtil.formatFileSize(fileDownloadItem.getFileSize()));
-            } else {
-                fileSize.setText(activity.getString(R.string.download_failed));
+            if (fileDownloadedItemViewModel == null) {
+                fileDownloadedItemViewModel = new FileDownloadedItemViewModel();
+                binding.setFileDownloadedItemViewModel(fileDownloadedItemViewModel);
             }
 
-            toggleFileIconBgResource(fileDownloadItem.getFileUUID());
+            fileDownloadedItemViewModel.fileName.set(fileDownloadItem.getFileName());
+
+            if (downloadState.equals(DownloadState.FINISHED)) {
+
+                fileDownloadedItemViewModel.fileSize.set(FileUtil.formatFileSize(fileDownloadItem.getFileSize()));
+
+            } else {
+
+                fileDownloadedItemViewModel.fileSize.set(activity.getString(R.string.download_failed));
+
+            }
+
+            toggleFileIconBgResource(fileDownloadItem.getFileUUID(), fileDownloadedItemViewModel);
 
             if (selectMode) {
-                fileIconBg.setVisibility(View.VISIBLE);
+
+                fileDownloadedItemViewModel.fileIconBgVisibility.set(true);
 
                 downloadedItemLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        toggleFileInSelectedFile(fileDownloadItem.getFileUUID());
-                        toggleFileIconBgResource(fileDownloadItem.getFileUUID());
+                        toggleFileInSelectedFile(fileDownloadItem.getFileUUID(), fileDownloadItem.getFileName());
+                        toggleFileIconBgResource(fileDownloadItem.getFileUUID(), fileDownloadedItemViewModel);
                     }
                 });
 
             } else {
-                fileIconBg.setVisibility(View.INVISIBLE);
+
+                fileDownloadedItemViewModel.fileIconBgVisibility.set(false);
 
                 downloadedItemLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -637,21 +681,25 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
             }
         }
 
-        private void toggleFileIconBgResource(String fileUUID) {
-            if (selectDownloadedItemUUID.contains(fileUUID)) {
-                fileIconBg.setBackgroundResource(R.drawable.check_circle_selected);
-                fileIcon.setVisibility(View.INVISIBLE);
+        private void toggleFileIconBgResource(String fileUUID, FileDownloadedItemViewModel fileDownloadedItemViewModel) {
+            if (selectDownloadedItemMap.containsKey(fileUUID)) {
+
+                fileDownloadedItemViewModel.fileIconBgBackgroundSource.set(R.drawable.check_circle_selected);
+                fileDownloadedItemViewModel.fileIconVisibility.set(false);
+
             } else {
-                fileIconBg.setBackgroundResource(R.drawable.round_circle);
-                fileIcon.setVisibility(View.VISIBLE);
+
+                fileDownloadedItemViewModel.fileIconBgBackgroundSource.set(R.drawable.round_circle);
+                fileDownloadedItemViewModel.fileIconVisibility.set(true);
+
             }
         }
 
-        private void toggleFileInSelectedFile(String fileUUID) {
-            if (selectDownloadedItemUUID.contains(fileUUID)) {
-                selectDownloadedItemUUID.remove(fileUUID);
+        private void toggleFileInSelectedFile(String fileUUID, String fileName) {
+            if (selectDownloadedItemMap.containsKey(fileUUID)) {
+                selectDownloadedItemMap.remove(fileUUID);
             } else {
-                selectDownloadedItemUUID.add(fileUUID);
+                selectDownloadedItemMap.put(fileUUID, new DownloadedFileWrapper(fileUUID, fileName));
             }
         }
     }

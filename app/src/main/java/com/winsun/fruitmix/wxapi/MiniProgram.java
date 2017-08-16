@@ -30,8 +30,7 @@ public class MiniProgram {
 
     private static final String REQ_SCORE = "snsapi_userinfo";
 
-
-    static void sendAuthRequest(IWXAPI iwxapi) {
+    public static void sendAuthRequest(IWXAPI iwxapi) {
 
         SendAuth.Req req = new SendAuth.Req();
 

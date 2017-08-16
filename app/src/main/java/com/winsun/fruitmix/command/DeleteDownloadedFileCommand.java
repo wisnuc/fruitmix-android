@@ -1,17 +1,22 @@
 package com.winsun.fruitmix.command;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
+import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -21,14 +26,14 @@ import java.util.concurrent.Callable;
 
 public class DeleteDownloadedFileCommand extends AbstractCommand {
 
-    private List<String> fileUUIDs;
+    private Collection<DownloadedFileWrapper> files;
 
     private String currentUserUUID;
 
     private StationFileRepository stationFileRepository;
 
-    public DeleteDownloadedFileCommand(List<String> fileUUIDs, String currentUserUUID, StationFileRepository stationFileRepository) {
-        this.fileUUIDs = fileUUIDs;
+    public DeleteDownloadedFileCommand(Collection<DownloadedFileWrapper> files, String currentUserUUID, StationFileRepository stationFileRepository) {
+        this.files = files;
         this.currentUserUUID = currentUserUUID;
         this.stationFileRepository = stationFileRepository;
     }
@@ -42,9 +47,21 @@ public class DeleteDownloadedFileCommand extends AbstractCommand {
             @Override
             public Boolean call() throws Exception {
 
-                stationFileRepository.deleteDownloadedFileRecord(fileUUIDs, currentUserUUID);
+                stationFileRepository.deleteDownloadedFile(files, currentUserUUID, new BaseOperateDataCallback<Void>() {
+                    @Override
+                    public void onSucceed(Void data, OperationResult result) {
 
-                EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_DELETED, new OperationSuccess(R.string.delete_text)));
+                        EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_DELETED, new OperationSuccess(R.string.delete_text)));
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult result) {
+
+                        EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_DELETED, result));
+                    }
+                });
+
 
                 return true;
             }

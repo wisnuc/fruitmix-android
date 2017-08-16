@@ -43,7 +43,6 @@ public class InjectLoginUseCase {
         return LoginUseCase.getInstance(loggedInUserDataSource, tokenRemoteDataSource, httpRequestFactory,
                 userDataRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, EventBus.getDefault(), ThreadManager.getInstance());
 
-
     }
 
 }
