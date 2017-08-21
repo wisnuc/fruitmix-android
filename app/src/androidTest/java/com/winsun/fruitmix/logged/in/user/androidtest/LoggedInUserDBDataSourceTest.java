@@ -84,7 +84,7 @@ public class LoggedInUserDBDataSourceTest {
     }
 
     @Test
-    public void testSetCurrentLoginUser() {
+    public void testGetLoggedInUserByUserUUID() {
 
         User user = new User();
 
@@ -92,16 +92,17 @@ public class LoggedInUserDBDataSourceTest {
 
         user.setUuid(testUserUUID);
 
-        LoggedInUser loggedInUser = new LoggedInUser("", "", "", "", user);
+        String testToken = "testToken";
+        String testGateway = "testGateway";
+
+        LoggedInUser loggedInUser = new LoggedInUser("", testToken, testGateway, "", user);
 
         loggedInUserDataSource.insertLoggedInUsers(Collections.singletonList(loggedInUser));
 
-        loggedInUserDataSource.setCurrentLoggedInUser(loggedInUser);
+        LoggedInUser currentLoggedInUser = loggedInUserDataSource.getLoggedInUserByUserUUID(testUserUUID);
 
-        LoggedInUser currentLoggedInUser = loggedInUserDataSource.getCurrentLoggedInUser();
-
-        assertEquals(testUserUUID, currentLoggedInUser.getUser().getUuid());
-
+        assertEquals(testToken, currentLoggedInUser.getToken());
+        assertEquals(testGateway, currentLoggedInUser.getGateway());
     }
 
 }

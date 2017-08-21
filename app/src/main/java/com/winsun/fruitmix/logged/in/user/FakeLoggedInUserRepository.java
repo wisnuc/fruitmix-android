@@ -34,23 +34,11 @@ public class FakeLoggedInUserRepository implements LoggedInUserDataSource{
     }
 
     @Override
-    public LoggedInUser getCurrentLoggedInUser() {
-
+    public LoggedInUser getLoggedInUserByUserUUID(String userUUID) {
         User user = new User();
         user.setUuid(FakeGroupDataSource.MYSELF_UUID);
 
-        LoggedInUser loggedInUser = new LoggedInUser("","","","",user);
-
-        return loggedInUser;
+        return new LoggedInUser("","","","",user);
     }
 
-    @Override
-    public void setCurrentLoggedInUser(LoggedInUser loggedInUser) {
-
-    }
-
-    @Override
-    public String getCurrentLoggedInUserUUID() {
-        return FakeGroupDataSource.MYSELF_UUID;
-    }
 }

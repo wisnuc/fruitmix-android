@@ -1,7 +1,5 @@
 package com.winsun.fruitmix.file.data.model;
 
-import android.content.Context;
-
 import com.winsun.fruitmix.R;
 
 import java.util.ArrayList;
@@ -29,12 +27,6 @@ public abstract class AbstractRemoteFile extends AbstractFile{
 
         setFileTypeResID(R.drawable.file_icon);
     }
-
-    public abstract boolean openAbstractRemoteFile(Context context, String rootUUID);
-
-    public abstract List<AbstractRemoteFile> listChildAbstractRemoteFileList();
-
-    public abstract void initChildAbstractRemoteFileList(List<AbstractRemoteFile> abstractRemoteFiles);
 
     public String getUuid() {
         return uuid;
@@ -87,6 +79,7 @@ public abstract class AbstractRemoteFile extends AbstractFile{
     public void setParentFolderUUID(String parentFolderUUID) {
         this.parentFolderUUID = parentFolderUUID;
     }
+
 
     @Override
     public boolean equals(Object o) {

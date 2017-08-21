@@ -16,6 +16,4 @@ public abstract class AbstractLocalFile extends AbstractFile{
         this.path = path;
     }
 
-
-
 }

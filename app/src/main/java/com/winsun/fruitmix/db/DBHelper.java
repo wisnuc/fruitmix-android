@@ -3,7 +3,6 @@ package com.winsun.fruitmix.db;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 /**
  * Created by Administrator on 2016/7/8.
@@ -30,7 +29,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String MEDIA_KEY_HEIGHT = "media_height";
     public static final String MEDIA_KEY_THUMB = "media_thumb";
     public static final String MEDIA_KEY_LOCAL = "media_local";
-    public static final String MEDIA_KEY_UPLOADED_DEVICE_ID = "media_key_uploaded_device_id";
+    public static final String MEDIA_KEY_UPLOADED_USER_UUID = "media_key_uploaded_device_id";
     public static final String MEDIA_KEY_SHARING = "media_key_sharing";
     public static final String MEDIA_KEY_ORIENTATION_NUMBER = "media_key_orientation_number";
     public static final String MEDIA_KEY_TYPE = "media_key_type";
@@ -73,7 +72,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_MEDIA_CREATE = " (" + MEDIA_KEY_ID + " integer primary key autoincrement,"
             + MEDIA_KEY_UUID + " text not null," + MEDIA_KEY_TIME + " text not null," + MEDIA_KEY_WIDTH + " text not null,"
             + MEDIA_KEY_HEIGHT + " text not null," + MEDIA_KEY_THUMB + " text," + MEDIA_KEY_LOCAL + " integer not null,"
-            + MEDIA_KEY_UPLOADED_DEVICE_ID + " text," + MEDIA_KEY_SHARING + " integer not null,"
+            + MEDIA_KEY_UPLOADED_USER_UUID + " text," + MEDIA_KEY_SHARING + " integer not null,"
             + MEDIA_KEY_ORIENTATION_NUMBER + " integer," + MEDIA_KEY_TYPE + " text,"
             + MEDIA_KEY_MINI_THUMB + " text," + MEDIA_KEY_ORIGINAL_PHOTO_PATH + " text,"
             + MEDIA_KEY_LONGITUDE + " text," + MEDIA_KEY_LATITUDE + " text)";
@@ -127,12 +126,14 @@ public class DBHelper extends SQLiteOpenHelper {
 //
 //        onCreate(db);
 
-        db.execSQL(DROP_TABLE + REMOTE_COMMENT_TABLE_NAME);
-        db.execSQL(DROP_TABLE + LOCAL_COMMENT_TABLE_NAME);
-        db.execSQL(DROP_TABLE + LOCAL_SHARE_TABLE_NAME);
-        db.execSQL(DROP_TABLE + REMOTE_SHARE_TABLE_NAME);
-        db.execSQL(DROP_TABLE + REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
-        db.execSQL(DROP_TABLE + LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + REMOTE_COMMENT_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + LOCAL_COMMENT_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + LOCAL_SHARE_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + REMOTE_SHARE_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
+//        db.execSQL(DROP_TABLE + LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME);
+
+        db.execSQL(DROP_TABLE + LOCAL_MEDIA_TABLE_NAME);
 
     }
 }

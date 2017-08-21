@@ -54,6 +54,7 @@ import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.util.FNAS;
@@ -97,7 +98,7 @@ public class FileFragment implements Page, IShowHideFragmentListener {
 
         filePresenter = new FilePresenter(activity, InjectStationFileRepository.provideStationFileRepository(activity),
                 noContentViewModel, loadingViewModel, fileViewModel, handleTitleCallback,
-                InjectLoggedInUser.provideLoggedInUserRepository(activity).getCurrentLoggedInUserUUID());
+                InjectLoggedInUser.provideLoggedInUserRepository(activity), InjectSystemSettingDataSource.provideSystemSettingDataSource(activity));
 
         fileRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
         fileRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -110,7 +111,7 @@ public class FileFragment implements Page, IShowHideFragmentListener {
     private View onCreateView() {
         // Inflate the layout for this fragment
 
-        FragmentFileBinding binding = FragmentFileBinding.inflate(LayoutInflater.from(activity.getApplicationContext()), null, false);
+        FragmentFileBinding binding = FragmentFileBinding.inflate(LayoutInflater.from(activity), null, false);
 
         noContentViewModel = new NoContentViewModel();
         noContentViewModel.setNoContentText(activity.getString(R.string.no_files));

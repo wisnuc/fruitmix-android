@@ -9,6 +9,25 @@ import java.util.Date;
 
 public class LocalFile extends AbstractLocalFile {
 
+    private String fileHash;
+    private String size;
+
+    public String getFileHash() {
+        return fileHash;
+    }
+
+    public void setFileHash(String fileHash) {
+        this.fileHash = fileHash;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
     @Override
     public boolean isFolder() {
         return false;

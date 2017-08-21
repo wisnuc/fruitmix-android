@@ -591,23 +591,6 @@ public class Util {
 
     }
 
-
-    public static boolean checkAutoUpload(Context context) {
-        for (LoggedInUser loggedInUser : LocalCache.LocalLoggedInUsers) {
-
-            if (loggedInUser.getUser().getUuid().equals(FNAS.userUUID)) {
-                if (!LocalCache.getCurrentUploadDeviceID(context).equals(LocalCache.DeviceID)) {
-                    LocalCache.setAutoUploadOrNot(context, false);
-                    return false;
-                } else {
-                    LocalCache.setAutoUploadOrNot(context, true);
-                    return true;
-                }
-            }
-        }
-        return true;
-    }
-
     public static void setStatusBarColor(Activity activity, int colorResID) {
 
         if (checkRunningOnLollipopOrHigher()) {

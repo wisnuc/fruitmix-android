@@ -1,11 +1,16 @@
 package com.winsun.fruitmix.create.user;
 
+import android.app.Activity;
 import android.content.Context;
 
 import com.winsun.fruitmix.CreateUserActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -24,17 +29,26 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
 
     private List<String> remoteUserNames;
 
-    public CreateUserPresenterImpl(CreateUserView createUserView) {
+    private UserDataRepository userDataRepository;
+
+    public CreateUserPresenterImpl(CreateUserView createUserView, UserDataRepository userDataRepository) {
 
         this.createUserView = createUserView;
+        this.userDataRepository = userDataRepository;
 
-        int size = LocalCache.RemoteUserMapKeyIsUUID.size();
-        remoteUserNames = new ArrayList<>(size);
+        remoteUserNames = new ArrayList<>();
 
-        final Collection<User> users = new ArrayList<>(LocalCache.RemoteUserMapKeyIsUUID.values());
-        for (User user : users) {
-            remoteUserNames.add(user.getUserName());
-        }
+        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>() {
+            @Override
+            public void onSucceed(List<User> data, OperationResult operationResult) {
+                super.onSucceed(data, operationResult);
+
+                for (User user : data) {
+                    remoteUserNames.add(user.getUserName());
+                }
+            }
+        });
+
     }
 
     @Override
@@ -45,7 +59,7 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
     }
 
     @Override
-    public void createUser(Context context, CreateUserActivity.CreateUserViewModel createUserViewModel) {
+    public void createUser(final Context context, CreateUserActivity.CreateUserViewModel createUserViewModel) {
 
         createUserView.hideSoftInput();
 
@@ -93,12 +107,27 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
 
         createUserView.showProgressDialog(String.format(context.getString(R.string.operating_title), context.getString(R.string.create_user)));
 
-        FNAS.createRemoteUser(userName, password);
+        userDataRepository.insertUser(userName, password, new BaseOperateDataCallback<User>() {
+            @Override
+            public void onSucceed(User data, OperationResult result) {
+
+                createUserView.dismissDialog();
+
+                createUserView.setResultCode(Activity.RESULT_OK);
+
+                createUserView.finishView();
+            }
+
+            @Override
+            public void onFail(OperationResult result) {
+
+                createUserView.dismissDialog();
+
+                createUserView.showToast(result.getResultMessage(context));
+
+            }
+        });
 
     }
 
-    @Override
-    public void handleOperationEvent(OperationEvent operationEvent) {
-        createUserView.dismissDialog();
-    }
 }

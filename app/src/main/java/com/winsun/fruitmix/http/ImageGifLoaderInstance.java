@@ -41,9 +41,24 @@ public class ImageGifLoaderInstance {
         return instance;
     }
 
+    public static void destroyInstance() {
+        instance = null;
+    }
+
     public void setToken(String token) {
 
         this.token = token;
+
+        if (mImageLoader != null) {
+            createHeader();
+
+            mImageLoader.setHeaders(headers);
+
+            if (mGifLoader != null) {
+                mGifLoader.setHeaders(headers);
+            }
+
+        }
 
     }
 
@@ -55,9 +70,7 @@ public class ImageGifLoaderInstance {
             mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
 
             if (headers == null) {
-                headers = new ArrayMap<>();
-                headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
-                Log.i(TAG, "FNAS JWT: " + token);
+                createHeader();
             }
 
             mImageLoader.setHeaders(headers);
@@ -65,6 +78,12 @@ public class ImageGifLoaderInstance {
 
         return mImageLoader;
 
+    }
+
+    private void createHeader() {
+        headers = new ArrayMap<>();
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
+        Log.i(TAG, "FNAS JWT: " + token);
     }
 
     public GifLoader getGifLoader(Context context) {
@@ -75,9 +94,7 @@ public class ImageGifLoaderInstance {
             mGifLoader = new GifLoader(mRequestQueue, GifLruCache.instance());
 
             if (headers == null) {
-                headers = new ArrayMap<>();
-                headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
-                Log.i(TAG, "FNAS JWT: " + token);
+                createHeader();
             }
 
             mImageLoader.setHeaders(headers);

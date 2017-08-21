@@ -60,6 +60,7 @@ import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
@@ -135,6 +136,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private Dialog mDialog;
 
     private MediaDataSourceRepository mediaDataSourceRepository;
+
+    private CheckMediaIsUploadStrategy checkMediaIsUploadStrategy;
 
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
@@ -286,6 +289,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         });
 
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
+
+        checkMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
 
 //        initShareBtn();
 
@@ -632,7 +637,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 photoSliderViewModel.titleText.set(title);
             }
 
-            if (LocalCache.DeviceID != null && media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
+            if (checkMediaIsUploadStrategy.isMediaUploaded(media)) {
                 photoSliderViewModel.showCloudOff.set(false);
             } else {
                 photoSliderViewModel.showCloudOff.set(true);

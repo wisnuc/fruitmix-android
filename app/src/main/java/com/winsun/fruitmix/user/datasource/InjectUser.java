@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 
 /**
  * Created by Administrator on 2017/7/24.
@@ -11,10 +12,11 @@ import com.winsun.fruitmix.http.InjectHttp;
 
 public class InjectUser {
 
-    public static UserDataRepositoryImpl provideRepository(Context context) {
+    public static UserDataRepository provideRepository(Context context) {
 
         return UserDataRepositoryImpl.getInstance(new UserDBDataSourceImpl(DBUtils.getInstance(context)),
-                new UserRemoteDataSourceImpl(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory()));
+                new UserRemoteDataSourceImpl(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory(),
+                        InjectSystemSettingDataSource.provideSystemSettingDataSource(context)));
 
     }
 

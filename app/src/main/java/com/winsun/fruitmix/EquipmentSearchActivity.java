@@ -158,8 +158,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
 
     @Override
-    public void handleLoginWithUserSucceed() {
-        Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
+    public void handleLoginWithUserSucceed(boolean autoUpload) {
+
+        if (!autoUpload)
+            Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
 
         setResult(RESULT_OK);
         finish();

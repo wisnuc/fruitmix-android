@@ -39,7 +39,7 @@ import java.util.Random;
  * Created by Administrator on 2017/8/15.
  */
 
-public class EquipmentPresenter  {
+public class EquipmentPresenter {
 
     public static final String TAG = EquipmentPresenter.class.getSimpleName();
 
@@ -505,12 +505,13 @@ public class EquipmentPresenter  {
     private void loginWithUserInThread(final User user) {
         loginUseCase.loginWithUser(user, new BaseOperateDataCallback<Boolean>() {
             @Override
-            public void onSucceed(Boolean data, OperationResult result) {
+            public void onSucceed(final Boolean data, OperationResult result) {
 
                 threadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        equipmentSearchView.handleLoginWithUserSucceed();
+
+                        equipmentSearchView.handleLoginWithUserSucceed(data);
                     }
                 });
 

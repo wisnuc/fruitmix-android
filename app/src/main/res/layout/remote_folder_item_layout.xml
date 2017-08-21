@@ -79,9 +79,9 @@
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:text="@{file.name}"
-                    tools:text="文件名"
                     android:textColor="@color/eighty_seven_percent_black"
-                    android:textSize="16dp" />
+                    android:textSize="16dp"
+                    tools:text="文件名" />
 
 
             </LinearLayout>

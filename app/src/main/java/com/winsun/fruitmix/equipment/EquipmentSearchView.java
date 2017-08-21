@@ -9,7 +9,7 @@ import com.winsun.fruitmix.user.User;
 
 public interface EquipmentSearchView {
 
-    void handleLoginWithUserSucceed();
+    void handleLoginWithUserSucceed(boolean autoUpload);
 
     void handleLoginWithUserFail(Equipment equipment, User user);
 

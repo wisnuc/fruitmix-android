@@ -15,9 +15,19 @@ import java.util.List;
 
 public class RemoteFile extends AbstractRemoteFile {
 
+    private String fileHash;
+
     public RemoteFile() {
 
         setFileTypeResID(R.drawable.file_icon);
+    }
+
+    public String getFileHash() {
+        return fileHash;
+    }
+
+    public void setFileHash(String fileHash) {
+        this.fileHash = fileHash;
     }
 
     @Override
@@ -25,21 +35,10 @@ public class RemoteFile extends AbstractRemoteFile {
         return false;
     }
 
-    @Override
     public boolean openAbstractRemoteFile(Context context,String rootUUID) {
 
         return FileUtil.openAbstractRemoteFile(context, getName());
 
-    }
-
-    @Override
-    public List<AbstractRemoteFile> listChildAbstractRemoteFileList() {
-        throw new UnsupportedOperationException("File can not call this operation");
-    }
-
-    @Override
-    public void initChildAbstractRemoteFileList(List<AbstractRemoteFile> abstractRemoteFiles) {
-        throw new UnsupportedOperationException("File can not call this operation");
     }
 
     @Override

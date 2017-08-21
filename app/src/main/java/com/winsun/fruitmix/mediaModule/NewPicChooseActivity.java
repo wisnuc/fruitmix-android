@@ -29,6 +29,7 @@ import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
@@ -100,7 +101,8 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
         groupDataSource = InjectGroupDataSource.provideGroupRepository();
 
-        currentUser = InjectLoggedInUser.provideLoggedInUserRepository(this).getCurrentLoggedInUser().getUser();
+        currentUser = InjectLoggedInUser.provideLoggedInUserRepository(this)
+                .getLoggedInUserByUserUUID(InjectSystemSettingDataSource.provideSystemSettingDataSource(this).getCurrentLoginUserUUID()).getUser();
 
         groupUUID = getIntent().getStringExtra(Util.KEY_GROUP_UUID);
 

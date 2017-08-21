@@ -36,9 +36,9 @@ public class SystemSettingDataSourceTest {
 
         String currentUploadDeviceID = "testDeviceID";
 
-        systemSettingDataSource.setCurrentUploadDeviceID(currentUploadDeviceID);
+        systemSettingDataSource.setCurrentUploadUserUUID(currentUploadDeviceID);
 
-        String result = systemSettingDataSource.getCurrentUploadDeviceID();
+        String result = systemSettingDataSource.getCurrentUploadUserUUID();
 
         assertEquals(result, currentUploadDeviceID);
 

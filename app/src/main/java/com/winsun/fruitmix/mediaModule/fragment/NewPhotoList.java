@@ -46,6 +46,7 @@ import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
+import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
@@ -261,7 +262,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         mediaDataSourceRepository.getMedia(new BaseLoadDataCallback<Media>() {
             @Override
-            public void onSucceed(final List<Media> data, OperationResult operationResult) {
+            public void onSucceed(final List<Media> data, final OperationResult operationResult) {
 
                 threadManager.runOnMainThread(new Runnable() {
                     @Override
@@ -270,6 +271,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                         initImageLoader();
 
                         final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
+
+                        if (operationResult.getOperationResultType() == OperationResultType.HAS_NEW_MEDIA)
+                            loader.setNeedRefreshData(true);
 
                         loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
                             @Override
@@ -363,7 +367,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 Iterator<Media> iterator = preLoadMediaMiniThumbs.iterator();
                 while (iterator.hasNext()) {
                     media = iterator.next();
-                    if (media.isLocal() && media.getMiniThumbPath().isEmpty())
+                    if (media.isLocal())
                         iterator.remove();
                 }
 

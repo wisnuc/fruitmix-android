@@ -11,4 +11,6 @@ public interface UserRemoteDataSource extends BaseUserDataSource {
 
     void insertUser(String userName, String userPwd, BaseOperateDataCallback<User> callback);
 
+    String getCurrentUserHome();
+
 }

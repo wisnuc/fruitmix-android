@@ -30,6 +30,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
 import com.winsun.fruitmix.equipment.InjectEquipment;
@@ -49,20 +50,23 @@ import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.mainpage.MainPagePresenter;
 import com.winsun.fruitmix.mainpage.MainPagePresenterImpl;
 import com.winsun.fruitmix.mainpage.MainPageView;
+import com.winsun.fruitmix.media.InjectMedia;
+import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.equipment.EquipmentSearchManager;
-import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
+import com.winsun.fruitmix.user.manage.UserManageActivity;
 import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -246,6 +250,10 @@ public class NavPagerActivity extends BaseActivity
 
     private LoggedInUserDataSource loggedInUserDataSource;
 
+    private MediaDataSourceRepository mediaDataSourceRepository;
+    private CheckMediaIsUploadStrategy checkMediaIsUploadStrategy;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -268,7 +276,13 @@ public class NavPagerActivity extends BaseActivity
 
         loggedInUserDataSource = InjectLoggedInUser.provideLoggedInUserRepository(mContext);
 
-        mainPagePresenter = new MainPagePresenterImpl(mContext, loggedInUserDataSource, navPagerViewModel, this);
+        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
+
+        checkMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
+
+        systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
+
+        mainPagePresenter = new MainPagePresenterImpl(mContext, systemSettingDataSource, loggedInUserDataSource, navPagerViewModel, this);
 
         binding.setViewModel(navPagerViewModel);
 
@@ -288,7 +302,7 @@ public class NavPagerActivity extends BaseActivity
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
 
-                calcAlreadyUploadMediaCount();
+                calcAlreadyUploadMediaCount(mediaDataSourceRepository.getLocalMedia());
 
 //                final BitmapDrawable drawable = (BitmapDrawable) ContextCompat.getDrawable(mContext, R.drawable.navigation_header_bg);
 //
@@ -318,10 +332,6 @@ public class NavPagerActivity extends BaseActivity
 
         mCustomHandler = new CustomHandler(this);
 
-        systemSettingDataSource = SystemSettingDataSource.getInstance(this);
-
-        checkShowAutoUploadDialog();
-
         refreshUserInNavigationView();
 
         Log.d(TAG, "onCreate: ");
@@ -333,11 +343,11 @@ public class NavPagerActivity extends BaseActivity
         }
     }
 
-    private void calcAlreadyUploadMediaCount() {
+    private void calcAlreadyUploadMediaCount(final List<Media> medias) {
 
-        if (LocalCache.LocalMediaMapKeyIsOriginalPhotoPath == null || LocalCache.DeviceID == null) {
+        if (medias == null) {
 
-            Log.w(TAG, " LocalMediaMapKeyIsOriginalPhotoPath", new NullPointerException());
+            Log.w(TAG, "calc already upload medias", new NullPointerException());
 
             return;
 
@@ -350,11 +360,10 @@ public class NavPagerActivity extends BaseActivity
                 int alreadyUploadMediaCount = 0;
                 int totalUploadMediaCount = 0;
 
-                for (Media media : LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()) {
+                for (Media media : medias) {
 
-                    if (media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
+                    if (checkMediaIsUploadStrategy.isMediaUploaded(media))
                         alreadyUploadMediaCount++;
-                    }
 
                     totalUploadMediaCount++;
                 }
@@ -441,14 +450,17 @@ public class NavPagerActivity extends BaseActivity
                     @Override
                     public void onSucceed(Boolean data, OperationResult result) {
 
-                        handleLoginWithLoggedInUserSucceed();
+                        if (data)
+                            handleLoginWithLoggedInUserSucceed();
+                        else
+                            handleLoginWithLoggedInUserFail();
 
                     }
 
                     @Override
                     public void onFail(OperationResult result) {
 
-                        handleLoginWithLoggedInUserFail();
+                        Log.d(TAG, "onFail: login with logged in user failed");
 
                     }
                 });
@@ -488,7 +500,7 @@ public class NavPagerActivity extends BaseActivity
 
                 systemSettingDataSource.setShowAutoUploadDialog(false);
 
-                systemSettingDataSource.setCurrentUploadDeviceID(loggedInUserDataSource.getCurrentLoggedInUser().getDeviceID());
+                systemSettingDataSource.setCurrentUploadUserUUID(systemSettingDataSource.getCurrentLoginUserUUID());
 
                 systemSettingDataSource.setAutoUploadOrNot(true);
 
@@ -501,7 +513,8 @@ public class NavPagerActivity extends BaseActivity
 
                 systemSettingDataSource.setShowAutoUploadDialog(false);
 
-                systemSettingDataSource.setCurrentUploadDeviceID("");
+                systemSettingDataSource.setCurrentUploadUserUUID("");
+
                 systemSettingDataSource.setAutoUploadOrNot(false);
 
             }
@@ -589,7 +602,7 @@ public class NavPagerActivity extends BaseActivity
 
     private void refreshUserInNavigationView() {
 
-        LoggedInUser loggedInUser = loggedInUserDataSource.getCurrentLoggedInUser();
+        LoggedInUser loggedInUser = loggedInUserDataSource.getLoggedInUserByUserUUID(systemSettingDataSource.getCurrentLoginUserUUID());
 
         if (loggedInUser == null)
             return;

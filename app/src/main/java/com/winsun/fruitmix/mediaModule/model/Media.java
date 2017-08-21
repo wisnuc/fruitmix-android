@@ -7,7 +7,6 @@ import android.util.Log;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
-import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpRequestFactory;
@@ -24,7 +23,7 @@ public class Media implements Parcelable {
 
     private static final String TAG = Media.class.getSimpleName();
 
-    public static final String thumbPhotoUrl = "%1$s/thumbnail?width=%2$s&amp;height=%3$s&amp;autoOrient=true&amp;modifier=caret";
+    private static final String thumbPhotoFormatCode = "%1$s?alt=thumbnail&width=%2$s&height=%3$s&autoOrient=true&modifier=caret";
 
     private String uuid;
     private String thumb;
@@ -36,7 +35,7 @@ public class Media implements Parcelable {
     private String date;
     private boolean loaded;
     private String belongingMediaShareUUID;
-    private String uploadedDeviceIDs;
+    private String uploadedUserUUIDs;
     private boolean sharing;
     private int orientationNumber;
     private String type;
@@ -76,7 +75,7 @@ public class Media implements Parcelable {
         date = in.readString();
         loaded = in.readByte() != 0;
         belongingMediaShareUUID = in.readString();
-        uploadedDeviceIDs = in.readString();
+        uploadedUserUUIDs = in.readString();
         orientationNumber = in.readInt();
         type = in.readString();
         miniThumbPath = in.readString();
@@ -94,7 +93,7 @@ public class Media implements Parcelable {
         dest.writeString(date);
         dest.writeByte((byte) (loaded ? 1 : 0));
         dest.writeString(belongingMediaShareUUID);
-        dest.writeString(uploadedDeviceIDs);
+        dest.writeString(uploadedUserUUIDs);
         dest.writeInt(orientationNumber);
         dest.writeString(type);
         dest.writeString(miniThumbPath);
@@ -197,12 +196,12 @@ public class Media implements Parcelable {
         this.belongingMediaShareUUID = belongingMediaShareUUID;
     }
 
-    public String getUploadedDeviceIDs() {
-        return uploadedDeviceIDs == null ? "" : uploadedDeviceIDs;
+    public String getUploadedUserUUIDs() {
+        return uploadedUserUUIDs == null ? "" : uploadedUserUUIDs;
     }
 
-    public void setUploadedDeviceIDs(String uploadedDeviceIDs) {
-        this.uploadedDeviceIDs = uploadedDeviceIDs;
+    public void setUploadedUserUUIDs(String uploadedUserUUIDs) {
+        this.uploadedUserUUIDs = uploadedUserUUIDs;
     }
 
     public boolean isSharing() {
@@ -276,7 +275,7 @@ public class Media implements Parcelable {
 
     public synchronized boolean uploadIfNotDone(DBUtils dbUtils) {
 
-        boolean uploaded;
+/*        boolean uploaded;
 
         if (LocalCache.RemoteMediaMapKeyIsUUID.containsKey(getUuid())) {
 
@@ -287,7 +286,7 @@ public class Media implements Parcelable {
 
             Log.i(TAG, "original path: " + getOriginalPhotoPath() + "hash:" + getUuid());
 
-            String url = getMediaUrl();
+            String url = getRemoteMediaThumbUrl();
 
             Log.i(TAG, "uploadIfNotDone: url: " + url);
 
@@ -300,12 +299,12 @@ public class Media implements Parcelable {
 
         if (!uploaded) return false;
 
-        if (getUploadedDeviceIDs().isEmpty()) {
-            setUploadedDeviceIDs(LocalCache.DeviceID);
-        } else if (!getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
-            setUploadedDeviceIDs(getUploadedDeviceIDs() + "," + LocalCache.DeviceID);
+        if (getUploadedUserUUIDs().isEmpty()) {
+            setUploadedUserUUIDs(LocalCache.DeviceID);
+        } else if (!getUploadedUserUUIDs().contains(LocalCache.DeviceID)) {
+            setUploadedUserUUIDs(getUploadedUserUUIDs() + "," + LocalCache.DeviceID);
         }
-        dbUtils.updateLocalMedia(this);
+        dbUtils.updateLocalMedia(this);*/
 
         return true;
     }
@@ -327,7 +326,9 @@ public class Media implements Parcelable {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            imageUrl = String.format(thumbPhotoUrl,getMediaUrl(),
+            Log.d(TAG, "getImageSmallThumbUrl: ");
+
+            imageUrl = String.format(thumbPhotoFormatCode, getRemoteMediaThumbUrl(),
                     String.valueOf(64), String.valueOf(64));
 
         }
@@ -349,7 +350,9 @@ public class Media implements Parcelable {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            imageUrl = String.format(thumbPhotoUrl, getMediaUrl(),
+            Log.d(TAG, "getImageThumbUrl: ");
+
+            imageUrl = String.format(thumbPhotoFormatCode, getRemoteMediaThumbUrl(),
                     String.valueOf(200), String.valueOf(200));
 
         }
@@ -357,9 +360,26 @@ public class Media implements Parcelable {
 
     }
 
-    private String getMediaUrl(){
+    private String generateUrl(String req) {
 
-        return FNAS.generateUrl(Util.MEDIA_PARAMETER + "/" + getUuid());
+        HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory();
+
+        String gateway = httpRequestFactory.getGateway();
+        int port = httpRequestFactory.getPort();
+
+        return gateway + ":" + port + req;
+    }
+
+    private String getRemoteMediaThumbUrl() {
+
+        return generateUrl(Util.MEDIA_PARAMETER + "/" + getUuid());
+
+    }
+
+    private String getRemoteMediaOriginalUrl() {
+
+        return generateUrl(Util.MEDIA_PARAMETER + "/" + getUuid() + "?alt=data");
+
     }
 
     public String getImageOriginalUrl(Context context) {
@@ -368,7 +388,7 @@ public class Media implements Parcelable {
         if (isLocal()) {
             imageUrl = getOriginalPhotoPath();
         } else {
-            imageUrl = FNAS.getDownloadOriginalMediaUrl(this);
+            imageUrl = getRemoteMediaOriginalUrl();
         }
         return imageUrl;
     }
@@ -380,7 +400,7 @@ public class Media implements Parcelable {
             return getUuid();
     }
 
-    public void setImageUrl(NetworkImageView networkImageView,String url, ImageLoader imageLoader){
+    public void setImageUrl(NetworkImageView networkImageView, String url, ImageLoader imageLoader) {
 
         imageLoader.setShouldCache(!isLocal());
 
@@ -389,7 +409,7 @@ public class Media implements Parcelable {
 
         networkImageView.setTag(url);
 
-        networkImageView.setImageUrl(url,imageLoader);
+        networkImageView.setImageUrl(url, imageLoader);
     }
 
 }

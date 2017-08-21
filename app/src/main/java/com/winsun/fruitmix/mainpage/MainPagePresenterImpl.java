@@ -21,6 +21,7 @@ import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.invitation.InvitationRemoteDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
@@ -71,20 +72,20 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     private String currentUserUUID;
 
-    public MainPagePresenterImpl(Context context, LoggedInUserDataSource loggedInUserDataSource,NavPagerActivity.NavPagerViewModel navPagerViewModel, MainPageView mainPageView) {
+    public MainPagePresenterImpl(Context context, SystemSettingDataSource systemSettingDataSource, LoggedInUserDataSource loggedInUserDataSource, NavPagerActivity.NavPagerViewModel navPagerViewModel, MainPageView mainPageView) {
 
         mNavigationMenuItems = new ArrayList<>();
         mNavigationMenuLoggedInUsers = new ArrayList<>();
 
         navigationItemAdapter = new NavigationItemAdapter();
 
-        this.loggedInUserDataSource = loggedInUserDataSource;
-
         this.navPagerViewModel = navPagerViewModel;
 
         this.mainPageView = mainPageView;
 
-        currentUserUUID = loggedInUserDataSource.getCurrentLoggedInUserUUID();
+        this.loggedInUserDataSource = loggedInUserDataSource;
+
+        currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
 
         initNavigationAccountManageViewModel(context);
 
@@ -304,7 +305,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
                 threadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        MiniProgram.shareMiniWXApp(iwxapi,resources, data);
+                        MiniProgram.shareMiniWXApp(iwxapi, resources, data);
                     }
                 });
 

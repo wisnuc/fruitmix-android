@@ -18,10 +18,6 @@ public interface LoggedInUserDataSource {
 
     Collection<LoggedInUser> getAllLoggedInUsers();
 
-    LoggedInUser getCurrentLoggedInUser();
-
-    void setCurrentLoggedInUser(LoggedInUser loggedInUser);
-
-    String getCurrentLoggedInUserUUID();
+    LoggedInUser getLoggedInUserByUserUUID(String userUUID);
 
 }

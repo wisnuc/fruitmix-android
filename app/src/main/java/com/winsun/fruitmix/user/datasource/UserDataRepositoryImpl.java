@@ -140,4 +140,8 @@ public class UserDataRepositoryImpl implements UserDataRepository {
 
     }
 
+    @Override
+    public String getCurrentUserHome() {
+        return userRemoteDataSource.getCurrentUserHome();
+    }
 }

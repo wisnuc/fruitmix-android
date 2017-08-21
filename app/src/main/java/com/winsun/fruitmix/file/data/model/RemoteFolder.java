@@ -3,6 +3,8 @@ package com.winsun.fruitmix.file.data.model;
 import android.content.Context;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.util.FNAS;
 
 import java.text.SimpleDateFormat;
@@ -17,11 +19,7 @@ import java.util.List;
 
 public class RemoteFolder extends AbstractRemoteFile {
 
-    private List<AbstractRemoteFile> abstractRemoteFiles;
-
     public RemoteFolder() {
-        super();
-        abstractRemoteFiles = new ArrayList<>();
 
         setFileTypeResID(R.drawable.folder_icon);
     }
@@ -29,23 +27,6 @@ public class RemoteFolder extends AbstractRemoteFile {
     @Override
     public boolean isFolder() {
         return true;
-    }
-
-    @Override
-    public boolean openAbstractRemoteFile(Context context,String rootUUID) {
-
-        FNAS.retrieveRemoteFile(context, getUuid(),rootUUID);
-        return true;
-    }
-
-    @Override
-    public List<AbstractRemoteFile> listChildAbstractRemoteFileList() {
-        return Collections.unmodifiableList(abstractRemoteFiles);
-    }
-
-    @Override
-    public void initChildAbstractRemoteFileList(List<AbstractRemoteFile> abstractRemoteFiles) {
-        this.abstractRemoteFiles.addAll(abstractRemoteFiles);
     }
 
     @Override

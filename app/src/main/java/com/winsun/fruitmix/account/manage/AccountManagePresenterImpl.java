@@ -16,6 +16,7 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -23,6 +24,7 @@ import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
@@ -34,6 +36,7 @@ import static android.app.Activity.RESULT_OK;
 public class AccountManagePresenterImpl implements AccountManagePresenter {
 
     private AccountManageView view;
+    private LoggedInUserDataSource loggedInUserDataSource;
 
     private List<String> mEquipmentNames;
     private List<List<LoggedInUser>> mUsers;
@@ -48,14 +51,15 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
 
     private String currentUserUUID;
 
-    public AccountManagePresenterImpl(AccountManageView view, LoggedInUserDataSource loggedInUserDataSource) {
+    public AccountManagePresenterImpl(AccountManageView view, LoggedInUserDataSource loggedInUserDataSource,SystemSettingDataSource systemSettingDataSource) {
         this.view = view;
+        this.loggedInUserDataSource = loggedInUserDataSource;
 
         mEquipmentNames = new ArrayList<>();
         mUsers = new ArrayList<>();
 
         loggedInUsers = new ArrayList<>(loggedInUserDataSource.getAllLoggedInUsers());
-        currentUserUUID = loggedInUserDataSource.getCurrentLoggedInUser().getUser().getUuid();
+        currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
 
         fillData();
 
@@ -261,11 +265,9 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
 
         public void deleteUser(Context context) {
 
-            DBUtils.getInstance(context).deleteLoggerUserByUserUUID(user.getUuid());
+            loggedInUserDataSource.deleteLoggedInUsers(Collections.singletonList(loggedInUser));
 
             users.get(groupPosition).remove(childPosition);
-
-            LocalCache.LocalLoggedInUsers.remove(loggedInUser);
 
             mAdapter.notifyDataSetChanged();
 

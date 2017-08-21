@@ -16,4 +16,10 @@ public interface MediaDataSourceRepository {
 
     void downloadMedia(List<Media> medias, BaseOperateDataCallback<Boolean> callback);
 
+    void updateMedia(Media media);
+
+    void setCalcDigestCallback(CalcMediaDigestStrategy.CalcMediaDigestCallback calcDigestCallback);
+
+    List<Media> getLocalMedia();
+
 }

@@ -6,14 +6,20 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.RemoteCurrentUserParser;
 import com.winsun.fruitmix.parser.RemoteInsertUserParser;
+import com.winsun.fruitmix.parser.RemoteUserHomeParser;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +35,14 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     public static final String ACCOUNT_PARAMETER = "/account";
     public static final String LOGIN_PARAMETER = "/users";
 
-    public UserRemoteDataSourceImpl(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
+    public static final String USER_HOME_PARAMETER = "/drives";
+
+    private SystemSettingDataSource systemSettingDataSource;
+
+    public UserRemoteDataSourceImpl(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory, SystemSettingDataSource systemSettingDataSource) {
         super(iHttpUtil, httpRequestFactory);
+
+        this.systemSettingDataSource = systemSettingDataSource;
     }
 
     @Override
@@ -49,7 +61,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
         final List<User> users = new ArrayList<>();
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(ACCOUNT_PARAMETER);
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(LOGIN_PARAMETER + "/" + systemSettingDataSource.getCurrentLoginUserUUID());
 
         wrapper.loadCall(httpRequest, new BaseLoadDataCallback<User>() {
 
@@ -107,5 +119,27 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
                 users.add(otherUser);
             }
         }
+    }
+
+    @Override
+    public String getCurrentUserHome() {
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_HOME_PARAMETER);
+
+        try {
+            HttpResponse response = iHttpUtil.remoteCall(httpRequest);
+
+            RemoteUserHomeParser parser = new RemoteUserHomeParser();
+            return parser.parse(response.getResponseData());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+        }
+
+        return "";
     }
 }

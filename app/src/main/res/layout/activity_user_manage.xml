@@ -12,7 +12,7 @@
 
         <variable
             name="userManageViewModel"
-            type="com.winsun.fruitmix.UserManageActivity.UserManageViewModel" />
+            type="com.winsun.fruitmix.user.manage.UserManageActivity.UserManageViewModel" />
 
         <variable
             name="toolbarViewModel"
@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#DEDEDE"
-        tools:context="com.winsun.fruitmix.UserManageActivity">
+        tools:context="com.winsun.fruitmix.user.manage.UserManageActivity">
 
         <LinearLayout
             android:layout_width="match_parent"

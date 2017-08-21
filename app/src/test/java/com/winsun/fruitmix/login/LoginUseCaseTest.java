@@ -2,7 +2,6 @@ package com.winsun.fruitmix.login;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.HttpRequestFactory;
@@ -16,6 +15,7 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.token.TokenRemoteDataSource;
+import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 
@@ -51,6 +51,9 @@ public class LoginUseCaseTest {
     private HttpRequestFactory httpRequestFactory;
 
     @Mock
+    private CheckMediaIsUploadStrategy checkMediaIsUploadStrategy;
+
+    @Mock
     private UserDataRepository userDataRepository;
 
     @Mock
@@ -76,6 +79,9 @@ public class LoginUseCaseTest {
     @Captor
     private ArgumentCaptor<BaseLoadDataCallback<User>> loadUserCallbackArgumentCaptor;
 
+    @Mock
+    private BaseLoadDataCallback<String> callback;
+
     @Before
     public void setup() {
 
@@ -84,12 +90,14 @@ public class LoginUseCaseTest {
         LoginUseCase.destroyInstance();
 
         loginUseCase = LoginUseCase.getInstance(loggedInUserDataSource, tokenRemoteDataSource,
-                httpRequestFactory, userDataRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager);
+                httpRequestFactory, checkMediaIsUploadStrategy, userDataRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager);
 
     }
 
     @Test
     public void loginWithNoParamFail() {
+
+        when(systemSettingDataSource.getCurrentLoginUserUUID()).thenReturn("");
 
         loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>() {
 
@@ -106,7 +114,9 @@ public class LoginUseCaseTest {
             }
         });
 
-        verify(loggedInUserDataSource).getCurrentLoggedInUser();
+        verify(systemSettingDataSource).getCurrentLoginUserUUID();
+
+        verify(loggedInUserDataSource).getLoggedInUserByUserUUID(anyString());
 
         verify(stationFileRepository, never()).clearDownloadFileRecordInCache();
 
@@ -115,7 +125,12 @@ public class LoginUseCaseTest {
     @Test
     public void loginWithNoParamSucceed() {
 
-        when(loggedInUserDataSource.getCurrentLoggedInUser()).thenReturn(new LoggedInUser());
+        when(systemSettingDataSource.getCurrentLoginUserUUID()).thenReturn(testUserUUID);
+
+        User user = new User();
+        user.setUuid(testUserUUID);
+
+        when(loggedInUserDataSource.getLoggedInUserByUserUUID(testUserUUID)).thenReturn(new LoggedInUser("", "", "", "", user));
 
         loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>() {
             @Override
@@ -130,9 +145,13 @@ public class LoginUseCaseTest {
             }
         });
 
-        verify(loggedInUserDataSource).getCurrentLoggedInUser();
+        verify(systemSettingDataSource).getCurrentLoginUserUUID();
+
+        verify(loggedInUserDataSource).getLoggedInUserByUserUUID(anyString());
 
         verify(httpRequestFactory).setCurrentData(anyString(), anyString());
+
+        verify(checkMediaIsUploadStrategy).setCurrentUserUUID(testUserUUID);
 
         verify(imageGifLoaderInstance).setToken(anyString());
 
@@ -156,8 +175,6 @@ public class LoginUseCaseTest {
 
         LoadTokenParam loadTokenParam = new LoadTokenParam(testGateway, testUserUUID, testUserPwd, testEquipmentName);
 
-        BaseLoadDataCallback<String> callback = Mockito.mock(BaseLoadDataCallback.class);
-
         loginUseCase.loginWithLoadTokenParam(loadTokenParam, callback);
 
         verify(tokenRemoteDataSource).getToken(any(LoadTokenParam.class), loadTokenCallbackArgumentCaptor.capture());
@@ -166,11 +183,13 @@ public class LoginUseCaseTest {
 
         verify(httpRequestFactory).setCurrentData(anyString(), anyString());
 
+        verify(checkMediaIsUploadStrategy).setCurrentUserUUID(anyString());
+
         verify(imageGifLoaderInstance).setToken(anyString());
 
         verify(stationFileRepository).clearDownloadFileRecordInCache();
 
-        verify(callback).onSucceed(ArgumentMatchers.<String>anyList(), any(OperationResult.class));
+        verify(systemSettingDataSource).setCurrentLoginUserUUID(testUserUUID);
 
         verify(userDataRepository).getUsers(loadUserCallbackArgumentCaptor.capture());
 
@@ -184,13 +203,21 @@ public class LoginUseCaseTest {
         User user = new User();
         user.setUuid(testUserUUID);
 
+        String testUserHome = "testUserHome";
+
+        when(userDataRepository.getCurrentUserHome()).thenReturn(testUserHome);
+
         loadUserCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess());
+
+        verify(userDataRepository).getCurrentUserHome();
+
+        assertEquals(testUserHome, user.getHome());
 
         verify(loggedInUserDataSource).getAllLoggedInUsers();
 
-        verify(loggedInUserDataSource).setCurrentLoggedInUser(any(LoggedInUser.class));
-
         verify(loggedInUserDataSource).insertLoggedInUsers(ArgumentMatchers.<LoggedInUser>anyCollection());
+
+        verify(callback).onSucceed(ArgumentMatchers.<String>anyList(), any(OperationResult.class));
 
         verify(eventBus).postSticky(ArgumentMatchers.any(OperationEvent.class));
 
@@ -205,9 +232,9 @@ public class LoginUseCaseTest {
         testLoadUserSuccessAfterLoginSuccess();
 
         verify(systemSettingDataSource).setAutoUploadOrNot(true);
-        verify(systemSettingDataSource).setCurrentUploadDeviceID(anyString());
+        verify(systemSettingDataSource).setCurrentUploadUserUUID(testUserUUID);
 
-        verify(systemSettingDataSource).setShowAutoUploadDialog(true);
+        verify(systemSettingDataSource).setShowAutoUploadDialog(false);
 
     }
 
@@ -218,7 +245,7 @@ public class LoginUseCaseTest {
 
         testLoadUserSuccessAfterLoginSuccess();
 
-        verify(systemSettingDataSource).setShowAutoUploadDialog(false);
+        verify(systemSettingDataSource).setShowAutoUploadDialog(true);
 
     }
 
@@ -281,20 +308,20 @@ public class LoginUseCaseTest {
 
         verify(imageGifLoaderInstance).setToken(anyString());
 
-        verify(loggedInUserDataSource).setCurrentLoggedInUser(any(LoggedInUser.class));
+        verify(systemSettingDataSource).setCurrentLoginUserUUID(testUserUUID);
 
         verify(stationFileRepository).clearDownloadFileRecordInCache();
 
         verify(userDataRepository).getUsers(any(BaseLoadDataCallback.class));
 
-        verify(systemSettingDataSource).getCurrentUploadDeviceID();
+        verify(systemSettingDataSource).getCurrentUploadUserUUID();
 
     }
 
     @Test
     public void testCurrentUploadDeviceIDNotEqualsNewUserDeviceID() {
 
-        when(systemSettingDataSource.getCurrentUploadDeviceID()).thenReturn("");
+        when(systemSettingDataSource.getCurrentUploadUserUUID()).thenReturn("");
 
         testLoginWithLoggedInUser();
 
@@ -305,7 +332,7 @@ public class LoginUseCaseTest {
     @Test
     public void testCurrentUploadDeviceIDEqualsNewUserDeviceID() {
 
-        when(systemSettingDataSource.getCurrentUploadDeviceID()).thenReturn(testDeviceID);
+        when(systemSettingDataSource.getCurrentUploadUserUUID()).thenReturn(testUserUUID);
 
         testLoginWithLoggedInUser();
 
@@ -331,7 +358,6 @@ public class LoginUseCaseTest {
         verify(stationFileRepository).clearDownloadFileRecordInCache();
 
         verify(callback).onSucceed(anyBoolean(), any(OperationResult.class));
-
 
     }
 

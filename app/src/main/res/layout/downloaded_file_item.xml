@@ -44,8 +44,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:visibility="@{fileDownloadedItemViewModel.fileIconBgVisibility?View.VISIBLE:View.INVISIBLE,default=visible}"
-                    android:src="@drawable/file_icon" />
+                    android:src="@drawable/file_icon"
+                    android:visibility="@{fileDownloadedItemViewModel.fileIconVisibility?View.VISIBLE:View.INVISIBLE,default=visible}" />
 
             </FrameLayout>
 

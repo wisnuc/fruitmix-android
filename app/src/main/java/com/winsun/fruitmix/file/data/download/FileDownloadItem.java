@@ -22,6 +22,8 @@ public class FileDownloadItem {
 
     private String parentFolderUUID;
 
+    private String driveUUID;
+
     private Future<Boolean> future;
 
     public FileDownloadItem(String fileName, long fileSize, String fileUUID) {
@@ -30,11 +32,12 @@ public class FileDownloadItem {
         this.fileUUID = fileUUID;
     }
 
-    public FileDownloadItem(String fileName, long fileSize, String fileUUID, String parentFolderUUID) {
+    public FileDownloadItem(String fileName, long fileSize, String fileUUID, String parentFolderUUID,String driveUUID) {
         this.fileName = fileName;
         this.fileUUID = fileUUID;
         this.fileSize = fileSize;
         this.parentFolderUUID = parentFolderUUID;
+        this.driveUUID = driveUUID;
     }
 
     public void setFileDownloadState(FileDownloadState fileDownloadState) {
@@ -83,6 +86,10 @@ public class FileDownloadItem {
 
     public String getParentFolderUUID() {
         return parentFolderUUID;
+    }
+
+    public String getDriveUUID() {
+        return driveUUID;
     }
 
     public void setFuture(Future<Boolean> future) {

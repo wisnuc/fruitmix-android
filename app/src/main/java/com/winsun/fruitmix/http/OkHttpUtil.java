@@ -3,11 +3,15 @@ package com.winsun.fruitmix.http;
 import android.util.Log;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.file.data.model.LocalFile;
+import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -165,28 +169,83 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     @Override
-    public boolean uploadFile(HttpRequest httpRequest, Media media) {
-
-        Request.Builder builder = generateRequestBuilder(httpRequest);
-
-        RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart(SHA_256_STRING, media.getUuid())
-                .addFormDataPart(FILE_STRING, media.getOriginalPhotoPath(), RequestBody.create(MediaType.parse(JPEG_STRING), new File(media.getOriginalPhotoPath())))
-                .build();
-
-        Request request = builder.post(requestBody).build();
+    public boolean uploadFile(HttpRequest httpRequest, LocalFile localFile) {
 
         try {
+
+            Request.Builder builder = generateRequestBuilder(httpRequest);
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("size", Integer.valueOf(localFile.getSize()));
+            jsonObject.put("sha256", localFile.getFileHash());
+
+            String fileName = jsonObject.toString();
+
+//            String fileName = "{" +
+//                    "\"size\":" + localFile.getSize() + "," +
+//                    "\"sha256\":\"" + localFile.getFileHash() + "\"" +
+//                    "}";
+
+            RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart(localFile.getName(), fileName, RequestBody.create(MediaType.parse(JPEG_STRING), new File(localFile.getPath())))
+                    .build();
+
+
+            Request request = builder.post(requestBody).build();
+
             Response response = executeRequest(request);
 
-            return handleResponseCode(response);
+            boolean result = handleResponseCode(response);
+
+            response.close();
+
+            return result;
 
         } catch (IOException e) {
             e.printStackTrace();
 
             return false;
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return false;
         }
 
+    }
+
+    @Override
+    public HttpResponse createFolder(HttpRequest httpRequest, String folderName) {
+
+        try {
+
+            Request.Builder builder = generateRequestBuilder(httpRequest);
+
+            RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart(folderName, "{\"op\":\"mkdir\"}").build();
+
+            Request request = builder.post(requestBody).build();
+
+            Response response = executeRequest(request);
+
+            String str = "";
+
+            int responseCode = response.code();
+
+            if (handleResponseCode(response)) {
+
+                str = response.body().string();
+
+            }
+
+            response.close();
+
+            return new HttpResponse(responseCode, str);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            return null;
+        }
     }
 
     private Request.Builder generateRequestBuilder(HttpRequest httpRequest) {

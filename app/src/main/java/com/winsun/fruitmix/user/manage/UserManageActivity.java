@@ -1,4 +1,4 @@
-package com.winsun.fruitmix;
+package com.winsun.fruitmix.user.manage;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -7,7 +7,11 @@ import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.winsun.fruitmix.BaseActivity;
+import com.winsun.fruitmix.CreateUserActivity;
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.ActivityUserManageBinding;
+import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.manage.UserManagePresenterImpl;
 import com.winsun.fruitmix.user.manage.UserManageView;
 import com.winsun.fruitmix.user.manage.UserMangePresenter;
@@ -38,7 +42,7 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
 
         binding.setUserManageViewModel(userManageViewModel);
 
-        userMangePresenter = new UserManagePresenterImpl(this, userManageViewModel);
+        userMangePresenter = new UserManagePresenterImpl(this, userManageViewModel, InjectUser.provideRepository(this));
 
         binding.setUserPresenter(userMangePresenter);
 

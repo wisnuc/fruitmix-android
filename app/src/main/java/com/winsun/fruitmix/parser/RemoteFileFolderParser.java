@@ -22,14 +22,16 @@ public class RemoteFileFolderParser implements RemoteDatasParser<AbstractRemoteF
 
         List<AbstractRemoteFile> abstractRemoteFiles = new ArrayList<>();
 
-        JSONArray jsonArray = new JSONArray(json);
+        JSONObject root = new JSONObject(json);
 
-        int length = jsonArray.length();
+        JSONArray entries = root.getJSONArray("entries");
+
+        int length = entries.length();
         int ownerLength;
 
         for (int i = 0; i < length; i++) {
 
-            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            JSONObject jsonObject = entries.getJSONObject(i);
 
             AbstractRemoteFile abstractRemoteFile;
 
@@ -40,6 +42,8 @@ public class RemoteFileFolderParser implements RemoteDatasParser<AbstractRemoteF
                 abstractRemoteFile = new RemoteFile();
 
                 abstractRemoteFile.setFileTypeResID(FileUtil.getFileTypeResID(fileName));
+
+                ((RemoteFile) abstractRemoteFile).setFileHash(jsonObject.optString("hash"));
 
             } else {
                 abstractRemoteFile = new RemoteFolder();

@@ -16,8 +16,6 @@ public class LoggedInUserDBDataSource implements LoggedInUserDataSource {
 
     private DBUtils dbUtils;
 
-    private SystemSettingDataSource systemSettingDataSource;
-
     private static LoggedInUserDataSource instance;
 
     public static LoggedInUserDataSource getInstance(Context context) {
@@ -31,8 +29,6 @@ public class LoggedInUserDBDataSource implements LoggedInUserDataSource {
     private LoggedInUserDBDataSource(Context context) {
 
         dbUtils = DBUtils.getInstance(context);
-
-        systemSettingDataSource = SystemSettingDataSource.getInstance(context);
 
     }
 
@@ -69,24 +65,11 @@ public class LoggedInUserDBDataSource implements LoggedInUserDataSource {
     }
 
     @Override
-    public LoggedInUser getCurrentLoggedInUser() {
+    public LoggedInUser getLoggedInUserByUserUUID(String userUUID) {
 
-        return dbUtils.getCurrentLoggedInUser(systemSettingDataSource.getCurrentLoginUserUUID());
-
-    }
-
-    @Override
-    public void setCurrentLoggedInUser(LoggedInUser loggedInUser) {
-
-        if (loggedInUser == null)
-            systemSettingDataSource.setCurrentLoginUserUUID("");
-        else
-            systemSettingDataSource.setCurrentLoginUserUUID(loggedInUser.getUser().getUuid());
+        return dbUtils.getCurrentLoggedInUser(userUUID);
 
     }
 
-    @Override
-    public String getCurrentLoggedInUserUUID() {
-        return systemSettingDataSource.getCurrentLoginUserUUID();
-    }
+
 }

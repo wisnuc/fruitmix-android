@@ -21,8 +21,8 @@ public class LocalMediaAppDBDataSource {
 
     public static LocalMediaAppDBDataSource getInstance(Context context) {
 
-        if(instance == null)
-            instance =new LocalMediaAppDBDataSource(context);
+        if (instance == null)
+            instance = new LocalMediaAppDBDataSource(context);
 
         return instance;
     }
@@ -45,5 +45,10 @@ public class LocalMediaAppDBDataSource {
         dbUtils.insertLocalMedias(medias);
 
     }
+
+    public boolean updateMedia(Media media) {
+        return dbUtils.updateLocalMedia(media) > 0;
+    }
+
 
 }

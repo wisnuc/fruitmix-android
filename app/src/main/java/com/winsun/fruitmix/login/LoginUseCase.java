@@ -16,6 +16,7 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.token.TokenRemoteDataSource;
+import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.Util;
@@ -40,6 +41,8 @@ public class LoginUseCase {
 
     private HttpRequestFactory httpRequestFactory;
 
+    private CheckMediaIsUploadStrategy checkMediaIsUploadStrategy;
+
     private UserDataRepository userDataRepository;
 
     private StationFileRepository stationFileRepository;
@@ -52,13 +55,17 @@ public class LoginUseCase {
 
     private ThreadManager threadManager;
 
+    //TODO: check login with loggedInUser: get user null pointer
+
     private LoginUseCase(LoggedInUserDataSource loggedInUserDataSource, TokenRemoteDataSource tokenRemoteDataSource,
-                         HttpRequestFactory httpRequestFactory, UserDataRepository userDataRepository,
-                         StationFileRepository stationFileRepository, SystemSettingDataSource systemSettingDataSource,
-                         ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager) {
+                         HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
+                         UserDataRepository userDataRepository, StationFileRepository stationFileRepository,
+                         SystemSettingDataSource systemSettingDataSource, ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus,
+                         ThreadManager threadManager) {
         this.loggedInUserDataSource = loggedInUserDataSource;
         this.tokenRemoteDataSource = tokenRemoteDataSource;
         this.httpRequestFactory = httpRequestFactory;
+        this.checkMediaIsUploadStrategy = checkMediaIsUploadStrategy;
         this.userDataRepository = userDataRepository;
         this.stationFileRepository = stationFileRepository;
         this.systemSettingDataSource = systemSettingDataSource;
@@ -68,13 +75,14 @@ public class LoginUseCase {
     }
 
     public static LoginUseCase getInstance(LoggedInUserDataSource loggedInUserDataSource, TokenRemoteDataSource tokenRemoteDataSource,
-                                           HttpRequestFactory httpRequestFactory, UserDataRepository userDataRepository,
+                                           HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
+                                           UserDataRepository userDataRepository,
                                            StationFileRepository stationFileRepository, SystemSettingDataSource systemSettingDataSource,
                                            ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager) {
 
         if (instance == null)
             instance = new LoginUseCase(loggedInUserDataSource, tokenRemoteDataSource,
-                    httpRequestFactory, userDataRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager);
+                    httpRequestFactory, checkMediaIsUploadStrategy, userDataRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager);
 
         return instance;
     }
@@ -85,7 +93,9 @@ public class LoginUseCase {
 
     public void loginWithNoParam(BaseOperateDataCallback<Boolean> callback) {
 
-        LoggedInUser loggedInUser = loggedInUserDataSource.getCurrentLoggedInUser();
+        String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
+
+        LoggedInUser loggedInUser = loggedInUserDataSource.getLoggedInUserByUserUUID(currentUserUUID);
 
         if (loggedInUser == null)
             callback.onFail(new OperationSQLException());
@@ -94,6 +104,8 @@ public class LoginUseCase {
             httpRequestFactory.setCurrentData(loggedInUser.getToken(), loggedInUser.getGateway());
 
             imageGifLoaderInstance.setToken(loggedInUser.getToken());
+
+            checkMediaIsUploadStrategy.setCurrentUserUUID(loggedInUser.getUser().getUuid());
 
             stationFileRepository.clearDownloadFileRecordInCache();
 
@@ -123,11 +135,13 @@ public class LoginUseCase {
 
                 imageGifLoaderInstance.setToken(token);
 
+                checkMediaIsUploadStrategy.setCurrentUserUUID(loadTokenParam.getUserUUID());
+
                 stationFileRepository.clearDownloadFileRecordInCache();
 
-                callback.onSucceed(data, operationResult);
+                systemSettingDataSource.setCurrentLoginUserUUID(loadTokenParam.getUserUUID());
 
-                getUsers(loadTokenParam, token);
+                getUsers(loadTokenParam, token, callback);
 
             }
 
@@ -140,7 +154,7 @@ public class LoginUseCase {
 
     }
 
-    private void getUsers(final LoadTokenParam loadTokenParam, final String token) {
+    private void getUsers(final LoadTokenParam loadTokenParam, final String token, final BaseLoadDataCallback<String> callback) {
 
         userDataRepository.setCacheDirty();
         userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>() {
@@ -150,24 +164,26 @@ public class LoginUseCase {
                 for (User user : data) {
                     if (user.getUuid().equals(loadTokenParam.getUserUUID())) {
 
+                        user.setHome(userDataRepository.getCurrentUserHome());
+
                         Collection<LoggedInUser> loggedInUsers = loggedInUserDataSource.getAllLoggedInUsers();
 
                         if (loggedInUsers.isEmpty()) {
 
                             systemSettingDataSource.setAutoUploadOrNot(true);
-                            systemSettingDataSource.setCurrentUploadDeviceID(user.getLibrary());
-
-                            systemSettingDataSource.setShowAutoUploadDialog(true);
-                        } else {
+                            systemSettingDataSource.setCurrentUploadUserUUID(user.getUuid());
 
                             systemSettingDataSource.setShowAutoUploadDialog(false);
+                        } else {
+
+                            systemSettingDataSource.setShowAutoUploadDialog(true);
                         }
 
                         LoggedInUser loggedInUser = new LoggedInUser(user.getLibrary(), token, loadTokenParam.getGateway(), loadTokenParam.getEquipmentName(), user);
 
                         loggedInUserDataSource.insertLoggedInUsers(Collections.singletonList(loggedInUser));
 
-                        loggedInUserDataSource.setCurrentLoggedInUser(loggedInUser);
+                        callback.onSucceed(Collections.singletonList(token), new OperationSuccess());
 
                         eventBus.postSticky(new OperationEvent(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN, new OperationSuccess()));
 
@@ -205,21 +221,29 @@ public class LoginUseCase {
 
         httpRequestFactory.setCurrentData(currentLoggedInUser.getToken(), currentLoggedInUser.getGateway());
 
+        checkMediaIsUploadStrategy.setCurrentUserUUID(currentLoggedInUser.getUser().getUuid());
+
         imageGifLoaderInstance.setToken(currentLoggedInUser.getToken());
 
-        loggedInUserDataSource.setCurrentLoggedInUser(currentLoggedInUser);
+        systemSettingDataSource.setCurrentLoginUserUUID(currentLoggedInUser.getUser().getUuid());
 
         stationFileRepository.clearDownloadFileRecordInCache();
 
-        String preDeviceID = systemSettingDataSource.getCurrentUploadDeviceID();
+        String preUploadUserUUID = systemSettingDataSource.getCurrentUploadUserUUID();
 
-        if (preDeviceID.equals(currentLoggedInUser.getDeviceID())) {
+        boolean result;
+
+        if (preUploadUserUUID.equals(currentLoggedInUser.getUser().getUuid())) {
             systemSettingDataSource.setAutoUploadOrNot(true);
+
+            result = true;
         } else {
             systemSettingDataSource.setAutoUploadOrNot(false);
+
+            result = false;
         }
 
-        callback.onSucceed(true, new OperationSuccess());
+        callback.onSucceed(result, new OperationSuccess());
 
         getUsers();
 

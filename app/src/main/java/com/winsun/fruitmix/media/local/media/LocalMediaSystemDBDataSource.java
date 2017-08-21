@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.operationResult.OperationHasNewMedia;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FileUtil;
 
@@ -33,7 +34,7 @@ public class LocalMediaSystemDBDataSource {
 
     public static LocalMediaSystemDBDataSource getInstance(Context context) {
 
-        if(instance == null)
+        if (instance == null)
             instance = new LocalMediaSystemDBDataSource(context);
 
         return instance;
@@ -131,7 +132,10 @@ public class LocalMediaSystemDBDataSource {
 
         cursor.close();
 
-        callback.onSucceed(mediaList, new OperationSuccess());
+        if (mediaList.isEmpty())
+            callback.onSucceed(mediaList, new OperationSuccess());
+        else
+            callback.onSucceed(mediaList, new OperationHasNewMedia());
 
     }
 

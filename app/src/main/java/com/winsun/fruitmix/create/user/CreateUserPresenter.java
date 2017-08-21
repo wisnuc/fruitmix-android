@@ -15,5 +15,5 @@ public interface CreateUserPresenter {
 
     void createUser(Context context,CreateUserActivity.CreateUserViewModel createUserViewModel);
 
-    void handleOperationEvent(OperationEvent operationEvent);
+
 }

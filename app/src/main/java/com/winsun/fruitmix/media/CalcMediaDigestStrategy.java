@@ -65,8 +65,14 @@ public class CalcMediaDigestStrategy {
 
         if (calcMediaDigestCallback != null) {
             if (newMediaList.size() > 0) {
+
+                Log.d(TAG, "handleMedia: finish calc");
+
                 calcMediaDigestCallback.handleFinished();
             } else {
+
+                Log.d(TAG, "handleMedia: nothing need calc");
+
                 calcMediaDigestCallback.handleNothing();
             }
         }

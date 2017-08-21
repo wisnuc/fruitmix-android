@@ -44,6 +44,8 @@ import com.winsun.fruitmix.file.data.download.DownloadState;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.model.RemoteFile;
+import com.winsun.fruitmix.file.data.model.RemoteFolder;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.view.FileDownloadActivity;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
@@ -51,9 +53,12 @@ import com.winsun.fruitmix.file.view.interfaces.HandleTitleCallback;
 import com.winsun.fruitmix.file.view.viewmodel.FileItemViewModel;
 import com.winsun.fruitmix.file.view.viewmodel.FileViewModel;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
+import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -130,7 +135,7 @@ public class FilePresenter implements OnViewSelectListener {
     private ThreadManager threadManager;
 
     public FilePresenter(Activity activity, StationFileRepository stationFileRepository, NoContentViewModel noContentViewModel, LoadingViewModel loadingViewModel, FileViewModel fileViewModel,
-                         HandleTitleCallback handleTitleCallback, String currentUserUUID) {
+                         HandleTitleCallback handleTitleCallback, LoggedInUserDataSource loggedInUserRepository, SystemSettingDataSource systemSettingDataSource) {
         this.activity = activity;
         this.stationFileRepository = stationFileRepository;
         this.noContentViewModel = noContentViewModel;
@@ -138,7 +143,8 @@ public class FilePresenter implements OnViewSelectListener {
         this.fileViewModel = fileViewModel;
         this.handleTitleCallback = handleTitleCallback;
 
-        this.currentUserUUID = currentUserUUID;
+        currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
+        rootUUID = loggedInUserRepository.getLoggedInUserByUserUUID(currentUserUUID).getUser().getHome();
 
         threadManager = ThreadManager.getInstance();
 
@@ -178,12 +184,8 @@ public class FilePresenter implements OnViewSelectListener {
 
         if (!remoteFileLoaded) {
 
-            String userHome = "";
-
-            currentFolderUUID = userHome;
+            currentFolderUUID = rootUUID;
             currentFolderName = activity.getString(R.string.file);
-
-            rootUUID = userHome;
 
             if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
                 retrievedFolderUUIDList.add(currentFolderUUID);
@@ -192,7 +194,6 @@ public class FilePresenter implements OnViewSelectListener {
 
             getFile();
 
-//            FNAS.retrieveRemoteFile(activity, currentFolderUUID, rootUUID);
         }
 
 
@@ -297,29 +298,6 @@ public class FilePresenter implements OnViewSelectListener {
 
     public void handleOperationEvent(OperationEvent operationEvent) {
 
-        String action = operationEvent.getAction();
-        if (action.equals(Util.REMOTE_FILE_RETRIEVED)) {
-
-            loadingViewModel.showLoading.set(false);
-
-            OperationResultType result = operationEvent.getOperationResult().getOperationResultType();
-            switch (result) {
-                case SUCCEED:
-
-                    List<AbstractRemoteFile> files = LocalCache.RemoteFileMapKeyIsUUID.get(((RetrieveFileOperationEvent) operationEvent).getFolderUUID()).listChildAbstractRemoteFileList();
-
-                    handleGetFileSucceed(files);
-
-                    break;
-                default:
-
-                    handleGetFileFail();
-
-                    break;
-            }
-
-        }
-
     }
 
     private void handleGetFileFail() {
@@ -414,7 +392,7 @@ public class FilePresenter implements OnViewSelectListener {
             retrievedFolderNameList.remove(retrievedFolderNameList.size() - 1);
             currentFolderName = retrievedFolderNameList.get(retrievedFolderNameList.size() - 1);
 
-            FNAS.retrieveRemoteFile(activity, currentFolderUUID, rootUUID);
+            getFile();
 
         } else {
             selectMode = false;
@@ -490,7 +468,7 @@ public class FilePresenter implements OnViewSelectListener {
 
     private void openFileWhenOnClick() {
 
-        mCurrentDownloadFileCommand = new DownloadFileCommand(selectedFiles.get(0), stationFileRepository, currentFolderUUID);
+        mCurrentDownloadFileCommand = new DownloadFileCommand(selectedFiles.get(0), stationFileRepository, currentFolderUUID, rootUUID);
 
         mCurrentDownloadFileCommand.execute();
 
@@ -575,7 +553,7 @@ public class FilePresenter implements OnViewSelectListener {
     private void addSelectFilesToMacroCommand() {
         for (AbstractRemoteFile abstractRemoteFile : selectedFiles) {
 
-            AbstractCommand abstractCommand = new DownloadFileCommand(abstractRemoteFile, stationFileRepository, currentUserUUID);
+            AbstractCommand abstractCommand = new DownloadFileCommand(abstractRemoteFile, stationFileRepository, currentUserUUID, rootUUID);
             macroCommand.addCommand(abstractCommand);
 
         }
@@ -589,7 +567,7 @@ public class FilePresenter implements OnViewSelectListener {
 
         @Override
         public int getItemCount() {
-            return abstractRemoteFiles == null ? 0 : abstractRemoteFiles.size();
+            return abstractRemoteFiles.size();
         }
 
         @Override
@@ -672,7 +650,7 @@ public class FilePresenter implements OnViewSelectListener {
 
             }
 
-            final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
+            final RemoteFolder abstractRemoteFile = (RemoteFolder) abstractRemoteFiles.get(position);
 
             FileItemViewModel fileItemViewModel = binding.getFileItemViewModel();
 
@@ -694,7 +672,7 @@ public class FilePresenter implements OnViewSelectListener {
 
                     loadingViewModel.showLoading.set(true);
 
-                    abstractRemoteFile.openAbstractRemoteFile(activity, rootUUID);
+                    getFile();
 
                     handleTitleCallback.handleTitle(currentFolderName);
                 }
@@ -706,7 +684,7 @@ public class FilePresenter implements OnViewSelectListener {
     }
 
 
-    class FileViewHolder extends BaseBindingViewHolder {
+    private class FileViewHolder extends BaseBindingViewHolder {
 
         LinearLayout remoteFileItemLayout;
 
@@ -738,7 +716,7 @@ public class FilePresenter implements OnViewSelectListener {
 
             }
 
-            final AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(position);
+            final RemoteFile abstractRemoteFile = (RemoteFile) abstractRemoteFiles.get(position);
 
             FileItemViewModel fileItemViewModel = binding.getFileItemViewModel();
 
@@ -781,7 +759,7 @@ public class FilePresenter implements OnViewSelectListener {
                             menuItem = new BottomMenuItem(R.drawable.file_icon, activity.getString(R.string.open_the_item), new OpenFileCommand(activity, abstractRemoteFile.getName()));
                         } else {
                             AbstractCommand macroCommand = new MacroCommand();
-                            AbstractCommand downloadFileCommand = new DownloadFileCommand(abstractRemoteFile, stationFileRepository, currentUserUUID);
+                            AbstractCommand downloadFileCommand = new DownloadFileCommand(abstractRemoteFile, stationFileRepository, currentUserUUID, rootUUID);
                             macroCommand.addCommand(downloadFileCommand);
                             macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
                             menuItem = new BottomMenuItem(R.drawable.download, activity.getString(R.string.download_the_item), macroCommand);

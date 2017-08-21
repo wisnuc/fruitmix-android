@@ -23,41 +23,25 @@ public class RemoteMediaParser implements RemoteDatasParser<Media> {
         List<Media> medias = new ArrayList<>();
 
         JSONArray jsonArray;
-        JSONObject itemRaw;
-
-        JSONObject itemObject;
-
-        JSONArray item;
 
         Media media;
 
         jsonArray = new JSONArray(json);
 
         for (int i = 0; i < jsonArray.length(); i++) {
-            item = jsonArray.getJSONArray(i);
+            JSONObject root = jsonArray.getJSONObject(i);
 
             media = new Media();
 
-            media.setUuid(item.getString(0));
+            media.setUuid(root.optString("hash"));
 
-            itemObject = item.getJSONObject(1);
-
-            boolean sharing = itemObject.optBoolean("permittedToShare");
-
-            media.setSharing(sharing);
-
-            itemRaw = itemObject.optJSONObject("metadata");
-
-            if (itemRaw == null)
-                continue;
-
-            String width = itemRaw.optString("width");
-            String height = itemRaw.optString("height");
+            String width = root.optString("w");
+            String height = root.optString("h");
 
             media.setWidth(width);
             media.setHeight(height);
 
-            String dateTime = itemRaw.optString("exifDateTime");
+            String dateTime = root.optString("datetime");
 
             if (dateTime.equals("")) {
                 media.setTime(Util.DEFAULT_DATE);
@@ -65,15 +49,16 @@ public class RemoteMediaParser implements RemoteDatasParser<Media> {
                 media.setTime(dateTime.substring(0, 4) + "-" + dateTime.substring(5, 7) + "-" + dateTime.substring(8, 10));
             }
 
-            int orientationNumber = itemRaw.optInt("exifOrientation");
+            int orientationNumber = root.optInt("orient");
 
             if (orientationNumber == 0)
                 orientationNumber = 1;
 
             media.setOrientationNumber(orientationNumber);
+
             media.setLocal(false);
 
-            media.setType(itemRaw.optString("format"));
+            media.setType(root.optString("m"));
 
             medias.add(media);
 

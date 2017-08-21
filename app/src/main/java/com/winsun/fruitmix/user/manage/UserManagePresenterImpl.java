@@ -9,9 +9,11 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.UserManageActivity;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.databinding.UserManageItemBinding;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
@@ -38,12 +40,14 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
     private UserManageActivity.UserManageViewModel userManageViewModel;
 
-    public UserManagePresenterImpl(UserManageView userManageView, UserManageActivity.UserManageViewModel userManageViewModel) {
+    private UserDataRepository userDataRepository;
+
+    public UserManagePresenterImpl(UserManageView userManageView, UserManageActivity.UserManageViewModel userManageViewModel, UserDataRepository userDataRepository) {
         this.userManageView = userManageView;
+        this.userDataRepository = userDataRepository;
+        this.userManageViewModel = userManageViewModel;
 
         mUserListAdapter = new UserListAdapter();
-
-        this.userManageViewModel = userManageViewModel;
     }
 
     @Override
@@ -54,36 +58,38 @@ public class UserManagePresenterImpl implements UserMangePresenter {
     @Override
     public void refreshView() {
 
-        if (LocalCache.RemoteUserMapKeyIsUUID == null) {
-            Log.w(TAG, "refreshUserInNavigationView: RemoteUserMapKeyIsUUID", new NullPointerException());
-        }
+        userDataRepository.getUsers(new BaseLoadDataCallback<User>() {
+            @Override
+            public void onSucceed(List<User> data, OperationResult operationResult) {
 
-        if (LocalCache.RemoteUserMapKeyIsUUID != null && !LocalCache.RemoteUserMapKeyIsUUID.isEmpty()) {
+                userManageViewModel.showUserListEmpty.set(false);
+                userManageViewModel.showUserListView.set(true);
 
-            userManageViewModel.showUserListEmpty.set(false);
-            userManageViewModel.showUserListView.set(true);
+                refreshUserList(data);
 
-            refreshUserList();
+                mUserListAdapter.notifyDataSetChanged();
 
-            mUserListAdapter.notifyDataSetChanged();
+            }
 
-        } else {
+            @Override
+            public void onFail(OperationResult operationResult) {
 
-            userManageViewModel.showUserListEmpty.set(true);
-            userManageViewModel.showUserListView.set(false);
+                userManageViewModel.showUserListEmpty.set(true);
+                userManageViewModel.showUserListView.set(false);
 
-        }
+            }
+        });
 
     }
 
-    private void refreshUserList() {
+    private void refreshUserList(List<User> users) {
 
         if (mUserList == null)
             mUserList = new ArrayList<>();
         else
             mUserList.clear();
 
-        mUserList.addAll(LocalCache.RemoteUserMapKeyIsUUID.values());
+        mUserList.addAll(users);
 
         Collections.sort(mUserList, new Comparator<User>() {
             @Override

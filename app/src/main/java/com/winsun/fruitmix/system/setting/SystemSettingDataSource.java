@@ -15,13 +15,13 @@ public class SystemSettingDataSource {
 
     private String showAutoUploadDialogKey = "showAutoUploadDialog";
 
-    public static final String CURRENT_UPLOAD_DEVICE_ID = "current_upload_device_id";
+    public static final String CURRENT_UPLOAD_USER_UUID = "current_upload_user_uuid";
 
     public static final String CURRENT_LOGIN_USER_UUID = "current_login_user_uuid";
 
     private static SystemSettingDataSource instance;
 
-    public static SystemSettingDataSource getInstance(Context context) {
+    static SystemSettingDataSource getInstance(Context context) {
 
         if (instance == null)
             instance = new SystemSettingDataSource(context);
@@ -39,17 +39,17 @@ public class SystemSettingDataSource {
 
     }
 
-    public String getCurrentUploadDeviceID() {
+    public String getCurrentUploadUserUUID() {
 
-        return sharedPreferences.getString(CURRENT_UPLOAD_DEVICE_ID, "");
+        return sharedPreferences.getString(CURRENT_UPLOAD_USER_UUID, "");
     }
 
-    public void setCurrentUploadDeviceID(String currentUploadDeviceID) {
+    public void setCurrentUploadUserUUID(String currentUploadUserUUID) {
 
         SharedPreferences.Editor editor;
 
         editor = sharedPreferences.edit();
-        editor.putString(CURRENT_UPLOAD_DEVICE_ID, currentUploadDeviceID);
+        editor.putString(CURRENT_UPLOAD_USER_UUID, currentUploadUserUUID);
         editor.apply();
     }
 
@@ -98,6 +98,5 @@ public class SystemSettingDataSource {
         editor.apply();
 
     }
-
 
 }

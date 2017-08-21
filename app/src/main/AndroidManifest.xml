@@ -52,7 +52,7 @@
             android:name=".PersonInfoActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".UserManageActivity"
+            android:name=".user.manage.UserManageActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".EquipmentSearchActivity"

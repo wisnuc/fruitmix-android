@@ -46,6 +46,10 @@ public abstract class FileDownloadState {
         return fileDownloadItem.getParentFolderUUID();
     }
 
+    public String getDriveUUID(){
+        return fileDownloadItem.getDriveUUID();
+    }
+
     public FileDownloadItem getFileDownloadItem() {
         return fileDownloadItem;
     }

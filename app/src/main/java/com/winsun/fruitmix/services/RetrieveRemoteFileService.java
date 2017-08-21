@@ -96,7 +96,6 @@ public class RetrieveRemoteFileService extends IntentService {
 
                 AbstractRemoteFile remoteFolder = new RemoteFolder();
                 remoteFolder.setUuid(folderUUID);
-                remoteFolder.initChildAbstractRemoteFileList(abstractRemoteFiles);
 
                 LocalCache.RemoteFileMapKeyIsUUID.put(folderUUID, remoteFolder);
 

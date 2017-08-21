@@ -53,6 +53,10 @@
     <color name="login_ui_blue">#03a9f4</color>
 
     <color name="equipment_ui_blue">#0288d1</color>
+    
+    <color name="virtual_machine_foreground_color">#8bc34a</color>
+
+    <color name="virtual_machine_background_color">#689f38</color>
 
     <!-- finish add by liang.wu-->
 

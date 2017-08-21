@@ -6,6 +6,8 @@ import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 
 import java.util.ArrayList;
@@ -92,7 +94,7 @@ public class LocalMediaRepository {
 
                 mediaConcurrentMapKeyIsOriginalPath.putAll(LocalCache.BuildMediaMapKeyIsThumb(data));
 
-                callback.onSucceed(new ArrayList<>(mediaConcurrentMapKeyIsOriginalPath.values()), new OperationSuccess());
+                callback.onSucceed(new ArrayList<>(mediaConcurrentMapKeyIsOriginalPath.values()), operationResult);
 
                 Collection<Media> result = data;
 
@@ -103,6 +105,10 @@ public class LocalMediaRepository {
 
             }
         });
+    }
+
+    public boolean updateMedia(Media media) {
+        return localMediaAppDBDataSource.updateMedia(media);
     }
 
 

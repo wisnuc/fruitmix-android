@@ -9,7 +9,10 @@ import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.model.LocalFile;
+import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.file.data.model.RemoteFolder;
+import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -34,7 +37,7 @@ public class StationFileRepositoryImpl implements StationFileRepository {
     private StationFileDataSource stationFileDataSource;
     private DownloadedFileDataSource downloadedFileDataSource;
 
-    ConcurrentMap<String, AbstractRemoteFile> stationFileMap;
+    List<AbstractRemoteFile> stationFiles;
 
     private String currentFolderUUID;
 
@@ -44,7 +47,7 @@ public class StationFileRepositoryImpl implements StationFileRepository {
         this.stationFileDataSource = stationFileDataSource;
         this.downloadedFileDataSource = downloadedFileDataSource;
 
-        stationFileMap = new ConcurrentHashMap<>();
+        stationFiles = new ArrayList<>();
     }
 
     public static StationFileRepositoryImpl getInstance(StationFileDataSource stationFileDataSource, DownloadedFileDataSource downloadedFileDataSource) {
@@ -63,7 +66,7 @@ public class StationFileRepositoryImpl implements StationFileRepository {
             cacheDirty = true;
 
         if (!cacheDirty) {
-            callback.onSucceed(new ArrayList<>(stationFileMap.values()), new OperationSuccess());
+            callback.onSucceed(new ArrayList<>(stationFiles), new OperationSuccess());
             return;
         }
 
@@ -79,13 +82,9 @@ public class StationFileRepositoryImpl implements StationFileRepository {
                     file.setParentFolderUUID(folderUUID);
                 }
 
-                stationFileMap.clear();
+                stationFiles.clear();
 
-                AbstractRemoteFile remoteFolder = new RemoteFolder();
-                remoteFolder.setUuid(folderUUID);
-                remoteFolder.initChildAbstractRemoteFileList(data);
-
-                stationFileMap.put(folderUUID, remoteFolder);
+                stationFiles.addAll(data);
 
                 callback.onSucceed(data, operationResult);
 
@@ -168,6 +167,19 @@ public class StationFileRepositoryImpl implements StationFileRepository {
             callback.onSucceed(null, new OperationSuccess());
         else
             callback.onFail(new OperationSQLException());
+
+    }
+
+    @Override
+    public void createFolder(String folderName, String driveUUID, String dirUUID, BaseOperateDataCallback<HttpResponse> callback) {
+
+        stationFileDataSource.createFolder(folderName, driveUUID, dirUUID, callback);
+    }
+
+    @Override
+    public void uploadFile(LocalFile file, String driveUUID, String dirUUID, BaseOperateDataCallback<Boolean> callback) {
+
+        stationFileDataSource.uploadFile(file, driveUUID, dirUUID, callback);
 
     }
 }

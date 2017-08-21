@@ -26,6 +26,7 @@ import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.mediaModule.NewPicChooseActivity;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
@@ -155,7 +156,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         LoggedInUserDataSource loggedInUserDataSource = InjectLoggedInUser.provideLoggedInUserRepository(this);
 
-        groupContentPresenter = new GroupContentPresenter(this, groupUUID, loggedInUserDataSource,
+        groupContentPresenter = new GroupContentPresenter(this, groupUUID, loggedInUserDataSource, InjectSystemSettingDataSource.provideSystemSettingDataSource(this),
                 groupRepository, groupContentViewModel, ImageGifLoaderInstance.getInstance().getImageLoader(this), PlayAudioUseCaseImpl.getInstance());
     }
 

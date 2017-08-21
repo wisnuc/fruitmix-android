@@ -7,6 +7,7 @@ import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.file.data.station.StationFileRepositoryImpl;
 import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
 import com.winsun.fruitmix.media.MediaDataSourceRepositoryImpl;
 import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
@@ -26,6 +27,8 @@ public class InitSystem {
     public static void initSystem(Context context) {
 
         HttpRequestFactory.destroyInstance();
+
+        ImageGifLoaderInstance.destroyInstance();
 
         ButlerService.startButlerService(context);
 

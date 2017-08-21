@@ -18,7 +18,6 @@ import com.winsun.fruitmix.eventbus.LoggedInUserRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
-import com.winsun.fruitmix.eventbus.RetrieveMediaOriginalPhotoRequestEvent;
 import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
 import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.eventbus.UserRequestEvent;
@@ -26,18 +25,23 @@ import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.GenerateLocalMediaMiniThumbTask;
 import com.winsun.fruitmix.executor.GenerateLocalMediaThumbTask;
-import com.winsun.fruitmix.executor.RetrieveOriginalPhotoTask;
 import com.winsun.fruitmix.executor.UploadMediaTask;
+import com.winsun.fruitmix.generate.media.GenerateMediaThumbUseCase;
+import com.winsun.fruitmix.generate.media.InjectGenerateMediaThumbUseCase;
 import com.winsun.fruitmix.http.InjectHttp;
-import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
 import com.winsun.fruitmix.invitation.InvitationRemoteDataSource;
+import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
+import com.winsun.fruitmix.media.InjectMedia;
+import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
+import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationTargetType;
@@ -66,13 +70,15 @@ public class ButlerService extends Service {
 
     private boolean mStopUpload = false;
 
-    private boolean mStopGenerateMiniThumb = false;
-
-    private boolean mStopGenerateThumb = false;
-
     private InvitationRemoteDataSource invitationRemoteDataSource;
 
+    private MediaDataSourceRepository mediaDataSourceRepository;
+    private GenerateMediaThumbUseCase generateMediaThumbUseCase;
+    private UploadMediaUseCase uploadMediaUseCase;
+
     public static boolean startRetrieveTicketTask = false;
+
+    private CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback;
 
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
@@ -93,12 +99,41 @@ public class ButlerService extends Service {
 //
 //        task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS,20 * 1000);
 
+        calcMediaDigestCallback = new CalcMediaDigestStrategy.CalcMediaDigestCallback() {
+            @Override
+            public void handleFinished() {
+
+                generateMediaThumbUseCase.startGenerateMediaMiniThumb();
+                generateMediaThumbUseCase.startGenerateMediaThumb();
+
+                uploadMediaUseCase.startUploadMedia();
+
+            }
+
+            @Override
+            public void handleNothing() {
+
+                generateMediaThumbUseCase.startGenerateMediaMiniThumb();
+                generateMediaThumbUseCase.startGenerateMediaThumb();
+
+                uploadMediaUseCase.startUploadMedia();
+
+            }
+        };
+
+        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
+        mediaDataSourceRepository.setCalcDigestCallback(calcMediaDigestCallback);
+
+        generateMediaThumbUseCase = InjectGenerateMediaThumbUseCase.provideGenerateMediaThumbUseCase(this);
+        uploadMediaUseCase = InjectUploadMediaUseCase.provideUploadMediaUseCase(this);
+
         initInvitationRemoteDataSource();
     }
 
     public static void startRetrieveTicketTask() {
 
         startRetrieveTicketTask = true;
+
     }
 
 
@@ -128,11 +163,9 @@ public class ButlerService extends Service {
 
         task = null;
 
-        stopUpload();
-
-        stopGenerateThumb();
-
-        stopGenerateMiniThumb();
+        generateMediaThumbUseCase.stopGenerateLocalPhotoThumbnail();
+        generateMediaThumbUseCase.stopGenerateLocalPhotoMiniThumbnail();
+        uploadMediaUseCase.stopUploadMedia();
 
         super.onDestroy();
 
@@ -192,16 +225,12 @@ public class ButlerService extends Service {
         switch (action) {
             case Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED:
 
-                startGenerateLocalPhotoThumbnail();
-
-                startGenerateLocalPhotoMiniThumbnail();
 
                 mCalcNewLocalMediaDigestFinished = true;
-                startUpload();
+
                 break;
             case Util.REMOTE_MEDIA_RETRIEVED:
                 mRetrieveRemoteMediaFinished = true;
-                startUpload();
                 break;
             case Util.REMOTE_TOKEN_RETRIEVED:
 
@@ -281,106 +310,6 @@ public class ButlerService extends Service {
         }
     }
 
-    private void startGenerateLocalPhotoThumbnail() {
-
-        if (LocalCache.LocalMediaMapKeyIsOriginalPhotoPath == null) {
-            Log.w(TAG, "LocalMediaMapKeyIsOriginalPhotoPath", new NullPointerException());
-
-            return;
-        }
-
-        DBUtils dbUtils = DBUtils.getInstance(this);
-        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-
-        for (Media media : LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()) {
-
-            if (mStopGenerateThumb) return;
-
-            if (media.getThumb().isEmpty()) {
-
-                GenerateLocalMediaThumbTask task = new GenerateLocalMediaThumbTask(media, dbUtils, mStopGenerateThumb);
-                instance.doOneTaskInGenerateThumbThreadPool(task);
-            }
-
-        }
-
-    }
-
-    private void stopGenerateThumb() {
-
-        mStopGenerateThumb = true;
-
-        ExecutorServiceInstance.SINGLE_INSTANCE.shutdownGenerateMiniThumbThreadPoolNow();
-
-    }
-
-
-    private void startGenerateLocalPhotoMiniThumbnail() {
-
-        if (LocalCache.LocalMediaMapKeyIsOriginalPhotoPath == null) {
-            Log.w(TAG, "LocalMediaMapKeyIsOriginalPhotoPath", new NullPointerException());
-
-            return;
-        }
-
-        DBUtils dbUtils = DBUtils.getInstance(this);
-        ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-
-        for (Media media : LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()) {
-
-            if (mStopGenerateMiniThumb) return;
-
-            if (media.getMiniThumbPath().isEmpty()) {
-
-                GenerateLocalMediaMiniThumbTask task = new GenerateLocalMediaMiniThumbTask(media, dbUtils, mStopGenerateMiniThumb);
-                instance.doOneTaskInGenerateMiniThumbThreadPool(task);
-            }
-
-        }
-
-    }
-
-    private void stopGenerateMiniThumb() {
-
-        mStopGenerateMiniThumb = true;
-
-        ExecutorServiceInstance.SINGLE_INSTANCE.shutdownGenerateMiniThumbThreadPoolNow();
-
-    }
-
-    private void startUpload() {
-
-        Log.i(TAG, "startUpload: auto upload:" + LocalCache.getAutoUploadOrNot(this));
-
-        if (mStopUpload)
-            mStopUpload = false;
-
-        if (mCalcNewLocalMediaDigestFinished && mRetrieveRemoteMediaFinished && LocalCache.getAutoUploadOrNot(this)) {
-            startUploadAllLocalPhoto();
-
-            Log.i(TAG, "startUpload");
-        }
-    }
-
-    private void stopUpload() {
-
-        mStopUpload = true;
-
-        ExecutorServiceInstance.SINGLE_INSTANCE.shutdownUploadMediaThreadPoolNow();
-    }
-
-
-    private void startUploadAllLocalPhoto() {
-        for (Media media : LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.values()) {
-
-            if (mStopUpload) return;
-
-            if (LocalCache.DeviceID != null && !media.getUploadedDeviceIDs().contains(LocalCache.DeviceID)) {
-                FNAS.createRemoteMedia(this, media);
-            }
-        }
-    }
-
     @Subscribe(threadMode = ThreadMode.POSTING)
     public void handleRequestEvent(RequestEvent requestEvent) {
 
@@ -402,10 +331,10 @@ public class ButlerService extends Service {
                 handleGetOperation(requestEvent);
                 break;
             case START_UPLOAD:
-                startUpload();
+                uploadMediaUseCase.startUploadMedia();
                 break;
             case STOP_UPLOAD:
-                stopUpload();
+                uploadMediaUseCase.stopUploadMedia();
                 break;
         }
 
@@ -536,11 +465,6 @@ public class ButlerService extends Service {
                 LocalCache.LocalLoggedInUsers.addAll(dbUtils.getAllLoggedInUser());
                 break;
             case MEDIA_ORIGINAL_PHOTO:
-
-                List<Media> medias = ((RetrieveMediaOriginalPhotoRequestEvent) requestEvent).getMedias();
-                ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-                RetrieveOriginalPhotoTask downloadFileTask = new RetrieveOriginalPhotoTask(medias, DBUtils.getInstance(this));
-                instance.doOneTaskInCachedThreadUsingCallable(downloadFileTask);
 
                 break;
         }

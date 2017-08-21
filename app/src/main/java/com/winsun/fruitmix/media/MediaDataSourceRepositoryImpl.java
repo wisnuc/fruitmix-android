@@ -8,6 +8,8 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.operationResult.OperationHasNewMedia;
 import com.winsun.fruitmix.model.operationResult.OperationNoChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -41,8 +43,12 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
     private boolean hasSetCalcStrategy = false;
     private boolean hasCallGetStationMedia = false;
 
-    private Collection<Media> localMedias;
-    private Collection<Media> stationMedias;
+    private List<Media> localMedias;
+    private List<Media> stationMedias;
+
+    private boolean hasNewMedia = false;
+
+    private CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback;
 
     public static MediaDataSourceRepositoryImpl getInstance(LocalMediaRepository localMediaRepository, StationMediaRepository stationMediaRepository,
                                                             CalcMediaDigestStrategy calcMediaDigestStrategy) {
@@ -70,6 +76,17 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
 
     }
 
+    @Override
+    public void setCalcDigestCallback(CalcMediaDigestStrategy.CalcMediaDigestCallback calcDigestCallback) {
+        this.calcMediaDigestCallback = calcDigestCallback;
+    }
+
+    @Override
+    public List<Media> getLocalMedia() {
+
+        return localMedias;
+
+    }
 
     @Override
     public void getMedia(final BaseLoadDataCallback<Media> callback) {
@@ -81,12 +98,18 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
                 public void handleFinished() {
 
                     calcMediaDigestCallbackReturn = true;
+
+                    if (calcMediaDigestCallback != null)
+                        calcMediaDigestCallback.handleFinished();
                 }
 
                 @Override
                 public void handleNothing() {
 
                     calcMediaDigestCallbackReturn = true;
+
+                    if (calcMediaDigestCallback != null)
+                        calcMediaDigestCallback.handleNothing();
 
                 }
             });
@@ -104,6 +127,8 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
                 getLocalMediaCallbackReturn = true;
 
                 localMedias = data;
+
+                hasNewMedia = operationResult.getOperationResultType() == OperationResultType.HAS_NEW_MEDIA;
 
                 checkAllDataRetrieved(callback);
             }
@@ -144,9 +169,17 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
 
     private void checkAllDataRetrieved(BaseLoadDataCallback<Media> callback) {
 
-        if (getStationMediaCallbackReturn && getLocalMediaCallbackReturn)
-            callback.onSucceed(filterLocalStationMediaStrategy.filter(localMedias, stationMedias), new OperationSuccess());
-        else
+        if (getStationMediaCallbackReturn && getLocalMediaCallbackReturn) {
+
+            OperationResult result;
+
+            if (hasNewMedia) {
+                result = new OperationHasNewMedia();
+            } else
+                result = new OperationSuccess();
+
+            callback.onSucceed(filterLocalStationMediaStrategy.filter(localMedias, stationMedias), result);
+        } else
             callback.onFail(new OperationNoChanged());
     }
 
@@ -164,10 +197,19 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
 
         Log.d(TAG, "call: finish retrieve original photo task");
 
-        callback.onSucceed(true,new OperationSuccess());
+        callback.onSucceed(true, new OperationSuccess());
 
 //        EventBus.getDefault().post(new OperationEvent(Util.SHARED_PHOTO_THUMB_RETRIEVED, null));
 
+
+    }
+
+    @Override
+    public void updateMedia(Media media) {
+
+        if (media.isLocal()) {
+            localMediaRepository.updateMedia(media);
+        }
 
     }
 }

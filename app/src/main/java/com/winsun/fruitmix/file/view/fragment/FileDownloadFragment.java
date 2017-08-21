@@ -52,6 +52,7 @@ import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
@@ -81,9 +82,9 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     private CustomHandler customHandler;
 
-    public static final int DOWNLOAD_STATE_CHANGED = 0x0010;
+    private static final int DOWNLOAD_STATE_CHANGED = 0x0010;
 
-    public static final int DELAY_TIME_MILLISECOND = 0;
+    private static final int DELAY_TIME_MILLISECOND = 0;
 
     private boolean selectMode = false;
 
@@ -204,7 +205,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
         view = onCreateView(activity.getLayoutInflater());
 
-        currentUserUUID = InjectLoggedInUser.provideLoggedInUserRepository(activity).getCurrentLoggedInUserUUID();
+        currentUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(activity).getCurrentLoginUserUUID();
 
         stationFileRepository = InjectStationFileRepository.provideStationFileRepository(activity);
 

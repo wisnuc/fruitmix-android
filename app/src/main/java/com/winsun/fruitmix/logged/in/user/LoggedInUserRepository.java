@@ -21,9 +21,7 @@ public class LoggedInUserRepository implements LoggedInUserDataSource {
 
     private boolean loadedAllLoggedInUserFromDB = false;
 
-    private boolean loadedCurrentLoggedInUserFromDB = false;
-
-    private String currentLoggedInUserUUID;
+    private String preQueryUserUUID;
 
     private LoggedInUserRepository(LoggedInUserDataSource loggedInUserDBDataSource) {
         this.loggedInUserDBDataSource = loggedInUserDBDataSource;
@@ -42,7 +40,6 @@ public class LoggedInUserRepository implements LoggedInUserDataSource {
     public static void destroyInstance() {
         instance = null;
     }
-
 
     Collection<LoggedInUser> getCacheLoggedInUsers() {
         return cacheLoggedInUsers;
@@ -90,36 +87,17 @@ public class LoggedInUserRepository implements LoggedInUserDataSource {
     }
 
     @Override
-    public LoggedInUser getCurrentLoggedInUser() {
+    public LoggedInUser getLoggedInUserByUserUUID(String userUUID) {
 
-        if (!loadedCurrentLoggedInUserFromDB) {
+        if (preQueryUserUUID == null || !preQueryUserUUID.equals(userUUID)) {
 
-            currentLoggedInUser = loggedInUserDBDataSource.getCurrentLoggedInUser();
+            currentLoggedInUser = loggedInUserDBDataSource.getLoggedInUserByUserUUID(userUUID);
 
-            loadedCurrentLoggedInUserFromDB = true;
+            preQueryUserUUID = userUUID;
+
         }
 
         return currentLoggedInUser;
     }
 
-    @Override
-    public void setCurrentLoggedInUser(LoggedInUser loggedInUser) {
-
-        currentLoggedInUser = loggedInUser;
-
-        loggedInUserDBDataSource.setCurrentLoggedInUser(loggedInUser);
-
-    }
-
-    @Override
-    public String getCurrentLoggedInUserUUID() {
-
-        if (currentLoggedInUserUUID == null) {
-
-            currentLoggedInUserUUID = loggedInUserDBDataSource.getCurrentLoggedInUserUUID();
-
-        }
-
-        return currentLoggedInUserUUID;
-    }
 }

@@ -21,17 +21,20 @@ public class DownloadFileCommand extends AbstractCommand {
 
     private String currentUserUUID;
 
-    public DownloadFileCommand(AbstractRemoteFile abstractRemoteFile,StationFileRepository stationFileRepository,String currentUserUUID) {
+    private String driveUUID;
+
+    public DownloadFileCommand(AbstractRemoteFile abstractRemoteFile,StationFileRepository stationFileRepository,String currentUserUUID,String driveUUID) {
         this.abstractRemoteFile = abstractRemoteFile;
 
         this.stationFileRepository =stationFileRepository;
         this.currentUserUUID = currentUserUUID;
+        this.driveUUID = driveUUID;
 
     }
 
     @Override
     public void execute() {
-        fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), Long.parseLong(abstractRemoteFile.getSize()), abstractRemoteFile.getUuid(),abstractRemoteFile.getParentFolderUUID());
+        fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), Long.parseLong(abstractRemoteFile.getSize()), abstractRemoteFile.getUuid(),abstractRemoteFile.getParentFolderUUID(),driveUUID);
 
         FileDownloadManager.getInstance().addFileDownloadItem(fileDownloadItem,stationFileRepository,currentUserUUID);
     }

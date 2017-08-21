@@ -22,6 +22,8 @@ import com.winsun.fruitmix.group.presenter.GroupListPresenter;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
@@ -62,7 +64,11 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         GroupRepository groupRepository = InjectGroupDataSource.provideGroupRepository();
 
-        groupRepository.setCurrentUser(InjectLoggedInUser.provideLoggedInUserRepository(containerActivity).getCurrentLoggedInUser().getUser());
+        String currentLoginUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(containerActivity).getCurrentLoginUserUUID();
+
+        User currentUser = InjectLoggedInUser.provideLoggedInUserRepository(containerActivity).getLoggedInUserByUserUUID(currentLoginUserUUID).getUser();
+
+        groupRepository.setCurrentUser(currentUser);
 
         groupListPresenter = new GroupListPresenter(this, groupRepository, loadingViewModel, noContentViewModel, groupListViewModel);
 

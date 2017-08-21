@@ -16,7 +16,6 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.parser.LocalDataParser;
 import com.winsun.fruitmix.parser.LocalMediaParser;
 import com.winsun.fruitmix.parser.LocalUserParser;
-import com.winsun.fruitmix.util.FNAS;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -181,7 +180,7 @@ public class DBUtils {
         contentValues.put(DBHelper.MEDIA_KEY_HEIGHT, media.getHeight());
         contentValues.put(DBHelper.MEDIA_KEY_THUMB, media.getThumb());
         contentValues.put(DBHelper.MEDIA_KEY_LOCAL, media.isLocal() ? 1 : 0);
-        contentValues.put(DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID, media.getUploadedDeviceIDs());
+        contentValues.put(DBHelper.MEDIA_KEY_UPLOADED_USER_UUID, media.getUploadedUserUUIDs());
         contentValues.put(DBHelper.MEDIA_KEY_SHARING, media.isSharing() ? 1 : 0);
         contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER, media.getOrientationNumber());
         contentValues.put(DBHelper.MEDIA_KEY_TYPE, media.getType());
@@ -200,7 +199,7 @@ public class DBUtils {
         sqLiteStatement.bindString(4, media.getHeight());
         sqLiteStatement.bindString(5, media.getThumb());
         sqLiteStatement.bindLong(6, media.isLocal() ? 1 : 0);
-        sqLiteStatement.bindString(7, media.getUploadedDeviceIDs());
+        sqLiteStatement.bindString(7, media.getUploadedUserUUIDs());
         sqLiteStatement.bindLong(8, media.isSharing() ? 1 : 0);
         sqLiteStatement.bindLong(9, media.getOrientationNumber());
         sqLiteStatement.bindString(10, media.getType());
@@ -219,7 +218,7 @@ public class DBUtils {
                 DBHelper.MEDIA_KEY_HEIGHT + "," +
                 DBHelper.MEDIA_KEY_THUMB + "," +
                 DBHelper.MEDIA_KEY_LOCAL + "," +
-                DBHelper.MEDIA_KEY_UPLOADED_DEVICE_ID + "," +
+                DBHelper.MEDIA_KEY_UPLOADED_USER_UUID + "," +
                 DBHelper.MEDIA_KEY_SHARING + "," +
                 DBHelper.MEDIA_KEY_ORIENTATION_NUMBER + "," +
                 DBHelper.MEDIA_KEY_TYPE + "," +

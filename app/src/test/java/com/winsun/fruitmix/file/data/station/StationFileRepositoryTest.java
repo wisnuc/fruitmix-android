@@ -90,9 +90,9 @@ public class StationFileRepositoryTest {
 
         captor.getValue().onSucceed(Collections.singletonList(file), new OperationSuccess());
 
-        assertEquals(1, fileRepository.stationFileMap.size());
+        assertEquals(1, fileRepository.stationFiles.size());
 
-        assertNotNull(fileRepository.stationFileMap.get(testFolderUUID));
+        assertEquals(testFolderUUID, fileRepository.stationFiles.get(0).getParentFolderUUID());
 
     }
 

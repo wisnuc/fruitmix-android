@@ -19,6 +19,7 @@ import com.winsun.fruitmix.group.presenter.CreateGroupPresenter;
 import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
@@ -38,7 +39,8 @@ public class CreateGroupActivity extends BaseActivity implements CreateGroupPres
 
         groupRepository = InjectGroupDataSource.provideGroupRepository();
 
-        currentUser = InjectLoggedInUser.provideLoggedInUserRepository(this).getCurrentLoggedInUser().getUser();
+        currentUser = InjectLoggedInUser.provideLoggedInUserRepository(this)
+                .getLoggedInUserByUserUUID(InjectSystemSettingDataSource.provideSystemSettingDataSource(this).getCurrentLoginUserUUID()).getUser();
 
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 

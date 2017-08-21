@@ -55,7 +55,7 @@ public enum ExecutorServiceInstance {
     }
 
     private void startUploadMediaThreadPool() {
-        updateMediaThreadPool = Executors.newFixedThreadPool(THREAD_SIZE);
+        updateMediaThreadPool = Executors.newFixedThreadPool(1);
     }
 
     public void doOneTaskInGenerateMiniThumbThreadPool(Callable<Boolean> callable) {

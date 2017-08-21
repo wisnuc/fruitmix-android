@@ -15,10 +15,15 @@ import android.widget.TextView;
 
 import com.winsun.fruitmix.databinding.ActivitySettingBinding;
 import com.winsun.fruitmix.eventbus.RequestEvent;
+import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
+import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.setting.SettingPresenter;
 import com.winsun.fruitmix.setting.SettingPresenterImpl;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
@@ -38,11 +43,15 @@ public class SettingActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ActivitySettingBinding binding = DataBindingUtil.setContentView(this,R.layout.activity_setting);
+        ActivitySettingBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_setting);
 
         SettingViewModel settingViewModel = new SettingViewModel();
 
-        settingPresenter = new SettingPresenterImpl(settingViewModel);
+        SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
+
+        settingPresenter = new SettingPresenterImpl(settingViewModel, systemSettingDataSource,
+                InjectMedia.provideMediaDataSourceRepository(this), CheckMediaIsUploadStrategy.getInstance(),
+                systemSettingDataSource.getCurrentLoginUserUUID());
 
         binding.setSettingPresenter(settingPresenter);
 
