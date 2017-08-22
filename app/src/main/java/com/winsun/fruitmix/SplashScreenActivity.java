@@ -151,6 +151,9 @@ public class SplashScreenActivity extends AppCompatActivity {
         Intent intent = new Intent();
 
         if (loginWithNoParamResult) {
+
+            Log.d(TAG, "welcome: start nav pager");
+
             intent.setClass(SplashScreenActivity.this, NavPagerActivity.class);
         } else {
             intent.setClass(SplashScreenActivity.this, EquipmentSearchActivity.class);

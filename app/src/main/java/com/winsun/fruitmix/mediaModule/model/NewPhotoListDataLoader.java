@@ -125,7 +125,6 @@ public enum NewPhotoListDataLoader {
         mMapKeyIsPhotoPositionValueIsPhotoDate.clear();
         mMapKeyIsPhotoPositionValueIsPhoto.clear();
 
-
         Log.i(TAG, "reloadData: before load list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
         for (Media media : medias) {

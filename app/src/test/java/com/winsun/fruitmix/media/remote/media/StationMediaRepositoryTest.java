@@ -1,8 +1,11 @@
 package com.winsun.fruitmix.media.remote.media;
 
+import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mock.MockApplication;
+import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.user.User;
@@ -10,12 +13,15 @@ import com.winsun.fruitmix.user.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.Collections;
 
@@ -25,7 +31,8 @@ import static org.junit.Assert.*;
 /**
  * Created by Administrator on 2017/7/18.
  */
-
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
 public class StationMediaRepositoryTest {
 
     private StationMediaRepository stationMediaRepository;
@@ -55,11 +62,7 @@ public class StationMediaRepositoryTest {
 
         stationMediaRepository.getMedia(new BaseLoadDataCallbackImpl<Media>());
 
-        InOrder inOrder = inOrder(stationMediaRemoteDataSource, stationMediaDBDataSource);
-
-        inOrder.verify(stationMediaDBDataSource).getMedia(any(BaseLoadDataCallback.class));
-
-        inOrder.verify(stationMediaRemoteDataSource).getMedia(any(BaseLoadDataCallback.class));
+        verify(stationMediaRemoteDataSource).getMedia(any(BaseLoadDataCallback.class));
 
     }
 
@@ -70,20 +73,16 @@ public class StationMediaRepositoryTest {
 
         ArgumentCaptor<BaseLoadDataCallback<Media>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(stationMediaDBDataSource).getMedia(captor.capture());
+        verify(stationMediaRemoteDataSource).getMedia(captor.capture());
 
         captor.getValue().onSucceed(Collections.<Media>emptyList(), new OperationSuccess());
 
-        stationMediaRepository.getMedia(new BaseLoadDataCallbackImpl<Media>());
-
-        verify(stationMediaDBDataSource, times(1)).getMedia(any(BaseLoadDataCallback.class));
         verify(stationMediaRemoteDataSource, times(1)).getMedia(any(BaseLoadDataCallback.class));
 
         stationMediaRepository.setCacheDirty();
 
         stationMediaRepository.getMedia(new BaseLoadDataCallbackImpl<Media>());
 
-        verify(stationMediaDBDataSource, times(2)).getMedia(any(BaseLoadDataCallback.class));
         verify(stationMediaRemoteDataSource, times(2)).getMedia(any(BaseLoadDataCallback.class));
 
     }
@@ -91,11 +90,17 @@ public class StationMediaRepositoryTest {
     private String testMediaUUID = "testMediaUUID";
 
     @Test
-    public void getMedia_RetrieveFromDBSucceed() {
+    public void getMedia_RetrieveFromStationFailThenRetrieveFromDBSucceed() {
 
         stationMediaRepository.getMedia(new BaseLoadDataCallbackImpl<Media>());
 
         assertEquals(true, stationMediaRepository.cacheDirty);
+
+        ArgumentCaptor<BaseLoadDataCallback<Media>> stationMediaRemoteDataCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(stationMediaRemoteDataSource).getMedia(stationMediaRemoteDataCaptor.capture());
+
+        stationMediaRemoteDataCaptor.getValue().onFail(new OperationIOException());
 
         ArgumentCaptor<BaseLoadDataCallback<Media>> loadStationMediaRemoteDataCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -123,12 +128,6 @@ public class StationMediaRepositoryTest {
         media.setUuid(testMediaUUID);
 
         stationMediaRepository.getMedia(new BaseLoadDataCallbackImpl<Media>());
-
-        ArgumentCaptor<BaseLoadDataCallback<Media>> loadStationMediaDBDataCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
-
-        verify(stationMediaDBDataSource).getMedia(loadStationMediaDBDataCaptor.capture());
-
-        loadStationMediaDBDataCaptor.getValue().onSucceed(Collections.singletonList(media), new OperationSuccess());
 
         ArgumentCaptor<BaseLoadDataCallback<Media>> loadStationMediaRemoteDataCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 

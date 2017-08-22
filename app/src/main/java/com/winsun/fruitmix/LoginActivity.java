@@ -154,6 +154,9 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
     }
 
     private void startNavPagerActivity() {
+
+        Log.d(TAG, "startNavPagerActivity: ");
+        
         Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
         startActivity(jumpIntent);
         LoginActivity.this.setResult(RESULT_OK);

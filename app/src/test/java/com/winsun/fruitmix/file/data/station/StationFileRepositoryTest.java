@@ -69,7 +69,7 @@ public class StationFileRepositoryTest {
     @Test
     public void testGetFileMethodCall() {
 
-        fileRepository.getFile(folderUUID, rootUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>());
+        fileRepository.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>());
 
         verify(stationFileDataSource).getFile(anyString(), anyString(), any(BaseLoadDataCallback.class));
 
@@ -84,7 +84,7 @@ public class StationFileRepositoryTest {
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        fileRepository.getFile(testFolderUUID, rootUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>());
+        fileRepository.getFile(rootUUID, testFolderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>());
 
         verify(stationFileDataSource).getFile(anyString(), anyString(), captor.capture());
 
@@ -107,7 +107,7 @@ public class StationFileRepositoryTest {
 
         BaseLoadDataCallback<AbstractRemoteFile> callback = new BaseLoadDataCallbackImpl<>();
 
-        fileRepository.getFile(folderUUID, rootUUID, callback);
+        fileRepository.getFile(rootUUID, folderUUID, callback);
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -117,7 +117,7 @@ public class StationFileRepositoryTest {
 
         assertFalse(fileRepository.cacheDirty);
 
-        fileRepository.getFile(secondFolderUUID, rootUUID, callback);
+        fileRepository.getFile(rootUUID, secondFolderUUID, callback);
 
         verify(stationFileDataSource, times(2)).getFile(anyString(), anyString(), captor.capture());
 
@@ -135,7 +135,7 @@ public class StationFileRepositoryTest {
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        fileRepository.getFile(folderUUID, rootUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>());
+        fileRepository.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>());
 
         verify(stationFileDataSource).getFile(anyString(), anyString(), captor.capture());
 
@@ -143,18 +143,17 @@ public class StationFileRepositoryTest {
 
         assertFalse(fileRepository.cacheDirty);
 
-        fileRepository.getFile(folderUUID, rootUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>());
+        fileRepository.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>());
 
         fileRepository.setCacheDirty();
 
         assertTrue(fileRepository.cacheDirty);
 
-        fileRepository.getFile(folderUUID, rootUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>());
+        fileRepository.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>());
 
         verify(stationFileDataSource, times(2)).getFile(anyString(), anyString(), any(BaseLoadDataCallback.class));
 
     }
-
 
     @Test
     public void testDownloadFile() {

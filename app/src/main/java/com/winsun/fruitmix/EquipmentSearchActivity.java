@@ -167,6 +167,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         finish();
 
         startActivity(new Intent(mContext, NavPagerActivity.class));
+
+        Log.d(TAG, "handleLoginWithUserSucceed: start nav pager ");
     }
 
     @Override
@@ -251,7 +253,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     @Override
     public void wechatLogin() {
 
-        WXEntryActivity.setWxEntryCallback(new WXEntryActivity.WXEntryCallback() {
+/*        WXEntryActivity.setWxEntryCallback(new WXEntryActivity.WXEntryCallback() {
             @Override
             public void loginSucceed() {
 
@@ -270,7 +272,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         IWXAPI iwxapi = MiniProgram.registerToWX(this);
 
-        MiniProgram.sendAuthRequest(iwxapi);
+        MiniProgram.sendAuthRequest(iwxapi);*/
 
     }
 

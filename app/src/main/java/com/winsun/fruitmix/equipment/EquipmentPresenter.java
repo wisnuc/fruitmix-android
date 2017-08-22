@@ -231,60 +231,56 @@ public class EquipmentPresenter {
             @Override
             public void run() {
 
-                mEquipmentRemoteDataSource.getEquipmentHostAlias(equipment, new BaseLoadDataCallback<String>() {
-                    @Override
-                    public void onSucceed(List<String> data, OperationResult operationResult) {
-
-                        for (String alias : data) {
-
-                            List<String> hosts = equipment.getHosts();
-                            if (!hosts.contains(alias)) {
-                                hosts.add(alias);
-                            }
-
-                        }
-
-                        mEquipmentRemoteDataSource.getUsersInEquipment(equipment, new BaseLoadDataCallback<User>() {
-                            @Override
-                            public void onSucceed(List<User> data, OperationResult operationResult) {
-
-                                handleRetrieveUsers(data, equipment);
-
-                            }
-
-                            @Override
-                            public void onFail(OperationResult operationResult) {
-
-                                handleRetrieveUserFail(equipment);
-                            }
-                        });
-
-                    }
-
-                    @Override
-                    public void onFail(OperationResult operationResult) {
-
-                        mEquipmentRemoteDataSource.getUsersInEquipment(equipment, new BaseLoadDataCallback<User>() {
-                            @Override
-                            public void onSucceed(List<User> data, OperationResult operationResult) {
-
-                                handleRetrieveUsers(data, equipment);
-                            }
-
-                            @Override
-                            public void onFail(OperationResult operationResult) {
-
-                                handleRetrieveUserFail(equipment);
-                            }
-                        });
-
-                    }
-                });
+                getUserInThread(equipment);
 
             }
         });
 
 
+    }
+
+    private void getEquipmentHostAlias(final Equipment equipment) {
+        mEquipmentRemoteDataSource.getEquipmentHostAlias(equipment, new BaseLoadDataCallback<String>() {
+            @Override
+            public void onSucceed(List<String> data, OperationResult operationResult) {
+
+                for (String alias : data) {
+
+                    List<String> hosts = equipment.getHosts();
+                    if (!hosts.contains(alias)) {
+                        hosts.add(alias);
+                    }
+
+                }
+
+                getUserInThread(equipment);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                getUserInThread(equipment);
+
+            }
+        });
+    }
+
+    private void getUserInThread(final Equipment equipment) {
+        mEquipmentRemoteDataSource.getUsersInEquipment(equipment, new BaseLoadDataCallback<User>() {
+            @Override
+            public void onSucceed(List<User> data, OperationResult operationResult) {
+
+                handleRetrieveUsers(data, equipment);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                handleRetrieveUserFail(equipment);
+            }
+        });
     }
 
     private void handleRetrieveUserFail(Equipment equipment) {

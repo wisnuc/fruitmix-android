@@ -76,6 +76,12 @@ public class BaseHttpCallWrapper {
     }
 
     public <T> void loadCall(HttpRequest httpRequest, BaseLoadDataCallback<T> callback, RemoteDatasParser<T> parser) {
+
+        if (!httpRequest.getUrl().contains("http://")) {
+            callback.onFail(new OperationMalformedUrlException());
+            return;
+        }
+
         loadCall(httpRequest, callback, parser, 0);
     }
 

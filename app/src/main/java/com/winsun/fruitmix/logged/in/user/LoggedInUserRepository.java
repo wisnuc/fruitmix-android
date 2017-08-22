@@ -78,6 +78,7 @@ public class LoggedInUserRepository implements LoggedInUserDataSource {
 
             Collection<LoggedInUser> loggedInUsers = loggedInUserDBDataSource.getAllLoggedInUsers();
 
+            cacheLoggedInUsers.clear();
             cacheLoggedInUsers.addAll(loggedInUsers);
 
             loadedAllLoggedInUserFromDB = true;

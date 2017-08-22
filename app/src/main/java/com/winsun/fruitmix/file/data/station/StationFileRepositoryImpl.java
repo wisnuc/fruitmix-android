@@ -60,7 +60,7 @@ public class StationFileRepositoryImpl implements StationFileRepository {
         instance = null;
     }
 
-    public void getFile(final String folderUUID, String rootUUID, final BaseLoadDataCallback<AbstractRemoteFile> callback) {
+    public void getFile(String rootUUID,final String folderUUID,  final BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
         if (currentFolderUUID != null && !currentFolderUUID.equals(folderUUID))
             cacheDirty = true;
@@ -70,7 +70,7 @@ public class StationFileRepositoryImpl implements StationFileRepository {
             return;
         }
 
-        stationFileDataSource.getFile(folderUUID, rootUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
+        stationFileDataSource.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
 
             @Override
             public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {

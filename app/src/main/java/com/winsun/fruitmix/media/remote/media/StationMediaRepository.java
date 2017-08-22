@@ -4,6 +4,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
 
@@ -59,28 +60,6 @@ public class StationMediaRepository {
             return;
         }
 
-        stationMediaDBDataSource.getMedia(new BaseLoadDataCallbackImpl<Media>() {
-            @Override
-            public void onSucceed(List<Media> data, OperationResult operationResult) {
-                super.onSucceed(data, operationResult);
-
-                mediaConcurrentMap.clear();
-
-                mediaConcurrentMap.putAll(LocalCache.BuildMediaMapKeyIsUUID(data));
-
-                callback.onSucceed(data, operationResult);
-
-                cacheDirty = false;
-            }
-
-            @Override
-            public void onFail(OperationResult operationResult) {
-                super.onFail(operationResult);
-
-                cacheDirty = false;
-            }
-        });
-
         stationMediaRemoteDataSource.getMedia(new BaseLoadDataCallbackImpl<Media>() {
 
             @Override
@@ -94,7 +73,44 @@ public class StationMediaRepository {
                 stationMediaDBDataSource.clearAllMedias();
                 stationMediaDBDataSource.insertMedias(data);
 
+                cacheDirty = false;
+
                 callback.onSucceed(data, operationResult);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+                super.onFail(operationResult);
+
+                getMediaFromDB(callback);
+            }
+        });
+    }
+
+    private void getMediaFromDB(final BaseLoadDataCallback<Media> callback) {
+        stationMediaDBDataSource.getMedia(new BaseLoadDataCallbackImpl<Media>() {
+            @Override
+            public void onSucceed(List<Media> data, OperationResult operationResult) {
+                super.onSucceed(data, operationResult);
+
+                mediaConcurrentMap.clear();
+
+                mediaConcurrentMap.putAll(LocalCache.BuildMediaMapKeyIsUUID(data));
+
+                cacheDirty = false;
+
+                callback.onSucceed(data, operationResult);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+                super.onFail(operationResult);
+
+                cacheDirty = false;
+
+                callback.onFail(new OperationSQLException());
 
             }
         });

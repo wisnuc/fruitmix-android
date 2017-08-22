@@ -179,8 +179,8 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
                 result = new OperationSuccess();
 
             callback.onSucceed(filterLocalStationMediaStrategy.filter(localMedias, stationMedias), result);
-        } else
-            callback.onFail(new OperationNoChanged());
+        }
+
     }
 
     @Override

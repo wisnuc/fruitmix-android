@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.login;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -33,6 +35,8 @@ import java.util.List;
 
 public class LoginUseCase {
 
+    public static final String TAG = LoginUseCase.class.getSimpleName();
+
     private static LoginUseCase instance;
 
     private LoggedInUserDataSource loggedInUserDataSource;
@@ -54,6 +58,9 @@ public class LoginUseCase {
     private EventBus eventBus;
 
     private ThreadManager threadManager;
+
+    public static String mToken;
+    public static String mGateway;
 
     //TODO: check login with loggedInUser: get user null pointer
 
@@ -101,6 +108,11 @@ public class LoginUseCase {
             callback.onFail(new OperationSQLException());
         else {
 
+            Log.d(TAG, "loginWithNoParam: http request factory set current data token:" + loggedInUser.getToken() + " gateway: " + loggedInUser.getGateway());
+
+            mToken = loggedInUser.getToken();
+            mGateway = loggedInUser.getGateway();
+
             httpRequestFactory.setCurrentData(loggedInUser.getToken(), loggedInUser.getGateway());
 
             imageGifLoaderInstance.setToken(loggedInUser.getToken());
@@ -130,6 +142,11 @@ public class LoginUseCase {
             public void onSucceed(List<String> data, OperationResult operationResult) {
 
                 String token = data.get(0);
+
+                Log.d(TAG, "loginWithLoadTokenParam: http request factory set current data token:" + token + " gateway: " + loadTokenParam.getGateway());
+
+                mToken = token;
+                mGateway = loadTokenParam.getGateway();
 
                 httpRequestFactory.setCurrentData(token, loadTokenParam.getGateway());
 
@@ -187,6 +204,8 @@ public class LoginUseCase {
 
                         eventBus.postSticky(new OperationEvent(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN, new OperationSuccess()));
 
+                        break;
+
                     }
                 }
 
@@ -218,6 +237,11 @@ public class LoginUseCase {
     }
 
     public void loginWithLoggedInUser(LoggedInUser currentLoggedInUser, BaseOperateDataCallback<Boolean> callback) {
+
+        Log.d(TAG, "loginWithLoggedInUser: http request factory set current data token:" + currentLoggedInUser.getToken() + " gateway: " + currentLoggedInUser.getGateway());
+
+        mToken = currentLoggedInUser.getToken();
+        mGateway = currentLoggedInUser.getGateway();
 
         httpRequestFactory.setCurrentData(currentLoggedInUser.getToken(), currentLoggedInUser.getGateway());
 
@@ -259,6 +283,8 @@ public class LoginUseCase {
                 String token = data.get(0);
 
                 //TODO: check get gateway and user when login by wechat code
+
+                Log.d(TAG, "loginWithNoParam: http request factory set current data token:" + token + " gateway: " + "10.10.9.49");
 
                 httpRequestFactory.setCurrentData(token, "10.10.9.49");
 

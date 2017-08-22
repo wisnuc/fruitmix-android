@@ -2,6 +2,8 @@ package com.winsun.fruitmix.upload.media;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
 
+import java.util.List;
+
 /**
  * Created by Administrator on 2017/8/18.
  */
@@ -9,6 +11,8 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 public class CheckMediaIsUploadStrategy {
 
     private String currentUserUUID;
+
+    private List<String> uploadedMediaHashs;
 
     private static CheckMediaIsUploadStrategy instance;
 
@@ -22,9 +26,13 @@ public class CheckMediaIsUploadStrategy {
         this.currentUserUUID = currentUserUUID;
     }
 
+    public void setUploadedMediaHashs(List<String> uploadedMediaHashs) {
+        this.uploadedMediaHashs = uploadedMediaHashs;
+    }
+
     public boolean isMediaUploaded(Media media) {
 
-        return currentUserUUID != null && media.getUploadedUserUUIDs().contains(currentUserUUID);
+        return uploadedMediaHashs != null && currentUserUUID != null && uploadedMediaHashs.contains(media.getUuid());
 
     }
 

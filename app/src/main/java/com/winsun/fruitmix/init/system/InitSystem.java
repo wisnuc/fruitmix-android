@@ -13,6 +13,7 @@ import com.winsun.fruitmix.media.MediaDataSourceRepositoryImpl;
 import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.services.ButlerService;
+import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.datasource.UserDataRepositoryImpl;
 import com.winsun.fruitmix.util.FileUtil;
 
@@ -43,6 +44,8 @@ public class InitSystem {
         StationFileRepositoryImpl.destroyInstance();
 
         LoggedInUserRepository.destroyInstance();
+
+        UploadMediaUseCase.destroyInstance();
 
         boolean result = FileUtil.createDownloadFileStoreFolder();
 

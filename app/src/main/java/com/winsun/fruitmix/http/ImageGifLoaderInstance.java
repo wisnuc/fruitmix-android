@@ -9,6 +9,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.gif.GifLruCache;
+import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
@@ -42,14 +43,22 @@ public class ImageGifLoaderInstance {
     }
 
     public static void destroyInstance() {
+
+        Log.d(TAG, "destroyInstance: ");
+
         instance = null;
     }
 
     public void setToken(String token) {
 
+        Log.d(TAG, "setToken: " + token);
+
         this.token = token;
 
         if (mImageLoader != null) {
+
+            Log.d(TAG, "setToken: create header");
+
             createHeader();
 
             mImageLoader.setHeaders(headers);
@@ -70,6 +79,9 @@ public class ImageGifLoaderInstance {
             mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
 
             if (headers == null) {
+
+                Log.d(TAG, "getImageLoader: create header");
+
                 createHeader();
             }
 
@@ -82,8 +94,8 @@ public class ImageGifLoaderInstance {
 
     private void createHeader() {
         headers = new ArrayMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token);
-        Log.i(TAG, "FNAS JWT: " + token);
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + LoginUseCase.mToken);
+        Log.i(TAG, "FNAS JWT: " + LoginUseCase.mToken);
     }
 
     public GifLoader getGifLoader(Context context) {
@@ -94,6 +106,9 @@ public class ImageGifLoaderInstance {
             mGifLoader = new GifLoader(mRequestQueue, GifLruCache.instance());
 
             if (headers == null) {
+
+                Log.d(TAG, "getGifLoader: create header");
+
                 createHeader();
             }
 

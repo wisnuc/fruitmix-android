@@ -79,10 +79,13 @@ public class BaseHttpCallWrapperTest {
         try {
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(new HttpResponse(404, ""));
 
+            HttpRequest httpRequest = new HttpRequest("", "");
+
             baseHttpCallWrapper.loadCall(httpRequest, loadDataCallback, remoteDatasParser);
 
-            verify(iHttpUtil).remoteCall(any(HttpRequest.class));
             verify(loadDataCallback).onFail(any(OperationResult.class));
+
+            verify(iHttpUtil, never()).remoteCall(any(HttpRequest.class));
 
         } catch (IOException e) {
             e.printStackTrace();

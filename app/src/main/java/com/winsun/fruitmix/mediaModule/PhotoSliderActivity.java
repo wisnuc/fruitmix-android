@@ -214,6 +214,10 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
+
+        checkMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
+
         ActivityPhotoSliderBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_photo_slider);
 
         mContext = this;
@@ -287,10 +291,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 }
             }
         });
-
-        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
-
-        checkMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
 
 //        initShareBtn();
 

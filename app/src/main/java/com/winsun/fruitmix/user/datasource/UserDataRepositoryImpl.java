@@ -60,24 +60,6 @@ public class UserDataRepositoryImpl implements UserDataRepository {
             return;
         }
 
-        userDBDataSource.getUsers(new BaseLoadDataCallback<User>() {
-            @Override
-            public void onSucceed(List<User> data, OperationResult operationResult) {
-
-                cacheUsers.clear();
-                cacheUsers.putAll(buildRemoteUserMapKeyIsUUID(data));
-
-                if (callback != null)
-                    callback.onSucceed(data, operationResult);
-            }
-
-            @Override
-            public void onFail(OperationResult operationResult) {
-                if (callback != null)
-                    callback.onFail(operationResult);
-            }
-        });
-
         userRemoteDataSource.getUsers(new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
@@ -96,13 +78,36 @@ public class UserDataRepositoryImpl implements UserDataRepository {
 
             @Override
             public void onFail(OperationResult operationResult) {
-                if (callback != null)
-                    callback.onFail(operationResult);
 
-                cacheDirty = false;
+                getUserFromDB(callback);
             }
         });
 
+    }
+
+    private void getUserFromDB(final BaseLoadDataCallback<User> callback) {
+        userDBDataSource.getUsers(new BaseLoadDataCallback<User>() {
+            @Override
+            public void onSucceed(List<User> data, OperationResult operationResult) {
+
+                cacheUsers.clear();
+                cacheUsers.putAll(buildRemoteUserMapKeyIsUUID(data));
+
+                cacheDirty = false;
+
+                if (callback != null)
+                    callback.onSucceed(data, operationResult);
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                cacheDirty = false;
+
+                if (callback != null)
+                    callback.onFail(operationResult);
+            }
+        });
     }
 
     private ConcurrentMap<String, User> buildRemoteUserMapKeyIsUUID(List<User> users) {

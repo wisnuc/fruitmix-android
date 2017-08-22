@@ -249,6 +249,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     private Request.Builder generateRequestBuilder(HttpRequest httpRequest) {
+
         Request.Builder builder = new Request.Builder().url(httpRequest.getUrl());
 
         String headerKey = httpRequest.getHeaderKey();

@@ -245,24 +245,10 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         mNavigationMenuItems.add(model);
 
-        model = new NavigationMenuViewModel() {
+ /*       model = new NavigationMenuViewModel() {
             @Override
             public void onClick() {
                 super.onClick();
-                mainPageView.logout();
-            }
-        };
-        model.setMenuIconResId(R.drawable.ic_power_settings_new_black_24dp);
-        model.setMenuText(context.getString(R.string.logout));
-
-        mNavigationMenuItems.add(model);
-
-        model = new NavigationMenuViewModel() {
-            @Override
-            public void onClick() {
-                super.onClick();
-
-//                MiniProgram.shareMiniWXApp(iwxapi, resources, "https://13151693.qcloud.la/v1/tickets/a88d1e9f-543b-40b6-aac2-69418cd4d14f");
 
                 threadManager.runOnCacheThread(new Runnable() {
                     @Override
@@ -291,6 +277,18 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         model.setMenuIconResId(R.drawable.ic_settings_black_24dp);
         model.setMenuText("确认邀请");
+        mNavigationMenuItems.add(model);*/
+
+        model = new NavigationMenuViewModel() {
+            @Override
+            public void onClick() {
+                super.onClick();
+                mainPageView.logout();
+            }
+        };
+        model.setMenuIconResId(R.drawable.ic_power_settings_new_black_24dp);
+        model.setMenuText(context.getString(R.string.logout));
+
         mNavigationMenuItems.add(model);
 
     }

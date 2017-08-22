@@ -326,10 +326,10 @@ public class Media implements Parcelable {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            Log.d(TAG, "getImageSmallThumbUrl: ");
-
             imageUrl = String.format(thumbPhotoFormatCode, getRemoteMediaThumbUrl(),
                     String.valueOf(64), String.valueOf(64));
+
+            Log.d(TAG, "getImageSmallThumbUrl: " + imageUrl);
 
         }
         return imageUrl;
@@ -350,10 +350,10 @@ public class Media implements Parcelable {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            Log.d(TAG, "getImageThumbUrl: ");
-
             imageUrl = String.format(thumbPhotoFormatCode, getRemoteMediaThumbUrl(),
                     String.valueOf(200), String.valueOf(200));
+
+            Log.d(TAG, "getImageThumbUrl: " + imageUrl);
 
         }
         return imageUrl;

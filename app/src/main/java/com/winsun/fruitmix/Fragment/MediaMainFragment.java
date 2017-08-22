@@ -96,9 +96,9 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private ProgressDialog mDialog;
 
-    private static final int PAGE_GROUP = 0;
-    private static final int PAGE_PHOTO = 1;
-    private static final int PAGE_FILE = 2;
+    //    private static final int PAGE_GROUP = 0;
+    private static final int PAGE_PHOTO = 0;
+    private static final int PAGE_FILE = 1;
 
     private boolean sInChooseMode = false;
 
@@ -149,8 +149,6 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
 
-        initPageList();
-
         Log.d(TAG, "onCreate: ");
     }
 
@@ -180,9 +178,12 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         initNavigationView();
 
+        initPageList();
+
         initViewPager();
 
         viewPager.setCurrentItem(PAGE_PHOTO);
+        onPageSelect(PAGE_PHOTO);
 
         ivBtShare.setOnClickListener(this);
         fab.setOnClickListener(this);
@@ -428,7 +429,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             viewPager.setCurrentItem(PAGE_FILE);
             onDidAppear(PAGE_FILE);
             pageList.get(PAGE_FILE).refreshView();
-            pageList.get(PAGE_GROUP).refreshView();
+//            pageList.get(PAGE_GROUP).refreshView();
         }
     }
 
@@ -446,7 +447,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 String eventId = "";
 
                 switch (item.getItemId()) {
-                    case R.id.share:
+/*                    case R.id.group:
 
                         eventId = Util.SWITCH_MEDIA_SHARE_MODULE_UMENG_EVENT_ID;
 
@@ -454,7 +455,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
 //                        ViewPagerTranslation.INSTANCE.animatePagerTransition(false, viewPager, 200, viewPager.getCurrentItem() - PAGE_GROUP);
 
-                        break;
+                        break;*/
                     case R.id.photo:
 
                         eventId = Util.SWITCH_MEDIA_MODULE_UMENG_EVENT_ID;
@@ -500,18 +501,18 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     }
 
     private void initPageList() {
-        groupListPage = new GroupListPage(getActivity());
+//        groupListPage = new GroupListPage(getActivity());
         photoList = new NewPhotoList(getActivity());
         fileFragment = new FileFragment(getActivity(), this);
         pageList = new ArrayList<>();
-        pageList.add(groupListPage);
+//        pageList.add(groupListPage);
         pageList.add(photoList);
         pageList.add(fileFragment);
     }
 
     public void refreshUser() {
 
-        groupListPage.refreshView();
+//        groupListPage.refreshView();
 
     }
 
@@ -528,13 +529,17 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             @Override
             public void onPageSelected(int position) {
 
-                onDidAppear(position);
-
-                resetBottomNavigationItemCheckState();
-                bottomNavigationView.getMenu().getItem(position).setChecked(true);
+                onPageSelect(position);
 
             }
         });
+    }
+
+    private void onPageSelect(int position) {
+        onDidAppear(position);
+
+        resetBottomNavigationItemCheckState();
+        bottomNavigationView.getMenu().getItem(position).setChecked(true);
     }
 
     public void requestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -1035,7 +1040,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, true);
             mDialog.setCanceledOnTouchOutside(false);
 
-            mediaDataSourceRepository.downloadMedia(mSelectMedias,new BaseOperateDataCallbackImpl<Boolean>(){
+            mediaDataSourceRepository.downloadMedia(mSelectMedias, new BaseOperateDataCallbackImpl<Boolean>() {
                 @Override
                 public void onSucceed(Boolean data, OperationResult result) {
                     super.onSucceed(data, result);
@@ -1126,23 +1131,23 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         }
 
         switch (position) {
-            case PAGE_GROUP:
-
-                setCurrentItem(groupListPage);
-
-                toolbarViewModel.titleText.set(getString(R.string.group));
-                toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
-                toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
-
-                fab.setVisibility(View.GONE);
-                ivBtShare.setVisibility(View.GONE);
-
-                toolbarViewModel.showSelect.set(false);
-                toolbarViewModel.showMenu.set(false);
-
-                mListener.unlockDrawer();
-
-                break;
+//            case PAGE_GROUP:
+//
+//                setCurrentItem(groupListPage);
+//
+//                toolbarViewModel.titleText.set(getString(R.string.group));
+//                toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
+//                toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
+//
+//                fab.setVisibility(View.GONE);
+//                ivBtShare.setVisibility(View.GONE);
+//
+//                toolbarViewModel.showSelect.set(false);
+//                toolbarViewModel.showMenu.set(false);
+//
+//                mListener.unlockDrawer();
+//
+//                break;
             case PAGE_PHOTO:
 
                 setCurrentItem(photoList);
@@ -1209,7 +1214,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         @Override
         public int getCount() {
-            return 3;
+            return 2;
         }
 
         @Override

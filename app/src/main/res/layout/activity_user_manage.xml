@@ -36,7 +36,7 @@
             <include
                 android:id="@+id/toolbar_layout"
                 layout="@layout/toolbar_layout"
-                app:toolbarViewModel="@{toolbarViewModel}"/>
+                app:toolbarViewModel="@{toolbarViewModel}" />
 
             <!--        <android.support.v7.widget.Toolbar
                         android:layout_width="match_parent"
@@ -125,7 +125,7 @@
             android:layout_marginRight="30dp"
             android:onClick="@{()-> userPresenter.addUser()}"
             android:src="@drawable/ic_add_white_24dp"
-            android:visibility="visible"
+            android:visibility="gone"
             app:borderWidth="0dp"
             app:fabSize="normal" />
 

@@ -213,7 +213,7 @@ public class FilePresenter implements OnViewSelectListener {
     }
 
     private void getFileInThread() {
-        stationFileRepository.getFile(currentFolderUUID, rootUUID, new BaseLoadDataCallback<AbstractRemoteFile>() {
+        stationFileRepository.getFile(rootUUID, currentFolderUUID,new BaseLoadDataCallback<AbstractRemoteFile>() {
             @Override
             public void onSucceed(final List<AbstractRemoteFile> data, OperationResult operationResult) {
 

@@ -127,18 +127,6 @@ public class UserDataRepositoryImplTest {
     }
 
     @Test
-    public void getUser_RetrieveOrder() {
-
-        userDataRepositoryImpl.getUsers(new BaseLoadDataCallbackImpl<User>());
-
-        InOrder inOrder = inOrder(userDBDataSource, userRemoteDataSource);
-
-        inOrder.verify(userDBDataSource).getUsers(any(BaseLoadDataCallback.class));
-        inOrder.verify(userRemoteDataSource).getUsers(any(BaseLoadDataCallback.class));
-
-    }
-
-    @Test
     public void getUserRetrieveWhenCacheDirty() {
 
         userDataRepositoryImpl.getUsers(new BaseLoadDataCallbackImpl<User>());
@@ -151,36 +139,25 @@ public class UserDataRepositoryImplTest {
 
         userDataRepositoryImpl.getUsers(new BaseLoadDataCallbackImpl<User>());
 
-        verify(userDBDataSource, times(1)).getUsers(any(BaseLoadDataCallback.class));
         verify(userRemoteDataSource, times(1)).getUsers(any(BaseLoadDataCallback.class));
 
         userDataRepositoryImpl.setCacheDirty();
 
         userDataRepositoryImpl.getUsers(new BaseLoadDataCallbackImpl<User>());
 
-        verify(userDBDataSource, times(2)).getUsers(any(BaseLoadDataCallback.class));
         verify(userRemoteDataSource, times(2)).getUsers(any(BaseLoadDataCallback.class));
     }
 
     @Test
-    public void getUser_RetrieveFromDBFail_FromRemoteSucceed() {
+    public void getUser_RetrieveFromRemoteSucceed() {
 
         userDataRepositoryImpl.getUsers(baseLoadDataCallback);
-
-        verify(userDBDataSource).getUsers(loadDBDataCallbackArgumentCaptor.capture());
-
-        loadDBDataCallbackArgumentCaptor.getValue().onFail(new OperationJSONException());
-
-        assertEquals(true, userDataRepositoryImpl.cacheDirty);
 
         verify(userRemoteDataSource).getUsers(loadRemoteDataCallbackArgumentCaptor.capture());
 
         loadRemoteDataCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(createUser()), new OperationSuccess());
 
-        InOrder inOrder = inOrder(baseLoadDataCallback);
-
-        inOrder.verify(baseLoadDataCallback).onFail(any(OperationResult.class));
-        inOrder.verify(baseLoadDataCallback).onSucceed(ArgumentMatchers.<User>anyList(), any(OperationResult.class));
+        verify(userDBDataSource, never()).getUsers(any(BaseLoadDataCallback.class));
 
         assertEquals(USER_NAME, userDataRepositoryImpl.cacheUsers.get(USER_UUID).getUserName());
 
@@ -188,24 +165,17 @@ public class UserDataRepositoryImplTest {
     }
 
     @Test
-    public void getUser_RetrieveFromDBSucceed_FromRemoteFail() {
+    public void getUser_RetrieveFromRemoteFail_ThenRemoteFromDB() {
 
         userDataRepositoryImpl.getUsers(baseLoadDataCallback);
-
-        verify(userDBDataSource).getUsers(loadDBDataCallbackArgumentCaptor.capture());
-
-        loadDBDataCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(createUser()), new OperationSuccess());
-
-        assertEquals(true, userDataRepositoryImpl.cacheDirty);
 
         verify(userRemoteDataSource).getUsers(loadRemoteDataCallbackArgumentCaptor.capture());
 
         loadRemoteDataCallbackArgumentCaptor.getValue().onFail(new OperationJSONException());
 
-        InOrder inOrder = inOrder(baseLoadDataCallback);
+        verify(userDBDataSource).getUsers(loadDBDataCallbackArgumentCaptor.capture());
 
-        inOrder.verify(baseLoadDataCallback).onSucceed(ArgumentMatchers.<User>anyList(), any(OperationResult.class));
-        inOrder.verify(baseLoadDataCallback).onFail(any(OperationResult.class));
+        loadDBDataCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(createUser()), new OperationSuccess());
 
         assertEquals(USER_NAME, userDataRepositoryImpl.cacheUsers.get(USER_UUID).getUserName());
 

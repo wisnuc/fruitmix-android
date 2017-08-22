@@ -1,7 +1,9 @@
 package com.winsun.fruitmix.http;
 
 import android.util.Base64;
+import android.util.Log;
 
+import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
@@ -11,6 +13,8 @@ import com.winsun.fruitmix.util.Util;
  */
 
 public class HttpRequestFactory {
+
+    public static final String TAG = HttpRequestFactory.class.getSimpleName();
 
     public static HttpRequestFactory instance;
 
@@ -28,6 +32,9 @@ public class HttpRequestFactory {
     }
 
     public static void destroyInstance() {
+
+        Log.d(TAG, "destroyInstance: ");
+
         instance = null;
     }
 
@@ -40,22 +47,31 @@ public class HttpRequestFactory {
     }
 
     public void setToken(String token) {
+
+        Log.d(TAG, "setToken: " + token);
+
         this.token = token;
     }
 
     public void setGateway(String gateway) {
+
+        Log.d(TAG, "setGateway: " + gateway);
+
         this.gateway = gateway;
     }
 
     public String getGateway() {
-        return gateway;
+        return LoginUseCase.mGateway;
     }
 
     public String getToken() {
-        return token;
+        return LoginUseCase.mToken;
     }
 
     public void setCurrentData(String token, String gateway) {
+
+        Log.d(TAG, "setCurrentData: token: " + token + " gateway: " + gateway);
+
         setToken(token);
         setGateway(gateway);
     }
@@ -80,7 +96,6 @@ public class HttpRequestFactory {
 
         return httpRequest;
     }
-
 
     public HttpRequest createHttpGetTokenRequest(LoadTokenParam loadTokenParam) {
 

@@ -264,6 +264,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             @Override
             public void onSucceed(final List<Media> data, final OperationResult operationResult) {
 
+                Log.d(TAG, "onSucceed: get media");
+
                 threadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
@@ -278,12 +280,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                         loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
                             @Override
                             public void onDataLoadFinished() {
+
+                                Log.d(TAG, "onDataLoadFinished: ");
+
                                 doAfterReloadData(loader);
 
                                 mIsLoaded = true;
                             }
                         }, data);
-
 
                     }
                 });
@@ -1100,6 +1104,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             mPhotoIv.setImageUrl(imageUrl, mImageLoader);
 
             final List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());
+
             final int mediaInListPosition = getPosition(mediaList, currentMedia);
 
             setPhotoItemMargin(mediaInListPosition);

@@ -58,7 +58,8 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         this.iHttpFileUtil = iHttpFileUtil;
     }
 
-    public void getFile(String folderUUID, String rootUUID, BaseLoadDataCallback<AbstractRemoteFile> callback) {
+    @Override
+    public void getFile(String rootUUID,final String folderUUID, BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(LIST_FILE_PARAMETER + "/" + rootUUID + "/dirs/" + folderUUID);
 

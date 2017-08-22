@@ -9,6 +9,7 @@ import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.mock.MockApplication;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationJSONException;
@@ -47,12 +48,15 @@ public class UserRemoteDataSourceTest {
     @Mock
     private HttpRequestFactory httpRequestFactory;
 
+    @Mock
+    private SystemSettingDataSource systemSettingDataSource;
+
     @Before
     public void init() {
 
         MockitoAnnotations.initMocks(this);
 
-        userRemoteDataSource = new UserRemoteDataSourceImpl(iHttpUtil, httpRequestFactory);
+        userRemoteDataSource = new UserRemoteDataSourceImpl(iHttpUtil, httpRequestFactory, systemSettingDataSource);
 
     }
 
@@ -141,7 +145,7 @@ public class UserRemoteDataSourceTest {
     }
 
     private void prepareHttpRequest() {
-        HttpRequest httpRequest = new HttpRequest("", "");
+        HttpRequest httpRequest = new HttpRequest("http://", "");
 
         when(httpRequestFactory.createHttpGetRequest(anyString())).thenReturn(httpRequest);
         when(httpRequestFactory.createGetRequestByPathWithoutToken(anyString())).thenReturn(httpRequest);
