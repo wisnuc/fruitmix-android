@@ -5,9 +5,6 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 
 import java.util.ArrayList;

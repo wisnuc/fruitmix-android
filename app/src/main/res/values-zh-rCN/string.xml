@@ -193,6 +193,8 @@
     <!-- Errors -->
     <string name="network_exception">网络数据异常，错误码：%1$s</string>    <!-- String + ErrorCode -->
 
+    <string name="connnect_server_fail">未连接服务器</string>
+
     <!-- network error -->
     <string name="no_network">没有网络，请检查</string>
     <string name="socket_timeout_exception">服务器超时</string>

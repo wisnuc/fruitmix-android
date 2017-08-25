@@ -18,6 +18,7 @@ import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,9 +32,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
     public static final String TAG = UserRemoteDataSourceImpl.class.getSimpleName();
 
-    public static final String ADMIN_USER_PARAMETER = "/admin/users";
-    public static final String ACCOUNT_PARAMETER = "/account";
-    public static final String LOGIN_PARAMETER = "/users";
+    public static final String USER_PARAMETER = "/users";
 
     public static final String USER_HOME_PARAMETER = "/drives";
 
@@ -48,9 +47,19 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     @Override
     public void insertUser(String userName, String userPwd, BaseOperateDataCallback<User> callback) {
 
-        String body = User.generateCreateRemoteUserBody(userName, userPwd);
+        JSONObject jsonObject = new JSONObject();
+        try {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(ADMIN_USER_PARAMETER, body);
+            jsonObject.put("username", userName);
+            jsonObject.put("password", userPwd);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        String body = jsonObject.toString();
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(USER_PARAMETER, body);
 
         wrapper.operateCall(httpRequest, callback, new RemoteInsertUserParser(), R.string.create_user);
 
@@ -61,7 +70,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
         final List<User> users = new ArrayList<>();
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(LOGIN_PARAMETER + "/" + systemSettingDataSource.getCurrentLoginUserUUID());
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER + "/" + systemSettingDataSource.getCurrentLoginUserUUID());
 
         wrapper.loadCall(httpRequest, new BaseLoadDataCallback<User>() {
 
@@ -85,7 +94,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     }
 
     private void getOtherUsers(final List<User> users, final BaseLoadDataCallback<User> callback) {
-        HttpRequest loginHttpRequest = httpRequestFactory.createGetRequestByPathWithoutToken(LOGIN_PARAMETER);
+        HttpRequest loginHttpRequest = httpRequestFactory.createGetRequestByPathWithoutToken(USER_PARAMETER);
 
         wrapper.loadCall(loginHttpRequest, new BaseLoadDataCallback<User>() {
 

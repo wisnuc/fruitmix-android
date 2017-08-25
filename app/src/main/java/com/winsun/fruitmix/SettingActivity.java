@@ -24,6 +24,7 @@ import com.winsun.fruitmix.setting.SettingPresenterImpl;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
+import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
@@ -51,7 +52,7 @@ public class SettingActivity extends BaseActivity {
 
         settingPresenter = new SettingPresenterImpl(settingViewModel, systemSettingDataSource,
                 InjectMedia.provideMediaDataSourceRepository(this), CheckMediaIsUploadStrategy.getInstance(),
-                systemSettingDataSource.getCurrentLoginUserUUID());
+                InjectUploadMediaUseCase.provideUploadMediaUseCase(this),systemSettingDataSource.getCurrentLoginUserUUID());
 
         binding.setSettingPresenter(settingPresenter);
 
@@ -67,6 +68,20 @@ public class SettingActivity extends BaseActivity {
 
         settingPresenter.onCreate(this);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        settingPresenter.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        settingPresenter.onPause();
     }
 
     @Override

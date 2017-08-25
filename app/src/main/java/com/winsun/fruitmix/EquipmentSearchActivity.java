@@ -5,9 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -16,20 +14,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.LruCache;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.tencent.mm.opensdk.openapi.IWXAPI;
-import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.component.AnimatedExpandableListView;
 import com.winsun.fruitmix.databinding.ActivityEquipmentSearchBinding;
 import com.winsun.fruitmix.equipment.EquipmentPresenter;
 import com.winsun.fruitmix.equipment.EquipmentRemoteDataSource;
@@ -40,25 +30,15 @@ import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.equipment.EquipmentSearchManager;
-import com.winsun.fruitmix.model.LoginType;
-import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
-import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.wxapi.MiniProgram;
 import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import me.relex.circleindicator.CircleIndicator;
 
 public class EquipmentSearchActivity extends AppCompatActivity implements View.OnClickListener, EquipmentSearchView, WeChatLoginListener {
@@ -69,6 +49,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     private ViewPager equipmentViewPager;
     private RecyclerView equipmentUserRecyclerView;
+
+    private ViewGroup viewPagerLayout;
+    private Toolbar toolbar;
 
     private EquipmentPresenter equipmentPresenter;
 
@@ -84,11 +67,20 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         super.onCreate(savedInstanceState);
         ActivityEquipmentSearchBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_equipment_search);
 
-        Util.setStatusBarColor(this, R.color.equipment_ui_blue);
+        toolbar = binding.toolbar;
+        viewPagerLayout = binding.viewpagerLayout;
+
+        setBackgroundColor(R.color.equipment_ui_blue);
 
         LoadingViewModel loadingViewModel = new LoadingViewModel();
 
         binding.setLoadingViewModel(loadingViewModel);
+
+        NoContentViewModel noContentViewModel = new NoContentViewModel();
+        noContentViewModel.setNoContentText("没有内容");
+        noContentViewModel.setNoContentImgResId(R.drawable.no_file);
+
+        binding.setNoContentViewModel(noContentViewModel);
 
         equipmentViewPager = binding.equipmentViewpager;
 
@@ -105,10 +97,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         LoginUseCase loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
 
-        ThreadManager threadManager = ThreadManager.getInstance();
+        ThreadManagerImpl threadManagerImpl = ThreadManagerImpl.getInstance();
 
-        equipmentPresenter = new EquipmentPresenter(loadingViewModel, this,
-                mEquipmentSearchManager, mEquipmentRemoteDataSource, loginUseCase, threadManager);
+        equipmentPresenter = new EquipmentPresenter(loadingViewModel, noContentViewModel, this,
+                mEquipmentSearchManager, mEquipmentRemoteDataSource, loginUseCase, threadManagerImpl);
 
         binding.setWechatLoginListener(this);
 
@@ -154,8 +146,18 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 //        equipment.setSerialNumber("");
 //        getUserList(equipment);
 
+        equipmentPresenter.onCreate();
+
     }
 
+    @Override
+    public void setBackgroundColor(int color) {
+
+        Util.setStatusBarColor(this, color);
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, color));
+        viewPagerLayout.setBackgroundColor(ContextCompat.getColor(this, color));
+
+    }
 
     @Override
     public void handleLoginWithUserSucceed(boolean autoUpload) {
@@ -253,7 +255,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     @Override
     public void wechatLogin() {
 
-/*        WXEntryActivity.setWxEntryCallback(new WXEntryActivity.WXEntryCallback() {
+        WXEntryActivity.setWxEntryCallback(new WXEntryActivity.WXEntryCallback() {
             @Override
             public void loginSucceed() {
 
@@ -272,7 +274,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         IWXAPI iwxapi = MiniProgram.registerToWX(this);
 
-        MiniProgram.sendAuthRequest(iwxapi);*/
+        MiniProgram.sendAuthRequest(iwxapi);
 
     }
 

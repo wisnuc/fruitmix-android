@@ -12,18 +12,14 @@ import com.winsun.fruitmix.AccountManageActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.databinding.AccountChildItemBinding;
 import com.winsun.fruitmix.databinding.AccountGroupItemBinding;
-import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,19 +47,33 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
 
     private String currentUserUUID;
 
-    public AccountManagePresenterImpl(AccountManageView view, LoggedInUserDataSource loggedInUserDataSource,SystemSettingDataSource systemSettingDataSource) {
+    public AccountManagePresenterImpl(AccountManageView view, LoggedInUserDataSource loggedInUserDataSource, SystemSettingDataSource systemSettingDataSource) {
         this.view = view;
         this.loggedInUserDataSource = loggedInUserDataSource;
 
         mEquipmentNames = new ArrayList<>();
         mUsers = new ArrayList<>();
 
-        loggedInUsers = new ArrayList<>(loggedInUserDataSource.getAllLoggedInUsers());
+        loggedInUsers = new ArrayList<>();
         currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
+
+        mAdapter = new AccountExpandableListViewAdapter();
+
+        refreshData();
+    }
+
+    private void refreshData() {
+
+        mEquipmentNames.clear();
+        mUsers.clear();
+
+        loggedInUsers.clear();
+        loggedInUsers.addAll(loggedInUserDataSource.getAllLoggedInUsers());
 
         fillData();
 
-        mAdapter = new AccountExpandableListViewAdapter(mEquipmentNames, mUsers);
+        mAdapter.setData(mEquipmentNames, mUsers);
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -136,32 +146,39 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
 
     private class AccountExpandableListViewAdapter extends BaseExpandableListAdapter {
 
-        private List<String> equipmentNames;
-        private List<List<LoggedInUser>> users;
+        private List<String> mEquipmentNames;
+        private List<List<LoggedInUser>> mUsers;
 
-        AccountExpandableListViewAdapter(List<String> equipmentNames, List<List<LoggedInUser>> users) {
-            this.equipmentNames = equipmentNames;
-            this.users = users;
+        AccountExpandableListViewAdapter() {
+            mEquipmentNames = new ArrayList<>();
+            mUsers = new ArrayList<>();
+        }
+
+        void setData(List<String> equipmentNames, List<List<LoggedInUser>> users) {
+            mEquipmentNames.clear();
+            mEquipmentNames.addAll(equipmentNames);
+            mUsers.clear();
+            mUsers.addAll(users);
         }
 
         @Override
         public int getGroupCount() {
-            return equipmentNames.size();
+            return mEquipmentNames.size();
         }
 
         @Override
         public int getChildrenCount(int groupPosition) {
-            return users.get(groupPosition).size();
+            return mUsers.get(groupPosition).size();
         }
 
         @Override
         public Object getGroup(int groupPosition) {
-            return equipmentNames.get(groupPosition);
+            return mEquipmentNames.get(groupPosition);
         }
 
         @Override
         public Object getChild(int groupPosition, int childPosition) {
-            return users.get(groupPosition).get(childPosition);
+            return mUsers.get(groupPosition).get(childPosition);
         }
 
         @Override
@@ -194,7 +211,7 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
                 binding = DataBindingUtil.getBinding(convertView);
             }
 
-            binding.setEquipmentName(equipmentNames.get(groupPosition));
+            binding.setEquipmentName(mEquipmentNames.get(groupPosition));
             binding.executePendingBindings();
 
             return convertView;
@@ -217,7 +234,7 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
                 binding = DataBindingUtil.getBinding(convertView);
             }
 
-            AccountChildViewModel model = new AccountChildViewModel(users, groupPosition, childPosition);
+            AccountChildViewModel model = new AccountChildViewModel(mUsers, groupPosition, childPosition);
 
             binding.setAccountChildViewModel(model);
             binding.executePendingBindings();
@@ -267,9 +284,7 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
 
             loggedInUserDataSource.deleteLoggedInUsers(Collections.singletonList(loggedInUser));
 
-            users.get(groupPosition).remove(childPosition);
-
-            mAdapter.notifyDataSetChanged();
+            refreshData();
 
             if (user.getUuid().equals(currentUserUUID)) {
                 mDeleteCurrentUser = true;

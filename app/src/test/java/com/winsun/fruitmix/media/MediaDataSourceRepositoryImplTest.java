@@ -118,5 +118,16 @@ public class MediaDataSourceRepositoryImplTest {
 
     }
 
+    @Test
+    public void testGetStationMediaForceRefresh() {
+
+        mediaDataSourceRepositoryImpl.getStationMediaForceRefresh(new BaseLoadDataCallbackImpl<Media>());
+
+        verify(stationMediaRepository).setCacheDirty();
+
+        verify(stationMediaRepository).getMedia(any(BaseLoadDataCallback.class));
+
+    }
+
 
 }

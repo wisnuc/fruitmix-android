@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -77,6 +78,8 @@ public class FileFragment implements Page, IShowHideFragmentListener {
 
     public static final String TAG = FileFragment.class.getSimpleName();
 
+    private SwipeRefreshLayout swipeRefreshLayout;
+
     private RecyclerView fileRecyclerView;
 
     private Activity activity;
@@ -100,16 +103,15 @@ public class FileFragment implements Page, IShowHideFragmentListener {
                 noContentViewModel, loadingViewModel, fileViewModel, handleTitleCallback,
                 InjectLoggedInUser.provideLoggedInUserRepository(activity), InjectSystemSettingDataSource.provideSystemSettingDataSource(activity));
 
-        fileRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
-        fileRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        fileRecyclerView.setAdapter(filePresenter.getFileRecyclerViewAdapter());
+        initFileRecyclerView(activity);
+
+        initSwipeRefreshLayout();
 
         refreshView();
 
     }
 
     private View onCreateView() {
-        // Inflate the layout for this fragment
 
         FragmentFileBinding binding = FragmentFileBinding.inflate(LayoutInflater.from(activity), null, false);
 
@@ -126,9 +128,32 @@ public class FileFragment implements Page, IShowHideFragmentListener {
 
         binding.setFileViewModel(fileViewModel);
 
+        swipeRefreshLayout = binding.swipeRefreshLayout;
+
         fileRecyclerView = binding.fileRecyclerview;
 
         return binding.getRoot();
+    }
+
+
+    private void initFileRecyclerView(Activity activity) {
+        fileRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
+        fileRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        fileRecyclerView.setAdapter(filePresenter.getFileRecyclerViewAdapter());
+    }
+
+    private void initSwipeRefreshLayout() {
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                filePresenter.refreshCurrentFolder();
+
+                if (swipeRefreshLayout.isRefreshing())
+                    swipeRefreshLayout.setRefreshing(false);
+
+            }
+        });
     }
 
     @Override

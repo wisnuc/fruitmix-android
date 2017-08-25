@@ -7,6 +7,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,11 +35,11 @@ public class FileUtilTest {
     @Ignore
     public void percentTest() {
 
-        float percent = 400 * 100 / 7000;
+        float percent = ((float) 61 * 100) / ((float) 7811);
 
-        String percentText = (int) percent + "%";
+        String result = Math.round(percent) + "%";
 
-        Assert.fail(percentText);
+        Assert.fail(result);
     }
 
     @Test

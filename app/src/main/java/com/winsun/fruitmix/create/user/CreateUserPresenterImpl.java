@@ -7,16 +7,14 @@ import com.winsun.fruitmix.CreateUserActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,6 +28,8 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
     private List<String> remoteUserNames;
 
     private UserDataRepository userDataRepository;
+
+    private ThreadManager threadManagerImpl;
 
     public CreateUserPresenterImpl(CreateUserView createUserView, UserDataRepository userDataRepository) {
 
@@ -68,7 +68,7 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
             return;
         }
 
-        String userName = createUserViewModel.getUserName();
+        final String userName = createUserViewModel.getUserName();
 
         if (remoteUserNames.contains(userName)) {
 
@@ -88,7 +88,7 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
             createUserViewModel.userNameErrorEnable.set(false);
         }
 
-        String password = createUserViewModel.getUserPassword();
+        final String password = createUserViewModel.getUserPassword();
 
         String confirmPassword = createUserViewModel.getUserConfirmPassword();
 
@@ -107,27 +107,54 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
 
         createUserView.showProgressDialog(String.format(context.getString(R.string.operating_title), context.getString(R.string.create_user)));
 
+        threadManagerImpl = ThreadManagerImpl.getInstance();
+
+        threadManagerImpl.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                insertUserInThread(context, userName, password);
+            }
+        });
+
+    }
+
+    private void insertUserInThread(final Context context, String userName, String password) {
         userDataRepository.insertUser(userName, password, new BaseOperateDataCallback<User>() {
             @Override
             public void onSucceed(User data, OperationResult result) {
 
-                createUserView.dismissDialog();
+                threadManagerImpl.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-                createUserView.setResultCode(Activity.RESULT_OK);
+                        createUserView.dismissDialog();
 
-                createUserView.finishView();
+                        createUserView.setResultCode(Activity.RESULT_OK);
+
+                        createUserView.finishView();
+
+                    }
+                });
+
             }
 
             @Override
-            public void onFail(OperationResult result) {
+            public void onFail(final OperationResult result) {
 
-                createUserView.dismissDialog();
+                threadManagerImpl.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-                createUserView.showToast(result.getResultMessage(context));
+                        createUserView.dismissDialog();
+
+                        createUserView.showToast(result.getResultMessage(context));
+
+                    }
+                });
+
 
             }
         });
-
     }
 
 }

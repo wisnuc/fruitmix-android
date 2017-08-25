@@ -62,13 +62,13 @@ public class StationFileRepositoryImpl implements StationFileRepository {
 
     public void getFile(String rootUUID,final String folderUUID,  final BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
-        if (currentFolderUUID != null && !currentFolderUUID.equals(folderUUID))
+/*        if (currentFolderUUID != null && !currentFolderUUID.equals(folderUUID))
             cacheDirty = true;
 
         if (!cacheDirty) {
             callback.onSucceed(new ArrayList<>(stationFiles), new OperationSuccess());
             return;
-        }
+        }*/
 
         stationFileDataSource.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
 

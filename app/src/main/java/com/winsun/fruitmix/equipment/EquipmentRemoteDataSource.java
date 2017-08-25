@@ -8,6 +8,8 @@ import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.Equipment;
+import com.winsun.fruitmix.model.EquipmentInfo;
+import com.winsun.fruitmix.parser.RemoteEquipmentInfoParser;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.parser.RemoteEquipmentHostAliasParser;
 import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
@@ -22,6 +24,8 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl {
     public static final String TAG = EquipmentRemoteDataSource.class.getSimpleName();
 
     private static final String IPALIASING = "/system/ipaliasing";
+
+    private static final String EQUIPMENT_INFO = "/control/system";
 
     public EquipmentRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
         super(iHttpUtil, httpRequestFactory);
@@ -48,5 +52,18 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl {
         wrapper.loadCall(httpRequest, callback, new RemoteEquipmentHostAliasParser());
 
     }
+
+    public void getEquipmentInfo(String equipmentIP, BaseLoadDataCallback<EquipmentInfo> callback) {
+
+        String url = Util.HTTP + equipmentIP + ":" + httpRequestFactory.getPort() + EQUIPMENT_INFO;
+
+        Log.d(TAG, "getEquipmentInfo: url: " + url);
+
+        HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(url);
+
+        wrapper.loadCall(httpRequest, callback, new RemoteEquipmentInfoParser());
+
+    }
+
 
 }

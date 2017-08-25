@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
@@ -20,6 +19,7 @@ import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
 import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -63,7 +63,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         imageLoader.setShouldCache(true);
 
-        threadManager = ThreadManager.getInstance();
+        threadManager = ThreadManagerImpl.getInstance();
 
         mConfirmInviteUserMaps = new HashMap<>();
 

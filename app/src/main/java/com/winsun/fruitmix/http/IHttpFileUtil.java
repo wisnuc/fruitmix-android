@@ -18,7 +18,7 @@ public interface IHttpFileUtil {
 
     ResponseBody downloadFile(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException;
 
-    boolean uploadFile(HttpRequest httpRequest, LocalFile localFile);
+    HttpResponse uploadFile(HttpRequest httpRequest, LocalFile localFile) throws MalformedURLException, IOException, SocketTimeoutException;
 
     HttpResponse createFolder(HttpRequest httpRequest,String folderName);
 

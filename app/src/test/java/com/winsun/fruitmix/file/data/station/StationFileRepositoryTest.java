@@ -16,6 +16,7 @@ import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
@@ -96,7 +97,9 @@ public class StationFileRepositoryTest {
 
     }
 
-    @Test
+    //cache dirty logic is comment out
+
+    @Ignore
     public void testSetCacheDirtyLogic() {
 
         String folderUUID = "testFolderUUID";
@@ -142,12 +145,6 @@ public class StationFileRepositoryTest {
         captor.getValue().onSucceed(Collections.<AbstractRemoteFile>emptyList(), new OperationSuccess());
 
         assertFalse(fileRepository.cacheDirty);
-
-        fileRepository.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>());
-
-        fileRepository.setCacheDirty();
-
-        assertTrue(fileRepository.cacheDirty);
 
         fileRepository.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>());
 

@@ -212,4 +212,13 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
         }
 
     }
+
+    @Override
+    public void getStationMediaForceRefresh(BaseLoadDataCallback<Media> callback) {
+
+        stationMediaRepository.setCacheDirty();
+
+        stationMediaRepository.getMedia(callback);
+
+    }
 }

@@ -3,7 +3,6 @@ package com.winsun.fruitmix.login;
 import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.HttpRequestFactory;
@@ -15,10 +14,11 @@ import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.token.TokenRemoteDataSource;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
+import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 
@@ -62,6 +62,9 @@ public class LoginUseCaseTest {
     private CheckMediaIsUploadStrategy checkMediaIsUploadStrategy;
 
     @Mock
+    private UploadMediaUseCase uploadMediaUseCase;
+
+    @Mock
     private UserDataRepository userDataRepository;
 
     @Mock
@@ -79,7 +82,7 @@ public class LoginUseCaseTest {
     private EventBus eventBus;
 
     @Mock
-    private ThreadManager threadManager;
+    private ThreadManagerImpl threadManagerImpl;
 
     @Captor
     private ArgumentCaptor<BaseLoadDataCallback<String>> loadTokenCallbackArgumentCaptor;
@@ -98,7 +101,7 @@ public class LoginUseCaseTest {
         LoginUseCase.destroyInstance();
 
         loginUseCase = LoginUseCase.getInstance(loggedInUserDataSource, tokenRemoteDataSource,
-                httpRequestFactory, checkMediaIsUploadStrategy, userDataRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager);
+                httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManagerImpl);
 
     }
 
@@ -161,7 +164,13 @@ public class LoginUseCaseTest {
 
         verify(checkMediaIsUploadStrategy).setCurrentUserUUID(testUserUUID);
 
+        verify(checkMediaIsUploadStrategy).setUploadedMediaHashs(Collections.<String>emptyList());
+
+        verify(uploadMediaUseCase).resetState();
+
         verify(imageGifLoaderInstance).setToken(anyString());
+
+        verify(systemSettingDataSource).setCurrentLoginUserUUID(anyString());
 
         verify(stationFileRepository).clearDownloadFileRecordInCache();
 
@@ -192,6 +201,10 @@ public class LoginUseCaseTest {
         verify(httpRequestFactory).setCurrentData(anyString(), anyString());
 
         verify(checkMediaIsUploadStrategy).setCurrentUserUUID(anyString());
+
+        verify(checkMediaIsUploadStrategy).setUploadedMediaHashs(Collections.<String>emptyList());
+
+        verify(uploadMediaUseCase).resetState();
 
         verify(imageGifLoaderInstance).setToken(anyString());
 
@@ -312,6 +325,12 @@ public class LoginUseCaseTest {
         testLoginWithUser();
 
         verify(httpRequestFactory).setCurrentData(testToken, testGateway);
+
+        verify(checkMediaIsUploadStrategy).setCurrentUserUUID(anyString());
+
+        verify(checkMediaIsUploadStrategy).setUploadedMediaHashs(Collections.<String>emptyList());
+
+        verify(uploadMediaUseCase).resetState();
 
         verify(imageGifLoaderInstance).setToken(anyString());
 

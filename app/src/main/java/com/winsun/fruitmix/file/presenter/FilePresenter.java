@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,10 +16,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.BR;
@@ -39,7 +36,6 @@ import com.winsun.fruitmix.databinding.RemoteFolderItemLayoutBinding;
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.eventbus.RetrieveFileOperationEvent;
 import com.winsun.fruitmix.file.data.download.DownloadState;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadManager;
@@ -48,23 +44,18 @@ import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.file.data.model.RemoteFolder;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.view.FileDownloadActivity;
-import com.winsun.fruitmix.file.view.fragment.FileFragment;
 import com.winsun.fruitmix.file.view.interfaces.HandleTitleCallback;
 import com.winsun.fruitmix.file.view.viewmodel.FileItemViewModel;
 import com.winsun.fruitmix.file.view.viewmodel.FileViewModel;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
 import com.winsun.fruitmix.model.BottomMenuItem;
-import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BaseBindingViewHolder;
-import com.winsun.fruitmix.viewholder.BaseRecyclerViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
@@ -72,9 +63,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by Administrator on 2017/7/27.
@@ -146,7 +134,7 @@ public class FilePresenter implements OnViewSelectListener {
         currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
         rootUUID = loggedInUserRepository.getLoggedInUserByUserUUID(currentUserUUID).getUser().getHome();
 
-        threadManager = ThreadManager.getInstance();
+        threadManager = ThreadManagerImpl.getInstance();
 
         init();
     }
@@ -196,6 +184,11 @@ public class FilePresenter implements OnViewSelectListener {
 
         }
 
+    }
+
+    public void refreshCurrentFolder(){
+
+        getFile();
 
     }
 
@@ -306,7 +299,6 @@ public class FilePresenter implements OnViewSelectListener {
 
         noContentViewModel.showNoContent.set(true);
     }
-
 
     private void handleGetFileSucceed(List<AbstractRemoteFile> files) {
 

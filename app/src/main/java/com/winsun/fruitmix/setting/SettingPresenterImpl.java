@@ -15,6 +15,8 @@ import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
+import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
+import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
 
@@ -44,15 +46,20 @@ public class SettingPresenterImpl implements SettingPresenter {
 
     private CheckMediaIsUploadStrategy checkMediaIsUploadStrategy;
 
+    private UploadMediaUseCase uploadMediaUseCase;
+
+    private UploadMediaCountChangeListener uploadMediaCountChangeListener;
+
     private String currentUserUUID;
 
     public SettingPresenterImpl(SettingActivity.SettingViewModel settingViewModel, SystemSettingDataSource systemSettingDataSource,
                                 MediaDataSourceRepository mediaDataSourceRepository, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
-                                String currentUserUUID) {
+                                UploadMediaUseCase uploadMediaUseCase, String currentUserUUID) {
         this.settingViewModel = settingViewModel;
         this.systemSettingDataSource = systemSettingDataSource;
         this.mediaDataSourceRepository = mediaDataSourceRepository;
         this.checkMediaIsUploadStrategy = checkMediaIsUploadStrategy;
+        this.uploadMediaUseCase = uploadMediaUseCase;
         this.currentUserUUID = currentUserUUID;
     }
 
@@ -64,6 +71,33 @@ public class SettingPresenterImpl implements SettingPresenter {
 
         calcAlreadyUploadMediaCountAndTotalCacheSize(context, mediaDataSourceRepository.getLocalMedia());
 
+        uploadMediaCountChangeListener = new UploadMediaCountChangeListener() {
+            @Override
+            public void onUploadMediaCountChanged(int uploadedMediaCount, int totalCount) {
+
+                mAlreadyUploadMediaCount = uploadedMediaCount;
+                mTotalLocalMediaCount = totalCount;
+
+                handleUploadMedia(context);
+            }
+
+            @Override
+            public void onGetUploadMediaCountFail() {
+
+            }
+        };
+    }
+
+    @Override
+    public void onResume() {
+
+        uploadMediaUseCase.registerUploadMediaCountChangeListener(uploadMediaCountChangeListener);
+    }
+
+    @Override
+    public void onPause() {
+
+        uploadMediaUseCase.unregisterUploadMediaCountChangeListener(uploadMediaCountChangeListener);
     }
 
     @Override
@@ -113,14 +147,18 @@ public class SettingPresenterImpl implements SettingPresenter {
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
 
-                settingViewModel.alreadyUploadMediaCountTextViewVisibility.set(true);
-                settingViewModel.alreadyUploadMediaCountText.set(String.format(context.getString(R.string.already_upload_media_count_text), mAlreadyUploadMediaCount, mTotalLocalMediaCount));
-
-                settingViewModel.cacheSizeText.set(FileUtil.formatFileSize(mTotalCacheSize));
+                handleUploadMedia(context);
 
             }
         }.execute();
 
+    }
+
+    private void handleUploadMedia(Context context) {
+        settingViewModel.alreadyUploadMediaCountTextViewVisibility.set(true);
+        settingViewModel.alreadyUploadMediaCountText.set(String.format(context.getString(R.string.already_upload_media_count_text), mAlreadyUploadMediaCount, mTotalLocalMediaCount));
+
+        settingViewModel.cacheSizeText.set(FileUtil.formatFileSize(mTotalCacheSize));
     }
 
     @Override

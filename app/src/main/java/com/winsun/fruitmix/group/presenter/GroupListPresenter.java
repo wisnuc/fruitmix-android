@@ -16,6 +16,7 @@ import com.winsun.fruitmix.group.data.viewmodel.GroupListViewModel;
 import com.winsun.fruitmix.group.view.GroupListPageView;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -51,7 +52,7 @@ public class GroupListPresenter {
 
         groupListAdapter = new GroupListAdapter();
 
-        threadManager = ThreadManager.getInstance();
+        threadManager = ThreadManagerImpl.getInstance();
 
     }
 

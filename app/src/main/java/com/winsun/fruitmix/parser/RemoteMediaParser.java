@@ -60,6 +60,9 @@ public class RemoteMediaParser implements RemoteDatasParser<Media> {
 
             media.setType(root.optString("m"));
 
+            media.setLatitude(root.optString("lat"));
+            media.setLongitude(root.optString("long"));
+
             medias.add(media);
 
         }

@@ -10,13 +10,17 @@
             type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
 
         <variable
+            name="noContentViewModel"
+            type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
+
+        <variable
             name="wechatLoginListener"
             type="com.winsun.fruitmix.equipment.WeChatLoginListener" />
 
 
     </data>
 
-    <android.support.design.widget.CoordinatorLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -39,11 +43,50 @@
 
         </android.support.v7.widget.Toolbar>
 
+        <LinearLayout
+            android:id="@+id/wechat_login_layout"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_alignParentBottom="true"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:onClick="@{()->wechatLoginListener.wechatLogin()}"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="#1F000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="8dp"
+                    android:src="@drawable/wechat" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="微信登录"
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="14dp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="48dp"
-            android:layout_marginTop="?attr/actionBarSize"
+            android:layout_above="@id/wechat_login_layout"
+            android:layout_below="@id/toolbar"
             android:background="#FAFAFA">
 
             <LinearLayout
@@ -52,6 +95,7 @@
                 android:orientation="vertical">
 
                 <RelativeLayout
+                    android:id="@+id/viewpager_layout"
                     android:layout_width="match_parent"
                     android:layout_height="224dp"
                     android:background="@color/equipment_ui_blue">
@@ -96,54 +140,20 @@
             </LinearLayout>
 
             <include
+                layout="@layout/new_no_content_layout"
+                android:visibility="gone"
+                app:noContentViewModel="@{noContentViewModel}"/>
+
+            <include
                 layout="@layout/new_loading_layout"
                 android:visibility="gone"
                 app:loadingViewModel="@{loadingViewModel}" />
 
+
         </FrameLayout>
 
 
-        <LinearLayout
-            android:id="@+id/wechat_login_layout"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_gravity="bottom"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:onClick="@{()->wechatLoginListener.wechatLogin()}"
-            android:orientation="vertical">
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:background="#1F000000" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="8dp"
-                    android:src="@drawable/wechat" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="微信登录"
-                    android:textColor="@color/eighty_seven_percent_black"
-                    android:textSize="14dp" />
-
-            </LinearLayout>
-
-
-        </LinearLayout>
-
-
-    </android.support.design.widget.CoordinatorLayout>
+    </RelativeLayout>
 
 
 </layout>

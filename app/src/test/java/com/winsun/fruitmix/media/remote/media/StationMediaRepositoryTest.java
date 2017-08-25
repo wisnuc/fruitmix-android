@@ -23,7 +23,10 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
@@ -43,6 +46,9 @@ public class StationMediaRepositoryTest {
     @Mock
     private StationMediaDBDataSource stationMediaDBDataSource;
 
+    private String testMediaUUID = "testMediaUUID";
+    private String testMedia2UUID = "testMedia2UUID";
+
     @Before
     public void setup() {
 
@@ -56,6 +62,16 @@ public class StationMediaRepositoryTest {
     public void clean() {
         StationMediaRepository.destroyInstance();
     }
+
+
+    private Media createMedia(String mediaUUID) {
+
+        Media media = new Media();
+        media.setUuid(mediaUUID);
+
+        return media;
+    }
+
 
     @Test
     public void getMediaRetrieveOrder() {
@@ -87,7 +103,66 @@ public class StationMediaRepositoryTest {
 
     }
 
-    private String testMediaUUID = "testMediaUUID";
+    @Test
+    public void getMediaTwiceWhenCacheDirtyAndHasNotNewMedia() {
+
+        Media media = createMedia(testMediaUUID);
+
+        stationMediaRepository.getMedia(new BaseLoadDataCallbackImpl<Media>());
+
+        ArgumentCaptor<BaseLoadDataCallback<Media>> firstCallCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(stationMediaRemoteDataSource).getMedia(firstCallCaptor.capture());
+
+        firstCallCaptor.getValue().onSucceed(Collections.singletonList(media), new OperationSuccess());
+
+        stationMediaRepository.setCacheDirty();
+
+        stationMediaRepository.getMedia(new BaseLoadDataCallbackImpl<Media>());
+
+        ArgumentCaptor<BaseLoadDataCallback<Media>> secondCallCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(stationMediaRemoteDataSource, times(2)).getMedia(secondCallCaptor.capture());
+
+        secondCallCaptor.getValue().onSucceed(Collections.singletonList(media), new OperationSuccess());
+
+        verify(stationMediaDBDataSource, times(1)).clearAllMedias();
+        verify(stationMediaDBDataSource, times(1)).insertMedias(ArgumentMatchers.<Media>anyCollection());
+
+    }
+
+    @Test
+    public void getMediaTwiceWhenCacheDirtyAndHasNewMedia() {
+
+        Media media = createMedia(testMediaUUID);
+
+        stationMediaRepository.getMedia(new BaseLoadDataCallbackImpl<Media>());
+
+        ArgumentCaptor<BaseLoadDataCallback<Media>> firstCallCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(stationMediaRemoteDataSource).getMedia(firstCallCaptor.capture());
+
+        firstCallCaptor.getValue().onSucceed(Collections.singletonList(media), new OperationSuccess());
+
+        stationMediaRepository.setCacheDirty();
+
+        List<Media> medias = new ArrayList<>();
+        medias.add(createMedia(testMediaUUID));
+        medias.add(createMedia(testMedia2UUID));
+
+        stationMediaRepository.getMedia(new BaseLoadDataCallbackImpl<Media>());
+
+        ArgumentCaptor<BaseLoadDataCallback<Media>> secondCallCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(stationMediaRemoteDataSource, times(2)).getMedia(secondCallCaptor.capture());
+
+        secondCallCaptor.getValue().onSucceed(medias, new OperationSuccess());
+
+        verify(stationMediaDBDataSource, times(2)).clearAllMedias();
+        verify(stationMediaDBDataSource, times(2)).insertMedias(ArgumentMatchers.<Media>anyCollection());
+
+    }
+
 
     @Test
     public void getMedia_RetrieveFromStationFailThenRetrieveFromDBSucceed() {

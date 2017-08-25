@@ -3,6 +3,7 @@ package com.winsun.fruitmix.db;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created by Administrator on 2016/7/8.
@@ -10,6 +11,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String TAG = DBHelper.class.getSimpleName();
+
+    public static final int ADD_MEDIA_LATITUDE_L0NGITUDE_DB_VERSION = 28;
+
 
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
@@ -63,9 +67,9 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String DOWNLOADED_FILE_TABLE_NAME = "downloaded_file";
     static final String LOGGED_IN_USER_TABLE_NAME = "logged_in_user";
 
-    private static final int DB_VERSION = 28;
+    private static final int DB_VERSION = 29;
 
-    private static final String CREATE_TABLE = "create table ";
+    private static final String CREATE_TABLE = "create table if not exists ";
 
     private static final String DROP_TABLE = "DROP TABLE IF EXISTS ";
 
@@ -114,26 +118,18 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-//        Log.i(TAG, "Upgrading database from version " + oldVersion + "to " +
-//                newVersion + ", which will destroy all old data");
+        Log.i(TAG, "Upgrading database from version " + oldVersion + "to " +
+                newVersion);
 
-//        db.execSQL(DROP_TABLE + REMOTE_MEDIA_TABLE_NAME);
-//        db.execSQL(DROP_TABLE + LOCAL_MEDIA_TABLE_NAME);
-//        db.execSQL(DROP_TABLE + REMOTE_USER_TABLE_NAME);
+        if(oldVersion < ADD_MEDIA_LATITUDE_L0NGITUDE_DB_VERSION){
 
-//        db.execSQL(DROP_TABLE + DOWNLOADED_FILE_TABLE_NAME);
-//        db.execSQL(DROP_TABLE + LOGGED_IN_USER_TABLE_NAME);
-//
-//        onCreate(db);
+            db.execSQL(DROP_TABLE + REMOTE_MEDIA_TABLE_NAME);
+            db.execSQL(DROP_TABLE + LOCAL_MEDIA_TABLE_NAME);
+            db.execSQL(DROP_TABLE + REMOTE_USER_TABLE_NAME);
 
-//        db.execSQL(DROP_TABLE + REMOTE_COMMENT_TABLE_NAME);
-//        db.execSQL(DROP_TABLE + LOCAL_COMMENT_TABLE_NAME);
-//        db.execSQL(DROP_TABLE + LOCAL_SHARE_TABLE_NAME);
-//        db.execSQL(DROP_TABLE + REMOTE_SHARE_TABLE_NAME);
-//        db.execSQL(DROP_TABLE + REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME);
-//        db.execSQL(DROP_TABLE + LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME);
+            onCreate(db);
+        }
 
-        db.execSQL(DROP_TABLE + LOCAL_MEDIA_TABLE_NAME);
 
     }
 }

@@ -10,12 +10,9 @@ public class InjectLoggedInUser {
 
     public static LoggedInUserDataSource provideLoggedInUserRepository(Context context) {
 
-//        return LoggedInUserRepository.getInstance(LoggedInUserDBDataSource.getInstance(context));
-
         return LoggedInUserRepository.getInstance(LoggedInUserDBDataSource.getInstance(context));
 
 //        return FakeLoggedInUserRepository.instance;
     }
-
 
 }

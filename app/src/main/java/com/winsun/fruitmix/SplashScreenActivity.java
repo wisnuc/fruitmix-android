@@ -11,15 +11,11 @@ import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.init.system.InitSystem;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
-import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
@@ -64,7 +60,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         final LoginUseCase loginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
 
-        ThreadManager.getInstance().runOnCacheThread(new Runnable() {
+        ThreadManagerImpl.getInstance().runOnCacheThread(new Runnable() {
             @Override
             public void run() {
                 loginWithNoParamInThread(loginUseCase);

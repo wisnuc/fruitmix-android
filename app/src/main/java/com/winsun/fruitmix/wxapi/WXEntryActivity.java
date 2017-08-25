@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -14,8 +13,6 @@ import com.tencent.mm.opensdk.modelbase.BaseResp;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
-import com.winsun.fruitmix.EquipmentSearchActivity;
-import com.winsun.fruitmix.LoginActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -23,7 +20,7 @@ import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 
 public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
@@ -34,6 +31,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
     private ProgressDialog dialog;
 
     private Context mContext;
+
+    private ThreadManager threadManager;
 
     public interface WXEntryCallback {
 
@@ -56,6 +55,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
         mContext = this;
 
         loginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
+
+        threadManager = ThreadManagerImpl.getInstance();
 
         Log.d(TAG, "onCreate: ");
 
@@ -102,7 +103,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                 dialog = ProgressDialog.show(this, null, String.format(getString(R.string.operating_title), getString(R.string.login)), true, false);
 
-                ThreadManager.getInstance().runOnCacheThread(new Runnable() {
+                threadManager.runOnCacheThread(new Runnable() {
                     @Override
                     public void run() {
                         loginInThread(code);
@@ -146,7 +147,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
 
-                ThreadManager.getInstance().runOnMainThread(new Runnable() {
+                threadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
 
@@ -162,7 +163,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             @Override
             public void onFail(final OperationResult result) {
 
-                ThreadManager.getInstance().runOnMainThread(new Runnable() {
+                threadManager.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
 

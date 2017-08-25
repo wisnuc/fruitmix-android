@@ -16,9 +16,11 @@ import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.token.TokenRemoteDataSource;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
+import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.Util;
@@ -47,6 +49,8 @@ public class LoginUseCase {
 
     private CheckMediaIsUploadStrategy checkMediaIsUploadStrategy;
 
+    private UploadMediaUseCase uploadMediaUseCase;
+
     private UserDataRepository userDataRepository;
 
     private StationFileRepository stationFileRepository;
@@ -65,7 +69,7 @@ public class LoginUseCase {
     //TODO: check login with loggedInUser: get user null pointer
 
     private LoginUseCase(LoggedInUserDataSource loggedInUserDataSource, TokenRemoteDataSource tokenRemoteDataSource,
-                         HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
+                         HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy, UploadMediaUseCase uploadMediaUseCase,
                          UserDataRepository userDataRepository, StationFileRepository stationFileRepository,
                          SystemSettingDataSource systemSettingDataSource, ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus,
                          ThreadManager threadManager) {
@@ -73,6 +77,7 @@ public class LoginUseCase {
         this.tokenRemoteDataSource = tokenRemoteDataSource;
         this.httpRequestFactory = httpRequestFactory;
         this.checkMediaIsUploadStrategy = checkMediaIsUploadStrategy;
+        this.uploadMediaUseCase = uploadMediaUseCase;
         this.userDataRepository = userDataRepository;
         this.stationFileRepository = stationFileRepository;
         this.systemSettingDataSource = systemSettingDataSource;
@@ -83,13 +88,13 @@ public class LoginUseCase {
 
     public static LoginUseCase getInstance(LoggedInUserDataSource loggedInUserDataSource, TokenRemoteDataSource tokenRemoteDataSource,
                                            HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
-                                           UserDataRepository userDataRepository,
+                                           UploadMediaUseCase uploadMediaUseCase, UserDataRepository userDataRepository,
                                            StationFileRepository stationFileRepository, SystemSettingDataSource systemSettingDataSource,
                                            ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager) {
 
         if (instance == null)
             instance = new LoginUseCase(loggedInUserDataSource, tokenRemoteDataSource,
-                    httpRequestFactory, checkMediaIsUploadStrategy, userDataRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager);
+                    httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager);
 
         return instance;
     }
@@ -113,13 +118,7 @@ public class LoginUseCase {
             mToken = loggedInUser.getToken();
             mGateway = loggedInUser.getGateway();
 
-            httpRequestFactory.setCurrentData(loggedInUser.getToken(), loggedInUser.getGateway());
-
-            imageGifLoaderInstance.setToken(loggedInUser.getToken());
-
-            checkMediaIsUploadStrategy.setCurrentUserUUID(loggedInUser.getUser().getUuid());
-
-            stationFileRepository.clearDownloadFileRecordInCache();
+            initSystemState(loggedInUser.getToken(), loggedInUser.getGateway(), loggedInUser.getUser().getUuid());
 
             callback.onSucceed(true, new OperationSuccess());
 
@@ -148,15 +147,7 @@ public class LoginUseCase {
                 mToken = token;
                 mGateway = loadTokenParam.getGateway();
 
-                httpRequestFactory.setCurrentData(token, loadTokenParam.getGateway());
-
-                imageGifLoaderInstance.setToken(token);
-
-                checkMediaIsUploadStrategy.setCurrentUserUUID(loadTokenParam.getUserUUID());
-
-                stationFileRepository.clearDownloadFileRecordInCache();
-
-                systemSettingDataSource.setCurrentLoginUserUUID(loadTokenParam.getUserUUID());
+                initSystemState(token, loadTokenParam.getGateway(), loadTokenParam.getUserUUID());
 
                 getUsers(loadTokenParam, token, callback);
 
@@ -243,15 +234,7 @@ public class LoginUseCase {
         mToken = currentLoggedInUser.getToken();
         mGateway = currentLoggedInUser.getGateway();
 
-        httpRequestFactory.setCurrentData(currentLoggedInUser.getToken(), currentLoggedInUser.getGateway());
-
-        checkMediaIsUploadStrategy.setCurrentUserUUID(currentLoggedInUser.getUser().getUuid());
-
-        imageGifLoaderInstance.setToken(currentLoggedInUser.getToken());
-
-        systemSettingDataSource.setCurrentLoginUserUUID(currentLoggedInUser.getUser().getUuid());
-
-        stationFileRepository.clearDownloadFileRecordInCache();
+        initSystemState(currentLoggedInUser.getToken(), currentLoggedInUser.getGateway(), currentLoggedInUser.getUser().getUuid());
 
         String preUploadUserUUID = systemSettingDataSource.getCurrentUploadUserUUID();
 
@@ -271,6 +254,25 @@ public class LoginUseCase {
 
         getUsers();
 
+    }
+
+    private void initSystemState(String token, String gateway, String loginUserUUID) {
+
+        Log.i(TAG, "initSystemState: token: " + token + " gateway: " + gateway + " loginUserUUID: " + loginUserUUID);
+
+        httpRequestFactory.setCurrentData(token, gateway);
+
+        checkMediaIsUploadStrategy.setCurrentUserUUID(loginUserUUID);
+
+        checkMediaIsUploadStrategy.setUploadedMediaHashs(Collections.<String>emptyList());
+
+        uploadMediaUseCase.resetState();
+
+        imageGifLoaderInstance.setToken(token);
+
+        systemSettingDataSource.setCurrentLoginUserUUID(loginUserUUID);
+
+        stationFileRepository.clearDownloadFileRecordInCache();
     }
 
 

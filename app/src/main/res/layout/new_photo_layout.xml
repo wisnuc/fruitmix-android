@@ -12,18 +12,31 @@
             name="noContentViewModel"
             type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
 
+        <variable
+            name="newPhotoListViewModel"
+            type="com.winsun.fruitmix.mediaModule.model.NewPhotoListViewModel" />
+
+        <import type="android.view.View" />
+
     </data>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/photo_recyclerview"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/white"
-            android:visibility="gone" />
+            android:visibility="@{newPhotoListViewModel.showContent?View.VISIBLE:View.GONE,default=gone}">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/photo_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white" />
+
+        </android.support.v4.widget.SwipeRefreshLayout>
 
         <include
             layout="@layout/new_loading_layout"

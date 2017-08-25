@@ -125,7 +125,7 @@
             android:layout_marginRight="30dp"
             android:onClick="@{()-> userPresenter.addUser()}"
             android:src="@drawable/ic_add_white_24dp"
-            android:visibility="gone"
+            android:visibility="visible"
             app:borderWidth="0dp"
             app:fabSize="normal" />
 

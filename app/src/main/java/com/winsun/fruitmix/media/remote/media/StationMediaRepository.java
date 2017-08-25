@@ -1,8 +1,11 @@
 package com.winsun.fruitmix.media.remote.media;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.operationResult.OperationHasNewMedia;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -66,16 +69,34 @@ public class StationMediaRepository {
             public void onSucceed(List<Media> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);
 
-                mediaConcurrentMap.clear();
-
-                mediaConcurrentMap.putAll(LocalCache.BuildMediaMapKeyIsUUID(data));
-
-                stationMediaDBDataSource.clearAllMedias();
-                stationMediaDBDataSource.insertMedias(data);
-
                 cacheDirty = false;
 
-                callback.onSucceed(data, operationResult);
+                boolean hasNewMedia = false;
+
+                for (Media media : data) {
+                    if (!mediaConcurrentMap.containsKey(media.getUuid())) {
+                        hasNewMedia = true;
+                    }
+                }
+
+                if (hasNewMedia) {
+
+                    Log.d(TAG, "onSucceed: get media has new media");
+
+                    mediaConcurrentMap.clear();
+
+                    mediaConcurrentMap.putAll(LocalCache.BuildMediaMapKeyIsUUID(data));
+
+                    stationMediaDBDataSource.clearAllMedias();
+                    stationMediaDBDataSource.insertMedias(data);
+
+                    callback.onSucceed(data, new OperationHasNewMedia());
+                } else {
+
+                    Log.d(TAG, "onSucceed: get media no new media");
+
+                    callback.onSucceed(data, operationResult);
+                }
 
             }
 

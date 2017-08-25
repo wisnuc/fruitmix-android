@@ -1,0 +1,12 @@
+package com.winsun.fruitmix.upload.media;
+
+/**
+ * Created by Administrator on 2017/8/23.
+ */
+
+public interface UploadMediaCountChangeListener {
+
+    void onUploadMediaCountChanged(int uploadedMediaCount, int totalCount);
+
+    void onGetUploadMediaCountFail();
+}

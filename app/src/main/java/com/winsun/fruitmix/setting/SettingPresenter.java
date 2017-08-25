@@ -12,6 +12,10 @@ public interface SettingPresenter {
 
     void onCreate(Context context);
 
+    void onResume();
+
+    void onPause();
+
     void clearCache(Context context, SettingActivity.SettingViewModel settingViewModel);
 
     void onDestroy(Context context);

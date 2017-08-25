@@ -2,12 +2,10 @@ package com.winsun.fruitmix.generate.media;
 
 import android.util.Log;
 
-import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.FileUtil;
 
 import java.util.ArrayList;
@@ -43,7 +41,7 @@ public class GenerateMediaThumbUseCase {
     private GenerateMediaThumbUseCase(MediaDataSourceRepository mediaDataSourceRepository) {
         this.mediaDataSourceRepository = mediaDataSourceRepository;
 
-        threadManager = ThreadManager.getInstance();
+        threadManager = ThreadManagerImpl.getInstance();
     }
 
     public void startGenerateMediaThumb() {

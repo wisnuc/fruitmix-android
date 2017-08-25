@@ -30,7 +30,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
 import com.winsun.fruitmix.equipment.InjectEquipment;
@@ -61,8 +60,11 @@ import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
+import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
+import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
+import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.user.manage.UserManageActivity;
@@ -74,6 +76,8 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.ref.WeakReference;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -173,6 +177,8 @@ public class NavPagerActivity extends BaseActivity
 
         public final ObservableInt headerArrowResID = new ObservableInt();
 
+        public final ObservableBoolean showUploadProgress = new ObservableBoolean();
+
     }
 
     private Context mContext;
@@ -250,9 +256,11 @@ public class NavPagerActivity extends BaseActivity
 
     private LoggedInUserDataSource loggedInUserDataSource;
 
-    private MediaDataSourceRepository mediaDataSourceRepository;
     private CheckMediaIsUploadStrategy checkMediaIsUploadStrategy;
 
+    private UploadMediaCountChangeListener uploadMediaCountChangeListener;
+
+    private UploadMediaUseCase uploadMediaUseCase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -276,8 +284,6 @@ public class NavPagerActivity extends BaseActivity
 
         loggedInUserDataSource = InjectLoggedInUser.provideLoggedInUserRepository(mContext);
 
-        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
-
         checkMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
 
         systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
@@ -290,19 +296,12 @@ public class NavPagerActivity extends BaseActivity
 
         setExitSharedElementCallback(sharedElementCallback);
 
-/*        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawerLayout.setDrawerListener(toggle);
-        toggle.syncState();*/
-
         initNavigationMenuRecyclerView();
 
         mDrawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-
-                calcAlreadyUploadMediaCount(mediaDataSourceRepository.getLocalMedia());
 
 //                final BitmapDrawable drawable = (BitmapDrawable) ContextCompat.getDrawable(mContext, R.drawable.navigation_header_bg);
 //
@@ -334,13 +333,29 @@ public class NavPagerActivity extends BaseActivity
 
         refreshUserInNavigationView();
 
-        Log.d(TAG, "onCreate: ");
-    }
+        uploadMediaCountChangeListener = new UploadMediaCountChangeListener() {
+            @Override
+            public void onUploadMediaCountChanged(int uploadedMediaCount, int totalCount) {
 
-    private void checkShowAutoUploadDialog() {
-        if (systemSettingDataSource.getShowAutoUploadDialog()) {
-            showNeedAutoUploadDialog();
-        }
+                navPagerViewModel.showUploadProgress.set(true);
+
+                mAlreadyUploadMediaCount = uploadedMediaCount;
+                mTotalLocalMediaCount = totalCount;
+
+                handleUploadMediaCount();
+
+            }
+
+            @Override
+            public void onGetUploadMediaCountFail() {
+
+                navPagerViewModel.showUploadProgress.set(false);
+
+            }
+        };
+
+        uploadMediaUseCase = InjectUploadMediaUseCase.provideUploadMediaUseCase(this);
+
     }
 
     private void calcAlreadyUploadMediaCount(final List<Media> medias) {
@@ -378,29 +393,35 @@ public class NavPagerActivity extends BaseActivity
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
 
-                if (mAlreadyUploadMediaCount == mTotalLocalMediaCount) {
-
-                    navPagerViewModel.uploadMediaPercentText.set(getString(R.string.already_upload_finished));
-
-                    navPagerViewModel.uploadPercentProgress.set(100);
-
-                } else {
-
-                    float percent = mAlreadyUploadMediaCount * 100 / mTotalLocalMediaCount;
-
-                    String percentText = (int) percent + "%";
-
-                    navPagerViewModel.uploadMediaPercentText.set(String.format(getString(R.string.already_upload_media_percent_text), percentText));
-
-                    navPagerViewModel.uploadPercentProgress.set((int) percent);
-
-                }
-
-                navPagerViewModel.uploadCountText.set(mAlreadyUploadMediaCount + "/" + mTotalLocalMediaCount);
+                handleUploadMediaCount();
 
             }
         }.execute();
 
+    }
+
+    private void handleUploadMediaCount() {
+        if (mAlreadyUploadMediaCount == mTotalLocalMediaCount) {
+
+            navPagerViewModel.uploadMediaPercentText.set(getString(R.string.already_upload_finished));
+
+            navPagerViewModel.uploadPercentProgress.set(100);
+
+        } else {
+
+            float percent = ((float) mAlreadyUploadMediaCount * 100) / ((float) mTotalLocalMediaCount);
+
+            int roundPercent = Math.round(percent);
+
+            String percentText = roundPercent + "%";
+
+            navPagerViewModel.uploadMediaPercentText.set(String.format(getString(R.string.already_upload_media_percent_text), percentText));
+
+            navPagerViewModel.uploadPercentProgress.set(roundPercent);
+
+        }
+
+        navPagerViewModel.uploadCountText.set(mAlreadyUploadMediaCount + "/" + mTotalLocalMediaCount);
     }
 
 
@@ -442,7 +463,7 @@ public class NavPagerActivity extends BaseActivity
 
         mCustomHandler.removeMessages(DISCOVERY_TIMEOUT_MESSAGE);
 
-        ThreadManager.getInstance().runOnCacheThread(new Runnable() {
+        ThreadManagerImpl.getInstance().runOnCacheThread(new Runnable() {
             @Override
             public void run() {
 
@@ -528,6 +549,8 @@ public class NavPagerActivity extends BaseActivity
         if (currentPage == PAGE_MEDIA) {
             mediaMainFragment.show();
         }
+
+        uploadMediaUseCase.registerUploadMediaCountChangeListener(uploadMediaCountChangeListener);
     }
 
     @Override
@@ -537,6 +560,8 @@ public class NavPagerActivity extends BaseActivity
         if (currentPage == PAGE_MEDIA) {
             mediaMainFragment.hide();
         }
+
+        uploadMediaUseCase.unregisterUploadMediaCountChangeListener(uploadMediaCountChangeListener);
     }
 
     @Override
@@ -547,7 +572,6 @@ public class NavPagerActivity extends BaseActivity
 
         mContext = null;
 
-        Log.d(TAG, "onDestroy: ");
     }
 
     @Override
@@ -622,6 +646,11 @@ public class NavPagerActivity extends BaseActivity
 
     }
 
+    private void checkShowAutoUploadDialog() {
+        if (systemSettingDataSource.getShowAutoUploadDialog()) {
+            showNeedAutoUploadDialog();
+        }
+    }
 
     private void showExplanation(String title, String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

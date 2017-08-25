@@ -1,86 +1,33 @@
 package com.winsun.fruitmix.thread.manage;
 
-import android.os.Handler;
-import android.os.Looper;
-
-import com.winsun.fruitmix.executor.ExecutorServiceInstance;
-
 import java.util.concurrent.Callable;
 
 /**
- * Created by Administrator on 2017/7/12.
+ * Created by Administrator on 2017/8/23.
  */
 
-public class ThreadManager {
+public interface ThreadManager {
 
-    private static ThreadManager instance;
+    void runOnCacheThread(Runnable runnable);
 
-    private Handler handler;
+    void runOnCacheThread(Callable<Boolean> callable);
 
-    private ExecutorServiceInstance executorServiceInstance;
+    void runOnGenerateThumbThread(Runnable runnable);
 
-    private ThreadManager() {
+    void stopGenerateThumbThreadNow();
 
-        handler = new Handler(Looper.getMainLooper());
+    void runOnGenerateMiniThumbThread(Callable<Boolean> callable);
 
-        executorServiceInstance = ExecutorServiceInstance.SINGLE_INSTANCE;
-    }
+    void stopGenerateMiniThumbThreadNow();
 
-    public static ThreadManager getInstance() {
+    void runOnUploadMediaThread(Callable<Boolean> callable);
 
-        if (instance == null)
-            instance = new ThreadManager();
+    void runOnUploadMediaThread(Runnable runnable);
 
-        return instance;
-    }
+    void stopUploadMediaThreadNow();
 
-    public void runOnCacheThread(Runnable runnable) {
+    void stopUploadMediaThread();
 
-        executorServiceInstance.doOneTaskInCachedThread(runnable);
-
-    }
-
-    public void runOnCacheThread(Callable<Boolean> callable) {
-
-        executorServiceInstance.doOneTaskInCachedThreadUsingCallable(callable);
-    }
-
-    public void runOnGenerateThumbThread(Runnable runnable) {
-        executorServiceInstance.doOneTaskInGenerateThumbThreadPool(runnable);
-    }
-
-    public void stopGenerateThumbThreadNow(){
-        executorServiceInstance.shutdownGenerateThumbThreadPoolNow();
-    }
-
-    public void runOnGenerateMiniThumbThread(Callable<Boolean> callable) {
-        executorServiceInstance.doOneTaskInGenerateMiniThumbThreadPool(callable);
-    }
-
-    public void stopGenerateMiniThumbThreadNow(){
-        executorServiceInstance.shutdownGenerateMiniThumbThreadPoolNow();
-    }
-
-    public void runOnUploadMediaThread(Callable<Boolean> callable) {
-        executorServiceInstance.doOneTaskInUploadMediaThreadPool(callable);
-    }
-
-    public void runOnUploadMediaThread(Runnable runnable){
-        executorServiceInstance.doOneTaskInUploadMediaThreadPool(runnable);
-    }
-
-    public void stopUploadMediaThreadNow(){
-        executorServiceInstance.shutdownUploadMediaThreadPoolNow();
-    }
-
-    public void stopUploadMediaThread(){
-        executorServiceInstance.shutdownUploadMediaThreadPool();
-    }
-
-    public void runOnMainThread(Runnable runnable) {
-
-        handler.post(runnable);
-    }
-
+    void runOnMainThread(Runnable runnable);
 
 }

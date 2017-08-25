@@ -22,4 +22,6 @@ public interface MediaDataSourceRepository {
 
     List<Media> getLocalMedia();
 
+    void getStationMediaForceRefresh(BaseLoadDataCallback<Media> callback);
+
 }

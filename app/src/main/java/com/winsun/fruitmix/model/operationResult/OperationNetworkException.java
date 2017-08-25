@@ -31,6 +31,10 @@ public class OperationNetworkException extends OperationResult {
         return resultMessage;
     }
 
+    public int getResponseCode() {
+        return responseCode;
+    }
+
     @Override
     public OperationResultType getOperationResultType() {
         return OperationResultType.NETWORK_EXCEPTION;

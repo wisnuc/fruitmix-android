@@ -13,5 +13,6 @@ public interface EquipmentSearchView {
 
     void handleLoginWithUserFail(Equipment equipment, User user);
 
+    void setBackgroundColor(int color);
 
 }

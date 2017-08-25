@@ -169,7 +169,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     @Override
-    public boolean uploadFile(HttpRequest httpRequest, LocalFile localFile) {
+    public HttpResponse uploadFile(HttpRequest httpRequest, LocalFile localFile) throws MalformedURLException, IOException, SocketTimeoutException{
 
         try {
 
@@ -195,20 +195,26 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             Response response = executeRequest(request);
 
-            boolean result = handleResponseCode(response);
+            String str = "";
+
+            int responseCode = response.code();
+
+            if (handleResponseCode(response)) {
+
+                str = response.body().string();
+
+            }
 
             response.close();
 
-            return result;
+            Log.d(TAG, "remoteCallMethod: after read response body" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            return new HttpResponse(responseCode, str);
 
-            return false;
         } catch (JSONException e) {
             e.printStackTrace();
 
-            return false;
+            return null;
         }
 
     }

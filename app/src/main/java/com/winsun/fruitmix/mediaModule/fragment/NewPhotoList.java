@@ -10,8 +10,8 @@ import android.databinding.ViewDataBinding;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Process;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,6 +32,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.NewPhotoLayoutBinding;
 import com.winsun.fruitmix.databinding.NewPhotoTitleItemBinding;
@@ -46,9 +47,11 @@ import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
+import com.winsun.fruitmix.mediaModule.model.NewPhotoListViewModel;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.util.Util;
@@ -73,6 +76,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     private Activity containerActivity;
     private View view;
 
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
 
     private int mSpanCount = 3;
@@ -130,6 +134,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     private NoContentViewModel noContentViewModel;
     private LoadingViewModel loadingViewModel;
 
+    private NewPhotoListViewModel newPhotoListViewModel;
+
     private Animator scaleAnimator;
 
     private MediaDataSourceRepository mediaDataSourceRepository;
@@ -152,6 +158,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         loadingViewModel = new LoadingViewModel();
 
         binding.setLoadingViewModel(loadingViewModel);
+
+        newPhotoListViewModel = new NewPhotoListViewModel();
+
+        binding.setNewPhotoListViewModel(newPhotoListViewModel);
+
+        mSwipeRefreshLayout = binding.swipeRefreshLayout;
+
+        initSwipeRefreshLayout();
 
         mRecyclerView = binding.photoRecyclerview;
 
@@ -181,7 +195,21 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(containerActivity);
 
-        threadManager = ThreadManager.getInstance();
+        threadManager = ThreadManagerImpl.getInstance();
+    }
+
+    private void initSwipeRefreshLayout() {
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                refreshStationMediaForceRefresh();
+
+                if (mSwipeRefreshLayout.isRefreshing())
+                    mSwipeRefreshLayout.setRefreshing(false);
+
+            }
+        });
     }
 
     @Override
@@ -220,6 +248,26 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     public void setAlreadySelectedImageKeyArrayList(List<String> alreadySelectedImageKeyArrayList) {
         this.alreadySelectedImageKeyArrayList = alreadySelectedImageKeyArrayList;
+    }
+
+    private void refreshStationMediaForceRefresh(){
+
+        threadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+
+                mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallbackImpl<Media>(){
+                    @Override
+                    public void onSucceed(List<Media> data, OperationResult operationResult) {
+                        super.onSucceed(data, operationResult);
+
+                        handleGetMediaSucceed(data,operationResult);
+                    }
+                });
+
+            }
+        });
+
     }
 
     @Override
@@ -266,31 +314,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 Log.d(TAG, "onSucceed: get media");
 
-                threadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        initImageLoader();
-
-                        final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
-
-                        if (operationResult.getOperationResultType() == OperationResultType.HAS_NEW_MEDIA)
-                            loader.setNeedRefreshData(true);
-
-                        loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
-                            @Override
-                            public void onDataLoadFinished() {
-
-                                Log.d(TAG, "onDataLoadFinished: ");
-
-                                doAfterReloadData(loader);
-
-                                mIsLoaded = true;
-                            }
-                        }, data);
-
-                    }
-                });
+                handleGetMediaSucceed(data, operationResult);
 
             }
 
@@ -307,6 +331,34 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             }
         });
 
+    }
+
+    private void handleGetMediaSucceed(final List<Media> data, final OperationResult operationResult) {
+        threadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+
+                initImageLoader();
+
+                final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
+
+                if (operationResult.getOperationResultType() == OperationResultType.HAS_NEW_MEDIA)
+                    loader.setNeedRefreshData(true);
+
+                loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
+                    @Override
+                    public void onDataLoadFinished() {
+
+                        Log.d(TAG, "onDataLoadFinished: ");
+
+                        doAfterReloadData(loader);
+
+                        mIsLoaded = true;
+                    }
+                }, data);
+
+            }
+        });
     }
 
     public boolean isLoaded() {
@@ -332,7 +384,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             noContentViewModel.showNoContent.set(true);
 
-            mRecyclerView.setVisibility(View.GONE);
+            newPhotoListViewModel.showContent.set(false);
 
             if (mPhotoListListener != null)
                 mPhotoListListener.onNoPhotoItem(true);
@@ -341,7 +393,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             noContentViewModel.showNoContent.set(false);
 
-            mRecyclerView.setVisibility(View.VISIBLE);
+            newPhotoListViewModel.showContent.set(true);
 
             mPhotoRecycleAdapter.notifyDataSetChanged();
 

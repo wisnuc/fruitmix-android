@@ -15,15 +15,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/equipment_ui_blue"
-        android:orientation="vertical">
+        android:background="@{equipmentItemViewModel.backgroundColorID}"
+        android:orientation="vertical"
+        tools:background="@color/equipment_ui_blue">
 
         <android.support.v7.widget.CardView
             android:layout_width="296dp"
             android:layout_height="166dp"
             android:layout_gravity="center"
             android:orientation="vertical"
-            app:cardBackgroundColor="@color/login_ui_blue"
+            app:cardBackgroundColor="@{equipmentItemViewModel.cardBackgroundColorID,default=@color/login_ui_blue}"
             app:cardCornerRadius="5dp">
 
             <RelativeLayout
@@ -38,7 +39,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/equipment_215i" />
+                    android:src="@{equipmentItemViewModel.equipmentIconID}"
+                    tools:src="@drawable/equipment_215i" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -51,7 +53,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@{equipmentItemViewModel.name}"
+                        android:text="@{equipmentItemViewModel.type}"
                         android:textColor="@color/eighty_seven_percent_white"
                         android:textSize="16dp"
                         tools:text="WS215i" />
@@ -59,7 +61,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="我的设备"
+                        android:text="@{equipmentItemViewModel.label}"
                         android:textColor="@color/fifty_four_percent_white"
                         android:textSize="14dp" />
 
@@ -79,8 +81,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/equipment_info" />
-
+                    android:src="@drawable/equipment_info"
+                    android:visibility="gone" />
 
             </RelativeLayout>
 

@@ -20,6 +20,8 @@ public class Equipment {
     private String model;
     private String serialNumber;
 
+    private EquipmentInfo equipmentInfo;
+
     public Equipment(String serviceName, List<String> hosts, int port) {
         this.serviceName = serviceName;
         this.hosts = hosts;
@@ -71,6 +73,14 @@ public class Equipment {
 
     public String getEquipmentName() {
         return getModel() + "-" + getSerialNumber();
+    }
+
+    public EquipmentInfo getEquipmentInfo() {
+        return equipmentInfo;
+    }
+
+    public void setEquipmentInfo(EquipmentInfo equipmentInfo) {
+        this.equipmentInfo = equipmentInfo;
     }
 
     public static Equipment createEquipment(BonjourService bonjourService) {

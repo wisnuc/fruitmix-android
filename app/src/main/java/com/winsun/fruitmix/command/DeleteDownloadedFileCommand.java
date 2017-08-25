@@ -2,22 +2,18 @@ package com.winsun.fruitmix.command;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
-import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
-import com.winsun.fruitmix.model.OperationTargetType;
-import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -41,7 +37,7 @@ public class DeleteDownloadedFileCommand extends AbstractCommand {
     @Override
     public void execute() {
 
-        ThreadManager threadManager = ThreadManager.getInstance();
+        ThreadManager threadManager = ThreadManagerImpl.getInstance();
 
         threadManager.runOnCacheThread(new Callable<Boolean>() {
             @Override

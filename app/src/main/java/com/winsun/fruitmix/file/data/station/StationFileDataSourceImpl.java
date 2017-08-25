@@ -16,11 +16,16 @@ import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.model.operationResult.OperationJSONException;
+import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
+
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -59,7 +64,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     }
 
     @Override
-    public void getFile(String rootUUID,final String folderUUID, BaseLoadDataCallback<AbstractRemoteFile> callback) {
+    public void getFile(String rootUUID, final String folderUUID, BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(LIST_FILE_PARAMETER + "/" + rootUUID + "/dirs/" + folderUUID);
 
@@ -119,15 +124,32 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         Log.i(TAG, "uploadFile: start upload: " + httpRequest.getUrl());
 
-        boolean result = iHttpFileUtil.uploadFile(httpRequest, file);
+        HttpResponse httpResponse;
 
-        Log.i(TAG, "uploadFile: result: " + (result ? "succeed" : "fail"));
+        try {
 
-        if (result)
-            callback.onSucceed(true, new OperationSuccess());
-        else
+            httpResponse = iHttpFileUtil.uploadFile(httpRequest, file);
+
+            Log.i(TAG, "uploadFile: http response code: " + httpResponse.getResponseCode());
+
+            if (httpResponse.getResponseCode() == 200)
+                callback.onSucceed(true, new OperationSuccess());
+            else
+                callback.onFail(new OperationNetworkException(httpResponse.getResponseCode()));
+
+        } catch (MalformedURLException e) {
+
+            callback.onFail(new OperationMalformedUrlException());
+
+        } catch (SocketTimeoutException ex) {
+
+            callback.onFail(new OperationSocketTimeoutException());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
             callback.onFail(new OperationIOException());
-
+        }
 
     }
 }

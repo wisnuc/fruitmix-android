@@ -215,6 +215,8 @@
     <!-- Errors -->
     <string name="network_exception">Network exception,error code：%1$s</string>    <!-- String + ErrorCode -->
 
+    <string name="connnect_server_fail">Connect server failed</string>
+
     <!-- network error -->
     <string name="no_network">No internet connection, check your network.</string>
     <string name="socket_timeout_exception">Socket Timeout Exception</string>

@@ -19,7 +19,6 @@ import android.widget.ImageView;
         @BindingMethod(type = ImageView.class,
                 attribute = "android:src",
                 method = "setImageResource"),
-
 })
 
 public class DataBindingSetting {

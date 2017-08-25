@@ -9,40 +9,21 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.databinding.ActivityLoginBinding;
-import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginPresenter;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.login.LoginViewModel;
-import com.winsun.fruitmix.model.OperationResultType;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.token.LoadTokenParam;
-import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.Collections;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class LoginActivity extends AppCompatActivity implements LoginPresenter {
 
@@ -182,7 +163,7 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
 
         final LoadTokenParam loadTokenParam = new LoadTokenParam(mGateway, mUserUUid, mPwd, mEquipmentGroupName);
 
-        ThreadManager.getInstance().runOnCacheThread(new Runnable() {
+        ThreadManagerImpl.getInstance().runOnCacheThread(new Runnable() {
             @Override
             public void run() {
                 loginInThread(loadTokenParam);

@@ -4,8 +4,9 @@ import android.databinding.ViewDataBinding;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.winsun.fruitmix.EquipmentSearchActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -21,11 +21,11 @@ import com.winsun.fruitmix.databinding.EquipmentItemBinding;
 import com.winsun.fruitmix.databinding.EquipmentUserItemBinding;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.Equipment;
+import com.winsun.fruitmix.model.EquipmentInfo;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewholder.BaseBindingViewHolder;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -51,6 +51,8 @@ public class EquipmentPresenter {
 
     private LoadingViewModel loadingViewModel;
 
+    private NoContentViewModel noContentViewModel;
+
     private final List<Equipment> mUserLoadedEquipments = new ArrayList<>();
 
     private Equipment currentEquipment;
@@ -61,9 +63,16 @@ public class EquipmentPresenter {
 
     private static final int DATA_CHANGE = 0x0001;
 
-    private static final int RETRY_GET_USER = 0x0002;
+    private static final int RETRY_GET_DATA = 0x0002;
+
+    private static final int DISCOVERY_TIMEOUT = 0x0003;
+
+    private static final int RESUME_DISCOVERY = 0x0004;
 
     private static final int RETRY_DELAY_MILLSECOND = 20 * 1000;
+
+    private static final int DISCOVERY_TIMEOUT_TIME = 6 * 1000;
+    private static final int RESUME_DISCOVERY_INTERVAL = 3 * 1000;
 
     private EquipmentSearchManager mEquipmentSearchManager;
 
@@ -71,13 +80,15 @@ public class EquipmentPresenter {
 
     private LoginUseCase loginUseCase;
 
-    private ThreadManager threadManager;
+    private ThreadManager threadManagerImpl;
 
     private Random random;
 
     private int preAvatarBgColor = 0;
 
     private boolean onPause = false;
+
+    private boolean hasFindEquipment = false;
 
     private class CustomHandler extends Handler {
 
@@ -107,28 +118,56 @@ public class EquipmentPresenter {
 
                     break;
 
-                case RETRY_GET_USER:
+                case RETRY_GET_DATA:
 
                     Equipment equipment = (Equipment) msg.obj;
 
                     Log.d(TAG, "handleMessage: retry get user equipment host0: " + equipment.getHosts().get(0));
 
-                    getUserList(equipment);
+                    getEquipmentInfo(equipment);
+
+                    break;
+
+                case DISCOVERY_TIMEOUT:
+
+                    if (hasFindEquipment)
+                        return;
+
+                    noContentViewModel.showNoContent.set(true);
+                    loadingViewModel.showLoading.set(false);
+
+                    stopDiscovery();
+
+                    mHandler.sendEmptyMessageDelayed(RESUME_DISCOVERY, RESUME_DISCOVERY_INTERVAL);
+
+                    break;
+
+                case RESUME_DISCOVERY:
+
+                    noContentViewModel.showNoContent.set(false);
+                    loadingViewModel.showLoading.set(true);
+
+                    startDiscovery();
+
+                    mHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT, DISCOVERY_TIMEOUT_TIME);
+
+                    break;
 
                 default:
             }
         }
     }
 
-    public EquipmentPresenter(LoadingViewModel loadingViewModel, EquipmentSearchView equipmentSearchView,
+    public EquipmentPresenter(LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel, EquipmentSearchView equipmentSearchView,
                               EquipmentSearchManager mEquipmentSearchManager, EquipmentRemoteDataSource mEquipmentRemoteDataSource,
-                              LoginUseCase loginUseCase, ThreadManager threadManager) {
+                              LoginUseCase loginUseCase, ThreadManager threadManagerImpl) {
         this.loadingViewModel = loadingViewModel;
+        this.noContentViewModel = noContentViewModel;
         this.equipmentSearchView = equipmentSearchView;
         this.mEquipmentSearchManager = mEquipmentSearchManager;
         this.mEquipmentRemoteDataSource = mEquipmentRemoteDataSource;
         this.loginUseCase = loginUseCase;
-        this.threadManager = threadManager;
+        this.threadManagerImpl = threadManagerImpl;
 
         mUserExpandableLists = new ArrayList<>();
 
@@ -149,9 +188,13 @@ public class EquipmentPresenter {
         return equipmentViewPagerAdapter;
     }
 
-    public void onResume() {
+    public void onCreate(){
 
-        startDiscovery();
+        mHandler.sendEmptyMessage(RESUME_DISCOVERY);
+
+    }
+
+    public void onResume() {
 
         onPause = false;
 
@@ -159,18 +202,21 @@ public class EquipmentPresenter {
 
     public void onPause() {
 
-        stopDiscovery();
-
         onPause = true;
 
-        mHandler.removeMessages(RETRY_GET_USER);
+        mHandler.removeMessages(RETRY_GET_DATA);
         mHandler.removeMessages(DATA_CHANGE);
 
     }
 
     public void onDestroy() {
 
-        mHandler.removeMessages(RETRY_GET_USER);
+        stopDiscovery();
+
+        mHandler.removeMessages(DISCOVERY_TIMEOUT);
+        mHandler.removeMessages(RESUME_DISCOVERY);
+
+        mHandler.removeMessages(RETRY_GET_DATA);
         mHandler.removeMessages(DATA_CHANGE);
 
         mHandler = null;
@@ -184,7 +230,7 @@ public class EquipmentPresenter {
         hosts.add(ip);
 
         Equipment equipment = new Equipment("Winsuc Appliction " + ip, hosts, 6666);
-        getUserList(equipment);
+        getEquipmentInfo(equipment);
     }
 
     public void refreshEquipment(int position) {
@@ -214,9 +260,16 @@ public class EquipmentPresenter {
             @Override
             public void call(Equipment equipment) {
 
-                getUserList(equipment);
+                getEquipmentInfo(equipment);
+
+                hasFindEquipment = true;
+
+                mHandler.removeMessages(DISCOVERY_TIMEOUT);
+
             }
         });
+
+        mHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT, DISCOVERY_TIMEOUT_TIME);
 
     }
 
@@ -225,13 +278,13 @@ public class EquipmentPresenter {
         mEquipmentSearchManager.stopDiscovery();
     }
 
-    private void getUserList(final Equipment equipment) {
+    private void getEquipmentInfo(final Equipment equipment) {
 
-        threadManager.runOnCacheThread(new Runnable() {
+        threadManagerImpl.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
 
-                getUserInThread(equipment);
+                getEquipmentInfoInThread(equipment);
 
             }
         });
@@ -239,19 +292,12 @@ public class EquipmentPresenter {
 
     }
 
-    private void getEquipmentHostAlias(final Equipment equipment) {
-        mEquipmentRemoteDataSource.getEquipmentHostAlias(equipment, new BaseLoadDataCallback<String>() {
+    private void getEquipmentInfoInThread(final Equipment equipment) {
+        mEquipmentRemoteDataSource.getEquipmentInfo(equipment.getHosts().get(0), new BaseLoadDataCallback<EquipmentInfo>() {
             @Override
-            public void onSucceed(List<String> data, OperationResult operationResult) {
+            public void onSucceed(List<EquipmentInfo> data, OperationResult operationResult) {
 
-                for (String alias : data) {
-
-                    List<String> hosts = equipment.getHosts();
-                    if (!hosts.contains(alias)) {
-                        hosts.add(alias);
-                    }
-
-                }
+                equipment.setEquipmentInfo(data.get(0));
 
                 getUserInThread(equipment);
 
@@ -259,6 +305,12 @@ public class EquipmentPresenter {
 
             @Override
             public void onFail(OperationResult operationResult) {
+
+                EquipmentInfo equipmentInfo = new EquipmentInfo();
+                equipmentInfo.setLabel("未知");
+                equipmentInfo.setType("未知");
+
+                equipment.setEquipmentInfo(equipmentInfo);
 
                 getUserInThread(equipment);
 
@@ -285,7 +337,7 @@ public class EquipmentPresenter {
 
     private void handleRetrieveUserFail(Equipment equipment) {
         if (mHandler != null && !onPause) {
-            Message message = Message.obtain(mHandler, RETRY_GET_USER, equipment);
+            Message message = Message.obtain(mHandler, RETRY_GET_DATA, equipment);
             mHandler.sendMessageDelayed(message, RETRY_DELAY_MILLSECOND);
         }
     }
@@ -343,7 +395,35 @@ public class EquipmentPresenter {
 
             Equipment equipment = mEquipments.get(position);
 
-            equipmentItemViewModel.name.set(equipment.getModel() + "-" + equipment.getSerialNumber());
+            EquipmentInfo equipmentInfo = equipment.getEquipmentInfo();
+
+            if (equipmentInfo != null) {
+
+                equipmentItemViewModel.type.set(equipmentInfo.getType());
+                equipmentItemViewModel.label.set(equipmentInfo.getLabel());
+
+                if (equipmentInfo.getType().equals(EquipmentInfo.WS215I)) {
+
+                    equipmentItemViewModel.equipmentIconID.set(R.drawable.equipment_215i);
+
+                    equipmentItemViewModel.cardBackgroundColorID.set(ContextCompat.getColor(container.getContext(), R.color.login_ui_blue));
+
+                    equipmentItemViewModel.backgroundColorID.set(R.color.equipment_ui_blue);
+
+                    equipmentSearchView.setBackgroundColor(R.color.equipment_ui_blue);
+
+
+                } else {
+
+                    equipmentItemViewModel.equipmentIconID.set(R.drawable.virtual_machine);
+                    equipmentItemViewModel.cardBackgroundColorID.set(ContextCompat.getColor(container.getContext(), R.color.virtual_machine_foreground_color));
+                    equipmentItemViewModel.backgroundColorID.set(R.color.virtual_machine_background_color);
+
+                    equipmentSearchView.setBackgroundColor(R.color.virtual_machine_background_color);
+
+                }
+
+            }
 
             List<String> hosts = equipment.getHosts();
 
@@ -484,7 +564,7 @@ public class EquipmentPresenter {
                 @Override
                 public void onClick(View v) {
 
-                    threadManager.runOnCacheThread(new Runnable() {
+                    threadManagerImpl.runOnCacheThread(new Runnable() {
                         @Override
                         public void run() {
                             loginWithUserInThread(user);
@@ -503,7 +583,7 @@ public class EquipmentPresenter {
             @Override
             public void onSucceed(final Boolean data, OperationResult result) {
 
-                threadManager.runOnMainThread(new Runnable() {
+                threadManagerImpl.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
 
@@ -516,7 +596,7 @@ public class EquipmentPresenter {
             @Override
             public void onFail(OperationResult result) {
 
-                threadManager.runOnMainThread(new Runnable() {
+                threadManagerImpl.runOnMainThread(new Runnable() {
                     @Override
                     public void run() {
                         equipmentSearchView.handleLoginWithUserFail(currentEquipment, user);

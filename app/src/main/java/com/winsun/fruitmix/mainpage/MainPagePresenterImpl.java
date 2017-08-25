@@ -13,20 +13,16 @@ import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
-import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.http.InjectHttp;
-import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.invitation.InvitationRemoteDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.wxapi.MiniProgram;
 
@@ -91,7 +87,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         initNavigationMenuItems(context);
 
-        threadManager = ThreadManager.getInstance();
+        threadManager = ThreadManagerImpl.getInstance();
 
         iwxapi = MiniProgram.registerToWX(context);
 
