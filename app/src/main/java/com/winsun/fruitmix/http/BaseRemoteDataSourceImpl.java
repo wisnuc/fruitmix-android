@@ -9,7 +9,7 @@ public class BaseRemoteDataSourceImpl {
     protected IHttpUtil iHttpUtil;
     protected HttpRequestFactory httpRequestFactory;
 
-    protected  BaseHttpCallWrapper wrapper;
+    protected BaseHttpCallWrapper wrapper;
 
     public BaseRemoteDataSourceImpl(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
         this.iHttpUtil = iHttpUtil;

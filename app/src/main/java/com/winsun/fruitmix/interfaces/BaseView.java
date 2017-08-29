@@ -17,4 +17,6 @@ public interface BaseView {
     void dismissDialog();
 
     void showToast(String text);
+
+    void showCustomErrorCode(String text);
 }

@@ -1,9 +1,11 @@
 package com.winsun.fruitmix.file.data.download;
 
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.executor.DownloadFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.util.FileUtil;
 
 import java.util.concurrent.Future;
@@ -18,13 +20,16 @@ public class FileStartDownloadState extends FileDownloadState {
 
     private String currentUserUUID;
 
+    private ThreadManager threadManager;
 
-    public FileStartDownloadState(FileDownloadItem fileDownloadItem,StationFileRepository stationFileRepository,String currentUserUUID) {
+    public FileStartDownloadState(FileDownloadItem fileDownloadItem, StationFileRepository stationFileRepository, ThreadManager threadManager, String currentUserUUID) {
         super(fileDownloadItem);
 
         this.stationFileRepository = stationFileRepository;
 
         this.currentUserUUID = currentUserUUID;
+
+        this.threadManager = threadManager;
 
     }
 
@@ -40,9 +45,9 @@ public class FileStartDownloadState extends FileDownloadState {
             getFileDownloadItem().setFileDownloadState(new FileDownloadNoEnoughSpaceState(getFileDownloadItem()));
         } else {
 
-            ExecutorServiceInstance instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-            DownloadFileTask downloadFileTask = new DownloadFileTask(this, stationFileRepository,currentUserUUID);
-            Future<Boolean> future = instance.doOneTaskInDownloadFileThreadPool(downloadFileTask);
+            DownloadFileTask downloadFileTask = new DownloadFileTask(this, stationFileRepository, currentUserUUID);
+
+            Future<Boolean> future = threadManager.runOnDownloadFileThread(downloadFileTask);
 
             getFileDownloadItem().setFuture(future);
         }

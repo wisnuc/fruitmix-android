@@ -4,6 +4,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
+import com.winsun.fruitmix.mock.MockThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationJSONException;
@@ -21,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
@@ -70,7 +72,7 @@ public class UserDataRepositoryImplTest {
 
         MockitoAnnotations.initMocks(this);
 
-        userDataRepositoryImpl = UserDataRepositoryImpl.getInstance(userDBDataSource, userRemoteDataSource);
+        userDataRepositoryImpl = UserDataRepositoryImpl.getInstance(userDBDataSource, userRemoteDataSource, new MockThreadManager());
 
     }
 
@@ -185,7 +187,17 @@ public class UserDataRepositoryImplTest {
     @Test
     public void getUser_RetrieveFromRemoteSucceed_deleteOldDataFromDB_InsertNewDataToDB() {
 
-        userDataRepositoryImpl.getUsers(null);
+        userDataRepositoryImpl.getUsers(new BaseLoadDataCallback<User>() {
+            @Override
+            public void onSucceed(List<User> data, OperationResult operationResult) {
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+            }
+        });
 
         verify(userRemoteDataSource).getUsers(loadRemoteDataCallbackArgumentCaptor.capture());
 

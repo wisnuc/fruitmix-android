@@ -26,11 +26,23 @@
             android:layout_marginRight="16dp"
             android:src="@drawable/file_icon" />
 
+        <ImageButton
+            android:id="@+id/downloading_file_item_menu"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:background="@null"
+            android:clickable="true"
+            android:src="@drawable/ic_more_vert_black" />
+
         <LinearLayout
             android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/downloading_file_item_menu"
             android:layout_toRightOf="@id/file_icon"
             android:orientation="vertical">
 

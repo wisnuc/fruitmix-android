@@ -1,10 +1,13 @@
 package com.winsun.fruitmix.user.datasource;
 
+import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
  * Created by Administrator on 2017/7/11.
  */
 
-public class UserDataRepositoryImpl implements UserDataRepository {
+public class UserDataRepositoryImpl extends BaseDataRepository implements UserDataRepository {
 
     private static UserDataRepositoryImpl instance;
 
@@ -27,17 +30,18 @@ public class UserDataRepositoryImpl implements UserDataRepository {
 
     boolean cacheDirty = true;
 
-    private UserDataRepositoryImpl(UserDBDataSource userDBDataSource, UserRemoteDataSource userRemoteDataSource) {
+    private UserDataRepositoryImpl(UserDBDataSource userDBDataSource, UserRemoteDataSource userRemoteDataSource, ThreadManager threadManager) {
+        super(threadManager);
         this.userDBDataSource = userDBDataSource;
         this.userRemoteDataSource = userRemoteDataSource;
 
         cacheUsers = new ConcurrentHashMap<>();
     }
 
-    public static UserDataRepositoryImpl getInstance(UserDBDataSource userDBDataSource, UserRemoteDataSource userRemoteDataSource) {
+    public static UserDataRepositoryImpl getInstance(UserDBDataSource userDBDataSource, UserRemoteDataSource userRemoteDataSource, ThreadManager threadManager) {
 
         if (instance == null)
-            instance = new UserDataRepositoryImpl(userDBDataSource, userRemoteDataSource);
+            instance = new UserDataRepositoryImpl(userDBDataSource, userRemoteDataSource, threadManager);
 
         return instance;
     }
@@ -54,32 +58,42 @@ public class UserDataRepositoryImpl implements UserDataRepository {
     @Override
     public void getUsers(final BaseLoadDataCallback<User> callback) {
 
+        final BaseLoadDataCallback<User> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
+
         if (!cacheDirty) {
-            callback.onSucceed(new ArrayList<>(cacheUsers.values()), new OperationSuccess());
+
+            runOnMainThreadCallback.onSucceed(new ArrayList<>(cacheUsers.values()), new OperationSuccess());
 
             return;
         }
 
-        userRemoteDataSource.getUsers(new BaseLoadDataCallback<User>() {
+        mThreadManager.runOnCacheThread(new Runnable() {
             @Override
-            public void onSucceed(List<User> data, OperationResult operationResult) {
+            public void run() {
 
-                userDBDataSource.clearUsers();
-                userDBDataSource.insertUser(data);
+                userRemoteDataSource.getUsers(new BaseLoadDataCallback<User>() {
+                    @Override
+                    public void onSucceed(List<User> data, OperationResult operationResult) {
 
-                cacheUsers.clear();
-                cacheUsers.putAll(buildRemoteUserMapKeyIsUUID(data));
+                        userDBDataSource.clearUsers();
+                        userDBDataSource.insertUser(data);
 
-                cacheDirty = false;
+                        cacheUsers.clear();
+                        cacheUsers.putAll(buildRemoteUserMapKeyIsUUID(data));
 
-                if (callback != null)
-                    callback.onSucceed(data, operationResult);
-            }
+                        cacheDirty = false;
 
-            @Override
-            public void onFail(OperationResult operationResult) {
+                        if (runOnMainThreadCallback != null)
+                            runOnMainThreadCallback.onSucceed(data, operationResult);
+                    }
 
-                getUserFromDB(callback);
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        getUserFromDB(runOnMainThreadCallback);
+                    }
+                });
+
             }
         });
 
@@ -121,25 +135,34 @@ public class UserDataRepositoryImpl implements UserDataRepository {
 
 
     @Override
-    public void insertUser(String userName, String userPwd, final BaseOperateDataCallback<User> callback) {
+    public void insertUser(final String userName, final String userPwd, final BaseOperateDataCallback<User> callback) {
 
-        userRemoteDataSource.insertUser(userName, userPwd, new BaseOperateDataCallback<User>() {
+        final BaseOperateDataCallback<User> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
             @Override
-            public void onSucceed(User data, OperationResult result) {
+            public void run() {
 
-                userDBDataSource.insertUser(Collections.singletonList(data));
+                userRemoteDataSource.insertUser(userName, userPwd, new BaseOperateDataCallback<User>() {
+                    @Override
+                    public void onSucceed(User data, OperationResult result) {
 
-                cacheUsers.put(data.getUuid(), data);
+                        userDBDataSource.insertUser(Collections.singletonList(data));
 
-                if (callback != null)
-                    callback.onSucceed(data, result);
+                        cacheUsers.put(data.getUuid(), data);
 
-            }
+                        if (runOnMainThreadCallback != null)
+                            runOnMainThreadCallback.onSucceed(data, result);
 
-            @Override
-            public void onFail(OperationResult result) {
-                if (callback != null)
-                    callback.onFail(result);
+                    }
+
+                    @Override
+                    public void onFail(OperationResult result) {
+                        if (runOnMainThreadCallback != null)
+                            runOnMainThreadCallback.onFail(result);
+                    }
+                });
+
             }
         });
 
@@ -148,5 +171,11 @@ public class UserDataRepositoryImpl implements UserDataRepository {
     @Override
     public String getCurrentUserHome() {
         return userRemoteDataSource.getCurrentUserHome();
+    }
+
+
+    @Override
+    public boolean clearAllUsersInDB() {
+        return userDBDataSource.clearUsers();
     }
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 
 /**
  * Created by Administrator on 2017/7/24.
@@ -16,7 +17,7 @@ public class InjectUser {
 
         return UserDataRepositoryImpl.getInstance(new UserDBDataSourceImpl(DBUtils.getInstance(context)),
                 new UserRemoteDataSourceImpl(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory(),
-                        InjectSystemSettingDataSource.provideSystemSettingDataSource(context)));
+                        InjectSystemSettingDataSource.provideSystemSettingDataSource(context)), ThreadManagerImpl.getInstance());
 
     }
 

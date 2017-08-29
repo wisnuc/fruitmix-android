@@ -119,7 +119,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private Bundle reenterState;
 
-    private List<String> alreadySelectedImageKeyArrayList;
+    private List<String> alreadySelectedImageKeysFromChooseActivity;
 
     private boolean mPreLoadPhoto = false;
 
@@ -196,6 +196,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(containerActivity);
 
         threadManager = ThreadManagerImpl.getInstance();
+
     }
 
     private void initSwipeRefreshLayout() {
@@ -205,11 +206,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 refreshStationMediaForceRefresh();
 
-                if (mSwipeRefreshLayout.isRefreshing())
-                    mSwipeRefreshLayout.setRefreshing(false);
-
             }
         });
+    }
+
+    private void finishSwipeRefreshAnimation() {
+        if (mSwipeRefreshLayout.isRefreshing())
+            mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -238,49 +241,54 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         mSelectMode = selectMode;
 
-        if (mSelectMode)
+        if (mSelectMode) {
             clearSelectedPhoto();
+
+            mSwipeRefreshLayout.setEnabled(false);
+
+        } else {
+
+            mSwipeRefreshLayout.setEnabled(true);
+
+        }
+
 
         mUseAnim = true;
 
         mPhotoRecycleAdapter.notifyDataSetChanged();
     }
 
-    public void setAlreadySelectedImageKeyArrayList(List<String> alreadySelectedImageKeyArrayList) {
-        this.alreadySelectedImageKeyArrayList = alreadySelectedImageKeyArrayList;
+    public void setAlreadySelectedImageKeysFromChooseActivity(List<String> alreadySelectedImageKeysFromChooseActivity) {
+        this.alreadySelectedImageKeysFromChooseActivity = alreadySelectedImageKeysFromChooseActivity;
     }
 
-    private void refreshStationMediaForceRefresh(){
+    private void refreshStationMediaForceRefresh() {
 
-        threadManager.runOnCacheThread(new Runnable() {
+        mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallbackImpl<Media>() {
             @Override
-            public void run() {
+            public void onSucceed(List<Media> data, OperationResult operationResult) {
+                super.onSucceed(data, operationResult);
 
-                mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallbackImpl<Media>(){
-                    @Override
-                    public void onSucceed(List<Media> data, OperationResult operationResult) {
-                        super.onSucceed(data, operationResult);
+                handleGetMediaSucceed(data, operationResult);
+            }
 
-                        handleGetMediaSucceed(data,operationResult);
-                    }
-                });
+            @Override
+            public void onFail(OperationResult operationResult) {
+                super.onFail(operationResult);
+
+                finishSwipeRefreshAnimation();
 
             }
         });
+
 
     }
 
     @Override
     public void refreshView() {
 
-        threadManager.runOnCacheThread(new Runnable() {
-            @Override
-            public void run() {
 
-                getMediaInThread();
-
-            }
-        });
+        getMediaInThread();
 
 
 //        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded()) {
@@ -321,12 +329,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                threadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        loadingViewModel.showLoading.set(true);
-                    }
-                });
+                loadingViewModel.showLoading.set(true);
 
             }
         });
@@ -334,31 +337,29 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     }
 
     private void handleGetMediaSucceed(final List<Media> data, final OperationResult operationResult) {
-        threadManager.runOnMainThread(new Runnable() {
+
+        finishSwipeRefreshAnimation();
+
+        initImageLoader();
+
+        final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
+
+        if (operationResult.getOperationResultType() == OperationResultType.HAS_NEW_MEDIA)
+            loader.setNeedRefreshData(true);
+
+        loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
             @Override
-            public void run() {
+            public void onDataLoadFinished() {
 
-                initImageLoader();
+                Log.d(TAG, "onDataLoadFinished: ");
 
-                final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
+                doAfterReloadData(loader);
 
-                if (operationResult.getOperationResultType() == OperationResultType.HAS_NEW_MEDIA)
-                    loader.setNeedRefreshData(true);
-
-                loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
-                    @Override
-                    public void onDataLoadFinished() {
-
-                        Log.d(TAG, "onDataLoadFinished: ");
-
-                        doAfterReloadData(loader);
-
-                        mIsLoaded = true;
-                    }
-                }, data);
-
+                mIsLoaded = true;
             }
-        });
+        }, data);
+
+
     }
 
     public boolean isLoaded() {
@@ -966,7 +967,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 int selectNum = 0;
                 for (Media media : mediaList) {
 
-                    if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(media.getKey()))
+                    if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(media.getKey()))
                         media.setSelected(true);
 
                     if (media.isSelected())
@@ -1117,9 +1118,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (currentMedia == null) return;
 
-            Log.d(TAG, "refreshView: media key: " + currentMedia.getKey());
+            Log.d(TAG, "refreshDownloadItemView: media key: " + currentMedia.getKey());
 
-            if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getKey()))
+            if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(currentMedia.getKey()))
                 currentMedia.setSelected(true);
 
             final ObservableBoolean showPhotoSelectImg = new ObservableBoolean(currentMedia.isSelected());
@@ -1164,13 +1165,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             if (mSelectMode) {
                 boolean selected = currentMedia.isSelected();
                 if (selected && mPhotoIv.getScaleX() == 1) {
-                    scalePhoto(false);
+                    scalePhoto(true);
 
                     showPhotoSelectImg.set(true);
 
                 } else if (!selected && mPhotoIv.getScaleX() != 1) {
 
-                    restorePhoto(false);
+                    restorePhoto(true);
 
                     showPhotoSelectImg.set(false);
 
@@ -1191,10 +1192,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 public void onClick(View v) {
                     if (mSelectMode) {
 
-                        if (!currentMedia.isSharing()) {
-                            Toast.makeText(containerActivity, containerActivity.getString(R.string.photo_not_sharing), Toast.LENGTH_SHORT).show();
-                            return;
-                        } else if (alreadySelectedImageKeyArrayList != null && alreadySelectedImageKeyArrayList.contains(currentMedia.getKey())) {
+                        if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(currentMedia.getKey())) {
                             Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -1292,19 +1290,19 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         }
 
         private void setPhotoItemMargin(int mediaInListPosition) {
-            GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) mImageLayout.getLayoutParams();
-
-            params.height = mItemWidth;
 
             int normalMargin = Util.dip2px(containerActivity, 2.5f);
 
             if ((mediaInListPosition + 1) % mSpanCount == 0) {
-                params.setMargins(normalMargin, normalMargin, normalMargin, 0);
+
+                Util.setMarginAndHeight(mImageLayout, mItemWidth, normalMargin, normalMargin, normalMargin, 0);
+
             } else {
-                params.setMargins(normalMargin, normalMargin, 0, 0);
+
+                Util.setMarginAndHeight(mImageLayout, mItemWidth, normalMargin, normalMargin, 0, 0);
+
             }
 
-            mImageLayout.setLayoutParams(params);
         }
 
         private void scalePhoto(boolean immediate) {
@@ -1339,9 +1337,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         }
 
         private void setPhotoIvLayoutParams(int margin) {
-            RelativeLayout.LayoutParams photoParams = (RelativeLayout.LayoutParams) mPhotoIv.getLayoutParams();
-            photoParams.setMargins(margin, margin, margin, margin);
-            mPhotoIv.setLayoutParams(photoParams);
+
+            Util.setMargin(mPhotoIv, margin, margin, margin, margin);
+
         }
 
         private int getPosition(List<Media> mediaList, Media media) {

@@ -8,5 +8,12 @@ public interface UploadMediaCountChangeListener {
 
     void onUploadMediaCountChanged(int uploadedMediaCount, int totalCount);
 
-    void onGetUploadMediaCountFail();
+    void onUploadMediaFail(int httpErrorCode);
+
+    void onGetUploadMediaCountFail(int httpErrorCode);
+
+    void onCreateFolderFail(int httpErrorCode);
+
+    void onGetFolderFail(int httpErrorCode);
+
 }

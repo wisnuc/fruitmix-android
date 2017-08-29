@@ -32,8 +32,8 @@
 
             <FrameLayout
                 android:id="@+id/folder_icon_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="16dp">
 
@@ -42,7 +42,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="@drawable/round_circle"
-                    android:visibility="@{fileItemViewModel.selectMode?View.VISIBLE:View.GONE,default=invisible}" />
+                    android:visibility="@{fileItemViewModel.selectMode?View.GONE:View.GONE,default=gone}" />
 
                 <ImageView
                     android:id="@+id/folder_icon"

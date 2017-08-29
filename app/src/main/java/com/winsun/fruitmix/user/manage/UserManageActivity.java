@@ -11,6 +11,8 @@ import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.CreateUserActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.ActivityUserManageBinding;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.manage.UserManagePresenterImpl;
 import com.winsun.fruitmix.user.manage.UserManageView;

@@ -20,6 +20,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
 import com.github.druk.rxdnssd.BonjourService;
@@ -47,7 +48,13 @@ public class Util {
 
     public static final String TAG = Util.class.getSimpleName();
 
-    public static final String PORT = "3721";
+    public static final String CUSTOM_ERROR_CODE_HEAD = "8";
+
+    public static final String CUSTOM_ERROR_CODE_UPLOAD_MEDIA = "01";
+    public static final String CUSTOM_ERROR_CODE_GET_UPLOADED_MEDIA = "02";
+    public static final String CUSTOM_ERROR_CODE_GET_ALL_MEDIA_I_CAN_VIEW = "03";
+    public static final String CUSTOM_ERROR_CODE_CREATE_FOLDER = "04";
+    public static final String CUSTOM_ERROR_CODE_GET_FOLDER = "05";
 
     public static final String SHOW_ALBUM_TIPS = "show_album_tips";
     public static final String SHOW_PHOTO_RETURN_TIPS = "show_photo_return_tips";
@@ -419,7 +426,7 @@ public class Util {
 
     }
 
-    public static Pair<View, String>[] createSafeTransitionPairs(View toolbar,Activity activity, boolean includeBottomNavigationView, Pair... otherPairs) {
+    public static Pair<View, String>[] createSafeTransitionPairs(View toolbar, Activity activity, boolean includeBottomNavigationView, Pair... otherPairs) {
 
         // Avoid system UI glitches as described here:
         // https://plus.google.com/+AlexLockwood/posts/RPtwZ5nNebb
@@ -633,5 +640,85 @@ public class Util {
     public static void startActivity(Context context, Class target) {
         context.startActivity(new Intent(context, target));
     }
+
+    public static void setLeftMargin(View view, int left) {
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+
+            params.leftMargin = left;
+
+            view.requestLayout();
+        }
+    }
+
+    public static void setRightMargin(View view, int right) {
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+
+            params.rightMargin = right;
+
+            view.requestLayout();
+        }
+    }
+
+    public static void setBottomMargin(View view, int bottom) {
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+
+            params.bottomMargin = bottom;
+
+            view.requestLayout();
+        }
+    }
+
+    public static void setMargin(View view, int left, int top, int right, int bottom) {
+
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+
+            params.setMargins(left, top, right, bottom);
+
+            view.requestLayout();
+        }
+
+    }
+
+    public static void setHeight(View view, int height) {
+
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+
+            params.height = height;
+
+            view.requestLayout();
+        }
+    }
+
+    public static void setWidthAndHeight(View view, int width, int height) {
+
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+
+            params.width = width;
+            params.height = height;
+
+            view.requestLayout();
+        }
+    }
+
+    public static void setMarginAndHeight(View view, int height, int left, int top, int right, int bottom) {
+
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+
+            params.height = height;
+
+            params.setMargins(left, top, right, bottom);
+
+            view.requestLayout();
+        }
+
+    }
+
 
 }

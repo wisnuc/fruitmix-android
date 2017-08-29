@@ -22,20 +22,21 @@ import android.widget.Toast;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.databinding.ActivityEquipmentSearchBinding;
 import com.winsun.fruitmix.equipment.EquipmentPresenter;
-import com.winsun.fruitmix.equipment.EquipmentRemoteDataSource;
+import com.winsun.fruitmix.equipment.data.EquipmentDataSource;
+import com.winsun.fruitmix.equipment.data.EquipmentRemoteDataSource;
 import com.winsun.fruitmix.equipment.EquipmentSearchView;
-import com.winsun.fruitmix.equipment.InjectEquipment;
+import com.winsun.fruitmix.equipment.EquipmentSearchViewModel;
+import com.winsun.fruitmix.equipment.data.InjectEquipment;
 import com.winsun.fruitmix.equipment.WeChatLoginListener;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.Equipment;
-import com.winsun.fruitmix.equipment.EquipmentSearchManager;
+import com.winsun.fruitmix.equipment.data.EquipmentSearchManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
-import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.wxapi.MiniProgram;
 import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
@@ -68,19 +69,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         ActivityEquipmentSearchBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_equipment_search);
 
         toolbar = binding.toolbar;
+
         viewPagerLayout = binding.viewpagerLayout;
-
-        setBackgroundColor(R.color.equipment_ui_blue);
-
-        LoadingViewModel loadingViewModel = new LoadingViewModel();
-
-        binding.setLoadingViewModel(loadingViewModel);
-
-        NoContentViewModel noContentViewModel = new NoContentViewModel();
-        noContentViewModel.setNoContentText("没有内容");
-        noContentViewModel.setNoContentImgResId(R.drawable.no_file);
-
-        binding.setNoContentViewModel(noContentViewModel);
 
         equipmentViewPager = binding.equipmentViewpager;
 
@@ -88,19 +78,27 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         mContext = this;
 
+        setBackgroundColor(R.color.equipment_ui_blue);
+
+        LoadingViewModel loadingViewModel = new LoadingViewModel();
+
+        binding.setLoadingViewModel(loadingViewModel);
+
+        EquipmentSearchViewModel equipmentSearchViewModel = new EquipmentSearchViewModel();
+
+        binding.setEquipmentSearchViewModel(equipmentSearchViewModel);
+
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         EquipmentSearchManager mEquipmentSearchManager = InjectEquipment.provideEquipmentSearchManager(mContext);
 
-        EquipmentRemoteDataSource mEquipmentRemoteDataSource = InjectEquipment.provideEquipmentRemoteDataSource(mContext);
+        EquipmentDataSource mEquipmentDataSource = InjectEquipment.provideEquipmentDataSource(mContext);
 
         LoginUseCase loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
 
-        ThreadManagerImpl threadManagerImpl = ThreadManagerImpl.getInstance();
-
-        equipmentPresenter = new EquipmentPresenter(loadingViewModel, noContentViewModel, this,
-                mEquipmentSearchManager, mEquipmentRemoteDataSource, loginUseCase, threadManagerImpl);
+        equipmentPresenter = new EquipmentPresenter(loadingViewModel, equipmentSearchViewModel, this,
+                mEquipmentSearchManager, mEquipmentDataSource, loginUseCase);
 
         binding.setWechatLoginListener(this);
 

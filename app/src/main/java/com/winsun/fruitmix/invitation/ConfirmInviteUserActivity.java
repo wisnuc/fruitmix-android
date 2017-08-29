@@ -12,7 +12,9 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.ActivityConfirmInviteUserBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.InjectHttp;
-import com.winsun.fruitmix.http.ImageGifLoaderInstance;
+import com.winsun.fruitmix.invitation.data.InjectInvitationDataSource;
+import com.winsun.fruitmix.invitation.data.InvitationDataSource;
+import com.winsun.fruitmix.invitation.data.InvitationRemoteDataSource;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -48,11 +50,11 @@ public class ConfirmInviteUserActivity extends BaseActivity {
 
         binding.setNoContentViewModel(noContentViewModel);
 
-        InvitationRemoteDataSource invitationRemoteDataSource = new InvitationRemoteDataSource(InjectHttp.provideIHttpUtil(this),InjectHttp.provideHttpRequestFactory());
+        InvitationDataSource invitationDataSource = InjectInvitationDataSource.provideInvitationDataSource(this);
 
         ImageLoader imageLoader = InjectHttp.provideImageGifLoaderIntance().getImageLoader(this);
 
-        confirmInviteUserPresenter = new ConfirmInviteUserPresenterImpl(this, invitationRemoteDataSource, imageLoader, loadingViewModel, noContentViewModel);
+        confirmInviteUserPresenter = new ConfirmInviteUserPresenterImpl(this, invitationDataSource, imageLoader, loadingViewModel, noContentViewModel);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());

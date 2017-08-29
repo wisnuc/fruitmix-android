@@ -3,6 +3,7 @@ package com.winsun.fruitmix.mock;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * Created by Administrator on 2017/8/23.
@@ -61,6 +62,19 @@ public class MockThreadManager implements ThreadManager {
     public void runOnUploadMediaThread(Runnable runnable) {
 
         runnable.run();
+    }
+
+    @Override
+    public Future<Boolean> runOnDownloadFileThread(Callable<Boolean> callable) {
+        try {
+            callable.call();
+
+            return null;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override

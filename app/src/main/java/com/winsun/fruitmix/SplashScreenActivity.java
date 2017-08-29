@@ -60,13 +60,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         final LoginUseCase loginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
 
-        ThreadManagerImpl.getInstance().runOnCacheThread(new Runnable() {
-            @Override
-            public void run() {
-                loginWithNoParamInThread(loginUseCase);
-            }
-        });
-
+        loginWithNoParamInThread(loginUseCase);
 
 //        FNAS.retrieveLocalMedia(mContext);
 

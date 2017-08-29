@@ -9,6 +9,7 @@
             name="equipmentItemViewModel"
             type="com.winsun.fruitmix.equipment.EquipmentItemViewModel" />
 
+        <import type="android.view.View" />
 
     </data>
 
@@ -27,12 +28,30 @@
             app:cardBackgroundColor="@{equipmentItemViewModel.cardBackgroundColorID,default=@color/login_ui_blue}"
             app:cardCornerRadius="5dp">
 
+            <LinearLayout
+                android:id="@+id/no_equipment_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="@{equipmentItemViewModel.showNoEquipment?View.VISIBLE:View.GONE,default=gone}">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="未搜到服务器"
+                    android:textColor="@color/eighty_seven_percent_white"
+                    android:textSize="16dp" />
+
+            </LinearLayout>
+
             <RelativeLayout
+                android:id="@+id/equipment_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
-                android:orientation="horizontal">
+                android:visibility="@{equipmentItemViewModel.showNoEquipment?View.GONE:View.VISIBLE,default=visible}">
 
                 <ImageView
                     android:id="@+id/equipment_icon"

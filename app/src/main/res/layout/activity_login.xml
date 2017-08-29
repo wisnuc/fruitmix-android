@@ -134,6 +134,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="36dp"
                 android:layout_alignParentBottom="true"
+                android:layout_marginBottom="16dp"
                 android:background="@color/login_ui_blue"
                 android:onClick="@{()->loginPresenter.login()}"
                 android:text="确定"

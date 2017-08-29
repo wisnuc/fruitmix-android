@@ -23,14 +23,14 @@ import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.eventbus.UserRequestEvent;
 import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
-import com.winsun.fruitmix.executor.GenerateLocalMediaMiniThumbTask;
-import com.winsun.fruitmix.executor.GenerateLocalMediaThumbTask;
 import com.winsun.fruitmix.executor.UploadMediaTask;
 import com.winsun.fruitmix.generate.media.GenerateMediaThumbUseCase;
 import com.winsun.fruitmix.generate.media.InjectGenerateMediaThumbUseCase;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
-import com.winsun.fruitmix.invitation.InvitationRemoteDataSource;
+import com.winsun.fruitmix.invitation.data.InjectInvitationDataSource;
+import com.winsun.fruitmix.invitation.data.InvitationDataSource;
+import com.winsun.fruitmix.invitation.data.InvitationRemoteDataSource;
 import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
@@ -70,7 +70,7 @@ public class ButlerService extends Service {
 
     private boolean mStopUpload = false;
 
-    private InvitationRemoteDataSource invitationRemoteDataSource;
+    private InvitationDataSource invitationDataSource;
 
     private MediaDataSourceRepository mediaDataSourceRepository;
     private GenerateMediaThumbUseCase generateMediaThumbUseCase;
@@ -139,8 +139,8 @@ public class ButlerService extends Service {
 
     private void initInvitationRemoteDataSource() {
 
-        if (invitationRemoteDataSource == null)
-            invitationRemoteDataSource = new InvitationRemoteDataSource(InjectHttp.provideIHttpUtil(this), InjectHttp.provideHttpRequestFactory());
+        if (invitationDataSource == null)
+            invitationDataSource = InjectInvitationDataSource.provideInvitationDataSource(this);
     }
 
 
@@ -195,7 +195,7 @@ public class ButlerService extends Service {
                     //TODO: check token is exist when call getInvitation
                     butlerService.initInvitationRemoteDataSource();
 
-                    butlerService.invitationRemoteDataSource.getInvitation(new BaseLoadDataCallbackImpl<ConfirmInviteUser>() {
+                    butlerService.invitationDataSource.getInvitation(new BaseLoadDataCallbackImpl<ConfirmInviteUser>() {
                         @Override
                         public void onSucceed(List<ConfirmInviteUser> data, OperationResult operationResult) {
                             super.onSucceed(data, operationResult);

@@ -60,10 +60,7 @@ public class AudioCommentView extends UserCommentView {
             audioCommentContainer.addView(audioImg);
             audioCommentContainer.addView(audioTimeTextView);
 
-            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) audioImg.getLayoutParams();
-
-            layoutParams.rightMargin = Util.dip2px(context, 4);
-            audioImg.setLayoutParams(layoutParams);
+            Util.setRightMargin(audioImg,Util.dip2px(context,4));
 
 
         } else {
@@ -71,10 +68,7 @@ public class AudioCommentView extends UserCommentView {
             audioCommentContainer.addView(audioTimeTextView);
             audioCommentContainer.addView(audioImg);
 
-            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) audioImg.getLayoutParams();
-
-            layoutParams.leftMargin = Util.dip2px(context, 4);
-            audioImg.setLayoutParams(layoutParams);
+            Util.setLeftMargin(audioImg,Util.dip2px(context,4));
 
         }
 

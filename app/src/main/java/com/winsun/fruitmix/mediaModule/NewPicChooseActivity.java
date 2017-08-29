@@ -16,7 +16,7 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.databinding.NewActivityAlbumPicChooseBinding;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.view.LocalFileFragment;
-import com.winsun.fruitmix.file.view.interfaces.HandleTitleCallback;
+import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
 import com.winsun.fruitmix.group.data.model.MultiFileComment;
 import com.winsun.fruitmix.group.data.model.MultiPhotoComment;
 import com.winsun.fruitmix.group.data.model.SingleFileComment;
@@ -39,7 +39,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/5/9.
  */
-public class NewPicChooseActivity extends BaseActivity implements IPhotoListListener, RevealToolbarViewModel.RevealToolbarRightTextOnClickListener, HandleTitleCallback {
+public class NewPicChooseActivity extends BaseActivity implements IPhotoListListener, RevealToolbarViewModel.RevealToolbarRightTextOnClickListener, HandleFileListOperateCallback {
 
     public static final String TAG = "NewAlbumPicChooseActivity";
 
@@ -145,7 +145,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
         mMainFrameLayout.addView(mNewPhotoList.getView());
         mNewPhotoList.setSelectMode(true);
-        mNewPhotoList.setAlreadySelectedImageKeyArrayList(alreadySelectedImageKeyArrayList);
+        mNewPhotoList.setAlreadySelectedImageKeysFromChooseActivity(alreadySelectedImageKeyArrayList);
 
         mNewPhotoList.setPhotoListListener(this);
     }
@@ -379,7 +379,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
 
     @Override
-    public void handleTitle(String currentFolderName) {
+    public void handleFileListOperate(String currentFolderName) {
 
     }
 }

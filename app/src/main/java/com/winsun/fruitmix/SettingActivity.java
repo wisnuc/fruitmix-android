@@ -11,6 +11,7 @@ import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.databinding.ActivitySettingBinding;
@@ -50,7 +51,7 @@ public class SettingActivity extends BaseActivity {
 
         SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
 
-        settingPresenter = new SettingPresenterImpl(settingViewModel, systemSettingDataSource,
+        settingPresenter = new SettingPresenterImpl(this,settingViewModel, systemSettingDataSource,
                 InjectMedia.provideMediaDataSourceRepository(this), CheckMediaIsUploadStrategy.getInstance(),
                 InjectUploadMediaUseCase.provideUploadMediaUseCase(this),systemSettingDataSource.getCurrentLoginUserUUID());
 
@@ -65,6 +66,15 @@ public class SettingActivity extends BaseActivity {
         toolbarViewModel.setBaseView(this);
 
         binding.setToolbarViewModel(toolbarViewModel);
+
+        binding.autoUploadPhotosSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                settingPresenter.onCheckedChanged(isChecked);
+
+            }
+        });
 
         settingPresenter.onCreate(this);
 

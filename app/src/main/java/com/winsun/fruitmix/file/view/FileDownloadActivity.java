@@ -5,6 +5,7 @@ import android.databinding.DataBindingUtil;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.ActivityFileDownloadBinding;
 import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
@@ -18,7 +19,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-public class FileDownloadActivity extends AppCompatActivity implements BaseView {
+public class FileDownloadActivity extends BaseActivity implements BaseView {
 
     private FileDownloadFragment fileDownloadFragment;
 
@@ -54,21 +55,6 @@ public class FileDownloadActivity extends AppCompatActivity implements BaseView 
         binding.setToolbarViewModel(toolbarViewModel);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void onStop() {
-
-        EventBus.getDefault().unregister(this);
-
-        super.onStop();
-    }
-
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleOperationEvent(OperationEvent operationEvent) {
 
@@ -85,31 +71,6 @@ public class FileDownloadActivity extends AppCompatActivity implements BaseView 
         EventBus.getDefault().removeStickyEvent(downloadStateChangedEvent);
 
         fileDownloadFragment.handleEvent(downloadStateChangedEvent);
-    }
-
-    @Override
-    public void finishView() {
-        finish();
-    }
-
-    @Override
-    public void setResultCode(int resultCode) {
-        setResult(resultCode);
-    }
-
-    @Override
-    public Dialog showProgressDialog(String message) {
-        return null;
-    }
-
-    @Override
-    public void dismissDialog() {
-
-    }
-
-    @Override
-    public void showToast(String text) {
-
     }
 
     @Override

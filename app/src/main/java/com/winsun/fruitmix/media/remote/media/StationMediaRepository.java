@@ -23,6 +23,8 @@ import java.util.concurrent.ConcurrentMap;
 
 public class StationMediaRepository {
 
+    //TODO: move change running thread in repository to avoid forget run on cache thread and cause NetworkOnMainThreadException
+
     private static StationMediaRepository instance;
 
     private StationMediaDBDataSource stationMediaDBDataSource;
@@ -152,6 +154,10 @@ public class StationMediaRepository {
         if (result)
             stationMediaDBDataSource.updateMedia(media);
 
+    }
+
+    public boolean clearAllStationMediasInDB() {
+        return stationMediaDBDataSource.clearAllMedias();
     }
 
 }

@@ -17,6 +17,8 @@ import com.winsun.fruitmix.databinding.ConfirmInviteUserItemHeaderBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
 import com.winsun.fruitmix.interfaces.BaseView;
+import com.winsun.fruitmix.invitation.data.InvitationDataSource;
+import com.winsun.fruitmix.invitation.data.InvitationRemoteDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
@@ -38,7 +40,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     public static final String TAG = ConfirmInviteUserPresenterImpl.class.getSimpleName();
 
-    private InvitationRemoteDataSource mInvitationRemoteDataSource;
+    private InvitationDataSource mInvitationDataSource;
 
     private ThreadManager threadManager;
 
@@ -52,8 +54,8 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     private BaseView baseView;
 
-    public ConfirmInviteUserPresenterImpl(BaseView baseView, InvitationRemoteDataSource invitationRemoteDataSource, ImageLoader imageLoader, final LoadingViewModel loadingViewModel, final NoContentViewModel noContentViewModel) {
-        mInvitationRemoteDataSource = invitationRemoteDataSource;
+    public ConfirmInviteUserPresenterImpl(BaseView baseView, InvitationDataSource invitationDataSource, ImageLoader imageLoader, final LoadingViewModel loadingViewModel, final NoContentViewModel noContentViewModel) {
+        mInvitationDataSource = invitationDataSource;
 
         this.baseView = baseView;
         this.loadingViewModel = loadingViewModel;
@@ -80,52 +82,32 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
     @Override
     public void getInvitations() {
 
-        threadManager.runOnCacheThread(new Runnable() {
-            @Override
-            public void run() {
-                getInvitationInThread();
-
-            }
-        });
+        getInvitationInThread();
 
     }
 
     private void getInvitationInThread() {
-        mInvitationRemoteDataSource.getInvitation(new BaseLoadDataCallback<ConfirmInviteUser>() {
+        mInvitationDataSource.getInvitation(new BaseLoadDataCallback<ConfirmInviteUser>() {
             @Override
             public void onSucceed(final List<ConfirmInviteUser> data, OperationResult operationResult) {
 
-                threadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
+                loadingViewModel.showLoading.set(false);
 
-                        loadingViewModel.showLoading.set(false);
+                noContentViewModel.showNoContent.set(false);
 
-                        noContentViewModel.showNoContent.set(false);
+                createMap(data);
 
-                        createMap(data);
-
-                        adapter.setViewItems(createViewItems(mConfirmInviteUserMaps));
-                        adapter.notifyDataSetChanged();
-
-                    }
-                });
+                adapter.setViewItems(createViewItems(mConfirmInviteUserMaps));
+                adapter.notifyDataSetChanged();
 
             }
 
             @Override
             public void onFail(OperationResult operationResult) {
 
-                threadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
+                loadingViewModel.showLoading.set(false);
 
-                        loadingViewModel.showLoading.set(false);
-
-                        noContentViewModel.showNoContent.set(true);
-
-                    }
-                });
+                noContentViewModel.showNoContent.set(true);
 
             }
         });
@@ -158,42 +140,24 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         baseView.showProgressDialog("正在执行");
 
-        threadManager.runOnCacheThread(new Runnable() {
+        mInvitationDataSource.confirmInvitation(confirmInviteUser, new BaseOperateDataCallback<String>() {
             @Override
-            public void run() {
+            public void onSucceed(final String data, OperationResult result) {
 
-                mInvitationRemoteDataSource.confirmInvitation(confirmInviteUser, new BaseOperateDataCallback<String>() {
-                    @Override
-                    public void onSucceed(final String data, OperationResult result) {
+                baseView.dismissDialog();
 
-                        threadManager.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                baseView.dismissDialog();
+                baseView.showToast("执行成功");
 
-                                baseView.showToast("执行成功");
+                handleOperateSucceed(confirmInviteUser.getTicketUUID());
 
-                                handleOperateSucceed(confirmInviteUser.getTicketUUID());
-                            }
-                        });
+            }
 
-                    }
+            @Override
+            public void onFail(OperationResult result) {
 
-                    @Override
-                    public void onFail(OperationResult result) {
+                baseView.dismissDialog();
 
-                        threadManager.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                baseView.dismissDialog();
-
-                                baseView.showToast("执行失败");
-
-                            }
-                        });
-
-                    }
-                });
+                baseView.showToast("执行失败");
 
             }
         });
@@ -380,7 +344,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         imageView.setDefaultImageResId(R.drawable.default_place_holder);
 
-        if (userAvatarUrl != null && !userAvatarUrl.isEmpty()){
+        if (userAvatarUrl != null && !userAvatarUrl.isEmpty()) {
 
             imageView.setTag(userAvatarUrl);
 

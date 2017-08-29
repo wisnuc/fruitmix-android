@@ -8,4 +8,6 @@ public interface UserDataRepository extends UserRemoteDataSource{
 
     void setCacheDirty();
 
+    boolean clearAllUsersInDB();
+
 }

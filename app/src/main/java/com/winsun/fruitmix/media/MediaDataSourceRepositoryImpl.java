@@ -2,6 +2,7 @@ package com.winsun.fruitmix.media;
 
 import android.util.Log;
 
+import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -13,6 +14,7 @@ import com.winsun.fruitmix.model.operationResult.OperationHasNewMedia;
 import com.winsun.fruitmix.model.operationResult.OperationNoChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +25,7 @@ import java.util.List;
  * Created by Administrator on 2017/7/19.
  */
 
-public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository {
+public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements MediaDataSourceRepository {
 
     public static final String TAG = MediaDataSourceRepositoryImpl.class.getSimpleName();
 
@@ -51,10 +53,10 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
     private CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback;
 
     public static MediaDataSourceRepositoryImpl getInstance(LocalMediaRepository localMediaRepository, StationMediaRepository stationMediaRepository,
-                                                            CalcMediaDigestStrategy calcMediaDigestStrategy) {
+                                                            CalcMediaDigestStrategy calcMediaDigestStrategy, ThreadManager threadManager) {
 
         if (ourInstance == null)
-            ourInstance = new MediaDataSourceRepositoryImpl(localMediaRepository, stationMediaRepository, calcMediaDigestStrategy);
+            ourInstance = new MediaDataSourceRepositoryImpl(localMediaRepository, stationMediaRepository, calcMediaDigestStrategy, threadManager);
         return ourInstance;
     }
 
@@ -63,8 +65,8 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
     }
 
     private MediaDataSourceRepositoryImpl(LocalMediaRepository localMediaRepository, StationMediaRepository stationMediaRepository,
-                                          CalcMediaDigestStrategy calcMediaDigestStrategy) {
-
+                                          CalcMediaDigestStrategy calcMediaDigestStrategy, ThreadManager threadManager) {
+        super(threadManager);
         this.localMediaRepository = localMediaRepository;
         this.stationMediaRepository = stationMediaRepository;
         this.calcMediaDigestStrategy = calcMediaDigestStrategy;
@@ -91,6 +93,20 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
     @Override
     public void getMedia(final BaseLoadDataCallback<Media> callback) {
 
+        final BaseLoadDataCallback<Media> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+
+                getMediaInThread(runOnMainThreadCallback);
+
+            }
+        });
+
+    }
+
+    private void getMediaInThread(final BaseLoadDataCallback<Media> callback) {
         if (!hasSetCalcStrategy) {
 
             calcMediaDigestStrategy.setCalcMediaDigestCallback(new CalcMediaDigestStrategy.CalcMediaDigestCallback() {
@@ -164,7 +180,6 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
             hasCallGetStationMedia = true;
 
         }
-
     }
 
     private void checkAllDataRetrieved(BaseLoadDataCallback<Media> callback) {
@@ -184,22 +199,32 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
     }
 
     @Override
-    public void downloadMedia(List<Media> medias, BaseOperateDataCallback<Boolean> callback) {
+    public void downloadMedia(final List<Media> medias, BaseOperateDataCallback<Boolean> callback) {
 
-        Log.d(TAG, "call: begin retrieve original photo task");
+        final BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
-        for (Media media : medias) {
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
 
-            Log.d(TAG, "call: media uuid:" + media.getUuid());
+                Log.d(TAG, "call: begin retrieve original photo task");
 
-            stationMediaRepository.downloadMedia(media);
-        }
+                for (Media media : medias) {
 
-        Log.d(TAG, "call: finish retrieve original photo task");
+                    Log.d(TAG, "call: media uuid:" + media.getUuid());
 
-        callback.onSucceed(true, new OperationSuccess());
+                    stationMediaRepository.downloadMedia(media);
+                }
 
-//        EventBus.getDefault().post(new OperationEvent(Util.SHARED_PHOTO_THUMB_RETRIEVED, null));
+                Log.d(TAG, "call: finish retrieve original photo task");
+
+                runOnMainThreadCallback.onSucceed(true, new OperationSuccess());
+
+//                EventBus.getDefault().post(new OperationEvent(Util.SHARED_PHOTO_THUMB_RETRIEVED, null));
+
+
+            }
+        });
 
 
     }
@@ -216,9 +241,23 @@ public class MediaDataSourceRepositoryImpl implements MediaDataSourceRepository 
     @Override
     public void getStationMediaForceRefresh(BaseLoadDataCallback<Media> callback) {
 
-        stationMediaRepository.setCacheDirty();
+        final BaseLoadDataCallback<Media> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
 
-        stationMediaRepository.getMedia(callback);
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
 
+                stationMediaRepository.setCacheDirty();
+
+                stationMediaRepository.getMedia(runOnMainThreadCallback);
+
+            }
+        });
+
+    }
+
+    @Override
+    public boolean clearAllStationMediasInDB() {
+        return stationMediaRepository.clearAllStationMediasInDB();
     }
 }

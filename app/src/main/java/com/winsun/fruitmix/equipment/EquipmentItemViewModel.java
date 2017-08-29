@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.equipment;
 
+import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
 
@@ -17,5 +18,7 @@ public class EquipmentItemViewModel {
     public final ObservableInt cardBackgroundColorID = new ObservableInt();
 
     public final ObservableInt equipmentIconID = new ObservableInt();
+
+    public final ObservableBoolean showNoEquipment = new ObservableBoolean();
 
 }

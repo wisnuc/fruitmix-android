@@ -23,8 +23,11 @@ public class DownloadFileCommand extends AbstractCommand {
 
     private String driveUUID;
 
-    public DownloadFileCommand(AbstractRemoteFile abstractRemoteFile,StationFileRepository stationFileRepository,String currentUserUUID,String driveUUID) {
+    private FileDownloadManager fileDownloadManager;
+
+    public DownloadFileCommand(FileDownloadManager fileDownloadManager,AbstractRemoteFile abstractRemoteFile,StationFileRepository stationFileRepository,String currentUserUUID,String driveUUID) {
         this.abstractRemoteFile = abstractRemoteFile;
+        this.fileDownloadManager = fileDownloadManager;
 
         this.stationFileRepository =stationFileRepository;
         this.currentUserUUID = currentUserUUID;
@@ -36,7 +39,7 @@ public class DownloadFileCommand extends AbstractCommand {
     public void execute() {
         fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), Long.parseLong(abstractRemoteFile.getSize()), abstractRemoteFile.getUuid(),abstractRemoteFile.getParentFolderUUID(),driveUUID);
 
-        FileDownloadManager.getInstance().addFileDownloadItem(fileDownloadItem,stationFileRepository,currentUserUUID);
+        fileDownloadManager.addFileDownloadItem(fileDownloadItem,stationFileRepository,currentUserUUID);
     }
 
     @Override
@@ -44,7 +47,7 @@ public class DownloadFileCommand extends AbstractCommand {
 
         fileDownloadItem.cancelDownloadItem();
 
-        FileDownloadManager.getInstance().deleteFileDownloadItem(Collections.singletonList(fileDownloadItem.getFileUUID()));
+        fileDownloadManager.deleteFileDownloadItem(Collections.singletonList(fileDownloadItem.getFileUUID()));
 
     }
 

@@ -11,6 +11,7 @@ import com.winsun.fruitmix.file.data.download.FileDownloadPendingState;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.RemoteFolder;
+import com.winsun.fruitmix.mock.MockThreadManager;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 
@@ -55,7 +56,7 @@ public class StationFileRepositoryTest {
 
         MockitoAnnotations.initMocks(this);
 
-        fileRepository = StationFileRepositoryImpl.getInstance(stationFileDataSource, downloadedFileDataSource);
+        fileRepository = StationFileRepositoryImpl.getInstance(stationFileDataSource, downloadedFileDataSource,new MockThreadManager());
 
     }
 

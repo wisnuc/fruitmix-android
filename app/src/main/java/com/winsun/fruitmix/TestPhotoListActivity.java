@@ -60,7 +60,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
     //TODO use SparseArray or ArrayMap to optimize memory use effect
 
-    private Map<Integer,String> mMapKeyIsPhotoPositionValueIsPhotoDate;
+    private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
     private SparseArray<Media> mMapKeyIsPhotoPositionValueIsPhoto;
 
     private List<Media> medias;
@@ -439,19 +439,19 @@ public class TestPhotoListActivity extends AppCompatActivity {
         }
 
         private void setPhotoItemMargin(int mediaInListPosition) {
-            GridLayoutManager.LayoutParams params = (GridLayoutManager.LayoutParams) mImageLayout.getLayoutParams();
-
-            params.height = mItemWidth;
 
             int normalMargin = Util.dip2px(mContext, 2.5f);
 
             if ((mediaInListPosition + 1) % mSpanCount == 0) {
-                params.setMargins(normalMargin, normalMargin, normalMargin, 0);
+
+                Util.setMarginAndHeight(mImageLayout, mItemWidth, normalMargin, normalMargin, normalMargin, 0);
+
             } else {
-                params.setMargins(normalMargin, normalMargin, 0, 0);
+
+                Util.setMarginAndHeight(mImageLayout, mItemWidth, normalMargin, normalMargin, 0, 0);
+
             }
 
-            mImageLayout.setLayoutParams(params);
         }
 
         private int getPosition(List<Media> mediaList, Media media) {

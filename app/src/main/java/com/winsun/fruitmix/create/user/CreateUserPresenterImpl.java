@@ -27,16 +27,22 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
 
     private List<String> remoteUserNames;
 
-    private UserDataRepository userDataRepository;
+    private UserDataRepository mUserDataRepository;
 
     private ThreadManager threadManagerImpl;
 
     public CreateUserPresenterImpl(CreateUserView createUserView, UserDataRepository userDataRepository) {
 
         this.createUserView = createUserView;
-        this.userDataRepository = userDataRepository;
+        this.mUserDataRepository = userDataRepository;
 
         remoteUserNames = new ArrayList<>();
+
+        getUserInThread(mUserDataRepository);
+
+    }
+
+    private void getUserInThread(UserDataRepository userDataRepository) {
 
         userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>() {
             @Override
@@ -48,7 +54,6 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
                 }
             }
         });
-
     }
 
     @Override
@@ -107,51 +112,30 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
 
         createUserView.showProgressDialog(String.format(context.getString(R.string.operating_title), context.getString(R.string.create_user)));
 
-        threadManagerImpl = ThreadManagerImpl.getInstance();
-
-        threadManagerImpl.runOnCacheThread(new Runnable() {
-            @Override
-            public void run() {
-                insertUserInThread(context, userName, password);
-            }
-        });
+        insertUserInThread(context, userName, password);
 
     }
 
     private void insertUserInThread(final Context context, String userName, String password) {
-        userDataRepository.insertUser(userName, password, new BaseOperateDataCallback<User>() {
+
+        mUserDataRepository.insertUser(userName, password, new BaseOperateDataCallback<User>() {
             @Override
             public void onSucceed(User data, OperationResult result) {
 
-                threadManagerImpl.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
+                createUserView.dismissDialog();
 
-                        createUserView.dismissDialog();
+                createUserView.setResultCode(Activity.RESULT_OK);
 
-                        createUserView.setResultCode(Activity.RESULT_OK);
-
-                        createUserView.finishView();
-
-                    }
-                });
+                createUserView.finishView();
 
             }
 
             @Override
             public void onFail(final OperationResult result) {
 
-                threadManagerImpl.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
+                createUserView.dismissDialog();
 
-                        createUserView.dismissDialog();
-
-                        createUserView.showToast(result.getResultMessage(context));
-
-                    }
-                });
-
+                createUserView.showToast(result.getResultMessage(context));
 
             }
         });

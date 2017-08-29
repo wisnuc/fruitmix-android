@@ -82,7 +82,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:checked="@={setting.autoUploadOrNot}" />
+                    android:checked="@{setting.autoUploadOrNot}" />
 
             </RelativeLayout>
 

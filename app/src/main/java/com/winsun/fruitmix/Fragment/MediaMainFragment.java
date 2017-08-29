@@ -24,7 +24,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -38,7 +37,8 @@ import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
 import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
-import com.winsun.fruitmix.file.view.interfaces.HandleTitleCallback;
+import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
+import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
 import com.winsun.fruitmix.group.view.GroupListPage;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
@@ -52,6 +52,8 @@ import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
@@ -67,23 +69,25 @@ import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 
-public class MediaMainFragment extends Fragment implements View.OnClickListener, IPhotoListListener, HandleTitleCallback {
+public class MediaMainFragment extends Fragment implements View.OnClickListener, IPhotoListListener, HandleFileListOperateCallback, FileListSelectModeListener {
 
     public static final String TAG = "MediaMainFragment";
 
-    Toolbar toolbar;
+    private Toolbar toolbar;
 
-    Toolbar revealToolbar;
+    private Toolbar revealToolbar;
 
-    FloatingActionButton fab;
+    private FloatingActionButton fab;
 
-    ViewPager viewPager;
+    private ViewPager viewPager;
 
-    ImageView ivBtShare;
+    private ImageView ivBtShare;
 
-    ImageView mAlbumBalloon;
+    private FloatingActionButton downloadFileBtn;
 
-    BottomNavigationView bottomNavigationView;
+    private ImageView mAlbumBalloon;
+
+    private BottomNavigationView bottomNavigationView;
 
     private List<Page> pageList;
     private FileFragment fileFragment;
@@ -124,6 +128,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private MediaDataSourceRepository mediaDataSourceRepository;
 
+    private ThreadManager mThreadManger;
+
     public MediaMainFragment() {
         // Required empty public constructor
     }
@@ -149,6 +155,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
 
+        mThreadManger = ThreadManagerImpl.getInstance();
+
         Log.d(TAG, "onCreate: ");
     }
 
@@ -168,6 +176,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         ivBtShare = binding.btShare;
 
+        downloadFileBtn = binding.downloadFileBtn;
+
         mAlbumBalloon = binding.albumBalloon;
 
         bottomNavigationView = binding.bottomNavigationView;
@@ -186,6 +196,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         onPageSelect(PAGE_PHOTO);
 
         ivBtShare.setOnClickListener(this);
+        downloadFileBtn.setOnClickListener(this);
         fab.setOnClickListener(this);
 
         photoList.setPhotoListListener(this);
@@ -208,6 +219,10 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 if (sInChooseMode) {
                     hideChooseHeader();
                     showBottomNavAnim();
+
+                    if (viewPager.getCurrentItem() == PAGE_FILE)
+                        fileFragment.quitSelectMode();
+
                 } else {
                     mListener.onBackPress();
                 }
@@ -236,19 +251,18 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         toolbarViewModel.setToolbarSelectBtnOnClickListener(new ToolbarViewModel.ToolbarSelectBtnOnClickListener() {
             @Override
             public void onClick() {
-                showChooseHeader();
-                dismissBottomNavAnim();
+
+                if (viewPager.getCurrentItem() == PAGE_PHOTO) {
+                    showChooseHeader();
+                    dismissBottomNavAnim();
+                } else {
+                    fileFragment.enterSelectMode();
+                }
+
             }
         });
 
         toolbarViewModel.showSelect.set(true);
-
-        toolbarViewModel.setToolbarMenuBtnOnClickListener(new ToolbarViewModel.ToolbarMenuBtnOnClickListener() {
-            @Override
-            public void onClick() {
-                fileFragment.getBottomSheetDialog(fileFragment.getMainMenuItem()).show();
-            }
-        });
 
         binding.setToolbarViewModel(toolbarViewModel);
 
@@ -276,7 +290,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
 
 //        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && !mPhotoListRefresh) {
-//            pageList.get(PAGE_PHOTO).refreshView();
+//            pageList.get(PAGE_PHOTO).refreshDownloadItemView();
 //
 //            mPhotoListRefresh = true;
 //        }
@@ -429,7 +443,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             viewPager.setCurrentItem(PAGE_FILE);
             onDidAppear(PAGE_FILE);
             pageList.get(PAGE_FILE).refreshView();
-//            pageList.get(PAGE_GROUP).refreshView();
+//            pageList.get(PAGE_GROUP).refreshDownloadItemView();
         }
     }
 
@@ -503,7 +517,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     private void initPageList() {
 //        groupListPage = new GroupListPage(getActivity());
         photoList = new NewPhotoList(getActivity());
-        fileFragment = new FileFragment(getActivity(), this);
+        fileFragment = new FileFragment(getActivity(), this, this);
         pageList = new ArrayList<>();
 //        pageList.add(groupListPage);
         pageList.add(photoList);
@@ -512,13 +526,13 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     public void refreshUser() {
 
-//        groupListPage.refreshView();
+//        groupListPage.refreshDownloadItemView();
 
     }
 
     public void refreshAllViews() {
         groupListPage.refreshView();
-        fileFragment.refreshView();
+        fileFragment.refreshViewForce();
         photoList.refreshView();
     }
 
@@ -712,18 +726,18 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         lbRight.setVisibility(View.GONE);*/
 
         sInChooseMode = true;
-        photoList.setSelectMode(sInChooseMode);
 
-        setSelectCountText(getString(R.string.choose_photo));
+        if (viewPager.getCurrentItem() == PAGE_PHOTO) {
+            photoList.setSelectMode(sInChooseMode);
+
+            setSelectCountText(getString(R.string.choose_photo));
+        }
 
         mListener.lockDrawer();
     }
 
     private void hideChooseHeader() {
-        if (sMenuUnfolding) {
-            sMenuUnfolding = false;
-            collapseFab();
-        }
+        collapseFab();
 
 //        fab.setVisibility(View.GONE);
 
@@ -743,9 +757,18 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         setSelectCountText(getString(R.string.photo));*/
 
         sInChooseMode = false;
-        photoList.setSelectMode(sInChooseMode);
+
+        if (viewPager.getCurrentItem() == PAGE_PHOTO)
+            photoList.setSelectMode(sInChooseMode);
 
         mListener.unlockDrawer();
+    }
+
+    private void collapseFab() {
+        if (sMenuUnfolding) {
+            sMenuUnfolding = false;
+            collapseFabAnimation();
+        }
     }
 
     private void showFab() {
@@ -824,10 +847,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
 
-                FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) viewPager.getLayoutParams();
-                lp.bottomMargin = marginValue;
+                Util.setBottomMargin(viewPager, marginValue);
 
-                viewPager.setLayoutParams(lp);
             }
         });
 
@@ -844,9 +865,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private void dismissBottomNavAnim() {
 
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) viewPager.getLayoutParams();
-        lp.bottomMargin = 0;
-        viewPager.setLayoutParams(lp);
+        Util.setBottomMargin(viewPager, 0);
 
         ObjectAnimator animator = ObjectAnimator.ofFloat(bottomNavigationView, "translationY", 0, Util.dip2px(getContext(), 56f))
                 .setDuration(200);
@@ -889,10 +908,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void onPhotoItemClick(int selectedItemCount) {
-        if (sMenuUnfolding) {
-            sMenuUnfolding = false;
-            collapseFab();
-        }
+        collapseFab();
 
         if (selectedItemCount == 0) {
             handleBackPressed();
@@ -1010,6 +1026,12 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
                 break;
 
+            case R.id.download_file_btn:
+
+                fileFragment.downloadSelectItems();
+
+                break;
+
             case R.id.fab:
                 refreshFabState();
                 break;
@@ -1037,7 +1059,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             Util.sendShareToOtherApp(getContext(), mSelectMediaOriginalPhotoPaths);
         } else {
 
-            mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.create_share)), true, true);
+            mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.download_original_photo)), true, true);
             mDialog.setCanceledOnTouchOutside(false);
 
             mediaDataSourceRepository.downloadMedia(mSelectMedias, new BaseOperateDataCallbackImpl<Boolean>() {
@@ -1046,6 +1068,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                     super.onSucceed(data, result);
 
                     handleDownloadMedia();
+
                 }
             });
 
@@ -1057,41 +1080,73 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     private void refreshFabState() {
         if (sMenuUnfolding) {
             sMenuUnfolding = false;
-            collapseFab();
+            collapseFabAnimation();
         } else {
             sMenuUnfolding = true;
-            extendFab();
+            extendFabAnimation();
         }
     }
 
-    private void collapseFab() {
+    private void collapseFabAnimation() {
 
         new AnimatorBuilder(getContext(), R.animator.fab_remote_restore, fab).startAnimator();
 
-        new AnimatorBuilder(getContext(), R.animator.share_btn_restore, ivBtShare).addAdapter(new AnimatorListenerAdapter() {
+        if (viewPager.getCurrentItem() == PAGE_PHOTO) {
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
+            new AnimatorBuilder(getContext(), R.animator.share_btn_restore, ivBtShare).addAdapter(new AnimatorListenerAdapter() {
 
-                ivBtShare.setVisibility(View.GONE);
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
 
-            }
-        }).startAnimator();
+                    ivBtShare.setVisibility(View.GONE);
+
+                }
+            }).startAnimator();
+
+        } else {
+
+            new AnimatorBuilder(getContext(), R.animator.share_btn_restore, downloadFileBtn).addAdapter(new AnimatorListenerAdapter() {
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+
+                    downloadFileBtn.setVisibility(View.GONE);
+
+                }
+            }).startAnimator();
+
+        }
+
 
     }
 
-    private void extendFab() {
-
-        ivBtShare.setVisibility(View.VISIBLE);
+    private void extendFabAnimation() {
 
         new AnimatorBuilder(getContext(), R.animator.fab_remote, fab).startAnimator();
 
-        new AnimatorBuilder(getContext(), R.animator.share_btn_translation, ivBtShare).startAnimator();
+        if (viewPager.getCurrentItem() == PAGE_PHOTO) {
+
+            downloadFileBtn.setVisibility(View.GONE);
+
+            ivBtShare.setVisibility(View.VISIBLE);
+            new AnimatorBuilder(getContext(), R.animator.share_btn_translation, ivBtShare).startAnimator();
+        } else {
+
+            ivBtShare.setVisibility(View.GONE);
+
+            downloadFileBtn.setVisibility(View.VISIBLE);
+            new AnimatorBuilder(getContext(), R.animator.share_btn_translation, downloadFileBtn).startAnimator();
+
+        }
+
     }
 
     @Override
-    public void handleTitle(String currentFolderName) {
+    public void handleFileListOperate(String currentFolderName) {
+
+        collapseFab();
 
         if (fileFragment.handleBackPressedOrNot()) {
 
@@ -1116,6 +1171,40 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             mListener.unlockDrawer();
 
         }
+
+    }
+
+    @Override
+    public void onFileItemLongClick() {
+
+        showChooseHeader();
+
+        dismissBottomNavAnim();
+
+    }
+
+    @Override
+    public void onFileSelectItemClick() {
+
+        collapseFab();
+
+    }
+
+    @Override
+    public void enterSelectMode() {
+
+        showChooseHeader();
+
+        dismissBottomNavAnim();
+
+    }
+
+    @Override
+    public void quitSelectMode() {
+
+        hideChooseHeader();
+
+        showBottomNav();
 
     }
 
@@ -1158,6 +1247,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
                 fab.setVisibility(View.GONE);
                 ivBtShare.setVisibility(View.GONE);
+                downloadFileBtn.setVisibility(View.GONE);
 
                 toolbarViewModel.showSelect.set(true);
                 toolbarViewModel.showMenu.set(false);
@@ -1171,16 +1261,18 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
                 fab.setVisibility(View.GONE);
                 ivBtShare.setVisibility(View.GONE);
+                downloadFileBtn.setVisibility(View.GONE);
 
-                toolbarViewModel.showSelect.set(false);
-                toolbarViewModel.showMenu.set(true);
+                toolbarViewModel.showSelect.set(true);
+                toolbarViewModel.showMenu.set(false);
 
                 if (fileFragment != null && isResumed()) {
 
                     String title = fileFragment.getCurrentFolderName();
 
-                    handleTitle(title);
+                    handleFileListOperate(title);
 
+                    fileFragment.refreshView();
                 }
 
                 break;

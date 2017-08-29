@@ -6,7 +6,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +18,9 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.databinding.EquipmentItemBinding;
 import com.winsun.fruitmix.databinding.EquipmentUserItemBinding;
+import com.winsun.fruitmix.equipment.data.EquipmentDataSource;
+import com.winsun.fruitmix.equipment.data.EquipmentRemoteDataSource;
+import com.winsun.fruitmix.equipment.data.EquipmentSearchManager;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.model.EquipmentInfo;
@@ -28,10 +30,10 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
-import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -51,7 +53,7 @@ public class EquipmentPresenter {
 
     private LoadingViewModel loadingViewModel;
 
-    private NoContentViewModel noContentViewModel;
+    private EquipmentSearchViewModel equipmentSearchViewModel;
 
     private final List<Equipment> mUserLoadedEquipments = new ArrayList<>();
 
@@ -76,11 +78,9 @@ public class EquipmentPresenter {
 
     private EquipmentSearchManager mEquipmentSearchManager;
 
-    private EquipmentRemoteDataSource mEquipmentRemoteDataSource;
+    private EquipmentDataSource mEquipmentDataSource;
 
     private LoginUseCase loginUseCase;
-
-    private ThreadManager threadManagerImpl;
 
     private Random random;
 
@@ -106,9 +106,13 @@ public class EquipmentPresenter {
 
                     if (loadingViewModel.showLoading.get()) {
                         loadingViewModel.showLoading.set(false);
-
-                        refreshEquipment(0);
                     }
+
+                    equipmentSearchViewModel.showEquipmentViewPager.set(true);
+                    equipmentSearchViewModel.showEquipmentViewPagerIndicator.set(true);
+                    equipmentSearchViewModel.showEquipmentUsers.set(true);
+
+                    refreshEquipment(0);
 
                     EquipmentViewPagerAdapter adapter = weakReference.get().equipmentViewPagerAdapter;
 
@@ -130,13 +134,17 @@ public class EquipmentPresenter {
 
                 case DISCOVERY_TIMEOUT:
 
-                    if (hasFindEquipment)
-                        return;
+                    if (!hasFindEquipment) {
 
-                    noContentViewModel.showNoContent.set(true);
-                    loadingViewModel.showLoading.set(false);
+                        loadingViewModel.showLoading.set(false);
 
-                    stopDiscovery();
+                        equipmentSearchViewModel.showEquipmentViewPager.set(true);
+                        equipmentSearchViewModel.showEquipmentViewPagerIndicator.set(false);
+                        equipmentSearchViewModel.showEquipmentUsers.set(false);
+
+                        equipmentViewPagerAdapter.setEquipments(Collections.singletonList(Equipment.NULL));
+                        equipmentViewPagerAdapter.notifyDataSetChanged();
+                    }
 
                     mHandler.sendEmptyMessageDelayed(RESUME_DISCOVERY, RESUME_DISCOVERY_INTERVAL);
 
@@ -144,10 +152,15 @@ public class EquipmentPresenter {
 
                 case RESUME_DISCOVERY:
 
-                    noContentViewModel.showNoContent.set(false);
-                    loadingViewModel.showLoading.set(true);
+                    if (!hasFindEquipment) {
 
-                    startDiscovery();
+                        equipmentSearchViewModel.showEquipmentViewPager.set(false);
+                        equipmentSearchViewModel.showEquipmentViewPagerIndicator.set(false);
+                        equipmentSearchViewModel.showEquipmentUsers.set(false);
+
+                        loadingViewModel.showLoading.set(true);
+
+                    }
 
                     mHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT, DISCOVERY_TIMEOUT_TIME);
 
@@ -158,16 +171,15 @@ public class EquipmentPresenter {
         }
     }
 
-    public EquipmentPresenter(LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel, EquipmentSearchView equipmentSearchView,
-                              EquipmentSearchManager mEquipmentSearchManager, EquipmentRemoteDataSource mEquipmentRemoteDataSource,
-                              LoginUseCase loginUseCase, ThreadManager threadManagerImpl) {
+    public EquipmentPresenter(LoadingViewModel loadingViewModel, EquipmentSearchViewModel equipmentSearchViewModel, EquipmentSearchView equipmentSearchView,
+                              EquipmentSearchManager mEquipmentSearchManager, EquipmentDataSource equipmentDataSource,
+                              LoginUseCase loginUseCase) {
         this.loadingViewModel = loadingViewModel;
-        this.noContentViewModel = noContentViewModel;
+        this.equipmentSearchViewModel = equipmentSearchViewModel;
         this.equipmentSearchView = equipmentSearchView;
         this.mEquipmentSearchManager = mEquipmentSearchManager;
-        this.mEquipmentRemoteDataSource = mEquipmentRemoteDataSource;
+        this.mEquipmentDataSource = equipmentDataSource;
         this.loginUseCase = loginUseCase;
-        this.threadManagerImpl = threadManagerImpl;
 
         mUserExpandableLists = new ArrayList<>();
 
@@ -188,7 +200,9 @@ public class EquipmentPresenter {
         return equipmentViewPagerAdapter;
     }
 
-    public void onCreate(){
+    public void onCreate() {
+
+        startDiscovery();
 
         mHandler.sendEmptyMessage(RESUME_DISCOVERY);
 
@@ -264,8 +278,6 @@ public class EquipmentPresenter {
 
                 hasFindEquipment = true;
 
-                mHandler.removeMessages(DISCOVERY_TIMEOUT);
-
             }
         });
 
@@ -280,24 +292,34 @@ public class EquipmentPresenter {
 
     private void getEquipmentInfo(final Equipment equipment) {
 
-        threadManagerImpl.runOnCacheThread(new Runnable() {
-            @Override
-            public void run() {
+        synchronized (mUserLoadedEquipments) {
 
-                getEquipmentInfoInThread(equipment);
-
+            for (Equipment loadedEquipment : mUserLoadedEquipments) {
+                if (loadedEquipment.getSerialNumber().equals(equipment.getSerialNumber())) {
+                    return;
+                }
             }
-        });
 
+            getEquipmentInfoInThread(equipment);
+
+        }
 
     }
 
     private void getEquipmentInfoInThread(final Equipment equipment) {
-        mEquipmentRemoteDataSource.getEquipmentInfo(equipment.getHosts().get(0), new BaseLoadDataCallback<EquipmentInfo>() {
+        mEquipmentDataSource.getEquipmentInfo(equipment.getHosts().get(0), new BaseLoadDataCallback<EquipmentInfo>() {
             @Override
             public void onSucceed(List<EquipmentInfo> data, OperationResult operationResult) {
 
-                equipment.setEquipmentInfo(data.get(0));
+                EquipmentInfo equipmentInfo = data.get(0);
+
+                Log.d(TAG, "onSucceed: equipment info: " + equipmentInfo);
+
+                if (equipmentInfo == null) {
+                    equipmentInfo = new EquipmentInfo();
+                }
+
+                equipment.setEquipmentInfo(equipmentInfo);
 
                 getUserInThread(equipment);
 
@@ -306,9 +328,9 @@ public class EquipmentPresenter {
             @Override
             public void onFail(OperationResult operationResult) {
 
+                Log.d(TAG, "onFail: get equipment info");
+
                 EquipmentInfo equipmentInfo = new EquipmentInfo();
-                equipmentInfo.setLabel("未知");
-                equipmentInfo.setType("未知");
 
                 equipment.setEquipmentInfo(equipmentInfo);
 
@@ -319,7 +341,7 @@ public class EquipmentPresenter {
     }
 
     private void getUserInThread(final Equipment equipment) {
-        mEquipmentRemoteDataSource.getUsersInEquipment(equipment, new BaseLoadDataCallback<User>() {
+        mEquipmentDataSource.getUsersInEquipment(equipment, new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
 
@@ -336,10 +358,13 @@ public class EquipmentPresenter {
     }
 
     private void handleRetrieveUserFail(Equipment equipment) {
-        if (mHandler != null && !onPause) {
+
+        //comment cause this may be call api too much times and get error
+
+/*        if (mHandler != null && !onPause) {
             Message message = Message.obtain(mHandler, RETRY_GET_DATA, equipment);
             mHandler.sendMessageDelayed(message, RETRY_DELAY_MILLSECOND);
-        }
+        }*/
     }
 
     private void handleRetrieveUsers(List<User> data, Equipment equipment) {
@@ -349,8 +374,7 @@ public class EquipmentPresenter {
         synchronized (mUserLoadedEquipments) {
 
             for (Equipment userLoadedEquipment : mUserLoadedEquipments) {
-                if (userLoadedEquipment == null || userLoadedEquipment.getHosts().contains(equipment.getHosts().get(0))
-                        || userLoadedEquipment.getSerialNumber().equals(equipment.getSerialNumber()))
+                if (userLoadedEquipment.getSerialNumber().equals(equipment.getSerialNumber()))
                     return;
             }
 
@@ -395,47 +419,19 @@ public class EquipmentPresenter {
 
             Equipment equipment = mEquipments.get(position);
 
-            EquipmentInfo equipmentInfo = equipment.getEquipmentInfo();
+            if (equipment.equals(Equipment.NULL)) {
 
-            if (equipmentInfo != null) {
+                equipmentItemViewModel.showNoEquipment.set(true);
 
-                equipmentItemViewModel.type.set(equipmentInfo.getType());
-                equipmentItemViewModel.label.set(equipmentInfo.getLabel());
+                initEquipmentViewModelDefaultBackgroundColor(container, equipmentItemViewModel);
 
-                if (equipmentInfo.getType().equals(EquipmentInfo.WS215I)) {
+            } else {
 
-                    equipmentItemViewModel.equipmentIconID.set(R.drawable.equipment_215i);
+                equipmentItemViewModel.showNoEquipment.set(false);
 
-                    equipmentItemViewModel.cardBackgroundColorID.set(ContextCompat.getColor(container.getContext(), R.color.login_ui_blue));
-
-                    equipmentItemViewModel.backgroundColorID.set(R.color.equipment_ui_blue);
-
-                    equipmentSearchView.setBackgroundColor(R.color.equipment_ui_blue);
-
-
-                } else {
-
-                    equipmentItemViewModel.equipmentIconID.set(R.drawable.virtual_machine);
-                    equipmentItemViewModel.cardBackgroundColorID.set(ContextCompat.getColor(container.getContext(), R.color.virtual_machine_foreground_color));
-                    equipmentItemViewModel.backgroundColorID.set(R.color.virtual_machine_background_color);
-
-                    equipmentSearchView.setBackgroundColor(R.color.virtual_machine_background_color);
-
-                }
+                initEquipmentItemViewModel(container, equipmentItemViewModel, equipment);
 
             }
-
-            List<String> hosts = equipment.getHosts();
-
-            String and = container.getContext().getString(R.string.and);
-
-            StringBuilder builder = new StringBuilder();
-            for (String host : hosts) {
-                builder.append(and);
-                builder.append(host);
-            }
-
-            equipmentItemViewModel.ip.set(builder.substring(1));
 
             binding.setEquipmentItemViewModel(equipmentItemViewModel);
 
@@ -453,6 +449,52 @@ public class EquipmentPresenter {
         public boolean isViewFromObject(View view, Object object) {
             return view == object;
         }
+    }
+
+    private void initEquipmentViewModelDefaultBackgroundColor(ViewGroup container, EquipmentItemViewModel equipmentItemViewModel) {
+        equipmentItemViewModel.cardBackgroundColorID.set(ContextCompat.getColor(container.getContext(), R.color.login_ui_blue));
+
+        equipmentItemViewModel.backgroundColorID.set(R.color.equipment_ui_blue);
+
+        equipmentSearchView.setBackgroundColor(R.color.equipment_ui_blue);
+    }
+
+    private void initEquipmentItemViewModel(ViewGroup container, EquipmentItemViewModel equipmentItemViewModel, Equipment equipment) {
+        EquipmentInfo equipmentInfo = equipment.getEquipmentInfo();
+
+        if (equipmentInfo != null) {
+
+            equipmentItemViewModel.type.set(equipmentInfo.getType());
+            equipmentItemViewModel.label.set(equipmentInfo.getLabel());
+
+            if (equipmentInfo.getType().equals(EquipmentInfo.WS215I)) {
+
+                equipmentItemViewModel.equipmentIconID.set(R.drawable.equipment_215i);
+
+                initEquipmentViewModelDefaultBackgroundColor(container, equipmentItemViewModel);
+
+
+            } else {
+
+                equipmentItemViewModel.equipmentIconID.set(R.drawable.virtual_machine);
+
+                initEquipmentViewModelDefaultBackgroundColor(container, equipmentItemViewModel);
+
+            }
+
+        }
+
+        List<String> hosts = equipment.getHosts();
+
+        String and = container.getContext().getString(R.string.and);
+
+        StringBuilder builder = new StringBuilder();
+        for (String host : hosts) {
+            builder.append(and);
+            builder.append(host);
+        }
+
+        equipmentItemViewModel.ip.set(builder.substring(1));
     }
 
     private class EquipmentUserRecyclerViewAdapter extends RecyclerView.Adapter<EquipmentUserViewHolder> {
@@ -564,12 +606,7 @@ public class EquipmentPresenter {
                 @Override
                 public void onClick(View v) {
 
-                    threadManagerImpl.runOnCacheThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            loginWithUserInThread(user);
-                        }
-                    });
+                    loginWithUserInThread(user);
 
                 }
             });
@@ -579,32 +616,21 @@ public class EquipmentPresenter {
 
 
     private void loginWithUserInThread(final User user) {
+
         loginUseCase.loginWithUser(user, new BaseOperateDataCallback<Boolean>() {
             @Override
             public void onSucceed(final Boolean data, OperationResult result) {
 
-                threadManagerImpl.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        equipmentSearchView.handleLoginWithUserSucceed(data);
-                    }
-                });
+                equipmentSearchView.handleLoginWithUserSucceed(data);
 
             }
 
             @Override
             public void onFail(OperationResult result) {
 
-                threadManagerImpl.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        equipmentSearchView.handleLoginWithUserFail(currentEquipment, user);
-                    }
-                });
+                equipmentSearchView.handleLoginWithUserFail(currentEquipment, user);
 
             }
-
 
         });
     }

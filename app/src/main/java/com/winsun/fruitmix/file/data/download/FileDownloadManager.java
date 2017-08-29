@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 
 import java.util.ArrayList;
 
@@ -58,7 +59,7 @@ public class FileDownloadManager {
 
         } else {
 
-            fileDownloadState = new FileStartDownloadState(fileDownloadItem, stationFileRepository,currentUserUUID);
+            fileDownloadState = new FileStartDownloadState(fileDownloadItem, stationFileRepository, ThreadManagerImpl.getInstance(),currentUserUUID);
         }
 
         // must first add and then set,because setFileDownloadState will call notifyDownloadStateChanged,update ui using fileDownloadItems
@@ -139,7 +140,7 @@ public class FileDownloadManager {
 
                 Log.d(TAG, "startPendingDownloadItem: " + fileDownloadItem.getFileName());
 
-                fileDownloadItem.setFileDownloadState(new FileStartDownloadState(fileDownloadItem, state.getStationFileRepository(), state.getCurrentUserUUID()));
+                fileDownloadItem.setFileDownloadState(new FileStartDownloadState(fileDownloadItem, state.getStationFileRepository(),ThreadManagerImpl.getInstance(), state.getCurrentUserUUID()));
             }
         }
     }

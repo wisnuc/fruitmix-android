@@ -104,4 +104,10 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     public void showToast(String text) {
         Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
     }
+
+    @Override
+    public void showCustomErrorCode(String text) {
+        Toast.makeText(this, String.format(getString(R.string.server_exception), text), Toast.LENGTH_SHORT).show();
+    }
+
 }

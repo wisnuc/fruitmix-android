@@ -7,6 +7,7 @@ import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mock.MockApplication;
+import com.winsun.fruitmix.mock.MockThreadManager;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 
@@ -59,7 +60,7 @@ public class MediaDataSourceRepositoryImplTest {
 
         MockitoAnnotations.initMocks(this);
 
-        mediaDataSourceRepositoryImpl = MediaDataSourceRepositoryImpl.getInstance(localMediaRepository, stationMediaRepository, calcMediaDigestStrategy);
+        mediaDataSourceRepositoryImpl = MediaDataSourceRepositoryImpl.getInstance(localMediaRepository, stationMediaRepository, calcMediaDigestStrategy,new MockThreadManager());
 
     }
 

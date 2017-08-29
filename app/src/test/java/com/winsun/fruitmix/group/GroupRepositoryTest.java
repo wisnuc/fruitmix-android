@@ -4,6 +4,7 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
+import com.winsun.fruitmix.mock.MockThreadManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +29,7 @@ public class GroupRepositoryTest {
 
         MockitoAnnotations.initMocks(this);
 
-        groupRepository = GroupRepository.getInstance(groupDataSource);
+        groupRepository = GroupRepository.getInstance(groupDataSource,new MockThreadManager());
 
     }
 

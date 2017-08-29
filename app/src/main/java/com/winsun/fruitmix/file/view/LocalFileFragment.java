@@ -248,9 +248,7 @@ public class LocalFileFragment {
 
             if (position == 0) {
 
-                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
-                layoutParams.setMargins(0, Util.dip2px(mContext, 8), Util.dip2px(mContext, 16), 0);
-                contentLayout.setLayoutParams(layoutParams);
+                Util.setMargin(contentLayout,0,Util.dip2px(mContext,8),Util.dip2px(mContext,16),0);
 
             }
 
@@ -304,9 +302,7 @@ public class LocalFileFragment {
 
             if (position == 0) {
 
-                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
-                layoutParams.setMargins(0, Util.dip2px(mContext, 8), 0, 0);
-                contentLayout.setLayoutParams(layoutParams);
+                Util.setMargin(contentLayout,0,Util.dip2px(mContext,8),0,0);
 
             }
 

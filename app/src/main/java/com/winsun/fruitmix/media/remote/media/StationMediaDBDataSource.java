@@ -42,9 +42,8 @@ public class StationMediaDBDataSource {
 
     }
 
-    public void clearAllMedias() {
-
-        dbUtils.deleteAllRemoteMedia();
+    public boolean clearAllMedias() {
+        return dbUtils.deleteAllRemoteMedia() > 0;
     }
 
 
@@ -54,10 +53,9 @@ public class StationMediaDBDataSource {
 
     }
 
-    public void updateMedia(Media media){
+    public void updateMedia(Media media) {
         dbUtils.updateRemoteMedia(media);
     }
-
 
 
 }

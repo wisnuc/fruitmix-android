@@ -12,6 +12,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.databinding.UserManageItemBinding;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.LocalCache;
@@ -58,9 +59,15 @@ public class UserManagePresenterImpl implements UserMangePresenter {
     @Override
     public void refreshView() {
 
+        getUserInThread();
+
+    }
+
+    private void getUserInThread() {
+
         userDataRepository.getUsers(new BaseLoadDataCallback<User>() {
             @Override
-            public void onSucceed(List<User> data, OperationResult operationResult) {
+            public void onSucceed(final List<User> data, OperationResult operationResult) {
 
                 userManageViewModel.showUserListEmpty.set(false);
                 userManageViewModel.showUserListView.set(true);

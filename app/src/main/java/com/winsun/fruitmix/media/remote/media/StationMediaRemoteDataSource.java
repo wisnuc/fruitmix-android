@@ -53,13 +53,12 @@ public class StationMediaRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     boolean downloadMedia(Media media) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(MEDIA_PARAMETER + "/" + media.getUuid() + "/download");
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(media.getRemoteMediaRequestPath());
 
         ResponseBody responseBody = iHttpFileUtil.downloadFile(httpRequest);
 
         return FileUtil.downloadMediaToOriginalPhotoFolder(responseBody, media);
 
     }
-
 
 }

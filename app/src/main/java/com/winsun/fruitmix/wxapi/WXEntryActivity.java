@@ -103,12 +103,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                 dialog = ProgressDialog.show(this, null, String.format(getString(R.string.operating_title), getString(R.string.login)), true, false);
 
-                threadManager.runOnCacheThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        loginInThread(code);
-                    }
-                });
+                loginInThread(code);
+
 
                 break;
             case BaseResp.ErrCode.ERR_USER_CANCEL:
@@ -147,34 +143,20 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
 
-                threadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
+                dismissDialog();
 
-                        dismissDialog();
-
-                        startNavPagerActivity();
-
-                    }
-                });
+                startNavPagerActivity();
 
             }
 
             @Override
             public void onFail(final OperationResult result) {
 
-                threadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
+                dismissDialog();
 
-                        dismissDialog();
+                finishWhenLoginFail();
 
-                        finishWhenLoginFail();
-
-                        Toast.makeText(WXEntryActivity.this, result.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-
-                    }
-                });
+                Toast.makeText(WXEntryActivity.this, result.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
 
             }
         });

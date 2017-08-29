@@ -31,8 +31,8 @@
 
             <FrameLayout
                 android:id="@+id/file_icon_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="16dp">
 
@@ -64,7 +64,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:src="@drawable/ic_menu"
-                android:visibility="@{fileItemViewModel.selectMode?View.VISIBLE:View.GONE,default=visible}" />
+                android:visibility="@{fileItemViewModel.selectMode?View.GONE:View.VISIBLE,default=visible}" />
 
             <TextView
                 android:id="@+id/owner"

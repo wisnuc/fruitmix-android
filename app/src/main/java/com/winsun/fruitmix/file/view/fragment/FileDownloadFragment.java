@@ -13,10 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
@@ -36,36 +33,30 @@ import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.download.DownloadState;
 import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
-import com.winsun.fruitmix.file.data.download.DownloadedItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadManager;
-import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.view.viewmodel.FileDownloadGroupItemViewModel;
 import com.winsun.fruitmix.file.view.viewmodel.FileDownloadedItemViewModel;
 import com.winsun.fruitmix.file.view.viewmodel.FileDownloadingItemViewModel;
 import com.winsun.fruitmix.interfaces.Page;
-import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHideFragmentListener {
 
@@ -109,6 +100,8 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
     private StationFileRepository stationFileRepository;
 
     private String currentUserUUID;
+
+    private FileDownloadManager fileDownloadManager;
 
     private static final int DOWNLOADING_GROUP = 0;
     private static final int DOWNLOADING_CHILD = 1;
@@ -183,6 +176,8 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
         this.activity = activity;
 
+        fileDownloadManager = FileDownloadManager.getInstance();
+
         setToolbarViewModel(toolbarViewModel);
         setDefaultListener(defaultListener);
 
@@ -212,6 +207,8 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
         stationFileRepository.getCurrentLoginUserDownloadedFileRecord(currentUserUUID);
 
         refreshView();
+
+        fileDownloadRecyclerView.smoothScrollToPosition(0);
 
     }
 
@@ -322,8 +319,6 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
         mAdapter.setDownloads(downloadItems);
         mAdapter.notifyDataSetChanged();
 
-        fileDownloadRecyclerView.smoothScrollToPosition(0);
-
     }
 
     @Override
@@ -411,7 +406,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
             AbstractCommand macroCommand = new MacroCommand();
 
-            macroCommand.addCommand(new DeleteDownloadedFileCommand(selectDownloadedItemMap.values(), currentUserUUID, stationFileRepository));
+            macroCommand.addCommand(new DeleteDownloadedFileCommand(new ArrayList<>(selectDownloadedItemMap.values()), currentUserUUID, stationFileRepository));
             macroCommand.addCommand(showUnSelectModeViewCommand);
 
             BottomMenuItem deleteSelectItem = new BottomMenuItem(R.drawable.del_user, activity.getString(R.string.delete_text), macroCommand);
@@ -522,7 +517,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
         @Override
         public void onBindViewHolder(FileDownloadViewHolder holder, int position) {
-            holder.refreshView(mDownloads.get(position));
+            holder.refreshDownloadItemView(mDownloads.get(position));
         }
 
         @Override
@@ -544,7 +539,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
             super(viewDataBinding);
         }
 
-        public abstract void refreshView(IDownloadItem downloadItem);
+        public abstract void refreshDownloadItemView(IDownloadItem downloadItem);
     }
 
     class FileDownloadGroupHolder extends FileDownloadViewHolder {
@@ -558,7 +553,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
         }
 
         @Override
-        public void refreshView(IDownloadItem downloadItem) {
+        public void refreshDownloadItemView(IDownloadItem downloadItem) {
 
             FileDownloadGroupItemViewModel fileDownloadGroupItemViewModel = binding.getFileDownloadGroupItemViewModel();
 
@@ -590,7 +585,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
         }
 
         @Override
-        public void refreshView(IDownloadItem downloadItem) {
+        public void refreshDownloadItemView(IDownloadItem downloadItem) {
 
             FileDownloadingItemViewModel fileDownloadingItemViewModel = binding.getFileDownloadingItemViewModel();
 
@@ -599,12 +594,45 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
                 binding.setFileDownloadingItemViewModel(fileDownloadingItemViewModel);
             }
 
-            FileDownloadItem fileDownloadItem = ((DownloadingChildItem) downloadItem).getFileDownloadItem();
+            final FileDownloadItem fileDownloadItem = ((DownloadingChildItem) downloadItem).getFileDownloadItem();
 
             fileDownloadingItemViewModel.fileName.set(fileDownloadItem.getFileName());
             fileDownloadingItemViewModel.maxProgress.set(max);
 
             fileDownloadingItemViewModel.currentProgress.set(fileDownloadItem.getCurrentProgress(max));
+
+            binding.downloadingFileItemMenu.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
+
+                    BottomMenuItem cancelDownloadItem = new BottomMenuItem(R.drawable.cancel, activity.getString(R.string.cancel) + activity.getString(R.string.download), new AbstractCommand() {
+                        @Override
+                        public void execute() {
+
+                            fileDownloadItem.cancelDownloadItem();
+
+                            fileDownloadManager.deleteFileDownloadItem(Collections.singletonList(fileDownloadItem.getFileUUID()));
+
+                            refreshView();
+
+                        }
+
+                        @Override
+                        public void unExecute() {
+
+                        }
+                    });
+                    bottomMenuItems.add(cancelDownloadItem);
+
+                    BottomMenuItem cancelMenuItem = new BottomMenuItem(R.drawable.close, activity.getString(R.string.cancel), nullCommand);
+                    bottomMenuItems.add(cancelMenuItem);
+
+                    getBottomSheetDialog(bottomMenuItems).show();
+
+                }
+            });
 
         }
     }
@@ -626,7 +654,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
         }
 
         @Override
-        public void refreshView(IDownloadItem downloadItem) {
+        public void refreshDownloadItemView(IDownloadItem downloadItem) {
             final FileDownloadItem fileDownloadItem = ((DownloadedChildItem) downloadItem).getFileDownloadItem();
 
             final DownloadState downloadState = fileDownloadItem.getDownloadState();

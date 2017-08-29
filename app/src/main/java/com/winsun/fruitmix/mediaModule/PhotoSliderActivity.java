@@ -60,6 +60,8 @@ import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.LocalCache;
@@ -486,7 +488,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 } else {
 
-                    mDialog = showProgressDialog(String.format(getString(R.string.operating_title), getString(R.string.create_share)));
+                    mDialog = showProgressDialog(String.format(getString(R.string.operating_title), getString(R.string.download_original_photo)));
 
                     mDialog.setCanceledOnTouchOutside(false);
 
@@ -496,6 +498,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                             super.onSucceed(data, result);
 
                             handleDownloadMedia();
+
                         }
                     });
 
@@ -996,7 +999,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             int mediaHeight = Integer.parseInt(media.getHeight());
             int actualWidth;
             int actualHeight;
-            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) view.getLayoutParams();
 
             int systemUIHeight = Util.dip2px(mContext, 24);
 
@@ -1015,15 +1017,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 int marginTop = (screenHeight - actualHeight) / 2 + systemUIHeight;
 
-                layoutParams.setMargins(0, marginTop, marginRight, 0);
+                Util.setMargin(view, 0, marginTop, marginRight, 0);
 
             } else if (mediaWidth - mediaHeight < screenWidth - screenHeight) {
 
-                layoutParams.setMargins(0, systemUIHeight, marginRight, 0);
+                Util.setMargin(view, 0, systemUIHeight, marginRight, 0);
 
             }
 
-            view.setLayoutParams(layoutParams);
         }
 
         @Override
@@ -1060,7 +1061,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         int actualWidth = 0;
         int actualHeight = 0;
-        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) mainPic.getLayoutParams();
 
         if (mediaWidthLargerThanHeight(media, mediaWidth, mediaHeight)) {
             actualWidth = Util.calcScreenWidth(PhotoSliderActivity.this);
@@ -1073,10 +1073,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             actualWidth = actualHeight = Util.calcScreenWidth(PhotoSliderActivity.this);
         }
 
-        layoutParams.width = actualWidth;
-        layoutParams.height = actualHeight;
+        Util.setWidthAndHeight(mainPic, actualWidth, actualHeight);
 
-        mainPic.setLayoutParams(layoutParams);
     }
 
     private boolean mediaWidthEqualsHeight(int mediaWidth, int mediaHeight) {

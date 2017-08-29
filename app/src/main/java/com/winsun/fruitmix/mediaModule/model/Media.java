@@ -378,9 +378,14 @@ public class Media implements Parcelable {
 
     private String getRemoteMediaOriginalUrl() {
 
-        return generateUrl(Util.MEDIA_PARAMETER + "/" + getUuid() + "?alt=data");
+        return generateUrl(getRemoteMediaRequestPath());
 
     }
+
+    public String getRemoteMediaRequestPath(){
+        return Util.MEDIA_PARAMETER + "/" + getUuid() + "?alt=data";
+    }
+
 
     public String getImageOriginalUrl(Context context) {
 

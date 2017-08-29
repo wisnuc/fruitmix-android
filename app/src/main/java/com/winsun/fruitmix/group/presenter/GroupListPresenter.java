@@ -66,50 +66,32 @@ public class GroupListPresenter {
 
     public void refreshGroups() {
 
-        threadManager.runOnCacheThread(new Runnable() {
+        groupRepository.getGroupList(new BaseLoadDataCallback<PrivateGroup>() {
             @Override
-            public void run() {
+            public void onSucceed(final List<PrivateGroup> data, OperationResult operationResult) {
 
-                groupRepository.getGroupList(new BaseLoadDataCallback<PrivateGroup>() {
-                    @Override
-                    public void onSucceed(final List<PrivateGroup> data, OperationResult operationResult) {
+                loadingViewModel.showLoading.set(false);
+                noContentViewModel.showNoContent.set(false);
 
-                        threadManager.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
+                groupListViewModel.showRecyclerView.set(true);
+                groupListViewModel.showAddFriendsFAB.set(true);
 
-                                loadingViewModel.showLoading.set(false);
-                                noContentViewModel.showNoContent.set(false);
+                groupListAdapter.setPrivateGroups(data);
+                groupListAdapter.notifyDataSetChanged();
 
-                                groupListViewModel.showRecyclerView.set(true);
-                                groupListViewModel.showAddFriendsFAB.set(true);
 
-                                groupListAdapter.setPrivateGroups(data);
-                                groupListAdapter.notifyDataSetChanged();
+            }
 
-                            }
-                        });
+            @Override
+            public void onFail(OperationResult operationResult) {
 
-                    }
 
-                    @Override
-                    public void onFail(OperationResult operationResult) {
+                loadingViewModel.showLoading.set(false);
+                noContentViewModel.showNoContent.set(true);
 
-                        threadManager.runOnMainThread(new Runnable() {
-                            @Override
-                            public void run() {
+                groupListViewModel.showRecyclerView.set(false);
+                groupListViewModel.showAddFriendsFAB.set(true);
 
-                                loadingViewModel.showLoading.set(false);
-                                noContentViewModel.showNoContent.set(true);
-
-                                groupListViewModel.showRecyclerView.set(false);
-                                groupListViewModel.showAddFriendsFAB.set(true);
-
-                            }
-                        });
-
-                    }
-                });
 
             }
         });

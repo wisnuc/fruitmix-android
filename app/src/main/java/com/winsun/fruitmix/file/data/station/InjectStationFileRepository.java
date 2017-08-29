@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 
 /**
  * Created by Administrator on 2017/7/28.
@@ -13,7 +14,7 @@ public class InjectStationFileRepository {
 
     public static StationFileRepository provideStationFileRepository(Context context) {
 
-        return StationFileRepositoryImpl.getInstance(provideStationFileDataSource(context), provideDownloadedFileDataSource(context));
+        return StationFileRepositoryImpl.getInstance(provideStationFileDataSource(context), provideDownloadedFileDataSource(context), ThreadManagerImpl.getInstance());
     }
 
 

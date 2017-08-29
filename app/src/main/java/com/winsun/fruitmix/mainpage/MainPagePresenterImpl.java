@@ -14,8 +14,8 @@ import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
-import com.winsun.fruitmix.http.InjectHttp;
-import com.winsun.fruitmix.invitation.InvitationRemoteDataSource;
+import com.winsun.fruitmix.invitation.data.InjectInvitationDataSource;
+import com.winsun.fruitmix.invitation.data.InvitationDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
@@ -58,7 +58,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     private ThreadManager threadManager;
 
-    private InvitationRemoteDataSource invitationRemoteDataSource;
+    private InvitationDataSource invitationDataSource;
 
     private Resources resources;
 
@@ -91,7 +91,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         iwxapi = MiniProgram.registerToWX(context);
 
-        invitationRemoteDataSource = new InvitationRemoteDataSource(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory());
+        invitationDataSource = InjectInvitationDataSource.provideInvitationDataSource(context);
 
         resources = context.getResources();
 
@@ -246,14 +246,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
             public void onClick() {
                 super.onClick();
 
-                threadManager.runOnCacheThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        createInvitationInThread();
-
-                    }
-                });
+                createInvitationInThread();
 
             }
         };
@@ -290,18 +283,13 @@ public class MainPagePresenterImpl implements MainPagePresenter {
     }
 
     private void createInvitationInThread() {
-        invitationRemoteDataSource.createInvitation(new BaseOperateDataCallbackImpl<String>() {
+        invitationDataSource.createInvitation(new BaseOperateDataCallbackImpl<String>() {
             @Override
             public void onSucceed(final String data, OperationResult result) {
 
                 Log.d(TAG, "onSucceed: data: " + data);
 
-                threadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MiniProgram.shareMiniWXApp(iwxapi, resources, data);
-                    }
-                });
+                MiniProgram.shareMiniWXApp(iwxapi, resources, data);
 
             }
 

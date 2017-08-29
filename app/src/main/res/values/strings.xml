@@ -74,8 +74,6 @@
     <string name="need_auto_upload">Automatic backup your photos?</string>
     <string name="photo_auto_upload_already_close">Automatic backup turn off, you can turn on in \'Setting\'.</string>
 
-    <string name="download_original_photo_fail">Download original photo failed! </string>
-
     <!-- slide menu -->
 
     <string name="person_data">Biography</string>
@@ -132,6 +130,10 @@
 
     <string name="choose_photo">Select Photo</string>
     <string name="select_count">Select %1$d item</string>
+
+    <string name="download_original_photo">Download original photo</string>
+
+    <string name="download_original_photo_fail">Download original photo failed!</string>
 
     <!-- share -->
 
@@ -214,6 +216,8 @@
 
     <!-- Errors -->
     <string name="network_exception">Network exception,error code：%1$s</string>    <!-- String + ErrorCode -->
+
+    <string name="server_exception">Server exception,error code：%1$s</string>
 
     <string name="connnect_server_fail">Connect server failed</string>
 

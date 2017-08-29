@@ -102,11 +102,11 @@ public class FileDownloadItem {
     }
 
     public int getCurrentProgress(int max) {
-        Log.d(TAG, "refreshView: currentDownloadSize:" + getFileCurrentDownloadSize() + " fileSize:" + getFileSize());
+        Log.d(TAG, "refreshDownloadItemView: currentDownloadSize:" + getFileCurrentDownloadSize() + " fileSize:" + getFileSize());
 
         float currentProgress = getFileCurrentDownloadSize() * max / getFileSize();
 
-        Log.d(TAG, "refreshView: currentProgress:" + currentProgress);
+        Log.d(TAG, "refreshDownloadItemView: currentProgress:" + currentProgress);
 
         return (int) currentProgress;
     }

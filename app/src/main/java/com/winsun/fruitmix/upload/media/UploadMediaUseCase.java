@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.upload.media;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
@@ -156,26 +157,19 @@ public class UploadMediaUseCase {
 
         mAlreadyStartUpload = true;
 
-        threadManager.runOnUploadMediaThread(new Runnable() {
-            @Override
-            public void run() {
+        if (uploadParentFolderUUID == null || uploadFolderUUID == null)
+            checkFolderExist(currentUserHome, currentUserHome, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
+                @Override
+                public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
+                    super.onSucceed(data, operationResult);
 
-                if (uploadParentFolderUUID == null || uploadFolderUUID == null)
-                    checkFolderExist(currentUserHome, currentUserHome, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
-                        @Override
-                        public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
-                            super.onSucceed(data, operationResult);
+                    handleGetRootFolderResult(data);
 
-                            handleGetRootFolderResult(data);
+                }
 
-                        }
-
-                    });
-                else
-                    startAutoUpload();
-
-            }
-        });
+            });
+        else
+            startAutoUpload();
 
     }
 
@@ -192,8 +186,13 @@ public class UploadMediaUseCase {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                notifyGetUploadMediaCountFail();
+                if (operationResult instanceof OperationNetworkException) {
+                    notifyGetFolderFail(((OperationNetworkException) operationResult).getResponseCode());
+                } else
+                    notifyGetFolderFail(-1);
+
                 stopUploadMedia();
+
             }
         });
 
@@ -286,6 +285,11 @@ public class UploadMediaUseCase {
             public void onFail(OperationResult operationResult) {
                 super.onFail(operationResult);
 
+                if (operationResult instanceof OperationNetworkException) {
+                    notifyGetUploadMediaCountFail(((OperationNetworkException) operationResult).getResponseCode());
+                } else
+                    notifyGetUploadMediaCountFail(-1);
+
                 startAutoUploadWithNoFolder();
             }
         });
@@ -362,7 +366,7 @@ public class UploadMediaUseCase {
 
                         Log.i(TAG, "create upload folder succeed but can not find folder uuid");
 
-                        notifyGetUploadMediaCountFail();
+                        notifyCreateFolderFail(-1);
                         stopUploadMedia();
                     }
 
@@ -371,7 +375,7 @@ public class UploadMediaUseCase {
 
                     Log.d(TAG, "create upload folder fail");
 
-                    notifyGetUploadMediaCountFail();
+                    notifyCreateFolderFail(-1);
                     stopUploadMedia();
                 }
 
@@ -404,7 +408,7 @@ public class UploadMediaUseCase {
                     } else {
                         Log.i(TAG, "create upload folder succeed but can not find folder uuid");
 
-                        notifyGetUploadMediaCountFail();
+                        notifyCreateFolderFail(-1);
                         stopUploadMedia();
                     }
 
@@ -414,7 +418,7 @@ public class UploadMediaUseCase {
 
                     Log.d(TAG, "create upload folder fail");
 
-                    notifyGetUploadMediaCountFail();
+                    notifyCreateFolderFail(-1);
                     stopUploadMedia();
 
                 }
@@ -424,17 +428,21 @@ public class UploadMediaUseCase {
         });
     }
 
-    private void createFolder(String folderName, String rootUUID, String dirUUID, final BaseOperateDataCallback<HttpResponse> callback){
+    private void createFolder(String folderName, String rootUUID, String dirUUID, final BaseOperateDataCallback<HttpResponse> callback) {
         stationFileRepository.createFolder(folderName, rootUUID, dirUUID, new BaseOperateDataCallback<HttpResponse>() {
             @Override
             public void onSucceed(HttpResponse data, OperationResult result) {
-                callback.onSucceed(data,result);
+                callback.onSucceed(data, result);
             }
 
             @Override
             public void onFail(OperationResult result) {
 
-                notifyGetUploadMediaCountFail();
+                if (result instanceof OperationNetworkException)
+                    notifyCreateFolderFail(((OperationNetworkException) result).getResponseCode());
+                else
+                    notifyCreateFolderFail(-1);
+
                 stopUploadMedia();
             }
         });
@@ -556,7 +564,12 @@ public class UploadMediaUseCase {
                                     } else
                                         uploadMedia(medias);
 
+                                    notifyUploadMediaFail(code);
+
                                 } else {
+
+                                    notifyUploadMediaFail(-1);
+
                                     uploadMedia(medias);
                                 }
 
@@ -601,17 +614,90 @@ public class UploadMediaUseCase {
 
     }
 
-    private void notifyGetUploadMediaCountFail() {
+    private void notifyGetUploadMediaCountFail(final int httpErrorCode) {
 
+        threadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+                notifyGetUploadMediaCountFailInThread(httpErrorCode);
+            }
+        });
+
+    }
+
+    private void notifyGetUploadMediaCountFailInThread(int httpErrorCode) {
         if (uploadMediaCountChangeListeners != null) {
 
-            Log.i(TAG, "call notifyUploadMediaCountChange");
+            Log.i(TAG, "call notifyGetUploadMediaCountFail");
 
             for (UploadMediaCountChangeListener uploadMediaCountChangeListener : uploadMediaCountChangeListeners) {
-                uploadMediaCountChangeListener.onGetUploadMediaCountFail();
+                uploadMediaCountChangeListener.onGetUploadMediaCountFail(httpErrorCode);
             }
 
         }
+    }
+
+    private void notifyGetFolderFail(final int httpErrorCode) {
+
+        threadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+
+                if (uploadMediaCountChangeListeners != null) {
+
+                    Log.i(TAG, "call notifyGetFolderFail");
+
+                    for (UploadMediaCountChangeListener uploadMediaCountChangeListener : uploadMediaCountChangeListeners) {
+                        uploadMediaCountChangeListener.onGetFolderFail(httpErrorCode);
+                    }
+
+                }
+
+            }
+        });
+
+    }
+
+    private void notifyCreateFolderFail(final int httpErrorCode) {
+
+        threadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+
+                if (uploadMediaCountChangeListeners != null) {
+
+                    Log.i(TAG, "call notifyCreateFolderFail");
+
+                    for (UploadMediaCountChangeListener uploadMediaCountChangeListener : uploadMediaCountChangeListeners) {
+                        uploadMediaCountChangeListener.onCreateFolderFail(httpErrorCode);
+                    }
+
+                }
+
+            }
+        });
+
+
+    }
+
+    private void notifyUploadMediaFail(final int httpErrorCode) {
+
+        threadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+
+                if (uploadMediaCountChangeListeners != null) {
+
+                    Log.i(TAG, "call notifyUploadMediaFail");
+
+                    for (UploadMediaCountChangeListener uploadMediaCountChangeListener : uploadMediaCountChangeListeners) {
+                        uploadMediaCountChangeListener.onUploadMediaFail(httpErrorCode);
+                    }
+
+                }
+
+            }
+        });
 
     }
 
@@ -639,6 +725,8 @@ public class UploadMediaUseCase {
         mAlreadyStartUpload = false;
 
         uploadMediaCount = 0;
+
+        alreadyUploadedMediaCount = 0;
 
         uploadFolderUUID = null;
 

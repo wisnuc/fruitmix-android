@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.invitation;
+package com.winsun.fruitmix.invitation.data;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -6,18 +6,16 @@ import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
-import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.invitation.ConfirmInviteUser;
 import com.winsun.fruitmix.parser.RemoteConfirmInviteUsersParser;
 import com.winsun.fruitmix.parser.RemoteConfirmUserResultParser;
 import com.winsun.fruitmix.parser.RemoteTicketParser;
-
-import java.util.List;
 
 /**
  * Created by Administrator on 2017/7/12.
  */
 
-public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl {
+public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl implements InvitationDataSource {
 
     public static final String TAG = InvitationRemoteDataSource.class.getSimpleName();
 
@@ -29,7 +27,8 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl {
         super(iHttpUtil, httpRequestFactory);
     }
 
-    public void createInvitation(BaseOperateDataCallback<String> callback) {
+    @Override
+    public void createInvitation(final BaseOperateDataCallback<String> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(TICKETS_PARAMETER, "{\"type\":\"invite\"}");
 
@@ -37,15 +36,20 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     }
 
+    @Override
     public void getInvitation(final BaseLoadDataCallback<ConfirmInviteUser> callback) {
+
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(TICKETS_PARAMETER);
 
         wrapper.loadCall(httpRequest, callback, new RemoteConfirmInviteUsersParser());
 
+
     }
 
-    public void confirmInvitation(ConfirmInviteUser confirmInviteUser, BaseOperateDataCallback<String> callback) {
+    @Override
+    public void confirmInvitation(final ConfirmInviteUser confirmInviteUser, final BaseOperateDataCallback<String> callback) {
+
 
         String path = CONFIRM_TICKET_PARAMETER + confirmInviteUser.getTicketUUID();
 
@@ -61,6 +65,7 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl {
         HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path, body);
 
         wrapper.operateCall(httpRequest, callback, new RemoteConfirmUserResultParser());
+
 
     }
 

@@ -21,14 +21,18 @@ public class RemoteEquipmentInfoParser implements RemoteDatasParser<EquipmentInf
 
         JSONObject jsonObject = new JSONObject(json);
 
-        String type = jsonObject.optString(EquipmentInfo.WS215I);
+        String type;
 
-        if (type.isEmpty()) {
+        if (jsonObject.has(EquipmentInfo.WS215I)) {
 
-            type = EquipmentInfo.VIRTUAL_MACHINE;
+            type = EquipmentInfo.WS215I;
 
             equipmentInfo.setType(type);
 
+        } else {
+            type = EquipmentInfo.VIRTUAL_MACHINE;
+
+            equipmentInfo.setType(type);
         }
 
         equipmentInfo.setLabel(type);

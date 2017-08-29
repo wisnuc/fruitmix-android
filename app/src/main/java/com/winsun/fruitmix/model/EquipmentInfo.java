@@ -12,6 +12,13 @@ public class EquipmentInfo {
     private String type;
     private String label;
 
+    public EquipmentInfo() {
+
+        type = "未知";
+        label = "未知";
+
+    }
+
     public String getType() {
         return type;
     }
@@ -26,5 +33,10 @@ public class EquipmentInfo {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    @Override
+    public String toString() {
+        return "type: " + type + " label: " + label;
     }
 }

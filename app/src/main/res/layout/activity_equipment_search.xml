@@ -10,13 +10,14 @@
             type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
 
         <variable
-            name="noContentViewModel"
-            type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
-
-        <variable
             name="wechatLoginListener"
             type="com.winsun.fruitmix.equipment.WeChatLoginListener" />
 
+        <variable
+            name="equipmentSearchViewModel"
+            type="com.winsun.fruitmix.equipment.EquipmentSearchViewModel" />
+
+        <import type="android.view.View" />
 
     </data>
 
@@ -98,7 +99,8 @@
                     android:id="@+id/viewpager_layout"
                     android:layout_width="match_parent"
                     android:layout_height="224dp"
-                    android:background="@color/equipment_ui_blue">
+                    android:background="@color/equipment_ui_blue"
+                    android:visibility="@{equipmentSearchViewModel.showEquipmentViewPager?View.VISIBLE:View.GONE,default=visible}">
 
                     <android.support.v4.view.ViewPager
                         android:id="@+id/equipment_viewpager"
@@ -112,6 +114,7 @@
                         android:layout_height="match_parent"
                         android:layout_below="@id/equipment_viewpager"
                         android:layout_marginTop="8dp"
+                        android:visibility="@{equipmentSearchViewModel.showEquipmentViewPagerIndicator?View.VISIBLE:View.GONE,default=visible}"
                         app:ci_drawable="@drawable/viewpager_indicator_select_item_bg"
                         app:ci_drawable_unselected="@drawable/viewpager_indicator_unselect_item_bg"
                         app:ci_height="5dp"
@@ -130,19 +133,16 @@
                     android:paddingLeft="16dp"
                     android:text="用户"
                     android:textColor="@color/fifty_four_percent_black"
-                    android:textSize="18dp" />
+                    android:textSize="18dp"
+                    android:visibility="@{equipmentSearchViewModel.showEquipmentUsers?View.VISIBLE:View.GONE,default=gone}" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/equipment_user_recyclerview"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:visibility="@{equipmentSearchViewModel.showEquipmentUsers?View.VISIBLE:View.GONE,default=gone}" />
 
             </LinearLayout>
-
-            <include
-                layout="@layout/new_no_content_layout"
-                android:visibility="gone"
-                app:noContentViewModel="@{noContentViewModel}"/>
 
             <include
                 layout="@layout/new_loading_layout"

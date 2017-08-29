@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.setting;
 
 import android.content.Context;
+import android.widget.CompoundButton;
 
 import com.winsun.fruitmix.SettingActivity;
 
@@ -19,4 +20,6 @@ public interface SettingPresenter {
     void clearCache(Context context, SettingActivity.SettingViewModel settingViewModel);
 
     void onDestroy(Context context);
+
+    void onCheckedChanged(boolean isChecked);
 }

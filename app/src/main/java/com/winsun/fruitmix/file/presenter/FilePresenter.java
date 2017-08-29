@@ -44,7 +44,9 @@ import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.file.data.model.RemoteFolder;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.view.FileDownloadActivity;
-import com.winsun.fruitmix.file.view.interfaces.HandleTitleCallback;
+import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
+import com.winsun.fruitmix.file.view.interfaces.FileView;
+import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
 import com.winsun.fruitmix.file.view.viewmodel.FileItemViewModel;
 import com.winsun.fruitmix.file.view.viewmodel.FileViewModel;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
@@ -112,7 +114,9 @@ public class FilePresenter implements OnViewSelectListener {
 
     private Activity activity;
 
-    private HandleTitleCallback handleTitleCallback;
+    private FileView fileView;
+
+    private HandleFileListOperateCallback handleFileListOperateCallback;
 
     private ChangeToDownloadPageCommand.ChangeToDownloadPageCallback changeToDownloadPageCallback;
 
@@ -122,14 +126,21 @@ public class FilePresenter implements OnViewSelectListener {
 
     private ThreadManager threadManager;
 
-    public FilePresenter(Activity activity, StationFileRepository stationFileRepository, NoContentViewModel noContentViewModel, LoadingViewModel loadingViewModel, FileViewModel fileViewModel,
-                         HandleTitleCallback handleTitleCallback, LoggedInUserDataSource loggedInUserRepository, SystemSettingDataSource systemSettingDataSource) {
+    private FileDownloadManager fileDownloadManager;
+
+    private FileListSelectModeListener fileListSelectModeListener;
+
+    public FilePresenter(Activity activity, FileView fileView, FileListSelectModeListener fileListSelectModeListener, StationFileRepository stationFileRepository, NoContentViewModel noContentViewModel, LoadingViewModel loadingViewModel, FileViewModel fileViewModel,
+                         HandleFileListOperateCallback handleFileListOperateCallback, LoggedInUserDataSource loggedInUserRepository, SystemSettingDataSource systemSettingDataSource, FileDownloadManager fileDownloadManager) {
         this.activity = activity;
+        this.fileView = fileView;
+        this.fileListSelectModeListener = fileListSelectModeListener;
         this.stationFileRepository = stationFileRepository;
         this.noContentViewModel = noContentViewModel;
         this.loadingViewModel = loadingViewModel;
         this.fileViewModel = fileViewModel;
-        this.handleTitleCallback = handleTitleCallback;
+        this.handleFileListOperateCallback = handleFileListOperateCallback;
+        this.fileDownloadManager = fileDownloadManager;
 
         currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
         rootUUID = loggedInUserRepository.getLoggedInUserByUserUUID(currentUserUUID).getUser().getHome();
@@ -162,18 +173,21 @@ public class FilePresenter implements OnViewSelectListener {
 
         fileRecyclerViewAdapter = new FileRecyclerViewAdapter();
 
+        currentFolderUUID = rootUUID;
+        currentFolderName = activity.getString(R.string.file);
+
     }
 
     public FileRecyclerViewAdapter getFileRecyclerViewAdapter() {
         return fileRecyclerViewAdapter;
     }
 
-    public void refreshView() {
+    public void refreshView(boolean force) {
+
+        if (force)
+            remoteFileLoaded = false;
 
         if (!remoteFileLoaded) {
-
-            currentFolderUUID = rootUUID;
-            currentFolderName = activity.getString(R.string.file);
 
             if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
                 retrievedFolderUUIDList.add(currentFolderUUID);
@@ -186,7 +200,7 @@ public class FilePresenter implements OnViewSelectListener {
 
     }
 
-    public void refreshCurrentFolder(){
+    public void refreshCurrentFolder() {
 
         getFile();
 
@@ -194,44 +208,23 @@ public class FilePresenter implements OnViewSelectListener {
 
     private void getFile() {
 
-        threadManager.runOnCacheThread(new Runnable() {
-            @Override
-            public void run() {
-
-                getFileInThread();
-
-            }
-        });
+        getFileInThread();
 
     }
 
     private void getFileInThread() {
-        stationFileRepository.getFile(rootUUID, currentFolderUUID,new BaseLoadDataCallback<AbstractRemoteFile>() {
+        stationFileRepository.getFile(rootUUID, currentFolderUUID, new BaseLoadDataCallback<AbstractRemoteFile>() {
             @Override
             public void onSucceed(final List<AbstractRemoteFile> data, OperationResult operationResult) {
 
-                threadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        handleGetFileSucceed(data);
-
-                    }
-                });
+                handleGetFileSucceed(data);
 
             }
 
             @Override
             public void onFail(OperationResult operationResult) {
 
-                threadManager.runOnMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        handleGetFileFail();
-
-                    }
-                });
+                handleGetFileFail();
 
             }
         });
@@ -297,12 +290,16 @@ public class FilePresenter implements OnViewSelectListener {
 
         loadingViewModel.showLoading.set(false);
 
+        fileView.setSwipeRefreshing(false);
+
         noContentViewModel.showNoContent.set(true);
     }
 
     private void handleGetFileSucceed(List<AbstractRemoteFile> files) {
 
         loadingViewModel.showLoading.set(false);
+
+        fileView.setSwipeRefreshing(false);
 
         remoteFileLoaded = true;
 
@@ -387,11 +384,10 @@ public class FilePresenter implements OnViewSelectListener {
             getFile();
 
         } else {
-            selectMode = false;
-            refreshSelectMode(selectMode, null);
+            unSelectMode();
         }
 
-        handleTitleCallback.handleTitle(currentFolderName);
+        handleFileListOperateCallback.handleFileListOperate(currentFolderName);
 
     }
 
@@ -403,12 +399,18 @@ public class FilePresenter implements OnViewSelectListener {
 
     @Override
     public void selectMode() {
+
+        fileListSelectModeListener.enterSelectMode();
+
         selectMode = true;
         refreshSelectMode(selectMode, null);
     }
 
     @Override
     public void unSelectMode() {
+
+        fileListSelectModeListener.quitSelectMode();
+
         selectMode = false;
         refreshSelectMode(selectMode, null);
     }
@@ -416,6 +418,11 @@ public class FilePresenter implements OnViewSelectListener {
     private void refreshSelectMode(boolean selectMode, AbstractRemoteFile selectFile) {
 
         this.selectMode = selectMode;
+
+        if (selectMode)
+            fileViewModel.swipeRefreshEnabled.set(false);
+        else
+            fileViewModel.swipeRefreshEnabled.set(true);
 
         selectedFiles.clear();
         if (selectFile != null)
@@ -443,7 +450,6 @@ public class FilePresenter implements OnViewSelectListener {
 
         }
 
-
     }
 
     public void checkWriteExternalStoragePermission() {
@@ -460,7 +466,7 @@ public class FilePresenter implements OnViewSelectListener {
 
     private void openFileWhenOnClick() {
 
-        mCurrentDownloadFileCommand = new DownloadFileCommand(selectedFiles.get(0), stationFileRepository, currentFolderUUID, rootUUID);
+        mCurrentDownloadFileCommand = new DownloadFileCommand(fileDownloadManager, selectedFiles.get(0), stationFileRepository, currentFolderUUID, rootUUID);
 
         mCurrentDownloadFileCommand.execute();
 
@@ -512,13 +518,7 @@ public class FilePresenter implements OnViewSelectListener {
 
             bottomMenuItems.add(clearSelectItem);
 
-            macroCommand = new MacroCommand();
-
-            addSelectFilesToMacroCommand();
-
-            macroCommand.addCommand(showUnSelectModeViewCommand);
-
-            macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
+            createDownloadSelectFilesCommand();
 
             BottomMenuItem downloadSelectItem = new BottomMenuItem(R.drawable.download, activity.getString(R.string.download_select_item), macroCommand);
 
@@ -542,10 +542,36 @@ public class FilePresenter implements OnViewSelectListener {
 
     }
 
+    public void downloadSelectItems() {
+
+        createDownloadSelectFilesCommand();
+
+        macroCommand.execute();
+
+    }
+
+    public void quitSelectMode() {
+        unSelectMode();
+    }
+
+    public void enterSelectMode() {
+        selectMode();
+    }
+
+    private void createDownloadSelectFilesCommand() {
+        macroCommand = new MacroCommand();
+
+        addSelectFilesToMacroCommand();
+
+        macroCommand.addCommand(showUnSelectModeViewCommand);
+
+        macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
+    }
+
     private void addSelectFilesToMacroCommand() {
         for (AbstractRemoteFile abstractRemoteFile : selectedFiles) {
 
-            AbstractCommand abstractCommand = new DownloadFileCommand(abstractRemoteFile, stationFileRepository, currentUserUUID, rootUUID);
+            AbstractCommand abstractCommand = new DownloadFileCommand(fileDownloadManager, abstractRemoteFile, stationFileRepository, currentUserUUID, rootUUID);
             macroCommand.addCommand(abstractCommand);
 
         }
@@ -636,9 +662,7 @@ public class FilePresenter implements OnViewSelectListener {
 
             if (position == 0) {
 
-                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
-                layoutParams.setMargins(0, Util.dip2px(activity, 8), Util.dip2px(activity, 16), 0);
-                contentLayout.setLayoutParams(layoutParams);
+                Util.setMargin(contentLayout, 0, Util.dip2px(activity, 8), Util.dip2px(activity, 16), 0);
 
             }
 
@@ -666,7 +690,7 @@ public class FilePresenter implements OnViewSelectListener {
 
                     getFile();
 
-                    handleTitleCallback.handleTitle(currentFolderName);
+                    handleFileListOperateCallback.handleFileListOperate(currentFolderName);
                 }
             });
 
@@ -702,9 +726,7 @@ public class FilePresenter implements OnViewSelectListener {
 
             if (position == 0) {
 
-                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) contentLayout.getLayoutParams();
-                layoutParams.setMargins(0, Util.dip2px(activity, 8), 0, 0);
-                contentLayout.setLayoutParams(layoutParams);
+                Util.setMargin(contentLayout, 0, Util.dip2px(activity, 8), 0, 0);
 
             }
 
@@ -728,6 +750,8 @@ public class FilePresenter implements OnViewSelectListener {
                         toggleFileInSelectedFile(abstractRemoteFile);
                         toggleFileIconBgResource(binding.getFileItemViewModel(), abstractRemoteFile);
 
+                        fileListSelectModeListener.onFileSelectItemClick();
+
                         if (selectedFiles.isEmpty())
                             unSelectMode();
 
@@ -747,11 +771,11 @@ public class FilePresenter implements OnViewSelectListener {
                         List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
 
                         BottomMenuItem menuItem;
-                        if (FileDownloadManager.getInstance().checkIsDownloaded(abstractRemoteFile.getUuid())) {
+                        if (fileDownloadManager.checkIsDownloaded(abstractRemoteFile.getUuid())) {
                             menuItem = new BottomMenuItem(R.drawable.file_icon, activity.getString(R.string.open_the_item), new OpenFileCommand(activity, abstractRemoteFile.getName()));
                         } else {
                             AbstractCommand macroCommand = new MacroCommand();
-                            AbstractCommand downloadFileCommand = new DownloadFileCommand(abstractRemoteFile, stationFileRepository, currentUserUUID, rootUUID);
+                            AbstractCommand downloadFileCommand = new DownloadFileCommand(fileDownloadManager, abstractRemoteFile, stationFileRepository, currentUserUUID, rootUUID);
                             macroCommand.addCommand(downloadFileCommand);
                             macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
                             menuItem = new BottomMenuItem(R.drawable.download, activity.getString(R.string.download_the_item), macroCommand);
@@ -769,7 +793,6 @@ public class FilePresenter implements OnViewSelectListener {
                     @Override
                     public void onClick(View v) {
 
-                        FileDownloadManager fileDownloadManager = FileDownloadManager.getInstance();
                         if (fileDownloadManager.checkIsDownloaded(abstractRemoteFile.getUuid())) {
 
                             if (!abstractRemoteFile.openAbstractRemoteFile(activity, rootUUID)) {
@@ -791,10 +814,13 @@ public class FilePresenter implements OnViewSelectListener {
                 remoteFileItemLayout.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
+
+                        fileListSelectModeListener.onFileItemLongClick();
+
                         selectMode = true;
                         refreshSelectMode(selectMode, abstractRemoteFile);
 
-                        handleTitleCallback.handleTitle(currentFolderName);
+                        handleFileListOperateCallback.handleFileListOperate(currentFolderName);
 
                         return true;
                     }

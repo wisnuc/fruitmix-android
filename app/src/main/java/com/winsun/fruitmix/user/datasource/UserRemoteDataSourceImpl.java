@@ -109,7 +109,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
             @Override
             public void onFail(OperationResult operationResult) {
 
-                callback.onSucceed(users, new OperationSuccess());
+                callback.onFail(operationResult);
 
             }
         }, new RemoteLoginUsersParser());

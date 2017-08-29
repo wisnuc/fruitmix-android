@@ -9,10 +9,13 @@ import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.media.InjectMedia;
+import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
+import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.token.TokenRemoteDataSource;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
@@ -38,7 +41,7 @@ public class InjectLoginUseCase {
 
         UploadMediaUseCase uploadMediaUseCase = InjectUploadMediaUseCase.provideUploadMediaUseCase(context);
 
-        TokenRemoteDataSource tokenRemoteDataSource = InjectTokenRemoteDataSource.provideTokenRemoteDataSource(context);
+        TokenDataSource tokenDataSource = InjectTokenRemoteDataSource.provideTokenDataSource(context);
 
         StationFileRepository stationFileRepository = InjectStationFileRepository.provideStationFileRepository(context);
 
@@ -46,10 +49,12 @@ public class InjectLoginUseCase {
 
         UserDataRepository userDataRepository = InjectUser.provideRepository(context);
 
+        MediaDataSourceRepository mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(context);
+
         ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderIntance();
 
-        return LoginUseCase.getInstance(loggedInUserDataSource, tokenRemoteDataSource, httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase,
-                userDataRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, EventBus.getDefault(), ThreadManagerImpl.getInstance());
+        return LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource, httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase,
+                userDataRepository, mediaDataSourceRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, EventBus.getDefault(), ThreadManagerImpl.getInstance());
 
     }
 

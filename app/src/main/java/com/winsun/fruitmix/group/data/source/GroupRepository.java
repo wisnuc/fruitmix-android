@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.group.data.source;
 
+import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
@@ -9,6 +10,7 @@ import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 
 import java.util.Collection;
@@ -18,19 +20,20 @@ import java.util.Collections;
  * Created by Administrator on 2017/7/20.
  */
 
-public class GroupRepository {
+public class GroupRepository extends BaseDataRepository {
 
     private static GroupRepository ourInstance;
 
     private GroupDataSource groupDataSource;
 
-    public static GroupRepository getInstance(GroupDataSource groupDataSource) {
+    public static GroupRepository getInstance(GroupDataSource groupDataSource, ThreadManager threadManager) {
         if (ourInstance == null)
-            ourInstance = new GroupRepository(groupDataSource);
+            ourInstance = new GroupRepository(threadManager, groupDataSource);
         return ourInstance;
     }
 
-    private GroupRepository(GroupDataSource groupDataSource) {
+    public GroupRepository(ThreadManager threadManager, GroupDataSource groupDataSource) {
+        super(threadManager);
         this.groupDataSource = groupDataSource;
     }
 
@@ -42,7 +45,15 @@ public class GroupRepository {
 
     public void getGroupList(BaseLoadDataCallback<PrivateGroup> callback) {
 
-        callback.onSucceed(groupDataSource.getAllGroups(), new OperationSuccess());
+        final BaseLoadDataCallback<PrivateGroup> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                runOnMainThreadCallback.onSucceed(groupDataSource.getAllGroups(), new OperationSuccess());
+            }
+        });
+
 
     }
 

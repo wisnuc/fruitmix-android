@@ -14,6 +14,8 @@ public class Equipment {
 
     public static final String TAG = Equipment.class.getSimpleName();
 
+    public static final Equipment NULL = new Equipment(null,null,0);
+
     private String serviceName;
     private List<String> hosts;
     private int port;

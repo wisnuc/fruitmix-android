@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.thread.manage;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * Created by Administrator on 2017/8/23.
@@ -23,6 +24,8 @@ public interface ThreadManager {
     void runOnUploadMediaThread(Callable<Boolean> callable);
 
     void runOnUploadMediaThread(Runnable runnable);
+
+    Future<Boolean> runOnDownloadFileThread(Callable<Boolean> callable);
 
     void stopUploadMediaThreadNow();
 

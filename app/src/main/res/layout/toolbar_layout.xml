@@ -44,7 +44,7 @@
                 android:visibility="@{toolbarViewModel.showSelect?View.VISIBLE:View.GONE,default=gone}" />
 
             <ImageView
-                android:id="@+id/file_main_menu"
+                android:id="@+id/downloading_file_item_menu"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_alignParentRight="true"
@@ -57,7 +57,7 @@
                 android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/file_main_menu"
+                android:layout_toLeftOf="@id/downloading_file_item_menu"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
                 android:maxLines="1"

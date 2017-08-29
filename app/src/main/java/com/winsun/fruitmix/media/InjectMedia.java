@@ -9,6 +9,7 @@ import com.winsun.fruitmix.media.local.media.LocalMediaSystemDBDataSource;
 import com.winsun.fruitmix.media.remote.media.StationMediaDBDataSource;
 import com.winsun.fruitmix.media.remote.media.StationMediaRemoteDataSource;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 
 /**
  * Created by Administrator on 2017/7/28.
@@ -18,7 +19,7 @@ public class InjectMedia {
 
     public static MediaDataSourceRepository provideMediaDataSourceRepository(Context context) {
 
-        return MediaDataSourceRepositoryImpl.getInstance(provideLocalMediaRepository(context), provideStationMediaRepository(context), CalcMediaDigestStrategy.getInstance());
+        return MediaDataSourceRepositoryImpl.getInstance(provideLocalMediaRepository(context), provideStationMediaRepository(context), CalcMediaDigestStrategy.getInstance(), ThreadManagerImpl.getInstance());
 
     }
 

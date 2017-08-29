@@ -3,6 +3,7 @@ package com.winsun.fruitmix.token;
 import android.content.Context;
 
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 
 /**
  * Created by Administrator on 2017/7/28.
@@ -11,9 +12,10 @@ import com.winsun.fruitmix.http.InjectHttp;
 
 public class InjectTokenRemoteDataSource {
 
-    public static TokenRemoteDataSource provideTokenRemoteDataSource(Context context){
+    public static TokenDataSource provideTokenDataSource(Context context){
 
-        return new TokenRemoteDataSource(InjectHttp.provideIHttpUtil(context),InjectHttp.provideHttpRequestFactory());
+        return new TokenDataRepository(ThreadManagerImpl.getInstance(),new TokenRemoteDataSource(InjectHttp.provideIHttpUtil(context),InjectHttp.provideHttpRequestFactory()));
+
     }
 
 }

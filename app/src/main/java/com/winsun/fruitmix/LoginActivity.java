@@ -163,13 +163,7 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
 
         final LoadTokenParam loadTokenParam = new LoadTokenParam(mGateway, mUserUUid, mPwd, mEquipmentGroupName);
 
-        ThreadManagerImpl.getInstance().runOnCacheThread(new Runnable() {
-            @Override
-            public void run() {
-                loginInThread(loadTokenParam);
-            }
-        });
-
+        loginInThread(loadTokenParam);
 
     }
 
@@ -190,6 +184,7 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
                 dismissDialog();
 
                 Toast.makeText(LoginActivity.this, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+
             }
         });
     }

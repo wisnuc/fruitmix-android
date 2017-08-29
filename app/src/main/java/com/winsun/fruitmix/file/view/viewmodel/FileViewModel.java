@@ -9,4 +9,7 @@ import android.databinding.ObservableBoolean;
 public class FileViewModel {
 
     public final ObservableBoolean showFileRecyclerView = new ObservableBoolean(false);
+
+    public final ObservableBoolean swipeRefreshEnabled = new ObservableBoolean(true);
+
 }

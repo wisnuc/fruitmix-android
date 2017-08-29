@@ -53,9 +53,7 @@ public class SingleFileCommentView extends UserCommentView {
 
             frameLayout.addView(singlePhotoBinding.getRoot());
 
-            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) singlePhotoBinding.container.getLayoutParams();
-
-            setHeight(context, singlePhotoBinding.container, layoutParams);
+            Util.setHeight(singlePhotoBinding.container,Util.dip2px(context, 250));
 
             NetworkImageView networkImageView = singlePhotoBinding.coverImg;
 
@@ -73,9 +71,7 @@ public class SingleFileCommentView extends UserCommentView {
 
             frameLayout.addView(singleFileBinding.getRoot());
 
-            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) singleFileBinding.container.getLayoutParams();
-
-            setHeight(context, singleFileBinding.container, layoutParams);
+            Util.setHeight(singleFileBinding.container,Util.dip2px(context, 250));
 
             singleFileBinding.setFile(singleFileComment.getFile());
 

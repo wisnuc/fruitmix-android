@@ -5,8 +5,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.winsun.fruitmix.model.Equipment;
-import com.winsun.fruitmix.equipment.EquipmentSearchManager;
-import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.equipment.data.EquipmentSearchManager;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.IOException;

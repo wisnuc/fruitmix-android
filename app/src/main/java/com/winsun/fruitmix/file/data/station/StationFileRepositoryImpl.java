@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.file.data.station;
 
+import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -16,6 +17,7 @@ import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,7 +32,7 @@ import java.util.concurrent.ConcurrentMap;
  * Created by Administrator on 2017/7/19.
  */
 
-public class StationFileRepositoryImpl implements StationFileRepository {
+public class StationFileRepositoryImpl extends BaseDataRepository implements StationFileRepository {
 
     private static StationFileRepositoryImpl instance;
 
@@ -43,16 +45,17 @@ public class StationFileRepositoryImpl implements StationFileRepository {
 
     boolean cacheDirty = true;
 
-    private StationFileRepositoryImpl(StationFileDataSource stationFileDataSource, DownloadedFileDataSource downloadedFileDataSource) {
+    private StationFileRepositoryImpl(StationFileDataSource stationFileDataSource, DownloadedFileDataSource downloadedFileDataSource, ThreadManager threadManager) {
+        super(threadManager);
         this.stationFileDataSource = stationFileDataSource;
         this.downloadedFileDataSource = downloadedFileDataSource;
 
         stationFiles = new ArrayList<>();
     }
 
-    public static StationFileRepositoryImpl getInstance(StationFileDataSource stationFileDataSource, DownloadedFileDataSource downloadedFileDataSource) {
+    public static StationFileRepositoryImpl getInstance(StationFileDataSource stationFileDataSource, DownloadedFileDataSource downloadedFileDataSource, ThreadManager threadManager) {
         if (instance == null)
-            instance = new StationFileRepositoryImpl(stationFileDataSource, downloadedFileDataSource);
+            instance = new StationFileRepositoryImpl(stationFileDataSource, downloadedFileDataSource, threadManager);
         return instance;
     }
 
@@ -60,7 +63,7 @@ public class StationFileRepositoryImpl implements StationFileRepository {
         instance = null;
     }
 
-    public void getFile(String rootUUID,final String folderUUID,  final BaseLoadDataCallback<AbstractRemoteFile> callback) {
+    public void getFile(final String rootUUID, final String folderUUID, final BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
 /*        if (currentFolderUUID != null && !currentFolderUUID.equals(folderUUID))
             cacheDirty = true;
@@ -70,37 +73,46 @@ public class StationFileRepositoryImpl implements StationFileRepository {
             return;
         }*/
 
-        stationFileDataSource.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
+        final BaseLoadDataCallback<AbstractRemoteFile> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
 
+        mThreadManager.runOnCacheThread(new Runnable() {
             @Override
-            public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
-                super.onSucceed(data, operationResult);
+            public void run() {
 
-                currentFolderUUID = folderUUID;
+                stationFileDataSource.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
 
-                for (AbstractRemoteFile file : data) {
-                    file.setParentFolderUUID(folderUUID);
-                }
+                    @Override
+                    public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
+                        super.onSucceed(data, operationResult);
 
-                stationFiles.clear();
+                        currentFolderUUID = folderUUID;
 
-                stationFiles.addAll(data);
+                        for (AbstractRemoteFile file : data) {
+                            file.setParentFolderUUID(folderUUID);
+                        }
 
-                callback.onSucceed(data, operationResult);
+                        stationFiles.clear();
 
-                cacheDirty = false;
+                        stationFiles.addAll(data);
 
-            }
+                        runOnMainThreadCallback.onSucceed(data, operationResult);
 
-            @Override
-            public void onFail(OperationResult operationResult) {
-                super.onFail(operationResult);
+                        cacheDirty = false;
 
-                currentFolderUUID = folderUUID;
+                    }
 
-                callback.onFail(operationResult);
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+                        super.onFail(operationResult);
 
-                cacheDirty = false;
+                        currentFolderUUID = folderUUID;
+
+                        runOnMainThreadCallback.onFail(operationResult);
+
+                        cacheDirty = false;
+                    }
+                });
+
             }
         });
 
@@ -119,7 +131,6 @@ public class StationFileRepositoryImpl implements StationFileRepository {
                 downloadedItem.setFileCreatorUUID(currentUserUUID);
 
                 downloadedFileDataSource.insertDownloadedFileRecord(downloadedItem);
-
 
             }
 
@@ -151,8 +162,20 @@ public class StationFileRepositoryImpl implements StationFileRepository {
     }
 
     @Override
-    public void deleteDownloadedFile(Collection<DownloadedFileWrapper> downloadedFileWrappers, String currentLoginUserUUID, BaseOperateDataCallback<Void> callback) {
+    public void deleteDownloadedFile(final Collection<DownloadedFileWrapper> downloadedFileWrappers, final String currentLoginUserUUID, BaseOperateDataCallback<Void> callback) {
 
+        final BaseOperateDataCallback<Void> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                deleteDownloadedFileInThread(downloadedFileWrappers, currentLoginUserUUID, runOnMainThreadCallback);
+            }
+        });
+
+    }
+
+    private void deleteDownloadedFileInThread(Collection<DownloadedFileWrapper> downloadedFileWrappers, String currentLoginUserUUID, BaseOperateDataCallback<Void> callback) {
         boolean result = false;
 
         for (DownloadedFileWrapper downloadedFileWrapper : downloadedFileWrappers) {
@@ -167,13 +190,20 @@ public class StationFileRepositoryImpl implements StationFileRepository {
             callback.onSucceed(null, new OperationSuccess());
         else
             callback.onFail(new OperationSQLException());
-
     }
 
     @Override
-    public void createFolder(String folderName, String driveUUID, String dirUUID, BaseOperateDataCallback<HttpResponse> callback) {
+    public void createFolder(final String folderName, final String driveUUID, final String dirUUID, BaseOperateDataCallback<HttpResponse> callback) {
 
-        stationFileDataSource.createFolder(folderName, driveUUID, dirUUID, callback);
+        final BaseOperateDataCallback<HttpResponse> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                stationFileDataSource.createFolder(folderName, driveUUID, dirUUID, runOnMainThreadCallback);
+            }
+        });
+
     }
 
     @Override

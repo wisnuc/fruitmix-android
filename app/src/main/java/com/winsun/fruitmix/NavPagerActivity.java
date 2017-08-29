@@ -28,11 +28,13 @@ import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
-import com.winsun.fruitmix.equipment.InjectEquipment;
+import com.winsun.fruitmix.databinding.LeftDrawerHeadBinding;
+import com.winsun.fruitmix.equipment.data.InjectEquipment;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.file.view.FileDownloadActivity;
@@ -49,11 +51,9 @@ import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.mainpage.MainPagePresenter;
 import com.winsun.fruitmix.mainpage.MainPagePresenterImpl;
 import com.winsun.fruitmix.mainpage.MainPageView;
-import com.winsun.fruitmix.media.InjectMedia;
-import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.Equipment;
-import com.winsun.fruitmix.equipment.EquipmentSearchManager;
+import com.winsun.fruitmix.equipment.data.EquipmentSearchManager;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.OperationType;
@@ -76,8 +76,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.ref.WeakReference;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -86,11 +84,15 @@ public class NavPagerActivity extends BaseActivity
 
     public static final String TAG = NavPagerActivity.class.getSimpleName();
 
-    DrawerLayout mDrawerLayout;
+    private DrawerLayout mDrawerLayout;
 
-    ImageButton mNavigationHeaderArrow;
+    private ImageButton mNavigationHeaderArrow;
 
-    RecyclerView mNavigationMenuRecyclerView;
+    private RecyclerView mNavigationMenuRecyclerView;
+
+    private LinearLayout uploadLayout;
+
+    private LinearLayout serverErrorLayout;
 
     @Override
     public void gotoUserManageActivity() {
@@ -262,19 +264,26 @@ public class NavPagerActivity extends BaseActivity
 
     private UploadMediaUseCase uploadMediaUseCase;
 
+    private ActivityNavPagerBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mContext = this;
 
-        ActivityNavPagerBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_nav_pager);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_nav_pager);
 
         mDrawerLayout = binding.drawerLayout;
 
         mNavigationHeaderArrow = binding.leftDrawerHeadLayout.navigationHeaderArrowImageview;
 
         mNavigationMenuRecyclerView = binding.navigationMenuRecyclerView;
+
+        LeftDrawerHeadBinding leftDrawerHeadBinding = binding.leftDrawerHeadLayout;
+
+        uploadLayout = leftDrawerHeadBinding.uploadLayout;
+        serverErrorLayout = leftDrawerHeadBinding.serverErrorLayout;
 
         navPagerViewModel = new NavPagerViewModel();
 
@@ -344,13 +353,45 @@ public class NavPagerActivity extends BaseActivity
 
                 handleUploadMediaCount();
 
+                binding.setViewModel(navPagerViewModel);
+
             }
 
             @Override
-            public void onGetUploadMediaCountFail() {
+            public void onGetFolderFail(int httpErrorCode) {
 
                 navPagerViewModel.showUploadProgress.set(false);
 
+                showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_FOLDER + httpErrorCode);
+
+                binding.setViewModel(navPagerViewModel);
+            }
+
+            @Override
+            public void onCreateFolderFail(int httpErrorCode) {
+
+                navPagerViewModel.showUploadProgress.set(false);
+
+                showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_CREATE_FOLDER + httpErrorCode);
+
+                binding.setViewModel(navPagerViewModel);
+            }
+
+            @Override
+            public void onUploadMediaFail(int httpErrorCode) {
+                showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_UPLOAD_MEDIA + httpErrorCode);
+
+                binding.setViewModel(navPagerViewModel);
+            }
+
+            @Override
+            public void onGetUploadMediaCountFail(int httpErrorCode) {
+
+                navPagerViewModel.showUploadProgress.set(false);
+
+                showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_UPLOADED_MEDIA + httpErrorCode);
+
+                binding.setViewModel(navPagerViewModel);
             }
         };
 
@@ -463,32 +504,24 @@ public class NavPagerActivity extends BaseActivity
 
         mCustomHandler.removeMessages(DISCOVERY_TIMEOUT_MESSAGE);
 
-        ThreadManagerImpl.getInstance().runOnCacheThread(new Runnable() {
+        loginUseCase.loginWithLoggedInUser(loggedInUser, new BaseOperateDataCallback<Boolean>() {
             @Override
-            public void run() {
+            public void onSucceed(Boolean data, OperationResult result) {
 
-                loginUseCase.loginWithLoggedInUser(loggedInUser, new BaseOperateDataCallback<Boolean>() {
-                    @Override
-                    public void onSucceed(Boolean data, OperationResult result) {
+                if (data)
+                    handleLoginWithLoggedInUserSucceed();
+                else
+                    handleLoginWithLoggedInUserFail();
 
-                        if (data)
-                            handleLoginWithLoggedInUserSucceed();
-                        else
-                            handleLoginWithLoggedInUserFail();
+            }
 
-                    }
+            @Override
+            public void onFail(OperationResult result) {
 
-                    @Override
-                    public void onFail(OperationResult result) {
-
-                        Log.d(TAG, "onFail: login with logged in user failed");
-
-                    }
-                });
+                Log.d(TAG, "onFail: login with logged in user failed");
 
             }
         });
-
 
     }
 

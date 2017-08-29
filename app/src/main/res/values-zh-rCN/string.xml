@@ -71,8 +71,6 @@
     <string name="need_auto_upload">是否自动备份该手机的照片至WISNUC服务器?</string>
     <string name="photo_auto_upload_already_close">照片自动备份功能被关闭，可以到设置中打开</string>
 
-    <string name="download_original_photo_fail">下载照片原图失败</string>
-
     <!-- 侧边栏 -->
     <string name="person_data">个人信息</string>
     <string name="user_manage">用户管理</string>
@@ -120,6 +118,10 @@
     <string name="unknown_time">未知时间</string>
     <string name="choose_photo">选择照片</string>
     <string name="select_count">已选%1$d张</string>
+
+    <string name="download_original_photo">下载原图</string>
+
+    <string name="download_original_photo_fail">下载照片原图失败</string>
 
     <!-- 主界面-分享模块 -->
     <string name="check_more_photos">查看更多照片</string>
@@ -192,6 +194,8 @@
 
     <!-- Errors -->
     <string name="network_exception">网络数据异常，错误码：%1$s</string>    <!-- String + ErrorCode -->
+
+    <string name="server_exception">服务器异常，错误码：%1$s</string>
 
     <string name="connnect_server_fail">未连接服务器</string>
 

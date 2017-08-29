@@ -37,32 +37,20 @@ public class DeleteDownloadedFileCommand extends AbstractCommand {
     @Override
     public void execute() {
 
-        ThreadManager threadManager = ThreadManagerImpl.getInstance();
-
-        threadManager.runOnCacheThread(new Callable<Boolean>() {
+        stationFileRepository.deleteDownloadedFile(files, currentUserUUID, new BaseOperateDataCallback<Void>() {
             @Override
-            public Boolean call() throws Exception {
+            public void onSucceed(Void data, OperationResult result) {
 
-                stationFileRepository.deleteDownloadedFile(files, currentUserUUID, new BaseOperateDataCallback<Void>() {
-                    @Override
-                    public void onSucceed(Void data, OperationResult result) {
+                EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_DELETED, new OperationSuccess(R.string.delete_text)));
 
-                        EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_DELETED, new OperationSuccess(R.string.delete_text)));
+            }
 
-                    }
+            @Override
+            public void onFail(OperationResult result) {
 
-                    @Override
-                    public void onFail(OperationResult result) {
-
-                        EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_DELETED, result));
-                    }
-                });
-
-
-                return true;
+                EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_DELETED, result));
             }
         });
-
 
 //        EventBus.getDefault().post(new DeleteDownloadedRequestEvent(OperationType.DELETE, OperationTargetType.DOWNLOADED_FILE, fileUUIDs));
     }

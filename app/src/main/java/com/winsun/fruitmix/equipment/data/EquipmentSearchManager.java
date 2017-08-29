@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.equipment;
+package com.winsun.fruitmix.equipment.data;
 
 import android.content.Context;
 import android.util.Log;
@@ -39,7 +39,7 @@ public class EquipmentSearchManager {
 
     static EquipmentSearchManager getInstance(Context context) {
 
-        if(instance == null){
+        if (instance == null) {
             instance = new EquipmentSearchManager(context);
         }
 
@@ -76,9 +76,13 @@ public class EquipmentSearchManager {
     }
 
     public void stopDiscovery() {
+
         if (mSubscription != null) {
             mSubscription.unsubscribe();
+
+            mSubscription = null;
         }
+
     }
 
     public interface IEquipmentDiscoveryListener {
