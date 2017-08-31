@@ -137,7 +137,7 @@ public class RecommendAlbumStrategyTest {
 
         for (Media media : allLocalMedias) {
 
-            String time = media.getTime().substring(0, 10);
+            String time = media.getTime();
 
             long timeStamp = 0;
 

@@ -21,4 +21,19 @@ public class StringUtilTest {
 
     }
 
+    @Test
+    public void testRemoveHttpHead() {
+
+        String ip = "10.10.9.100";
+
+        String httpHead = "http://";
+
+        String url = httpHead + ip;
+
+        String[] result = url.split(httpHead);
+
+        assertEquals(ip, result[1]);
+
+    }
+
 }

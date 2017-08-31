@@ -49,7 +49,6 @@ public class FilterLocalStationMediaStrategy {
 
         Log.i(TAG, "after filter : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
-
         result.addAll(stationMediaMap.values());
 
         return result;

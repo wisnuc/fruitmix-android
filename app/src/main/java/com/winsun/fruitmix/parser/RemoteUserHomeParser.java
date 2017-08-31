@@ -4,14 +4,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by Administrator on 2017/8/17.
  */
 
-public class RemoteUserHomeParser implements RemoteDataParser<String> {
+public class RemoteUserHomeParser implements RemoteDatasParser<String> {
 
     @Override
-    public String parse(String json) throws JSONException {
+    public List<String> parse(String json) throws JSONException {
 
         JSONArray jsonArray = new JSONArray(json);
 
@@ -20,11 +24,11 @@ public class RemoteUserHomeParser implements RemoteDataParser<String> {
             JSONObject drive = jsonArray.getJSONObject(i);
 
             if (drive.optString("tag").equals("home")) {
-                return drive.optString("uuid");
+                return Collections.singletonList(drive.optString("uuid"));
             }
 
         }
 
-        return "";
+        return Collections.emptyList();
     }
 }

@@ -22,6 +22,8 @@ import java.util.Collections;
 
 public class GroupRepository extends BaseDataRepository {
 
+    //TODO: group operation add thread change
+
     private static GroupRepository ourInstance;
 
     private GroupDataSource groupDataSource;

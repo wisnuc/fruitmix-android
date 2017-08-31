@@ -486,11 +486,17 @@ public class UploadMediaUseCase {
         if (mStopUpload)
             return;
 
-        if (needUploadedMedia.size() <= uploadMediaCount) {
+        if (needUploadedMedia.size() == 0) {
+
+            stopUploadMedia();
+
+        } else if (needUploadedMedia.size() <= uploadMediaCount) {
 
             Log.d(TAG, "uploadMedia: finish upload and stop");
 
             stopUploadMedia();
+
+            startUploadMedia();
 
         } else {
             uploadMediaInThread(needUploadedMedia, uploadFolderUUID, uploadMediaCount);

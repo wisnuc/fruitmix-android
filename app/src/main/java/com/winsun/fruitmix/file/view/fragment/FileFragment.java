@@ -208,6 +208,12 @@ public class FileFragment implements Page, IShowHideFragmentListener,FileView{
         filePresenter.downloadSelectItems();
     }
 
+    @Override
+    public boolean canEnterSelectMode() {
+
+        return filePresenter.canEnterSelectMode();
+    }
+
     public void enterSelectMode() {
         filePresenter.enterSelectMode();
     }

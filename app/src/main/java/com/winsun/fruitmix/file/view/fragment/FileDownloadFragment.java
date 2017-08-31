@@ -20,8 +20,8 @@ import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.command.DeleteDownloadedFileCommand;
-import com.winsun.fruitmix.command.NullCommand;
 import com.winsun.fruitmix.command.MacroCommand;
+import com.winsun.fruitmix.command.NullCommand;
 import com.winsun.fruitmix.command.ShowSelectModeViewCommand;
 import com.winsun.fruitmix.command.ShowUnSelectModeViewCommand;
 import com.winsun.fruitmix.databinding.DownloadedFileItemBinding;
@@ -40,10 +40,10 @@ import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.view.viewmodel.FileDownloadGroupItemViewModel;
 import com.winsun.fruitmix.file.view.viewmodel.FileDownloadedItemViewModel;
 import com.winsun.fruitmix.file.view.viewmodel.FileDownloadingItemViewModel;
-import com.winsun.fruitmix.interfaces.Page;
-import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
+import com.winsun.fruitmix.interfaces.Page;
+import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
@@ -443,7 +443,19 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
     }
 
     @Override
+    public boolean canEnterSelectMode() {
+
+        return downloadedItems.size() > 0;
+    }
+
+    @Override
     public void selectMode() {
+
+        if (!canEnterSelectMode()) {
+            Toast.makeText(activity, "没有下载记录可选", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         selectMode = true;
         refreshSelectMode(selectMode);
     }

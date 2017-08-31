@@ -439,11 +439,16 @@ public class Util {
             View statusBar = decor.findViewById(android.R.id.statusBarBackground);
             View navBar = decor.findViewById(android.R.id.navigationBarBackground);
 
-            Pair statusBarPair = new Pair<>(statusBar, ViewCompat.getTransitionName(statusBar));
-            Pair navBarPair = new Pair<>(navBar, ViewCompat.getTransitionName(navBar));
+            if (statusBar != null){
+                Pair statusBarPair = new Pair<>(statusBar, ViewCompat.getTransitionName(statusBar));
+                pairs.add(statusBarPair);
+            }
 
-            pairs.add(statusBarPair);
-            pairs.add(navBarPair);
+            if (navBar != null){
+                Pair navBarPair = new Pair<>(navBar, ViewCompat.getTransitionName(navBar));
+                pairs.add(navBarPair);
+            }
+
         }
 
         if (toolbar != null) {

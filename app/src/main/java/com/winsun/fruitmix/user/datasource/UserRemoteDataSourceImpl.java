@@ -22,6 +22,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -131,24 +133,11 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     }
 
     @Override
-    public String getCurrentUserHome() {
+    public void getCurrentUserHome(BaseLoadDataCallback<String> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_HOME_PARAMETER);
 
-        try {
-            HttpResponse response = iHttpUtil.remoteCall(httpRequest);
+        wrapper.loadCall(httpRequest,callback,new RemoteUserHomeParser());
 
-            RemoteUserHomeParser parser = new RemoteUserHomeParser();
-            return parser.parse(response.getResponseData());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-        }
-
-        return "";
     }
 }

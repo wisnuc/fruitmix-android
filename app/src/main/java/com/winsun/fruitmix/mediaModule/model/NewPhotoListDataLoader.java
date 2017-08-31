@@ -129,7 +129,7 @@ public enum NewPhotoListDataLoader {
 
         for (Media media : medias) {
 
-            date = media.getTime().substring(0, 10);
+            date = media.getTime();
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
                 mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
             } else {

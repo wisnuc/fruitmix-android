@@ -21,35 +21,35 @@
 
     </data>
 
-    <FrameLayout
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".file.view.fragment.FileFragment">
+        bind:enabled="@{fileViewModel.swipeRefreshEnabled}">
 
-        <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/swipe_refresh_layout"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="@{fileViewModel.showFileRecyclerView?View.VISIBLE:View.GONE,default=gone}"
-            bind:enabled="@{fileViewModel.swipeRefreshEnabled}">
+            tools:context=".file.view.fragment.FileFragment">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/file_recyclerview"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:visibility="@{fileViewModel.showFileRecyclerView?View.VISIBLE:View.GONE,default=gone}" />
 
-        </android.support.v4.widget.SwipeRefreshLayout>
+            <include
+                layout="@layout/new_loading_layout"
+                bind:loadingViewModel="@{loadingViewModel}" />
 
-        <include
-            layout="@layout/new_loading_layout"
-            bind:loadingViewModel="@{loadingViewModel}" />
-
-        <include
-            layout="@layout/new_no_content_layout"
-            bind:noContentViewModel="@{noContentViewModel}" />
+            <include
+                layout="@layout/new_no_content_layout"
+                bind:noContentViewModel="@{noContentViewModel}" />
 
 
-    </FrameLayout>
+        </FrameLayout>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 
 </layout>

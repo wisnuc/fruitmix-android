@@ -51,6 +51,8 @@ import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.mainpage.MainPagePresenter;
 import com.winsun.fruitmix.mainpage.MainPagePresenterImpl;
 import com.winsun.fruitmix.mainpage.MainPageView;
+import com.winsun.fruitmix.media.InjectMedia;
+import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.equipment.data.EquipmentSearchManager;
@@ -86,13 +88,7 @@ public class NavPagerActivity extends BaseActivity
 
     private DrawerLayout mDrawerLayout;
 
-    private ImageButton mNavigationHeaderArrow;
-
     private RecyclerView mNavigationMenuRecyclerView;
-
-    private LinearLayout uploadLayout;
-
-    private LinearLayout serverErrorLayout;
 
     @Override
     public void gotoUserManageActivity() {
@@ -266,6 +262,8 @@ public class NavPagerActivity extends BaseActivity
 
     private ActivityNavPagerBinding binding;
 
+    private MediaDataSourceRepository mediaDataSourceRepository;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -276,14 +274,7 @@ public class NavPagerActivity extends BaseActivity
 
         mDrawerLayout = binding.drawerLayout;
 
-        mNavigationHeaderArrow = binding.leftDrawerHeadLayout.navigationHeaderArrowImageview;
-
         mNavigationMenuRecyclerView = binding.navigationMenuRecyclerView;
-
-        LeftDrawerHeadBinding leftDrawerHeadBinding = binding.leftDrawerHeadLayout;
-
-        uploadLayout = leftDrawerHeadBinding.uploadLayout;
-        serverErrorLayout = leftDrawerHeadBinding.serverErrorLayout;
 
         navPagerViewModel = new NavPagerViewModel();
 
@@ -296,6 +287,8 @@ public class NavPagerActivity extends BaseActivity
         checkMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
 
         systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
+
+        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
 
         mainPagePresenter = new MainPagePresenterImpl(mContext, systemSettingDataSource, loggedInUserDataSource, navPagerViewModel, this);
 
@@ -508,6 +501,10 @@ public class NavPagerActivity extends BaseActivity
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
 
+                refreshUserInNavigationView();
+
+                uploadMediaUseCase.startUploadMedia();
+
                 if (data)
                     handleLoginWithLoggedInUserSucceed();
                 else
@@ -558,7 +555,7 @@ public class NavPagerActivity extends BaseActivity
 
                 systemSettingDataSource.setAutoUploadOrNot(true);
 
-                EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
+                uploadMediaUseCase.startUploadMedia();
 
             }
         }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -571,6 +568,9 @@ public class NavPagerActivity extends BaseActivity
 
                 systemSettingDataSource.setAutoUploadOrNot(false);
 
+                uploadMediaUseCase.stopUploadMedia();
+
+
             }
         }).setCancelable(false).create().show();
     }
@@ -582,6 +582,8 @@ public class NavPagerActivity extends BaseActivity
         if (currentPage == PAGE_MEDIA) {
             mediaMainFragment.show();
         }
+
+        calcAlreadyUploadMediaCount(mediaDataSourceRepository.getLocalMedia());
 
         uploadMediaUseCase.registerUploadMediaCountChangeListener(uploadMediaCountChangeListener);
     }

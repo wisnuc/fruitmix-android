@@ -23,4 +23,5 @@ public class ShowSelectModeViewCommand extends AbstractCommand {
     public void unExecute() {
         onViewSelectListener.unSelectMode();
     }
+
 }

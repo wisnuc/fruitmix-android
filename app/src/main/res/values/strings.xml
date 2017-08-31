@@ -33,6 +33,8 @@
 
     <string name="app_name">WISNUC</string>
 
+    <string name="confirm">Confirm</string>
+
     <string name="finish_text">Done</string>
 
     <string name="choose_text">Select</string>
@@ -128,8 +130,8 @@
     <string name="photo">Photo</string>
     <string name="unknown_time">Unknown Time</string>
 
-    <string name="choose_photo">Select Photo</string>
-    <string name="select_count">Select %1$d item</string>
+    <string name="select_photo">Select Photo</string>
+    <string name="select_photo_count">Select %1$d item</string>
 
     <string name="download_original_photo">Download original photo</string>
 
@@ -200,9 +202,11 @@
     <string name="file">File</string>
     <string name="download">Download</string>
     <string name="select_file">Select File</string>
+    <string name="select_file_count">Select %1$d Item</string>
     <string name="download_select_item">Download selection</string>
     <string name="download_the_item">Download</string>
     <string name="open_the_item">Open</string>
+    <string name="re_download_the_item">Re Download</string>
 
     <!-- file download -->
 

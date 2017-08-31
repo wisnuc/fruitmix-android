@@ -21,4 +21,6 @@ public class EquipmentItemViewModel {
 
     public final ObservableBoolean showNoEquipment = new ObservableBoolean();
 
+    public final ObservableBoolean showEquipment = new ObservableBoolean();
+
 }

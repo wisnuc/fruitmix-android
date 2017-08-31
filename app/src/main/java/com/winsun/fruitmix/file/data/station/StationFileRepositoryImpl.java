@@ -14,6 +14,7 @@ import com.winsun.fruitmix.file.data.model.LocalFile;
 import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.file.data.model.RemoteFolder;
 import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -119,7 +120,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     }
 
     @Override
-    public void downloadFile(final String currentUserUUID, FileDownloadState fileDownloadState, final BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException {
+    public void downloadFile(final String currentUserUUID, final FileDownloadState fileDownloadState, final BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException {
 
         stationFileDataSource.downloadFile(fileDownloadState, new BaseOperateDataCallback<FileDownloadItem>() {
             @Override
@@ -131,6 +132,8 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
                 downloadedItem.setFileCreatorUUID(currentUserUUID);
 
                 downloadedFileDataSource.insertDownloadedFileRecord(downloadedItem);
+
+                callback.onSucceed(fileDownloadState.getFileDownloadItem(),new OperationSuccess());
 
             }
 
@@ -189,7 +192,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
         if (result)
             callback.onSucceed(null, new OperationSuccess());
         else
-            callback.onFail(new OperationSQLException());
+            callback.onFail(new OperationIOException());
     }
 
     @Override

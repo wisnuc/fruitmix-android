@@ -3,10 +3,9 @@ package com.winsun.fruitmix.http;
 import android.util.Log;
 
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.file.data.model.LocalFile;
-import com.winsun.fruitmix.file.data.model.RemoteFile;
-import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -19,10 +18,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -111,7 +107,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
         int responseCode = response.code();
 
-        if (handleResponseCode(response)) {
+        if (checkResponseCode(handleResponse(response))) {
 
             str = response.body().string();
 
@@ -123,6 +119,10 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
         return new HttpResponse(responseCode, str);
 
+    }
+
+    private boolean checkResponseCode(int code) {
+        return code == 200;
     }
 
     private Response executeRequest(Request request) throws MalformedURLException, IOException, SocketTimeoutException {
@@ -152,7 +152,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     @Override
-    public ResponseBody downloadFile(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException {
+    public ResponseBody downloadFile(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException,NetworkException{
 
         Request.Builder builder = generateRequestBuilder(httpRequest);
 
@@ -160,10 +160,12 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
         Response response = executeRequest(request);
 
-        if (handleResponseCode(response)) {
+        int code = handleResponse(response);
+
+        if (checkResponseCode(code)) {
             return response.body();
         } else {
-            throw new IOException();
+            throw new NetworkException("download api return http error code",code);
         }
 
     }
@@ -199,7 +201,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             int responseCode = response.code();
 
-            if (handleResponseCode(response)) {
+            if (checkResponseCode(handleResponse(response))) {
 
                 str = response.body().string();
 
@@ -237,7 +239,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             int responseCode = response.code();
 
-            if (handleResponseCode(response)) {
+            if (checkResponseCode(handleResponse(response))) {
 
                 str = response.body().string();
 
@@ -265,22 +267,22 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
         return builder;
     }
 
-    private boolean handleResponseCode(Response response) {
+    private int handleResponse(Response response){
 
         int code = response.code();
 
         if (code == 200) {
-            return true;
+            return code;
         } else {
 
-            Log.d(TAG, "handleResponseCode: " + code);
+            Log.d(TAG, "handleResponse: " + code);
 
-            if (code == HttpURLConnection.HTTP_FORBIDDEN)
-                EventBus.getDefault().post(new OperationEvent(Util.TOKEN_INVALID, null));
+/*            if (code == HttpURLConnection.HTTP_FORBIDDEN)
+                EventBus.getDefault().post(new OperationEvent(Util.TOKEN_INVALID, new OperationNetworkException(code)));*/
 
             response.close();
 
-            return false;
+            return code;
         }
 
     }

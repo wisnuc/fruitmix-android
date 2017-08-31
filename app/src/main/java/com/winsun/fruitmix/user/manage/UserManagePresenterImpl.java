@@ -11,6 +11,10 @@ import android.widget.BaseAdapter;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.databinding.UserManageItemBinding;
+import com.winsun.fruitmix.equipment.EquipmentItemViewModel;
+import com.winsun.fruitmix.equipment.data.EquipmentDataRepository;
+import com.winsun.fruitmix.equipment.data.EquipmentDataSource;
+import com.winsun.fruitmix.model.EquipmentInfo;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
@@ -41,12 +45,21 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
     private UserManageActivity.UserManageViewModel userManageViewModel;
 
+    private EquipmentItemViewModel equipmentItemViewModel;
+
     private UserDataRepository userDataRepository;
 
-    public UserManagePresenterImpl(UserManageView userManageView, UserManageActivity.UserManageViewModel userManageViewModel, UserDataRepository userDataRepository) {
+    private EquipmentDataSource equipmentDataSource;
+    private String currentIP;
+
+    public UserManagePresenterImpl(UserManageView userManageView, EquipmentItemViewModel equipmentItemViewModel, UserManageActivity.UserManageViewModel userManageViewModel, UserDataRepository userDataRepository,
+                                   EquipmentDataSource equipmentDataSource, String currentIP) {
         this.userManageView = userManageView;
         this.userDataRepository = userDataRepository;
         this.userManageViewModel = userManageViewModel;
+        this.equipmentItemViewModel = equipmentItemViewModel;
+        this.equipmentDataSource = equipmentDataSource;
+        this.currentIP = currentIP;
 
         mUserListAdapter = new UserListAdapter();
     }
@@ -59,8 +72,40 @@ public class UserManagePresenterImpl implements UserMangePresenter {
     @Override
     public void refreshView() {
 
+        equipmentDataSource.getEquipmentInfo(currentIP, new BaseLoadDataCallback<EquipmentInfo>() {
+            @Override
+            public void onSucceed(List<EquipmentInfo> data, OperationResult operationResult) {
+
+                EquipmentInfo equipmentInfo = data.get(0);
+
+                setEquipmentInfo(equipmentInfo);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                EquipmentInfo equipmentInfo = new EquipmentInfo();
+
+                setEquipmentInfo(equipmentInfo);
+
+            }
+        });
+
         getUserInThread();
 
+    }
+
+    private void setEquipmentInfo(EquipmentInfo equipmentInfo) {
+
+        if (equipmentInfo.getType().equals(EquipmentInfo.WS215I))
+            equipmentItemViewModel.equipmentIconID.set(R.drawable.equipment_215i);
+        else
+            equipmentItemViewModel.equipmentIconID.set(R.drawable.virtual_machine);
+
+        equipmentItemViewModel.type.set(equipmentInfo.getType());
+        equipmentItemViewModel.label.set(equipmentInfo.getLabel());
+        equipmentItemViewModel.ip.set(currentIP);
     }
 
     private void getUserInThread() {

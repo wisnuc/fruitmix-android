@@ -6,6 +6,8 @@ package com.winsun.fruitmix.http;
 
 public class HttpRequest {
 
+    public static final String TAG = HttpRequest.class.getSimpleName();
+
     private String url;
     private String httpMethod;
     private String headerKey;
@@ -33,7 +35,7 @@ public class HttpRequest {
         this.httpMethod = httpMethod;
     }
 
-    public void setHeader(String key,String value){
+    public void setHeader(String key, String value) {
         headerKey = key;
         headerValue = value;
     }

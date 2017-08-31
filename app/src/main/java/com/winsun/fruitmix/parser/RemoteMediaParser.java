@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.parser;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.Util;
 
@@ -7,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,10 +46,30 @@ public class RemoteMediaParser implements RemoteDatasParser<Media> {
 
             String dateTime = root.optString("datetime");
 
-            if (dateTime.equals("")) {
+            if (dateTime.equals("") || dateTime.length() < 10) {
                 media.setTime(Util.DEFAULT_DATE);
             } else {
-                media.setTime(dateTime.substring(0, 4) + "-" + dateTime.substring(5, 7) + "-" + dateTime.substring(8, 10));
+
+                try {
+
+                    String year = dateTime.substring(0, 4);
+
+                    int yearNum = Integer.valueOf(year);
+
+                    String month = dateTime.substring(5, 7);
+
+                    int monthNum = Integer.valueOf(month);
+
+                    String day = dateTime.substring(8, 10);
+
+                    int dayNum = Integer.valueOf(day);
+
+                    media.setTime(yearNum + "-" + monthNum + "-" + dayNum);
+
+                } catch (NumberFormatException e) {
+
+                    media.setTime(Util.DEFAULT_DATE);
+                }
             }
 
             int orientationNumber = root.optInt("orient");

@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.media.remote.media;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.HttpRequestFactory;
@@ -51,7 +52,7 @@ public class StationMediaRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     }
 
-    boolean downloadMedia(Media media) throws MalformedURLException, IOException, SocketTimeoutException {
+    boolean downloadMedia(Media media) throws MalformedURLException, IOException, SocketTimeoutException, NetworkException {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(media.getRemoteMediaRequestPath());
 

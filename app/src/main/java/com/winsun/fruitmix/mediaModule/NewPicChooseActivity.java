@@ -204,7 +204,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
             setEnterSelectModeVisibility(View.INVISIBLE);
         }
 
-        setSelectCountText(String.format(getString(R.string.select_count), selectedItemCount));
+        setSelectCountText(String.format(getString(R.string.select_photo_count), selectedItemCount));
 
     }
 

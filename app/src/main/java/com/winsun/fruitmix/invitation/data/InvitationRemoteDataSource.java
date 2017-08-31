@@ -39,11 +39,9 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl impleme
     @Override
     public void getInvitation(final BaseLoadDataCallback<ConfirmInviteUser> callback) {
 
-
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(TICKETS_PARAMETER);
 
         wrapper.loadCall(httpRequest, callback, new RemoteConfirmInviteUsersParser());
-
 
     }
 

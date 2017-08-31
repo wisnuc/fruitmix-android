@@ -127,4 +127,9 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
         containerActivity.startActivity(intent);
 
     }
+
+    @Override
+    public boolean canEnterSelectMode() {
+        return false;
+    }
 }

@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.user.datasource;
 
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.user.User;
 
@@ -11,6 +12,6 @@ public interface UserRemoteDataSource extends BaseUserDataSource {
 
     void insertUser(String userName, String userPwd, BaseOperateDataCallback<User> callback);
 
-    String getCurrentUserHome();
+    void getCurrentUserHome(BaseLoadDataCallback<String> callback);
 
 }

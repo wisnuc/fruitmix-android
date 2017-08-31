@@ -67,8 +67,6 @@ public class LoginUseCase extends BaseDataRepository{
     public static String mToken;
     public static String mGateway;
 
-    //TODO: check login with loggedInUser: get user null pointer
-
     private LoginUseCase(LoggedInUserDataSource loggedInUserDataSource, TokenDataSource tokenDataSource,
                          HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy, UploadMediaUseCase uploadMediaUseCase,
                          UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
@@ -176,31 +174,46 @@ public class LoginUseCase extends BaseDataRepository{
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
 
-                for (User user : data) {
+                for (final User user : data) {
                     if (user.getUuid().equals(loadTokenParam.getUserUUID())) {
 
-                        user.setHome(userDataRepository.getCurrentUserHome());
+                        userDataRepository.getCurrentUserHome(new BaseLoadDataCallback<String>() {
+                            @Override
+                            public void onSucceed(List<String> data, OperationResult operationResult) {
 
-                        Collection<LoggedInUser> loggedInUsers = loggedInUserDataSource.getAllLoggedInUsers();
+                                user.setHome(data.get(0));
 
-                        if (loggedInUsers.isEmpty()) {
+                                Collection<LoggedInUser> loggedInUsers = loggedInUserDataSource.getAllLoggedInUsers();
 
-                            systemSettingDataSource.setAutoUploadOrNot(true);
-                            systemSettingDataSource.setCurrentUploadUserUUID(user.getUuid());
+                                if (loggedInUsers.isEmpty()) {
 
-                            systemSettingDataSource.setShowAutoUploadDialog(false);
-                        } else {
+                                    systemSettingDataSource.setAutoUploadOrNot(true);
+                                    systemSettingDataSource.setCurrentUploadUserUUID(user.getUuid());
 
-                            systemSettingDataSource.setShowAutoUploadDialog(true);
-                        }
+                                    systemSettingDataSource.setShowAutoUploadDialog(false);
+                                } else {
 
-                        LoggedInUser loggedInUser = new LoggedInUser(user.getLibrary(), token, loadTokenParam.getGateway(), loadTokenParam.getEquipmentName(), user);
+                                    systemSettingDataSource.setAutoUploadOrNot(false);
+                                    systemSettingDataSource.setShowAutoUploadDialog(true);
+                                }
 
-                        loggedInUserDataSource.insertLoggedInUsers(Collections.singletonList(loggedInUser));
+                                LoggedInUser loggedInUser = new LoggedInUser(user.getLibrary(), token, loadTokenParam.getGateway(), loadTokenParam.getEquipmentName(), user);
 
-                        callback.onSucceed(Collections.singletonList(token), new OperationSuccess());
+                                loggedInUserDataSource.insertLoggedInUsers(Collections.singletonList(loggedInUser));
 
-                        eventBus.postSticky(new OperationEvent(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN, new OperationSuccess()));
+                                callback.onSucceed(Collections.singletonList(token), new OperationSuccess());
+
+                                eventBus.postSticky(new OperationEvent(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN, new OperationSuccess()));
+
+                            }
+
+                            @Override
+                            public void onFail(OperationResult operationResult) {
+
+                                callback.onFail(operationResult);
+
+                            }
+                        });
 
                         break;
 
@@ -270,7 +283,6 @@ public class LoginUseCase extends BaseDataRepository{
         boolean result;
 
         if (preUploadUserUUID.equals(currentLoggedInUser.getUser().getUuid())) {
-            systemSettingDataSource.setAutoUploadOrNot(true);
 
             result = true;
         } else {
@@ -307,6 +319,8 @@ public class LoginUseCase extends BaseDataRepository{
 
     public void loginWithWeChatCode(String code, final BaseOperateDataCallback<Boolean> callback) {
 
+        final BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
         tokenDataSource.getToken(code, new BaseLoadDataCallback<String>() {
             @Override
             public void onSucceed(List<String> data, OperationResult operationResult) {
@@ -323,7 +337,7 @@ public class LoginUseCase extends BaseDataRepository{
 
                 stationFileRepository.clearDownloadFileRecordInCache();
 
-                callback.onSucceed(true, operationResult);
+                runOnMainThreadCallback.onSucceed(true, operationResult);
 
                 getUsers(token);
 
@@ -332,7 +346,7 @@ public class LoginUseCase extends BaseDataRepository{
             @Override
             public void onFail(OperationResult operationResult) {
 
-                callback.onFail(operationResult);
+                runOnMainThreadCallback.onFail(operationResult);
 
             }
         });

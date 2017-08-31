@@ -26,13 +26,14 @@
         android:id="@+id/activity_setting"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#fafafa"
         android:orientation="vertical"
         tools:context="com.winsun.fruitmix.SettingActivity">
 
         <include
             android:id="@+id/toolbar_layout"
             layout="@layout/toolbar_layout"
-            bind:toolbarViewModel="@{toolbarViewModel}"/>
+            bind:toolbarViewModel="@{toolbarViewModel}" />
 
         <!--    <android.support.v7.widget.Toolbar
                 android:layout_width="match_parent"
@@ -59,14 +60,29 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/setting_text"
+                    android:textColor="@color/fifty_four_percent_black" />
+
+            </LinearLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp">
+                android:layout_height="56dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -74,7 +90,8 @@
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
                     android:text="@string/photo_auto_upload_setting_text"
-                    android:textColor="@color/eighty_seven_percent_black" />
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="16dp" />
 
                 <android.support.v7.widget.SwitchCompat
                     android:id="@+id/auto_upload_photos_switch"
@@ -89,12 +106,13 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/light_gray" />
+                android:background="@color/light_gray"
+                android:visibility="gone" />
 
             <RelativeLayout
                 android:id="@+id/already_upload_media_count_layout"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="56dp"
                 android:visibility="visible">
 
                 <TextView
@@ -103,7 +121,8 @@
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
                     android:text="@string/already_upload_media_count_hint"
-                    android:textColor="@color/eighty_seven_percent_black" />
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="16dp" />
 
                 <TextView
                     android:id="@+id/already_upload_media_count"
@@ -112,8 +131,10 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:text="@{setting.alreadyUploadMediaCountText}"
-                    android:textColor="@color/eighty_seven_percent_black"
-                    android:visibility="@{setting.alreadyUploadMediaCountTextViewVisibility?View.VISIBLE:View.GONE}" />
+                    android:textColor="@color/fifty_four_percent_black"
+                    android:textSize="14dp"
+                    android:visibility="@{setting.alreadyUploadMediaCountTextViewVisibility?View.VISIBLE:View.GONE}"
+                    tools:text="558/14666" />
 
             </RelativeLayout>
 
@@ -122,11 +143,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/light_gray"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="56dp"
                 android:visibility="gone">
 
                 <TextView
@@ -135,7 +156,8 @@
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
                     android:text="@string/mobile_network_upload"
-                    android:textColor="@color/eighty_seven_percent_black" />
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="16dp" />
 
                 <android.support.v7.widget.SwitchCompat
                     android:id="@+id/mobile_network_upload_switch"
@@ -155,7 +177,7 @@
             <RelativeLayout
                 android:id="@+id/clear_cache_layout"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="56dp"
                 android:clickable="true"
                 android:onClick="@{() -> settingPresenter.clearCache(context,setting)}">
 
@@ -165,7 +187,8 @@
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
                     android:text="@string/clear_cache"
-                    android:textColor="@color/eighty_seven_percent_black" />
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="16dp" />
 
                 <TextView
                     android:id="@+id/cache_size"
@@ -174,14 +197,17 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:text="@{setting.cacheSizeText}"
-                    android:textColor="@color/eighty_seven_percent_black" />
+                    android:textColor="@color/fifty_four_percent_black"
+                    android:textSize="14dp"
+                    tools:text="132.95K" />
 
             </RelativeLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/light_gray" />
+                android:background="@color/light_gray"
+                android:visibility="gone" />
 
         </LinearLayout>
 

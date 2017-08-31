@@ -11,6 +11,7 @@ import android.databinding.ViewDataBinding;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,8 +24,10 @@ import android.widget.Toast;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.command.ChangeToDownloadPageCommand;
+import com.winsun.fruitmix.command.DeleteDownloadedFileCommand;
 import com.winsun.fruitmix.command.DownloadFileCommand;
 import com.winsun.fruitmix.command.MacroCommand;
 import com.winsun.fruitmix.command.NullCommand;
@@ -37,6 +40,7 @@ import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.download.DownloadState;
+import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
@@ -56,14 +60,17 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BaseBindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -96,6 +103,8 @@ public class FilePresenter implements OnViewSelectListener {
     private AbstractCommand macroCommand;
 
     private AbstractCommand nullCommand;
+
+    private AbstractCommand checkFileAlreadyDownloadedCommand;
 
     private String rootUUID;
 
@@ -178,6 +187,80 @@ public class FilePresenter implements OnViewSelectListener {
 
     }
 
+
+    private class ReDownloadCommand extends AbstractCommand {
+
+        private AbstractRemoteFile abstractRemoteFile;
+
+        ReDownloadCommand(AbstractRemoteFile abstractRemoteFile) {
+            this.abstractRemoteFile = abstractRemoteFile;
+        }
+
+        @Override
+        public void execute() {
+
+            File file = new File(FileUtil.getDownloadFileStoreFolderPath(), abstractRemoteFile.getName());
+
+            if (file.exists()) {
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+                builder.setMessage("是否下载并覆盖原文件").setPositiveButton("覆盖", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        DownloadedFileWrapper downloadedFileWrapper = new DownloadedFileWrapper(abstractRemoteFile.getUuid(), abstractRemoteFile.getName());
+
+                        stationFileRepository.deleteDownloadedFile(Collections.singleton(downloadedFileWrapper), currentUserUUID, new BaseOperateDataCallback<Void>() {
+                            @Override
+                            public void onSucceed(Void data, OperationResult result) {
+
+                                MacroCommand macroCommand = createDownloadFileMarcoCommand(abstractRemoteFile);
+
+                                macroCommand.execute();
+                            }
+
+                            @Override
+                            public void onFail(OperationResult result) {
+
+                                Toast.makeText(activity, "删除原图失败", Toast.LENGTH_SHORT).show();
+
+                            }
+                        });
+
+
+                    }
+                }).setNegativeButton(activity.getString(R.string.cancel), null)
+                        .setCancelable(false).create().show();
+
+
+            } else {
+
+                MacroCommand macroCommand = createDownloadFileMarcoCommand(abstractRemoteFile);
+
+                macroCommand.execute();
+            }
+
+        }
+
+        @Override
+        public void unExecute() {
+
+        }
+    }
+
+    private MacroCommand createDownloadFileMarcoCommand(AbstractRemoteFile abstractRemoteFile) {
+
+        MacroCommand macroCommand = new MacroCommand();
+
+        AbstractCommand downloadFileCommand = new DownloadFileCommand(fileDownloadManager, abstractRemoteFile, stationFileRepository, currentUserUUID, rootUUID);
+        macroCommand.addCommand(downloadFileCommand);
+        macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
+
+        return macroCommand;
+    }
+
+
     public FileRecyclerViewAdapter getFileRecyclerViewAdapter() {
         return fileRecyclerViewAdapter;
     }
@@ -202,11 +285,19 @@ public class FilePresenter implements OnViewSelectListener {
 
     public void refreshCurrentFolder() {
 
-        getFile();
+        fileViewModel.swipeRefreshEnabled.set(true);
+
+        getFileInThread();
 
     }
 
     private void getFile() {
+
+        noContentViewModel.showNoContent.set(false);
+
+        loadingViewModel.showLoading.set(true);
+
+        fileViewModel.swipeRefreshEnabled.set(false);
 
         getFileInThread();
 
@@ -228,6 +319,79 @@ public class FilePresenter implements OnViewSelectListener {
 
             }
         });
+    }
+
+    private void handleGetFileFail() {
+
+        loadingViewModel.showLoading.set(false);
+
+        fileViewModel.swipeRefreshEnabled.set(true);
+        fileView.setSwipeRefreshing(false);
+
+        noContentViewModel.showNoContent.set(true);
+
+        abstractRemoteFiles.clear();
+    }
+
+    private void handleGetFileSucceed(List<AbstractRemoteFile> files) {
+
+        loadingViewModel.showLoading.set(false);
+
+        fileViewModel.swipeRefreshEnabled.set(true);
+        fileView.setSwipeRefreshing(false);
+
+        remoteFileLoaded = true;
+
+        if (files.size() == 0) {
+
+            noContentViewModel.showNoContent.set(true);
+
+            fileViewModel.showFileRecyclerView.set(false);
+
+            abstractRemoteFiles.clear();
+
+        } else {
+
+            noContentViewModel.showNoContent.set(false);
+
+            fileViewModel.showFileRecyclerView.set(true);
+
+            abstractRemoteFiles.clear();
+            abstractRemoteFiles.addAll(files);
+
+            sortFile(abstractRemoteFiles);
+
+            fileRecyclerViewAdapter.notifyDataSetChanged();
+        }
+    }
+
+
+    private void sortFile(List<AbstractRemoteFile> abstractRemoteFiles) {
+
+        List<AbstractRemoteFile> files = new ArrayList<>();
+        List<AbstractRemoteFile> folders = new ArrayList<>();
+
+        for (AbstractRemoteFile abstractRemoteFile : abstractRemoteFiles) {
+            if (abstractRemoteFile.isFolder())
+                folders.add(abstractRemoteFile);
+            else
+                files.add(abstractRemoteFile);
+        }
+
+        Comparator<AbstractRemoteFile> comparator = new Comparator<AbstractRemoteFile>() {
+            @Override
+            public int compare(AbstractRemoteFile lhs, AbstractRemoteFile rhs) {
+                return (int) (Long.parseLong(lhs.getTime()) - Long.parseLong(rhs.getTime()));
+            }
+        };
+
+        Collections.sort(folders, comparator);
+        Collections.sort(files, comparator);
+
+        abstractRemoteFiles.clear();
+        abstractRemoteFiles.addAll(folders);
+        abstractRemoteFiles.addAll(files);
+
     }
 
     public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
@@ -286,71 +450,6 @@ public class FilePresenter implements OnViewSelectListener {
 
     }
 
-    private void handleGetFileFail() {
-
-        loadingViewModel.showLoading.set(false);
-
-        fileView.setSwipeRefreshing(false);
-
-        noContentViewModel.showNoContent.set(true);
-    }
-
-    private void handleGetFileSucceed(List<AbstractRemoteFile> files) {
-
-        loadingViewModel.showLoading.set(false);
-
-        fileView.setSwipeRefreshing(false);
-
-        remoteFileLoaded = true;
-
-        if (files.size() == 0) {
-
-            noContentViewModel.showNoContent.set(true);
-
-            fileViewModel.showFileRecyclerView.set(false);
-        } else {
-
-            noContentViewModel.showNoContent.set(false);
-
-            fileViewModel.showFileRecyclerView.set(true);
-
-            abstractRemoteFiles.clear();
-            abstractRemoteFiles.addAll(files);
-
-            sortFile(abstractRemoteFiles);
-
-            fileRecyclerViewAdapter.notifyDataSetChanged();
-        }
-    }
-
-    private void sortFile(List<AbstractRemoteFile> abstractRemoteFiles) {
-
-        List<AbstractRemoteFile> files = new ArrayList<>();
-        List<AbstractRemoteFile> folders = new ArrayList<>();
-
-        for (AbstractRemoteFile abstractRemoteFile : abstractRemoteFiles) {
-            if (abstractRemoteFile.isFolder())
-                folders.add(abstractRemoteFile);
-            else
-                files.add(abstractRemoteFile);
-        }
-
-        Comparator<AbstractRemoteFile> comparator = new Comparator<AbstractRemoteFile>() {
-            @Override
-            public int compare(AbstractRemoteFile lhs, AbstractRemoteFile rhs) {
-                return (int) (Long.parseLong(lhs.getTime()) - Long.parseLong(rhs.getTime()));
-            }
-        };
-
-        Collections.sort(folders, comparator);
-        Collections.sort(files, comparator);
-
-        abstractRemoteFiles.clear();
-        abstractRemoteFiles.addAll(folders);
-        abstractRemoteFiles.addAll(files);
-
-    }
-
     public String getCurrentFolderName() {
         return currentFolderName;
     }
@@ -366,14 +465,12 @@ public class FilePresenter implements OnViewSelectListener {
 
     public void onBackPressed() {
 
-        if (notRootFolder()) {
+        if (selectMode) {
+            unSelectMode();
+        } else if (notRootFolder()) {
 
             if (loadingViewModel.showLoading.get() && !noContentViewModel.showNoContent.get())
                 return;
-
-            noContentViewModel.showNoContent.set(false);
-
-            loadingViewModel.showLoading.set(true);
 
             retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
             currentFolderUUID = retrievedFolderUUIDList.get(retrievedFolderUUIDList.size() - 1);
@@ -383,11 +480,9 @@ public class FilePresenter implements OnViewSelectListener {
 
             getFile();
 
-        } else {
-            unSelectMode();
-        }
+            handleFileListOperateCallback.handleFileListOperate(currentFolderName);
 
-        handleFileListOperateCallback.handleFileListOperate(currentFolderName);
+        }
 
     }
 
@@ -397,10 +492,28 @@ public class FilePresenter implements OnViewSelectListener {
 
     }
 
+    public boolean canEnterSelectMode() {
+
+        for (AbstractRemoteFile file : abstractRemoteFiles) {
+
+            if (file instanceof RemoteFile) {
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    public void quitSelectMode() {
+        unSelectMode();
+    }
+
+    public void enterSelectMode() {
+        selectMode();
+    }
+
     @Override
     public void selectMode() {
-
-        fileListSelectModeListener.enterSelectMode();
 
         selectMode = true;
         refreshSelectMode(selectMode, null);
@@ -408,8 +521,6 @@ public class FilePresenter implements OnViewSelectListener {
 
     @Override
     public void unSelectMode() {
-
-        fileListSelectModeListener.quitSelectMode();
 
         selectMode = false;
         refreshSelectMode(selectMode, null);
@@ -550,14 +661,6 @@ public class FilePresenter implements OnViewSelectListener {
 
     }
 
-    public void quitSelectMode() {
-        unSelectMode();
-    }
-
-    public void enterSelectMode() {
-        selectMode();
-    }
-
     private void createDownloadSelectFilesCommand() {
         macroCommand = new MacroCommand();
 
@@ -678,6 +781,10 @@ public class FilePresenter implements OnViewSelectListener {
             folderItemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
+                    if (selectMode)
+                        return;
+
                     currentFolderUUID = abstractRemoteFile.getUuid();
 
                     retrievedFolderUUIDList.add(currentFolderUUID);
@@ -685,8 +792,6 @@ public class FilePresenter implements OnViewSelectListener {
                     currentFolderName = abstractRemoteFile.getName();
 
                     retrievedFolderNameList.add(currentFolderName);
-
-                    loadingViewModel.showLoading.set(true);
 
                     getFile();
 
@@ -750,10 +855,7 @@ public class FilePresenter implements OnViewSelectListener {
                         toggleFileInSelectedFile(abstractRemoteFile);
                         toggleFileIconBgResource(binding.getFileItemViewModel(), abstractRemoteFile);
 
-                        fileListSelectModeListener.onFileSelectItemClick();
-
-                        if (selectedFiles.isEmpty())
-                            unSelectMode();
+                        fileListSelectModeListener.onFileSelectItemClick(selectedFiles.size());
 
                     }
                 });
@@ -772,12 +874,17 @@ public class FilePresenter implements OnViewSelectListener {
 
                         BottomMenuItem menuItem;
                         if (fileDownloadManager.checkIsDownloaded(abstractRemoteFile.getUuid())) {
+
+                            bottomMenuItems.add(new BottomMenuItem(R.drawable.download, activity.getString(R.string.re_download_the_item), new ReDownloadCommand(abstractRemoteFile)));
+
                             menuItem = new BottomMenuItem(R.drawable.file_icon, activity.getString(R.string.open_the_item), new OpenFileCommand(activity, abstractRemoteFile.getName()));
+
                         } else {
                             AbstractCommand macroCommand = new MacroCommand();
                             AbstractCommand downloadFileCommand = new DownloadFileCommand(fileDownloadManager, abstractRemoteFile, stationFileRepository, currentUserUUID, rootUUID);
                             macroCommand.addCommand(downloadFileCommand);
                             macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
+
                             menuItem = new BottomMenuItem(R.drawable.download, activity.getString(R.string.download_the_item), macroCommand);
                         }
                         bottomMenuItems.add(menuItem);
@@ -819,8 +926,6 @@ public class FilePresenter implements OnViewSelectListener {
 
                         selectMode = true;
                         refreshSelectMode(selectMode, abstractRemoteFile);
-
-                        handleFileListOperateCallback.handleFileListOperate(currentFolderName);
 
                         return true;
                     }

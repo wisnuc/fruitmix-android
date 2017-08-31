@@ -6,7 +6,7 @@ package com.winsun.fruitmix.file.view.interfaces;
 
 public interface FileListSelectModeListener {
 
-    void onFileSelectItemClick();
+    void onFileSelectItemClick(int selectItemCount);
 
     void onFileItemLongClick();
 

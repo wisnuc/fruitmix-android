@@ -304,7 +304,7 @@ public class UploadMediaUseCaseTest {
 
         when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
 
-        when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
+        when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false).thenReturn(false).thenReturn(false).thenReturn(true);
 
         uploadWhenUploadParentFolderExistAndUploadFolderExist();
 
@@ -505,7 +505,7 @@ public class UploadMediaUseCaseTest {
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getUploadParentFolderUUIDCallbackCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(stationFileRepository).getFile(anyString(),anyString(), getUploadParentFolderUUIDCallbackCaptor.capture());
+        verify(stationFileRepository).getFile(anyString(), anyString(), getUploadParentFolderUUIDCallbackCaptor.capture());
 
         getUploadParentFolderUUIDCallbackCaptor.getValue().onSucceed(Collections.<AbstractRemoteFile>emptyList(), new OperationSuccess());
 

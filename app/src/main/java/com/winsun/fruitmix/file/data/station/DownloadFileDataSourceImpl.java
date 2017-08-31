@@ -95,8 +95,16 @@ public class DownloadFileDataSourceImpl implements DownloadedFileDataSource {
     @Override
     public boolean deleteDownloadedFile(String fileName) {
 
-        //TODO: delete to real downloaded file
+        File file = new File(FileUtil.getDownloadFileStoreFolderPath(), fileName);
 
-        return true;
+        if (file.isFile() && file.exists()) {
+
+            return file.delete();
+
+        } else if (!file.exists()) {
+            return true;
+        }
+
+        return false;
     }
 }

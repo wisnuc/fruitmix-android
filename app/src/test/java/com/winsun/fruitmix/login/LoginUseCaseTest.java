@@ -230,11 +230,13 @@ public class LoginUseCaseTest {
 
         String testUserHome = "testUserHome";
 
-        when(userDataRepository.getCurrentUserHome()).thenReturn(testUserHome);
+        ArgumentCaptor<BaseLoadDataCallback<String>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
         loadUserCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess());
 
-        verify(userDataRepository).getCurrentUserHome();
+        verify(userDataRepository).getCurrentUserHome(captor.capture());
+
+        captor.getValue().onSucceed(Collections.singletonList(testUserHome), new OperationSuccess());
 
         assertEquals(testUserHome, user.getHome());
 
@@ -269,6 +271,7 @@ public class LoginUseCaseTest {
 
         testLoadUserSuccessAfterLoginSuccess();
 
+        verify(systemSettingDataSource).setAutoUploadOrNot(false);
         verify(systemSettingDataSource).setShowAutoUploadDialog(true);
 
     }
@@ -348,7 +351,7 @@ public class LoginUseCaseTest {
 
         testLoginWithLoggedInUser();
 
-        verify(systemSettingDataSource).setAutoUploadOrNot(true);
+        verify(systemSettingDataSource, never()).setAutoUploadOrNot(anyBoolean());
 
     }
 

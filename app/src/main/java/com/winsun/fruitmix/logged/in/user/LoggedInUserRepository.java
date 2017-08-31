@@ -1,15 +1,20 @@
 package com.winsun.fruitmix.logged.in.user;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Created by Administrator on 2017/7/6.
  */
 
 public class LoggedInUserRepository implements LoggedInUserDataSource {
+
+    public static final String TAG = LoggedInUserRepository.class.getSimpleName();
 
     private static LoggedInUserRepository instance;
 
@@ -61,7 +66,21 @@ public class LoggedInUserRepository implements LoggedInUserDataSource {
     @Override
     public boolean deleteLoggedInUsers(Collection<LoggedInUser> loggedInUsers) {
 
-        cacheLoggedInUsers.removeAll(loggedInUsers);
+        for (LoggedInUser loggedInUser : loggedInUsers) {
+
+            Iterator<LoggedInUser> iterator = cacheLoggedInUsers.iterator();
+
+            while (iterator.hasNext()) {
+
+                LoggedInUser cacheLoggedInUser = iterator.next();
+
+                if (loggedInUser.getUser().getUuid().equals(cacheLoggedInUser.getUser().getUuid()))
+                    iterator.remove();
+
+            }
+
+        }
+
 
         return loggedInUserDBDataSource.deleteLoggedInUsers(loggedInUsers);
     }

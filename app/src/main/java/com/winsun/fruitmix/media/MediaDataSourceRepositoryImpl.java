@@ -241,18 +241,11 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
     @Override
     public void getStationMediaForceRefresh(BaseLoadDataCallback<Media> callback) {
 
-        final BaseLoadDataCallback<Media> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
+        stationMediaRepository.setCacheDirty();
 
-        mThreadManager.runOnCacheThread(new Runnable() {
-            @Override
-            public void run() {
+        hasCallGetStationMedia = false;
 
-                stationMediaRepository.setCacheDirty();
-
-                stationMediaRepository.getMedia(runOnMainThreadCallback);
-
-            }
-        });
+        getMedia(callback);
 
     }
 

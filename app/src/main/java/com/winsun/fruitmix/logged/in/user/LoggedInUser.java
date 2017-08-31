@@ -70,4 +70,6 @@ public class LoggedInUser {
         this.token = token;
     }
 
+
+
 }

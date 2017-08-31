@@ -217,11 +217,11 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             @Override
             public void onClick() {
                 if (sInChooseMode) {
+
+                    setSelectMode(false);
+
                     hideChooseHeader();
                     showBottomNavAnim();
-
-                    if (viewPager.getCurrentItem() == PAGE_FILE)
-                        fileFragment.quitSelectMode();
 
                 } else {
                     mListener.onBackPress();
@@ -253,11 +253,26 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             public void onClick() {
 
                 if (viewPager.getCurrentItem() == PAGE_PHOTO) {
-                    showChooseHeader();
-                    dismissBottomNavAnim();
-                } else {
-                    fileFragment.enterSelectMode();
+
+                    if (!photoList.canEnterSelectMode()) {
+                        Toast.makeText(mContext, "没有照片可选", Toast.LENGTH_SHORT).show();
+
+                        return;
+                    }
+
+                } else if (viewPager.getCurrentItem() == PAGE_FILE) {
+
+                    if (!fileFragment.canEnterSelectMode()) {
+                        Toast.makeText(mContext, "没有文件可选", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                 }
+
+                setSelectMode(true);
+
+                showChooseHeader();
+                dismissBottomNavAnim();
 
             }
         });
@@ -531,9 +546,10 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     }
 
     public void refreshAllViews() {
-        groupListPage.refreshView();
+//        groupListPage.refreshView();
         fileFragment.refreshViewForce();
-        photoList.refreshView();
+
+        photoList.refreshViewForce();
     }
 
     private void initViewPager() {
@@ -725,15 +741,26 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         });
         lbRight.setVisibility(View.GONE);*/
 
-        sInChooseMode = true;
+        mListener.lockDrawer();
+    }
+
+    private void setSelectMode(boolean selectMode) {
+        sInChooseMode = selectMode;
 
         if (viewPager.getCurrentItem() == PAGE_PHOTO) {
             photoList.setSelectMode(sInChooseMode);
 
-            setSelectCountText(getString(R.string.choose_photo));
+            setSelectCountText(getString(R.string.select_photo));
+        } else if (viewPager.getCurrentItem() == PAGE_FILE) {
+
+            if (selectMode)
+                fileFragment.enterSelectMode();
+            else
+                fileFragment.quitSelectMode();
+
+            setSelectCountText(getString(R.string.select_file));
         }
 
-        mListener.lockDrawer();
     }
 
     private void hideChooseHeader() {
@@ -755,11 +782,6 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         lbRight.setVisibility(View.VISIBLE);
 
         setSelectCountText(getString(R.string.photo));*/
-
-        sInChooseMode = false;
-
-        if (viewPager.getCurrentItem() == PAGE_PHOTO)
-            photoList.setSelectMode(sInChooseMode);
 
         mListener.unlockDrawer();
     }
@@ -861,6 +883,9 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private void showBottomNav() {
         bottomNavigationView.setTranslationY(0);
+
+        Util.setBottomMargin(viewPager, Util.dip2px(getContext(), 56f));
+
     }
 
     private void dismissBottomNavAnim() {
@@ -898,8 +923,20 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         int currentItem = viewPager.getCurrentItem();
 
         if (currentItem == PAGE_FILE) {
-            fileFragment.onBackPressed();
+
+            if (sInChooseMode) {
+
+                setSelectMode(false);
+                hideChooseHeader();
+                showBottomNavAnim();
+
+            } else
+                fileFragment.onBackPressed();
+
         } else if (currentItem == PAGE_PHOTO) {
+
+            setSelectMode(false);
+
             hideChooseHeader();
             showBottomNavAnim();
         }
@@ -913,7 +950,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         if (selectedItemCount == 0) {
             handleBackPressed();
         } else {
-            setSelectCountText(String.format(getString(R.string.select_count), selectedItemCount));
+            setSelectCountText(String.format(getString(R.string.select_photo_count), selectedItemCount));
         }
 
     }
@@ -925,11 +962,14 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     @Override
     public void onPhotoItemLongClick() {
+
+        setSelectMode(true);
+
         showChooseHeader();
 
         dismissBottomNavAnim();
 
-        setSelectCountText(String.format(getString(R.string.select_count), 1));
+        setSelectCountText(String.format(getString(R.string.select_photo_count), 1));
     }
 
     @Override
@@ -1013,6 +1053,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                     public void execute() {
                         handleShareToOtherApp();
 
+                        setSelectMode(false);
                         hideChooseHeader();
                         showBottomNavAnim();
                     }
@@ -1177,16 +1218,27 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     @Override
     public void onFileItemLongClick() {
 
+        setSelectMode(true);
+
         showChooseHeader();
 
         dismissBottomNavAnim();
 
+        setSelectCountText(String.format(getString(R.string.select_file_count), 1));
+
     }
 
     @Override
-    public void onFileSelectItemClick() {
+    public void onFileSelectItemClick(int selectItemCount) {
 
         collapseFab();
+
+        if (selectItemCount == 0) {
+            setSelectMode(false);
+            hideChooseHeader();
+            showBottomNavAnim();
+        } else
+            setSelectCountText(String.format(getString(R.string.select_file_count), selectItemCount));
 
     }
 
@@ -1204,13 +1256,14 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         hideChooseHeader();
 
-        showBottomNav();
+        showBottomNavAnim();
 
     }
 
     private void onDidAppear(int position) {
 
         if (sInChooseMode) {
+            setSelectMode(false);
             hideChooseHeader();
             showBottomNav();
         }

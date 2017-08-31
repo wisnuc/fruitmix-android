@@ -225,7 +225,6 @@ public class ButlerService extends Service {
         switch (action) {
             case Util.CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED:
 
-
                 mCalcNewLocalMediaDigestFinished = true;
 
                 break;

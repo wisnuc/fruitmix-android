@@ -10,6 +10,6 @@ public class FileViewModel {
 
     public final ObservableBoolean showFileRecyclerView = new ObservableBoolean(false);
 
-    public final ObservableBoolean swipeRefreshEnabled = new ObservableBoolean(true);
+    public final ObservableBoolean swipeRefreshEnabled = new ObservableBoolean(false);
 
 }

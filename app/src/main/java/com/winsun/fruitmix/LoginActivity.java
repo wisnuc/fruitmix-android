@@ -53,6 +53,10 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
 
         mToolbar = binding.toolbarLayout.toolbar;
 
+        if(Util.checkRunningOnLollipopOrHigher()){
+            mToolbar.setElevation(0f);
+        }
+
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
         toolbarViewModel.setToolbarNavigationOnClickListener(new ToolbarViewModel.ToolbarNavigationOnClickListener() {
             @Override
@@ -71,6 +75,7 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setElevation(0f);
 
         Intent intent = getIntent();
         mEquipmentGroupName = intent.getStringExtra(Util.USER_GROUP_NAME);

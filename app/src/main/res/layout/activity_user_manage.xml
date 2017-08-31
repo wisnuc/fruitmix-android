@@ -18,6 +18,10 @@
             name="toolbarViewModel"
             type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
+        <variable
+            name="equipmentItemViewModel"
+            type="com.winsun.fruitmix.equipment.EquipmentItemViewModel"/>
+
         <import type="android.view.View" />
 
     </data>
@@ -25,7 +29,6 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#DEDEDE"
         tools:context="com.winsun.fruitmix.user.manage.UserManageActivity">
 
         <LinearLayout
@@ -73,20 +76,83 @@
 
                     </android.support.v7.widget.Toolbar>-->
 
+            <RelativeLayout
+                android:id="@+id/equipment_layout"
+                android:layout_width="match_parent"
+                android:layout_height="128dp"
+                android:background="@color/login_ui_blue"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:visibility="@{equipmentItemViewModel.showEquipment?View.VISIBLE:View.GONE,default=visible}">
+
+                <ImageView
+                    android:id="@+id/equipment_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:src="@{equipmentItemViewModel.equipmentIconID}"
+                    tools:src="@drawable/equipment_215i" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="16dp"
+                    android:layout_toRightOf="@id/equipment_icon"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{equipmentItemViewModel.type}"
+                        android:textColor="@color/eighty_seven_percent_white"
+                        android:textSize="16dp"
+                        tools:text="WS215i" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{equipmentItemViewModel.label}"
+                        android:textColor="@color/fifty_four_percent_white"
+                        android:textSize="14dp"
+                        tools:text="我的设备" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{equipmentItemViewModel.ip}"
+                        android:textColor="@color/fifty_four_percent_white"
+                        android:textSize="14dp"
+                        tools:text="10.10.9.124" />
+
+
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/equipment_info"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="16dp"
                 android:background="@color/white"
                 android:gravity="center_vertical"
                 android:orientation="vertical"
-                android:paddingLeft="16dp">
+                android:paddingTop="8dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/equipment_group_default_text"
+                    android:text="@string/user_manage"
                     android:textColor="@color/fifty_four_percent_black"
-                    android:textSize="24dp" />
+                    android:textSize="12dp" />
 
             </LinearLayout>
 
@@ -94,7 +160,6 @@
                 android:id="@+id/user_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="8dp"
                 android:background="@color/white"
                 android:cacheColorHint="@color/white"
                 android:divider="@null"

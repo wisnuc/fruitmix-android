@@ -51,7 +51,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
-                android:visibility="@{equipmentItemViewModel.showNoEquipment?View.GONE:View.VISIBLE,default=visible}">
+                android:visibility="@{equipmentItemViewModel.showEquipment?View.VISIBLE:View.GONE,default=visible}">
 
                 <ImageView
                     android:id="@+id/equipment_icon"

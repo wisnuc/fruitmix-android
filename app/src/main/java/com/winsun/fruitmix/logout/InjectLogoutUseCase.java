@@ -13,7 +13,7 @@ public class InjectLogoutUseCase {
 
     public static LogoutUseCase provideLogoutUseCase(Context context) {
 
-        return LogoutUseCase.getInstance(InjectSystemSettingDataSource.provideSystemSettingDataSource(context));
+        return LogoutUseCase.getInstance(InjectSystemSettingDataSource.provideSystemSettingDataSource(context),InjectLoggedInUser.provideLoggedInUserRepository(context));
 
     }
 

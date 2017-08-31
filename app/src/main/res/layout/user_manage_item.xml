@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -15,7 +16,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="56dp"
         android:background="@color/white">
 
         <TextView
@@ -36,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="32dp"
+            android:layout_marginLeft="16dp"
             android:layout_toRightOf="@id/user_default_portrait"
             android:orientation="vertical">
 
@@ -48,7 +49,8 @@
                 android:gravity="center_vertical"
                 android:text="@{user.getUserName(context)}"
                 android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="16dp" />
+                android:textSize="16dp"
+                tools:text="Admin" />
 
             <TextView
                 android:id="@+id/user_email"
@@ -59,7 +61,7 @@
                 android:text="@{user.email}"
                 android:textColor="@color/fifty_four_percent_black"
                 android:textSize="14dp"
-                android:visibility="@{user.email.length() > 0 ? View.VISIBLE : View.GONE}" />
+                android:visibility="@{user.email.length() > 0 ? View.VISIBLE : View.GONE,default=gone}" />
 
         </LinearLayout>
 
@@ -86,7 +88,8 @@
             android:layout_height="1dp"
             android:layout_alignLeft="@id/user_info_layout"
             android:layout_alignParentBottom="true"
-            android:background="#DEDEDE" />
+            android:background="#DEDEDE"
+            android:visibility="gone" />
 
     </RelativeLayout>
 

@@ -49,6 +49,7 @@ import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListViewModel;
 import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.operationResult.OperationHasNewMedia;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
@@ -237,6 +238,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         mPhotoListListener = listListener;
     }
 
+    @Override
+    public boolean canEnterSelectMode() {
+        return medias.size() > 0;
+    }
+
     public void setSelectMode(boolean selectMode) {
 
         mSelectMode = selectMode;
@@ -284,9 +290,28 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
+    public void refreshViewForce() {
+
+        mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallback<Media>() {
+            @Override
+            public void onSucceed(List<Media> data, OperationResult operationResult) {
+
+                handleGetMediaSucceed(data, new OperationHasNewMedia());
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                //TODO: consider fail logic
+
+            }
+        });
+
+    }
+
     @Override
     public void refreshView() {
-
 
         getMediaInThread();
 

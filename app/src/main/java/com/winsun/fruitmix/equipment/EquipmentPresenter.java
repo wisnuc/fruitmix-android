@@ -19,13 +19,11 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.databinding.EquipmentItemBinding;
 import com.winsun.fruitmix.databinding.EquipmentUserItemBinding;
 import com.winsun.fruitmix.equipment.data.EquipmentDataSource;
-import com.winsun.fruitmix.equipment.data.EquipmentRemoteDataSource;
 import com.winsun.fruitmix.equipment.data.EquipmentSearchManager;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.Equipment;
 import com.winsun.fruitmix.model.EquipmentInfo;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
@@ -71,7 +69,7 @@ public class EquipmentPresenter {
 
     private static final int RESUME_DISCOVERY = 0x0004;
 
-    private static final int RETRY_DELAY_MILLSECOND = 20 * 1000;
+    private static final int RETRY_DELAY_MILLISECOND = 20 * 1000;
 
     private static final int DISCOVERY_TIMEOUT_TIME = 6 * 1000;
     private static final int RESUME_DISCOVERY_INTERVAL = 3 * 1000;
@@ -94,6 +92,8 @@ public class EquipmentPresenter {
 
         WeakReference<EquipmentPresenter> weakReference = null;
 
+        private boolean hasForceRefresh = false;
+
         CustomHandler(EquipmentPresenter presenter, Looper looper) {
             super(looper);
             weakReference = new WeakReference<>(presenter);
@@ -104,21 +104,27 @@ public class EquipmentPresenter {
             switch (msg.what) {
                 case DATA_CHANGE:
 
+                    EquipmentViewPagerAdapter adapter = weakReference.get().equipmentViewPagerAdapter;
+
                     if (loadingViewModel.showLoading.get()) {
                         loadingViewModel.showLoading.set(false);
+                    }
+
+                    if (!hasForceRefresh) {
+                        hasForceRefresh = true;
+
+                        adapter.setForceRefresh();
                     }
 
                     equipmentSearchViewModel.showEquipmentViewPager.set(true);
                     equipmentSearchViewModel.showEquipmentViewPagerIndicator.set(true);
                     equipmentSearchViewModel.showEquipmentUsers.set(true);
 
-                    refreshEquipment(0);
-
-                    EquipmentViewPagerAdapter adapter = weakReference.get().equipmentViewPagerAdapter;
-
                     adapter.setEquipments(mUserLoadedEquipments);
 
                     adapter.notifyDataSetChanged();
+
+                    refreshEquipment(0);
 
                     break;
 
@@ -145,8 +151,6 @@ public class EquipmentPresenter {
                         equipmentViewPagerAdapter.setEquipments(Collections.singletonList(Equipment.NULL));
                         equipmentViewPagerAdapter.notifyDataSetChanged();
                     }
-
-                    mHandler.sendEmptyMessageDelayed(RESUME_DISCOVERY, RESUME_DISCOVERY_INTERVAL);
 
                     break;
 
@@ -203,6 +207,12 @@ public class EquipmentPresenter {
     public void onCreate() {
 
         startDiscovery();
+
+        // handle for huawei mate9 search result has no ip
+
+ /*       getEquipmentInfo(new Equipment("", Collections.singletonList("192.168.0.81"), 0));
+
+        hasFindEquipment = true;*/
 
         mHandler.sendEmptyMessage(RESUME_DISCOVERY);
 
@@ -359,11 +369,9 @@ public class EquipmentPresenter {
 
     private void handleRetrieveUserFail(Equipment equipment) {
 
-        //comment cause this may be call api too much times and get error
-
 /*        if (mHandler != null && !onPause) {
             Message message = Message.obtain(mHandler, RETRY_GET_DATA, equipment);
-            mHandler.sendMessageDelayed(message, RETRY_DELAY_MILLSECOND);
+            mHandler.sendMessageDelayed(message, RETRY_DELAY_MILLISECOND);
         }*/
     }
 
@@ -394,6 +402,8 @@ public class EquipmentPresenter {
 
         private List<Equipment> mEquipments;
 
+        private boolean forceRefresh = false;
+
         EquipmentViewPagerAdapter() {
             mEquipments = new ArrayList<>();
         }
@@ -403,6 +413,10 @@ public class EquipmentPresenter {
             mEquipments.addAll(equipments);
         }
 
+        public void setForceRefresh() {
+            forceRefresh = true;
+        }
+
         @Override
         public int getCount() {
             return mEquipments.size();
@@ -410,6 +424,8 @@ public class EquipmentPresenter {
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
+
+            Log.d(TAG, "instantiateItem: position: " + position);
 
             EquipmentItemBinding binding = EquipmentItemBinding.inflate(LayoutInflater.from(container.getContext()), container, false);
 
@@ -422,12 +438,20 @@ public class EquipmentPresenter {
             if (equipment.equals(Equipment.NULL)) {
 
                 equipmentItemViewModel.showNoEquipment.set(true);
+                equipmentItemViewModel.showEquipment.set(false);
+
+//                binding.noEquipmentLayout.setVisibility(View.VISIBLE);
+//                binding.equipmentLayout.setVisibility(View.GONE);
 
                 initEquipmentViewModelDefaultBackgroundColor(container, equipmentItemViewModel);
 
             } else {
 
                 equipmentItemViewModel.showNoEquipment.set(false);
+                equipmentItemViewModel.showEquipment.set(true);
+
+//                binding.noEquipmentLayout.setVisibility(View.GONE);
+//                binding.equipmentLayout.setVisibility(View.VISIBLE);
 
                 initEquipmentItemViewModel(container, equipmentItemViewModel, equipment);
 
@@ -441,8 +465,24 @@ public class EquipmentPresenter {
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
 
+            Log.d(TAG, "destroyItem: position: " + position);
+
             container.removeView((View) object);
 
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+
+            if (forceRefresh) {
+
+                forceRefresh = false;
+
+                return POSITION_NONE;
+
+            }
+
+            return super.getItemPosition(object);
         }
 
         @Override

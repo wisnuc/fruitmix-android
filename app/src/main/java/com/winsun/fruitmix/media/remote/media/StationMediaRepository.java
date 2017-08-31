@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
+import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationHasNewMedia;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -23,7 +24,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class StationMediaRepository {
 
-    //TODO: move change running thread in repository to avoid forget run on cache thread and cause NetworkOnMainThreadException
+    public static final String TAG = StationMediaRepository.class.getSimpleName();
 
     private static StationMediaRepository instance;
 
@@ -148,6 +149,10 @@ public class StationMediaRepository {
             result = stationMediaRemoteDataSource.downloadMedia(media);
 
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NetworkException e) {
+
+            Log.e(TAG, "downloadMedia: http error" + e.getHttpErrorCode());
             e.printStackTrace();
         }
 

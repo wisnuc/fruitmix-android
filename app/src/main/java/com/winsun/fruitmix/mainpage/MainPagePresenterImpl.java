@@ -66,7 +66,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     private LoggedInUserDataSource loggedInUserDataSource;
 
-    private String currentUserUUID;
+    private SystemSettingDataSource systemSettingDataSource;
 
     public MainPagePresenterImpl(Context context, SystemSettingDataSource systemSettingDataSource, LoggedInUserDataSource loggedInUserDataSource, NavPagerActivity.NavPagerViewModel navPagerViewModel, MainPageView mainPageView) {
 
@@ -81,7 +81,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         this.loggedInUserDataSource = loggedInUserDataSource;
 
-        currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
+        this.systemSettingDataSource = systemSettingDataSource;
 
         initNavigationAccountManageViewModel(context);
 
@@ -129,6 +129,8 @@ public class MainPagePresenterImpl implements MainPagePresenter {
     public void refreshNavigationLoggedInUsers() {
 
         if (loggedInUserDataSource == null) return;
+
+        String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
 
         List<LoggedInUser> loggedInUsers = new ArrayList<>(loggedInUserDataSource.getAllLoggedInUsers());
 

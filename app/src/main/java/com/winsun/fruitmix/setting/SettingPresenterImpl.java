@@ -21,6 +21,7 @@ import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.AbstractCollection;
 import java.util.List;
 
 /**
@@ -103,6 +104,7 @@ public class SettingPresenterImpl implements SettingPresenter {
                 baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_FOLDER + httpErrorCode);
             }
         };
+
     }
 
     @Override
@@ -189,10 +191,10 @@ public class SettingPresenterImpl implements SettingPresenter {
 
             if (isChecked) {
                 systemSettingDataSource.setCurrentUploadUserUUID(currentUserUUID);
-                EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
+                uploadMediaUseCase.startUploadMedia();
             } else {
                 systemSettingDataSource.setCurrentUploadUserUUID("");
-                EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
+                uploadMediaUseCase.stopUploadMedia();
             }
         }
 

@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.exception.NetworkException;
+import com.winsun.fruitmix.file.data.download.FileDownloadErrorState;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
@@ -30,6 +32,7 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.net.URLEncoder;
 
 import okhttp3.ResponseBody;
 
@@ -77,22 +80,37 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         //TODO:add file state(downloading,pending,finishing.etc) and scheduler,use state mode and do function:1.log child node 2.log parent node 3.find node and return
 
+        String encodedFileName = URLEncoder.encode(fileDownloadState.getFileName(), "UTF-8");
+
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(DOWNLOAD_FILE_PARAMETER + "/"
                 + fileDownloadState.getDriveUUID() + "/dirs/" + fileDownloadState.getParentFolderUUID()
-                + "/entries/" + fileDownloadState.getFileUUID() + "?name=" + fileDownloadState.getFileName());
+                + "/entries/" + fileDownloadState.getFileUUID() + "?name=" + encodedFileName);
 
-        ResponseBody responseBody = iHttpFileUtil.downloadFile(httpRequest);
+        ResponseBody responseBody = null;
+        try {
+            responseBody = iHttpFileUtil.downloadFile(httpRequest);
 
-        Log.d(TAG, "call: downloadFile");
+            Log.d(TAG, "call: downloadFile");
 
-        boolean result = FileUtil.writeResponseBodyToFolder(responseBody, fileDownloadState);
+            boolean result = FileUtil.writeResponseBodyToFolder(responseBody, fileDownloadState);
 
-        Log.d(TAG, "call: download result:" + result);
+            Log.d(TAG, "call: download result:" + result);
 
-        if (result)
-            callback.onSucceed(fileDownloadState.getFileDownloadItem(), new OperationSuccess());
-        else
-            callback.onFail(new OperationIOException());
+            if (result)
+                callback.onSucceed(fileDownloadState.getFileDownloadItem(), new OperationSuccess());
+            else
+                callback.onFail(new OperationIOException());
+
+        } catch (NetworkException e) {
+            e.printStackTrace();
+
+            FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
+
+            fileDownloadItem.setFileDownloadState(new FileDownloadErrorState(fileDownloadItem));
+
+            callback.onFail(new OperationNetworkException(e.getHttpErrorCode()));
+
+        }
 
     }
 

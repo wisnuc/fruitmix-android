@@ -8,6 +8,7 @@ import android.widget.Toast;
 import com.winsun.fruitmix.dialog.DialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.interfaces.BaseView;
+import com.winsun.fruitmix.logout.InjectLogoutUseCase;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
@@ -72,6 +73,10 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
 
         if (action.equals(Util.TOKEN_INVALID)) {
             FNAS.handleLogout();
+            InjectLogoutUseCase.provideLogoutUseCase(this).logout();
+
+            showToast("token失效");
+
             EquipmentSearchActivity.gotoEquipmentActivity(this, true);
         }
 

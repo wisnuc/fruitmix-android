@@ -169,8 +169,15 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
     }
 
     @Override
-    public String getCurrentUserHome() {
-        return userRemoteDataSource.getCurrentUserHome();
+    public void getCurrentUserHome(final BaseLoadDataCallback<String> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                userRemoteDataSource.getCurrentUserHome(createLoadCallbackRunOnMainThread(callback));
+            }
+        });
+
     }
 
 

@@ -4,6 +4,8 @@ import android.databinding.DataBindingUtil;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.Toolbar;
 
 import com.winsun.fruitmix.create.user.CreateUserPresenter;
 import com.winsun.fruitmix.create.user.CreateUserPresenterImpl;
@@ -29,6 +31,18 @@ public class CreateUserActivity extends BaseActivity implements CreateUserView {
 
         ActivityCreateUserBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_create_user);
 
+        Toolbar mToolbar = binding.toolbarLayout.toolbar;
+
+        if (Util.checkRunningOnLollipopOrHigher()) {
+            mToolbar.setElevation(0f);
+        }
+
+        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.white));
+
+        mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
+
+        Util.setStatusBarColor(this, R.color.login_ui_blue);
+
         CreateUserViewModel createUserViewModel = new CreateUserViewModel();
 
         createUserPresenter = new CreateUserPresenterImpl(this, InjectUser.provideRepository(this));
@@ -40,6 +54,8 @@ public class CreateUserActivity extends BaseActivity implements CreateUserView {
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 
         toolbarViewModel.titleText.set(getString(R.string.create_user));
+
+        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
 
         toolbarViewModel.setBaseView(this);
 

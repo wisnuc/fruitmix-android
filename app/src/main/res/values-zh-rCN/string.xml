@@ -36,6 +36,8 @@
     <!-- commmon-->
     <string name="app_name">WISNUC</string>
 
+    <string name="confirm">确定</string>
+
     <string name="finish_text">完成</string>
     <string name="choose_text">选择</string>
     <string name="delete_text">删除</string>
@@ -83,8 +85,8 @@
 
     <string name="account_manage">帐号管理</string>
 
-    <string name="already_upload_media_percent_text">已备份%1$s</string>
-    <string name="already_upload_finished">已完全备份</string>
+    <string name="already_upload_media_percent_text">已上传%1$s</string>
+    <string name="already_upload_finished">已完全上传</string>
 
     <string name="change_user">切换用户</string>
 
@@ -116,8 +118,8 @@
     <!-- 主界面-照片模块 -->
     <string name="photo">照片</string>
     <string name="unknown_time">未知时间</string>
-    <string name="choose_photo">选择照片</string>
-    <string name="select_count">已选%1$d张</string>
+    <string name="select_photo">选择照片</string>
+    <string name="select_photo_count">已选%1$d张照片</string>
 
     <string name="download_original_photo">下载原图</string>
 
@@ -179,9 +181,11 @@
     <string name="file">文件</string>
     <string name="download">下载</string>
     <string name="select_file">选择文件</string>
+    <string name="select_file_count">已选%1$d个文件</string>
     <string name="download_select_item">下载所选项</string>
     <string name="download_the_item">下载该文件</string>
     <string name="open_the_item">打开该文件</string>
+    <string name="re_download_the_item">重新下载该文件</string>
 
     <!-- 文件-下载模块 -->
     <string name="downloading">正在下载</string>
