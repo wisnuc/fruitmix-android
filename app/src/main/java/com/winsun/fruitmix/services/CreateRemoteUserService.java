@@ -102,7 +102,7 @@ public class CreateRemoteUserService extends IntentService {
 
             } else {
 
-                operationEvent = new OperationEvent(Util.REMOTE_USER_CREATED, new OperationNetworkException(httpResponse.getResponseCode()));
+                operationEvent = new OperationEvent(Util.REMOTE_USER_CREATED, new OperationNetworkException(httpResponse));
 
                 Log.i(TAG, "insert remote user fail");
 

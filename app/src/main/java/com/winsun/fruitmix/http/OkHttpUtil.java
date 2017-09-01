@@ -40,23 +40,20 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
     public static final String TAG = OkHttpUtil.class.getSimpleName();
 
-    private static OkHttpClient okHttpClient;
+    private OkHttpClient okHttpClient;
 
     private static final String APPLICATION_JSON_STRING = "application/json";
     private static final String JPEG_STRING = "image/jpeg";
 
-
     private static final String SHA_256_STRING = "sha256";
     private static final String FILE_STRING = "file";
-
-    static {
-        okHttpClient = new OkHttpClient.Builder().connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
-                .readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).addInterceptor(createHttpInterceptor()).build();
-    }
 
     private static OkHttpUtil instance;
 
     private OkHttpUtil() {
+
+        okHttpClient = new OkHttpClient.Builder().retryOnConnectionFailure(true).connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
+                .readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).addInterceptor(createHttpInterceptor()).build();
     }
 
     public static OkHttpUtil getInstance() {
@@ -65,6 +62,10 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
             instance = new OkHttpUtil();
 
         return instance;
+    }
+
+    public static void destroyInstance(){
+        instance = null;
     }
 
     private static Interceptor createHttpInterceptor() {
@@ -165,7 +166,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
         if (checkResponseCode(code)) {
             return response.body();
         } else {
-            throw new NetworkException("download api return http error code",code);
+            throw new NetworkException("download api return http error code",new HttpResponse(code,""));
         }
 
     }
@@ -197,15 +198,11 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             Response response = executeRequest(request);
 
-            String str = "";
+            String str;
 
             int responseCode = response.code();
 
-            if (checkResponseCode(handleResponse(response))) {
-
-                str = response.body().string();
-
-            }
+            str = response.body().string();
 
             response.close();
 
@@ -277,8 +274,13 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             Log.d(TAG, "handleResponse: " + code);
 
-/*            if (code == HttpURLConnection.HTTP_FORBIDDEN)
-                EventBus.getDefault().post(new OperationEvent(Util.TOKEN_INVALID, new OperationNetworkException(code)));*/
+            if (code == HttpURLConnection.HTTP_FORBIDDEN) {
+                try {
+                    Log.d(TAG, "handleResponse: 403 body: " + response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
 
             response.close();
 

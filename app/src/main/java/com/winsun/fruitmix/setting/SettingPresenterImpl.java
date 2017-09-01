@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.setting;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
@@ -75,6 +76,12 @@ public class SettingPresenterImpl implements SettingPresenter {
         calcAlreadyUploadMediaCountAndTotalCacheSize(context, mediaDataSourceRepository.getLocalMedia());
 
         uploadMediaCountChangeListener = new UploadMediaCountChangeListener() {
+
+            @Override
+            public void onUploadMediaStart() {
+
+            }
+
             @Override
             public void onUploadMediaCountChanged(int uploadedMediaCount, int totalCount) {
 
@@ -86,22 +93,28 @@ public class SettingPresenterImpl implements SettingPresenter {
 
             @Override
             public void onGetUploadMediaCountFail(int httpErrorCode) {
-                baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_UPLOADED_MEDIA + httpErrorCode);
+                if (httpErrorCode != -1)
+                    baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_UPLOADED_MEDIA + httpErrorCode);
             }
 
             @Override
             public void onUploadMediaFail(int httpErrorCode) {
-                baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_UPLOAD_MEDIA + httpErrorCode);
+                if (httpErrorCode != -1)
+                    baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_UPLOAD_MEDIA + httpErrorCode);
             }
 
             @Override
             public void onCreateFolderFail(int httpErrorCode) {
-                baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_CREATE_FOLDER + httpErrorCode);
+
+                if (httpErrorCode != -1)
+                    baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_CREATE_FOLDER + httpErrorCode);
             }
 
             @Override
             public void onGetFolderFail(int httpErrorCode) {
-                baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_FOLDER + httpErrorCode);
+
+                if (httpErrorCode != -1)
+                    baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_FOLDER + httpErrorCode);
             }
         };
 
@@ -110,13 +123,13 @@ public class SettingPresenterImpl implements SettingPresenter {
     @Override
     public void onResume() {
 
-        uploadMediaUseCase.registerUploadMediaCountChangeListener(uploadMediaCountChangeListener);
+//        uploadMediaUseCase.registerUploadMediaCountChangeListener(uploadMediaCountChangeListener);
     }
 
     @Override
     public void onPause() {
 
-        uploadMediaUseCase.unregisterUploadMediaCountChangeListener(uploadMediaCountChangeListener);
+//        uploadMediaUseCase.unregisterUploadMediaCountChangeListener(uploadMediaCountChangeListener);
     }
 
     @Override
@@ -139,6 +152,8 @@ public class SettingPresenterImpl implements SettingPresenter {
 
     private void calcAlreadyUploadMediaCountAndTotalCacheSize(final Context context, final List<Media> medias) {
 
+        final ProgressDialog dialog = ProgressDialog.show(context, null, "正在计算下载进度及缓存数", false, false);
+
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
@@ -146,13 +161,16 @@ public class SettingPresenterImpl implements SettingPresenter {
                 int alreadyUploadMediaCount = 0;
                 int totalUploadMediaCount = 0;
 
-                for (Media media : medias) {
+/*                for (Media media : medias) {
 
                     if (checkMediaIsUploadStrategy.isMediaUploaded(media))
                         alreadyUploadMediaCount++;
 
                     totalUploadMediaCount++;
-                }
+                }*/
+
+                alreadyUploadMediaCount = uploadMediaUseCase.getAlreadyUploadedMediaCount();
+                totalUploadMediaCount = medias.size();
 
                 mAlreadyUploadMediaCount = alreadyUploadMediaCount;
                 mTotalLocalMediaCount = totalUploadMediaCount;
@@ -165,6 +183,8 @@ public class SettingPresenterImpl implements SettingPresenter {
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
+
+                dialog.dismiss();
 
                 handleUploadMedia(context);
 
@@ -191,10 +211,11 @@ public class SettingPresenterImpl implements SettingPresenter {
 
             if (isChecked) {
                 systemSettingDataSource.setCurrentUploadUserUUID(currentUserUUID);
-                uploadMediaUseCase.startUploadMedia();
+                EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
+
             } else {
                 systemSettingDataSource.setCurrentUploadUserUUID("");
-                uploadMediaUseCase.stopUploadMedia();
+                EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
             }
         }
 

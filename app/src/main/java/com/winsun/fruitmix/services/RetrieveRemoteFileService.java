@@ -102,7 +102,7 @@ public class RetrieveRemoteFileService extends IntentService {
                 EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationSuccess(), folderUUID));
 
             } else {
-                EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()), folderUUID));
+                EventBus.getDefault().post(new RetrieveFileOperationEvent(Util.REMOTE_FILE_RETRIEVED, new OperationNetworkException(httpResponse), folderUUID));
             }
 
         } catch (MalformedURLException e) {

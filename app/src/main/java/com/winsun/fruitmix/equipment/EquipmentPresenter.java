@@ -55,6 +55,8 @@ public class EquipmentPresenter {
 
     private final List<Equipment> mUserLoadedEquipments = new ArrayList<>();
 
+    private List<String> equipmentSerialNumbers = new ArrayList<>();
+
     private Equipment currentEquipment;
 
     private List<List<User>> mUserExpandableLists;
@@ -302,6 +304,12 @@ public class EquipmentPresenter {
 
     private void getEquipmentInfo(final Equipment equipment) {
 
+        if (equipmentSerialNumbers.contains(equipment.getSerialNumber())) {
+            return;
+        } else {
+            equipmentSerialNumbers.add(equipment.getSerialNumber());
+        }
+
         synchronized (mUserLoadedEquipments) {
 
             for (Equipment loadedEquipment : mUserLoadedEquipments) {
@@ -369,10 +377,10 @@ public class EquipmentPresenter {
 
     private void handleRetrieveUserFail(Equipment equipment) {
 
-/*        if (mHandler != null && !onPause) {
+        if (mHandler != null && !onPause) {
             Message message = Message.obtain(mHandler, RETRY_GET_DATA, equipment);
             mHandler.sendMessageDelayed(message, RETRY_DELAY_MILLISECOND);
-        }*/
+        }
     }
 
     private void handleRetrieveUsers(List<User> data, Equipment equipment) {

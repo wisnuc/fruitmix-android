@@ -137,7 +137,7 @@
                 android:layout_marginBottom="16dp"
                 android:background="@color/login_ui_blue"
                 android:onClick="@{()->loginPresenter.login()}"
-                android:text="@string/confirm"
+                android:text="@string/login"
                 android:textColor="#FFF"
                 android:textSize="16dp" />
 

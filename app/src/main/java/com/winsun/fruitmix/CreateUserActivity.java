@@ -82,10 +82,20 @@ public class CreateUserActivity extends BaseActivity implements CreateUserView {
         private String userPassword;
         private String userConfirmPassword;
 
+        public CreateUserViewModel() {
+
+            userName = "";
+            userPassword = "";
+            userConfirmPassword = "";
+
+        }
+
         public final ObservableBoolean userNameErrorEnable = new ObservableBoolean(false);
+        public final ObservableBoolean userPasswordErrorEnable = new ObservableBoolean(false);
         public final ObservableBoolean userConfirmPasswordErrorEnable = new ObservableBoolean(false);
 
         public final ObservableField<String> userNameError = new ObservableField<>();
+        public final ObservableField<String> userPasswordError = new ObservableField<>();
         public final ObservableField<String> userConfirmPasswordError = new ObservableField<>();
 
 

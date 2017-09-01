@@ -2,6 +2,7 @@ package com.winsun.fruitmix.upload.media;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,6 +35,10 @@ public class CheckMediaIsUploadStrategy {
 
         return uploadedMediaHashs != null && currentUserUUID != null && uploadedMediaHashs.contains(media.getUuid());
 
+    }
+
+    public void addUploadedMediaUUID(String mediaUUID){
+        uploadedMediaHashs.add(mediaUUID);
     }
 
 

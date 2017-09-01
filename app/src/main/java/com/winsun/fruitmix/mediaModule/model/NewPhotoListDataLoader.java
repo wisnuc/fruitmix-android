@@ -31,7 +31,7 @@ public enum NewPhotoListDataLoader {
 
     private List<String> mPhotoDateGroups;
 
-    private Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
+    private ArrayMap<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
 
     private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
 
@@ -59,19 +59,26 @@ public enum NewPhotoListDataLoader {
     }
 
     public List<String> getPhotoDateGroups() {
-        return mPhotoDateGroups;
+        return new ArrayList<>(mPhotoDateGroups);
     }
 
     public Map<String, List<Media>> getMapKeyIsDateValueIsPhotoList() {
-        return mMapKeyIsDateValueIsPhotoList;
+
+        Map<String, List<Media>> map = new HashMap<>();
+        map.putAll(mMapKeyIsDateValueIsPhotoList);
+
+        return map;
     }
 
     public Map<Integer, String> getMapKeyIsPhotoPositionValueIsPhotoDate() {
-        return mMapKeyIsPhotoPositionValueIsPhotoDate;
+
+        return new HashMap<>(mMapKeyIsPhotoPositionValueIsPhotoDate);
+
     }
 
     public SparseArray<Media> getMapKeyIsPhotoPositionValueIsPhoto() {
-        return mMapKeyIsPhotoPositionValueIsPhoto;
+
+        return mMapKeyIsPhotoPositionValueIsPhoto.clone();
     }
 
     public List<Media> getMedias() {
@@ -129,7 +136,11 @@ public enum NewPhotoListDataLoader {
 
         for (Media media : medias) {
 
-            date = media.getTime();
+            if (media.getTime().length() > 10) {
+                date = media.getTime().substring(0, 10);
+            } else
+                date = media.getTime();
+
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
                 mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
             } else {

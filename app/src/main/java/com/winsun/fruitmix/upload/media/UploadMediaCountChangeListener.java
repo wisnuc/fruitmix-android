@@ -16,4 +16,6 @@ public interface UploadMediaCountChangeListener {
 
     void onGetFolderFail(int httpErrorCode);
 
+    void onUploadMediaStart();
+
 }

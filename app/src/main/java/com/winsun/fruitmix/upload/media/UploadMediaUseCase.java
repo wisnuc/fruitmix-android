@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.upload.media;
 
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -18,6 +20,7 @@ import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
@@ -40,6 +43,12 @@ public class UploadMediaUseCase {
     static final String UPLOAD_PARENT_FOLDER_NAME = "上传的照片";
 
     static final String UPLOAD_FOLDER_NAME_PREFIX = "来自";
+
+    public static final int RETRY_UPLOAD = 0x1001;
+
+    public static final long RETRY_INTERVAL = 1 * 60 * 1000;
+
+    private RetryUploadHandler retryUploadHandler;
 
     private String uploadFolderName;
 
@@ -106,6 +115,8 @@ public class UploadMediaUseCase {
 
         uploadMediaCountChangeListeners = new ArrayList<>();
 
+        retryUploadHandler = new RetryUploadHandler();
+
     }
 
     private String getUploadFolderName() {
@@ -157,6 +168,8 @@ public class UploadMediaUseCase {
 
         mAlreadyStartUpload = true;
 
+        notifyUploadMediaStart();
+
         if (uploadParentFolderUUID == null || uploadFolderUUID == null)
             checkFolderExist(currentUserHome, currentUserHome, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
                 @Override
@@ -187,7 +200,7 @@ public class UploadMediaUseCase {
             public void onFail(OperationResult operationResult) {
 
                 if (operationResult instanceof OperationNetworkException) {
-                    notifyGetFolderFail(((OperationNetworkException) operationResult).getResponseCode());
+                    notifyGetFolderFail(((OperationNetworkException) operationResult).getHttpResponseCode());
                 } else
                     notifyGetFolderFail(-1);
 
@@ -227,7 +240,7 @@ public class UploadMediaUseCase {
     private void startAutoUploadWithNoFolder() {
         Log.d(TAG, "init upload media hashs no upload folder");
 
-        uploadedMediaHashs = new CopyOnWriteArrayList<>();
+        uploadedMediaHashs = new ArrayList<>();
 
         checkMediaIsUploadStrategy.setUploadedMediaHashs(uploadedMediaHashs);
 
@@ -264,7 +277,7 @@ public class UploadMediaUseCase {
             public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);
 
-                uploadedMediaHashs = new CopyOnWriteArrayList<>();
+                uploadedMediaHashs = new ArrayList<>();
 
                 for (AbstractRemoteFile file : data) {
                     if (file instanceof RemoteFile)
@@ -286,7 +299,7 @@ public class UploadMediaUseCase {
                 super.onFail(operationResult);
 
                 if (operationResult instanceof OperationNetworkException) {
-                    notifyGetUploadMediaCountFail(((OperationNetworkException) operationResult).getResponseCode());
+                    notifyGetUploadMediaCountFail(((OperationNetworkException) operationResult).getHttpResponseCode());
                 } else
                     notifyGetUploadMediaCountFail(-1);
 
@@ -408,7 +421,6 @@ public class UploadMediaUseCase {
                     } else {
                         Log.i(TAG, "create upload folder succeed but can not find folder uuid");
 
-                        notifyCreateFolderFail(-1);
                         stopUploadMedia();
                     }
 
@@ -418,7 +430,6 @@ public class UploadMediaUseCase {
 
                     Log.d(TAG, "create upload folder fail");
 
-                    notifyCreateFolderFail(-1);
                     stopUploadMedia();
 
                 }
@@ -439,7 +450,7 @@ public class UploadMediaUseCase {
             public void onFail(OperationResult result) {
 
                 if (result instanceof OperationNetworkException)
-                    notifyCreateFolderFail(((OperationNetworkException) result).getResponseCode());
+                    notifyCreateFolderFail(((OperationNetworkException) result).getHttpResponseCode());
                 else
                     notifyCreateFolderFail(-1);
 
@@ -490,6 +501,8 @@ public class UploadMediaUseCase {
 
             stopUploadMedia();
 
+            sendRetryUploadMessage();
+
         } else if (needUploadedMedia.size() <= uploadMediaCount) {
 
             Log.d(TAG, "uploadMedia: finish upload and stop");
@@ -532,6 +545,10 @@ public class UploadMediaUseCase {
                         public void onSucceed(Boolean data, OperationResult result) {
                             super.onSucceed(data, result);
 
+                            handleMediaUploadSucceed();
+                        }
+
+                        private void handleMediaUploadSucceed() {
                             Log.i(TAG, "upload onSucceed: media uuid: " + media.getUuid() + " user uuid: " + currentUserUUID);
 
                             if (media.getUploadedUserUUIDs().isEmpty()) {
@@ -542,7 +559,7 @@ public class UploadMediaUseCase {
 
                             mediaDataSourceRepository.updateMedia(media);
 
-                            uploadedMediaHashs.add(media.getUuid());
+                            checkMediaIsUploadStrategy.addUploadedMediaUUID(media.getUuid());
 
                             alreadyUploadedMediaCount++;
 
@@ -562,15 +579,36 @@ public class UploadMediaUseCase {
 
                                 if (result instanceof OperationNetworkException) {
 
-                                    int code = ((OperationNetworkException) result).getResponseCode();
+                                    int code = ((OperationNetworkException) result).getHttpResponseCode();
 
                                     if (code == 404) {
                                         resetState();
                                         startUploadMedia();
-                                    } else
+                                    } else if (code == 403) {
+
+                                        HttpErrorBodyParser parser = new HttpErrorBodyParser();
+                                        try {
+                                            String codeInBody = parser.parse(((OperationNetworkException) result).getHttpResponseBody());
+
+                                            if (codeInBody.equals(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE))
+                                                handleMediaUploadSucceed();
+
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+
+                                            uploadMedia(medias);
+
+                                        }
+
+
+                                    } else {
+
                                         uploadMedia(medias);
 
-                                    notifyUploadMediaFail(code);
+                                        notifyUploadMediaFail(code);
+
+                                    }
+
 
                                 } else {
 
@@ -629,6 +667,8 @@ public class UploadMediaUseCase {
             }
         });
 
+
+        sendRetryUploadMessage();
     }
 
     private void notifyGetUploadMediaCountFailInThread(int httpErrorCode) {
@@ -662,6 +702,8 @@ public class UploadMediaUseCase {
             }
         });
 
+        sendRetryUploadMessage();
+
     }
 
     private void notifyCreateFolderFail(final int httpErrorCode) {
@@ -682,6 +724,8 @@ public class UploadMediaUseCase {
 
             }
         });
+
+        sendRetryUploadMessage();
 
 
     }
@@ -707,6 +751,27 @@ public class UploadMediaUseCase {
 
     }
 
+    private void notifyUploadMediaStart() {
+
+        threadManager.runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+
+                if (uploadMediaCountChangeListeners != null) {
+
+                    Log.i(TAG, "call notifyUploadMediaFail");
+
+                    for (UploadMediaCountChangeListener uploadMediaCountChangeListener : uploadMediaCountChangeListeners) {
+                        uploadMediaCountChangeListener.onUploadMediaStart();
+                    }
+
+                }
+
+            }
+        });
+
+    }
+
 
     public void stopUploadMedia() {
 
@@ -717,6 +782,8 @@ public class UploadMediaUseCase {
         mAlreadyStartUpload = false;
 
         uploadMediaCount = 0;
+
+        uploadedMediaHashs = null;
 
         threadManager.stopUploadMediaThreadNow();
 
@@ -744,6 +811,38 @@ public class UploadMediaUseCase {
 
         currentUserHome = null;
 
+        retryUploadHandler.removeMessages(RETRY_UPLOAD);
+
     }
+
+    public int getAlreadyUploadedMediaCount() {
+        return alreadyUploadedMediaCount;
+    }
+
+    private void sendRetryUploadMessage() {
+
+        Log.d(TAG, "sendRetryUploadMessage: ");
+
+        retryUploadHandler.sendEmptyMessageDelayed(RETRY_UPLOAD, RETRY_INTERVAL);
+
+    }
+
+    private class RetryUploadHandler extends Handler {
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            switch (msg.what) {
+                case RETRY_UPLOAD:
+
+                    startUploadMedia();
+
+                    break;
+            }
+
+        }
+    }
+
 
 }

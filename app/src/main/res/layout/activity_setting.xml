@@ -113,7 +113,7 @@
                 android:id="@+id/already_upload_media_count_layout"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:visibility="visible">
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"

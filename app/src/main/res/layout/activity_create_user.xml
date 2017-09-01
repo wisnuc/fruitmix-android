@@ -127,7 +127,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:counterEnabled="true"
-                    app:counterMaxLength="40">
+                    app:counterMaxLength="40"
+                    app:error="@{createUserViewModel.userPasswordError}"
+                    app:errorEnabled="@{createUserViewModel.userPasswordErrorEnable}">
 
                     <android.support.design.widget.TextInputEditText
                         android:id="@+id/user_password_edittext"

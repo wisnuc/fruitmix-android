@@ -195,6 +195,7 @@
     <string name="create_user">Create User</string>
     <string name="username_not_unique">User name is exist.</string>
     <string name="empty_username">Please enter username</string>
+    <string name="empty_password">Please enter password</string>
     <string name="not_same_password">Passwords do not match.</string>
 
     <!-- file -->

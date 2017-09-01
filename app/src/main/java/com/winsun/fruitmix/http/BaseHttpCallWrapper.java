@@ -51,7 +51,7 @@ public class BaseHttpCallWrapper {
 
             } else {
 
-                callback.onFail(new OperationNetworkException(httpResponse.getResponseCode()));
+                callback.onFail(new OperationNetworkException(httpResponse));
             }
 
 
@@ -102,7 +102,7 @@ public class BaseHttpCallWrapper {
 
             } else {
 
-                callback.onFail(new OperationNetworkException(httpResponse.getResponseCode()));
+                callback.onFail(new OperationNetworkException(httpResponse));
             }
 
 

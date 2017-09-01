@@ -87,7 +87,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:visibility="@{viewModel.showUploadProgress?View.VISIBLE:View.GONE,default=visible}">
+                android:visibility="@{viewModel.showUploadProgress?View.VISIBLE:View.GONE,default=gone}">
 
                 <TextView
                     android:id="@+id/upload_percent_textview"
@@ -127,13 +127,30 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
-                android:visibility="@{viewModel.showUploadProgress?View.GONE:View.VISIBLE,default=visible}">
+                android:visibility="@{viewModel.showConnectServerFailed?View.VISIBLE:View.GONE,default=gone}">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/connnect_server_fail"
+                    android:textColor="#8AFFFFFF"
+                    android:textSize="12dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:visibility="@{viewModel.showLoadingUploadProgress?View.VISIBLE:View.GONE,default=visible}"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="正在获取下载进度"
                     android:textColor="#8AFFFFFF"
                     android:textSize="12dp" />
 

@@ -135,6 +135,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private boolean needTransition = true;
 
+    private boolean hasStartPostPoneEnterTransition = false;
+
     private Dialog mDialog;
 
     private MediaDataSourceRepository mediaDataSourceRepository;
@@ -243,6 +245,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         Log.d(TAG, "onCreate: needTransition:" + needTransition);
 
         if (needTransition) {
+
+            Log.d(TAG, "onCreate: postpone enter transition");
+
             ActivityCompat.postponeEnterTransition(this);
             setEnterSharedElementCallback(sharedElementCallback);
         }
@@ -662,6 +667,20 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     }
 
+    @Override
+    public void onImageLoadFail(String url, View view) {
+
+        if (url == null)
+            return;
+
+        Media media = ((GifTouchNetworkImageView) view).getCurrentMedia();
+
+        if (isImageThumb(url, media)) {
+            ((GifTouchNetworkImageView) view).setDefaultColor();
+        }
+
+    }
+
     private void handleMediaLoaded(String url, View view, Media media) {
         if (isImageThumb(url, media)) {
 
@@ -676,6 +695,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private void handleOriginalMediaLoaded(View view, Media media) {
         if (!transitionMediaNeedShowThumb && needTransition) {
+
+            Log.d(TAG, "handleOriginalMediaLoaded: start postponed enter transition");
+
             ActivityCompat.startPostponedEnterTransition(this);
             transitionMediaNeedShowThumb = true;
         } else if (media.isLocal() && media.getThumb().isEmpty()) {
@@ -691,7 +713,12 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     }
 
     private void handleThumbLoaded(View view, Media media) {
-        if (isCurrentViewPage(initialPhotoPosition) && needTransition) {
+        if (!hasStartPostPoneEnterTransition && needTransition) {
+
+            hasStartPostPoneEnterTransition = true;
+
+            Log.d(TAG, "handleThumbLoaded: start postponed enter transition");
+
             ActivityCompat.startPostponedEnterTransition(this);
 
             startLoadCurrentImageAfterTransition(view, media);

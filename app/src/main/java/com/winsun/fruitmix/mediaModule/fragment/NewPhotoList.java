@@ -59,6 +59,7 @@ import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -275,7 +276,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             public void onSucceed(List<Media> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);
 
-                handleGetMediaSucceed(data, operationResult);
+                handleGetMediaSucceed(data, new OperationHasNewMedia());
             }
 
             @Override
@@ -286,7 +287,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             }
         });
-
 
     }
 
@@ -561,6 +561,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         glm.getSpanSizeLookup().setSpanIndexCacheEnabled(true);
 
         mLayoutManager = glm;
+        ((GridLayoutManager) mLayoutManager).setSpanCount(mSpanCount);
+
         mScrollCalculator = mLinearScrollCalculator;
     }
 
@@ -940,7 +942,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     }
 
 
-    class PhotoGroupHolder extends BindingViewHolder {
+    private class PhotoGroupHolder extends BindingViewHolder {
 
         TextView mPhotoTitle;
 
@@ -1248,6 +1250,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                         }
 
                         currentMedia.setSelected(selected);
+
                         mPhotoRecycleAdapter.notifyDataSetChanged();
 
                         calcSelectedPhoto();

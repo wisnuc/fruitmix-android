@@ -125,7 +125,7 @@ public class RetrieveTokenService extends IntentService {
 
             } else {
 
-                operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationNetworkException(responseCode));
+                operationEvent = new OperationEvent(Util.REMOTE_TOKEN_RETRIEVED, new OperationNetworkException(httpResponse));
 
             }
 

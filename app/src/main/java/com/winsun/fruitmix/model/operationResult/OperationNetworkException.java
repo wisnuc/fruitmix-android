@@ -3,6 +3,7 @@ package com.winsun.fruitmix.model.operationResult;
 import android.content.Context;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.OperationResultType;
 
 /**
@@ -11,10 +12,10 @@ import com.winsun.fruitmix.model.OperationResultType;
 
 public class OperationNetworkException extends OperationResult {
 
-    private int responseCode = 0;
+    private HttpResponse httpResponse;
 
-    public OperationNetworkException(int responseCode) {
-        this.responseCode = responseCode;
+    public OperationNetworkException(HttpResponse httpResponse) {
+        this.httpResponse = httpResponse;
     }
 
     @Override
@@ -22,17 +23,21 @@ public class OperationNetworkException extends OperationResult {
 
         String resultMessage;
 
-        if (responseCode == 401) {
+        if (httpResponse.getResponseCode() == 401) {
             resultMessage = context.getString(R.string.password_error);
         } else {
-            resultMessage = String.format(context.getString(R.string.network_exception), "http " + responseCode);
+            resultMessage = String.format(context.getString(R.string.network_exception), "http " + httpResponse.getResponseCode());
         }
 
         return resultMessage;
     }
 
-    public int getResponseCode() {
-        return responseCode;
+    public String getHttpResponseBody(){
+        return httpResponse.getResponseData();
+    }
+
+    public int getHttpResponseCode(){
+        return httpResponse.getResponseCode();
     }
 
     @Override

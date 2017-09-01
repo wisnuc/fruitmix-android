@@ -30,6 +30,7 @@ import com.winsun.fruitmix.util.Util;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
@@ -108,7 +109,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
             fileDownloadItem.setFileDownloadState(new FileDownloadErrorState(fileDownloadItem));
 
-            callback.onFail(new OperationNetworkException(e.getHttpErrorCode()));
+            callback.onFail(new OperationNetworkException(e.getHttpResponse()));
 
         }
 
@@ -153,7 +154,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
             if (httpResponse.getResponseCode() == 200)
                 callback.onSucceed(true, new OperationSuccess());
             else
-                callback.onFail(new OperationNetworkException(httpResponse.getResponseCode()));
+                callback.onFail(new OperationNetworkException(httpResponse));
 
         } catch (MalformedURLException e) {
 

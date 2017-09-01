@@ -102,7 +102,7 @@ public class RetrieveRemoteUserService extends IntentService {
             httpResponse = FNAS.loadUser(this);
 
             if (httpResponse.getResponseCode() != 200 && Util.loginType == LoginType.LOGIN) {
-                OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()));
+                OperationEvent operationEvent = new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationNetworkException(httpResponse));
                 EventBus.getDefault().post(operationEvent);
                 return;
             }

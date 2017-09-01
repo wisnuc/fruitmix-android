@@ -97,7 +97,16 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
 
         String confirmPassword = createUserViewModel.getUserConfirmPassword();
 
-        if (!password.equals(confirmPassword)) {
+        if (password.isEmpty()) {
+
+            createUserViewModel.userPasswordErrorEnable.set(true);
+            createUserViewModel.userPasswordError.set(context.getString(R.string.empty_password));
+
+            return;
+
+        } else if (!password.equals(confirmPassword)) {
+
+            createUserViewModel.userPasswordErrorEnable.set(false);
 
             createUserViewModel.userConfirmPasswordErrorEnable.set(true);
             createUserViewModel.userConfirmPasswordError.set(context.getString(R.string.not_same_password));
@@ -106,6 +115,7 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
 
         } else {
 
+            createUserViewModel.userPasswordErrorEnable.set(false);
             createUserViewModel.userConfirmPasswordErrorEnable.set(false);
 
         }

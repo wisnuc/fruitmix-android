@@ -8,4 +8,6 @@ import android.view.View;
 public interface IImageLoadListener {
 
     void onImageLoadFinish(String url, View view);
+
+    void onImageLoadFail(String url,View view);
 }

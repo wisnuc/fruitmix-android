@@ -223,9 +223,7 @@ public class GifTouchNetworkImageView extends PinchImageView {
 //                            setImageResource(mDefaultImageId);
 //                        }
 
-                        setDefaultColor();
-
-                        deliverImageLoadFinish();
+                        deliverImageLoadFail();
 
                     }
 
@@ -270,7 +268,7 @@ public class GifTouchNetworkImageView extends PinchImageView {
                 });
     }
 
-    private void setDefaultColor() {
+    public void setDefaultColor() {
 
         if (mDefaultImageId != 0) {
             setImageResource(mDefaultImageId);
@@ -342,9 +340,7 @@ public class GifTouchNetworkImageView extends PinchImageView {
 //                            setImageResource(mDefaultImageId);
 //                        }
 
-                        setDefaultColor();
-
-                        deliverImageLoadFinish();
+                        deliverImageLoadFail();
                     }
 
                     @Override
@@ -395,6 +391,22 @@ public class GifTouchNetworkImageView extends PinchImageView {
             }
         });
     }
+
+    private void deliverImageLoadFail(){
+
+        post(new Runnable() {
+            @Override
+            public void run() {
+
+                Log.i(TAG, "onResponse Url:" + mUrl);
+                if (mImageLoadListener != null) {
+                    mImageLoadListener.onImageLoadFail(mUrl, GifTouchNetworkImageView.this);
+                }
+            }
+        });
+
+    }
+
 
     private void setDefaultImageOrNull() {
 //        if (mDefaultImageId != 0) {

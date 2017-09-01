@@ -394,7 +394,7 @@ public class UploadMediaUseCaseTest {
 
         verify(stationFileRepository).uploadFile(any(LocalFile.class), eq(testUserHome), eq(testUploadFolderUUID), captor.capture());
 
-        captor.getValue().onFail(new OperationNetworkException(404));
+        captor.getValue().onFail(new OperationNetworkException(new HttpResponse(404,"")));
 
         assertNull(uploadMediaUseCase.uploadParentFolderUUID);
         assertNull(uploadMediaUseCase.uploadFolderUUID);

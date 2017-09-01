@@ -152,7 +152,7 @@ public class StationMediaRepository {
             e.printStackTrace();
         } catch (NetworkException e) {
 
-            Log.e(TAG, "downloadMedia: http error" + e.getHttpErrorCode());
+            Log.e(TAG, "downloadMedia: http error" + e.getHttpResponseCode());
             e.printStackTrace();
         }
 
@@ -162,6 +162,9 @@ public class StationMediaRepository {
     }
 
     public boolean clearAllStationMediasInDB() {
+
+        mediaConcurrentMap.clear();
+
         return stationMediaDBDataSource.clearAllMedias();
     }
 

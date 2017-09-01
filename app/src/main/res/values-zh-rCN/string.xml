@@ -175,6 +175,7 @@
     <string name="create_user">添加用户</string>
     <string name="username_not_unique">用户名不唯一</string>
     <string name="empty_username">用户名不能为空</string>
+    <string name="empty_password">密码不能为空</string>
     <string name="not_same_password">密码不一致</string>
 
     <!-- 文件 -->

@@ -1,12 +1,14 @@
 package com.winsun.fruitmix.exception;
 
+import com.winsun.fruitmix.http.HttpResponse;
+
 /**
  * Created by Administrator on 2017/8/30.
  */
 
 public class NetworkException extends Exception {
 
-    private int httpErrorCode;
+    private HttpResponse httpResponse;
 
     /**
      * Constructs a new {@code Exception} with the current stack trace and the
@@ -14,12 +16,23 @@ public class NetworkException extends Exception {
      *
      * @param detailMessage the detail message for this exception.
      */
-    public NetworkException(String detailMessage, int httpErrorCode) {
+    public NetworkException(String detailMessage, HttpResponse httpResponse) {
         super(detailMessage);
-        this.httpErrorCode = httpErrorCode;
+        this.httpResponse = httpResponse;
     }
 
-    public int getHttpErrorCode() {
-        return httpErrorCode;
+    public HttpResponse getHttpResponse() {
+        return httpResponse;
     }
+
+    public String getHttpResponseBody(){
+        return httpResponse.getResponseData();
+    }
+
+    public int getHttpResponseCode(){
+        return httpResponse.getResponseCode();
+    }
+
+
+
 }

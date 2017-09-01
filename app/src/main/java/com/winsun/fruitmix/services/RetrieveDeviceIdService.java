@@ -98,7 +98,7 @@ public class RetrieveDeviceIdService extends IntentService {
 
                 } else {
 
-                    operationEvent = new OperationEvent(Util.REMOTE_DEVICE_ID_RETRIEVED, new OperationNetworkException(httpResponse.getResponseCode()));
+                    operationEvent = new OperationEvent(Util.REMOTE_DEVICE_ID_RETRIEVED, new OperationNetworkException(httpResponse));
                 }
 
             } catch (MalformedURLException e) {

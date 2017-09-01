@@ -13,6 +13,7 @@ import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
+import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -28,6 +29,7 @@ import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +38,7 @@ import java.util.List;
  * Created by Administrator on 2017/7/14.
  */
 
-public class LoginUseCase extends BaseDataRepository{
+public class LoginUseCase extends BaseDataRepository {
 
     public static final String TAG = LoginUseCase.class.getSimpleName();
 
@@ -199,7 +201,9 @@ public class LoginUseCase extends BaseDataRepository{
 
                                 LoggedInUser loggedInUser = new LoggedInUser(user.getLibrary(), token, loadTokenParam.getGateway(), loadTokenParam.getEquipmentName(), user);
 
-                                loggedInUserDataSource.insertLoggedInUsers(Collections.singletonList(loggedInUser));
+                                boolean result = loggedInUserDataSource.insertLoggedInUsers(Collections.singletonList(loggedInUser));
+
+                                Log.d(TAG, "onSucceed: insert result :" + result);
 
                                 callback.onSucceed(Collections.singletonList(token), new OperationSuccess());
 
@@ -284,6 +288,8 @@ public class LoginUseCase extends BaseDataRepository{
 
         if (preUploadUserUUID.equals(currentLoggedInUser.getUser().getUuid())) {
 
+            systemSettingDataSource.setAutoUploadOrNot(true);
+
             result = true;
         } else {
             systemSettingDataSource.setAutoUploadOrNot(false);
@@ -304,7 +310,7 @@ public class LoginUseCase extends BaseDataRepository{
 
         checkMediaIsUploadStrategy.setCurrentUserUUID(loginUserUUID);
 
-        checkMediaIsUploadStrategy.setUploadedMediaHashs(Collections.<String>emptyList());
+        checkMediaIsUploadStrategy.setUploadedMediaHashs(new ArrayList<String>());
 
         uploadMediaUseCase.resetState();
 
@@ -313,6 +319,8 @@ public class LoginUseCase extends BaseDataRepository{
         systemSettingDataSource.setCurrentLoginUserUUID(loginUserUUID);
 
         stationFileRepository.clearDownloadFileRecordInCache();
+
+        NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
 
     }
 

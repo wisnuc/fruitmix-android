@@ -175,7 +175,11 @@ public class NavPagerActivity extends BaseActivity
 
         public final ObservableInt headerArrowResID = new ObservableInt();
 
-        public final ObservableBoolean showUploadProgress = new ObservableBoolean();
+        public final ObservableBoolean showUploadProgress = new ObservableBoolean(false);
+
+        public final ObservableBoolean showConnectServerFailed = new ObservableBoolean(false);
+
+        public final ObservableBoolean showLoadingUploadProgress = new ObservableBoolean(true);
 
     }
 
@@ -336,8 +340,17 @@ public class NavPagerActivity extends BaseActivity
         refreshUserInNavigationView();
 
         uploadMediaCountChangeListener = new UploadMediaCountChangeListener() {
+
+            @Override
+            public void onUploadMediaStart() {
+                navPagerViewModel.showLoadingUploadProgress.set(true);
+            }
+
             @Override
             public void onUploadMediaCountChanged(int uploadedMediaCount, int totalCount) {
+
+                navPagerViewModel.showLoadingUploadProgress.set(false);
+                navPagerViewModel.showConnectServerFailed.set(false);
 
                 navPagerViewModel.showUploadProgress.set(true);
 
@@ -353,9 +366,13 @@ public class NavPagerActivity extends BaseActivity
             @Override
             public void onGetFolderFail(int httpErrorCode) {
 
+                navPagerViewModel.showLoadingUploadProgress.set(false);
+                navPagerViewModel.showConnectServerFailed.set(true);
+
                 navPagerViewModel.showUploadProgress.set(false);
 
-                showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_FOLDER + httpErrorCode);
+                if (httpErrorCode != -1)
+                    showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_FOLDER + httpErrorCode);
 
                 binding.setViewModel(navPagerViewModel);
             }
@@ -363,16 +380,22 @@ public class NavPagerActivity extends BaseActivity
             @Override
             public void onCreateFolderFail(int httpErrorCode) {
 
+                navPagerViewModel.showLoadingUploadProgress.set(false);
+                navPagerViewModel.showConnectServerFailed.set(true);
+
                 navPagerViewModel.showUploadProgress.set(false);
 
-                showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_CREATE_FOLDER + httpErrorCode);
+                if (httpErrorCode != -1)
+                    showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_CREATE_FOLDER + httpErrorCode);
 
                 binding.setViewModel(navPagerViewModel);
             }
 
             @Override
             public void onUploadMediaFail(int httpErrorCode) {
-                showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_UPLOAD_MEDIA + httpErrorCode);
+
+                if (httpErrorCode != -1)
+                    showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_UPLOAD_MEDIA + httpErrorCode);
 
                 binding.setViewModel(navPagerViewModel);
             }
@@ -380,9 +403,13 @@ public class NavPagerActivity extends BaseActivity
             @Override
             public void onGetUploadMediaCountFail(int httpErrorCode) {
 
+                navPagerViewModel.showLoadingUploadProgress.set(false);
+                navPagerViewModel.showConnectServerFailed.set(true);
+
                 navPagerViewModel.showUploadProgress.set(false);
 
-                showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_UPLOADED_MEDIA + httpErrorCode);
+                if (httpErrorCode != -1)
+                    showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_UPLOADED_MEDIA + httpErrorCode);
 
                 binding.setViewModel(navPagerViewModel);
             }
@@ -409,13 +436,16 @@ public class NavPagerActivity extends BaseActivity
                 int alreadyUploadMediaCount = 0;
                 int totalUploadMediaCount = 0;
 
-                for (Media media : medias) {
+                /*for (Media media : medias) {
 
                     if (checkMediaIsUploadStrategy.isMediaUploaded(media))
                         alreadyUploadMediaCount++;
 
                     totalUploadMediaCount++;
-                }
+                }*/
+
+                alreadyUploadMediaCount = uploadMediaUseCase.getAlreadyUploadedMediaCount();
+                totalUploadMediaCount = medias.size();
 
                 mAlreadyUploadMediaCount = alreadyUploadMediaCount;
                 mTotalLocalMediaCount = totalUploadMediaCount;
@@ -503,6 +533,8 @@ public class NavPagerActivity extends BaseActivity
 
                 refreshUserInNavigationView();
 
+                navPagerViewModel.showLoadingUploadProgress.set(true);
+
                 uploadMediaUseCase.startUploadMedia();
 
                 if (data)
@@ -555,7 +587,8 @@ public class NavPagerActivity extends BaseActivity
 
                 systemSettingDataSource.setAutoUploadOrNot(true);
 
-                uploadMediaUseCase.startUploadMedia();
+                EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
+
 
             }
         }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -564,11 +597,9 @@ public class NavPagerActivity extends BaseActivity
 
                 systemSettingDataSource.setShowAutoUploadDialog(false);
 
-                systemSettingDataSource.setCurrentUploadUserUUID("");
-
                 systemSettingDataSource.setAutoUploadOrNot(false);
 
-                uploadMediaUseCase.stopUploadMedia();
+                EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
 
 
             }

@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class FileFragment implements Page, IShowHideFragmentListener,FileView{
+public class FileFragment implements Page, IShowHideFragmentListener, FileView {
 
     public static final String TAG = FileFragment.class.getSimpleName();
 
@@ -55,18 +55,18 @@ public class FileFragment implements Page, IShowHideFragmentListener,FileView{
 
     private FilePresenter filePresenter;
 
+    private boolean initFileRecyclerView = false;
+
     public FileFragment(final Activity activity, FileListSelectModeListener fileListSelectModeListener, HandleFileListOperateCallback handleFileListOperateCallback) {
 
         this.activity = activity;
 
         view = onCreateView();
 
-        filePresenter = new FilePresenter(activity,this, fileListSelectModeListener, InjectStationFileRepository.provideStationFileRepository(activity),
+        filePresenter = new FilePresenter(activity, this, fileListSelectModeListener, InjectStationFileRepository.provideStationFileRepository(activity),
                 noContentViewModel, loadingViewModel, fileViewModel, handleFileListOperateCallback,
                 InjectLoggedInUser.provideLoggedInUserRepository(activity),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(activity), FileDownloadManager.getInstance());
-
-        initFileRecyclerView(activity);
 
         initSwipeRefreshLayout();
 
@@ -125,6 +125,11 @@ public class FileFragment implements Page, IShowHideFragmentListener,FileView{
 
     @Override
     public void refreshView() {
+
+        if (!initFileRecyclerView) {
+            initFileRecyclerView = true;
+            initFileRecyclerView(activity);
+        }
 
         filePresenter.refreshView(false);
     }
