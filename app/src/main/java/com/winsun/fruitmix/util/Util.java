@@ -32,6 +32,7 @@ import com.winsun.fruitmix.model.LoginType;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,6 +41,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Administrator on 2016/4/29.
@@ -439,12 +442,12 @@ public class Util {
             View statusBar = decor.findViewById(android.R.id.statusBarBackground);
             View navBar = decor.findViewById(android.R.id.navigationBarBackground);
 
-            if (statusBar != null){
+            if (statusBar != null) {
                 Pair statusBarPair = new Pair<>(statusBar, ViewCompat.getTransitionName(statusBar));
                 pairs.add(statusBarPair);
             }
 
-            if (navBar != null){
+            if (navBar != null) {
                 Pair navBarPair = new Pair<>(navBar, ViewCompat.getTransitionName(navBar));
                 pairs.add(navBarPair);
             }
@@ -723,6 +726,25 @@ public class Util {
             view.requestLayout();
         }
 
+    }
+
+    /**
+     * check str is number
+     *
+     * @param str may be -19162431.1254，if not use BigDecimal,it will become -1.91624311254E7
+     * @return true is number,false is not number
+     */
+    public static boolean isNumeric(String str) {
+        Pattern pattern = Pattern.compile("-?[0-9]+\\.?[0-9]*");
+        String bigStr;
+        try {
+            bigStr = new BigDecimal(str).toString();
+        } catch (Exception e) {
+            return false;
+        }
+
+        Matcher isNum = pattern.matcher(bigStr);
+        return isNum.matches();
     }
 
 

@@ -9,6 +9,7 @@ import com.winsun.fruitmix.media.local.media.LocalMediaSystemDBDataSource;
 import com.winsun.fruitmix.media.remote.media.StationMediaDBDataSource;
 import com.winsun.fruitmix.media.remote.media.StationMediaRemoteDataSource;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 
 /**
@@ -25,14 +26,15 @@ public class InjectMedia {
 
     private static LocalMediaRepository provideLocalMediaRepository(Context context) {
 
-        return LocalMediaRepository.getInstance(LocalMediaAppDBDataSource.getInstance(context), LocalMediaSystemDBDataSource.getInstance(context));
+        return LocalMediaRepository.getInstance(LocalMediaAppDBDataSource.getInstance(context), LocalMediaSystemDBDataSource.getInstance(context),
+                ThreadManagerImpl.getInstance());
 
     }
 
     private static StationMediaRepository provideStationMediaRepository(Context context) {
 
         return StationMediaRepository.getInstance(StationMediaDBDataSource.getInstance(context), StationMediaRemoteDataSource.getInstance(InjectHttp.provideIHttpUtil(context),
-                InjectHttp.provideHttpRequestFactory(),InjectHttp.provideIHttpFileUtil()));
+                InjectHttp.provideHttpRequestFactory(), InjectHttp.provideIHttpFileUtil()));
     }
 
 }

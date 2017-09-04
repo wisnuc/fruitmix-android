@@ -66,6 +66,8 @@ public class StationMediaRepository {
             return;
         }
 
+        Log.d(TAG, "getMedia: start get media from station");
+
         stationMediaRemoteDataSource.getMedia(new BaseLoadDataCallbackImpl<Media>() {
 
             @Override
@@ -162,8 +164,6 @@ public class StationMediaRepository {
     }
 
     public boolean clearAllStationMediasInDB() {
-
-        mediaConcurrentMap.clear();
 
         return stationMediaDBDataSource.clearAllMedias();
     }

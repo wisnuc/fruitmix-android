@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -60,7 +61,7 @@ public class MediaDataSourceRepositoryImplTest {
 
         MockitoAnnotations.initMocks(this);
 
-        mediaDataSourceRepositoryImpl = MediaDataSourceRepositoryImpl.getInstance(localMediaRepository, stationMediaRepository, calcMediaDigestStrategy,new MockThreadManager());
+        mediaDataSourceRepositoryImpl = MediaDataSourceRepositoryImpl.getInstance(localMediaRepository, stationMediaRepository, calcMediaDigestStrategy, new MockThreadManager());
 
     }
 
@@ -129,6 +130,5 @@ public class MediaDataSourceRepositoryImplTest {
         verify(stationMediaRepository).getMedia(any(BaseLoadDataCallback.class));
 
     }
-
 
 }

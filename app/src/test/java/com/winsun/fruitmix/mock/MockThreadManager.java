@@ -88,6 +88,16 @@ public class MockThreadManager implements ThreadManager {
     }
 
     @Override
+    public void stopGenerateMiniThumbThread() {
+
+    }
+
+    @Override
+    public void stopGenerateThumbThread() {
+
+    }
+
+    @Override
     public void runOnMainThread(Runnable runnable) {
         runnable.run();
     }

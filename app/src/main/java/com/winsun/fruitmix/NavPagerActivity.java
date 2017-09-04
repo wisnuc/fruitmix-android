@@ -258,8 +258,6 @@ public class NavPagerActivity extends BaseActivity
 
     private LoggedInUserDataSource loggedInUserDataSource;
 
-    private CheckMediaIsUploadStrategy checkMediaIsUploadStrategy;
-
     private UploadMediaCountChangeListener uploadMediaCountChangeListener;
 
     private UploadMediaUseCase uploadMediaUseCase;
@@ -287,8 +285,6 @@ public class NavPagerActivity extends BaseActivity
         logoutUseCase = InjectLogoutUseCase.provideLogoutUseCase(mContext);
 
         loggedInUserDataSource = InjectLoggedInUser.provideLoggedInUserRepository(mContext);
-
-        checkMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
 
         systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
 
@@ -342,8 +338,13 @@ public class NavPagerActivity extends BaseActivity
         uploadMediaCountChangeListener = new UploadMediaCountChangeListener() {
 
             @Override
-            public void onUploadMediaStart() {
+            public void onStartGetUploadMediaCount() {
+
                 navPagerViewModel.showLoadingUploadProgress.set(true);
+
+                navPagerViewModel.showConnectServerFailed.set(false);
+                navPagerViewModel.showUploadProgress.set(false);
+
             }
 
             @Override

@@ -110,7 +110,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
                 initImageLoader();
 
-                final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
+                final NewPhotoListDataLoader loader = NewPhotoListDataLoader.getInstance();
 
                 loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
                     @Override

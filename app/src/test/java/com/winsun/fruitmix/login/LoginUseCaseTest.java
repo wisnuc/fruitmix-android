@@ -11,6 +11,7 @@ import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
+import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.mock.MockThreadManager;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
@@ -86,6 +87,9 @@ public class LoginUseCaseTest {
     @Mock
     private EventBus eventBus;
 
+    @Mock
+    private NewPhotoListDataLoader newPhotoListDataLoader;
+
     @Captor
     private ArgumentCaptor<BaseLoadDataCallback<String>> loadTokenCallbackArgumentCaptor;
 
@@ -104,7 +108,7 @@ public class LoginUseCaseTest {
 
         loginUseCase = LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource,
                 httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, mediaDataSourceRepository,
-                stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, new MockThreadManager());
+                stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, new MockThreadManager(), newPhotoListDataLoader);
 
     }
 
@@ -185,6 +189,8 @@ public class LoginUseCaseTest {
         verify(systemSettingDataSource).setCurrentLoginUserUUID(anyString());
 
         verify(stationFileRepository).clearDownloadFileRecordInCache();
+
+        verify(newPhotoListDataLoader).setNeedRefreshData(eq(true));
 
     }
 
@@ -351,7 +357,7 @@ public class LoginUseCaseTest {
 
         testLoginWithLoggedInUser();
 
-        verify(systemSettingDataSource, never()).setAutoUploadOrNot(anyBoolean());
+        verify(systemSettingDataSource).setAutoUploadOrNot(eq(true));
 
     }
 

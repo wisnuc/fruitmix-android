@@ -127,7 +127,7 @@ public class GenerateMediaThumbUseCase {
 
         mStopGenerateThumb = true;
 
-        threadManager.stopGenerateThumbThreadNow();
+        threadManager.stopGenerateThumbThread();
     }
 
     private void startGenerateMediaMiniThumbInThread(List<Media> data) {
@@ -167,7 +167,7 @@ public class GenerateMediaThumbUseCase {
 
         mStopGenerateMiniThumb = true;
 
-        threadManager.stopGenerateMiniThumbThreadNow();
+        threadManager.stopGenerateMiniThumbThread();
     }
 
 

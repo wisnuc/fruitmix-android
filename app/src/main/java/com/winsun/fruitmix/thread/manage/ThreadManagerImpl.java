@@ -58,6 +58,11 @@ public class ThreadManagerImpl implements ThreadManager {
     }
 
     @Override
+    public void stopGenerateThumbThread() {
+        executorServiceInstance.shutdownGenerateThumbThreadPool();
+    }
+
+    @Override
     public void runOnGenerateMiniThumbThread(Callable<Boolean> callable) {
         executorServiceInstance.doOneTaskInGenerateMiniThumbThreadPool(callable);
     }
@@ -65,6 +70,11 @@ public class ThreadManagerImpl implements ThreadManager {
     @Override
     public void stopGenerateMiniThumbThreadNow() {
         executorServiceInstance.shutdownGenerateMiniThumbThreadPoolNow();
+    }
+
+    @Override
+    public void stopGenerateMiniThumbThread() {
+        executorServiceInstance.shutdownGenerateMiniThumbThreadPool();
     }
 
     @Override

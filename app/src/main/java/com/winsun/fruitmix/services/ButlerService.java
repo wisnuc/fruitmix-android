@@ -93,6 +93,8 @@ public class ButlerService extends Service {
     public void onCreate() {
         super.onCreate();
 
+        Log.d(TAG, "onCreate: start service");
+
         EventBus.getDefault().register(this);
 
 //        task = new TimingRetrieveTicketsTask(this,getMainLooper());
@@ -122,7 +124,6 @@ public class ButlerService extends Service {
         };
 
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
-        mediaDataSourceRepository.setCalcDigestCallback(calcMediaDigestCallback);
 
         generateMediaThumbUseCase = InjectGenerateMediaThumbUseCase.provideGenerateMediaThumbUseCase(this);
         uploadMediaUseCase = InjectUploadMediaUseCase.provideUploadMediaUseCase(this);
@@ -136,7 +137,6 @@ public class ButlerService extends Service {
 
     }
 
-
     private void initInvitationRemoteDataSource() {
 
         if (invitationDataSource == null)
@@ -146,6 +146,9 @@ public class ButlerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        mediaDataSourceRepository.setCalcDigestCallback(calcMediaDigestCallback);
+
         return super.onStartCommand(intent, flags, startId);
     }
 

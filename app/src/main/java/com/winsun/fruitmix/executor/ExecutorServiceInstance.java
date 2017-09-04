@@ -130,5 +130,18 @@ public enum ExecutorServiceInstance {
         }
     }
 
+    public void shutdownGenerateMiniThumbThreadPool() {
+        if (generateMiniThumbThreadPool != null && !generateMiniThumbThreadPool.isShutdown()) {
+            generateMiniThumbThreadPool.shutdown();
+            generateMiniThumbThreadPool = null;
+        }
+    }
+
+    public void shutdownGenerateThumbThreadPool() {
+        if (generateThumbThreadPool != null && !generateThumbThreadPool.isShutdown()) {
+            generateThumbThreadPool.shutdown();
+            generateThumbThreadPool = null;
+        }
+    }
 
 }

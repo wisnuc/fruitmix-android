@@ -3,8 +3,6 @@ package com.winsun.fruitmix.init.system;
 import android.content.Context;
 import android.util.Log;
 
-import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.file.data.station.StationFileRepositoryImpl;
 import com.winsun.fruitmix.http.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
@@ -13,6 +11,7 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
 import com.winsun.fruitmix.media.MediaDataSourceRepositoryImpl;
 import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
+import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.datasource.UserDataRepositoryImpl;
@@ -34,8 +33,6 @@ public class InitSystem {
 
         ImageGifLoaderInstance.destroyInstance();
 
-        ButlerService.startButlerService(context);
-
         UserDataRepositoryImpl.destroyInstance();
 
         StationMediaRepository.destroyInstance();
@@ -49,6 +46,10 @@ public class InitSystem {
         LoggedInUserRepository.destroyInstance();
 
         UploadMediaUseCase.destroyInstance();
+
+        NewPhotoListDataLoader.destroyInstance();
+
+        ButlerService.startButlerService(context);
 
         boolean result = FileUtil.createDownloadFileStoreFolder();
 

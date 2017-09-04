@@ -78,7 +78,7 @@ public class SettingPresenterImpl implements SettingPresenter {
         uploadMediaCountChangeListener = new UploadMediaCountChangeListener() {
 
             @Override
-            public void onUploadMediaStart() {
+            public void onStartGetUploadMediaCount() {
 
             }
 

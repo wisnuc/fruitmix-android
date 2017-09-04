@@ -11,6 +11,7 @@ import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
+import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
@@ -54,7 +55,8 @@ public class InjectLoginUseCase {
         ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderIntance();
 
         return LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource, httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase,
-                userDataRepository, mediaDataSourceRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, EventBus.getDefault(), ThreadManagerImpl.getInstance());
+                userDataRepository, mediaDataSourceRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, EventBus.getDefault(),
+                ThreadManagerImpl.getInstance(), NewPhotoListDataLoader.getInstance());
 
     }
 

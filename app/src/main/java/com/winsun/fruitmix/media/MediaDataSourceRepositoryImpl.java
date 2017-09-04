@@ -11,13 +11,11 @@ import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationHasNewMedia;
-import com.winsun.fruitmix.model.operationResult.OperationNoChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,7 +36,6 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
 
     private FilterLocalStationMediaStrategy filterLocalStationMediaStrategy;
 
-    private boolean calcMediaDigestCallbackReturn = false;
     private boolean getLocalMediaCallbackReturn = false;
     private boolean getStationMediaCallbackReturn = false;
 
@@ -86,7 +83,7 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
     @Override
     public List<Media> getLocalMedia() {
 
-        return localMedias;
+        return Collections.unmodifiableList(localMedias);
 
     }
 
@@ -113,16 +110,12 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
                 @Override
                 public void handleFinished() {
 
-                    calcMediaDigestCallbackReturn = true;
-
                     if (calcMediaDigestCallback != null)
                         calcMediaDigestCallback.handleFinished();
                 }
 
                 @Override
                 public void handleNothing() {
-
-                    calcMediaDigestCallbackReturn = true;
 
                     if (calcMediaDigestCallback != null)
                         calcMediaDigestCallback.handleNothing();
@@ -140,11 +133,13 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
             public void onSucceed(List<Media> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);
 
+                Log.d(TAG, "onSucceed: get media from local media repositroy");
+
                 getLocalMediaCallbackReturn = true;
 
                 localMedias = data;
 
-                hasNewMedia = operationResult.getOperationResultType() == OperationResultType.HAS_NEW_MEDIA;
+                hasNewMedia = operationResult.getOperationResultType() == OperationResultType.MEDIA_DATA_CHANGED;
 
                 checkAllDataRetrieved(callback);
             }
@@ -157,6 +152,8 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
                 @Override
                 public void onSucceed(List<Media> data, OperationResult operationResult) {
                     super.onSucceed(data, operationResult);
+
+                    Log.d(TAG, "onSucceed: get media from station media repository");
 
                     getStationMediaCallbackReturn = true;
 
@@ -244,6 +241,8 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
         stationMediaRepository.setCacheDirty();
 
         hasCallGetStationMedia = false;
+
+        getStationMediaCallbackReturn = false;
 
         getMedia(callback);
 

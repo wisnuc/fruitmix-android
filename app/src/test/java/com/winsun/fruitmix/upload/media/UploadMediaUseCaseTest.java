@@ -140,6 +140,10 @@ public class UploadMediaUseCaseTest {
         when(loggedInUserDataSource.getLoggedInUserByUserUUID(anyString())).thenReturn(new LoggedInUser("", "", "", "", user));
     }
 
+    private void assertStringIsEmpty(String param){
+        assertTrue(param.isEmpty());
+    }
+
     @Test
     public void testUploadParentFolderNotExist() {
 
@@ -153,8 +157,8 @@ public class UploadMediaUseCaseTest {
 
         uploadMediaUseCase.startUploadMedia();
 
-        assertNull(uploadMediaUseCase.uploadParentFolderUUID);
-        assertNull(uploadMediaUseCase.uploadFolderUUID);
+        assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
+        assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -235,8 +239,8 @@ public class UploadMediaUseCaseTest {
 
         uploadMediaUseCase.startUploadMedia();
 
-        assertNull(uploadMediaUseCase.uploadParentFolderUUID);
-        assertNull(uploadMediaUseCase.uploadFolderUUID);
+        assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
+        assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -326,8 +330,8 @@ public class UploadMediaUseCaseTest {
 
         uploadMediaUseCase.startUploadMedia();
 
-        assertNull(uploadMediaUseCase.uploadParentFolderUUID);
-        assertNull(uploadMediaUseCase.uploadFolderUUID);
+        assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
+        assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -396,8 +400,8 @@ public class UploadMediaUseCaseTest {
 
         captor.getValue().onFail(new OperationNetworkException(new HttpResponse(404,"")));
 
-        assertNull(uploadMediaUseCase.uploadParentFolderUUID);
-        assertNull(uploadMediaUseCase.uploadFolderUUID);
+        assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
+        assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
 
     }
 
@@ -423,8 +427,8 @@ public class UploadMediaUseCaseTest {
 
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
 
-        uploadMediaUseCase.uploadParentFolderUUID = "";
-        uploadMediaUseCase.uploadFolderUUID = "";
+        uploadMediaUseCase.uploadParentFolderUUID = testUploadParentFolderUUID;
+        uploadMediaUseCase.uploadFolderUUID = testUploadFolderUUID;
 
         uploadMediaUseCase.startUploadMedia();
 

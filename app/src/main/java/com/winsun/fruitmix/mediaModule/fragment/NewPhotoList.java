@@ -59,7 +59,6 @@ import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -206,7 +205,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             @Override
             public void onRefresh() {
 
-                refreshStationMediaForceRefresh();
+                refreshStationMediaForce();
 
             }
         });
@@ -269,12 +268,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         this.alreadySelectedImageKeysFromChooseActivity = alreadySelectedImageKeysFromChooseActivity;
     }
 
-    private void refreshStationMediaForceRefresh() {
+    private void refreshStationMediaForce() {
 
         mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallbackImpl<Media>() {
             @Override
             public void onSucceed(List<Media> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);
+
+                Log.d(TAG, "onSucceed: refresh station media force");
 
                 handleGetMediaSucceed(data, new OperationHasNewMedia());
             }
@@ -295,6 +296,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallback<Media>() {
             @Override
             public void onSucceed(List<Media> data, OperationResult operationResult) {
+
+                Log.d(TAG, "onSucceed: refresh view force");
 
                 handleGetMediaSucceed(data, new OperationHasNewMedia());
 
@@ -367,9 +370,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         initImageLoader();
 
-        final NewPhotoListDataLoader loader = NewPhotoListDataLoader.INSTANCE;
+        final NewPhotoListDataLoader loader = NewPhotoListDataLoader.getInstance();
 
-        if (operationResult.getOperationResultType() == OperationResultType.HAS_NEW_MEDIA)
+        if (operationResult.getOperationResultType() == OperationResultType.MEDIA_DATA_CHANGED)
             loader.setNeedRefreshData(true);
 
         loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
@@ -1145,7 +1148,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (currentMedia == null) return;
 
-            Log.d(TAG, "refreshDownloadItemView: media key: " + currentMedia.getKey());
+            Log.d(TAG, "PhotoHolder refreshView: media key: " + currentMedia.getKey());
 
             if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(currentMedia.getKey()))
                 currentMedia.setSelected(true);
@@ -1487,7 +1490,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 if (mSpanCount > mSpanMinCount) {
                     mSpanCount--;
                     calcPhotoItemWidth();
-                    NewPhotoListDataLoader.INSTANCE.calcPhotoPositionNumber();
+                    NewPhotoListDataLoader.getInstance().calcPhotoPositionNumber();
                     ((GridLayoutManager) mLayoutManager).setSpanCount(mSpanCount);
                     mRecyclerView.setLayoutManager(mLayoutManager);
                     mPhotoRecycleAdapter.notifyItemRangeChanged(0, mPhotoRecycleAdapter.getItemCount());
@@ -1500,7 +1503,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 if (mSpanCount < mSpanMaxCount) {
                     mSpanCount++;
                     calcPhotoItemWidth();
-                    NewPhotoListDataLoader.INSTANCE.calcPhotoPositionNumber();
+                    NewPhotoListDataLoader.getInstance().calcPhotoPositionNumber();
                     ((GridLayoutManager) mLayoutManager).setSpanCount(mSpanCount);
                     mRecyclerView.setLayoutManager(mLayoutManager);
                     mPhotoRecycleAdapter.notifyItemRangeChanged(0, mPhotoRecycleAdapter.getItemCount());

@@ -84,7 +84,7 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
 
             Log.i(TAG, "handleActionRetrieveLocalMedia: media size:" + medias.size());
 
-            NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+            NewPhotoListDataLoader.getInstance().setNeedRefreshData(true);
 
             EventBus.getDefault().post(new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, new OperationSuccess()));
 

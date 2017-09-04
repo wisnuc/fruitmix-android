@@ -15,9 +15,13 @@ public interface ThreadManager {
 
     void runOnGenerateThumbThread(Runnable runnable);
 
+    void stopGenerateThumbThread();
+
     void stopGenerateThumbThreadNow();
 
     void runOnGenerateMiniThumbThread(Callable<Boolean> callable);
+
+    void stopGenerateMiniThumbThread();
 
     void stopGenerateMiniThumbThreadNow();
 

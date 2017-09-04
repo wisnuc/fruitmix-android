@@ -88,7 +88,7 @@ public class RetrieveLocalMediaService extends IntentService {
         LocalCache.LocalMediaMapKeyIsOriginalPhotoPath.putAll(mediaConcurrentMap);
 
         Util.setLocalMediaInDBLoaded(true);
-        NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+        NewPhotoListDataLoader.getInstance().setNeedRefreshData(true);
 
         EventBus.getDefault().post(new OperationEvent(Util.LOCAL_MEDIA_RETRIEVED, new OperationSuccess()));
 

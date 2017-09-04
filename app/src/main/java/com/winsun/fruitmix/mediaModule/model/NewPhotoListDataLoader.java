@@ -23,15 +23,13 @@ import java.util.Map;
  * Created by Administrator on 2016/12/19.
  */
 
-public enum NewPhotoListDataLoader {
-
-    INSTANCE;
+public class NewPhotoListDataLoader {
 
     public static final String TAG = NewPhotoListDataLoader.class.getSimpleName();
 
     private List<String> mPhotoDateGroups;
 
-    private ArrayMap<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
+    private HashMap<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
 
     private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
 
@@ -43,10 +41,14 @@ public enum NewPhotoListDataLoader {
 
     private boolean needRefreshData = true;
 
-    NewPhotoListDataLoader() {
+    private static NewPhotoListDataLoader instance;
+
+    private boolean isOperate = false;
+
+    private NewPhotoListDataLoader() {
 
         mPhotoDateGroups = new ArrayList<>();
-        mMapKeyIsDateValueIsPhotoList = new ArrayMap<>();
+        mMapKeyIsDateValueIsPhotoList = new HashMap<>();
 
         mMapKeyIsPhotoPositionValueIsPhotoDate = new HashMap<>();
         mMapKeyIsPhotoPositionValueIsPhoto = new SparseArray<>();
@@ -54,25 +56,33 @@ public enum NewPhotoListDataLoader {
         medias = new ArrayList<>();
     }
 
+    public static NewPhotoListDataLoader getInstance() {
+        if (instance == null)
+            instance = new NewPhotoListDataLoader();
+
+        return instance;
+    }
+
+    public static void destroyInstance() {
+        instance = null;
+    }
+
     public void setNeedRefreshData(boolean needRefreshData) {
         this.needRefreshData = needRefreshData;
     }
 
     public List<String> getPhotoDateGroups() {
-        return new ArrayList<>(mPhotoDateGroups);
+        return Collections.unmodifiableList(mPhotoDateGroups);
     }
 
     public Map<String, List<Media>> getMapKeyIsDateValueIsPhotoList() {
 
-        Map<String, List<Media>> map = new HashMap<>();
-        map.putAll(mMapKeyIsDateValueIsPhotoList);
-
-        return map;
+        return Collections.unmodifiableMap(mMapKeyIsDateValueIsPhotoList);
     }
 
     public Map<Integer, String> getMapKeyIsPhotoPositionValueIsPhotoDate() {
 
-        return new HashMap<>(mMapKeyIsPhotoPositionValueIsPhotoDate);
+        return Collections.unmodifiableMap(mMapKeyIsPhotoPositionValueIsPhotoDate);
 
     }
 
@@ -95,8 +105,15 @@ public enum NewPhotoListDataLoader {
 
     public void retrieveData(final OnPhotoListDataListener listener, final List<Media> medias) {
 
+        if (isOperate)
+            return;
+
+        isOperate = true;
+
         if (!needRefreshData) {
             listener.onDataLoadFinished();
+
+            isOperate = false;
             return;
         }
 
@@ -116,6 +133,8 @@ public enum NewPhotoListDataLoader {
                 needRefreshData = false;
 
                 listener.onDataLoadFinished();
+
+                isOperate = false;
             }
         }.execute();
 

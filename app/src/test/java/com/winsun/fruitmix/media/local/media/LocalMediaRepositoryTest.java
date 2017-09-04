@@ -1,18 +1,24 @@
 package com.winsun.fruitmix.media.local.media;
 
+import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mock.MockApplication;
+import com.winsun.fruitmix.mock.MockThreadManager;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.Collections;
 
@@ -23,6 +29,8 @@ import static org.junit.Assert.*;
  * Created by Administrator on 2017/7/18.
  */
 
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
 public class LocalMediaRepositoryTest {
 
     @Mock
@@ -41,7 +49,9 @@ public class LocalMediaRepositoryTest {
 
         MockitoAnnotations.initMocks(this);
 
-        localMediaRepository = LocalMediaRepository.getInstance(localMediaAppDBDataSource, localMediaSystemDBDataSource);
+        MockThreadManager threadManager = new MockThreadManager();
+
+        localMediaRepository = LocalMediaRepository.getInstance(localMediaAppDBDataSource, localMediaSystemDBDataSource, threadManager);
     }
 
     @After

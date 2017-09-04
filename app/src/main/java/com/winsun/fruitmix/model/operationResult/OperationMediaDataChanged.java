@@ -8,7 +8,7 @@ import com.winsun.fruitmix.model.OperationResultType;
  * Created by Administrator on 2017/8/18.
  */
 
-public class OperationHasNewMedia extends OperationResult {
+public class OperationMediaDataChanged extends OperationResult {
     @Override
     public String getResultMessage(Context context) {
         return "";
@@ -16,6 +16,6 @@ public class OperationHasNewMedia extends OperationResult {
 
     @Override
     public OperationResultType getOperationResultType() {
-        return OperationResultType.HAS_NEW_MEDIA;
+        return OperationResultType.MEDIA_DATA_CHANGED;
     }
 }

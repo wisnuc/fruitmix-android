@@ -54,17 +54,20 @@ public class RemoteMediaParser implements RemoteDatasParser<Media> {
 
                     String year = dateTime.substring(0, 4);
 
-                    int yearNum = Integer.valueOf(year);
+                    if (!Util.isNumeric(year))
+                        throw new NumberFormatException(year + " is not number");
 
                     String month = dateTime.substring(5, 7);
 
-                    int monthNum = Integer.valueOf(month);
+                    if (!Util.isNumeric(month))
+                        throw new NumberFormatException(month + " is not number");
 
                     String day = dateTime.substring(8, 10);
 
-                    int dayNum = Integer.valueOf(day);
+                    if (!Util.isNumeric(day))
+                        throw new NumberFormatException(day + " is not number");
 
-                    media.setTime(yearNum + "-" + monthNum + "-" + dayNum);
+                    media.setTime(year + "-" + month + "-" + day);
 
                 } catch (NumberFormatException e) {
 
@@ -92,4 +95,6 @@ public class RemoteMediaParser implements RemoteDatasParser<Media> {
 
         return medias;
     }
+
+
 }

@@ -3,7 +3,6 @@ package com.winsun.fruitmix.upload.media;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
@@ -30,7 +29,6 @@ import org.json.JSONException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Administrator on 2017/8/18.
@@ -68,13 +66,13 @@ public class UploadMediaUseCase {
 
     boolean mAlreadyStartUpload = false;
 
-    private String currentUserHome;
+    private String currentUserHome = "";
 
-    private String currentUserUUID;
+    private String currentUserUUID = "";
 
-    String uploadParentFolderUUID;
+    String uploadParentFolderUUID = "";
 
-    String uploadFolderUUID;
+    String uploadFolderUUID = "";
 
     int uploadMediaCount = 0;
 
@@ -137,13 +135,26 @@ public class UploadMediaUseCase {
         uploadMediaCountChangeListeners.remove(uploadMediaCountChangeListener);
     }
 
-    public void startUploadMedia() {
+    public void startUploadMedia(){
+
+        threadManager.runOnUploadMediaThread(new Runnable() {
+            @Override
+            public void run() {
+                startUploadMediaInThread();
+            }
+        });
+
+    }
+
+    private void startUploadMediaInThread() {
 
         if (mAlreadyStartUpload) {
             Log.d(TAG, "startUploadMedia: already start");
 
             return;
         }
+
+        uploadedMediaHashs = null;
 
         currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
 
@@ -168,9 +179,9 @@ public class UploadMediaUseCase {
 
         mAlreadyStartUpload = true;
 
-        notifyUploadMediaStart();
+        notifyGetUploadMediaCountStart();
 
-        if (uploadParentFolderUUID == null || uploadFolderUUID == null)
+        if (uploadParentFolderUUID.isEmpty() || uploadFolderUUID.isEmpty())
             checkFolderExist(currentUserHome, currentUserHome, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
                 @Override
                 public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
@@ -182,7 +193,7 @@ public class UploadMediaUseCase {
 
             });
         else
-            startAutoUpload();
+            startPrepareAutoUpload();
 
     }
 
@@ -215,7 +226,7 @@ public class UploadMediaUseCase {
 
         uploadParentFolderUUID = getFolderUUIDByName(data, UPLOAD_PARENT_FOLDER_NAME);
 
-        if (uploadParentFolderUUID != null) {
+        if (uploadParentFolderUUID.length() != 0) {
 
             Log.i(TAG, "upload parent folder exist");
 
@@ -231,20 +242,20 @@ public class UploadMediaUseCase {
 
         } else {
 
-            startAutoUploadWithNoFolder();
+            startPrepareAutoUploadWithNoFolder();
 
         }
 
     }
 
-    private void startAutoUploadWithNoFolder() {
+    private void startPrepareAutoUploadWithNoFolder() {
         Log.d(TAG, "init upload media hashs no upload folder");
 
         uploadedMediaHashs = new ArrayList<>();
 
         checkMediaIsUploadStrategy.setUploadedMediaHashs(uploadedMediaHashs);
 
-        startAutoUpload();
+        startPrepareAutoUpload();
     }
 
 
@@ -252,17 +263,17 @@ public class UploadMediaUseCase {
 
         uploadFolderUUID = getFolderUUIDByName(data, getUploadFolderName());
 
-        if (uploadFolderUUID != null) {
+        if (!uploadFolderUUID.isEmpty()) {
 
             Log.i(TAG, "uploaded folder exist");
 
             if (uploadedMediaHashs == null)
                 getUploadedMediaHashList(uploadFolderUUID);
             else
-                startAutoUpload();
+                startPrepareAutoUpload();
 
         } else {
-            startAutoUploadWithNoFolder();
+            startPrepareAutoUploadWithNoFolder();
         }
 
     }
@@ -290,7 +301,7 @@ public class UploadMediaUseCase {
 
                 calcAlreadyUploadedMediaCount();
 
-                startAutoUpload();
+                startPrepareAutoUpload();
 
             }
 
@@ -303,7 +314,7 @@ public class UploadMediaUseCase {
                 } else
                     notifyGetUploadMediaCountFail(-1);
 
-                startAutoUploadWithNoFolder();
+                startPrepareAutoUploadWithNoFolder();
             }
         });
 
@@ -317,31 +328,34 @@ public class UploadMediaUseCase {
     }
 
 
-    private void startAutoUpload() {
+    private void startPrepareAutoUpload() {
+
+        if (mStopUpload)
+            return;
 
         notifyUploadMediaCountChange();
 
         if (!systemSettingDataSource.getAutoUploadOrNot()) {
 
-            Log.d(TAG, "startAutoUpload: auto upload false stop upload");
+            Log.d(TAG, "startPrepareAutoUpload: auto upload false stop upload");
 
             stopUploadMedia();
 
             return;
         }
 
-        startUploadMediaInThread(mediaDataSourceRepository.getLocalMedia());
+        createFolderIfNeed(mediaDataSourceRepository.getLocalMedia());
 
     }
 
-    private void startUploadMediaInThread(final List<Media> medias) {
+    private void createFolderIfNeed(final List<Media> medias) {
 
-        if (uploadParentFolderUUID == null) {
+        if (uploadParentFolderUUID.isEmpty()) {
 
             Log.i(TAG, "start create upload parent folder");
 
             createUploadParentFolder(medias);
-        } else if (uploadFolderUUID == null) {
+        } else if (uploadFolderUUID.isEmpty()) {
 
             Log.i(TAG, "start create upload folder");
 
@@ -369,7 +383,7 @@ public class UploadMediaUseCase {
 
                     uploadParentFolderUUID = getFolderUUIDByName(files, UPLOAD_PARENT_FOLDER_NAME);
 
-                    if (uploadParentFolderUUID != null) {
+                    if (uploadParentFolderUUID.length() != 0) {
 
                         Log.i(TAG, "create upload folder succeed folder uuid:" + uploadParentFolderUUID);
 
@@ -412,7 +426,7 @@ public class UploadMediaUseCase {
 
                     uploadFolderUUID = getFolderUUIDByName(files, getUploadFolderName());
 
-                    if (uploadFolderUUID != null) {
+                    if (!uploadFolderUUID.isEmpty()) {
 
                         Log.i(TAG, "create upload folder succeed folder uuid:" + uploadFolderUUID);
 
@@ -471,7 +485,7 @@ public class UploadMediaUseCase {
             }
 
         }
-        return null;
+        return "";
     }
 
     private void uploadMedia(final List<Media> medias) {
@@ -551,9 +565,12 @@ public class UploadMediaUseCase {
                         private void handleMediaUploadSucceed() {
                             Log.i(TAG, "upload onSucceed: media uuid: " + media.getUuid() + " user uuid: " + currentUserUUID);
 
+                            if (currentUserUUID.isEmpty() || mStopUpload)
+                                return;
+
                             if (media.getUploadedUserUUIDs().isEmpty()) {
                                 media.setUploadedUserUUIDs(currentUserUUID);
-                            } else if (!media.getUploadedUserUUIDs().contains(currentUserUUID)) {
+                            } else if (currentUserUUID.length() != 0 && !media.getUploadedUserUUIDs().contains(currentUserUUID)) {
                                 media.setUploadedUserUUIDs(media.getUploadedUserUUIDs() + "," + currentUserUUID);
                             }
 
@@ -751,7 +768,7 @@ public class UploadMediaUseCase {
 
     }
 
-    private void notifyUploadMediaStart() {
+    private void notifyGetUploadMediaCountStart() {
 
         threadManager.runOnMainThread(new Runnable() {
             @Override
@@ -759,10 +776,10 @@ public class UploadMediaUseCase {
 
                 if (uploadMediaCountChangeListeners != null) {
 
-                    Log.i(TAG, "call notifyUploadMediaFail");
+                    Log.i(TAG, "call notifyGetUploadMediaCountStart");
 
                     for (UploadMediaCountChangeListener uploadMediaCountChangeListener : uploadMediaCountChangeListeners) {
-                        uploadMediaCountChangeListener.onUploadMediaStart();
+                        uploadMediaCountChangeListener.onStartGetUploadMediaCount();
                     }
 
                 }
@@ -783,9 +800,7 @@ public class UploadMediaUseCase {
 
         uploadMediaCount = 0;
 
-        uploadedMediaHashs = null;
-
-        threadManager.stopUploadMediaThreadNow();
+        threadManager.stopUploadMediaThread();
 
     }
 
@@ -801,15 +816,13 @@ public class UploadMediaUseCase {
 
         alreadyUploadedMediaCount = 0;
 
-        uploadFolderUUID = null;
+        uploadFolderUUID = "";
 
-        uploadParentFolderUUID = null;
+        uploadParentFolderUUID = "";
 
-        uploadedMediaHashs = null;
+        currentUserUUID = "";
 
-        currentUserUUID = null;
-
-        currentUserHome = null;
+        currentUserHome = "";
 
         retryUploadHandler.removeMessages(RETRY_UPLOAD);
 
@@ -821,7 +834,7 @@ public class UploadMediaUseCase {
 
     private void sendRetryUploadMessage() {
 
-        Log.d(TAG, "sendRetryUploadMessage: ");
+        Log.d(TAG, "sendRetryUploadMessage: delay time " + RETRY_INTERVAL);
 
         retryUploadHandler.sendEmptyMessageDelayed(RETRY_UPLOAD, RETRY_INTERVAL);
 

@@ -10,8 +10,4 @@ public interface FileListSelectModeListener {
 
     void onFileItemLongClick();
 
-    void enterSelectMode();
-
-    void quitSelectMode();
-
 }

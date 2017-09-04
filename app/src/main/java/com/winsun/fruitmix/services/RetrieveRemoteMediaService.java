@@ -87,7 +87,7 @@ public class RetrieveRemoteMediaService extends IntentService {
         fillRemoteMediaMap(mediaConcurrentMap);
 
         Util.setRemoteMediaLoaded(true);
-        NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+        NewPhotoListDataLoader.getInstance().setNeedRefreshData(true);
 
         sendEvent();
 
@@ -117,7 +117,7 @@ public class RetrieveRemoteMediaService extends IntentService {
             fillRemoteMediaMap(mediaConcurrentMap);
 
             Util.setRemoteMediaLoaded(true);
-            NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+            NewPhotoListDataLoader.getInstance().setNeedRefreshData(true);
 
             sendEvent();
 

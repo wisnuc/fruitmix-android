@@ -64,6 +64,8 @@ public class LoginUseCase extends BaseDataRepository {
 
     private ImageGifLoaderInstance imageGifLoaderInstance;
 
+    private NewPhotoListDataLoader newPhotoListDataLoader;
+
     private EventBus eventBus;
 
     public static String mToken;
@@ -73,7 +75,7 @@ public class LoginUseCase extends BaseDataRepository {
                          HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy, UploadMediaUseCase uploadMediaUseCase,
                          UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
                          SystemSettingDataSource systemSettingDataSource, ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus,
-                         ThreadManager threadManager) {
+                         ThreadManager threadManager,NewPhotoListDataLoader newPhotoListDataLoader) {
         super(threadManager);
         this.loggedInUserDataSource = loggedInUserDataSource;
         this.tokenDataSource = tokenDataSource;
@@ -85,6 +87,7 @@ public class LoginUseCase extends BaseDataRepository {
         this.stationFileRepository = stationFileRepository;
         this.systemSettingDataSource = systemSettingDataSource;
         this.imageGifLoaderInstance = imageGifLoaderInstance;
+        this.newPhotoListDataLoader = newPhotoListDataLoader;
         this.eventBus = eventBus;
     }
 
@@ -92,12 +95,13 @@ public class LoginUseCase extends BaseDataRepository {
                                            HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
                                            UploadMediaUseCase uploadMediaUseCase, UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository,
                                            StationFileRepository stationFileRepository, SystemSettingDataSource systemSettingDataSource,
-                                           ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager) {
+                                           ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager,
+                                           NewPhotoListDataLoader newPhotoListDataLoader) {
 
         if (instance == null)
             instance = new LoginUseCase(loggedInUserDataSource, tokenDataSource,
                     httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, mediaDataSourceRepository,
-                    stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager);
+                    stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager,newPhotoListDataLoader);
 
         return instance;
     }
@@ -320,7 +324,7 @@ public class LoginUseCase extends BaseDataRepository {
 
         stationFileRepository.clearDownloadFileRecordInCache();
 
-        NewPhotoListDataLoader.INSTANCE.setNeedRefreshData(true);
+        newPhotoListDataLoader.setNeedRefreshData(true);
 
     }
 
