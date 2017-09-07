@@ -125,6 +125,8 @@ public class ButlerService extends Service {
 
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
 
+        mediaDataSourceRepository.setCalcDigestCallback(calcMediaDigestCallback);
+
         generateMediaThumbUseCase = InjectGenerateMediaThumbUseCase.provideGenerateMediaThumbUseCase(this);
         uploadMediaUseCase = InjectUploadMediaUseCase.provideUploadMediaUseCase(this);
 
@@ -146,6 +148,8 @@ public class ButlerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        Log.d(TAG, "onStartCommand: ");
 
         mediaDataSourceRepository.setCalcDigestCallback(calcMediaDigestCallback);
 
@@ -169,6 +173,8 @@ public class ButlerService extends Service {
         generateMediaThumbUseCase.stopGenerateLocalPhotoThumbnail();
         generateMediaThumbUseCase.stopGenerateLocalPhotoMiniThumbnail();
         uploadMediaUseCase.stopUploadMedia();
+
+        uploadMediaUseCase.stopRetryUpload();
 
         super.onDestroy();
 

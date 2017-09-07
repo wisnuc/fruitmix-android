@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -27,7 +28,6 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.command.ChangeToDownloadPageCommand;
-import com.winsun.fruitmix.command.DeleteDownloadedFileCommand;
 import com.winsun.fruitmix.command.DownloadFileCommand;
 import com.winsun.fruitmix.command.MacroCommand;
 import com.winsun.fruitmix.command.NullCommand;
@@ -58,8 +58,6 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BaseBindingViewHolder;
@@ -100,15 +98,19 @@ public class FilePresenter implements OnViewSelectListener {
 
     private AbstractCommand showSelectModeViewCommand;
 
-    private AbstractCommand macroCommand;
-
     private AbstractCommand nullCommand;
-
-    private AbstractCommand checkFileAlreadyDownloadedCommand;
 
     private String rootUUID;
 
-    private ProgressDialog progressDialog;
+    private List<String> alreadyDownloadedFilePathForShare;
+
+    private List<AbstractRemoteFile> needDownloadFilesForShare;
+
+    private ProgressDialog currentDownloadFileForShareProgressDialog;
+
+    private MacroCommand currentDownloadFileForShareCommand;
+
+    private ProgressDialog currentDownloadFileProgressDialog;
 
     private int progressMax = 100;
 
@@ -133,8 +135,6 @@ public class FilePresenter implements OnViewSelectListener {
 
     private String currentUserUUID;
 
-    private ThreadManager threadManager;
-
     private FileDownloadManager fileDownloadManager;
 
     private FileListSelectModeListener fileListSelectModeListener;
@@ -153,8 +153,6 @@ public class FilePresenter implements OnViewSelectListener {
 
         currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
         rootUUID = loggedInUserRepository.getLoggedInUserByUserUUID(currentUserUUID).getUser().getHome();
-
-        threadManager = ThreadManagerImpl.getInstance();
 
         init();
     }
@@ -223,7 +221,7 @@ public class FilePresenter implements OnViewSelectListener {
                             @Override
                             public void onFail(OperationResult result) {
 
-                                Toast.makeText(activity, "删除原图失败", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "删除原文件失败", Toast.LENGTH_SHORT).show();
 
                             }
                         });
@@ -396,12 +394,7 @@ public class FilePresenter implements OnViewSelectListener {
 
     public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
 
-        if (mCurrentDownloadFileCommand == null)
-            return;
-
         DownloadState downloadState = downloadStateChangedEvent.getDownloadState();
-
-        FileDownloadItem fileDownloadItem = mCurrentDownloadFileCommand.getFileDownloadItem();
 
         switch (downloadState) {
             case START_DOWNLOAD:
@@ -409,38 +402,93 @@ public class FilePresenter implements OnViewSelectListener {
                 break;
             case DOWNLOADING:
 
-                progressDialog.setProgress(fileDownloadItem.getCurrentProgress(progressMax));
+                if (mCurrentDownloadFileCommand != null){
+
+                    FileDownloadItem fileDownloadItem = mCurrentDownloadFileCommand.getFileDownloadItem();
+                    currentDownloadFileProgressDialog.setProgress(fileDownloadItem.getCurrentProgress(progressMax));
+
+                }
 
                 break;
             case FINISHED:
 
-                mCurrentDownloadFileCommand = null;
+                if (mCurrentDownloadFileCommand != null) {
 
-                progressDialog.dismiss();
+                    FileDownloadItem fileDownloadItem = mCurrentDownloadFileCommand.getFileDownloadItem();
 
-                OpenFileCommand openFileCommand = new OpenFileCommand(activity, fileDownloadItem.getFileName());
-                openFileCommand.execute();
+                    mCurrentDownloadFileCommand = null;
+
+                    currentDownloadFileProgressDialog.dismiss();
+
+                    OpenFileCommand openFileCommand = new OpenFileCommand(activity, fileDownloadItem.getFileName());
+                    openFileCommand.execute();
+
+                } else {
+
+                    checkFileForShareDownloaded(needDownloadFilesForShare);
+
+                    if (needDownloadFilesForShare.isEmpty()) {
+
+                        currentDownloadFileForShareCommand = null;
+
+                        currentDownloadFileForShareProgressDialog.dismiss();
+
+                        FileUtil.sendShareToOtherApp(activity, alreadyDownloadedFilePathForShare);
+                    }
+
+                }
 
                 break;
             case ERROR:
 
-                mCurrentDownloadFileCommand = null;
+                if (mCurrentDownloadFileCommand != null) {
 
-                progressDialog.dismiss();
+                    mCurrentDownloadFileCommand = null;
 
-                if (cancelDownload)
-                    cancelDownload = false;
-                else
-                    Toast.makeText(activity, activity.getText(R.string.download_failed), Toast.LENGTH_SHORT).show();
+                    currentDownloadFileProgressDialog.dismiss();
+
+                    if (cancelDownload)
+                        cancelDownload = false;
+                    else
+                        Toast.makeText(activity, activity.getText(R.string.download_failed), Toast.LENGTH_SHORT).show();
+
+                } else {
+
+                    currentDownloadFileForShareCommand.unExecute();
+
+                    currentDownloadFileForShareCommand = null;
+
+                    currentDownloadFileForShareProgressDialog.dismiss();
+
+                    Toast.makeText(activity, activity.getString(R.string.download_failed), Toast.LENGTH_SHORT).show();
+
+
+                }
 
                 break;
             case NO_ENOUGH_SPACE:
 
-                mCurrentDownloadFileCommand = null;
+                if (mCurrentDownloadFileCommand != null) {
 
-                progressDialog.dismiss();
+                    mCurrentDownloadFileCommand = null;
 
-                Toast.makeText(activity, activity.getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+                    currentDownloadFileProgressDialog.dismiss();
+
+                    Toast.makeText(activity, activity.getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+
+                } else {
+
+                    currentDownloadFileForShareCommand.unExecute();
+
+                    currentDownloadFileForShareCommand = null;
+
+                    currentDownloadFileForShareProgressDialog.dismiss();
+
+                    Toast.makeText(activity, activity.getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+
+                }
+
+
                 break;
         }
 
@@ -543,6 +591,53 @@ public class FilePresenter implements OnViewSelectListener {
 
     }
 
+
+    public void shareSelectFilesToOtherApp(Context context) {
+
+        alreadyDownloadedFilePathForShare = new ArrayList<>();
+
+        needDownloadFilesForShare = new ArrayList<>();
+
+        checkFileForShareDownloaded(selectedFiles);
+
+        if (selectedFiles.isEmpty()) {
+            FileUtil.sendShareToOtherApp(context, alreadyDownloadedFilePathForShare);
+        } else {
+
+            needDownloadFilesForShare.addAll(selectedFiles);
+
+            currentDownloadFileForShareProgressDialog = ProgressDialog.show(context, null, String.format(context.getString(R.string.operating_title), context.getString(R.string.download_select_item)), true, true);
+            currentDownloadFileForShareProgressDialog.setCanceledOnTouchOutside(false);
+
+            currentDownloadFileForShareCommand = new MacroCommand();
+            addSelectFilesToMacroCommand(currentDownloadFileForShareCommand, needDownloadFilesForShare);
+
+            currentDownloadFileForShareCommand.execute();
+
+        }
+
+    }
+
+    private void checkFileForShareDownloaded(List<AbstractRemoteFile> files) {
+
+        Iterator<AbstractRemoteFile> iterator = files.iterator();
+
+        while (iterator.hasNext()) {
+
+            AbstractRemoteFile file = iterator.next();
+
+            if (fileDownloadManager.checkIsDownloaded(file.getUuid())) {
+
+                alreadyDownloadedFilePathForShare.add(FileUtil.getDownloadFileStoreFolderPath() + file.getName());
+
+                iterator.remove();
+            }
+
+        }
+
+    }
+
+
     public void requestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
         switch (requestCode) {
@@ -581,14 +676,14 @@ public class FilePresenter implements OnViewSelectListener {
 
         mCurrentDownloadFileCommand.execute();
 
-        progressDialog = new ProgressDialog(activity);
+        currentDownloadFileProgressDialog = new ProgressDialog(activity);
 
-        progressDialog.setTitle(activity.getString(R.string.downloading));
+        currentDownloadFileProgressDialog.setTitle(activity.getString(R.string.downloading));
 
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progressDialog.setIndeterminate(false);
+        currentDownloadFileProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        currentDownloadFileProgressDialog.setIndeterminate(false);
 
-        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, activity.getText(R.string.cancel), new DialogInterface.OnClickListener() {
+        currentDownloadFileProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, activity.getText(R.string.cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mCurrentDownloadFileCommand.unExecute();
@@ -597,15 +692,15 @@ public class FilePresenter implements OnViewSelectListener {
 
                 cancelDownload = true;
 
-                progressDialog.dismiss();
+                currentDownloadFileProgressDialog.dismiss();
             }
         });
 
-        progressDialog.setMax(progressMax);
+        currentDownloadFileProgressDialog.setMax(progressMax);
 
-        progressDialog.setCancelable(false);
+        currentDownloadFileProgressDialog.setCancelable(false);
 
-        progressDialog.show();
+        currentDownloadFileProgressDialog.show();
     }
 
     public Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
@@ -629,7 +724,7 @@ public class FilePresenter implements OnViewSelectListener {
 
             bottomMenuItems.add(clearSelectItem);
 
-            createDownloadSelectFilesCommand();
+            MacroCommand macroCommand = createDownloadSelectFilesCommand();
 
             BottomMenuItem downloadSelectItem = new BottomMenuItem(R.drawable.download, activity.getString(R.string.download_select_item), macroCommand);
 
@@ -655,29 +750,33 @@ public class FilePresenter implements OnViewSelectListener {
 
     public void downloadSelectItems() {
 
-        createDownloadSelectFilesCommand();
+        MacroCommand macroCommand = createDownloadSelectFilesCommand();
 
         macroCommand.execute();
 
     }
 
-    private void createDownloadSelectFilesCommand() {
-        macroCommand = new MacroCommand();
+    private MacroCommand createDownloadSelectFilesCommand() {
+        MacroCommand macroCommand = new MacroCommand();
 
-        addSelectFilesToMacroCommand();
+        addSelectFilesToMacroCommand(macroCommand, selectedFiles);
 
         macroCommand.addCommand(showUnSelectModeViewCommand);
 
         macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
+
+        return macroCommand;
     }
 
-    private void addSelectFilesToMacroCommand() {
-        for (AbstractRemoteFile abstractRemoteFile : selectedFiles) {
+    private void addSelectFilesToMacroCommand(AbstractCommand macroCommand, List<AbstractRemoteFile> files) {
+
+        for (AbstractRemoteFile abstractRemoteFile : files) {
 
             AbstractCommand abstractCommand = new DownloadFileCommand(fileDownloadManager, abstractRemoteFile, stationFileRepository, currentUserUUID, rootUUID);
             macroCommand.addCommand(abstractCommand);
 
         }
+
     }
 
 

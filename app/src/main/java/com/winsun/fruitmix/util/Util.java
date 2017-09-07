@@ -525,22 +525,6 @@ public class Util {
 
     }
 
-    public static void sendShareToOtherApp(Context context, List<String> selectMediaOriginalPhotoPaths) {
-        ArrayList<Uri> uris = new ArrayList<>();
-
-        for (String originalPhotoPath : selectMediaOriginalPhotoPaths) {
-            Uri uri = Uri.fromFile(new File(originalPhotoPath));
-            uris.add(uri);
-        }
-
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_SEND_MULTIPLE);
-        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        intent.setType("image/*");
-        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_text)));
-
-    }
-
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void dismissViewWithReveal(final View view) {
 

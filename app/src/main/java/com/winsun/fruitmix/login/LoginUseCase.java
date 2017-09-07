@@ -189,19 +189,8 @@ public class LoginUseCase extends BaseDataRepository {
 
                                 user.setHome(data.get(0));
 
-                                Collection<LoggedInUser> loggedInUsers = loggedInUserDataSource.getAllLoggedInUsers();
-
-                                if (loggedInUsers.isEmpty()) {
-
-                                    systemSettingDataSource.setAutoUploadOrNot(true);
-                                    systemSettingDataSource.setCurrentUploadUserUUID(user.getUuid());
-
-                                    systemSettingDataSource.setShowAutoUploadDialog(false);
-                                } else {
-
-                                    systemSettingDataSource.setAutoUploadOrNot(false);
-                                    systemSettingDataSource.setShowAutoUploadDialog(true);
-                                }
+                                systemSettingDataSource.setAutoUploadOrNot(false);
+                                systemSettingDataSource.setShowAutoUploadDialog(true);
 
                                 LoggedInUser loggedInUser = new LoggedInUser(user.getLibrary(), token, loadTokenParam.getGateway(), loadTokenParam.getEquipmentName(), user);
 

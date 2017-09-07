@@ -4,7 +4,8 @@
     android:duration="200"
     android:propertyName="translationY"
     android:valueFrom="0"
-    android:valueTo="-168" />
+    android:valueTo="-56dp"
+    android:valueType="floatType"/>
 
 
 

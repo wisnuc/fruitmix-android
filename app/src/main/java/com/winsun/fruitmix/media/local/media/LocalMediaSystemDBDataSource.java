@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.operationResult.OperationHasNewMedia;
+import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FileUtil;
 
@@ -46,12 +46,15 @@ public class LocalMediaSystemDBDataSource {
 
     }
 
-    public void getMedia(Collection<String> currentLocalMediaOriginalPaths, BaseLoadDataCallback<Media> callback) {
+    public void getMedia(Collection<String> currentLocalMediaOriginalPaths, MediaInSystemDBLoadCallback callback) {
 
         ContentResolver cr = contentResolver;
 
         Cursor cursor;
-        List<Media> mediaList;
+
+        List<String> currentAllMediaPathInSystemDB = new ArrayList<>();
+
+        List<Media> newMediaList = new ArrayList<>();
         Media media;
         File f;
         SimpleDateFormat df;
@@ -75,9 +78,8 @@ public class LocalMediaSystemDBDataSource {
 
         cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, selection, selectionArgs, null);
 
-        mediaList = new ArrayList<>();
         if (cursor == null || !cursor.moveToFirst()) {
-            callback.onSucceed(Collections.<Media>emptyList(), new OperationSuccess());
+            callback.onSucceed(currentAllMediaPathInSystemDB, newMediaList, new OperationSuccess());
             return;
         }
         df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -89,14 +91,16 @@ public class LocalMediaSystemDBDataSource {
 
             String originalPhotoPath = cursor.getString(cursor.getColumnIndexOrThrow(data));
 
-            if (currentLocalMediaOriginalPaths == null)
-                break;
-
-            if (currentLocalMediaOriginalPaths.contains(originalPhotoPath) || originalPhotoPath.contains(thumbnailFolderPath)
-                    || originalPhotoPath.contains(oldThumbnailFolderPath) || originalPhotoPath.contains(thumbnailFolder200Path)
+            if (originalPhotoPath.contains(thumbnailFolderPath) || originalPhotoPath.contains(oldThumbnailFolderPath)
+                    || originalPhotoPath.contains(thumbnailFolder200Path)
                     || originalPhotoPath.contains(originalPhotoFolderPath)) {
                 continue;
             }
+
+            currentAllMediaPathInSystemDB.add(originalPhotoPath);
+
+            if (currentLocalMediaOriginalPaths.contains(originalPhotoPath))
+                continue;
 
             media = new Media();
             media.setOriginalPhotoPath(originalPhotoPath);
@@ -123,7 +127,7 @@ public class LocalMediaSystemDBDataSource {
             media.setLongitude(longitude);
             media.setLatitude(latitude);
 
-            mediaList.add(media);
+            newMediaList.add(media);
 
 //            Log.i(TAG, "insert local media to map key is originalPhotoPath result:" + (mapResult != null ? "true" : "false"));
 
@@ -132,10 +136,10 @@ public class LocalMediaSystemDBDataSource {
 
         cursor.close();
 
-        if (mediaList.isEmpty())
-            callback.onSucceed(mediaList, new OperationSuccess());
+        if (newMediaList.isEmpty())
+            callback.onSucceed(currentAllMediaPathInSystemDB, newMediaList, new OperationSuccess());
         else
-            callback.onSucceed(mediaList, new OperationHasNewMedia());
+            callback.onSucceed(currentAllMediaPathInSystemDB, newMediaList, new OperationMediaDataChanged());
 
     }
 

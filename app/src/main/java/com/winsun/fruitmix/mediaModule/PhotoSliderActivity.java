@@ -480,7 +480,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 if (originalPhotoPath.length() != 0) {
 
-                    Util.sendShareToOtherApp(mContext, Collections.singletonList(originalPhotoPath));
+                    FileUtil.sendShareToOtherApp(mContext, Collections.singletonList(originalPhotoPath));
 
                 } else {
 
@@ -541,7 +541,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         if (originalPhotoPath.isEmpty()) {
             Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
         } else {
-            Util.sendShareToOtherApp(mContext, Collections.singletonList(originalPhotoPath));
+            FileUtil.sendShareToOtherApp(mContext, Collections.singletonList(originalPhotoPath));
         }
     }
 
@@ -997,7 +997,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 } else if (action == MotionEvent.ACTION_UP) {
 
-                    if (lastY - y > Util.dip2px(mContext, 30)) {
+                    if (lastY - y > Util.dip2px(mContext, 60)) {
 
                         finishActivity();
 

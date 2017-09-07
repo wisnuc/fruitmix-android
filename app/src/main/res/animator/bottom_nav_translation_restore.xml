@@ -2,5 +2,6 @@
 <objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
     android:duration="200"
     android:propertyName="translationY"
-    android:valueFrom="168"
-    android:valueTo="0" />
+    android:valueFrom="56dp"
+    android:valueTo="0"
+    android:valueType="floatType"/>

@@ -20,7 +20,7 @@ public class InjectUploadMediaUseCase {
                 InjectStationFileRepository.provideStationFileRepository(context),
                 InjectLoggedInUser.provideLoggedInUserRepository(context), ThreadManagerImpl.getInstance(),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(context),
-                CheckMediaIsUploadStrategy.getInstance(), Build.MODEL);
+                CheckMediaIsUploadStrategy.getInstance(), CheckMediaIsExistStrategy.getInstance(),Build.MODEL);
     }
 
 }

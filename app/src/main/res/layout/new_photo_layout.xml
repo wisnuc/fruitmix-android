@@ -30,7 +30,7 @@
             android:layout_height="match_parent"
             android:visibility="@{newPhotoListViewModel.showContent?View.VISIBLE:View.GONE,default=gone}">
 
-            <android.support.v7.widget.RecyclerView
+            <com.winsun.fruitmix.component.CatchOnLayoutCrashRecyclerView
                 android:id="@+id/photo_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

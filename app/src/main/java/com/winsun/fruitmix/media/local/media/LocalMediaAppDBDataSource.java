@@ -51,4 +51,9 @@ public class LocalMediaAppDBDataSource {
     }
 
 
+    public long deleteMediaByPath(Collection<String> mediaPaths){
+        return dbUtils.deleteLocalMedias(mediaPaths);
+    }
+
+
 }

@@ -66,6 +66,9 @@ public class UploadMediaUseCaseTest {
     @Mock
     private CheckMediaIsUploadStrategy checkMediaIsUploadStrategy;
 
+    @Mock
+    private CheckMediaIsExistStrategy checkMediaIsExistStrategy;
+
     private ThreadManager threadManager;
 
     private String testUserUUID;
@@ -89,7 +92,7 @@ public class UploadMediaUseCaseTest {
         threadManager = new MockThreadManager();
 
         uploadMediaUseCase = UploadMediaUseCase.getInstance(mediaDataSourceRepository, stationFileRepository,
-                loggedInUserDataSource, threadManager, systemSettingDataSource, checkMediaIsUploadStrategy, testUploadFolderName);
+                loggedInUserDataSource, threadManager, systemSettingDataSource, checkMediaIsUploadStrategy, checkMediaIsExistStrategy, testUploadFolderName);
 
     }
 
@@ -138,9 +141,11 @@ public class UploadMediaUseCaseTest {
         when(systemSettingDataSource.getCurrentLoginUserUUID()).thenReturn(testUserUUID);
 
         when(loggedInUserDataSource.getLoggedInUserByUserUUID(anyString())).thenReturn(new LoggedInUser("", "", "", "", user));
+
+        when(checkMediaIsExistStrategy.checkMediaIsExist(any(Media.class))).thenReturn(true);
     }
 
-    private void assertStringIsEmpty(String param){
+    private void assertStringIsEmpty(String param) {
         assertTrue(param.isEmpty());
     }
 
@@ -398,7 +403,7 @@ public class UploadMediaUseCaseTest {
 
         verify(stationFileRepository).uploadFile(any(LocalFile.class), eq(testUserHome), eq(testUploadFolderUUID), captor.capture());
 
-        captor.getValue().onFail(new OperationNetworkException(new HttpResponse(404,"")));
+        captor.getValue().onFail(new OperationNetworkException(new HttpResponse(404, "")));
 
         assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
         assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
@@ -463,11 +468,65 @@ public class UploadMediaUseCaseTest {
 
         when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
 
-        uploadMediaUseCase.startUploadMedia();
+        secondCallUploadWhenUploadParentFolderExistAndUploadFolderExist();
 
         verify(stationFileRepository).uploadFile(any(LocalFile.class), anyString(), anyString(), any(BaseOperateDataCallback.class));
 
     }
+
+    private void secondCallUploadWhenUploadParentFolderExistAndUploadFolderExist() {
+
+        uploadMediaUseCase.startUploadMedia();
+
+        assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
+        assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
+
+        ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(stationFileRepository,times(2)).getFile(eq(testUserHome), eq(testUserHome), captor.capture());
+
+        List<AbstractRemoteFile> files = new ArrayList<>();
+
+        AbstractRemoteFile file = new RemoteFile();
+        file.setName(UploadMediaUseCase.UPLOAD_PARENT_FOLDER_NAME);
+        file.setUuid(testUploadParentFolderUUID);
+
+        files.add(file);
+
+        captor.getValue().onSucceed(files, new OperationSuccess());
+
+        ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> uploadFolderCallbackCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(stationFileRepository,times(2)).getFile(eq(testUserHome), eq(testUploadParentFolderUUID), uploadFolderCallbackCaptor.capture());
+
+        AbstractRemoteFile uploadFolderFile = new RemoteFile();
+        uploadFolderFile.setName(UploadMediaUseCase.UPLOAD_FOLDER_NAME_PREFIX + testUploadFolderName);
+        uploadFolderFile.setUuid(testUploadFolderUUID);
+
+        files.clear();
+        files.add(uploadFolderFile);
+
+        uploadFolderCallbackCaptor.getValue().onSucceed(files, new OperationSuccess());
+
+        assertNull(uploadMediaUseCase.uploadedMediaHashs);
+
+        ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getUploadMediaHashCallbackCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(stationFileRepository,times(2)).getFile(eq(testUserHome), eq(testUploadFolderUUID), getUploadMediaHashCallbackCaptor.capture());
+
+        AbstractRemoteFile uploadFile = new RemoteFile();
+        ((RemoteFile) uploadFile).setFileHash(testMediaUUID);
+
+        getUploadMediaHashCallbackCaptor.getValue().onSucceed(Collections.singletonList(uploadFile), new OperationSuccess());
+
+        verify(checkMediaIsUploadStrategy,times(2)).setUploadedMediaHashs(ArgumentMatchers.<String>anyList());
+
+        verify(systemSettingDataSource,times(2)).getAutoUploadOrNot();
+
+        verify(stationFileRepository, never()).createFolder(anyString(), anyString(), anyString(), any(BaseOperateDataCallback.class));
+
+    }
+
 
     @Test
     public void testGetUploadParentFolderUUIDFail() {

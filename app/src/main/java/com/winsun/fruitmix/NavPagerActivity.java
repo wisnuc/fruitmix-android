@@ -418,6 +418,8 @@ public class NavPagerActivity extends BaseActivity
 
         uploadMediaUseCase = InjectUploadMediaUseCase.provideUploadMediaUseCase(this);
 
+        uploadMediaUseCase.registerUploadMediaCountChangeListener(uploadMediaCountChangeListener);
+
     }
 
     private void calcAlreadyUploadMediaCount(final List<Media> medias) {
@@ -446,7 +448,7 @@ public class NavPagerActivity extends BaseActivity
                 }*/
 
                 alreadyUploadMediaCount = uploadMediaUseCase.getAlreadyUploadedMediaCount();
-                totalUploadMediaCount = medias.size();
+                totalUploadMediaCount = uploadMediaUseCase.getLocalMedias().size();
 
                 mAlreadyUploadMediaCount = alreadyUploadMediaCount;
                 mTotalLocalMediaCount = totalUploadMediaCount;
@@ -615,9 +617,6 @@ public class NavPagerActivity extends BaseActivity
             mediaMainFragment.show();
         }
 
-        calcAlreadyUploadMediaCount(mediaDataSourceRepository.getLocalMedia());
-
-        uploadMediaUseCase.registerUploadMediaCountChangeListener(uploadMediaCountChangeListener);
     }
 
     @Override
@@ -628,7 +627,6 @@ public class NavPagerActivity extends BaseActivity
             mediaMainFragment.hide();
         }
 
-        uploadMediaUseCase.unregisterUploadMediaCountChangeListener(uploadMediaCountChangeListener);
     }
 
     @Override
@@ -636,6 +634,8 @@ public class NavPagerActivity extends BaseActivity
         super.onDestroy();
 
         InjectHttp.provideImageGifLoaderIntance().getImageLoader(mContext).cancelAllPreLoadMedia();
+
+        uploadMediaUseCase.unregisterUploadMediaCountChangeListener(uploadMediaCountChangeListener);
 
         mContext = null;
 

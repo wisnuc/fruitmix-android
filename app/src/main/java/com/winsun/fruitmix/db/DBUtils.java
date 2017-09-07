@@ -75,19 +75,10 @@ public class DBUtils {
         return database.isOpen();
     }
 
-    private ContentValues createUserContentValues(User user) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.USER_KEY_USERNAME, user.getUserName());
-        contentValues.put(DBHelper.USER_KEY_UUID, user.getUuid());
-        contentValues.put(DBHelper.USER_KEY_AVATAR, user.getAvatar());
-        contentValues.put(DBHelper.USER_KEY_EMAIL, user.getEmail());
-        contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR, user.getDefaultAvatar());
-        contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR_BG_COLOR, user.getDefaultAvatarBgColor());
-        contentValues.put(DBHelper.USER_KEY_HOME, user.getHome());
-        contentValues.put(DBHelper.USER_KEY_LIBRARY, user.getLibrary());
-        contentValues.put(DBHelper.USER_KEY_IS_ADMIN, user.isAdmin() ? 1 : 0);
+    public long insertRemoteUser(User user) {
 
-        return contentValues;
+        return insertRemoteUsers(Collections.singletonList(user));
+
     }
 
     public long insertRemoteUsers(Collection<User> users) {
@@ -108,23 +99,6 @@ public class DBUtils {
         close();
 
         return returnValue;
-    }
-
-    public long insertRemoteUser(User user) {
-
-        return insertRemoteUsers(Collections.singletonList(user));
-
-    }
-
-    private ContentValues createLoggedInUserContentValues(LoggedInUser loggedInUser) {
-
-        ContentValues contentValues = createUserContentValues(loggedInUser.getUser());
-        contentValues.put(DBHelper.LOGGED_IN_USER_GATEWAY, loggedInUser.getGateway());
-        contentValues.put(DBHelper.LOGGED_IN_USER_EQUIPMENT_NAME, loggedInUser.getEquipmentName());
-        contentValues.put(DBHelper.LOGGED_IN_USER_TOKEN, loggedInUser.getToken());
-        contentValues.put(DBHelper.LOGGED_IN_USER_DEVICE_ID, loggedInUser.getDeviceID());
-
-        return contentValues;
     }
 
     public long insertLoggedInUserInDB(Collection<LoggedInUser> loggedInUsers) {
@@ -148,15 +122,28 @@ public class DBUtils {
 
     }
 
+    private ContentValues createLoggedInUserContentValues(LoggedInUser loggedInUser) {
 
-    private ContentValues createDownloadedFileContentValues(DownloadedItem downloadedItem) {
+        ContentValues contentValues = createUserContentValues(loggedInUser.getUser());
+        contentValues.put(DBHelper.LOGGED_IN_USER_GATEWAY, loggedInUser.getGateway());
+        contentValues.put(DBHelper.LOGGED_IN_USER_EQUIPMENT_NAME, loggedInUser.getEquipmentName());
+        contentValues.put(DBHelper.LOGGED_IN_USER_TOKEN, loggedInUser.getToken());
+        contentValues.put(DBHelper.LOGGED_IN_USER_DEVICE_ID, loggedInUser.getDeviceID());
 
+        return contentValues;
+    }
+
+    private ContentValues createUserContentValues(User user) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.FILE_KEY_NAME, downloadedItem.getFileName());
-        contentValues.put(DBHelper.FILE_KEY_SIZE, downloadedItem.getFileSize());
-        contentValues.put(DBHelper.FILE_KEY_UUID, downloadedItem.getFileUUID());
-        contentValues.put(DBHelper.FILE_KEY_TIME, downloadedItem.getFileTime());
-        contentValues.put(DBHelper.FILE_KEY_CREATOR_UUID, downloadedItem.getFileCreatorUUID());
+        contentValues.put(DBHelper.USER_KEY_USERNAME, user.getUserName());
+        contentValues.put(DBHelper.USER_KEY_UUID, user.getUuid());
+        contentValues.put(DBHelper.USER_KEY_AVATAR, user.getAvatar());
+        contentValues.put(DBHelper.USER_KEY_EMAIL, user.getEmail());
+        contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR, user.getDefaultAvatar());
+        contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR_BG_COLOR, user.getDefaultAvatarBgColor());
+        contentValues.put(DBHelper.USER_KEY_HOME, user.getHome());
+        contentValues.put(DBHelper.USER_KEY_LIBRARY, user.getLibrary());
+        contentValues.put(DBHelper.USER_KEY_IS_ADMIN, user.isAdmin() ? 1 : 0);
 
         return contentValues;
     }
@@ -172,27 +159,19 @@ public class DBUtils {
         return returnValue;
     }
 
-    private ContentValues createMediaContentValues(Media media) {
+    private ContentValues createDownloadedFileContentValues(DownloadedItem downloadedItem) {
+
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.MEDIA_KEY_UUID, media.getUuid());
-        contentValues.put(DBHelper.MEDIA_KEY_TIME, media.getTime());
-        contentValues.put(DBHelper.MEDIA_KEY_WIDTH, media.getWidth());
-        contentValues.put(DBHelper.MEDIA_KEY_HEIGHT, media.getHeight());
-        contentValues.put(DBHelper.MEDIA_KEY_THUMB, media.getThumb());
-        contentValues.put(DBHelper.MEDIA_KEY_LOCAL, media.isLocal() ? 1 : 0);
-        contentValues.put(DBHelper.MEDIA_KEY_UPLOADED_USER_UUID, media.getUploadedUserUUIDs());
-        contentValues.put(DBHelper.MEDIA_KEY_SHARING, media.isSharing() ? 1 : 0);
-        contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER, media.getOrientationNumber());
-        contentValues.put(DBHelper.MEDIA_KEY_TYPE, media.getType());
-        contentValues.put(DBHelper.MEDIA_KEY_MINI_THUMB, media.getMiniThumbPath());
-        contentValues.put(DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH, media.getOriginalPhotoPath());
-        contentValues.put(DBHelper.MEDIA_KEY_LONGITUDE, media.getLongitude());
-        contentValues.put(DBHelper.MEDIA_KEY_LATITUDE, media.getLatitude());
+        contentValues.put(DBHelper.FILE_KEY_NAME, downloadedItem.getFileName());
+        contentValues.put(DBHelper.FILE_KEY_SIZE, downloadedItem.getFileSize());
+        contentValues.put(DBHelper.FILE_KEY_UUID, downloadedItem.getFileUUID());
+        contentValues.put(DBHelper.FILE_KEY_TIME, downloadedItem.getFileTime());
+        contentValues.put(DBHelper.FILE_KEY_CREATOR_UUID, downloadedItem.getFileCreatorUUID());
 
         return contentValues;
     }
 
-    private void bindMedia(SQLiteStatement sqLiteStatement, Media media) {
+    private void bindMediaWhenCreate(SQLiteStatement sqLiteStatement, Media media) {
         sqLiteStatement.bindString(1, media.getUuid());
         sqLiteStatement.bindString(2, media.getTime());
         sqLiteStatement.bindString(3, media.getWidth());
@@ -243,7 +222,7 @@ public class DBUtils {
 
             for (Media media : medias) {
 
-                bindMedia(sqLiteStatement, media);
+                bindMediaWhenCreate(sqLiteStatement, media);
 
                 returnValue = sqLiteStatement.executeInsert();
 
@@ -336,6 +315,52 @@ public class DBUtils {
     public long deleteAllLocalMedia() {
 
         return deleteAllDataInTable(DBHelper.LOCAL_MEDIA_TABLE_NAME);
+    }
+
+    public long deleteLocalMedias(Collection<String> mediaPaths) {
+        return deleteMediasByPath(DBHelper.LOCAL_MEDIA_TABLE_NAME, mediaPaths);
+    }
+
+    private long deleteMediasByPath(String dbName, Collection<String> mediaPaths) {
+
+        long returnValue = 0;
+
+        try {
+            openWritableDB();
+
+            String sql = createDeleteMediaSql(dbName);
+
+            SQLiteStatement sqLiteStatement = database.compileStatement(sql);
+            database.beginTransaction();
+
+            for (String path : mediaPaths) {
+
+                bindMediaWhenDelete(sqLiteStatement, path);
+
+                returnValue = sqLiteStatement.executeUpdateDelete();
+
+            }
+            database.setTransactionSuccessful();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+
+            database.endTransaction();
+
+            close();
+        }
+
+        return returnValue;
+    }
+
+    private void bindMediaWhenDelete(SQLiteStatement sqLiteStatement, String path) {
+        sqLiteStatement.bindString(1, path);
+    }
+
+    @NonNull
+    private String createDeleteMediaSql(String dbName) {
+        return "delete from " + dbName + " where " +
+                DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH + " = ?";
     }
 
     public List<User> getAllRemoteUser() {
@@ -524,6 +549,26 @@ public class DBUtils {
         close();
 
         return returnValue;
+    }
+
+    private ContentValues createMediaContentValues(Media media) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.MEDIA_KEY_UUID, media.getUuid());
+        contentValues.put(DBHelper.MEDIA_KEY_TIME, media.getTime());
+        contentValues.put(DBHelper.MEDIA_KEY_WIDTH, media.getWidth());
+        contentValues.put(DBHelper.MEDIA_KEY_HEIGHT, media.getHeight());
+        contentValues.put(DBHelper.MEDIA_KEY_THUMB, media.getThumb());
+        contentValues.put(DBHelper.MEDIA_KEY_LOCAL, media.isLocal() ? 1 : 0);
+        contentValues.put(DBHelper.MEDIA_KEY_UPLOADED_USER_UUID, media.getUploadedUserUUIDs());
+        contentValues.put(DBHelper.MEDIA_KEY_SHARING, media.isSharing() ? 1 : 0);
+        contentValues.put(DBHelper.MEDIA_KEY_ORIENTATION_NUMBER, media.getOrientationNumber());
+        contentValues.put(DBHelper.MEDIA_KEY_TYPE, media.getType());
+        contentValues.put(DBHelper.MEDIA_KEY_MINI_THUMB, media.getMiniThumbPath());
+        contentValues.put(DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH, media.getOriginalPhotoPath());
+        contentValues.put(DBHelper.MEDIA_KEY_LONGITUDE, media.getLongitude());
+        contentValues.put(DBHelper.MEDIA_KEY_LATITUDE, media.getLatitude());
+
+        return contentValues;
     }
 
 }

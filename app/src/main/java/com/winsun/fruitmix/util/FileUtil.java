@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.ResponseBody;
 
@@ -512,6 +514,22 @@ public class FileUtil {
         intent.setDataAndType(Uri.fromFile(file), type);
 
         context.startActivity(intent);
+    }
+
+    public static void sendShareToOtherApp(Context context, List<String> filePaths) {
+        ArrayList<Uri> uris = new ArrayList<>();
+
+        for (String filePath : filePaths) {
+            Uri uri = Uri.fromFile(new File(filePath));
+            uris.add(uri);
+        }
+
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND_MULTIPLE);
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+        intent.setType("*/*");
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_text)));
+
     }
 
     private static String getMIMEType(File file) {

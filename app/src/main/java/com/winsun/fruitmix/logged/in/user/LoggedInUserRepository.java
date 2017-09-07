@@ -109,7 +109,7 @@ public class LoggedInUserRepository implements LoggedInUserDataSource {
     @Override
     public LoggedInUser getLoggedInUserByUserUUID(String userUUID) {
 
-        if (currentLoggedInUser == null || preQueryUserUUID == null || !preQueryUserUUID.equals(userUUID)) {
+        if (currentLoggedInUser == null || currentLoggedInUser.getUser() == null || preQueryUserUUID == null || !preQueryUserUUID.equals(userUUID)) {
 
             currentLoggedInUser = loggedInUserDBDataSource.getLoggedInUserByUserUUID(userUUID);
 

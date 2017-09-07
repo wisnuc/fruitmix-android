@@ -227,4 +227,11 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
         filePresenter.quitSelectMode();
     }
 
+    public void shareSelectFilesToOtherApp(){
+
+        filePresenter.shareSelectFilesToOtherApp(activity);
+
+
+    }
+
 }

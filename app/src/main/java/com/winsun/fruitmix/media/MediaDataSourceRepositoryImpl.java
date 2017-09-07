@@ -10,7 +10,7 @@ import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationResultType;
-import com.winsun.fruitmix.model.operationResult.OperationHasNewMedia;
+import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
@@ -45,7 +45,7 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
     private List<Media> localMedias;
     private List<Media> stationMedias;
 
-    private boolean hasNewMedia = false;
+    private boolean mediaDataChanged = false;
 
     private CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback;
 
@@ -83,7 +83,7 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
     @Override
     public List<Media> getLocalMedia() {
 
-        return Collections.unmodifiableList(localMedias);
+        return new ArrayList<>(localMedias);
 
     }
 
@@ -139,7 +139,7 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
 
                 localMedias = data;
 
-                hasNewMedia = operationResult.getOperationResultType() == OperationResultType.MEDIA_DATA_CHANGED;
+                mediaDataChanged = operationResult.getOperationResultType() == OperationResultType.MEDIA_DATA_CHANGED;
 
                 checkAllDataRetrieved(callback);
             }
@@ -185,8 +185,8 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
 
             OperationResult result;
 
-            if (hasNewMedia) {
-                result = new OperationHasNewMedia();
+            if (mediaDataChanged) {
+                result = new OperationMediaDataChanged();
             } else
                 result = new OperationSuccess();
 

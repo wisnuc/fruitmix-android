@@ -246,8 +246,6 @@ public class LoginUseCaseTest {
 
         assertEquals(testUserHome, user.getHome());
 
-        verify(loggedInUserDataSource).getAllLoggedInUsers();
-
         verify(loggedInUserDataSource).insertLoggedInUsers(ArgumentMatchers.<LoggedInUser>anyCollection());
 
         verify(callback).onSucceed(ArgumentMatchers.<String>anyList(), any(OperationResult.class));
@@ -263,10 +261,9 @@ public class LoginUseCaseTest {
 
         testLoadUserSuccessAfterLoginSuccess();
 
-        verify(systemSettingDataSource).setAutoUploadOrNot(true);
-        verify(systemSettingDataSource).setCurrentUploadUserUUID(testUserUUID);
+        verify(systemSettingDataSource).setAutoUploadOrNot(false);
 
-        verify(systemSettingDataSource).setShowAutoUploadDialog(false);
+        verify(systemSettingDataSource).setShowAutoUploadDialog(true);
 
     }
 

@@ -135,6 +135,9 @@ public class SettingPresenterImpl implements SettingPresenter {
     @Override
     public void clearCache(final Context context, final SettingActivity.SettingViewModel settingViewModel) {
 
+        if (mTotalCacheSize == 0)
+            return;
+
         new AlertDialog.Builder(context).setMessage(context.getString(R.string.confirm_clear_cache))
                 .setPositiveButton(context.getString(R.string.clear), new DialogInterface.OnClickListener() {
                     @Override
@@ -143,7 +146,9 @@ public class SettingPresenterImpl implements SettingPresenter {
                         FileUtil.clearAllCache(context);
                         dialog.dismiss();
 
-                        settingViewModel.cacheSizeText.set(FileUtil.formatFileSize(FileUtil.getTotalCacheSize(context)));
+                        mTotalCacheSize = FileUtil.getTotalCacheSize(context);
+
+                        settingViewModel.cacheSizeText.set(FileUtil.formatFileSize(mTotalCacheSize));
 
                     }
                 }).setNegativeButton(context.getString(R.string.cancel), null).create().show();

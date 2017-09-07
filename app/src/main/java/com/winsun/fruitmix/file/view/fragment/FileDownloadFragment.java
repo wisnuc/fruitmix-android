@@ -404,14 +404,18 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
             bottomMenuItems.add(clearSelectItem);
 
-            AbstractCommand macroCommand = new MacroCommand();
+            if (selectDownloadedItemMap.size() != 0) {
 
-            macroCommand.addCommand(new DeleteDownloadedFileCommand(new ArrayList<>(selectDownloadedItemMap.values()), currentUserUUID, stationFileRepository));
-            macroCommand.addCommand(showUnSelectModeViewCommand);
+                AbstractCommand macroCommand = new MacroCommand();
 
-            BottomMenuItem deleteSelectItem = new BottomMenuItem(R.drawable.del_user, activity.getString(R.string.delete_text), macroCommand);
+                macroCommand.addCommand(new DeleteDownloadedFileCommand(new ArrayList<>(selectDownloadedItemMap.values()), currentUserUUID, stationFileRepository));
+                macroCommand.addCommand(showUnSelectModeViewCommand);
 
-            bottomMenuItems.add(deleteSelectItem);
+                BottomMenuItem deleteSelectItem = new BottomMenuItem(R.drawable.del_user, activity.getString(R.string.delete_text), macroCommand);
+
+                bottomMenuItems.add(deleteSelectItem);
+
+            }
 
         } else {
 

@@ -49,7 +49,7 @@ import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListViewModel;
 import com.winsun.fruitmix.model.OperationResultType;
-import com.winsun.fruitmix.model.operationResult.OperationHasNewMedia;
+import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
@@ -277,7 +277,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 Log.d(TAG, "onSucceed: refresh station media force");
 
-                handleGetMediaSucceed(data, new OperationHasNewMedia());
+                handleGetMediaSucceed(data, new OperationMediaDataChanged());
             }
 
             @Override
@@ -299,7 +299,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 Log.d(TAG, "onSucceed: refresh view force");
 
-                handleGetMediaSucceed(data, new OperationHasNewMedia());
+                handleGetMediaSucceed(data, new OperationMediaDataChanged());
 
             }
 

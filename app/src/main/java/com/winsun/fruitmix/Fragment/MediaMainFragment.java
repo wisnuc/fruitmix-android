@@ -54,6 +54,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
@@ -81,7 +82,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private ViewPager viewPager;
 
-    private ImageView ivBtShare;
+    private ImageView systemShareBtn;
 
     private FloatingActionButton downloadFileBtn;
 
@@ -174,7 +175,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         viewPager = binding.viewPager;
 
-        ivBtShare = binding.btShare;
+        systemShareBtn = binding.systemShare;
 
         downloadFileBtn = binding.downloadFileBtn;
 
@@ -195,7 +196,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         viewPager.setCurrentItem(PAGE_PHOTO);
         onPageSelect(PAGE_PHOTO);
 
-        ivBtShare.setOnClickListener(this);
+        systemShareBtn.setOnClickListener(this);
         downloadFileBtn.setOnClickListener(this);
         fab.setOnClickListener(this);
 
@@ -665,7 +666,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         if (mSelectMediaOriginalPhotoPaths.isEmpty()) {
             Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
         } else {
-            Util.sendShareToOtherApp(getContext(), mSelectMediaOriginalPhotoPaths);
+            FileUtil.sendShareToOtherApp(getContext(), mSelectMediaOriginalPhotoPaths);
         }
     }
 
@@ -853,25 +854,16 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         final int marginValue = Util.dip2px(getContext(), 56f);
 
-        ObjectAnimator animator = ObjectAnimator.ofFloat(bottomNavigationView, "translationY", marginValue, 0)
-                .setDuration(200);
+        new AnimatorBuilder(getContext(), R.animator.bottom_nav_translation_restore, bottomNavigationView)
+                .addAdapter(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
 
-        animator.setInterpolator(new FastOutSlowInInterpolator());
+                        Util.setBottomMargin(viewPager, marginValue);
 
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-
-                Util.setBottomMargin(viewPager, marginValue);
-
-            }
-        });
-
-        animator.start();
-
-//        new AnimatorBuilder(getContext(), R.animator.bottom_nav_translation_restore, bottomNavigationView)
-//                .addAdapter().setInterpolator(new FastOutSlowInInterpolator()).startAnimator();
+                    }
+                }).setInterpolator(new FastOutSlowInInterpolator()).startAnimator();
 
     }
 
@@ -886,15 +878,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         Util.setBottomMargin(viewPager, 0);
 
-        ObjectAnimator animator = ObjectAnimator.ofFloat(bottomNavigationView, "translationY", 0, Util.dip2px(getContext(), 56f))
-                .setDuration(200);
-
-        animator.setInterpolator(new FastOutSlowInInterpolator());
-        animator.start();
-
-
-//        new AnimatorBuilder(getContext(), R.animator.bottom_nav_translation, bottomNavigationView)
-//                .setInterpolator(new FastOutSlowInInterpolator()).startAnimator();
+        new AnimatorBuilder(getContext(), R.animator.bottom_nav_translation, bottomNavigationView)
+                .setInterpolator(new FastOutSlowInInterpolator()).startAnimator();
     }
 
     private void dismissBottomNav() {
@@ -1014,14 +999,12 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.bt_share:
+            case R.id.system_share:
 
                 if (!Util.getNetworkState(mContext)) {
                     Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                     return;
                 }
-
-                mSelectMedias = photoList.getSelectedMedias();
 
                 AbstractCommand shareInAppCommand = new AbstractCommand() {
                     @Override
@@ -1068,6 +1051,16 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private void handleShareToOtherApp() {
 
+        if (viewPager.getCurrentItem() == PAGE_PHOTO)
+            shareMediaToOtherApp();
+        else if (viewPager.getCurrentItem() == PAGE_FILE)
+            shareFileToOtherApp();
+
+    }
+
+    private void shareMediaToOtherApp() {
+        mSelectMedias = new ArrayList<>(photoList.getSelectedMedias());
+
         mSelectMediaOriginalPhotoPaths = new ArrayList<>(mSelectMedias.size());
 
         Iterator<Media> iterator = mSelectMedias.iterator();
@@ -1082,7 +1075,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         }
 
         if (mSelectMedias.size() == 0) {
-            Util.sendShareToOtherApp(getContext(), mSelectMediaOriginalPhotoPaths);
+            FileUtil.sendShareToOtherApp(getContext(), mSelectMediaOriginalPhotoPaths);
         } else {
 
             mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.download_original_photo)), true, true);
@@ -1103,6 +1096,13 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         }
     }
 
+    private void shareFileToOtherApp() {
+
+        fileFragment.shareSelectFilesToOtherApp();
+
+    }
+
+
     private void refreshFabState() {
         if (sMenuUnfolding) {
             sMenuUnfolding = false;
@@ -1117,22 +1117,21 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         new AnimatorBuilder(getContext(), R.animator.fab_remote_restore, fab).startAnimator();
 
-        if (viewPager.getCurrentItem() == PAGE_PHOTO) {
-
-            new AnimatorBuilder(getContext(), R.animator.share_btn_restore, ivBtShare).addAdapter(new AnimatorListenerAdapter() {
+        if (systemShareBtn.getVisibility() == View.VISIBLE) {
+            new AnimatorBuilder(getContext(), R.animator.system_share_btn_restore, systemShareBtn).addAdapter(new AnimatorListenerAdapter() {
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
 
-                    ivBtShare.setVisibility(View.GONE);
+                    systemShareBtn.setVisibility(View.GONE);
 
                 }
             }).startAnimator();
+        }
 
-        } else {
-
-            new AnimatorBuilder(getContext(), R.animator.share_btn_restore, downloadFileBtn).addAdapter(new AnimatorListenerAdapter() {
+        if (downloadFileBtn.getVisibility() == View.VISIBLE) {
+            new AnimatorBuilder(getContext(), R.animator.download_file_btn_translation_restore, downloadFileBtn).addAdapter(new AnimatorListenerAdapter() {
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -1142,9 +1141,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
                 }
             }).startAnimator();
-
         }
-
 
     }
 
@@ -1156,14 +1153,19 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
             downloadFileBtn.setVisibility(View.GONE);
 
-            ivBtShare.setVisibility(View.VISIBLE);
-            new AnimatorBuilder(getContext(), R.animator.share_btn_translation, ivBtShare).startAnimator();
+            systemShareBtn.setVisibility(View.VISIBLE);
+
+            new AnimatorBuilder(getContext(), R.animator.system_share_btn_translation, systemShareBtn).startAnimator();
+
         } else {
 
-            ivBtShare.setVisibility(View.GONE);
+            systemShareBtn.setVisibility(View.VISIBLE);
 
             downloadFileBtn.setVisibility(View.VISIBLE);
-            new AnimatorBuilder(getContext(), R.animator.share_btn_translation, downloadFileBtn).startAnimator();
+
+            new AnimatorBuilder(getContext(), R.animator.system_share_btn_translation, systemShareBtn).startAnimator();
+
+            new AnimatorBuilder(getContext(), R.animator.download_file_btn_translation, downloadFileBtn).startAnimator();
 
         }
 
@@ -1256,7 +1258,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 //                toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
 //
 //                fab.setVisibility(View.GONE);
-//                ivBtShare.setVisibility(View.GONE);
+//                systemShareBtn.setVisibility(View.GONE);
 //
 //                toolbarViewModel.showSelect.set(false);
 //                toolbarViewModel.showMenu.set(false);
@@ -1273,7 +1275,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
 
                 fab.setVisibility(View.GONE);
-                ivBtShare.setVisibility(View.GONE);
+                systemShareBtn.setVisibility(View.GONE);
                 downloadFileBtn.setVisibility(View.GONE);
 
                 toolbarViewModel.showSelect.set(true);
@@ -1287,7 +1289,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 setCurrentItem(fileFragment);
 
                 fab.setVisibility(View.GONE);
-                ivBtShare.setVisibility(View.GONE);
+                systemShareBtn.setVisibility(View.GONE);
                 downloadFileBtn.setVisibility(View.GONE);
 
                 toolbarViewModel.showSelect.set(true);

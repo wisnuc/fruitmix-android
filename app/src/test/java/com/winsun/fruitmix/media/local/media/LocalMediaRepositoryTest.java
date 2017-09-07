@@ -20,6 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.Collection;
 import java.util.Collections;
 
 import static org.mockito.Mockito.*;
@@ -62,6 +63,13 @@ public class LocalMediaRepositoryTest {
     private String testMediaOriginalPath = "testMediaOriginalPath";
     private String testMediaOriginalPathFromSystemDB = "testMediaOriginalPathFromSystemDB";
 
+    private Media createMediaFromAppDB() {
+        Media media = new Media();
+        media.setOriginalPhotoPath(testMediaOriginalPath);
+
+        return media;
+    }
+
     @Test
     public void getMediaFromAppDBSucceed() {
 
@@ -71,8 +79,7 @@ public class LocalMediaRepositoryTest {
 
         verify(localMediaAppDBDataSource).getMedia(captor.capture());
 
-        Media media = new Media();
-        media.setOriginalPhotoPath(testMediaOriginalPath);
+        Media media = createMediaFromAppDB();
 
         captor.getValue().onSucceed(Collections.singletonList(media), new OperationSuccess());
 
@@ -83,11 +90,11 @@ public class LocalMediaRepositoryTest {
     }
 
     @Test
-    public void getMediaFromSystemDBSucceed() {
+    public void getMediaFromSystemDBSucceed_HasNoNewMediaAndNoPreMediaDeleted() {
 
         getMediaFromAppDBSucceed();
 
-        ArgumentCaptor<BaseLoadDataCallback<Media>> localMediaSystemDBLoadCallback = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+        ArgumentCaptor<MediaInSystemDBLoadCallback> localMediaSystemDBLoadCallback = ArgumentCaptor.forClass(MediaInSystemDBLoadCallback.class);
 
         verify(localMediaSystemDBDataSource).getMedia(ArgumentMatchers.<String>anyCollection(), localMediaSystemDBLoadCallback.capture());
 
@@ -98,13 +105,105 @@ public class LocalMediaRepositoryTest {
 
         when(calcMediaDigestStrategy.handleMedia(ArgumentMatchers.<Media>anyCollection())).thenReturn(Collections.<Media>emptyList());
 
-        localMediaSystemDBLoadCallback.getValue().onSucceed(Collections.singletonList(newMediaFromSystemDB), new OperationSuccess());
+        localMediaSystemDBLoadCallback.getValue().onSucceed(Collections.singletonList(testMediaOriginalPath), Collections.<Media>emptyList(), new OperationSuccess());
+
+        assertEquals(1, localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.size());
+
+        assertNotNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testMediaOriginalPath));
+
+        assertNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testMediaOriginalPathFromSystemDB));
+
+        verify(calcMediaDigestStrategy).handleMedia(ArgumentMatchers.<Media>anyCollection());
+
+        verify(localMediaAppDBDataSource, never()).insertMedias(ArgumentMatchers.<Media>anyCollection());
+
+    }
+
+    @Test
+    public void getMediaFromSystemDBSucceed_HasNoNewMediaAndPreMediaAlreadyDeleted() {
+
+        getMediaFromAppDBSucceed();
+
+        ArgumentCaptor<MediaInSystemDBLoadCallback> localMediaSystemDBLoadCallback = ArgumentCaptor.forClass(MediaInSystemDBLoadCallback.class);
+
+        verify(localMediaSystemDBDataSource).getMedia(ArgumentMatchers.<String>anyCollection(), localMediaSystemDBLoadCallback.capture());
+
+        Media newMediaFromSystemDB = new Media();
+        newMediaFromSystemDB.setOriginalPhotoPath(testMediaOriginalPathFromSystemDB);
+
+        localMediaRepository.setCalcMediaDigestStrategy(calcMediaDigestStrategy);
+
+        when(calcMediaDigestStrategy.handleMedia(ArgumentMatchers.<Media>anyCollection())).thenReturn(Collections.<Media>emptyList());
+
+        localMediaSystemDBLoadCallback.getValue().onSucceed(Collections.<String>emptyList(), Collections.<Media>emptyList(), new OperationSuccess());
+
+        assertEquals(0, localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.size());
+
+        assertNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testMediaOriginalPath));
+
+        assertNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testMediaOriginalPathFromSystemDB));
+
+        verify(calcMediaDigestStrategy).handleMedia(ArgumentMatchers.<Media>anyCollection());
+
+        verify(localMediaAppDBDataSource, never()).insertMedias(ArgumentMatchers.<Media>anyCollection());
+
+    }
+
+    @Test
+    public void getMediaFromSystemDB_HasNewMediaAndPreMediaAlreadyDeleted() {
+
+        getMediaFromAppDBSucceed();
+
+        ArgumentCaptor<MediaInSystemDBLoadCallback> localMediaSystemDBLoadCallback = ArgumentCaptor.forClass(MediaInSystemDBLoadCallback.class);
+
+        verify(localMediaSystemDBDataSource).getMedia(ArgumentMatchers.<String>anyCollection(), localMediaSystemDBLoadCallback.capture());
+
+        Media newMediaFromSystemDB = new Media();
+        newMediaFromSystemDB.setOriginalPhotoPath(testMediaOriginalPathFromSystemDB);
+
+        localMediaRepository.setCalcMediaDigestStrategy(calcMediaDigestStrategy);
+
+        when(calcMediaDigestStrategy.handleMedia(ArgumentMatchers.<Media>anyCollection())).thenReturn(Collections.singleton(newMediaFromSystemDB));
+
+        localMediaSystemDBLoadCallback.getValue().onSucceed(Collections.<String>emptyList(), Collections.singletonList(newMediaFromSystemDB), new OperationSuccess());
+
+        assertEquals(1, localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.size());
+
+        assertNotNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testMediaOriginalPathFromSystemDB));
+
+        assertNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testMediaOriginalPath));
+
+        verify(calcMediaDigestStrategy).handleMedia(Collections.singletonList(newMediaFromSystemDB));
+
+        verify(localMediaAppDBDataSource).insertMedias(ArgumentMatchers.<Media>anyCollection());
+
+    }
+
+    @Test
+    public void getMediaFromSystemDB_HasNewMediaAndNoPreMediaDeleted() {
+
+        getMediaFromAppDBSucceed();
+
+        ArgumentCaptor<MediaInSystemDBLoadCallback> localMediaSystemDBLoadCallback = ArgumentCaptor.forClass(MediaInSystemDBLoadCallback.class);
+
+        verify(localMediaSystemDBDataSource).getMedia(ArgumentMatchers.<String>anyCollection(), localMediaSystemDBLoadCallback.capture());
+
+        Media newMediaFromSystemDB = new Media();
+        newMediaFromSystemDB.setOriginalPhotoPath(testMediaOriginalPathFromSystemDB);
+
+        localMediaRepository.setCalcMediaDigestStrategy(calcMediaDigestStrategy);
+
+        when(calcMediaDigestStrategy.handleMedia(ArgumentMatchers.<Media>anyCollection())).thenReturn(Collections.singleton(newMediaFromSystemDB));
+
+        localMediaSystemDBLoadCallback.getValue().onSucceed(Collections.singletonList(testMediaOriginalPath), Collections.singletonList(newMediaFromSystemDB), new OperationSuccess());
 
         assertEquals(2, localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.size());
 
         assertNotNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testMediaOriginalPathFromSystemDB));
 
-        verify(calcMediaDigestStrategy).handleMedia(ArgumentMatchers.<Media>anyCollection());
+        assertNotNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testMediaOriginalPath));
+
+        verify(calcMediaDigestStrategy).handleMedia(Collections.singletonList(newMediaFromSystemDB));
 
         verify(localMediaAppDBDataSource).insertMedias(ArgumentMatchers.<Media>anyCollection());
 
@@ -123,7 +222,7 @@ public class LocalMediaRepositoryTest {
 
         captor.getValue().onSucceed(Collections.<Media>emptyList(), new OperationSuccess());
 
-        verify(localMediaSystemDBDataSource, times(2)).getMedia(ArgumentMatchers.<String>anyCollection(), any(BaseLoadDataCallback.class));
+        verify(localMediaSystemDBDataSource, times(2)).getMedia(ArgumentMatchers.<String>anyCollection(), any(MediaInSystemDBLoadCallback.class));
 
     }
 
