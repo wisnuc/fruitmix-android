@@ -79,8 +79,6 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     @Override
     public void downloadFile(FileDownloadState fileDownloadState, BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        //TODO:add file state(downloading,pending,finishing.etc) and scheduler,use state mode and do function:1.log child node 2.log parent node 3.find node and return
-
         String encodedFileName = URLEncoder.encode(fileDownloadState.getFileName(), "UTF-8");
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(DOWNLOAD_FILE_PARAMETER + "/"

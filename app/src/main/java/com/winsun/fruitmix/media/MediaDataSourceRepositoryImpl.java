@@ -81,9 +81,14 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
     }
 
     @Override
-    public List<Media> getLocalMedia() {
+    public void getLocalMedia(BaseLoadDataCallback<Media> mediaBaseLoadDataCallback) {
 
-        return new ArrayList<>(localMedias);
+        final BaseLoadDataCallback<Media> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(mediaBaseLoadDataCallback);
+
+        if (getLocalMediaCallbackReturn)
+            runOnMainThreadCallback.onSucceed(localMedias, new OperationSuccess());
+        else
+            localMediaRepository.getMedia(runOnMainThreadCallback);
 
     }
 

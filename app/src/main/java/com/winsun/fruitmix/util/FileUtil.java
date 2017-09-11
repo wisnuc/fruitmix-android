@@ -66,13 +66,13 @@ public class FileUtil {
             long availableBlocks = statFs.getAvailableBlocksLong();
             long blockSize = statFs.getBlockSizeLong();
 
-            return availableBlocks * blockSize > 100 * 1024 * 1024;
+            return availableBlocks * blockSize > 0;
 
         } else {
-            int availableBlocks = statFs.getAvailableBlocks();
-            int blockSize = statFs.getBlockSize();
+            long availableBlocks = statFs.getAvailableBlocks();
+            long blockSize = statFs.getBlockSize();
 
-            return availableBlocks * blockSize > 100 * 1024 * 1024;
+            return availableBlocks * blockSize > 0;
         }
     }
 
@@ -116,7 +116,7 @@ public class FileUtil {
         return createFolder(getOldLocalPhotoThumbnailFolderPath() + File.separator + NO_MEDIA);
     }
 
-    public static boolean createAudioRecordFolder(){
+    public static boolean createAudioRecordFolder() {
         return createFolder(getAudioRecordFolderPath());
     }
 
@@ -150,7 +150,7 @@ public class FileUtil {
         return getDownloadFileStoreFolderPath() + ORIGINAL_PHOTO_FOLDER_NAME;
     }
 
-    public static String getAudioRecordFolderPath(){
+    public static String getAudioRecordFolderPath() {
         return getDownloadFileStoreFolderPath() + AUDIO_RECORD_FOLDER_NAME;
     }
 

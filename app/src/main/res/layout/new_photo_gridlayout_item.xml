@@ -5,9 +5,9 @@
 
         <variable
             name="showPhotoSelectImg"
-            type="android.databinding.ObservableBoolean"/>
+            type="android.databinding.ObservableBoolean" />
 
-        <import type="android.view.View"/>
+        <import type="android.view.View" />
 
     </data>
 
@@ -33,7 +33,7 @@
             android:layout_alignParentTop="true"
             android:layout_margin="10dp"
             android:src="@drawable/select"
-            android:visibility="@{showPhotoSelectImg?View.VISIBLE:View.GONE,default=gone}" />
+            android:visibility="@{showPhotoSelectImg?View.VISIBLE:View.INVISIBLE,default=invisible}" />
 
 
     </RelativeLayout>

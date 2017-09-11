@@ -64,7 +64,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
         return instance;
     }
 
-    public static void destroyInstance(){
+    public static void destroyInstance() {
         instance = null;
     }
 
@@ -153,7 +153,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     @Override
-    public ResponseBody downloadFile(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException,NetworkException{
+    public ResponseBody downloadFile(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException, NetworkException {
 
         Request.Builder builder = generateRequestBuilder(httpRequest);
 
@@ -166,13 +166,13 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
         if (checkResponseCode(code)) {
             return response.body();
         } else {
-            throw new NetworkException("download api return http error code",new HttpResponse(code,""));
+            throw new NetworkException("download api return http error code", new HttpResponse(code, ""));
         }
 
     }
 
     @Override
-    public HttpResponse uploadFile(HttpRequest httpRequest, LocalFile localFile) throws MalformedURLException, IOException, SocketTimeoutException{
+    public HttpResponse uploadFile(HttpRequest httpRequest, LocalFile localFile) throws MalformedURLException, IOException, SocketTimeoutException {
 
         try {
 
@@ -198,11 +198,15 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             Response response = executeRequest(request);
 
-            String str;
+            String str = "";
 
             int responseCode = response.code();
 
-            str = response.body().string();
+            if (checkResponseCode(handleResponse(response))) {
+
+                str = response.body().string();
+
+            }
 
             response.close();
 
@@ -244,6 +248,8 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             response.close();
 
+            Log.d(TAG, "remoteCallMethod: after read response body" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+
             return new HttpResponse(responseCode, str);
 
         } catch (IOException e) {
@@ -264,7 +270,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
         return builder;
     }
 
-    private int handleResponse(Response response){
+    private int handleResponse(Response response) {
 
         int code = response.code();
 
@@ -274,12 +280,10 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             Log.d(TAG, "handleResponse: " + code);
 
-            if (code == HttpURLConnection.HTTP_FORBIDDEN) {
-                try {
-                    Log.d(TAG, "handleResponse: 403 body: " + response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            try {
+                Log.d(TAG, "handleResponse body: " + response.body().string());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
             response.close();

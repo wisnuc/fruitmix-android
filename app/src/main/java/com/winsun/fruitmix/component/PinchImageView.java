@@ -881,7 +881,7 @@ public class PinchImageView extends AppCompatImageView {
             //如果之前是缩放模式,还需要触发一下缩放结束动画
             if (mPinchMode == PINCH_MODE_SCALE) {
                 scaleEnd();
-            }else {
+            } else {
                 if (userTouchListener != null)
                     userTouchListener.onTouch(this, event);
             }
@@ -1187,7 +1187,6 @@ public class PinchImageView extends AppCompatImageView {
     }
 
     private int getIntrinsicHeight(boolean useMatchViewHeight) {
-
         if (useMatchViewHeight)
             return (int) matchViewHeight;
         else

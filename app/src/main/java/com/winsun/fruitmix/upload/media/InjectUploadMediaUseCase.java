@@ -9,6 +9,8 @@ import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 
+import org.greenrobot.eventbus.EventBus;
+
 /**
  * Created by Administrator on 2017/8/18.
  */
@@ -20,7 +22,7 @@ public class InjectUploadMediaUseCase {
                 InjectStationFileRepository.provideStationFileRepository(context),
                 InjectLoggedInUser.provideLoggedInUserRepository(context), ThreadManagerImpl.getInstance(),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(context),
-                CheckMediaIsUploadStrategy.getInstance(), CheckMediaIsExistStrategy.getInstance(),Build.MODEL);
+                CheckMediaIsUploadStrategy.getInstance(), CheckMediaIsExistStrategy.getInstance(),Build.MODEL, EventBus.getDefault());
     }
 
 }

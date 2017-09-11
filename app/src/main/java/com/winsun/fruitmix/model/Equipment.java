@@ -28,6 +28,10 @@ public class Equipment {
         this.serviceName = serviceName;
         this.hosts = hosts;
         this.port = port;
+
+        model = "";
+        serialNumber = "";
+
     }
 
     public Equipment() {

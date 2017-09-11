@@ -57,6 +57,8 @@ public class EquipmentPresenter {
 
     private List<String> equipmentSerialNumbers = new ArrayList<>();
 
+    private List<String> equipmentIps = new ArrayList<>();
+
     private Equipment currentEquipment;
 
     private List<List<User>> mUserExpandableLists;
@@ -108,25 +110,10 @@ public class EquipmentPresenter {
 
                     EquipmentViewPagerAdapter adapter = weakReference.get().equipmentViewPagerAdapter;
 
-                    if (loadingViewModel.showLoading.get()) {
-                        loadingViewModel.showLoading.set(false);
-                    }
+                    if (!hasFindEquipment)
+                        hasFindEquipment = true;
 
-                    if (!hasForceRefresh) {
-                        hasForceRefresh = true;
-
-                        adapter.setForceRefresh();
-                    }
-
-                    equipmentSearchViewModel.showEquipmentViewPager.set(true);
-                    equipmentSearchViewModel.showEquipmentViewPagerIndicator.set(true);
-                    equipmentSearchViewModel.showEquipmentUsers.set(true);
-
-                    adapter.setEquipments(mUserLoadedEquipments);
-
-                    adapter.notifyDataSetChanged();
-
-                    refreshEquipment(0);
+                    handleFindEquipment(adapter);
 
                     break;
 
@@ -152,6 +139,10 @@ public class EquipmentPresenter {
 
                         equipmentViewPagerAdapter.setEquipments(Collections.singletonList(Equipment.NULL));
                         equipmentViewPagerAdapter.notifyDataSetChanged();
+                    } else {
+
+                        handleFindEquipment(weakReference.get().equipmentViewPagerAdapter);
+
                     }
 
                     break;
@@ -166,6 +157,10 @@ public class EquipmentPresenter {
 
                         loadingViewModel.showLoading.set(true);
 
+                    } else {
+
+                        handleFindEquipment(weakReference.get().equipmentViewPagerAdapter);
+
                     }
 
                     mHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT, DISCOVERY_TIMEOUT_TIME);
@@ -174,6 +169,28 @@ public class EquipmentPresenter {
 
                 default:
             }
+        }
+
+        private void handleFindEquipment(EquipmentViewPagerAdapter adapter) {
+            if (loadingViewModel.showLoading.get()) {
+                loadingViewModel.showLoading.set(false);
+            }
+
+            if (!hasForceRefresh) {
+                hasForceRefresh = true;
+
+                adapter.setForceRefresh();
+            }
+
+            equipmentSearchViewModel.showEquipmentViewPager.set(true);
+            equipmentSearchViewModel.showEquipmentViewPagerIndicator.set(true);
+            equipmentSearchViewModel.showEquipmentUsers.set(true);
+
+            adapter.setEquipments(mUserLoadedEquipments);
+
+            adapter.notifyDataSetChanged();
+
+            refreshEquipment(0);
         }
     }
 
@@ -288,8 +305,6 @@ public class EquipmentPresenter {
 
                 getEquipmentInfo(equipment);
 
-                hasFindEquipment = true;
-
             }
         });
 
@@ -304,18 +319,28 @@ public class EquipmentPresenter {
 
     private void getEquipmentInfo(final Equipment equipment) {
 
-        if (equipmentSerialNumbers.contains(equipment.getSerialNumber())) {
-            return;
-        } else {
-            equipmentSerialNumbers.add(equipment.getSerialNumber());
+        if (equipment.getSerialNumber().length() != 0) {
+
+            if (equipmentSerialNumbers.contains(equipment.getSerialNumber())) {
+                return;
+            } else {
+                equipmentSerialNumbers.add(equipment.getSerialNumber());
+            }
+
         }
+
+        if (equipmentIps.contains(equipment.getHosts().get(0)))
+            return;
+        else
+            equipmentIps.add(equipment.getHosts().get(0));
 
         synchronized (mUserLoadedEquipments) {
 
             for (Equipment loadedEquipment : mUserLoadedEquipments) {
                 if (loadedEquipment.getSerialNumber().equals(equipment.getSerialNumber())) {
                     return;
-                }
+                } else if (loadedEquipment.getHosts().contains(equipment.getHosts().get(0)))
+                    return;
             }
 
             getEquipmentInfoInThread(equipment);
@@ -391,6 +416,8 @@ public class EquipmentPresenter {
 
             for (Equipment userLoadedEquipment : mUserLoadedEquipments) {
                 if (userLoadedEquipment.getSerialNumber().equals(equipment.getSerialNumber()))
+                    return;
+                else if (userLoadedEquipment.getHosts().contains(equipment.getHosts().get(0)))
                     return;
             }
 

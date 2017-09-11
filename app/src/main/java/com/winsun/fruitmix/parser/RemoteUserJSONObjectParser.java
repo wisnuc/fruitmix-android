@@ -32,7 +32,7 @@ public class RemoteUserJSONObjectParser {
         user = new User();
         uuid = itemRaw.optString("uuid");
         user.setUuid(uuid);
-        user.setUserName(itemRaw.optString("username"));
+        user.setUserName(itemRaw.optString("username").trim());
 
         String avatar = itemRaw.optString("avatar");
         if (avatar.equals("null")) {
@@ -41,7 +41,7 @@ public class RemoteUserJSONObjectParser {
             user.setAvatar(avatar);
         }
 
-        String email = itemRaw.optString("email");
+        String email = itemRaw.optString("email").trim();
         if (email.equals("null")) {
             user.setEmail("");
         } else {

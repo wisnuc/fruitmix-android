@@ -977,7 +977,23 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 int action = event.getAction() & MotionEvent.ACTION_MASK;
 
-                if (action == MotionEvent.ACTION_DOWN) {
+                if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+
+                    Log.d(TAG, "handleTouchEvent: action up lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
+
+                    if (lastY - y > Util.dip2px(mContext, 60)) {
+
+                        finishActivity();
+
+                    } else {
+
+                        view.setTranslationY(0);
+
+                    }
+
+                } else if (action == MotionEvent.ACTION_DOWN) {
+
+                    Log.d(TAG, "handleTouchEvent: action down lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
 
                     x = event.getRawX();
                     y = event.getRawY();
@@ -989,22 +1005,10 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                     lastX = event.getRawX();
                     lastY = event.getRawY();
 
-                    //Log.i(TAG, "handleTouchEvent: action move lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
+                    Log.d(TAG, "handleTouchEvent: action move lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
 
                     if (lastY > y) {
                         view.setTranslationY(lastY - y);
-                    }
-
-                } else if (action == MotionEvent.ACTION_UP) {
-
-                    if (lastY - y > Util.dip2px(mContext, 60)) {
-
-                        finishActivity();
-
-                    } else {
-
-                        view.setTranslationY(0);
-
                     }
 
                 }

@@ -2,8 +2,10 @@ package com.winsun.fruitmix.generate.media;
 
 import android.util.Log;
 
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.FileUtil;
@@ -48,19 +50,30 @@ public class GenerateMediaThumbUseCase {
 
         Log.d(TAG, "startGenerateMediaThumb: ");
 
-        List<Media> data = getMedia();
+        getMedia(new BaseLoadDataCallback<Media>() {
+            @Override
+            public void onSucceed(List<Media> data, OperationResult operationResult) {
 
-        List<Media> needOperateMedias = new ArrayList<>();
+                List<Media> needOperateMedias = new ArrayList<>();
 
-        for (Media media : data) {
-            if (media.isLocal() && media.getThumb().isEmpty()) {
-                needOperateMedias.add(media);
+                for (Media media : data) {
+                    if (media.isLocal() && media.getThumb().isEmpty()) {
+                        needOperateMedias.add(media);
+                    }
+                }
+
+                Log.d(TAG, "onSucceed: needOperateMedias size" + needOperateMedias.size());
+
+                startGenerateMediaThumbInThread(needOperateMedias);
+
+
             }
-        }
 
-        Log.d(TAG, "onSucceed: needOperateMedias size" + needOperateMedias.size());
+            @Override
+            public void onFail(OperationResult operationResult) {
 
-        startGenerateMediaThumbInThread(needOperateMedias);
+            }
+        });
 
 
     }
@@ -69,25 +82,35 @@ public class GenerateMediaThumbUseCase {
 
         Log.d(TAG, "startGenerateMediaMiniThumb: ");
 
-        List<Media> data = getMedia();
+        getMedia(new BaseLoadDataCallback<Media>() {
+            @Override
+            public void onSucceed(List<Media> data, OperationResult operationResult) {
 
-        List<Media> needOperateMedias = new ArrayList<>();
+                List<Media> needOperateMedias = new ArrayList<>();
 
-        for (Media media : data) {
-            if (media.isLocal() && media.getMiniThumbPath().isEmpty()) {
-                needOperateMedias.add(media);
+                for (Media media : data) {
+                    if (media.isLocal() && media.getMiniThumbPath().isEmpty()) {
+                        needOperateMedias.add(media);
+                    }
+                }
+
+                Log.d(TAG, "onSucceed: needOperateMiniMedias size" + needOperateMedias.size());
+
+                startGenerateMediaMiniThumbInThread(needOperateMedias);
+
             }
-        }
 
-        Log.d(TAG, "onSucceed: needOperateMiniMedias size" + needOperateMedias.size());
+            @Override
+            public void onFail(OperationResult operationResult) {
 
-        startGenerateMediaMiniThumbInThread(needOperateMedias);
+            }
+        });
 
     }
 
-    private List<Media> getMedia() {
+    private void getMedia(BaseLoadDataCallback<Media> callback) {
 
-        return mediaDataSourceRepository.getLocalMedia();
+        mediaDataSourceRepository.getLocalMedia(callback);
 
     }
 

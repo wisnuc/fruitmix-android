@@ -443,6 +443,8 @@ public class FilePresenter implements OnViewSelectListener {
 
                 if (mCurrentDownloadFileCommand != null) {
 
+                    mCurrentDownloadFileCommand.unExecute();
+
                     mCurrentDownloadFileCommand = null;
 
                     currentDownloadFileProgressDialog.dismiss();
@@ -470,6 +472,8 @@ public class FilePresenter implements OnViewSelectListener {
 
                 if (mCurrentDownloadFileCommand != null) {
 
+                    mCurrentDownloadFileCommand.unExecute();
+
                     mCurrentDownloadFileCommand = null;
 
                     currentDownloadFileProgressDialog.dismiss();
@@ -487,7 +491,6 @@ public class FilePresenter implements OnViewSelectListener {
                     Toast.makeText(activity, activity.getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
 
                 }
-
 
                 break;
         }
@@ -674,8 +677,6 @@ public class FilePresenter implements OnViewSelectListener {
 
         mCurrentDownloadFileCommand = new DownloadFileCommand(fileDownloadManager, selectedFiles.get(0), stationFileRepository, currentFolderUUID, rootUUID);
 
-        mCurrentDownloadFileCommand.execute();
-
         currentDownloadFileProgressDialog = new ProgressDialog(activity);
 
         currentDownloadFileProgressDialog.setTitle(activity.getString(R.string.downloading));
@@ -701,6 +702,8 @@ public class FilePresenter implements OnViewSelectListener {
         currentDownloadFileProgressDialog.setCancelable(false);
 
         currentDownloadFileProgressDialog.show();
+
+        mCurrentDownloadFileCommand.execute();
     }
 
     public Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {

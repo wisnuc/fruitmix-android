@@ -80,6 +80,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         setBackgroundColor(R.color.equipment_ui_blue);
 
+        binding.addIpBtn.setOnClickListener(this);
+
         LoadingViewModel loadingViewModel = new LoadingViewModel();
 
         binding.setLoadingViewModel(loadingViewModel);
@@ -233,7 +235,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.fab:
+            case R.id.add_ip_btn:
                 Intent intent = new Intent(mContext, CreateNewEquipmentActivity.class);
                 startActivityForResult(intent, Util.KEY_MANUAL_INPUT_IP_REQUEST_CODE);
                 break;

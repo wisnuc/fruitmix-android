@@ -23,6 +23,7 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -53,6 +54,7 @@ import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.util.Util;
@@ -142,6 +144,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     private MediaDataSourceRepository mediaDataSourceRepository;
 
     private ThreadManager threadManager;
+
+    private boolean hasCallStartUpload = false;
 
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
@@ -306,7 +310,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                //TODO: consider fail logic
+                Log.d(TAG, "onFail: refresh view force");
 
             }
         });
@@ -315,6 +319,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     @Override
     public void refreshView() {
+
+        if (mSelectMode)
+            return;
 
         getMediaInThread();
 
@@ -349,6 +356,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             public void onSucceed(final List<Media> data, final OperationResult operationResult) {
 
                 Log.d(TAG, "onSucceed: get media");
+
+                if (!hasCallStartUpload) {
+
+                    hasCallStartUpload = true;
+
+                    InjectUploadMediaUseCase.provideUploadMediaUseCase(containerActivity).startUploadMedia();
+
+                }
 
                 handleGetMediaSucceed(data, operationResult);
 
@@ -1131,6 +1146,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         RelativeLayout mImageLayout;
 
+        ImageView photoSelectImg;
+
         PhotoHolder(ViewDataBinding viewDataBinding) {
             super(viewDataBinding);
 
@@ -1139,6 +1156,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             mPhotoIv = binding.photoIv;
 
             mImageLayout = binding.photoItemLayout;
+
+            photoSelectImg = binding.photoSelectImg;
 
         }
 
@@ -1186,9 +1205,23 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             mPhotoIv.setImageUrl(imageUrl, mImageLoader);
 
-            final List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());
+            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());
 
-            final int mediaInListPosition = getPosition(mediaList, currentMedia);
+            int temporaryPosition = 0;
+
+            if (mediaList == null) {
+
+                Log.d(TAG, "refreshView: medialist is null,currentMedia getDate:" + currentMedia.getDate());
+
+                Log.d(TAG, "refreshView: medialist is null,map key is date,key:" + mMapKeyIsDateValueIsPhotoList.keySet());
+
+            } else {
+
+                temporaryPosition = getPosition(mediaList, currentMedia);
+
+            }
+
+            final int mediaInListPosition = temporaryPosition;
 
             setPhotoItemMargin(mediaInListPosition);
 
@@ -1216,6 +1249,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 }
 
             }
+
+            getViewDataBinding().setVariable(BR.showPhotoSelectImg, showPhotoSelectImg);
+            getViewDataBinding().executePendingBindings();
 
             mImageLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1314,9 +1350,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                     return true;
                 }
             });
-
-            getViewDataBinding().setVariable(BR.showPhotoSelectImg, showPhotoSelectImg);
-            getViewDataBinding().executePendingBindings();
 
         }
 

@@ -8,14 +8,14 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Administrator on 2017/6/22.
@@ -28,8 +28,6 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
     private List<String> remoteUserNames;
 
     private UserDataRepository mUserDataRepository;
-
-    private ThreadManager threadManagerImpl;
 
     public CreateUserPresenterImpl(CreateUserView createUserView, UserDataRepository userDataRepository) {
 
@@ -75,6 +73,21 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
 
         final String userName = createUserViewModel.getUserName();
 
+        if (checkUserNameFirstWordIsIllegal(userName)) {
+
+            createUserViewModel.userNameErrorEnable.set(true);
+            createUserViewModel.userNameError.set(context.getString(R.string.username_has_illegal_character));
+
+            return;
+        }
+
+        if (checkUserNameIsIllegal(userName)) {
+            createUserViewModel.userNameErrorEnable.set(true);
+            createUserViewModel.userNameError.set(context.getString(R.string.username_has_illegal_character));
+
+            return;
+        }
+
         if (remoteUserNames.contains(userName)) {
 
             createUserViewModel.userNameErrorEnable.set(true);
@@ -96,6 +109,24 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
         final String password = createUserViewModel.getUserPassword();
 
         String confirmPassword = createUserViewModel.getUserConfirmPassword();
+
+
+        if (checkPasswordFirstWordIsIllegal(password)) {
+
+            createUserViewModel.userPasswordErrorEnable.set(true);
+            createUserViewModel.userPasswordError.set(context.getString(R.string.password_has_illegal_character));
+
+            return;
+        }
+
+        if (checkPasswordIsIllegal(password)) {
+
+            createUserViewModel.userPasswordErrorEnable.set(true);
+            createUserViewModel.userPasswordError.set(context.getString(R.string.password_has_illegal_character));
+
+            return;
+
+        }
 
         if (password.isEmpty()) {
 
@@ -124,6 +155,42 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
 
         insertUserInThread(context, userName, password);
 
+    }
+
+    private boolean checkUserNameFirstWordIsIllegal(String userName) {
+        Pattern pattern = Pattern.compile("^[-.]");
+
+        Matcher matcher = pattern.matcher(userName);
+
+        return matcher.lookingAt();
+
+    }
+
+
+    private boolean checkUserNameIsIllegal(String userName) {
+
+        Pattern pattern = Pattern.compile("[a-zA-Z0-9]+|[!()\\-.?[\\\\]_`~@#\"']+|[\\u4E00-\\u9FFF\\u3400-\\u4dbf\\uf900-\\ufaff\\u3040-\\u309f\\uac00-\\ud7af]");
+
+        Matcher matcher = pattern.matcher(userName);
+
+        return matcher.replaceAll("").length() != 0;
+
+    }
+
+    private boolean checkPasswordFirstWordIsIllegal(String password) {
+        Pattern pattern = Pattern.compile("^[-.]");
+
+        Matcher matcher = pattern.matcher(password);
+
+        return matcher.lookingAt();
+    }
+
+    private boolean checkPasswordIsIllegal(String password) {
+        Pattern pattern = Pattern.compile("[a-zA-Z0-9]+|[!()\\-.?[\\\\]_`~@#\"']+");
+
+        Matcher matcher = pattern.matcher(password);
+
+        return matcher.replaceAll("").length() != 0;
     }
 
     private void insertUserInThread(final Context context, String userName, String password) {

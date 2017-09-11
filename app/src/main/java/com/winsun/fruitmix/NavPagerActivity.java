@@ -27,13 +27,10 @@ import android.util.Log;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
-import com.winsun.fruitmix.databinding.LeftDrawerHeadBinding;
 import com.winsun.fruitmix.equipment.data.InjectEquipment;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
@@ -62,11 +59,10 @@ import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
-import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
+import com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.user.manage.UserManageActivity;
@@ -81,14 +77,21 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 
+import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState.CREATE_FOLDER_FAIL;
+import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState.GET_FOLDER_FAIL;
+import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState.GET_MEDIA_COUNT_FAIL;
+import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState.START_GET_UPLOAD_MEDIA_COUNT;
+import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState.UPLOAD_MEDIA_COUNT_CHANGED;
+import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState.UPLOAD_MEDIA_FAIL;
+
 public class NavPagerActivity extends BaseActivity
-        implements OnMainFragmentInteractionListener, MainPageView {
+        implements OnMainFragmentInteractionListener, MainPageView ,UploadMediaCountChangeListener{
 
     public static final String TAG = NavPagerActivity.class.getSimpleName();
 
-    private DrawerLayout mDrawerLayout;
+    DrawerLayout mDrawerLayout;
 
-    private RecyclerView mNavigationMenuRecyclerView;
+    RecyclerView mNavigationMenuRecyclerView;
 
     @Override
     public void gotoUserManageActivity() {
@@ -335,91 +338,112 @@ public class NavPagerActivity extends BaseActivity
 
         refreshUserInNavigationView();
 
-        uploadMediaCountChangeListener = new UploadMediaCountChangeListener() {
-
-            @Override
-            public void onStartGetUploadMediaCount() {
-
-                navPagerViewModel.showLoadingUploadProgress.set(true);
-
-                navPagerViewModel.showConnectServerFailed.set(false);
-                navPagerViewModel.showUploadProgress.set(false);
-
-            }
-
-            @Override
-            public void onUploadMediaCountChanged(int uploadedMediaCount, int totalCount) {
-
-                navPagerViewModel.showLoadingUploadProgress.set(false);
-                navPagerViewModel.showConnectServerFailed.set(false);
-
-                navPagerViewModel.showUploadProgress.set(true);
-
-                mAlreadyUploadMediaCount = uploadedMediaCount;
-                mTotalLocalMediaCount = totalCount;
-
-                handleUploadMediaCount();
-
-                binding.setViewModel(navPagerViewModel);
-
-            }
-
-            @Override
-            public void onGetFolderFail(int httpErrorCode) {
-
-                navPagerViewModel.showLoadingUploadProgress.set(false);
-                navPagerViewModel.showConnectServerFailed.set(true);
-
-                navPagerViewModel.showUploadProgress.set(false);
-
-                if (httpErrorCode != -1)
-                    showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_FOLDER + httpErrorCode);
-
-                binding.setViewModel(navPagerViewModel);
-            }
-
-            @Override
-            public void onCreateFolderFail(int httpErrorCode) {
-
-                navPagerViewModel.showLoadingUploadProgress.set(false);
-                navPagerViewModel.showConnectServerFailed.set(true);
-
-                navPagerViewModel.showUploadProgress.set(false);
-
-                if (httpErrorCode != -1)
-                    showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_CREATE_FOLDER + httpErrorCode);
-
-                binding.setViewModel(navPagerViewModel);
-            }
-
-            @Override
-            public void onUploadMediaFail(int httpErrorCode) {
-
-                if (httpErrorCode != -1)
-                    showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_UPLOAD_MEDIA + httpErrorCode);
-
-                binding.setViewModel(navPagerViewModel);
-            }
-
-            @Override
-            public void onGetUploadMediaCountFail(int httpErrorCode) {
-
-                navPagerViewModel.showLoadingUploadProgress.set(false);
-                navPagerViewModel.showConnectServerFailed.set(true);
-
-                navPagerViewModel.showUploadProgress.set(false);
-
-                if (httpErrorCode != -1)
-                    showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_UPLOADED_MEDIA + httpErrorCode);
-
-                binding.setViewModel(navPagerViewModel);
-            }
-        };
-
         uploadMediaUseCase = InjectUploadMediaUseCase.provideUploadMediaUseCase(this);
 
-        uploadMediaUseCase.registerUploadMediaCountChangeListener(uploadMediaCountChangeListener);
+        uploadMediaUseCase.registerUploadMediaCountChangeListener(this);
 
+    }
+
+    @Override
+    public void onStartGetUploadMediaCount() {
+
+        handleUploadStateChangeToStartGetUploadMediaCount();
+
+    }
+
+    @Override
+    public void onUploadMediaCountChanged(int uploadedMediaCount, int totalCount) {
+
+        handleUploadStateChangeToUploadMediaCountChanged(uploadedMediaCount, totalCount);
+
+    }
+
+    @Override
+    public void onGetFolderFail(int httpErrorCode) {
+
+        handleUploadStateChangeToGetFolderFail(httpErrorCode);
+    }
+
+    @Override
+    public void onCreateFolderFail(int httpErrorCode) {
+
+        handleUploadStateChangeToCreateFolderFail(httpErrorCode);
+    }
+
+    @Override
+    public void onUploadMediaFail(int httpErrorCode) {
+
+        handleUploadStateChangeToUploadMediaFail(httpErrorCode);
+    }
+
+    @Override
+    public void onGetUploadMediaCountFail(int httpErrorCode) {
+
+        handleUploadStateChangeToGetUploadMediaCountFail(httpErrorCode);
+    }
+
+    private void handleUploadStateChangeToGetUploadMediaCountFail(int httpErrorCode) {
+        navPagerViewModel.showLoadingUploadProgress.set(false);
+        navPagerViewModel.showConnectServerFailed.set(true);
+
+        navPagerViewModel.showUploadProgress.set(false);
+
+//        if (httpErrorCode != -1)
+//            showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_UPLOADED_MEDIA + httpErrorCode);
+
+        binding.setViewModel(navPagerViewModel);
+    }
+
+    private void handleUploadStateChangeToUploadMediaFail(int httpErrorCode) {
+//        if (httpErrorCode != -1)
+//            showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_UPLOAD_MEDIA + httpErrorCode);
+
+        binding.setViewModel(navPagerViewModel);
+    }
+
+    private void handleUploadStateChangeToCreateFolderFail(int httpErrorCode) {
+        navPagerViewModel.showLoadingUploadProgress.set(false);
+        navPagerViewModel.showConnectServerFailed.set(true);
+
+        navPagerViewModel.showUploadProgress.set(false);
+
+//        if (httpErrorCode != -1)
+//            showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_CREATE_FOLDER + httpErrorCode);
+
+        binding.setViewModel(navPagerViewModel);
+    }
+
+    private void handleUploadStateChangeToGetFolderFail(int httpErrorCode) {
+        navPagerViewModel.showLoadingUploadProgress.set(false);
+        navPagerViewModel.showConnectServerFailed.set(true);
+
+        navPagerViewModel.showUploadProgress.set(false);
+
+//        if (httpErrorCode != -1)
+//            showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_FOLDER + httpErrorCode);
+
+        binding.setViewModel(navPagerViewModel);
+    }
+
+    private void handleUploadStateChangeToUploadMediaCountChanged(int uploadedMediaCount, int totalCount) {
+        navPagerViewModel.showLoadingUploadProgress.set(false);
+        navPagerViewModel.showConnectServerFailed.set(false);
+
+        navPagerViewModel.showUploadProgress.set(true);
+
+        mAlreadyUploadMediaCount = uploadedMediaCount;
+        mTotalLocalMediaCount = totalCount;
+
+        handleUploadMediaCount();
+
+        binding.setViewModel(navPagerViewModel);
+    }
+
+    private void handleUploadStateChangeToStartGetUploadMediaCount() {
+        navPagerViewModel.showLoadingUploadProgress.set(true);
+
+        navPagerViewModel.showConnectServerFailed.set(false);
+        navPagerViewModel.showUploadProgress.set(false);
     }
 
     private void calcAlreadyUploadMediaCount(final List<Media> medias) {
@@ -635,7 +659,7 @@ public class NavPagerActivity extends BaseActivity
 
         InjectHttp.provideImageGifLoaderIntance().getImageLoader(mContext).cancelAllPreLoadMedia();
 
-        uploadMediaUseCase.unregisterUploadMediaCountChangeListener(uploadMediaCountChangeListener);
+        uploadMediaUseCase.unregisterUploadMediaCountChangeListener(this);
 
         mContext = null;
 
@@ -690,6 +714,41 @@ public class NavPagerActivity extends BaseActivity
         }
 
     }
+
+    @Subscribe(threadMode = ThreadMode.MAIN,sticky = true)
+    public void handleUploadMediaStateChanged(UploadMediaState uploadMediaState) {
+
+        EventBus.getDefault().removeStickyEvent(uploadMediaState);
+
+        switch (uploadMediaState.getType()) {
+
+            case START_GET_UPLOAD_MEDIA_COUNT:
+                handleUploadStateChangeToStartGetUploadMediaCount();
+                break;
+            case GET_FOLDER_FAIL:
+                handleUploadStateChangeToGetFolderFail(uploadMediaState.getErrorCode());
+                break;
+            case CREATE_FOLDER_FAIL:
+                handleUploadStateChangeToCreateFolderFail(uploadMediaState.getErrorCode());
+                break;
+            case GET_MEDIA_COUNT_FAIL:
+                handleUploadStateChangeToGetUploadMediaCountFail(uploadMediaState.getErrorCode());
+                break;
+            case UPLOAD_MEDIA_FAIL:
+                handleUploadStateChangeToUploadMediaFail(uploadMediaState.getErrorCode());
+
+                break;
+            case UPLOAD_MEDIA_COUNT_CHANGED:
+                handleUploadStateChangeToUploadMediaCountChanged(uploadMediaUseCase.getAlreadyUploadedMediaCount(), uploadMediaUseCase.getLocalMedias().size());
+
+                break;
+            default:
+                Log.d(TAG, "handleUploadMediaStateChanged: enter default upload state,something wrong");
+
+        }
+
+    }
+
 
     private void refreshUserInNavigationView() {
 

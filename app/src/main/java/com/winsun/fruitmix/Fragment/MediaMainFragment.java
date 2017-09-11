@@ -2,7 +2,6 @@ package com.winsun.fruitmix.fragment;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -575,6 +574,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
 
+        EventBus.getDefault().removeStickyEvent(downloadStateChangedEvent);
+
         if (!mIsResume)
             return;
 
@@ -1118,7 +1119,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         new AnimatorBuilder(getContext(), R.animator.fab_remote_restore, fab).startAnimator();
 
         if (systemShareBtn.getVisibility() == View.VISIBLE) {
-            new AnimatorBuilder(getContext(), R.animator.system_share_btn_restore, systemShareBtn).addAdapter(new AnimatorListenerAdapter() {
+            new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation_restore, systemShareBtn).addAdapter(new AnimatorListenerAdapter() {
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -1128,20 +1129,38 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
                 }
             }).startAnimator();
+
+            if (downloadFileBtn.getVisibility() == View.VISIBLE) {
+
+                new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation_restore, downloadFileBtn).addAdapter(new AnimatorListenerAdapter() {
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+
+                        downloadFileBtn.setVisibility(View.GONE);
+
+                    }
+                }).startAnimator();
+            }
+        } else {
+
+            if (downloadFileBtn.getVisibility() == View.VISIBLE) {
+
+                new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation_restore, downloadFileBtn).addAdapter(new AnimatorListenerAdapter() {
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+
+                        downloadFileBtn.setVisibility(View.GONE);
+
+                    }
+                }).startAnimator();
+            }
+
         }
 
-        if (downloadFileBtn.getVisibility() == View.VISIBLE) {
-            new AnimatorBuilder(getContext(), R.animator.download_file_btn_translation_restore, downloadFileBtn).addAdapter(new AnimatorListenerAdapter() {
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-
-                    downloadFileBtn.setVisibility(View.GONE);
-
-                }
-            }).startAnimator();
-        }
 
     }
 
@@ -1155,17 +1174,27 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
             systemShareBtn.setVisibility(View.VISIBLE);
 
-            new AnimatorBuilder(getContext(), R.animator.system_share_btn_translation, systemShareBtn).startAnimator();
+            new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, systemShareBtn).startAnimator();
 
         } else {
 
-            systemShareBtn.setVisibility(View.VISIBLE);
+            systemShareBtn.setVisibility(View.GONE);
 
             downloadFileBtn.setVisibility(View.VISIBLE);
 
-            new AnimatorBuilder(getContext(), R.animator.system_share_btn_translation, systemShareBtn).startAnimator();
+            if (systemShareBtn.getVisibility() == View.VISIBLE) {
 
-            new AnimatorBuilder(getContext(), R.animator.download_file_btn_translation, downloadFileBtn).startAnimator();
+                new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, systemShareBtn).startAnimator();
+
+                if (downloadFileBtn.getVisibility() == View.VISIBLE)
+                    new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation, downloadFileBtn).startAnimator();
+
+            } else {
+
+                if (downloadFileBtn.getVisibility() == View.VISIBLE)
+                    new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, downloadFileBtn).startAnimator();
+
+            }
 
         }
 

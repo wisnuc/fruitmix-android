@@ -23,6 +23,7 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 
+import org.greenrobot.eventbus.EventBus;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +36,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -69,6 +71,9 @@ public class UploadMediaUseCaseTest {
     @Mock
     private CheckMediaIsExistStrategy checkMediaIsExistStrategy;
 
+    @Mock
+    private EventBus eventBus;
+
     private ThreadManager threadManager;
 
     private String testUserUUID;
@@ -92,7 +97,7 @@ public class UploadMediaUseCaseTest {
         threadManager = new MockThreadManager();
 
         uploadMediaUseCase = UploadMediaUseCase.getInstance(mediaDataSourceRepository, stationFileRepository,
-                loggedInUserDataSource, threadManager, systemSettingDataSource, checkMediaIsUploadStrategy, checkMediaIsExistStrategy, testUploadFolderName);
+                loggedInUserDataSource, threadManager, systemSettingDataSource, checkMediaIsUploadStrategy, checkMediaIsExistStrategy, testUploadFolderName,eventBus);
 
     }
 
@@ -156,11 +161,15 @@ public class UploadMediaUseCaseTest {
 
         when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
 
-        when(mediaDataSourceRepository.getLocalMedia()).thenReturn(Collections.<Media>emptyList());
-
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
 
         uploadMediaUseCase.startUploadMedia();
+
+        ArgumentCaptor<BaseLoadDataCallback<Media>> getLocalMediaCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(mediaDataSourceRepository).getLocalMedia(getLocalMediaCaptor.capture());
+
+        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(),new OperationSuccess());
 
         assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
         assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
@@ -238,11 +247,15 @@ public class UploadMediaUseCaseTest {
 
         when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
 
-        when(mediaDataSourceRepository.getLocalMedia()).thenReturn(Collections.<Media>emptyList());
-
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
 
         uploadMediaUseCase.startUploadMedia();
+
+        ArgumentCaptor<BaseLoadDataCallback<Media>> getLocalMediaCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(mediaDataSourceRepository).getLocalMedia(getLocalMediaCaptor.capture());
+
+        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(),new OperationSuccess());
 
         assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
         assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
@@ -309,13 +322,11 @@ public class UploadMediaUseCaseTest {
 
         Media media = createMedia();
 
-        when(mediaDataSourceRepository.getLocalMedia()).thenReturn(Collections.singletonList(media));
-
         when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
 
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false).thenReturn(false).thenReturn(false).thenReturn(true);
 
-        uploadWhenUploadParentFolderExistAndUploadFolderExist();
+        uploadWhenUploadParentFolderExistAndUploadFolderExist(Collections.singletonList(media));
 
         ArgumentCaptor<BaseOperateDataCallback<Boolean>> captor = ArgumentCaptor.forClass(BaseOperateDataCallback.class);
 
@@ -331,9 +342,15 @@ public class UploadMediaUseCaseTest {
 
     }
 
-    private void uploadWhenUploadParentFolderExistAndUploadFolderExist() {
+    private void uploadWhenUploadParentFolderExistAndUploadFolderExist(List<Media> medias) {
 
         uploadMediaUseCase.startUploadMedia();
+
+        ArgumentCaptor<BaseLoadDataCallback<Media>> getLocalMediaCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(mediaDataSourceRepository).getLocalMedia(getLocalMediaCaptor.capture());
+
+        getLocalMediaCaptor.getValue().onSucceed(medias,new OperationSuccess());
 
         assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
         assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
@@ -395,9 +412,7 @@ public class UploadMediaUseCaseTest {
 
         Media media = createMedia();
 
-        when(mediaDataSourceRepository.getLocalMedia()).thenReturn(Collections.singletonList(media));
-
-        uploadWhenUploadParentFolderExistAndUploadFolderExist();
+        uploadWhenUploadParentFolderExistAndUploadFolderExist(Collections.singletonList(media));
 
         ArgumentCaptor<BaseOperateDataCallback<Boolean>> captor = ArgumentCaptor.forClass(BaseOperateDataCallback.class);
 
@@ -428,14 +443,18 @@ public class UploadMediaUseCaseTest {
 
         when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
 
-        when(mediaDataSourceRepository.getLocalMedia()).thenReturn(Collections.<Media>emptyList());
-
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
 
         uploadMediaUseCase.uploadParentFolderUUID = testUploadParentFolderUUID;
         uploadMediaUseCase.uploadFolderUUID = testUploadFolderUUID;
 
         uploadMediaUseCase.startUploadMedia();
+
+        ArgumentCaptor<BaseLoadDataCallback<Media>> getLocalMediaCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(mediaDataSourceRepository).getLocalMedia(getLocalMediaCaptor.capture());
+
+        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(),new OperationSuccess());
 
         verify(stationFileRepository, never()).getFile(anyString(), anyString(), any(BaseLoadDataCallback.class));
 
@@ -456,27 +475,31 @@ public class UploadMediaUseCaseTest {
 
         Media media = createMedia();
 
-        when(mediaDataSourceRepository.getLocalMedia()).thenReturn(Collections.singletonList(media));
-
         when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(false);
 
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
 
-        uploadWhenUploadParentFolderExistAndUploadFolderExist();
+        uploadWhenUploadParentFolderExistAndUploadFolderExist(Collections.singletonList(media));
 
         verify(stationFileRepository, never()).uploadFile(any(LocalFile.class), anyString(), anyString(), any(BaseOperateDataCallback.class));
 
         when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
 
-        secondCallUploadWhenUploadParentFolderExistAndUploadFolderExist();
+        secondCallUploadWhenUploadParentFolderExistAndUploadFolderExist(Collections.singletonList(media));
 
         verify(stationFileRepository).uploadFile(any(LocalFile.class), anyString(), anyString(), any(BaseOperateDataCallback.class));
 
     }
 
-    private void secondCallUploadWhenUploadParentFolderExistAndUploadFolderExist() {
+    private void secondCallUploadWhenUploadParentFolderExistAndUploadFolderExist(List<Media> medias) {
 
         uploadMediaUseCase.startUploadMedia();
+
+        ArgumentCaptor<BaseLoadDataCallback<Media>> getLocalMediaCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(mediaDataSourceRepository,times(2)).getLocalMedia(getLocalMediaCaptor.capture());
+
+        getLocalMediaCaptor.getValue().onSucceed(medias,new OperationSuccess());
 
         assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
         assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
@@ -533,13 +556,17 @@ public class UploadMediaUseCaseTest {
 
         prepareStartUpload();
 
-        when(mediaDataSourceRepository.getLocalMedia()).thenReturn(Collections.<Media>emptyList());
-
         when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
 
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
 
         uploadMediaUseCase.startUploadMedia();
+
+        ArgumentCaptor<BaseLoadDataCallback<Media>> getLocalMediaCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(mediaDataSourceRepository).getLocalMedia(getLocalMediaCaptor.capture());
+
+        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(),new OperationSuccess());
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getUploadParentFolderUUIDCallbackCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -558,13 +585,17 @@ public class UploadMediaUseCaseTest {
 
         prepareStartUpload();
 
-        when(mediaDataSourceRepository.getLocalMedia()).thenReturn(Collections.<Media>emptyList());
-
         when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
 
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
 
         uploadMediaUseCase.startUploadMedia();
+
+        ArgumentCaptor<BaseLoadDataCallback<Media>> getLocalMediaCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(mediaDataSourceRepository).getLocalMedia(getLocalMediaCaptor.capture());
+
+        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(),new OperationSuccess());
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getUploadParentFolderUUIDCallbackCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -583,5 +614,37 @@ public class UploadMediaUseCaseTest {
 
     }
 
+    @Test
+    public void testUploadSameUUIDMedia(){
+
+        prepareStartUpload();
+
+        Media media = createMedia();
+
+        Media sameUUIDMedia = createMedia();
+
+        List<Media> medias = new ArrayList<>();
+        medias.add(media);
+        medias.add(sameUUIDMedia);
+
+        when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
+
+        when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false).thenReturn(false).thenReturn(false).thenReturn(false).thenReturn(false).thenReturn(true);
+
+        uploadWhenUploadParentFolderExistAndUploadFolderExist(medias);
+
+        ArgumentCaptor<BaseOperateDataCallback<Boolean>> captor = ArgumentCaptor.forClass(BaseOperateDataCallback.class);
+
+        verify(stationFileRepository).uploadFile(any(LocalFile.class), anyString(), anyString(), captor.capture());
+
+        captor.getValue().onSucceed(true, new OperationSuccess());
+
+        assertTrue(uploadMediaUseCase.mStopUpload);
+        assertFalse(uploadMediaUseCase.mAlreadyStartUpload);
+        assertEquals(1, uploadMediaUseCase.uploadMediaCount);
+
+        assertEquals(2, uploadMediaUseCase.alreadyUploadedMediaCount);
+
+    }
 
 }

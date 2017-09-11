@@ -20,7 +20,7 @@ public interface MediaDataSourceRepository {
 
     void setCalcDigestCallback(CalcMediaDigestStrategy.CalcMediaDigestCallback calcDigestCallback);
 
-    List<Media> getLocalMedia();
+    void getLocalMedia(BaseLoadDataCallback<Media> callback);
 
     void getStationMediaForceRefresh(BaseLoadDataCallback<Media> callback);
 
