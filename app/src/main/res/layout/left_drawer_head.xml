@@ -61,10 +61,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+                android:ellipsize="end"
                 android:gravity="center"
+                android:maxLines="1"
                 android:text="@{viewModel.userNameText}"
                 android:textColor="#DEFFFFFF"
-                android:textSize="14dp" />
+                android:textSize="14dp"
+                tools:text="富强民主范德萨发防守打法法撒旦发斯发地防守打法fdsafsadfsdfsfafd" />
 
 
             <TextView
@@ -143,8 +146,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:visibility="@{viewModel.showLoadingUploadProgress?View.VISIBLE:View.GONE,default=visible}"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:visibility="@{viewModel.showLoadingUploadProgress?View.VISIBLE:View.GONE,default=visible}">
 
                 <TextView
                     android:layout_width="wrap_content"

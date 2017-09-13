@@ -4,6 +4,7 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 
 import java.util.Collections;
 
@@ -19,17 +20,30 @@ public class LogoutUseCase {
 
     private LoggedInUserDataSource loggedInUserDataSource;
 
-    public static LogoutUseCase getInstance(SystemSettingDataSource systemSettingDataSource, LoggedInUserDataSource loggedInUserDataSource) {
+    private UploadMediaUseCase uploadMediaUseCase;
+
+    public static LogoutUseCase getInstance(SystemSettingDataSource systemSettingDataSource, LoggedInUserDataSource loggedInUserDataSource,UploadMediaUseCase uploadMediaUseCase) {
         if (ourInstance == null)
-            ourInstance = new LogoutUseCase(systemSettingDataSource, loggedInUserDataSource);
+            ourInstance = new LogoutUseCase(systemSettingDataSource, loggedInUserDataSource,uploadMediaUseCase);
         return ourInstance;
     }
 
-    private LogoutUseCase(SystemSettingDataSource systemSettingDataSource, LoggedInUserDataSource loggedInUserDataSource) {
+    private LogoutUseCase(SystemSettingDataSource systemSettingDataSource, LoggedInUserDataSource loggedInUserDataSource,UploadMediaUseCase uploadMediaUseCase) {
 
         this.systemSettingDataSource = systemSettingDataSource;
         this.loggedInUserDataSource = loggedInUserDataSource;
+        this.uploadMediaUseCase = uploadMediaUseCase;
+
     }
+
+    public void changeLoginUser(){
+
+        uploadMediaUseCase.stopUploadMedia();
+
+        uploadMediaUseCase.stopRetryUpload();
+
+    }
+
 
     public void logout() {
 
@@ -40,6 +54,9 @@ public class LogoutUseCase {
         loggedInUserDataSource.deleteLoggedInUsers(Collections.singletonList(loggedInUser));
 
         systemSettingDataSource.setCurrentLoginUserUUID("");
+
+        changeLoginUser();
+
     }
 
 

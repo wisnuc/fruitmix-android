@@ -12,6 +12,7 @@ import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mock.MockApplication;
@@ -72,6 +73,9 @@ public class UploadMediaUseCaseTest {
     private CheckMediaIsExistStrategy checkMediaIsExistStrategy;
 
     @Mock
+    private CalcMediaDigestStrategy calcMediaDigestStrategy;
+
+    @Mock
     private EventBus eventBus;
 
     private ThreadManager threadManager;
@@ -97,7 +101,8 @@ public class UploadMediaUseCaseTest {
         threadManager = new MockThreadManager();
 
         uploadMediaUseCase = UploadMediaUseCase.getInstance(mediaDataSourceRepository, stationFileRepository,
-                loggedInUserDataSource, threadManager, systemSettingDataSource, checkMediaIsUploadStrategy, checkMediaIsExistStrategy, testUploadFolderName,eventBus);
+                loggedInUserDataSource, threadManager, systemSettingDataSource, checkMediaIsUploadStrategy, checkMediaIsExistStrategy, testUploadFolderName, eventBus,
+                calcMediaDigestStrategy);
 
     }
 
@@ -148,6 +153,8 @@ public class UploadMediaUseCaseTest {
         when(loggedInUserDataSource.getLoggedInUserByUserUUID(anyString())).thenReturn(new LoggedInUser("", "", "", "", user));
 
         when(checkMediaIsExistStrategy.checkMediaIsExist(any(Media.class))).thenReturn(true);
+
+        when(calcMediaDigestStrategy.isFinishCalcMediaDigest()).thenReturn(true);
     }
 
     private void assertStringIsEmpty(String param) {
@@ -169,7 +176,7 @@ public class UploadMediaUseCaseTest {
 
         verify(mediaDataSourceRepository).getLocalMedia(getLocalMediaCaptor.capture());
 
-        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(),new OperationSuccess());
+        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(), new OperationSuccess());
 
         assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
         assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
@@ -236,7 +243,7 @@ public class UploadMediaUseCaseTest {
 
         assertTrue(uploadMediaUseCase.mStopUpload);
         assertFalse(uploadMediaUseCase.mAlreadyStartUpload);
-        assertEquals(0, uploadMediaUseCase.uploadMediaCount);
+
 
     }
 
@@ -255,7 +262,7 @@ public class UploadMediaUseCaseTest {
 
         verify(mediaDataSourceRepository).getLocalMedia(getLocalMediaCaptor.capture());
 
-        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(),new OperationSuccess());
+        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(), new OperationSuccess());
 
         assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
         assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
@@ -311,7 +318,6 @@ public class UploadMediaUseCaseTest {
 
         assertTrue(uploadMediaUseCase.mStopUpload);
         assertFalse(uploadMediaUseCase.mAlreadyStartUpload);
-        assertEquals(0, uploadMediaUseCase.uploadMediaCount);
 
     }
 
@@ -336,7 +342,7 @@ public class UploadMediaUseCaseTest {
 
         assertTrue(uploadMediaUseCase.mStopUpload);
         assertFalse(uploadMediaUseCase.mAlreadyStartUpload);
-        assertEquals(0, uploadMediaUseCase.uploadMediaCount);
+
 
         assertEquals(1, uploadMediaUseCase.alreadyUploadedMediaCount);
 
@@ -350,7 +356,7 @@ public class UploadMediaUseCaseTest {
 
         verify(mediaDataSourceRepository).getLocalMedia(getLocalMediaCaptor.capture());
 
-        getLocalMediaCaptor.getValue().onSucceed(medias,new OperationSuccess());
+        getLocalMediaCaptor.getValue().onSucceed(medias, new OperationSuccess());
 
         assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
         assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
@@ -454,7 +460,7 @@ public class UploadMediaUseCaseTest {
 
         verify(mediaDataSourceRepository).getLocalMedia(getLocalMediaCaptor.capture());
 
-        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(),new OperationSuccess());
+        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(), new OperationSuccess());
 
         verify(stationFileRepository, never()).getFile(anyString(), anyString(), any(BaseLoadDataCallback.class));
 
@@ -497,16 +503,16 @@ public class UploadMediaUseCaseTest {
 
         ArgumentCaptor<BaseLoadDataCallback<Media>> getLocalMediaCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(mediaDataSourceRepository,times(2)).getLocalMedia(getLocalMediaCaptor.capture());
+        verify(mediaDataSourceRepository, times(2)).getLocalMedia(getLocalMediaCaptor.capture());
 
-        getLocalMediaCaptor.getValue().onSucceed(medias,new OperationSuccess());
+        getLocalMediaCaptor.getValue().onSucceed(medias, new OperationSuccess());
 
         assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
         assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(stationFileRepository,times(2)).getFile(eq(testUserHome), eq(testUserHome), captor.capture());
+        verify(stationFileRepository, times(2)).getFile(eq(testUserHome), eq(testUserHome), captor.capture());
 
         List<AbstractRemoteFile> files = new ArrayList<>();
 
@@ -520,7 +526,7 @@ public class UploadMediaUseCaseTest {
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> uploadFolderCallbackCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(stationFileRepository,times(2)).getFile(eq(testUserHome), eq(testUploadParentFolderUUID), uploadFolderCallbackCaptor.capture());
+        verify(stationFileRepository, times(2)).getFile(eq(testUserHome), eq(testUploadParentFolderUUID), uploadFolderCallbackCaptor.capture());
 
         AbstractRemoteFile uploadFolderFile = new RemoteFile();
         uploadFolderFile.setName(UploadMediaUseCase.UPLOAD_FOLDER_NAME_PREFIX + testUploadFolderName);
@@ -535,16 +541,16 @@ public class UploadMediaUseCaseTest {
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getUploadMediaHashCallbackCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(stationFileRepository,times(2)).getFile(eq(testUserHome), eq(testUploadFolderUUID), getUploadMediaHashCallbackCaptor.capture());
+        verify(stationFileRepository, times(2)).getFile(eq(testUserHome), eq(testUploadFolderUUID), getUploadMediaHashCallbackCaptor.capture());
 
         AbstractRemoteFile uploadFile = new RemoteFile();
         ((RemoteFile) uploadFile).setFileHash(testMediaUUID);
 
         getUploadMediaHashCallbackCaptor.getValue().onSucceed(Collections.singletonList(uploadFile), new OperationSuccess());
 
-        verify(checkMediaIsUploadStrategy,times(2)).setUploadedMediaHashs(ArgumentMatchers.<String>anyList());
+        verify(checkMediaIsUploadStrategy, times(2)).setUploadedMediaHashs(ArgumentMatchers.<String>anyList());
 
-        verify(systemSettingDataSource,times(2)).getAutoUploadOrNot();
+        verify(systemSettingDataSource, times(2)).getAutoUploadOrNot();
 
         verify(stationFileRepository, never()).createFolder(anyString(), anyString(), anyString(), any(BaseOperateDataCallback.class));
 
@@ -566,7 +572,7 @@ public class UploadMediaUseCaseTest {
 
         verify(mediaDataSourceRepository).getLocalMedia(getLocalMediaCaptor.capture());
 
-        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(),new OperationSuccess());
+        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(), new OperationSuccess());
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getUploadParentFolderUUIDCallbackCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -595,7 +601,7 @@ public class UploadMediaUseCaseTest {
 
         verify(mediaDataSourceRepository).getLocalMedia(getLocalMediaCaptor.capture());
 
-        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(),new OperationSuccess());
+        getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(), new OperationSuccess());
 
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getUploadParentFolderUUIDCallbackCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -615,7 +621,7 @@ public class UploadMediaUseCaseTest {
     }
 
     @Test
-    public void testUploadSameUUIDMedia(){
+    public void testUploadSameUUIDMedia() {
 
         prepareStartUpload();
 
@@ -641,7 +647,6 @@ public class UploadMediaUseCaseTest {
 
         assertTrue(uploadMediaUseCase.mStopUpload);
         assertFalse(uploadMediaUseCase.mAlreadyStartUpload);
-        assertEquals(1, uploadMediaUseCase.uploadMediaCount);
 
         assertEquals(2, uploadMediaUseCase.alreadyUploadedMediaCount);
 

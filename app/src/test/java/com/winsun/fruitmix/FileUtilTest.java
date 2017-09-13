@@ -35,9 +35,9 @@ public class FileUtilTest {
     @Ignore
     public void percentTest() {
 
-        float percent = ((float) 61 * 100) / ((float) 7811);
+        float percent = ((float) 369 * 100) / ((float) 370);
 
-        String result = Math.round(percent) + "%";
+        String result = (int)percent + "%";
 
         Assert.fail(result);
     }

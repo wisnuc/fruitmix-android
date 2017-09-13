@@ -322,6 +322,9 @@ public class EquipmentPresenter {
         if (equipment.getSerialNumber().length() != 0) {
 
             if (equipmentSerialNumbers.contains(equipment.getSerialNumber())) {
+
+                Log.d(TAG, "getEquipmentInfo: serial number has founded: " + equipment.getSerialNumber());
+
                 return;
             } else {
                 equipmentSerialNumbers.add(equipment.getSerialNumber());
@@ -329,18 +332,29 @@ public class EquipmentPresenter {
 
         }
 
-        if (equipmentIps.contains(equipment.getHosts().get(0)))
+        if (equipmentIps.contains(equipment.getHosts().get(0))) {
+
+            Log.d(TAG, "getEquipmentInfo: host has founded: " + equipment.getHosts().get(0));
+
             return;
-        else
+        } else
             equipmentIps.add(equipment.getHosts().get(0));
 
         synchronized (mUserLoadedEquipments) {
 
             for (Equipment loadedEquipment : mUserLoadedEquipments) {
                 if (loadedEquipment.getSerialNumber().equals(equipment.getSerialNumber())) {
+
+                    Log.d(TAG, "getEquipmentInfo: second check in user loaded equipments,serial number has founded: " + equipment.getSerialNumber());
+
                     return;
-                } else if (loadedEquipment.getHosts().contains(equipment.getHosts().get(0)))
+                } else if (loadedEquipment.getHosts().contains(equipment.getHosts().get(0))) {
+
+                    Log.d(TAG, "getEquipmentInfo: second check in user loaded equipments,host has founded: " + equipment.getHosts().get(0));
+
                     return;
+                }
+
             }
 
             getEquipmentInfoInThread(equipment);

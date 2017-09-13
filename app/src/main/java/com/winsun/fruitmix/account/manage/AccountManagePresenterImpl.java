@@ -3,6 +3,7 @@ package com.winsun.fruitmix.account.manage;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import com.winsun.fruitmix.databinding.AccountChildItemBinding;
 import com.winsun.fruitmix.databinding.AccountGroupItemBinding;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.FNAS;
@@ -47,9 +49,14 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
 
     private String currentUserUUID;
 
-    public AccountManagePresenterImpl(AccountManageView view, LoggedInUserDataSource loggedInUserDataSource, SystemSettingDataSource systemSettingDataSource) {
+    private LogoutUseCase logoutUseCase;
+
+    public AccountManagePresenterImpl(AccountManageView view, LoggedInUserDataSource loggedInUserDataSource, SystemSettingDataSource systemSettingDataSource,
+                                      LogoutUseCase logoutUseCase) {
         this.view = view;
         this.loggedInUserDataSource = loggedInUserDataSource;
+
+        this.logoutUseCase = logoutUseCase;
 
         mEquipmentNames = new ArrayList<>();
         mUsers = new ArrayList<>();
@@ -135,7 +142,7 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
 
         if (requestCode == AccountManageActivity.START_EQUIPMENT_SEARCH && resultCode == RESULT_OK) {
 
-            FNAS.handleLogout();
+            logoutUseCase.changeLoginUser();
 
             mNewUserLoginSucceed = true;
             handleBack();

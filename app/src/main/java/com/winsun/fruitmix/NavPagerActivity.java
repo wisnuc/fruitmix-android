@@ -85,7 +85,7 @@ import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState
 import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState.UPLOAD_MEDIA_FAIL;
 
 public class NavPagerActivity extends BaseActivity
-        implements OnMainFragmentInteractionListener, MainPageView ,UploadMediaCountChangeListener{
+        implements OnMainFragmentInteractionListener, MainPageView, UploadMediaCountChangeListener {
 
     public static final String TAG = NavPagerActivity.class.getSimpleName();
 
@@ -341,6 +341,7 @@ public class NavPagerActivity extends BaseActivity
         uploadMediaUseCase = InjectUploadMediaUseCase.provideUploadMediaUseCase(this);
 
         uploadMediaUseCase.registerUploadMediaCountChangeListener(this);
+//        ButlerService.registerUploadMediaCountChangeListener(this);
 
     }
 
@@ -502,7 +503,7 @@ public class NavPagerActivity extends BaseActivity
 
             float percent = ((float) mAlreadyUploadMediaCount * 100) / ((float) mTotalLocalMediaCount);
 
-            int roundPercent = Math.round(percent);
+            int roundPercent = (int) percent;
 
             String percentText = roundPercent + "%";
 
@@ -546,7 +547,7 @@ public class NavPagerActivity extends BaseActivity
         if (!loggedInUser.getEquipmentName().equals(createdEquipment.getEquipmentName()))
             return;
 
-        FNAS.handleLogout();
+        logoutUseCase.changeLoginUser();
 
         dismissDialog();
 
@@ -659,6 +660,7 @@ public class NavPagerActivity extends BaseActivity
 
         InjectHttp.provideImageGifLoaderIntance().getImageLoader(mContext).cancelAllPreLoadMedia();
 
+//        ButlerService.unregisterUploadMediaCountChangeListener(this);
         uploadMediaUseCase.unregisterUploadMediaCountChangeListener(this);
 
         mContext = null;
@@ -715,7 +717,7 @@ public class NavPagerActivity extends BaseActivity
 
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN,sticky = true)
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void handleUploadMediaStateChanged(UploadMediaState uploadMediaState) {
 
         EventBus.getDefault().removeStickyEvent(uploadMediaState);
@@ -899,8 +901,6 @@ public class NavPagerActivity extends BaseActivity
 
             @Override
             protected Void doInBackground(Void... params) {
-
-                FNAS.handleLogout();
 
 //                LocalCache.clearToken(mContext);
 //

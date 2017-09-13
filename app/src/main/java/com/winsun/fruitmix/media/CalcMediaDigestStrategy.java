@@ -32,6 +32,8 @@ public class CalcMediaDigestStrategy {
 
     private CalcMediaDigestCallback calcMediaDigestCallback;
 
+    private boolean finishCalcMediaDigest = false;
+
     public static CalcMediaDigestStrategy getInstance() {
 
         if (ourInstance == null)
@@ -40,6 +42,10 @@ public class CalcMediaDigestStrategy {
     }
 
     private CalcMediaDigestStrategy() {
+    }
+
+    public boolean isFinishCalcMediaDigest() {
+        return finishCalcMediaDigest;
     }
 
     public void setCalcMediaDigestCallback(CalcMediaDigestCallback callback) {
@@ -52,6 +58,8 @@ public class CalcMediaDigestStrategy {
 
         Log.d(TAG, "start calc media digest" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
 
+        finishCalcMediaDigest = false;
+
         for (Media media : medias) {
             if (media.getUuid().isEmpty()) {
                 String uuid = calcSHA256OfFile(media.getOriginalPhotoPath());
@@ -62,6 +70,8 @@ public class CalcMediaDigestStrategy {
                 Log.d(TAG, "media original photo path: " + media.getOriginalPhotoPath() + " uuid: " + media.getUuid());
             }
         }
+
+        finishCalcMediaDigest = true;
 
         if (calcMediaDigestCallback != null) {
             if (newMediaList.size() > 0) {

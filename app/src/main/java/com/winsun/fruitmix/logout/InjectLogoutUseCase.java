@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 
 /**
  * Created by Administrator on 2017/7/28.
@@ -13,7 +14,8 @@ public class InjectLogoutUseCase {
 
     public static LogoutUseCase provideLogoutUseCase(Context context) {
 
-        return LogoutUseCase.getInstance(InjectSystemSettingDataSource.provideSystemSettingDataSource(context),InjectLoggedInUser.provideLoggedInUserRepository(context));
+        return LogoutUseCase.getInstance(InjectSystemSettingDataSource.provideSystemSettingDataSource(context), InjectLoggedInUser.provideLoggedInUserRepository(context),
+                InjectUploadMediaUseCase.provideUploadMediaUseCase(context));
 
     }
 

@@ -3,6 +3,7 @@ package com.winsun.fruitmix.logout;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,12 +29,15 @@ public class LogoutUseCaseTest {
 
     private LogoutUseCase logoutUseCase;
 
+    @Mock
+    private UploadMediaUseCase uploadMediaUseCase;
+
     @Before
     public void setup() {
 
         MockitoAnnotations.initMocks(this);
 
-        logoutUseCase = LogoutUseCase.getInstance(systemSettingDataSource, loggedInUserDataSource);
+        logoutUseCase = LogoutUseCase.getInstance(systemSettingDataSource, loggedInUserDataSource,uploadMediaUseCase);
     }
 
     @After

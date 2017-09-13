@@ -41,6 +41,7 @@ import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
+import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
@@ -57,7 +58,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ButlerService extends Service {
+public class ButlerService extends Service implements UploadMediaCountChangeListener{
 
     private static final String TAG = ButlerService.class.getSimpleName();
 
@@ -79,6 +80,8 @@ public class ButlerService extends Service {
     public static boolean startRetrieveTicketTask = false;
 
     private CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback;
+
+    private static List<UploadMediaCountChangeListener> uploadMediaCountChangeListeners = new ArrayList<>();
 
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
@@ -131,6 +134,96 @@ public class ButlerService extends Service {
         uploadMediaUseCase = InjectUploadMediaUseCase.provideUploadMediaUseCase(this);
 
         initInvitationRemoteDataSource();
+
+//        uploadMediaUseCase.registerUploadMediaCountChangeListener(this);
+
+    }
+
+    public static void registerUploadMediaCountChangeListener(UploadMediaCountChangeListener uploadMediaCountChangeListener) {
+
+        Log.d(TAG, "registerUploadMediaCountChangeListener: " + uploadMediaCountChangeListener);
+
+        uploadMediaCountChangeListeners.add(uploadMediaCountChangeListener);
+
+    }
+
+    public static void unregisterUploadMediaCountChangeListener(UploadMediaCountChangeListener uploadMediaCountChangeListener) {
+
+        Log.d(TAG, "unregisterUploadMediaCountChangeListener: " + uploadMediaCountChangeListener);
+
+        uploadMediaCountChangeListeners.remove(uploadMediaCountChangeListener);
+    }
+
+    @Override
+    public void onGetUploadMediaCountFail(int httpErrorCode) {
+
+        for (UploadMediaCountChangeListener uploadMediaCountChangeListener:uploadMediaCountChangeListeners){
+
+            Log.d(TAG, "onGetUploadMediaCountFail: " + uploadMediaCountChangeListener);
+
+            uploadMediaCountChangeListener.onGetUploadMediaCountFail(httpErrorCode);
+        }
+
+    }
+
+    @Override
+    public void onUploadMediaFail(int httpErrorCode) {
+
+        for (UploadMediaCountChangeListener uploadMediaCountChangeListener:uploadMediaCountChangeListeners){
+
+            Log.d(TAG, "onUploadMediaFail: " + uploadMediaCountChangeListener);
+
+            uploadMediaCountChangeListener.onUploadMediaFail(httpErrorCode);
+        }
+
+    }
+
+    @Override
+    public void onCreateFolderFail(int httpErrorCode) {
+
+        for (UploadMediaCountChangeListener uploadMediaCountChangeListener:uploadMediaCountChangeListeners){
+
+            Log.d(TAG, "onCreateFolderFail: " + uploadMediaCountChangeListener);
+
+            uploadMediaCountChangeListener.onCreateFolderFail(httpErrorCode);
+        }
+
+    }
+
+    @Override
+    public void onGetFolderFail(int httpErrorCode) {
+
+        for (UploadMediaCountChangeListener uploadMediaCountChangeListener:uploadMediaCountChangeListeners){
+
+            Log.d(TAG, "onGetFolderFail: " + uploadMediaCountChangeListener);
+
+            uploadMediaCountChangeListener.onGetFolderFail(httpErrorCode);
+        }
+
+    }
+
+    @Override
+    public void onStartGetUploadMediaCount() {
+
+        for (UploadMediaCountChangeListener uploadMediaCountChangeListener:uploadMediaCountChangeListeners){
+
+            Log.d(TAG, "onStartGetUploadMediaCount: " + uploadMediaCountChangeListener);
+
+            uploadMediaCountChangeListener.onStartGetUploadMediaCount();
+        }
+
+    }
+
+    @Override
+    public void onUploadMediaCountChanged(int uploadedMediaCount, int totalCount) {
+
+        for (UploadMediaCountChangeListener uploadMediaCountChangeListener:uploadMediaCountChangeListeners){
+
+            Log.d(TAG, "call notifyUploadMediaCountChange " + uploadMediaCountChangeListener + " alreadyUploadedMediaCount: " + uploadedMediaCount + " localMedias Size: " + totalCount);
+
+            uploadMediaCountChangeListener.onUploadMediaCountChanged(uploadedMediaCount,totalCount);
+        }
+
     }
 
     public static void startRetrieveTicketTask() {
@@ -172,9 +265,12 @@ public class ButlerService extends Service {
 
         generateMediaThumbUseCase.stopGenerateLocalPhotoThumbnail();
         generateMediaThumbUseCase.stopGenerateLocalPhotoMiniThumbnail();
+
         uploadMediaUseCase.stopUploadMedia();
 
         uploadMediaUseCase.stopRetryUpload();
+
+//        uploadMediaUseCase.unregisterUploadMediaCountChangeListener(this);
 
         super.onDestroy();
 

@@ -63,6 +63,8 @@ public class EquipmentSearchManager {
 
                         if (createdEquipment == null) return;
 
+                        Log.d(TAG, "call: createEquipment: " + createdEquipment + " listener: " + listener);
+
                         listener.call(createdEquipment);
 
                     }

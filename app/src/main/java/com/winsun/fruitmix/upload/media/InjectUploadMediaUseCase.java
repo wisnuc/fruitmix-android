@@ -5,6 +5,7 @@ import android.os.Build;
 
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
+import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
@@ -22,7 +23,8 @@ public class InjectUploadMediaUseCase {
                 InjectStationFileRepository.provideStationFileRepository(context),
                 InjectLoggedInUser.provideLoggedInUserRepository(context), ThreadManagerImpl.getInstance(),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(context),
-                CheckMediaIsUploadStrategy.getInstance(), CheckMediaIsExistStrategy.getInstance(),Build.MODEL, EventBus.getDefault());
+                CheckMediaIsUploadStrategy.getInstance(), CheckMediaIsExistStrategy.getInstance(),Build.MODEL, EventBus.getDefault(),
+                CalcMediaDigestStrategy.getInstance());
     }
 
 }
