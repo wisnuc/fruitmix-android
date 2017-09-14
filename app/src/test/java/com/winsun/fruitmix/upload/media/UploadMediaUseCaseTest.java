@@ -401,8 +401,6 @@ public class UploadMediaUseCaseTest {
 
         verify(checkMediaIsUploadStrategy).setUploadedMediaHashs(ArgumentMatchers.<String>anyList());
 
-        verify(systemSettingDataSource).getAutoUploadOrNot();
-
         verify(stationFileRepository, never()).createFolder(anyString(), anyString(), anyString(), any(BaseOperateDataCallback.class));
 
     }
@@ -463,8 +461,6 @@ public class UploadMediaUseCaseTest {
         getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(), new OperationSuccess());
 
         verify(stationFileRepository, never()).getFile(anyString(), anyString(), any(BaseLoadDataCallback.class));
-
-        verify(systemSettingDataSource).getAutoUploadOrNot();
 
         verify(stationFileRepository, never()).createFolder(anyString(), anyString(), anyString(), any(BaseOperateDataCallback.class));
 
@@ -549,13 +545,10 @@ public class UploadMediaUseCaseTest {
         getUploadMediaHashCallbackCaptor.getValue().onSucceed(Collections.singletonList(uploadFile), new OperationSuccess());
 
         verify(checkMediaIsUploadStrategy, times(2)).setUploadedMediaHashs(ArgumentMatchers.<String>anyList());
-
-        verify(systemSettingDataSource, times(2)).getAutoUploadOrNot();
-
+        
         verify(stationFileRepository, never()).createFolder(anyString(), anyString(), anyString(), any(BaseOperateDataCallback.class));
 
     }
-
 
     @Test
     public void testGetUploadParentFolderUUIDFail() {

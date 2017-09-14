@@ -609,6 +609,12 @@ public class UploadMediaUseCase {
 
     private void uploadMediaInThread(final List<Media> needUploadedMedias, final String uploadFolderUUID) {
 
+        Log.d(TAG, "uploadMediaInThread: mStopUpload: " + mStopUpload + " auto upload or not: " + systemSettingDataSource.getAutoUploadOrNot() + " threadID: " +
+                Thread.currentThread().getId());
+
+        if (!systemSettingDataSource.getAutoUploadOrNot())
+            return;
+
         if (needUploadedMedias.size() == 0) {
 
             Log.d(TAG, "uploadMedia: no need upload media,send retry upload message");
@@ -727,7 +733,9 @@ public class UploadMediaUseCase {
 
     private void handleUploadMediaFail(List<Media> needUploadedMedias, Media media, String uploadFolderUUID) {
         needUploadedMedias.remove(media);
-        uploadMediaInThread(needUploadedMedias, uploadFolderUUID);
+
+        if (!mStopUpload)
+            uploadMediaInThread(needUploadedMedias, uploadFolderUUID);
     }
 
     private void handleUploadMediaSucceed(Media media, List<Media> needUploadedMedias, String uploadFolderUUID) {
