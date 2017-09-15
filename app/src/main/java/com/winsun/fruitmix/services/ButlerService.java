@@ -268,7 +268,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
         uploadMediaUseCase.stopUploadMedia();
 
-        uploadMediaUseCase.stopRetryUpload();
+        uploadMediaUseCase.stopRetryUploadForever();
 
 //        uploadMediaUseCase.unregisterUploadMediaCountChangeListener(this);
 

@@ -2,7 +2,6 @@ package com.winsun.fruitmix.logout;
 
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 
@@ -40,7 +39,7 @@ public class LogoutUseCase {
 
         uploadMediaUseCase.stopUploadMedia();
 
-        uploadMediaUseCase.stopRetryUpload();
+        uploadMediaUseCase.stopRetryUploadTemporary();
 
     }
 

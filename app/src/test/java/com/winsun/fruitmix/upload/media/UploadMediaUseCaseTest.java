@@ -545,7 +545,7 @@ public class UploadMediaUseCaseTest {
         getUploadMediaHashCallbackCaptor.getValue().onSucceed(Collections.singletonList(uploadFile), new OperationSuccess());
 
         verify(checkMediaIsUploadStrategy, times(2)).setUploadedMediaHashs(ArgumentMatchers.<String>anyList());
-        
+
         verify(stationFileRepository, never()).createFolder(anyString(), anyString(), anyString(), any(BaseOperateDataCallback.class));
 
     }

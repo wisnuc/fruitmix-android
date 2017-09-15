@@ -91,6 +91,8 @@ public class UploadMediaUseCase {
 
     private List<Media> localMedias;
 
+    private boolean stopRetryUpload = false;
+
     private static List<UploadMediaCountChangeListener> uploadMediaCountChangeListeners = new ArrayList<>();
 
     public static UploadMediaUseCase getInstance(MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
@@ -630,7 +632,7 @@ public class UploadMediaUseCase {
             if (mStopUpload)
                 return;
 
-            stopRetryUpload();
+            stopRetryUploadTemporary();
 
             uploadOneMedia(needUploadedMedias, uploadFolderUUID);
 
@@ -987,9 +989,23 @@ public class UploadMediaUseCase {
         return localMedias;
     }
 
-    public void stopRetryUpload() {
+    public void stopRetryUploadTemporary() {
 
-        Log.d(TAG, "stopRetryUpload: ");
+        Log.d(TAG, "stopRetryUploadTemporary: ");
+
+        if (retryUploadHandler != null) {
+
+            retryUploadHandler.removeMessages(RETRY_UPLOAD);
+
+        }
+
+    }
+
+    public void stopRetryUploadForever() {
+
+        Log.d(TAG, "stopRetryUploadForever: ");
+
+        stopRetryUpload = true;
 
         if (retryUploadHandler != null) {
 
@@ -1002,6 +1018,9 @@ public class UploadMediaUseCase {
     private void sendRetryUploadMessage() {
 
         Log.d(TAG, "sendRetryUploadMessage: delay time " + RETRY_INTERVAL);
+
+        if (stopRetryUpload)
+            return;
 
         if (retryUploadHandler != null) {
 
