@@ -61,7 +61,7 @@ public class MultiFileCommentView extends UserCommentView {
 
                 Media media = medias.get(i);
 
-                String url = media.getImageThumbUrl();
+                String url = media.getImageThumbUrl(context);
 
                 SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), null, false);
 

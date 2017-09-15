@@ -174,6 +174,8 @@ public class LoginUseCaseTest {
 
         verify(loggedInUserDataSource).getLoggedInUserByToken(anyString());
 
+        verify(httpRequestFactory).setCurrentData(anyString(), anyString());
+
         initSystemStateAndVerify();
 
         verify(userDataRepository, never()).clearAllUsersInDB();
@@ -183,7 +185,6 @@ public class LoginUseCaseTest {
     }
 
     private void initSystemStateAndVerify() {
-        verify(httpRequestFactory).setCurrentData(anyString(), anyString());
 
         verify(checkMediaIsUploadStrategy).setCurrentUserUUID(testUserUUID);
 
@@ -194,6 +195,10 @@ public class LoginUseCaseTest {
         verify(imageGifLoaderInstance).setToken(anyString());
 
         verify(systemSettingDataSource).setCurrentLoginUserUUID(anyString());
+
+        verify(systemSettingDataSource).setCurrentLoginToken(anyString());
+
+        verify(systemSettingDataSource).setCurrentEquipmentIp(anyString());
 
         verify(stationFileRepository).clearDownloadFileRecordInCache();
 
@@ -212,6 +217,7 @@ public class LoginUseCaseTest {
     private String testToken = "testToken";
     private String testDeviceID = "testDeviceID";
     private String testGUID = "testGUID";
+    private String testUserHome = "testUserHome";
 
     @Test
     public void testLoginWithLoadTokenParam_succeed() {
@@ -224,11 +230,7 @@ public class LoginUseCaseTest {
 
         loadTokenCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(testToken), new OperationSuccess());
 
-        initSystemStateAndVerify();
-
-        verify(userDataRepository).clearAllUsersInDB();
-
-        verify(mediaDataSourceRepository).clearAllStationMediasInDB();
+        verify(httpRequestFactory).setCurrentData(anyString(), anyString());
 
         verify(userDataRepository).getUsers(eq(testUserUUID), loadUserCallbackArgumentCaptor.capture());
 
@@ -255,6 +257,12 @@ public class LoginUseCaseTest {
         assertEquals(testUserHome, user.getHome());
 
         verify(loggedInUserDataSource).insertLoggedInUsers(ArgumentMatchers.<LoggedInUser>anyCollection());
+
+        initSystemStateAndVerify();
+
+        verify(userDataRepository).clearAllUsersInDB();
+
+        verify(mediaDataSourceRepository).clearAllStationMediasInDB();
 
         verify(callback).onSucceed(ArgumentMatchers.<String>anyList(), any(OperationResult.class));
 
@@ -385,10 +393,6 @@ public class LoginUseCaseTest {
 
         verify(httpRequestFactory).setCurrentData(anyString(), anyString());
 
-        verify(imageGifLoaderInstance).setToken(anyString());
-
-        verify(stationFileRepository).clearDownloadFileRecordInCache();
-
     }
 
     @Test
@@ -426,7 +430,19 @@ public class LoginUseCaseTest {
 
         getUsersCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess());
 
-        verify(userDataRepository).getCurrentUserHome(any(BaseLoadDataCallback.class));
+        ArgumentCaptor<BaseLoadDataCallback<String>> getUserHomeCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(userDataRepository).getCurrentUserHome(getUserHomeCaptor.capture());
+
+        getUserHomeCaptor.getValue().onSucceed(Collections.singletonList(testUserHome), new OperationSuccess());
+
+        initSystemStateAndVerify();
+
+        verify(systemSettingDataSource).setCurrentLoginStationID(eq(testStationID));
+
+        verify(userDataRepository).clearAllUsersInDB();
+
+        verify(mediaDataSourceRepository).clearAllStationMediasInDB();
 
     }
 

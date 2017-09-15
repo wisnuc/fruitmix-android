@@ -46,7 +46,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     private static final String JPEG_STRING = "image/jpeg";
 
     private static final String SHA_256_STRING = "sha256";
-    private static final String FILE_STRING = "file";
+    private static final String SIZE_STRING = "size";
 
     private static OkHttpUtil instance;
 
@@ -181,8 +181,8 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
             Request.Builder builder = generateRequestBuilder(httpRequest);
 
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("size", Integer.valueOf(localFile.getSize()));
-            jsonObject.put("sha256", localFile.getFileHash());
+            jsonObject.put(SIZE_STRING, Integer.valueOf(localFile.getSize()));
+            jsonObject.put(SHA_256_STRING, localFile.getFileHash());
 
             String fileName = jsonObject.toString();
 

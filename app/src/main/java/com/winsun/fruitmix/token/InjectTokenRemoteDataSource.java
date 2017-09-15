@@ -14,7 +14,9 @@ public class InjectTokenRemoteDataSource {
 
     public static TokenDataSource provideTokenDataSource(Context context){
 
-        return new TokenDataRepository(ThreadManagerImpl.getInstance(),new TokenRemoteDataSource(InjectHttp.provideIHttpUtil(context),InjectHttp.provideHttpRequestFactory()));
+        return new TokenDataRepository(ThreadManagerImpl.getInstance(),
+                new TokenRemoteDataSource(InjectHttp.provideIHttpUtil(context),
+                        InjectHttp.provideHttpRequestFactory(context)));
 
     }
 

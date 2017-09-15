@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.group.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -16,6 +17,7 @@ import com.winsun.fruitmix.databinding.ActivityPinContentBinding;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.presenter.PinContentPresenter;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.mediaModule.NewPicChooseActivity;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
@@ -61,7 +63,7 @@ public class PinContentActivity extends BaseToolbarActivity implements PinConten
         pinContentRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         pinContentPresenter = new PinContentPresenter(groupUUID, pinUUID, InjectGroupDataSource.provideGroupRepository(), loadingViewModel, noContentViewModel,
-                toolbarViewModel, this, ImageGifLoaderInstance.getInstance().getImageLoader(this));
+                toolbarViewModel, this, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
 
         pinContentRecyclerView.setAdapter(pinContentPresenter.getPinContentAdapter());
 
@@ -178,5 +180,10 @@ public class PinContentActivity extends BaseToolbarActivity implements PinConten
     @Override
     public void showMenu() {
         setMenuVisible(true);
+    }
+
+    @Override
+    public Context getContext() {
+        return this;
     }
 }

@@ -68,7 +68,7 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
 
         binding.setEquipmentItemViewModel(equipmentItemViewModel);
 
-        String currentIPWithHttpHead = InjectHttp.provideHttpRequestFactory().getGateway();
+        String currentIPWithHttpHead = InjectHttp.provideHttpRequestFactory(this).getGateway();
 
         String currentIP;
 

@@ -14,7 +14,7 @@ public class InjectInvitationDataSource {
     public static InvitationDataSource provideInvitationDataSource(Context context) {
 
         return new InvitationDataRepository(ThreadManagerImpl.getInstance(), new InvitationRemoteDataSource(InjectHttp.provideIHttpUtil(context),
-                InjectHttp.provideHttpRequestFactory()));
+                InjectHttp.provideHttpRequestFactory(context)));
 
     }
 

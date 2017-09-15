@@ -19,7 +19,7 @@ public class InjectEquipment {
 
     public static EquipmentDataSource provideEquipmentDataSource(Context context) {
 
-        return EquipmentDataRepository.getInstance(ThreadManagerImpl.getInstance(),new EquipmentRemoteDataSource(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory()));
+        return EquipmentDataRepository.getInstance(ThreadManagerImpl.getInstance(),new EquipmentRemoteDataSource(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory(context)));
 
     }
 

@@ -16,13 +16,15 @@ import java.util.List;
  * Created by Administrator on 2016/10/25.
  */
 
-public class RemoteFileFolderParser implements RemoteDatasParser<AbstractRemoteFile> {
+public class RemoteFileFolderParser extends BaseRemoteDataParser implements RemoteDatasParser<AbstractRemoteFile> {
 
     public List<AbstractRemoteFile> parse(String json) throws JSONException {
 
+        String rootStr = checkHasWrapper(json);
+
         List<AbstractRemoteFile> abstractRemoteFiles = new ArrayList<>();
 
-        JSONObject root = new JSONObject(json);
+        JSONObject root = new JSONObject(rootStr);
 
         JSONArray entries = root.getJSONArray("entries");
 

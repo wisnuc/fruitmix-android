@@ -9,9 +9,12 @@ import org.json.JSONObject;
  * Created by Administrator on 2017/8/4.
  */
 
-public class RemoteInsertUserParser implements RemoteDataParser<User> {
+public class RemoteInsertUserParser extends BaseRemoteDataParser implements RemoteDataParser<User> {
     @Override
     public User parse(String json) throws JSONException {
-        return new RemoteUserJSONObjectParser().getUser(new JSONObject(json));
+
+        String rootStr = checkHasWrapper(json);
+
+        return new RemoteUserJSONObjectParser().getUser(new JSONObject(rootStr));
     }
 }

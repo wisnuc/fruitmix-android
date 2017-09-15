@@ -11,6 +11,7 @@ import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.gif.GifLruCache;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.RequestQueueInstance;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
@@ -32,12 +33,18 @@ public class ImageGifLoaderInstance {
 
     private static ImageGifLoaderInstance instance;
 
+    private HttpRequestFactory httpRequestFactory;
+
     private String token;
 
-    public static ImageGifLoaderInstance getInstance() {
+    public ImageGifLoaderInstance(HttpRequestFactory httpRequestFactory) {
+        this.httpRequestFactory = httpRequestFactory;
+    }
+
+    public static ImageGifLoaderInstance getInstance(HttpRequestFactory httpRequestFactory) {
 
         if (instance == null)
-            instance = new ImageGifLoaderInstance();
+            instance = new ImageGifLoaderInstance(httpRequestFactory);
 
         return instance;
     }
@@ -94,8 +101,9 @@ public class ImageGifLoaderInstance {
 
     private void createHeader() {
         headers = new ArrayMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + LoginUseCase.getToken());
-        Log.i(TAG, "FNAS JWT: " + LoginUseCase.getToken());
+
+        headers.put(Util.KEY_AUTHORIZATION, httpRequestFactory.getJWT());
+        Log.i(TAG, "FNAS JWT: " + httpRequestFactory.getJWT());
     }
 
     public GifLoader getGifLoader(Context context) {

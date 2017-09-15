@@ -68,7 +68,6 @@ import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.user.manage.UserManageActivity;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -664,7 +663,7 @@ public class NavPagerActivity extends BaseActivity
     protected void onDestroy() {
         super.onDestroy();
 
-        InjectHttp.provideImageGifLoaderIntance().getImageLoader(mContext).cancelAllPreLoadMedia();
+        InjectHttp.provideImageGifLoaderInstance(mContext).getImageLoader(mContext).cancelAllPreLoadMedia();
 
 //        ButlerService.unregisterUploadMediaCountChangeListener(this);
         uploadMediaUseCase.unregisterUploadMediaCountChangeListener(this);

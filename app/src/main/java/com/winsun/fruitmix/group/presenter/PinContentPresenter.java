@@ -352,7 +352,7 @@ public class PinContentPresenter implements OnPinContentItemClickListener {
 
                 Media media = ((MediaPinItemView) pinItemView).getMedia();
 
-                String url = media.getImageThumbUrl();
+                String url = media.getImageThumbUrl(pinContentView.getContext());
 
                 media.setImageUrl(networkImageView, url, imageLoader);
 

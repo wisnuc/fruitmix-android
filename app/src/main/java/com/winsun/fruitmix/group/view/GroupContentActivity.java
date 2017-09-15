@@ -23,6 +23,7 @@ import com.winsun.fruitmix.group.usecase.PlayAudioUseCaseImpl;
 import com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton;
 import com.winsun.fruitmix.group.view.customview.InputChatLayout;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.mediaModule.NewPicChooseActivity;
@@ -159,7 +160,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         UserDataRepository userDataRepository = InjectUser.provideRepository(this);
 
         groupContentPresenter = new GroupContentPresenter(this, groupUUID, userDataRepository, InjectSystemSettingDataSource.provideSystemSettingDataSource(this),
-                groupRepository, groupContentViewModel, ImageGifLoaderInstance.getInstance().getImageLoader(this), PlayAudioUseCaseImpl.getInstance());
+                groupRepository, groupContentViewModel, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this), PlayAudioUseCaseImpl.getInstance());
     }
 
     @Override

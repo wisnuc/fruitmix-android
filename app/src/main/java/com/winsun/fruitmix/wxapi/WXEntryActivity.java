@@ -97,14 +97,13 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                 final String code = resp.code;
 
-                Toast.makeText(this, "baseresp.getType = " + baseResp.getType() + "onResp: state: " + resp.state + " code: " + code, Toast.LENGTH_LONG).show();
+//                Toast.makeText(this, "baseresp.getType = " + baseResp.getType() + "onResp: state: " + resp.state + " code: " + code, Toast.LENGTH_LONG).show();
 
                 Log.d(TAG, "onResp: wechat code: " + code);
 
                 dialog = ProgressDialog.show(this, null, String.format(getString(R.string.operating_title), getString(R.string.login)), true, false);
 
                 loginInThread(code);
-
 
                 break;
             case BaseResp.ErrCode.ERR_USER_CANCEL:
@@ -145,7 +144,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                 dismissDialog();
 
-//                startNavPagerActivity();
+                startNavPagerActivity();
 
                 Toast.makeText(mContext, "登录成功", Toast.LENGTH_SHORT).show();
 

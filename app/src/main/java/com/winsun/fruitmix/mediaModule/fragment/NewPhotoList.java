@@ -233,7 +233,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private void initImageLoader() {
 
-        ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderIntance();
+        ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderInstance(containerActivity);
         mImageLoader = imageGifLoaderInstance.getImageLoader(containerActivity);
 
     }
@@ -686,7 +686,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 if (currentMedia == null) return;
 
-                View newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageThumbUrl());
+                View newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageThumbUrl(containerActivity));
 
                 if (newSharedElement == null)
                     newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageSmallThumbUrl(containerActivity));
@@ -1193,7 +1193,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (!mIsFling) {
 
-                imageUrl = currentMedia.getImageThumbUrl();
+                imageUrl = currentMedia.getImageThumbUrl(containerActivity);
 
             } else {
 
