@@ -65,6 +65,8 @@ import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
+import com.winsun.fruitmix.user.datasource.InjectUser;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.user.manage.UserManageActivity;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
@@ -261,6 +263,8 @@ public class NavPagerActivity extends BaseActivity
 
     private LoggedInUserDataSource loggedInUserDataSource;
 
+    private UserDataRepository userDataRepository;
+
     private UploadMediaCountChangeListener uploadMediaCountChangeListener;
 
     private UploadMediaUseCase uploadMediaUseCase;
@@ -282,6 +286,8 @@ public class NavPagerActivity extends BaseActivity
         mNavigationMenuRecyclerView = binding.navigationMenuRecyclerView;
 
         navPagerViewModel = new NavPagerViewModel();
+
+        userDataRepository = InjectUser.provideRepository(mContext);
 
         loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
 
@@ -754,12 +760,7 @@ public class NavPagerActivity extends BaseActivity
 
     private void refreshUserInNavigationView() {
 
-        LoggedInUser loggedInUser = loggedInUserDataSource.getLoggedInUserByUserUUID(systemSettingDataSource.getCurrentLoginUserUUID());
-
-        if (loggedInUser == null)
-            return;
-
-        User user = loggedInUser.getUser();
+        User user = userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
 
         String userName = user.getUserName();
 

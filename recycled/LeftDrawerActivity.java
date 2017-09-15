@@ -20,9 +20,9 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.winsun.fruitmix.Fragment.AlbumList;
-import com.winsun.fruitmix.Fragment.PhotoList;
-import com.winsun.fruitmix.Fragment.ShareList;
+import com.winsun.fruitmix.fragment.AlbumList;
+import com.winsun.fruitmix.fragment.PhotoList;
+import com.winsun.fruitmix.fragment.ShareList;
 import com.winsun.fruitmix.component.NavPageBar;
 
 public class LeftDrawerActivity extends AppCompatActivity

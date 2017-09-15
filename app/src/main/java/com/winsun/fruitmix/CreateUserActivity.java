@@ -14,6 +14,7 @@ import com.winsun.fruitmix.databinding.ActivityCreateUserBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
@@ -45,7 +46,7 @@ public class CreateUserActivity extends BaseActivity implements CreateUserView {
 
         CreateUserViewModel createUserViewModel = new CreateUserViewModel();
 
-        createUserPresenter = new CreateUserPresenterImpl(this, InjectUser.provideRepository(this));
+        createUserPresenter = new CreateUserPresenterImpl(this, InjectSystemSettingDataSource.provideSystemSettingDataSource(this).getCurrentLoginUserUUID(), InjectUser.provideRepository(this));
 
         binding.setCreateUserViewModel(createUserViewModel);
 

@@ -68,11 +68,11 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     }
 
     @Override
-    public void getUsers(final BaseLoadDataCallback<User> callback) {
+    public void getUsers(String currentLoginUserUUID,final BaseLoadDataCallback<User> callback) {
 
         final List<User> users = new ArrayList<>();
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER + "/" + systemSettingDataSource.getCurrentLoginUserUUID());
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER + "/" + currentLoginUserUUID);
 
         wrapper.loadCall(httpRequest, new BaseLoadDataCallback<User>() {
 
@@ -140,4 +140,15 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
         wrapper.loadCall(httpRequest,callback,new RemoteUserHomeParser());
 
     }
+
+
+    @Override
+    public void getUsersByStationID(String stationID, BaseLoadDataCallback<User> callback) {
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestThroughPipe(stationID,USER_PARAMETER);
+
+        wrapper.loadCall(httpRequest,callback,new RemoteLoginUsersParser());
+
+    }
+
 }

@@ -26,9 +26,9 @@ public class TokenRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     }
 
-    public void getToken(String wechatCode, BaseLoadDataCallback<String> callback) {
+    public void getToken(String wechatCode, BaseLoadDataCallback<WechatTokenUserWrapper> callback) {
 
-        String url = "http://10.10.9.59:5757/v1/test/oauth2?code=" + wechatCode + "&platform=mobile";
+        String url = "http://10.10.9.59:4000/c/v1/token?code=" + wechatCode + "&platform=mobile";
 
         HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(url);
 

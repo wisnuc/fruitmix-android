@@ -16,6 +16,7 @@ import com.winsun.fruitmix.databinding.ActivityUserManageBinding;
 import com.winsun.fruitmix.equipment.EquipmentItemViewModel;
 import com.winsun.fruitmix.equipment.data.InjectEquipment;
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.user.datasource.InjectUser;
@@ -81,7 +82,8 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
         }
 
         userMangePresenter = new UserManagePresenterImpl(this, equipmentItemViewModel, userManageViewModel,
-                InjectUser.provideRepository(this), InjectEquipment.provideEquipmentDataSource(this), currentIP);
+                InjectUser.provideRepository(this), InjectEquipment.provideEquipmentDataSource(this), currentIP,
+                InjectSystemSettingDataSource.provideSystemSettingDataSource(this).getCurrentLoginUserUUID());
 
         binding.setUserPresenter(userMangePresenter);
 

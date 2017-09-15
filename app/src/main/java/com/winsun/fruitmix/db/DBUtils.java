@@ -418,7 +418,15 @@ public class DBUtils {
         return loggedInUsers;
     }
 
-    public LoggedInUser getCurrentLoggedInUser(String currentLoginUserUUID) {
+    public LoggedInUser getCurrentLoggedInUserByUUID(String userUUID) {
+        return getCurrentLoggedInUser(DBHelper.USER_KEY_UUID, userUUID);
+    }
+
+    public LoggedInUser getCurrentLoggedInUserByToken(String token) {
+        return getCurrentLoggedInUser(DBHelper.LOGGED_IN_USER_TOKEN, token);
+    }
+
+    private LoggedInUser getCurrentLoggedInUser(String where, String param) {
         openReadableDB();
 
         LoggedInUser loggedInUser = null;
@@ -430,7 +438,7 @@ public class DBUtils {
         String deviceID;
         LocalDataParser<User> parser = new LocalUserParser();
 
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOGGED_IN_USER_TABLE_NAME + " where " + DBHelper.USER_KEY_UUID + " = ?", new String[]{currentLoginUserUUID});
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOGGED_IN_USER_TABLE_NAME + " where " + where + " = ?", new String[]{param});
 
         if (!cursor.moveToFirst())
             return null;

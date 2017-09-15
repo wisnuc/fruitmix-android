@@ -114,6 +114,8 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
         }
 
+        Log.d(TAG, "remoteCall succeed body: " + str);
+
         response.close();
 
         Log.d(TAG, "remoteCallMethod: after read response body" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));

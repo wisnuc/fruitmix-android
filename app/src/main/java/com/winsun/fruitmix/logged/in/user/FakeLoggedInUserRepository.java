@@ -45,7 +45,7 @@ public class FakeLoggedInUserRepository implements LoggedInUserDataSource {
 
             User user = new User();
             user.setUuid("testUserUUID" + i);
-            user.setUserName("testUserName"+i);
+            user.setUserName("testUserName" + i);
             user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
 
             loggedInUser.setUser(user);
@@ -64,4 +64,11 @@ public class FakeLoggedInUserRepository implements LoggedInUserDataSource {
         return new LoggedInUser("", "", "", "", user);
     }
 
+    @Override
+    public LoggedInUser getLoggedInUserByToken(String token) {
+        User user = new User();
+        user.setUuid(FakeGroupDataSource.MYSELF_UUID);
+
+        return new LoggedInUser("", "", "", "", user);
+    }
 }

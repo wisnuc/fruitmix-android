@@ -7,7 +7,6 @@ import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,7 +55,7 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
     }
 
     @Override
-    public void getUsers(final BaseLoadDataCallback<User> callback) {
+    public void getUsers(final String currentLoginUserUUID,final BaseLoadDataCallback<User> callback) {
 
         final BaseLoadDataCallback<User> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
 
@@ -71,7 +70,7 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
             @Override
             public void run() {
 
-                userRemoteDataSource.getUsers(new BaseLoadDataCallback<User>() {
+                userRemoteDataSource.getUsers(currentLoginUserUUID,new BaseLoadDataCallback<User>() {
                     @Override
                     public void onSucceed(List<User> data, OperationResult operationResult) {
 
@@ -184,5 +183,23 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
     @Override
     public boolean clearAllUsersInDB() {
         return userDBDataSource.clearUsers();
+    }
+
+    @Override
+    public void getUsersByStationID(final String stationID, final BaseLoadDataCallback<User> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                userRemoteDataSource.getUsersByStationID(stationID,createLoadCallbackRunOnMainThread(callback));
+            }
+        });
+
+
+    }
+
+    @Override
+    public User getUserByUUID(String userUUID) {
+        return cacheUsers.get(userUUID);
     }
 }

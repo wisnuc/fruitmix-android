@@ -28,6 +28,7 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import java.util.ArrayList;
@@ -62,9 +63,9 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
     private List<UserComment> userComments;
 
     public GroupContentPresenter(GroupContentView groupContentView, String groupUUID,
-                                 LoggedInUserDataSource loggedInUserDataSource,SystemSettingDataSource systemSettingDataSource,
+                                 UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
                                  GroupRepository groupRepository, GroupContentViewModel groupContentViewModel,
-                                 ImageLoader imageLoader,PlayAudioUseCase playAudioUseCase) {
+                                 ImageLoader imageLoader, PlayAudioUseCase playAudioUseCase) {
 
         this.playAudioUseCase = playAudioUseCase;
         this.imageLoader = imageLoader;
@@ -73,7 +74,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         this.groupRepository = groupRepository;
         this.groupContentViewModel = groupContentViewModel;
 
-        currentLoggedInUser = loggedInUserDataSource.getLoggedInUserByUserUUID(systemSettingDataSource.getCurrentLoginUserUUID()).getUser();
+        currentLoggedInUser = userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
 
 //        currentLoggedInUser = new User();
 //        currentLoggedInUser.setUuid(FakeGroupDataSource.MYSELF_UUID);

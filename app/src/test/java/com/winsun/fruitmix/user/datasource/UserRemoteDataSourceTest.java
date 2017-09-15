@@ -136,7 +136,7 @@ public class UserRemoteDataSourceTest {
 
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(httpResponse);
 
-            userRemoteDataSource.getUsers(callback);
+            userRemoteDataSource.getUsers("",callback);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -182,7 +182,7 @@ public class UserRemoteDataSourceTest {
 
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(httpResponse).thenReturn(new HttpResponse(404, ""));
 
-            userRemoteDataSource.getUsers(new BaseLoadDataCallbackImpl<User>());
+            userRemoteDataSource.getUsers("",new BaseLoadDataCallbackImpl<User>());
 
             verify(iHttpUtil, times(2)).remoteCall(any(HttpRequest.class));
 
@@ -252,7 +252,7 @@ public class UserRemoteDataSourceTest {
 
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(firstResponse).thenReturn(secondResponse);
 
-            userRemoteDataSource.getUsers(callback);
+            userRemoteDataSource.getUsers("",callback);
 
         } catch (IOException e) {
             e.printStackTrace();

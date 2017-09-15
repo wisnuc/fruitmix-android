@@ -30,7 +30,7 @@ public class TokenDataRepository extends BaseDataRepository implements TokenData
     }
 
     @Override
-    public void getToken(final String wechatCode, final BaseLoadDataCallback<String> callback) {
+    public void getToken(final String wechatCode, final BaseLoadDataCallback<WechatTokenUserWrapper> callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override

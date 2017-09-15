@@ -23,6 +23,7 @@ import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 
 import org.greenrobot.eventbus.EventBus;
 import org.junit.After;
@@ -61,7 +62,7 @@ public class UploadMediaUseCaseTest {
     private StationFileRepository stationFileRepository;
 
     @Mock
-    private LoggedInUserDataSource loggedInUserDataSource;
+    private UserDataRepository userDataRepository;
 
     @Mock
     private SystemSettingDataSource systemSettingDataSource;
@@ -101,7 +102,7 @@ public class UploadMediaUseCaseTest {
         threadManager = new MockThreadManager();
 
         uploadMediaUseCase = UploadMediaUseCase.getInstance(mediaDataSourceRepository, stationFileRepository,
-                loggedInUserDataSource, threadManager, systemSettingDataSource, checkMediaIsUploadStrategy, checkMediaIsExistStrategy, testUploadFolderName, eventBus,
+                userDataRepository, threadManager, systemSettingDataSource, checkMediaIsUploadStrategy, checkMediaIsExistStrategy, testUploadFolderName, eventBus,
                 calcMediaDigestStrategy);
 
     }
@@ -124,7 +125,7 @@ public class UploadMediaUseCaseTest {
 
         verify(systemSettingDataSource).getCurrentLoginUserUUID();
 
-        verify(loggedInUserDataSource).getLoggedInUserByUserUUID(anyString());
+        verify(userDataRepository).getUserByUUID(anyString());
 
         uploadMediaUseCase.startUploadMedia();
 
@@ -132,7 +133,7 @@ public class UploadMediaUseCaseTest {
 
         verify(systemSettingDataSource, times(1)).getCurrentLoginUserUUID();
 
-        verify(loggedInUserDataSource, times(1)).getLoggedInUserByUserUUID(anyString());
+        verify(userDataRepository, times(1)).getUserByUUID(anyString());
 
     }
 
@@ -150,7 +151,7 @@ public class UploadMediaUseCaseTest {
 
         when(systemSettingDataSource.getCurrentLoginUserUUID()).thenReturn(testUserUUID);
 
-        when(loggedInUserDataSource.getLoggedInUserByUserUUID(anyString())).thenReturn(new LoggedInUser("", "", "", "", user));
+        when(userDataRepository.getUserByUUID(anyString())).thenReturn(user);
 
         when(checkMediaIsExistStrategy.checkMediaIsExist(any(Media.class))).thenReturn(true);
 

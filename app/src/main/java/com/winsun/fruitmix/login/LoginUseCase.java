@@ -1,8 +1,10 @@
 package com.winsun.fruitmix.login;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.winsun.fruitmix.BaseDataRepository;
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -14,13 +16,18 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
+import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.stations.Station;
+import com.winsun.fruitmix.stations.StationsDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.token.TokenDataSource;
+import com.winsun.fruitmix.token.WechatTokenUserWrapper;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
@@ -68,6 +75,8 @@ public class LoginUseCase extends BaseDataRepository {
 
     private EventBus eventBus;
 
+    private StationsDataSource stationsDataSource;
+
     public static String mToken;
     public static String mGateway;
 
@@ -75,7 +84,7 @@ public class LoginUseCase extends BaseDataRepository {
                          HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy, UploadMediaUseCase uploadMediaUseCase,
                          UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
                          SystemSettingDataSource systemSettingDataSource, ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus,
-                         ThreadManager threadManager,NewPhotoListDataLoader newPhotoListDataLoader) {
+                         ThreadManager threadManager, NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource) {
         super(threadManager);
         this.loggedInUserDataSource = loggedInUserDataSource;
         this.tokenDataSource = tokenDataSource;
@@ -89,6 +98,9 @@ public class LoginUseCase extends BaseDataRepository {
         this.imageGifLoaderInstance = imageGifLoaderInstance;
         this.newPhotoListDataLoader = newPhotoListDataLoader;
         this.eventBus = eventBus;
+
+        this.stationsDataSource = stationsDataSource;
+
     }
 
     public static LoginUseCase getInstance(LoggedInUserDataSource loggedInUserDataSource, TokenDataSource tokenDataSource,
@@ -96,12 +108,12 @@ public class LoginUseCase extends BaseDataRepository {
                                            UploadMediaUseCase uploadMediaUseCase, UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository,
                                            StationFileRepository stationFileRepository, SystemSettingDataSource systemSettingDataSource,
                                            ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager,
-                                           NewPhotoListDataLoader newPhotoListDataLoader) {
+                                           NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource) {
 
         if (instance == null)
             instance = new LoginUseCase(loggedInUserDataSource, tokenDataSource,
                     httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, mediaDataSourceRepository,
-                    stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager,newPhotoListDataLoader);
+                    stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager, newPhotoListDataLoader, stationsDataSource);
 
         return instance;
     }
@@ -110,11 +122,20 @@ public class LoginUseCase extends BaseDataRepository {
         instance = null;
     }
 
+    public static String getToken() {
+
+        return mToken;
+    }
+
+    public static String getGateway() {
+        return mGateway;
+    }
+
     public void loginWithNoParam(BaseOperateDataCallback<Boolean> callback) {
 
-        String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
+        String currentLoginToken = systemSettingDataSource.getCurrentLoginToken();
 
-        LoggedInUser loggedInUser = loggedInUserDataSource.getLoggedInUserByUserUUID(currentUserUUID);
+        LoggedInUser loggedInUser = loggedInUserDataSource.getLoggedInUserByToken(currentLoginToken);
 
         if (loggedInUser == null)
             callback.onFail(new OperationSQLException());
@@ -129,15 +150,15 @@ public class LoginUseCase extends BaseDataRepository {
 
             callback.onSucceed(true, new OperationSuccess());
 
-            getUsers();
+            getUsers(loggedInUser.getUser().getUuid());
 
         }
     }
 
-    private void getUsers() {
+    private void getUsers(String currentUserUUID) {
 
         userDataRepository.setCacheDirty();
-        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>());
+        userDataRepository.getUsers(currentUserUUID, new BaseLoadDataCallbackImpl<User>());
 
     }
 
@@ -176,7 +197,7 @@ public class LoginUseCase extends BaseDataRepository {
     private void getUsers(final LoadTokenParam loadTokenParam, final String token, final BaseLoadDataCallback<String> callback) {
 
         userDataRepository.setCacheDirty();
-        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>() {
+        userDataRepository.getUsers(loadTokenParam.getUserUUID(), new BaseLoadDataCallbackImpl<User>() {
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
 
@@ -292,7 +313,7 @@ public class LoginUseCase extends BaseDataRepository {
 
         callback.onSucceed(result, new OperationSuccess());
 
-        getUsers();
+        getUsers(currentLoggedInUser.getUser().getUuid());
     }
 
     private void initSystemState(String token, String gateway, String loginUserUUID) {
@@ -322,25 +343,33 @@ public class LoginUseCase extends BaseDataRepository {
 
         final BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
-        tokenDataSource.getToken(code, new BaseLoadDataCallback<String>() {
+        tokenDataSource.getToken(code, new BaseLoadDataCallback<WechatTokenUserWrapper>() {
             @Override
-            public void onSucceed(List<String> data, OperationResult operationResult) {
+            public void onSucceed(List<WechatTokenUserWrapper> data, OperationResult operationResult) {
 
-                String token = data.get(0);
+                WechatTokenUserWrapper wechatTokenUserWrapper = data.get(0);
+
+                String token = wechatTokenUserWrapper.getToken();
+
+                String guid = wechatTokenUserWrapper.getGuid();
 
                 //TODO: check get gateway and user when login by wechat code
 
-                Log.d(TAG, "loginWithNoParam: http request factory set current data token:" + token + " gateway: " + "10.10.9.49");
+                Log.d(TAG, "loginWithNoParam: http request factory set current data token:" + token + " gateway: " + "10.10.9.59" + " guid: " + guid);
 
-                httpRequestFactory.setCurrentData(token, "10.10.9.49");
+                mToken = token;
+
+                mGateway = Util.HTTP + "10.10.9.59";
+
+                httpRequestFactory.setCurrentData(token, Util.HTTP + "10.10.9.59");
+
+                httpRequestFactory.setPort(4000);
 
                 imageGifLoaderInstance.setToken(token);
 
                 stationFileRepository.clearDownloadFileRecordInCache();
 
-                runOnMainThreadCallback.onSucceed(true, operationResult);
-
-                getUsers(token);
+                getStationList(guid, runOnMainThreadCallback);
 
             }
 
@@ -352,10 +381,154 @@ public class LoginUseCase extends BaseDataRepository {
             }
         });
 
+    }
+
+    private void getStationList(final String guid, final BaseOperateDataCallback<Boolean> callback) {
+
+        stationsDataSource.getStationsByWechatGUID(guid, new BaseLoadDataCallback<Station>() {
+            @Override
+            public void onSucceed(List<Station> data, OperationResult operationResult) {
+
+                if (data.size() == 1) {
+
+                    getUsers(guid, data.get(0).getId(), callback);
+
+                } else if (data.size() > 1) {
+
+                    callback.onSucceed(true, new OperationResult() {
+                        @Override
+                        public String getResultMessage(Context context) {
+                            return "";
+                        }
+
+                        @Override
+                        public OperationResultType getOperationResultType() {
+                            return OperationResultType.MOER_THAN_ONE_STATION;
+                        }
+                    });
+
+                } else {
+
+                    callback.onFail(new OperationResult() {
+                        @Override
+                        public String getResultMessage(Context context) {
+                            return "未绑定nas用户，请绑定";
+                        }
+
+                        @Override
+                        public OperationResultType getOperationResultType() {
+                            return null;
+                        }
+                    });
+
+                }
+
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                callback.onFail(operationResult);
+            }
+        });
+
 
     }
 
-    private void getUsers(String token) {
+
+    private void getUsers(final String guid, final String stationID, final BaseOperateDataCallback<Boolean> callback) {
+
+        httpRequestFactory.setStationID(stationID);
+
+        userDataRepository.getUsersByStationID(stationID, new BaseLoadDataCallback<User>() {
+            @Override
+            public void onSucceed(List<User> data, OperationResult operationResult) {
+
+                User currentLocalUser = null;
+
+                for (User user : data) {
+
+                    if (user.getAssociatedWechatGUID().equals(guid)) {
+
+                        currentLocalUser = user;
+                        break;
+                    }
+
+                }
+
+                if (currentLocalUser == null) {
+
+                    Log.d(TAG, "onSucceed: not find associatedWechatGUID");
+
+                    callback.onFail(new OperationIOException());
+
+                } else {
+
+                    systemSettingDataSource.setCurrentLoginUserUUID(currentLocalUser.getUuid());
+
+                    systemSettingDataSource.setCurrentLoginStationID(stationID);
+
+                    getCurrentByUserUUID(currentLocalUser.getUuid(), callback);
+
+                }
+
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                callback.onFail(operationResult);
+            }
+        });
+
+    }
+
+    private void getCurrentByUserUUID(final String currentUserUUID, final BaseOperateDataCallback<Boolean> callback) {
+
+        userDataRepository.setCacheDirty();
+        userDataRepository.getUsers(currentUserUUID, new BaseLoadDataCallback<User>() {
+            @Override
+            public void onSucceed(List<User> data, OperationResult operationResult) {
+
+                for (final User user : data) {
+
+                    if (user.getUuid().equals(currentUserUUID)) {
+
+                        userDataRepository.getCurrentUserHome(new BaseLoadDataCallback<String>() {
+                            @Override
+                            public void onSucceed(List<String> data, OperationResult operationResult) {
+
+                                user.setHome(data.get(0));
+
+                                callback.onSucceed(true, new OperationSuccess());
+
+                                eventBus.postSticky(new OperationEvent(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN, new OperationSuccess()));
+
+                            }
+
+                            @Override
+                            public void onFail(OperationResult operationResult) {
+
+                                callback.onFail(operationResult);
+
+                            }
+                        });
+
+                    }
+
+                }
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                callback.onFail(operationResult);
+
+            }
+        });
 
 
     }

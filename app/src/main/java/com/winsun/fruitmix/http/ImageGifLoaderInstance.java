@@ -94,8 +94,8 @@ public class ImageGifLoaderInstance {
 
     private void createHeader() {
         headers = new ArrayMap<>();
-        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + LoginUseCase.mToken);
-        Log.i(TAG, "FNAS JWT: " + LoginUseCase.mToken);
+        headers.put(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + LoginUseCase.getToken());
+        Log.i(TAG, "FNAS JWT: " + LoginUseCase.getToken());
     }
 
     public GifLoader getGifLoader(Context context) {

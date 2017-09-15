@@ -80,7 +80,7 @@
             android:clickable="true"
             android:onClick="@{()->wechatLoginListener.wechatLogin()}"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <View
                 android:layout_width="match_parent"

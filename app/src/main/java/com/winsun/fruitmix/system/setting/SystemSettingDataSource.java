@@ -19,6 +19,12 @@ public class SystemSettingDataSource {
 
     public static final String CURRENT_LOGIN_USER_UUID = "current_login_user_uuid";
 
+    public static final String CURRENT_LOGIN_TOKEN = "current_login_token";
+
+    public static final String CURRENT_LOGIN_STATION_ID = "current_login_station_id";
+
+    public static final String CURRENT_EQUIPMENT_IP = "current_equipment_ip";
+
     private static SystemSettingDataSource instance;
 
     static SystemSettingDataSource getInstance(Context context) {
@@ -98,5 +104,54 @@ public class SystemSettingDataSource {
         editor.apply();
 
     }
+
+    public String getCurrentLoginToken() {
+
+        return sharedPreferences.getString(CURRENT_LOGIN_TOKEN, "");
+
+    }
+
+    public void setCurrentLoginToken(String token) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putString(CURRENT_LOGIN_TOKEN, token);
+        editor.apply();
+
+    }
+
+    public String getCurrentLoginStationID() {
+
+        return sharedPreferences.getString(CURRENT_LOGIN_STATION_ID, "");
+
+    }
+
+    public void setCurrentLoginStationID(String currentLoginUserUUID) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putString(CURRENT_LOGIN_STATION_ID, currentLoginUserUUID);
+        editor.apply();
+
+    }
+
+    public String getCurrentEquipmentIp() {
+
+        return sharedPreferences.getString(CURRENT_EQUIPMENT_IP, "");
+
+    }
+
+    public void setCurrentEquipmentIp(String currentEquipmentIp) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putString(CURRENT_EQUIPMENT_IP, currentEquipmentIp);
+        editor.apply();
+
+    }
+
 
 }

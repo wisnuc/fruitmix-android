@@ -67,9 +67,13 @@ public class LoggedInUserDBDataSource implements LoggedInUserDataSource {
     @Override
     public LoggedInUser getLoggedInUserByUserUUID(String userUUID) {
 
-        return dbUtils.getCurrentLoggedInUser(userUUID);
+        return dbUtils.getCurrentLoggedInUserByUUID(userUUID);
 
     }
 
+    @Override
+    public LoggedInUser getLoggedInUserByToken(String token) {
 
+        return dbUtils.getCurrentLoggedInUserByToken(token);
+    }
 }

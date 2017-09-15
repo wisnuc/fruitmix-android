@@ -29,20 +29,20 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
 
     private UserDataRepository mUserDataRepository;
 
-    public CreateUserPresenterImpl(CreateUserView createUserView, UserDataRepository userDataRepository) {
+    public CreateUserPresenterImpl(CreateUserView createUserView,String currentLoginUserUUID, UserDataRepository userDataRepository) {
 
         this.createUserView = createUserView;
         this.mUserDataRepository = userDataRepository;
 
         remoteUserNames = new ArrayList<>();
 
-        getUserInThread(mUserDataRepository);
+        getUserInThread(currentLoginUserUUID,mUserDataRepository);
 
     }
 
-    private void getUserInThread(UserDataRepository userDataRepository) {
+    private void getUserInThread(String userUUID,UserDataRepository userDataRepository) {
 
-        userDataRepository.getUsers(new BaseLoadDataCallbackImpl<User>() {
+        userDataRepository.getUsers(userUUID,new BaseLoadDataCallbackImpl<User>() {
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);

@@ -145,7 +145,9 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                 dismissDialog();
 
-                startNavPagerActivity();
+//                startNavPagerActivity();
+
+                Toast.makeText(mContext, "登录成功", Toast.LENGTH_SHORT).show();
 
             }
 

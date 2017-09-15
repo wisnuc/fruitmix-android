@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.token.LoadTokenParam;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 /**
@@ -21,6 +20,8 @@ public class HttpRequestFactory {
     private String token;
     private String gateway;
     private int port;
+
+    private String stationID;
 
     private HttpRequestFactory() {
 
@@ -61,11 +62,12 @@ public class HttpRequestFactory {
     }
 
     public String getGateway() {
-        return LoginUseCase.mGateway;
+        return LoginUseCase.getGateway();
     }
 
     public String getToken() {
-        return LoginUseCase.mToken;
+
+        return LoginUseCase.getToken();
     }
 
     public void setCurrentData(String token, String gateway) {
@@ -80,21 +82,19 @@ public class HttpRequestFactory {
         return port;
     }
 
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public void setStationID(String stationID) {
+        this.stationID = stationID;
+    }
+
+
     public HttpRequest createGetRequestWithoutToken(String url) {
 
         return new HttpRequest(url, Util.HTTP_GET_METHOD);
 
-    }
-
-    public HttpRequest createGetRequestByPathWithoutToken(String httpPath) {
-        return new HttpRequest(createUrl(httpPath), Util.HTTP_GET_METHOD);
-    }
-
-    private HttpRequest createHttpGetRequestWithFullUrl(String url) {
-        HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, getTokenWithHead());
-
-        return httpRequest;
     }
 
     public HttpRequest createHttpGetTokenRequest(LoadTokenParam loadTokenParam) {
@@ -107,9 +107,63 @@ public class HttpRequestFactory {
         return httpRequest;
     }
 
+    public HttpRequest createGetRequestByPathWithoutToken(String httpPath) {
+
+        if (stationID != null) {
+            return createHttpGetRequestThroughPipe(stationID, httpPath);
+        } else {
+            return new HttpRequest(createUrl(httpPath), Util.HTTP_GET_METHOD);
+        }
+    }
+
     public HttpRequest createHttpGetRequest(String httpPath) {
 
-        return createHttpGetRequestWithFullUrl(createUrl(httpPath));
+        if (stationID != null) {
+            return createHttpGetRequestThroughPipe(stationID, httpPath);
+        } else {
+            return createHttpGetRequestWithFullUrl(createUrl(httpPath));
+        }
+
+    }
+
+    public HttpRequest createHttpGetRequestThroughPipe(String stationID, String httpPath) {
+
+        String httpPathEncodeByBase64 = Base64.encodeToString(httpPath.getBytes(), Base64.NO_WRAP);
+
+        String newHttpPath = "/c/v1/stations/" + stationID + "/json?resource=" + httpPathEncodeByBase64
+                + "&method=GET";
+
+        return createHttpGetRequestWithOutJWTHeader(newHttpPath);
+
+    }
+
+    private HttpRequest createHttpGetRequestWithFullUrl(String url) {
+        HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, getTokenWithHead());
+
+        return httpRequest;
+    }
+
+
+    public HttpRequest createHttpGetRequestWithOutJWTHeader(String httpPath) {
+
+        HttpRequest httpRequest = new HttpRequest(createUrl(httpPath), Util.HTTP_GET_METHOD);
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, getToken());
+
+        return httpRequest;
+
+    }
+
+
+    public HttpRequest createHttpGetRequestThroughPipeWithoutToken(String stationID, String httpPath) {
+
+        String httpPathEncodeByBase64 = Base64.encodeToString(httpPath.getBytes(), Base64.NO_WRAP);
+
+        String url = getGateway() + ":" + port + "/c/v1/stations/" + stationID + "/json?resource=" + httpPathEncodeByBase64
+                + "&method=GET";
+
+        return createGetRequestWithoutToken(url);
+
     }
 
     public HttpRequest createHttpPostRequest(String httpPath, String body) {

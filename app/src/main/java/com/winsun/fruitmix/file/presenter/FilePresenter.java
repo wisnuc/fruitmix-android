@@ -58,6 +58,7 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BaseBindingViewHolder;
@@ -140,7 +141,7 @@ public class FilePresenter implements OnViewSelectListener {
     private FileListSelectModeListener fileListSelectModeListener;
 
     public FilePresenter(Activity activity, FileView fileView, FileListSelectModeListener fileListSelectModeListener, StationFileRepository stationFileRepository, NoContentViewModel noContentViewModel, LoadingViewModel loadingViewModel, FileViewModel fileViewModel,
-                         HandleFileListOperateCallback handleFileListOperateCallback, LoggedInUserDataSource loggedInUserRepository, SystemSettingDataSource systemSettingDataSource, FileDownloadManager fileDownloadManager) {
+                         HandleFileListOperateCallback handleFileListOperateCallback, UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource, FileDownloadManager fileDownloadManager) {
         this.activity = activity;
         this.fileView = fileView;
         this.fileListSelectModeListener = fileListSelectModeListener;
@@ -152,7 +153,7 @@ public class FilePresenter implements OnViewSelectListener {
         this.fileDownloadManager = fileDownloadManager;
 
         currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
-        rootUUID = loggedInUserRepository.getLoggedInUserByUserUUID(currentUserUUID).getUser().getHome();
+        rootUUID = userDataRepository.getUserByUUID(currentUserUUID).getHome();
 
         init();
     }

@@ -9,6 +9,7 @@ import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.user.datasource.InjectUser;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -21,7 +22,7 @@ public class InjectUploadMediaUseCase {
     public static UploadMediaUseCase provideUploadMediaUseCase(Context context) {
         return UploadMediaUseCase.getInstance(InjectMedia.provideMediaDataSourceRepository(context),
                 InjectStationFileRepository.provideStationFileRepository(context),
-                InjectLoggedInUser.provideLoggedInUserRepository(context), ThreadManagerImpl.getInstance(),
+                InjectUser.provideRepository(context), ThreadManagerImpl.getInstance(),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(context),
                 CheckMediaIsUploadStrategy.getInstance(), CheckMediaIsExistStrategy.getInstance(),Build.MODEL, EventBus.getDefault(),
                 CalcMediaDigestStrategy.getInstance());

@@ -51,15 +51,17 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
     private EquipmentDataSource equipmentDataSource;
     private String currentIP;
+    private String currentLoginUserUUID;
 
     public UserManagePresenterImpl(UserManageView userManageView, EquipmentItemViewModel equipmentItemViewModel, UserManageActivity.UserManageViewModel userManageViewModel, UserDataRepository userDataRepository,
-                                   EquipmentDataSource equipmentDataSource, String currentIP) {
+                                   EquipmentDataSource equipmentDataSource, String currentIP,String currentLoginUserUUID) {
         this.userManageView = userManageView;
         this.userDataRepository = userDataRepository;
         this.userManageViewModel = userManageViewModel;
         this.equipmentItemViewModel = equipmentItemViewModel;
         this.equipmentDataSource = equipmentDataSource;
         this.currentIP = currentIP;
+        this.currentLoginUserUUID = currentLoginUserUUID;
 
         mUserListAdapter = new UserListAdapter();
     }
@@ -110,7 +112,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
     private void getUserInThread() {
 
-        userDataRepository.getUsers(new BaseLoadDataCallback<User>() {
+        userDataRepository.getUsers(currentLoginUserUUID,new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(final List<User> data, OperationResult operationResult) {
 
