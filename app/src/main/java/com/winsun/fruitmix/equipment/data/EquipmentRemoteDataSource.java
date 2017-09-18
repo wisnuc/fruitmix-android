@@ -19,7 +19,7 @@ import com.winsun.fruitmix.util.Util;
  * Created by Administrator on 2017/7/11.
  */
 
-public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implements EquipmentDataSource{
+public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implements EquipmentDataSource {
 
     public static final String TAG = EquipmentRemoteDataSource.class.getSimpleName();
 
@@ -53,6 +53,8 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
         wrapper.loadCall(httpRequest, callback, new RemoteEquipmentHostAliasParser());
 
     }
+
+    //TODO: get equipment info when login by wechat code,how to handle it
 
     @Override
     public void getEquipmentInfo(String equipmentIP, BaseLoadDataCallback<EquipmentInfo> callback) {

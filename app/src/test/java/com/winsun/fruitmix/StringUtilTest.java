@@ -17,7 +17,10 @@ public class StringUtilTest {
 
         String[] result = url.split("/");
 
-        assertEquals("586f0eb6-2db8-47b1-8dc3-0bb13b0c7088", result[result.length - 1]);
+        assertEquals("", result[0]);
+        assertEquals("v1", result[1]);
+        assertEquals("tickets", result[2]);
+        assertEquals("586f0eb6-2db8-47b1-8dc3-0bb13b0c7088", result[3]);
 
     }
 
@@ -35,5 +38,29 @@ public class StringUtilTest {
         assertEquals(ip, result[1]);
 
     }
+
+    @Test
+    public void testCreateBodyUsingQueryStr() {
+
+        String httpPath = "/media/5669da130c25ccb372d11c916b928d561517c04bbac9e0d9c2c7c0713af06240?alt=thumbnail&width=64&height=64&autoOrient=true&moidifier=caret";
+
+        String[] splitResult = httpPath.split("\\?");
+
+        assertEquals("/media/5669da130c25ccb372d11c916b928d561517c04bbac9e0d9c2c7c0713af06240", splitResult[0]);
+
+        String[] queryStrs = splitResult[1].split("&");
+
+        String[] queryStrSplitResult = queryStrs[0].split("=");
+
+        assertEquals("alt",queryStrSplitResult[0]);
+        assertEquals("thumbnail",queryStrSplitResult[1]);
+
+        queryStrSplitResult = queryStrs[1].split("=");
+
+        assertEquals("width",queryStrSplitResult[0]);
+        assertEquals("64",queryStrSplitResult[1]);
+
+    }
+
 
 }

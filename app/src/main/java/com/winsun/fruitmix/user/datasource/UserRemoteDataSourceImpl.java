@@ -141,11 +141,12 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
     }
 
+    //TODO: refactor get users:save current user name,avatar,and do not insert into db
 
     @Override
     public void getUsersByStationID(String stationID, BaseLoadDataCallback<User> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestThroughPipe(stationID,USER_PARAMETER);
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER);
 
         wrapper.loadCall(httpRequest,callback,new RemoteLoginUsersParser());
 

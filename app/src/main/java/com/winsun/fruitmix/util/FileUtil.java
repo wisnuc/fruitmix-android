@@ -409,7 +409,9 @@ public class FileUtil {
 
             long contentLength = responseBody.contentLength();
 
-            if (contentLength != 0) {
+            Log.d(TAG, "writeResponseBodyToFolder: contentLength: " + contentLength);
+
+            if (contentLength > 0) {
                 newFileDownloadState.setFileSize(contentLength);
             }
 
@@ -464,9 +466,13 @@ public class FileUtil {
 
             fileDownloadItem.setFileDownloadState(new FileDownloadErrorState(fileDownloadItem));
 
-            boolean result = downloadFile.delete();
+            if (downloadFile.exists()) {
 
-            Log.d(TAG, "writeResponseBodyToFolder: io exception occur,delete file: " + result);
+                boolean result = downloadFile.delete();
+
+                Log.d(TAG, "writeResponseBodyToFolder: io exception occur,delete file: " + result);
+
+            }
 
             return false;
         } finally {

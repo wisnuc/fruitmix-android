@@ -14,6 +14,7 @@ import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.stations.StationsRepository;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.datasource.UserDataRepositoryImpl;
 import com.winsun.fruitmix.util.FileUtil;
@@ -51,6 +52,8 @@ public class InitSystem {
         UploadMediaUseCase.destroyInstance();
 
         NewPhotoListDataLoader.destroyInstance();
+
+        InjectSystemSettingDataSource.provideSystemSettingDataSource(context).setCurrentLoginStationID("");
 
         ButlerService.startButlerService(context);
 

@@ -44,7 +44,6 @@ public class LogoutUseCase {
 
     }
 
-
     public void logout() {
 
         String currentLoginUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();

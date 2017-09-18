@@ -81,7 +81,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         String encodedFileName = URLEncoder.encode(fileDownloadState.getFileName(), "UTF-8");
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(DOWNLOAD_FILE_PARAMETER + "/"
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetFileRequest(DOWNLOAD_FILE_PARAMETER + "/"
                 + fileDownloadState.getDriveUUID() + "/dirs/" + fileDownloadState.getParentFolderUUID()
                 + "/entries/" + fileDownloadState.getFileUUID() + "?name=" + encodedFileName);
 
@@ -118,7 +118,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         String path = "/drives/" + driveUUID + "/dirs/" + dirUUID + "/entries";
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(path);
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path,"");
 
         Log.i(TAG, "createFolder: start create");
 

@@ -364,7 +364,7 @@ public class Media implements Parcelable {
 
         HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
 
-        return httpRequestFactory.createHttpGetRequest(req).getUrl();
+        return httpRequestFactory.createHttpGetFileRequest(req).getUrl();
 
     }
 

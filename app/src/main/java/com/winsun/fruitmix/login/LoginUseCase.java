@@ -499,6 +499,8 @@ public class LoginUseCase extends BaseDataRepository {
 
                                 initSystemState(mToken, mGateway, currentUserUUID);
 
+                                systemSettingDataSource.setAutoUploadOrNot(false);
+
                                 systemSettingDataSource.setCurrentLoginStationID(stationID);
 
                                 userDataRepository.clearAllUsersInDB();

@@ -403,7 +403,7 @@ public class FilePresenter implements OnViewSelectListener {
                 break;
             case DOWNLOADING:
 
-                if (mCurrentDownloadFileCommand != null){
+                if (mCurrentDownloadFileCommand != null) {
 
                     FileDownloadItem fileDownloadItem = mCurrentDownloadFileCommand.getFileDownloadItem();
                     currentDownloadFileProgressDialog.setProgress(fileDownloadItem.getCurrentProgress(progressMax));
@@ -424,7 +424,7 @@ public class FilePresenter implements OnViewSelectListener {
                     OpenFileCommand openFileCommand = new OpenFileCommand(activity, fileDownloadItem.getFileName());
                     openFileCommand.execute();
 
-                } else {
+                } else if (currentDownloadFileForShareCommand != null) {
 
                     checkFileForShareDownloaded(needDownloadFilesForShare);
 
@@ -455,7 +455,7 @@ public class FilePresenter implements OnViewSelectListener {
                     else
                         Toast.makeText(activity, activity.getText(R.string.download_failed), Toast.LENGTH_SHORT).show();
 
-                } else {
+                } else if (currentDownloadFileForShareCommand != null) {
 
                     currentDownloadFileForShareCommand.unExecute();
 
@@ -481,7 +481,7 @@ public class FilePresenter implements OnViewSelectListener {
 
                     Toast.makeText(activity, activity.getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
 
-                } else {
+                } else if (currentDownloadFileForShareCommand != null) {
 
                     currentDownloadFileForShareCommand.unExecute();
 
