@@ -257,4 +257,13 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
     public boolean clearAllStationMediasInDB() {
         return stationMediaRepository.clearAllStationMediasInDB();
     }
+
+    @Override
+    public void resetState() {
+
+        stationMediaRepository.setCacheDirty();
+
+        localMediaRepository.resetState();
+
+    }
 }

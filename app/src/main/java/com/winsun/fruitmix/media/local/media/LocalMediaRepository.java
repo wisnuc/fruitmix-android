@@ -64,6 +64,12 @@ public class LocalMediaRepository {
         this.calcMediaDigestStrategy = calcMediaDigestStrategy;
     }
 
+    public void resetState(){
+
+        hasGetMediaFromAppDB = false;
+
+    }
+
     public void getMedia(final BaseLoadDataCallback<Media> callback) {
 
         if (!hasGetMediaFromAppDB) {

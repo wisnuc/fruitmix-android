@@ -222,6 +222,8 @@ public class LoginUseCaseTest {
 
         verify(mediaDataSourceRepository).clearAllStationMediasInDB();
 
+        verify(mediaDataSourceRepository).resetState();
+
         verify(userDataRepository).getUsers(loadUserCallbackArgumentCaptor.capture());
 
     }
@@ -329,6 +331,8 @@ public class LoginUseCaseTest {
         verify(userDataRepository).clearAllUsersInDB();
 
         verify(mediaDataSourceRepository).clearAllStationMediasInDB();
+
+        verify(mediaDataSourceRepository).resetState();
 
         verify(userDataRepository).getUsers(any(BaseLoadDataCallback.class));
 

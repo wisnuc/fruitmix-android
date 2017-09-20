@@ -21,6 +21,7 @@ import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
@@ -133,7 +134,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     }
 
     @Override
-    public void uploadFile(LocalFile file, String driveUUID, String dirUUID, BaseOperateDataCallback<Boolean> callback) {
+    public OperationResult uploadFile(LocalFile file, String driveUUID, String dirUUID) {
 
         String path = "/drives/" + driveUUID + "/dirs/" + dirUUID + "/entries";
 
@@ -150,22 +151,22 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
             Log.i(TAG, "uploadFile: http response code: " + httpResponse.getResponseCode());
 
             if (httpResponse.getResponseCode() == 200)
-                callback.onSucceed(true, new OperationSuccess());
+                return new OperationSuccess();
             else
-                callback.onFail(new OperationNetworkException(httpResponse));
+                return new OperationNetworkException(httpResponse);
 
         } catch (MalformedURLException e) {
 
-            callback.onFail(new OperationMalformedUrlException());
+            return new OperationMalformedUrlException();
 
         } catch (SocketTimeoutException ex) {
 
-            callback.onFail(new OperationSocketTimeoutException());
+            return new OperationSocketTimeoutException();
 
         } catch (IOException e) {
             e.printStackTrace();
 
-            callback.onFail(new OperationIOException());
+            return new OperationIOException();
         }
 
     }

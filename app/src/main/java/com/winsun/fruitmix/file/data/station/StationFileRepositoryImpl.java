@@ -210,9 +210,9 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     }
 
     @Override
-    public void uploadFile(LocalFile file, String driveUUID, String dirUUID, BaseOperateDataCallback<Boolean> callback) {
+    public OperationResult uploadFile(LocalFile file, String driveUUID, String dirUUID) {
 
-        stationFileDataSource.uploadFile(file, driveUUID, dirUUID, callback);
+        return stationFileDataSource.uploadFile(file, driveUUID, dirUUID);
 
     }
 }

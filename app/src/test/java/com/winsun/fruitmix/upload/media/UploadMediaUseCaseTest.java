@@ -332,17 +332,12 @@ public class UploadMediaUseCaseTest {
 
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false).thenReturn(false).thenReturn(false).thenReturn(true);
 
+        when(stationFileRepository.uploadFile(any(LocalFile.class), anyString(), anyString())).thenReturn(new OperationSuccess());
+
         uploadWhenUploadParentFolderExistAndUploadFolderExist(Collections.singletonList(media));
-
-        ArgumentCaptor<BaseOperateDataCallback<Boolean>> captor = ArgumentCaptor.forClass(BaseOperateDataCallback.class);
-
-        verify(stationFileRepository).uploadFile(any(LocalFile.class), anyString(), anyString(), captor.capture());
-
-        captor.getValue().onSucceed(true, new OperationSuccess());
 
         assertTrue(uploadMediaUseCase.mStopUpload);
         assertFalse(uploadMediaUseCase.mAlreadyStartUpload);
-
 
         assertEquals(1, uploadMediaUseCase.alreadyUploadedMediaCount);
 
@@ -414,15 +409,12 @@ public class UploadMediaUseCaseTest {
 
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
 
+        when(stationFileRepository.uploadFile(any(LocalFile.class), anyString(), anyString())).thenReturn(new OperationNetworkException(new HttpResponse(404, "")));
+
         Media media = createMedia();
 
         uploadWhenUploadParentFolderExistAndUploadFolderExist(Collections.singletonList(media));
 
-        ArgumentCaptor<BaseOperateDataCallback<Boolean>> captor = ArgumentCaptor.forClass(BaseOperateDataCallback.class);
-
-        verify(stationFileRepository).uploadFile(any(LocalFile.class), eq(testUserHome), eq(testUploadFolderUUID), captor.capture());
-
-        captor.getValue().onFail(new OperationNetworkException(new HttpResponse(404, "")));
 
         assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
         assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
@@ -481,15 +473,17 @@ public class UploadMediaUseCaseTest {
 
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
 
+        when(stationFileRepository.uploadFile(any(LocalFile.class), anyString(), anyString())).thenReturn(new OperationSuccess());
+
         uploadWhenUploadParentFolderExistAndUploadFolderExist(Collections.singletonList(media));
 
-        verify(stationFileRepository, never()).uploadFile(any(LocalFile.class), anyString(), anyString(), any(BaseOperateDataCallback.class));
+        verify(stationFileRepository, never()).uploadFile(any(LocalFile.class), anyString(), anyString());
 
         when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
 
         secondCallUploadWhenUploadParentFolderExistAndUploadFolderExist(Collections.singletonList(media));
 
-        verify(stationFileRepository).uploadFile(any(LocalFile.class), anyString(), anyString(), any(BaseOperateDataCallback.class));
+        verify(stationFileRepository).uploadFile(any(LocalFile.class), anyString(), anyString());
 
     }
 
@@ -630,13 +624,9 @@ public class UploadMediaUseCaseTest {
 
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false).thenReturn(false).thenReturn(false).thenReturn(false).thenReturn(false).thenReturn(true);
 
+        when(stationFileRepository.uploadFile(any(LocalFile.class), anyString(), anyString())).thenReturn(new OperationSuccess());
+
         uploadWhenUploadParentFolderExistAndUploadFolderExist(medias);
-
-        ArgumentCaptor<BaseOperateDataCallback<Boolean>> captor = ArgumentCaptor.forClass(BaseOperateDataCallback.class);
-
-        verify(stationFileRepository).uploadFile(any(LocalFile.class), anyString(), anyString(), captor.capture());
-
-        captor.getValue().onSucceed(true, new OperationSuccess());
 
         assertTrue(uploadMediaUseCase.mStopUpload);
         assertFalse(uploadMediaUseCase.mAlreadyStartUpload);

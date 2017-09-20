@@ -26,4 +26,6 @@ public interface MediaDataSourceRepository {
 
     boolean clearAllStationMediasInDB();
 
+    void resetState();
+
 }

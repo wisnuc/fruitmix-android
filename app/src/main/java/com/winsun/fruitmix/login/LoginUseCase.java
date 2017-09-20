@@ -160,6 +160,8 @@ public class LoginUseCase extends BaseDataRepository {
 
                 mediaDataSourceRepository.clearAllStationMediasInDB();
 
+                mediaDataSourceRepository.resetState();
+
                 getUsers(loadTokenParam, token, callback);
 
             }
@@ -274,6 +276,8 @@ public class LoginUseCase extends BaseDataRepository {
         userDataRepository.clearAllUsersInDB();
 
         mediaDataSourceRepository.clearAllStationMediasInDB();
+
+        mediaDataSourceRepository.resetState();
 
         String preUploadUserUUID = systemSettingDataSource.getCurrentUploadUserUUID();
 
