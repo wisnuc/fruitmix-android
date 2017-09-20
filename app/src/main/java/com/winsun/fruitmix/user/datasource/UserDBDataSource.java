@@ -5,6 +5,7 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/7/7.
@@ -12,7 +13,7 @@ import java.util.Collection;
 
 public interface UserDBDataSource  {
 
-    void getUsers(BaseLoadDataCallback<User> callback);
+    List<User> getUsers();
 
     OperationResult insertUser(Collection<User> users);
 

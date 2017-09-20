@@ -10,27 +10,21 @@ import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
-import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
-import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.util.Util;
-
-import org.json.JSONException;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;

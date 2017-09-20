@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="user"
+            type="com.winsun.fruitmix.user.User" />
+
+    </data>
+
+    <FrameLayout
+        android:layout_width="64dp"
+        android:layout_height="64dp">
+
+        <TextView
+            android:id="@+id/avatar_textview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@{user.defaultAvatarBgColorResourceId,default=@drawable/share_portrait_bg}"
+            android:gravity="center"
+            android:text="@{user.defaultAvatar}"
+            android:textColor="@color/eighty_seven_percent_white"
+            android:textSize="18dp"
+            android:visibility="gone" />
+
+        <com.winsun.fruitmix.component.CircleImageView
+            android:id="@+id/avatar_imageview"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@color/default_place_holder"
+            android:scaleType="centerCrop"
+            app:civ_border_width="0dp" />
+
+    </FrameLayout>
+
+</layout>
+

@@ -5,8 +5,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.HttpRequestFactory;
-import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.RemoteCurrentUserParser;
@@ -14,16 +13,12 @@ import com.winsun.fruitmix.parser.RemoteInsertUserParser;
 import com.winsun.fruitmix.parser.RemoteUserHomeParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -152,4 +147,12 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
     }
 
+    @Override
+    public void getUserByUUID(String userUUID, BaseLoadDataCallback<User> callback) {
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER + "/" + userUUID);
+
+        wrapper.loadCall(httpRequest,callback,new RemoteCurrentUserParser());
+
+    }
 }

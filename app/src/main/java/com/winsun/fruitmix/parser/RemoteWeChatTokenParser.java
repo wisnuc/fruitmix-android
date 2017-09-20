@@ -1,7 +1,6 @@
 package com.winsun.fruitmix.parser;
 
-import com.winsun.fruitmix.token.WechatTokenUserWrapper;
-import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,19 +12,19 @@ import java.util.List;
  * Created by Administrator on 2017/7/10.
  */
 
-public class RemoteWeChatTokenParser extends BaseRemoteDataParser implements RemoteDatasParser<WechatTokenUserWrapper> {
+public class RemoteWeChatTokenParser extends BaseRemoteDataParser implements RemoteDatasParser<WeChatTokenUserWrapper> {
 
-    public List<WechatTokenUserWrapper> parse(String json) throws JSONException {
+    public List<WeChatTokenUserWrapper> parse(String json) throws JSONException {
 
         String rootStr = checkHasWrapper(json);
 
-        WechatTokenUserWrapper wechatTokenUserWrapper = new WechatTokenUserWrapper();
+        WeChatTokenUserWrapper weChatTokenUserWrapper = new WeChatTokenUserWrapper();
 
         JSONObject root = new JSONObject(rootStr);
 
         String token = root.optString("token");
 
-        wechatTokenUserWrapper.setToken(token);
+        weChatTokenUserWrapper.setToken(token);
 
         JSONObject user = root.getJSONObject("user");
 
@@ -33,11 +32,11 @@ public class RemoteWeChatTokenParser extends BaseRemoteDataParser implements Rem
         String avatarUrl = user.optString("avatarUrl");
         String guid = user.optString("id");
 
-        wechatTokenUserWrapper.setNickName(nickName);
-        wechatTokenUserWrapper.setAvatarUrl(avatarUrl);
-        wechatTokenUserWrapper.setGuid(guid);
+        weChatTokenUserWrapper.setNickName(nickName);
+        weChatTokenUserWrapper.setAvatarUrl(avatarUrl);
+        weChatTokenUserWrapper.setGuid(guid);
 
-        return Collections.singletonList(wechatTokenUserWrapper);
+        return Collections.singletonList(weChatTokenUserWrapper);
     }
 
 }

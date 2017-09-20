@@ -11,7 +11,7 @@ import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.eventbus.UserRequestEvent;
 import com.winsun.fruitmix.http.CheckIpHttpUtil;
 import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.http.OkHttpUtil;

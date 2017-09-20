@@ -23,11 +23,10 @@ public class UserDBDataSourceImpl implements UserDBDataSource {
     }
 
     @Override
-    public void getUsers(BaseLoadDataCallback<User> callback) {
+    public List<User> getUsers() {
 
-        List<User> users = dbUtils.getAllRemoteUser();
+        return dbUtils.getAllRemoteUser();
 
-        callback.onSucceed(users, new OperationSuccess());
     }
 
     @Override

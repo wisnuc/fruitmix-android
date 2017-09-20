@@ -18,4 +18,6 @@ public interface UserRemoteDataSource {
 
     void getUsersByStationID(String stationID, BaseLoadDataCallback<User> callback);
 
+    void getUserByUUID(String userUUID,BaseLoadDataCallback<User> callback);
+
 }

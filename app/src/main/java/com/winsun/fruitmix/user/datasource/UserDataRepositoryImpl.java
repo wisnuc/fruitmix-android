@@ -9,6 +9,7 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,7 +56,7 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
     }
 
     @Override
-    public void getUsers(final String currentLoginUserUUID,final BaseLoadDataCallback<User> callback) {
+    public void getUsers(final String currentLoginUserUUID, final BaseLoadDataCallback<User> callback) {
 
         final BaseLoadDataCallback<User> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
 
@@ -70,7 +71,7 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
             @Override
             public void run() {
 
-                userRemoteDataSource.getUsers(currentLoginUserUUID,new BaseLoadDataCallback<User>() {
+                userRemoteDataSource.getUsers(currentLoginUserUUID, new BaseLoadDataCallback<User>() {
                     @Override
                     public void onSucceed(List<User> data, OperationResult operationResult) {
 
@@ -99,31 +100,20 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
     }
 
     private void getUserFromDB(final BaseLoadDataCallback<User> callback) {
-        userDBDataSource.getUsers(new BaseLoadDataCallback<User>() {
-            @Override
-            public void onSucceed(List<User> data, OperationResult operationResult) {
 
-                cacheUsers.clear();
-                cacheUsers.putAll(buildRemoteUserMapKeyIsUUID(data));
+        List<User> users = userDBDataSource.getUsers();
 
-                cacheDirty = false;
+        cacheUsers.clear();
+        cacheUsers.putAll(buildRemoteUserMapKeyIsUUID(users));
 
-                if (callback != null)
-                    callback.onSucceed(data, operationResult);
-            }
+        cacheDirty = false;
 
-            @Override
-            public void onFail(OperationResult operationResult) {
+        if (callback != null)
+            callback.onSucceed(users, new OperationSuccess());
 
-                cacheDirty = false;
-
-                if (callback != null)
-                    callback.onFail(operationResult);
-            }
-        });
     }
 
-    private ConcurrentMap<String, User> buildRemoteUserMapKeyIsUUID(List<User> users) {
+    private ConcurrentMap<String, User> buildRemoteUserMapKeyIsUUID(Collection<User> users) {
 
         ConcurrentMap<String, User> userConcurrentMap = new ConcurrentHashMap<>(users.size());
         for (User user : users) {
@@ -191,15 +181,49 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                userRemoteDataSource.getUsersByStationID(stationID,createLoadCallbackRunOnMainThread(callback));
+                userRemoteDataSource.getUsersByStationID(stationID, createLoadCallbackRunOnMainThread(callback));
             }
         });
 
+    }
+
+    @Override
+    public void getUserByUUID(final String userUUID, final BaseLoadDataCallback<User> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                userRemoteDataSource.getUserByUUID(userUUID, createLoadCallbackRunOnMainThread(callback));
+            }
+        });
+
+    }
+
+
+    @Override
+    public void insertUsers(Collection<User> users) {
+
+        cacheDirty = false;
+
+        userDBDataSource.insertUser(users);
+
+        cacheUsers.clear();
+        cacheUsers.putAll(buildRemoteUserMapKeyIsUUID(users));
 
     }
 
     @Override
     public User getUserByUUID(String userUUID) {
+
+        if (cacheDirty || cacheUsers.isEmpty()) {
+
+            List<User> users = userDBDataSource.getUsers();
+
+            cacheUsers.clear();
+            cacheUsers.putAll(buildRemoteUserMapKeyIsUUID(users));
+
+        }
+
         return cacheUsers.get(userUUID);
     }
 }

@@ -2,6 +2,7 @@ package com.winsun.fruitmix.http;
 
 import android.content.Context;
 
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 
 /**
@@ -26,6 +27,7 @@ public class InjectHttp {
     public static HttpRequestFactory provideHttpRequestFactory(Context context) {
 
         return HttpRequestFactory.getInstance(InjectSystemSettingDataSource.provideSystemSettingDataSource(context));
+
     }
 
     public static IHttpFileUtil provideIHttpFileUtil() {

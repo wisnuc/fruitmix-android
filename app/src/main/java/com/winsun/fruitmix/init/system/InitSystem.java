@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.winsun.fruitmix.file.data.station.StationFileRepositoryImpl;
-import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;

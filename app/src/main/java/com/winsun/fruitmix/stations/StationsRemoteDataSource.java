@@ -3,7 +3,7 @@ package com.winsun.fruitmix.stations;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.parser.RemoteStationParser;
 
@@ -30,7 +30,7 @@ public class StationsRemoteDataSource extends BaseRemoteDataSourceImpl implement
     @Override
     public void getStationsByWechatGUID(String guid, BaseLoadDataCallback<Station> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestWithOutJWTHeader("/c/v1/users/" + guid + "/stations");
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap("/c/v1/users/" + guid + "/stations");
 
         wrapper.loadCall(httpRequest, callback, new RemoteStationParser());
 

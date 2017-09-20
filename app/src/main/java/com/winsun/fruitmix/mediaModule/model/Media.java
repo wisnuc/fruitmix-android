@@ -8,12 +8,8 @@ import android.util.Log;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.InjectHttp;
-import com.winsun.fruitmix.http.OkHttpUtil;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 /**

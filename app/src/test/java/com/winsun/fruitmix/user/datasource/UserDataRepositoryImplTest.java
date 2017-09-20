@@ -159,7 +159,7 @@ public class UserDataRepositoryImplTest {
 
         loadRemoteDataCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(createUser()), new OperationSuccess());
 
-        verify(userDBDataSource, never()).getUsers(any(BaseLoadDataCallback.class));
+        verify(userDBDataSource, never()).getUsers();
 
         assertEquals(USER_NAME, userDataRepositoryImpl.cacheUsers.get(USER_UUID).getUserName());
 
@@ -169,15 +169,13 @@ public class UserDataRepositoryImplTest {
     @Test
     public void getUser_RetrieveFromRemoteFail_ThenRemoteFromDB() {
 
+        when(userDBDataSource.getUsers()).thenReturn(Collections.singletonList(createUser()));
+
         userDataRepositoryImpl.getUsers("",baseLoadDataCallback);
 
         verify(userRemoteDataSource).getUsers(anyString(),loadRemoteDataCallbackArgumentCaptor.capture());
 
         loadRemoteDataCallbackArgumentCaptor.getValue().onFail(new OperationJSONException());
-
-        verify(userDBDataSource).getUsers(loadDBDataCallbackArgumentCaptor.capture());
-
-        loadDBDataCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(createUser()), new OperationSuccess());
 
         assertEquals(USER_NAME, userDataRepositoryImpl.cacheUsers.get(USER_UUID).getUserName());
 

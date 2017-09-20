@@ -4,7 +4,7 @@ package com.winsun.fruitmix.token;
  * Created by Administrator on 2017/9/13.
  */
 
-public class WechatTokenUserWrapper {
+public class WeChatTokenUserWrapper {
 
     private String token;
     private String guid;

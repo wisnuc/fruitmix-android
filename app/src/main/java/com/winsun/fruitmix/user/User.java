@@ -7,6 +7,8 @@ import com.winsun.fruitmix.R;
  */
 public class User {
 
+    public static final String DEFAULT_AVATAR = "defaultAvatar.jpg";
+
     private String userName;
     private String uuid;
     private String avatar;
@@ -23,7 +25,7 @@ public class User {
 
         setUserName("");
         setUuid("");
-        setAvatar("defaultAvatar.jpg");
+        setAvatar(DEFAULT_AVATAR);
         setEmail("");
         setDefaultAvatar("");
         setHome("");

@@ -9,10 +9,8 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.gif.GifLruCache;
-import com.winsun.fruitmix.login.LoginUseCase;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.model.RequestQueueInstance;
-import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.Map;

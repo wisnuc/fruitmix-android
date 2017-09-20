@@ -22,6 +22,7 @@ import com.winsun.fruitmix.invitation.data.InvitationRemoteDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -342,15 +343,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     private void retrieveUserAvatar(String userAvatarUrl, NetworkImageView imageView) {
 
-        imageView.setDefaultImageResId(R.drawable.default_place_holder);
-
-        if (userAvatarUrl != null && !userAvatarUrl.isEmpty()) {
-
-            imageView.setTag(userAvatarUrl);
-
-            imageView.setImageUrl(userAvatarUrl, imageLoader);
-        }
-
+        MediaUtil.startLoadRemoteImageUrl(userAvatarUrl, imageView, imageLoader);
 
     }
 

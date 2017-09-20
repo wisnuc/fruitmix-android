@@ -4,14 +4,12 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
 import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.util.Util;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

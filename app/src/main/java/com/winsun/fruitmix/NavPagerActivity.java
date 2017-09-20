@@ -30,12 +30,14 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
 import com.winsun.fruitmix.equipment.data.InjectEquipment;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.file.view.FileDownloadActivity;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
+import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.invitation.ConfirmInviteUserActivity;
@@ -89,6 +91,8 @@ public class NavPagerActivity extends BaseActivity
         implements OnMainFragmentInteractionListener, MainPageView, UploadMediaCountChangeListener {
 
     public static final String TAG = NavPagerActivity.class.getSimpleName();
+
+    UserAvatar userAvatar;
 
     DrawerLayout mDrawerLayout;
 
@@ -283,6 +287,8 @@ public class NavPagerActivity extends BaseActivity
         mDrawerLayout = binding.drawerLayout;
 
         mNavigationMenuRecyclerView = binding.navigationMenuRecyclerView;
+
+        userAvatar = binding.leftDrawerHeadLayout.avatar;
 
         navPagerViewModel = new NavPagerViewModel();
 
@@ -765,8 +771,9 @@ public class NavPagerActivity extends BaseActivity
 
         navPagerViewModel.userNameText.set(userName);
 
-        navPagerViewModel.userAvatarText.set(user.getDefaultAvatar());
-        navPagerViewModel.userAvatarBackgroundResID.set(user.getDefaultAvatarBgColorResourceId());
+        userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
+//        navPagerViewModel.userAvatarText.set(user.getDefaultAvatar());
+//        navPagerViewModel.userAvatarBackgroundResID.set(user.getDefaultAvatarBgColorResourceId());
 
         mainPagePresenter.refreshUserInNavigationView(mContext, user);
 

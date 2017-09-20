@@ -36,7 +36,7 @@ public class RemoteUserJSONObjectParser {
 
         String avatar = itemRaw.optString("avatar");
         if (avatar.equals("null")) {
-            user.setAvatar("defaultAvatar.jpg");
+            user.setAvatar(User.DEFAULT_AVATAR);
         } else {
             user.setAvatar(avatar);
         }
