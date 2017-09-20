@@ -61,6 +61,8 @@ import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -143,12 +145,18 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private MediaDataSourceRepository mediaDataSourceRepository;
 
-    private ThreadManager threadManager;
-
     private boolean hasCallStartUpload = false;
 
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
+
+        medias = Collections.emptyList();
+
+        mMapKeyIsDateValueIsPhotoList = Collections.emptyMap();
+
+        mMapKeyIsPhotoPositionValueIsPhotoDate = Collections.emptyMap();
+
+        mMapKeyIsPhotoPositionValueIsPhoto = new SparseArray<>();
 
         NewPhotoLayoutBinding binding = NewPhotoLayoutBinding.inflate(LayoutInflater.from(containerActivity.getApplicationContext()), null, false);
 
@@ -199,8 +207,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         mTypeface = Typeface.createFromAsset(containerActivity.getAssets(), "fonts/Roboto-Medium.ttf");
 
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(containerActivity);
-
-        threadManager = ThreadManagerImpl.getInstance();
 
     }
 
