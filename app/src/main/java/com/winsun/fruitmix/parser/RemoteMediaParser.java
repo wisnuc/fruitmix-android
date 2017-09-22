@@ -67,7 +67,7 @@ public class RemoteMediaParser implements RemoteDatasParser<Media> {
                     if (!Util.isNumeric(day))
                         throw new NumberFormatException(day + " is not number");
 
-                    media.setTime(year + "-" + month + "-" + day);
+                    media.setTime(year + "-" + month + "-" + day + dateTime.substring(10));
 
                 } catch (NumberFormatException e) {
 

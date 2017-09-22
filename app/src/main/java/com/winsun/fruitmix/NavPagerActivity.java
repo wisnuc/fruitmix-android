@@ -357,6 +357,8 @@ public class NavPagerActivity extends BaseActivity
 
         handleUploadStateChangeToUploadMediaCountChanged(uploadedMediaCount, totalCount);
 
+//        mediaMainFragment.onUploadMediaCountChanged(totalCount);
+
     }
 
     @Override

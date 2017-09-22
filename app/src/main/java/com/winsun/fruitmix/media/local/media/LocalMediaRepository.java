@@ -36,6 +36,8 @@ public class LocalMediaRepository {
 
     private boolean hasGetMediaFromAppDB = false;
 
+    private boolean gettingMediaFromAppDB = false;
+
     private ThreadManager threadManager;
 
     private LocalMediaRepository(LocalMediaAppDBDataSource localMediaAppDBDataSource,
@@ -64,7 +66,7 @@ public class LocalMediaRepository {
         this.calcMediaDigestStrategy = calcMediaDigestStrategy;
     }
 
-    public void resetState(){
+    public void resetState() {
 
         hasGetMediaFromAppDB = false;
 
@@ -76,12 +78,17 @@ public class LocalMediaRepository {
 
             Log.d(TAG, "getMedia: start get media from app db ");
 
+            if (gettingMediaFromAppDB)
+                return;
+            else
+                gettingMediaFromAppDB = true;
+
             localMediaAppDBDataSource.getMedia(new BaseLoadDataCallbackImpl<Media>() {
                 @Override
                 public void onSucceed(List<Media> data, OperationResult operationResult) {
                     super.onSucceed(data, operationResult);
 
-                    Log.d(TAG, "onSucceed: finish get media from app db");
+                    Log.d(TAG, "onSucceed: finish get media from app db,data size: " + data.size());
 
                     mediaConcurrentMapKeyIsOriginalPath.clear();
 
@@ -109,7 +116,8 @@ public class LocalMediaRepository {
 
             public void onSucceed(List<String> currentAllMediaPathInSystemDB, List<Media> newMedia, OperationResult operationResult) {
 
-                Log.d(TAG, "onSucceed: finish get media from system db");
+                Log.d(TAG, "onSucceed: finish get media from system db,data size: " + currentAllMediaPathInSystemDB.size()
+                        + " newMedia size: " + newMedia.size());
 
                 boolean hasDeleteMedia = false;
 
@@ -140,13 +148,18 @@ public class LocalMediaRepository {
                 }
 
                 mediaConcurrentMapKeyIsOriginalPath.putAll(LocalCache.BuildMediaMapKeyIsThumb(newMedia));
+
+                List<Media> returnValue = new ArrayList<>(mediaConcurrentMapKeyIsOriginalPath.values());
+
                 calcMediaDigest(newMedia);
 
-                callback.onSucceed(new ArrayList<>(mediaConcurrentMapKeyIsOriginalPath.values()), result);
+                callback.onSucceed(new ArrayList<>(returnValue), result);
 
                 if (needDeleteMediaPaths != null && needDeleteMediaPaths.size() != 0) {
                     localMediaAppDBDataSource.deleteMediaByPath(needDeleteMediaPaths);
                 }
+
+                gettingMediaFromAppDB = false;
 
             }
         });

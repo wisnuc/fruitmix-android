@@ -294,9 +294,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         if (isHidden()) return;
 
-        if (viewPager.getCurrentItem() == PAGE_PHOTO)
-            photoList.refreshView();
-
+        photoList.refreshView();
 
 //        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && !mPhotoListRefresh) {
 //            pageList.get(PAGE_PHOTO).refreshDownloadItemView();
@@ -536,6 +534,12 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     public void refreshUser() {
 
 //        groupListPage.refreshDownloadItemView();
+
+    }
+
+    public void onUploadMediaCountChanged(int totalLocalMediaCount) {
+
+        photoList.onUploadMediaCountChanged(totalLocalMediaCount);
 
     }
 

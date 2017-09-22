@@ -84,7 +84,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
 
-    private int mSpanCount = 3;
+    private int mSpanCount = 4;
 
     private PhotoRecycleAdapter mPhotoRecycleAdapter;
 
@@ -131,6 +131,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
     private boolean mCancelPreLoadPhoto = false;
 
     private Typeface mTypeface;
+
+    private boolean mIsLoading = false;
 
     private boolean mIsLoaded = false;
 
@@ -268,7 +270,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         }
 
-
         mUseAnim = true;
 
         mPhotoRecycleAdapter.notifyDataSetChanged();
@@ -323,10 +324,42 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
+    //prevent load media from system db return 0,but UploadMediaUseCase load local media return correct count,then refresh view
+    public void onUploadMediaCountChanged(int totalLocalMediaCount) {
+
+        if (mIsLoaded) {
+
+            if (medias.size() < totalLocalMediaCount) {
+
+                mediaDataSourceRepository.getLocalMedia(new BaseLoadDataCallback<Media>() {
+                    @Override
+                    public void onSucceed(List<Media> data, OperationResult operationResult) {
+
+                        handleGetMediaSucceed(data, new OperationMediaDataChanged());
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                    }
+                });
+
+            }
+
+        }
+
+    }
+
     @Override
     public void refreshView() {
 
         if (mSelectMode)
+            return;
+
+        if (!mIsLoading)
+            mIsLoading = true;
+        else
             return;
 
         getMediaInThread();
@@ -361,7 +394,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             @Override
             public void onSucceed(final List<Media> data, final OperationResult operationResult) {
 
-                Log.d(TAG, "onSucceed: get media");
+                Log.d(TAG, "onSucceed: get media size: " + data.size());
 
                 if (!hasCallStartUpload) {
 
@@ -373,12 +406,16 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 handleGetMediaSucceed(data, operationResult);
 
+                mIsLoading = false;
+
             }
 
             @Override
             public void onFail(OperationResult operationResult) {
 
                 loadingViewModel.showLoading.set(true);
+
+                mIsLoading = false;
 
             }
         });

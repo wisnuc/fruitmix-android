@@ -636,11 +636,16 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 photoSliderViewModel.titleText.set(title);
             }
 
-            if (checkMediaIsUploadStrategy.isMediaUploaded(media)) {
+            if (media.isLocal()) {
+
+                if (checkMediaIsUploadStrategy.isMediaUploaded(media)) {
+                    photoSliderViewModel.showCloudOff.set(false);
+                } else {
+                    photoSliderViewModel.showCloudOff.set(true);
+                }
+
+            } else
                 photoSliderViewModel.showCloudOff.set(false);
-            } else {
-                photoSliderViewModel.showCloudOff.set(true);
-            }
 
         }
 
@@ -977,11 +982,16 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 int action = event.getAction() & MotionEvent.ACTION_MASK;
 
+                Log.d(TAG, "handleTouchEvent: isEnlargeState: " + view.isEnlargeState());
+
                 if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
 
                     Log.d(TAG, "handleTouchEvent: action up lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
 
-                    if (lastY - y > Util.dip2px(mContext, 60)) {
+                    if(view.isEnlargeState())
+                        return;
+
+                    if (lastY - y > Util.dip2px(mContext, 60) ) {
 
                         finishActivity();
 

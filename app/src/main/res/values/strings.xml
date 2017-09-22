@@ -188,6 +188,8 @@
     <string name="clear_cache">Clear temporary files</string>
     <string name="already_upload_media_count_hint">Backups / Total Photos</string>
     <string name="already_upload_media_count_text">%1$d/%2$d</string>
+    
+    <string name="calculating">Calculating</string>
 
     <!-- create user -->
     <string name="user_name">User Name</string>

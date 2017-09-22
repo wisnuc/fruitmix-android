@@ -260,6 +260,14 @@ public class PinchImageView extends AppCompatImageView {
         }
     }
 
+    public boolean isEnlargeState() {
+
+        float outerScale = MathUtils.getMatrixScale(mOuterMatrix)[0];
+
+        return outerScale > 1.0;
+
+    }
+
     /**
      * 获取当前手势状态
      *

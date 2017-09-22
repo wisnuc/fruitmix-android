@@ -62,7 +62,7 @@ public class GenerateMediaThumbUseCase {
                     }
                 }
 
-                Log.d(TAG, "onSucceed: needOperateMedias size" + needOperateMedias.size());
+                Log.d(TAG, "onSucceed: needOperateMedias size: " + needOperateMedias.size());
 
                 startGenerateMediaThumbInThread(needOperateMedias);
 
@@ -94,7 +94,7 @@ public class GenerateMediaThumbUseCase {
                     }
                 }
 
-                Log.d(TAG, "onSucceed: needOperateMiniMedias size" + needOperateMedias.size());
+                Log.d(TAG, "onSucceed: needOperateMiniMedias size: " + needOperateMedias.size());
 
                 startGenerateMediaMiniThumbInThread(needOperateMedias);
 

@@ -160,28 +160,20 @@ public class SettingPresenterImpl implements SettingPresenter {
 
     private void calcAlreadyUploadMediaCountAndTotalCacheSize(final Context context) {
 
-        final ProgressDialog dialog = ProgressDialog.show(context, null, "正在计算下载进度及缓存数", false, false);
+        settingViewModel.cacheSizeText.set(context.getString(R.string.calculating));
 
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
 
-                int alreadyUploadMediaCount = 0;
+/*                int alreadyUploadMediaCount = 0;
                 int totalUploadMediaCount = 0;
-
-/*                for (Media media : medias) {
-
-                    if (checkMediaIsUploadStrategy.isMediaUploaded(media))
-                        alreadyUploadMediaCount++;
-
-                    totalUploadMediaCount++;
-                }*/
 
                 alreadyUploadMediaCount = uploadMediaUseCase.getAlreadyUploadedMediaCount();
                 totalUploadMediaCount = uploadMediaUseCase.getLocalMedias().size();
 
                 mAlreadyUploadMediaCount = alreadyUploadMediaCount;
-                mTotalLocalMediaCount = totalUploadMediaCount;
+                mTotalLocalMediaCount = totalUploadMediaCount;*/
 
                 mTotalCacheSize = FileUtil.getTotalCacheSize(context);
 
@@ -192,8 +184,6 @@ public class SettingPresenterImpl implements SettingPresenter {
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
 
-                dialog.dismiss();
-
                 handleUploadMedia(context);
 
             }
@@ -202,8 +192,9 @@ public class SettingPresenterImpl implements SettingPresenter {
     }
 
     private void handleUploadMedia(Context context) {
-        settingViewModel.alreadyUploadMediaCountTextViewVisibility.set(true);
-        settingViewModel.alreadyUploadMediaCountText.set(String.format(context.getString(R.string.already_upload_media_count_text), mAlreadyUploadMediaCount, mTotalLocalMediaCount));
+
+/*        settingViewModel.alreadyUploadMediaCountTextViewVisibility.set(true);
+        settingViewModel.alreadyUploadMediaCountText.set(String.format(context.getString(R.string.already_upload_media_count_text), mAlreadyUploadMediaCount, mTotalLocalMediaCount));*/
 
         settingViewModel.cacheSizeText.set(FileUtil.formatFileSize(mTotalCacheSize));
     }

@@ -86,7 +86,7 @@ public class StationMediaRepository {
 
                 if (hasNewMedia) {
 
-                    Log.d(TAG, "onSucceed: get media has new media");
+                    Log.d(TAG, "onSucceed: get media from station has new media");
 
                     mediaConcurrentMap.clear();
 

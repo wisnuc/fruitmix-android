@@ -12,6 +12,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 
@@ -88,7 +89,7 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
         if (getLocalMediaCallbackReturn)
             runOnMainThreadCallback.onSucceed(localMedias, new OperationSuccess());
         else
-            localMediaRepository.getMedia(runOnMainThreadCallback);
+            runOnMainThreadCallback.onFail(new OperationSQLException());
 
     }
 
@@ -138,7 +139,7 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
             public void onSucceed(List<Media> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);
 
-                Log.d(TAG, "onSucceed: get media from local media repositroy");
+                Log.d(TAG, "onSucceed: get media from local media repositroy,data size: " + data.size());
 
                 getLocalMediaCallbackReturn = true;
 
@@ -158,7 +159,7 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
                 public void onSucceed(List<Media> data, OperationResult operationResult) {
                     super.onSucceed(data, operationResult);
 
-                    Log.d(TAG, "onSucceed: get media from station media repository");
+                    Log.d(TAG, "onSucceed: get media from station media repository,data size: " + data.size());
 
                     getStationMediaCallbackReturn = true;
 
@@ -260,6 +261,12 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
 
     @Override
     public void resetState() {
+
+        getLocalMediaCallbackReturn = false;
+
+        getStationMediaCallbackReturn = false;
+
+        hasCallGetStationMedia = false;
 
         stationMediaRepository.setCacheDirty();
 

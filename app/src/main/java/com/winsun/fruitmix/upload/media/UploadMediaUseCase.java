@@ -221,8 +221,6 @@ public class UploadMediaUseCase {
 
                     Log.d(TAG, "not finish calc media digest,stop upload media");
 
-                    notifyUploadMediaCountChange();
-
                     stopUploadMedia();
 
                     sendRetryUploadMessage();
@@ -252,8 +250,6 @@ public class UploadMediaUseCase {
             public void onFail(OperationResult operationResult) {
 
                 stopUploadMedia();
-
-                notifyGetFolderFail(-1);
 
                 sendRetryUploadMessage();
 
