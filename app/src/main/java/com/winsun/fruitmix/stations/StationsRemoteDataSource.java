@@ -30,7 +30,7 @@ public class StationsRemoteDataSource extends BaseRemoteDataSourceImpl implement
     @Override
     public void getStationsByWechatGUID(String guid, BaseLoadDataCallback<Station> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap("/c/v1/users/" + guid + "/stations");
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap(HttpRequestFactory.CLOUD_API_LEVEL + "/users/" + guid + "/stations");
 
         wrapper.loadCall(httpRequest, callback, new RemoteStationParser());
 

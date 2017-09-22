@@ -159,6 +159,7 @@ public class UploadMediaUseCase {
     }
 
     public void startUploadMedia() {
+/*
 
         threadManager.runOnCacheThread(new Runnable() {
             @Override
@@ -166,6 +167,7 @@ public class UploadMediaUseCase {
                 startUploadMediaInThread();
             }
         });
+*/
 
     }
 

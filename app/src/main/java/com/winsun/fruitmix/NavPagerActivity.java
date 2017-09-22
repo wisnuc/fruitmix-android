@@ -43,6 +43,7 @@ import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.invitation.ConfirmInviteUserActivity;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.logout.InjectLogoutUseCase;
@@ -65,12 +66,15 @@ import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState;
+import com.winsun.fruitmix.usecase.InjectGetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.user.manage.UserManageActivity;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.wechat.user.InjectWeChatUserDataSource;
+import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -128,9 +132,40 @@ public class NavPagerActivity extends BaseActivity
 
         showProgressDialog(String.format(getString(R.string.operating_title), getString(R.string.change_user)));
 
-        startDiscovery(loggedInUser);
+        if (loggedInUser instanceof LoggedInWeChatUser) {
 
-        mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT_MESSAGE, DISCOVERY_TIMEOUT_TIME);
+            LoggedInWeChatUser loggedInWeChatUser = (LoggedInWeChatUser) loggedInUser;
+
+            loginUseCase.loginWithOtherWeChatUserBindingLocalUser(loggedInWeChatUser, new BaseOperateDataCallback<Boolean>() {
+                @Override
+                public void onSucceed(Boolean data, OperationResult result) {
+
+                    logoutUseCase.changeLoginUser();
+
+                    dismissDialog();
+
+                    handleChangeUserSucceed(data);
+
+                }
+
+                @Override
+                public void onFail(OperationResult result) {
+
+                    dismissDialog();
+
+                    Toast.makeText(mContext, result.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+
+                }
+            });
+
+        } else {
+
+            startDiscovery(loggedInUser);
+
+            mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT_MESSAGE, DISCOVERY_TIMEOUT_TIME);
+
+        }
+
     }
 
     @Override
@@ -304,7 +339,8 @@ public class NavPagerActivity extends BaseActivity
 
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
 
-        mainPagePresenter = new MainPagePresenterImpl(mContext, systemSettingDataSource, loggedInUserDataSource, navPagerViewModel, this);
+        mainPagePresenter = new MainPagePresenterImpl(mContext, systemSettingDataSource, loggedInUserDataSource,
+                navPagerViewModel, this, InjectGetAllBindingLocalUserUseCase.provideInstance(this));
 
         binding.setViewModel(navPagerViewModel);
 
@@ -570,16 +606,7 @@ public class NavPagerActivity extends BaseActivity
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
 
-                refreshUserInNavigationView();
-
-                navPagerViewModel.showLoadingUploadProgress.set(true);
-
-                uploadMediaUseCase.startUploadMedia();
-
-                if (data)
-                    handleLoginWithLoggedInUserSucceed();
-                else
-                    handleLoginWithLoggedInUserFail();
+                handleChangeUserSucceed(data);
 
             }
 
@@ -588,9 +615,24 @@ public class NavPagerActivity extends BaseActivity
 
                 Log.d(TAG, "onFail: login with logged in user failed");
 
+                Toast.makeText(mContext, result.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+
             }
         });
 
+    }
+
+    private void handleChangeUserSucceed(Boolean data) {
+        refreshUserInNavigationView();
+
+        navPagerViewModel.showLoadingUploadProgress.set(true);
+
+        uploadMediaUseCase.startUploadMedia();
+
+        if (data)
+            handleLoginWithLoggedInUserSucceed();
+        else
+            handleLoginWithLoggedInUserFail();
     }
 
     private void handleLoginWithLoggedInUserSucceed() {

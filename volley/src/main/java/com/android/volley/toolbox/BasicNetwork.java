@@ -17,6 +17,7 @@
 package com.android.volley.toolbox;
 
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
@@ -57,6 +58,9 @@ import java.util.TreeMap;
  * A network performing Volley requests over an {@link HttpStack}.
  */
 public class BasicNetwork implements Network {
+
+    public static final String TAG = BasicNetwork.class.getSimpleName();
+
     protected static final boolean DEBUG = VolleyLog.DEBUG;
 
     private static int SLOW_REQUEST_THRESHOLD_MS = 3000;
@@ -143,6 +147,9 @@ public class BasicNetwork implements Network {
                 if (statusCode < 200 || statusCode > 299) {
                     throw new IOException();
                 }
+
+                Log.d(TAG, "performRequest: succeed statusCode: " + statusCode);
+
                 return new NetworkResponse(statusCode, responseContents, responseHeaders, false,
                         SystemClock.elapsedRealtime() - requestStart);
             } catch (SocketTimeoutException e) {

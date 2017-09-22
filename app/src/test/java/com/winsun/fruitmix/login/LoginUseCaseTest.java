@@ -27,6 +27,8 @@ import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.wechat.user.WeChatUser;
+import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
 import org.greenrobot.eventbus.EventBus;
 import org.junit.Before;
@@ -105,6 +107,9 @@ public class LoginUseCaseTest {
     @Mock
     private StationsDataSource stationsDataSource;
 
+    @Mock
+    private WeChatUserDataSource weChatUserDataSource;
+
     @Before
     public void setup() {
 
@@ -114,7 +119,8 @@ public class LoginUseCaseTest {
 
         loginUseCase = LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource,
                 httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, mediaDataSourceRepository,
-                stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, new MockThreadManager(), newPhotoListDataLoader, stationsDataSource);
+                stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, new MockThreadManager(),
+                newPhotoListDataLoader, stationsDataSource, weChatUserDataSource);
 
     }
 
@@ -122,6 +128,8 @@ public class LoginUseCaseTest {
     public void loginWithNoParamFail() {
 
         when(systemSettingDataSource.getCurrentLoginToken()).thenReturn("");
+
+        when(systemSettingDataSource.getCurrentLoginUserGUID()).thenReturn("");
 
         loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>() {
 
@@ -140,14 +148,52 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).getCurrentLoginToken();
 
-        verify(loggedInUserDataSource).getLoggedInUserByToken(anyString());
+        verify(weChatUserDataSource).getWeChatUser(eq(""), eq(""));
+
+        verify(loggedInUserDataSource).getLoggedInUserByToken(eq(""));
 
         verify(stationFileRepository, never()).clearDownloadFileRecordInCache();
 
     }
 
     @Test
-    public void loginWithNoParamSucceed() {
+    public void loginWithNoParamSucceedByWeChatUserToken() {
+
+        when(systemSettingDataSource.getCurrentLoginToken()).thenReturn(testToken);
+
+        when(systemSettingDataSource.getCurrentLoginUserGUID()).thenReturn(testGUID);
+
+        when(loggedInUserDataSource.getLoggedInUserByToken(testToken)).thenReturn(null);
+
+        WeChatUser weChatUser = new WeChatUser(testToken, testGUID, testStationID);
+
+        when(weChatUserDataSource.getWeChatUser(testToken, testGUID)).thenReturn(weChatUser);
+
+        loginUseCase.loginWithNoParam(new BaseOperateDataCallbackImpl<Boolean>());
+
+        verify(systemSettingDataSource).getCurrentLoginToken();
+
+        verify(loggedInUserDataSource).getLoggedInUserByToken(eq(testToken));
+
+        verify(weChatUserDataSource).getWeChatUser(eq(testToken), eq(testGUID));
+
+        ArgumentCaptor<BaseLoadDataCallback<User>> getUserByGUIDCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(userDataRepository).getUserByGUID(eq(testGUID), getUserByGUIDCaptor.capture());
+
+        User user = new User();
+        user.setUserName(testUserName);
+        user.setAvatar(testUserAvatarUrl);
+
+        getUserByGUIDCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess());
+
+        testAfterChooseStationID();
+
+    }
+
+
+    @Test
+    public void loginWithNoParamSucceedByLocalUserToken() {
 
         when(systemSettingDataSource.getCurrentLoginToken()).thenReturn(testToken);
 
@@ -199,6 +245,10 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).setCurrentEquipmentIp(anyString());
 
+        verify(systemSettingDataSource).setCurrentLoginUserGUID(eq(""));
+
+        verify(systemSettingDataSource).setCurrentLoginStationID(eq(""));
+
         verify(stationFileRepository).clearDownloadFileRecordInCache();
 
         verify(newPhotoListDataLoader).setNeedRefreshData(eq(true));
@@ -219,7 +269,12 @@ public class LoginUseCaseTest {
     private String testUserHome = "testUserHome";
 
     private String testWeChatName = "testWeChatName";
-    private String testWeChatAvatatUrl = "testWeChatAvatatUrl";
+    private String testWeChatAvatarUrl = "testWeChatAvatarUrl";
+
+    private String testStationID = "testStationID";
+
+    private String testUserName = "testUserName";
+    private String testUserAvatarUrl = "testUserAvatarUrl";
 
     @Test
     public void testLoginWithLoadTokenParam_succeed() {
@@ -233,6 +288,8 @@ public class LoginUseCaseTest {
         loadTokenCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(testToken), new OperationSuccess());
 
         verify(httpRequestFactory).setCurrentData(anyString(), anyString());
+
+        verify(userDataRepository).clearAllUsersInDB();
 
         verify(userDataRepository).getUsers(eq(testUserUUID), loadUserCallbackArgumentCaptor.capture());
 
@@ -381,7 +438,7 @@ public class LoginUseCaseTest {
         weChatTokenUserWrapper.setToken(testToken);
         weChatTokenUserWrapper.setGuid(testGUID);
         weChatTokenUserWrapper.setNickName(testWeChatName);
-        weChatTokenUserWrapper.setAvatarUrl(testWeChatAvatatUrl);
+        weChatTokenUserWrapper.setAvatarUrl(testWeChatAvatarUrl);
 
         BaseOperateDataCallback<Boolean> callback = Mockito.mock(BaseOperateDataCallback.class);
 
@@ -400,8 +457,6 @@ public class LoginUseCaseTest {
     @Test
     public void testGetStationListAndGetLocalUserAndLoginWithWeChatCodeSucceed() {
 
-        String testStationID = "testStationID";
-
         testLoginWithWeChatCode_succeed();
 
         ArgumentCaptor<BaseLoadDataCallback<Station>> stationLoadCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
@@ -418,6 +473,17 @@ public class LoginUseCaseTest {
         verify(httpRequestFactory).setStationID(eq(testStationID));
         verify(httpRequestFactory).setDefaultFactory(eq(true));
 
+        testAfterChooseStationID();
+
+        verify(systemSettingDataSource).setCurrentLoginUserGUID(testGUID);
+
+        verify(mediaDataSourceRepository).clearAllStationMediasInDB();
+
+        verify(weChatUserDataSource).insertWeChatUser(any(WeChatUser.class));
+
+    }
+
+    private void testAfterChooseStationID() {
         ArgumentCaptor<BaseLoadDataCallback<User>> getUserByStationIDCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
         verify(userDataRepository).getUsersByStationID(eq(testStationID), getUserByStationIDCaptor.capture());
@@ -446,7 +512,6 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).setCurrentLoginStationID(eq(testStationID));
 
-        verify(mediaDataSourceRepository).clearAllStationMediasInDB();
 
     }
 

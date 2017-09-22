@@ -21,9 +21,12 @@ public class SystemSettingDataSource {
 
     public static final String CURRENT_LOGIN_TOKEN = "current_login_token";
 
+    public static final String CURRENT_LOGIN_USER_GUID = "current_login_user_guid";
+
     public static final String CURRENT_LOGIN_STATION_ID = "current_login_station_id";
 
     public static final String CURRENT_EQUIPMENT_IP = "current_equipment_ip";
+
 
     private static SystemSettingDataSource instance;
 
@@ -120,6 +123,23 @@ public class SystemSettingDataSource {
         editor.apply();
 
     }
+
+    public String getCurrentLoginUserGUID() {
+
+        return sharedPreferences.getString(CURRENT_LOGIN_USER_GUID, "");
+
+    }
+
+    public void setCurrentLoginUserGUID(String guid) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putString(CURRENT_LOGIN_USER_GUID, guid);
+        editor.apply();
+
+    }
+
 
     public String getCurrentLoginStationID() {
 

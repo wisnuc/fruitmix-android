@@ -19,9 +19,15 @@ public class HttpRequestFactory {
 
     public static final String TAG = HttpRequestFactory.class.getSimpleName();
 
-    public static final String CLOUD_IP = Util.HTTP + "10.10.9.59";
+    public static final String CLOUD_API_LEVEL = "/c/v1";
 
-    public static final int CLOUD_PORT = 4000;
+//    public static final String CLOUD_IP = Util.HTTP + "10.10.9.59";
+
+    public static final String CLOUD_IP = Util.HTTP + "www.siyouqun.org";
+
+//    public static final int CLOUD_PORT = 4000;
+
+    public static final int CLOUD_PORT = 80;
 
     public static final int STATION_PORT = 3000;
 
@@ -130,7 +136,7 @@ public class HttpRequestFactory {
 
     private String getStationID() {
 
-        if (stationID == null)
+        if (stationID == null || stationID.isEmpty())
             stationID = systemSettingDataSource.getCurrentLoginStationID();
 
         return stationID;
@@ -147,7 +153,7 @@ public class HttpRequestFactory {
 
     public HttpRequest createGetRequestWithWeChatCode(String weChatCode) {
 
-        String path = "/c/v1/token?code=" + weChatCode + "&platform=mobile";
+        String path = CLOUD_API_LEVEL + "/token?code=" + weChatCode + "&platform=mobile";
 
         noWrapHttpRequestFactory.setGateway(CLOUD_IP);
         noWrapHttpRequestFactory.setPort(CLOUD_PORT);
@@ -203,6 +209,17 @@ public class HttpRequestFactory {
         return createHttpGetRequest(httpPath, true);
 
     }
+
+    public HttpRequest createHttpGetRequestByCloudAPIWithWrap(String httpPath,String stationID){
+
+        wrapHttpRequestFactory.setGateway(CLOUD_IP);
+        wrapHttpRequestFactory.setPort(CLOUD_PORT);
+        wrapHttpRequestFactory.setToken(getToken());
+        wrapHttpRequestFactory.setStationID(stationID);
+
+        return wrapHttpRequestFactory.createHttpGetRequest(httpPath,false);
+    }
+
 
     public HttpRequest createHttpGetRequest(String httpPath) {
 

@@ -1,23 +1,24 @@
 package com.winsun.fruitmix.login;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
-import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.model.operationResult.OperationMoreThanOneStation;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -33,6 +34,8 @@ import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.wechat.user.WeChatUser;
+import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -77,6 +80,8 @@ public class LoginUseCase extends BaseDataRepository {
 
     private StationsDataSource stationsDataSource;
 
+    private WeChatUserDataSource weChatUserDataSource;
+
     private static String mToken;
     private static String mGateway;
 
@@ -84,7 +89,9 @@ public class LoginUseCase extends BaseDataRepository {
                          HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy, UploadMediaUseCase uploadMediaUseCase,
                          UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
                          SystemSettingDataSource systemSettingDataSource, ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus,
-                         ThreadManager threadManager, NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource) {
+                         ThreadManager threadManager, NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource,
+                         WeChatUserDataSource weChatUserDataSource) {
+
         super(threadManager);
         this.loggedInUserDataSource = loggedInUserDataSource;
         this.tokenDataSource = tokenDataSource;
@@ -98,8 +105,8 @@ public class LoginUseCase extends BaseDataRepository {
         this.imageGifLoaderInstance = imageGifLoaderInstance;
         this.newPhotoListDataLoader = newPhotoListDataLoader;
         this.eventBus = eventBus;
-
         this.stationsDataSource = stationsDataSource;
+        this.weChatUserDataSource = weChatUserDataSource;
 
     }
 
@@ -108,12 +115,14 @@ public class LoginUseCase extends BaseDataRepository {
                                            UploadMediaUseCase uploadMediaUseCase, UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository,
                                            StationFileRepository stationFileRepository, SystemSettingDataSource systemSettingDataSource,
                                            ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager,
-                                           NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource) {
+                                           NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource,
+                                           WeChatUserDataSource weChatUserDataSource) {
 
         if (instance == null)
             instance = new LoginUseCase(loggedInUserDataSource, tokenDataSource,
                     httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, mediaDataSourceRepository,
-                    stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager, newPhotoListDataLoader, stationsDataSource);
+                    stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager,
+                    newPhotoListDataLoader, stationsDataSource, weChatUserDataSource);
 
         return instance;
     }
@@ -131,15 +140,22 @@ public class LoginUseCase extends BaseDataRepository {
         return mGateway;
     }
 
-    public void loginWithNoParam(BaseOperateDataCallback<Boolean> callback) {
+    public void loginWithNoParam(final BaseOperateDataCallback<Boolean> callback) {
 
         String currentLoginToken = systemSettingDataSource.getCurrentLoginToken();
 
         LoggedInUser loggedInUser = loggedInUserDataSource.getLoggedInUserByToken(currentLoginToken);
 
-        if (loggedInUser == null)
-            callback.onFail(new OperationSQLException());
-        else {
+        if (loggedInUser == null) {
+
+            String currentLoginUserGUID = systemSettingDataSource.getCurrentLoginUserGUID();
+
+            final WeChatUser weChatUser = weChatUserDataSource.getWeChatUser(currentLoginToken, currentLoginUserGUID);
+
+            loginWithWeChatUser(callback, weChatUser);
+
+
+        } else {
 
             Log.d(TAG, "loginWithNoParam: http request factory set current data token:" + loggedInUser.getToken() + " gateway: " + loggedInUser.getGateway());
 
@@ -153,6 +169,63 @@ public class LoginUseCase extends BaseDataRepository {
             callback.onSucceed(true, new OperationSuccess());
 
             getUsers(loggedInUser.getUser().getUuid());
+
+        }
+    }
+
+    private void loginWithWeChatUser(final BaseOperateDataCallback<Boolean> callback, final WeChatUser weChatUser) {
+        if (weChatUser == null)
+            callback.onFail(new OperationSQLException());
+        else {
+
+            mToken = weChatUser.getToken();
+
+            mGateway = HttpRequestFactory.CLOUD_IP;
+
+            httpRequestFactory.setCurrentData(mToken, mGateway);
+
+            httpRequestFactory.setPort(HttpRequestFactory.CLOUD_PORT);
+
+            userDataRepository.getUserByGUID(weChatUser.getGuid(), new BaseLoadDataCallback<User>() {
+                @Override
+                public void onSucceed(final List<User> data, OperationResult operationResult) {
+
+                    WeChatTokenUserWrapper weChatTokenUserWrapper = new WeChatTokenUserWrapper();
+
+                    User user = data.get(0);
+
+                    weChatTokenUserWrapper.setAvatarUrl(user.getAvatar());
+                    weChatTokenUserWrapper.setNickName(user.getUserName());
+                    weChatTokenUserWrapper.setToken(weChatUser.getToken());
+                    weChatTokenUserWrapper.setGuid(weChatUser.getGuid());
+
+                    getUsersAfterChooseStationID(weChatTokenUserWrapper, weChatUser.getStationID(), new BaseOperateDataCallbackImpl<Boolean>() {
+                        @Override
+                        public void onSucceed(Boolean data, OperationResult result) {
+                            super.onSucceed(data, result);
+
+                            callback.onSucceed(data, result);
+
+                        }
+
+                        @Override
+                        public void onFail(OperationResult result) {
+                            super.onFail(result);
+
+                            callback.onFail(result);
+
+                        }
+                    });
+
+                }
+
+                @Override
+                public void onFail(OperationResult operationResult) {
+
+                    callback.onFail(operationResult);
+
+                }
+            });
 
         }
     }
@@ -178,6 +251,8 @@ public class LoginUseCase extends BaseDataRepository {
                 mGateway = loadTokenParam.getGateway();
 
                 httpRequestFactory.setCurrentData(token, mGateway);
+
+                userDataRepository.clearAllUsersInDB();
 
                 getUsers(loadTokenParam, token, callback);
 
@@ -338,9 +413,15 @@ public class LoginUseCase extends BaseDataRepository {
 
         systemSettingDataSource.setCurrentEquipmentIp(gateway);
 
+        systemSettingDataSource.setCurrentLoginUserGUID("");
+
+        systemSettingDataSource.setCurrentLoginStationID("");
+
         stationFileRepository.clearDownloadFileRecordInCache();
 
         newPhotoListDataLoader.setNeedRefreshData(true);
+
+        ImageGifLoaderInstance.destroyInstance();
 
     }
 
@@ -368,7 +449,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                 httpRequestFactory.setCurrentData(token, mGateway);
 
-                httpRequestFactory.setPort(4000);
+                httpRequestFactory.setPort(HttpRequestFactory.CLOUD_PORT);
 
                 getStationList(weChatTokenUserWrapper, runOnMainThreadCallback);
 
@@ -392,21 +473,11 @@ public class LoginUseCase extends BaseDataRepository {
 
                 if (data.size() == 1) {
 
-                    getUsers(weChatTokenUserWrapper, data.get(0).getId(), callback);
+                    getUsersAfterChooseStationID(weChatTokenUserWrapper, data.get(0).getId(), callback);
 
                 } else if (data.size() > 1) {
 
-                    callback.onSucceed(true, new OperationResult() {
-                        @Override
-                        public String getResultMessage(Context context) {
-                            return "";
-                        }
-
-                        @Override
-                        public OperationResultType getOperationResultType() {
-                            return OperationResultType.MORE_THAN_ONE_STATION;
-                        }
-                    });
+                    callback.onSucceed(true, new OperationMoreThanOneStation(data, weChatTokenUserWrapper));
 
                 } else {
 
@@ -420,14 +491,14 @@ public class LoginUseCase extends BaseDataRepository {
             public void onFail(OperationResult operationResult) {
 
                 callback.onFail(operationResult);
+
             }
         });
 
 
     }
 
-
-    private void getUsers(final WeChatTokenUserWrapper weChatTokenUserWrapper, final String stationID, final BaseOperateDataCallback<Boolean> callback) {
+    public void getUsersAfterChooseStationID(final WeChatTokenUserWrapper weChatTokenUserWrapper, final String stationID, final BaseOperateDataCallback<Boolean> callback) {
 
         httpRequestFactory.setStationID(stationID);
         httpRequestFactory.setDefaultFactory(true);
@@ -459,7 +530,16 @@ public class LoginUseCase extends BaseDataRepository {
                     currentLocalUser.setUserName(weChatTokenUserWrapper.getNickName());
                     currentLocalUser.setAvatar(weChatTokenUserWrapper.getAvatarUrl());
 
-                    getUserByUserUUID(stationID, currentLocalUser, data, callback);
+                    getUserByUserUUID(stationID, currentLocalUser, data, new BaseOperateDataCallbackImpl<Boolean>() {
+                        @Override
+                        public void onSucceed(Boolean data, OperationResult result) {
+                            super.onSucceed(data, result);
+
+                            handleLoginWithWeChatCodeSucceed(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(), stationID);
+
+                            callback.onSucceed(data, result);
+                        }
+                    });
 
                 }
 
@@ -496,11 +576,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                                 initSystemState(mToken, mGateway, currentUser.getUuid());
 
-                                systemSettingDataSource.setAutoUploadOrNot(false);
-
                                 systemSettingDataSource.setCurrentLoginStationID(stationID);
-
-                                mediaDataSourceRepository.clearAllStationMediasInDB();
 
                                 eventBus.postSticky(new OperationEvent(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN, new OperationSuccess()));
 
@@ -530,6 +606,41 @@ public class LoginUseCase extends BaseDataRepository {
             }
         });
 
+
+    }
+
+    private void handleLoginWithWeChatCodeSucceed(String guid, String token, String stationID) {
+        systemSettingDataSource.setAutoUploadOrNot(false);
+
+        systemSettingDataSource.setCurrentLoginUserGUID(guid);
+
+        mediaDataSourceRepository.clearAllStationMediasInDB();
+
+        weChatUserDataSource.insertWeChatUser(new WeChatUser(token,
+                guid, stationID));
+    }
+
+    public void loginWithOtherWeChatUserBindingLocalUser(LoggedInWeChatUser loggedInWeChatUser, final BaseOperateDataCallback<Boolean> callback) {
+
+        final WeChatUser weChatUser = new WeChatUser(loggedInWeChatUser.getToken(), loggedInWeChatUser.getUser().getAssociatedWechatGUID(), loggedInWeChatUser.getStationID());
+
+        loginWithWeChatUser(new BaseOperateDataCallback<Boolean>() {
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
+
+                handleLoginWithWeChatCodeSucceed(weChatUser.getGuid(), weChatUser.getToken(), weChatUser.getStationID());
+
+                callback.onSucceed(true, new OperationSuccess());
+
+            }
+
+            @Override
+            public void onFail(OperationResult result) {
+
+                callback.onFail(result);
+
+            }
+        }, weChatUser);
 
     }
 

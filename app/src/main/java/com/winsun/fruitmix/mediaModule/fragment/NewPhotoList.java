@@ -143,8 +143,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private MediaDataSourceRepository mediaDataSourceRepository;
 
-    private ThreadManager threadManager;
-
     private boolean hasCallStartUpload = false;
 
     public NewPhotoList(Activity activity) {
@@ -199,8 +197,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         mTypeface = Typeface.createFromAsset(containerActivity.getAssets(), "fonts/Roboto-Medium.ttf");
 
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(containerActivity);
-
-        threadManager = ThreadManagerImpl.getInstance();
 
     }
 
@@ -446,7 +442,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (!mPreLoadPhoto) {
                 mPreLoadPhoto = true;
-                loadSmallThumbnail(medias);
+//                loadSmallThumbnail(medias);
             }
 
         }
@@ -1211,9 +1207,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (mediaList == null) {
 
-                Log.d(TAG, "refreshView: medialist is null,currentMedia getDate:" + currentMedia.getDate());
+                Log.d(TAG, "refreshView: media list is null,currentMedia getDate:" + currentMedia.getDate());
 
-                Log.d(TAG, "refreshView: medialist is null,map key is date,key:" + mMapKeyIsDateValueIsPhotoList.keySet());
+                Log.d(TAG, "refreshView: media list is null,map key is date,key:" + mMapKeyIsDateValueIsPhotoList.keySet());
 
             } else {
 

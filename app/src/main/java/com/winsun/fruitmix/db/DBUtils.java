@@ -12,10 +12,12 @@ import com.winsun.fruitmix.file.data.download.DownloadedItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
+import com.winsun.fruitmix.parser.LocalWeChatUserParser;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.parser.LocalDataParser;
 import com.winsun.fruitmix.parser.LocalMediaParser;
 import com.winsun.fruitmix.parser.LocalUserParser;
+import com.winsun.fruitmix.wechat.user.WeChatUser;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -171,6 +173,29 @@ public class DBUtils {
         return contentValues;
     }
 
+    public long insertWeChatUser(WeChatUser weChatUser) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        returnValue = database.insert(DBHelper.LOGGED_IN_WECHAT_USER_TABLE_NAME, null, createLoggedWeChatUser(weChatUser));
+
+        return returnValue;
+
+    }
+
+    private ContentValues createLoggedWeChatUser(WeChatUser weChatUser) {
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.LOGGED_IN_WECAHT_USER_TOKEN, weChatUser.getToken());
+        contentValues.put(DBHelper.LOGGED_IN_WECHAT_USER_GUID, weChatUser.getGuid());
+        contentValues.put(DBHelper.LOGGED_IN_WECHAT_USER_STATION_ID, weChatUser.getStationID());
+
+        return contentValues;
+    }
+
+
     private void bindMediaWhenCreate(SQLiteStatement sqLiteStatement, Media media) {
         sqLiteStatement.bindString(1, media.getUuid());
         sqLiteStatement.bindString(2, media.getTime());
@@ -299,6 +324,20 @@ public class DBUtils {
         close();
 
         return returnValue;
+    }
+
+    public long deleteWeChatUser(String token) {
+
+        openWritableDB();
+
+        long returnValue = database.delete(DBHelper.LOGGED_IN_WECHAT_USER_TABLE_NAME,
+                DBHelper.LOGGED_IN_WECAHT_USER_TOKEN + " = ?",
+                new String[]{token});
+
+        close();
+
+        return returnValue;
+
     }
 
 
@@ -467,6 +506,7 @@ public class DBUtils {
         List<DownloadedItem> fileDownloadItems = new ArrayList<>();
 
         Cursor cursor = database.rawQuery("select * from " + DBHelper.DOWNLOADED_FILE_TABLE_NAME + " where " + DBHelper.FILE_KEY_CREATOR_UUID + " = ?", new String[]{currentUserUUID});
+
         while (cursor.moveToNext()) {
 
             String fileName = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_NAME));
@@ -497,6 +537,29 @@ public class DBUtils {
 
         return fileDownloadItems;
     }
+
+    public WeChatUser getWeChatUserByToken(String token, String guid) {
+
+        openReadableDB();
+
+        LocalDataParser<WeChatUser> parser = new LocalWeChatUserParser();
+
+        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOGGED_IN_WECHAT_USER_TABLE_NAME + " where " + DBHelper.LOGGED_IN_WECAHT_USER_TOKEN
+                + " = ? and " + DBHelper.LOGGED_IN_WECHAT_USER_GUID + " = ?", new String[]{token, guid});
+
+        if (!cursor.moveToFirst())
+            return null;
+
+        WeChatUser weChatUser = parser.parse(cursor);
+
+        cursor.close();
+
+        close();
+
+        return weChatUser;
+
+    }
+
 
     private List<Media> getAllMedia(String dbName) {
         openReadableDB();
@@ -578,5 +641,6 @@ public class DBUtils {
 
         return contentValues;
     }
+
 
 }

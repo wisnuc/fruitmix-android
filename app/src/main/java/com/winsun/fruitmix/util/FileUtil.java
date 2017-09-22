@@ -411,10 +411,6 @@ public class FileUtil {
 
             Log.d(TAG, "writeResponseBodyToFolder: contentLength: " + contentLength);
 
-            if (contentLength > 0) {
-                newFileDownloadState.setFileSize(contentLength);
-            }
-
             long fileDownloadedSize = 0;
 
             if (downloadFile.createNewFile() || downloadFile.isFile()) {

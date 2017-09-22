@@ -226,4 +226,16 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
 
         return cacheUsers.get(userUUID);
     }
+
+    @Override
+    public void getUserByGUID(final String guid, final BaseLoadDataCallback<User> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                userRemoteDataSource.getUserByGUID(guid,createLoadCallbackRunOnMainThread(callback));
+            }
+        });
+
+    }
 }

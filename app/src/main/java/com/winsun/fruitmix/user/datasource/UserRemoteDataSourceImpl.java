@@ -11,6 +11,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.RemoteCurrentUserParser;
 import com.winsun.fruitmix.parser.RemoteInsertUserParser;
 import com.winsun.fruitmix.parser.RemoteUserHomeParser;
+import com.winsun.fruitmix.parser.RemoteWeChatUser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
@@ -63,7 +64,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     }
 
     @Override
-    public void getUsers(String currentLoginUserUUID,final BaseLoadDataCallback<User> callback) {
+    public void getUsers(String currentLoginUserUUID, final BaseLoadDataCallback<User> callback) {
 
         final List<User> users = new ArrayList<>();
 
@@ -132,7 +133,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_HOME_PARAMETER);
 
-        wrapper.loadCall(httpRequest,callback,new RemoteUserHomeParser());
+        wrapper.loadCall(httpRequest, callback, new RemoteUserHomeParser());
 
     }
 
@@ -141,9 +142,9 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     @Override
     public void getUsersByStationID(String stationID, BaseLoadDataCallback<User> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER);
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithWrap(USER_PARAMETER, stationID);
 
-        wrapper.loadCall(httpRequest,callback,new RemoteLoginUsersParser());
+        wrapper.loadCall(httpRequest, callback, new RemoteLoginUsersParser());
 
     }
 
@@ -152,7 +153,16 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER + "/" + userUUID);
 
-        wrapper.loadCall(httpRequest,callback,new RemoteCurrentUserParser());
+        wrapper.loadCall(httpRequest, callback, new RemoteCurrentUserParser());
+
+    }
+
+    @Override
+    public void getUserByGUID(String guid, BaseLoadDataCallback<User> callback) {
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap(HttpRequestFactory.CLOUD_API_LEVEL + "/users/" + guid);
+
+        wrapper.loadCall(httpRequest, callback, new RemoteWeChatUser());
 
     }
 }

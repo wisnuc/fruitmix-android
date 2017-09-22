@@ -24,4 +24,5 @@ public class Station {
     public void setLabel(String label) {
         this.label = label;
     }
+
 }

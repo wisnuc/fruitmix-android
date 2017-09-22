@@ -8,6 +8,7 @@ import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
+import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.media.MediaDataSourceRepositoryImpl;
 import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
@@ -28,6 +29,8 @@ public class InitSystem {
     public static final String TAG = InitSystem.class.getSimpleName();
 
     public static void initSystem(Context context) {
+
+        LogoutUseCase.destroyInstance();
 
         OkHttpUtil.destroyInstance();
 
