@@ -83,6 +83,13 @@ public class HttpRequestFactory {
         return instance;
     }
 
+    public void reset(){
+
+        setCurrentData("","");
+        setStationID("");
+
+    }
+
     private void setToken(String token) {
 
         Log.d(TAG, "setToken: " + token);
@@ -204,12 +211,6 @@ public class HttpRequestFactory {
 
     }
 
-    public HttpRequest createHttpGetFileRequest(String httpPath) {
-
-        return createHttpGetRequest(httpPath, true);
-
-    }
-
     public HttpRequest createHttpGetRequestByCloudAPIWithWrap(String httpPath,String stationID){
 
         wrapHttpRequestFactory.setGateway(CLOUD_IP);
@@ -218,6 +219,13 @@ public class HttpRequestFactory {
         wrapHttpRequestFactory.setStationID(stationID);
 
         return wrapHttpRequestFactory.createHttpGetRequest(httpPath,false);
+    }
+
+
+    public HttpRequest createHttpGetFileRequest(String httpPath) {
+
+        return createHttpGetRequest(httpPath, true);
+
     }
 
 

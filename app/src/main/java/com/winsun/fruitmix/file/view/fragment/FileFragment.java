@@ -120,6 +120,7 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
         swipeRefreshLayout.setRefreshing(refreshing);
     }
 
+    @Override
     public void refreshViewForce() {
         filePresenter.refreshView(true);
     }

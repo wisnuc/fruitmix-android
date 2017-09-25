@@ -15,6 +15,8 @@ public interface Page {
 
     void refreshView();
 
+    void refreshViewForce();
+
     void onActivityReenter(int resultCode, Intent data);
 
     void onMapSharedElements(List<String> names, Map<String, View> sharedElements);

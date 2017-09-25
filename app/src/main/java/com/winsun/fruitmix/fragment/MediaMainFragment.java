@@ -539,11 +539,12 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     }
 
-    public void refreshAllViews() {
+    public void refreshCurrentViewForce() {
 //        groupListPage.refreshView();
-        fileFragment.refreshViewForce();
 
         photoList.refreshViewForce();
+        fileFragment.refreshViewForce();
+
     }
 
     private void initViewPager() {

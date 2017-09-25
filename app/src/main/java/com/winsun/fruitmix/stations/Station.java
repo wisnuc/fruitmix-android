@@ -8,6 +8,8 @@ public class Station {
 
     private String id;
     private String label;
+    private String ip;
+    private boolean isOnline;
 
     public String getId() {
         return id;
@@ -25,4 +27,19 @@ public class Station {
         this.label = label;
     }
 
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public boolean isOnline() {
+        return isOnline;
+    }
+
+    public void setOnline(boolean online) {
+        isOnline = online;
+    }
 }

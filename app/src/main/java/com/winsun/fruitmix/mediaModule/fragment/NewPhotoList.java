@@ -291,6 +291,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
+    @Override
     public void refreshViewForce() {
 
         mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallback<Media>() {
@@ -442,7 +443,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (!mPreLoadPhoto) {
                 mPreLoadPhoto = true;
-//                loadSmallThumbnail(medias);
+                loadSmallThumbnail(medias);
             }
 
         }

@@ -129,7 +129,7 @@ public class LoginUseCaseTest {
 
         when(systemSettingDataSource.getCurrentLoginToken()).thenReturn("");
 
-        when(systemSettingDataSource.getCurrentLoginUserGUID()).thenReturn("");
+        when(systemSettingDataSource.getCurrentLoginStationID()).thenReturn("");
 
         loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>() {
 
@@ -148,6 +148,8 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).getCurrentLoginToken();
 
+        verify(systemSettingDataSource).getCurrentLoginStationID();
+
         verify(weChatUserDataSource).getWeChatUser(eq(""), eq(""));
 
         verify(loggedInUserDataSource).getLoggedInUserByToken(eq(""));
@@ -161,13 +163,13 @@ public class LoginUseCaseTest {
 
         when(systemSettingDataSource.getCurrentLoginToken()).thenReturn(testToken);
 
-        when(systemSettingDataSource.getCurrentLoginUserGUID()).thenReturn(testGUID);
+        when(systemSettingDataSource.getCurrentLoginStationID()).thenReturn(testStationID);
 
         when(loggedInUserDataSource.getLoggedInUserByToken(testToken)).thenReturn(null);
 
         WeChatUser weChatUser = new WeChatUser(testToken, testGUID, testStationID);
 
-        when(weChatUserDataSource.getWeChatUser(testToken, testGUID)).thenReturn(weChatUser);
+        when(weChatUserDataSource.getWeChatUser(testToken, testStationID)).thenReturn(weChatUser);
 
         loginUseCase.loginWithNoParam(new BaseOperateDataCallbackImpl<Boolean>());
 
@@ -175,7 +177,9 @@ public class LoginUseCaseTest {
 
         verify(loggedInUserDataSource).getLoggedInUserByToken(eq(testToken));
 
-        verify(weChatUserDataSource).getWeChatUser(eq(testToken), eq(testGUID));
+        verify(systemSettingDataSource).getCurrentLoginStationID();
+
+        verify(weChatUserDataSource).getWeChatUser(eq(testToken), eq(testStationID));
 
         ArgumentCaptor<BaseLoadDataCallback<User>> getUserByGUIDCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 

@@ -538,14 +538,14 @@ public class DBUtils {
         return fileDownloadItems;
     }
 
-    public WeChatUser getWeChatUserByToken(String token, String guid) {
+    public WeChatUser getWeChatUserByToken(String token, String stationID) {
 
         openReadableDB();
 
         LocalDataParser<WeChatUser> parser = new LocalWeChatUserParser();
 
         Cursor cursor = database.rawQuery("select * from " + DBHelper.LOGGED_IN_WECHAT_USER_TABLE_NAME + " where " + DBHelper.LOGGED_IN_WECAHT_USER_TOKEN
-                + " = ? and " + DBHelper.LOGGED_IN_WECHAT_USER_GUID + " = ?", new String[]{token, guid});
+                + " = ? and " + DBHelper.LOGGED_IN_WECHAT_USER_STATION_ID + " = ?", new String[]{token, stationID});
 
         if (!cursor.moveToFirst())
             return null;

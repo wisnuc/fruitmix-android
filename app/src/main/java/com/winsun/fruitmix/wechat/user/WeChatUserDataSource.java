@@ -10,7 +10,7 @@ public interface WeChatUserDataSource {
 
     boolean insertWeChatUser(WeChatUser weChatUser);
 
-    WeChatUser getWeChatUser(String token, String guid);
+    WeChatUser getWeChatUser(String token, String stationID);
 
     boolean deleteWeChatUser(String token);
 

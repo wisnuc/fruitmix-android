@@ -1,8 +1,33 @@
 apply plugin: 'com.android.application'
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+
+def keystoreProperties = new Properties()
+
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
+
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties["keystoreFile"])
+            storePassword keystoreProperties["keystorePassword"]
+            keyAlias keystoreProperties["keyAlias"]
+            keyPassword keystoreProperties["keyPassword"]
+        }
+
+        debug{
+
+            storeFile file(keystoreProperties["keystoreFile"])
+            storePassword keystoreProperties["keystorePassword"]
+            keyAlias keystoreProperties["keyAlias"]
+            keyPassword keystoreProperties["keyPassword"]
+
+        }
+
+    }
 
     defaultConfig {
         applicationId "com.winsun.fruitmix"
@@ -29,12 +54,16 @@ android {
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
+            signingConfig signingConfigs.debug
+
         }
         release {
 
             minifyEnabled false
             zipAlignEnabled true
             shrinkResources false
+
+            signingConfig signingConfigs.release
 
         }
 

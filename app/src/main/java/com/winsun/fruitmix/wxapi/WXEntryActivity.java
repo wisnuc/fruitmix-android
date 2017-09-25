@@ -23,6 +23,7 @@ import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationMoreThanOneStation;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.stations.Station;
@@ -144,7 +145,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
         }
 
-        Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "onResp: " + result);
 
     }
 
@@ -170,9 +171,17 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                                 @Override
                                 public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
 
-                                    dismissDialog();
+                                    if (data.isEmpty()) {
 
-                                    showChooseStationDialog(weChatTokenUserWrapper, data);
+                                        handleLoginFail(new OperationFail("logged in wechat user is empty"));
+
+                                    } else {
+
+                                        dismissDialog();
+
+                                        showChooseStationDialog(weChatTokenUserWrapper, data);
+
+                                    }
 
                                 }
 

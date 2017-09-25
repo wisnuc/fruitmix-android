@@ -37,7 +37,6 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.file.view.FileDownloadActivity;
 import com.winsun.fruitmix.fragment.MediaMainFragment;
-import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.invitation.ConfirmInviteUserActivity;
@@ -73,8 +72,6 @@ import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.user.manage.UserManageActivity;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.wechat.user.InjectWeChatUserDataSource;
-import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -629,7 +626,7 @@ public class NavPagerActivity extends BaseActivity
 
         uploadMediaUseCase.startUploadMedia();
 
-        if (data)
+        if (systemSettingDataSource.getAutoUploadOrNot())
             handleLoginWithLoggedInUserSucceed();
         else
             handleLoginWithLoggedInUserFail();
@@ -648,7 +645,7 @@ public class NavPagerActivity extends BaseActivity
     }
 
     private void handleFinishLoginWithLoggedInUser() {
-        mediaMainFragment.refreshAllViews();
+        mediaMainFragment.refreshCurrentViewForce();
 
         mDrawerLayout.closeDrawer(GravityCompat.START);
     }

@@ -14,8 +14,8 @@ public class EquipmentInfo {
 
     public EquipmentInfo() {
 
-        type = "未知";
-        label = "未知";
+        type = WS215I;
+        label = WS215I;
 
     }
 

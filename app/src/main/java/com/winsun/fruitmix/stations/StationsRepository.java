@@ -7,6 +7,7 @@ import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -19,19 +20,15 @@ public class StationsRepository extends BaseDataRepository implements StationsDa
 
     private StationsDataSource stationsDataSource;
 
-    List<Station> stations;
-
-    String currentGUID;
-
-    public static StationsRepository getInstance(ThreadManager threadManager,StationsDataSource stationsDataSource) {
+    public static StationsRepository getInstance(ThreadManager threadManager, StationsDataSource stationsDataSource) {
 
         if (instance == null)
-            instance = new StationsRepository(threadManager,stationsDataSource);
+            instance = new StationsRepository(threadManager, stationsDataSource);
 
         return instance;
     }
 
-    public static void destroyInstance(){
+    public static void destroyInstance() {
         instance = null;
     }
 
@@ -39,21 +36,12 @@ public class StationsRepository extends BaseDataRepository implements StationsDa
         super(threadManager);
         this.stationsDataSource = stationsDataSource;
 
-        stations = new ArrayList<>();
-        currentGUID = "";
     }
 
     @Override
     public void getStationsByWechatGUID(final String guid, final BaseLoadDataCallback<Station> callback) {
 
         final BaseLoadDataCallback<Station> runOnMainThread = createLoadCallbackRunOnMainThread(callback);
-
-        if(currentGUID.equals(guid)){
-
-            runOnMainThread.onSucceed(stations,new OperationSuccess());
-            return;
-
-        }
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
@@ -63,18 +51,23 @@ public class StationsRepository extends BaseDataRepository implements StationsDa
                     @Override
                     public void onSucceed(List<Station> data, OperationResult operationResult) {
 
-                        stations.clear();
-                        stations.addAll(data);
+                        Iterator<Station> iterator = data.iterator();
 
-                        currentGUID = guid;
+                        while (iterator.hasNext()) {
 
-                        runOnMainThread.onSucceed(data,operationResult);
+                            Station station = iterator.next();
+
+                            if (!station.isOnline())
+                                iterator.remove();
+
+                        }
+
+                        runOnMainThread.onSucceed(data, operationResult);
 
                     }
 
                     @Override
                     public void onFail(OperationResult operationResult) {
-
                         runOnMainThread.onFail(operationResult);
                     }
                 });

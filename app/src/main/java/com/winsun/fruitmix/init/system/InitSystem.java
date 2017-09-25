@@ -56,8 +56,6 @@ public class InitSystem {
 
         NewPhotoListDataLoader.destroyInstance();
 
-        InjectSystemSettingDataSource.provideSystemSettingDataSource(context).setCurrentLoginStationID("");
-
         ButlerService.startButlerService(context);
 
         boolean result = FileUtil.createDownloadFileStoreFolder();

@@ -75,14 +75,6 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
                     @Override
                     public void onSucceed(List<User> data, OperationResult operationResult) {
 
-                        userDBDataSource.clearUsers();
-                        userDBDataSource.insertUser(data);
-
-                        cacheUsers.clear();
-                        cacheUsers.putAll(buildRemoteUserMapKeyIsUUID(data));
-
-                        cacheDirty = false;
-
                         if (runOnMainThreadCallback != null)
                             runOnMainThreadCallback.onSucceed(data, operationResult);
                     }
@@ -120,8 +112,8 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
             userConcurrentMap.put(user.getUuid(), user);
         }
         return userConcurrentMap;
-    }
 
+    }
 
     @Override
     public void insertUser(final String userName, final String userPwd, final BaseOperateDataCallback<User> callback) {
@@ -205,6 +197,7 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
 
         cacheDirty = false;
 
+        userDBDataSource.clearUsers();
         userDBDataSource.insertUser(users);
 
         cacheUsers.clear();

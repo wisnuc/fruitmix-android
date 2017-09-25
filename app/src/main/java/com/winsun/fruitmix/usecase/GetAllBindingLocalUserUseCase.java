@@ -4,6 +4,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
+import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.stations.Station;
@@ -38,7 +39,7 @@ public class GetAllBindingLocalUserUseCase {
 
         if (guid.isEmpty()) {
 
-            callback.onSucceed(loggedInUsers, new OperationSuccess());
+            callback.onFail(new OperationFail("guid is empty"));
 
             return;
 
@@ -55,7 +56,7 @@ public class GetAllBindingLocalUserUseCase {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                callback.onSucceed(loggedInUsers, new OperationSuccess());
+                callback.onFail(operationResult);
 
             }
         });

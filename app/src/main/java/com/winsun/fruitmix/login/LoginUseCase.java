@@ -148,9 +148,9 @@ public class LoginUseCase extends BaseDataRepository {
 
         if (loggedInUser == null) {
 
-            String currentLoginUserGUID = systemSettingDataSource.getCurrentLoginUserGUID();
+            String currentLoginStationID = systemSettingDataSource.getCurrentLoginStationID();
 
-            final WeChatUser weChatUser = weChatUserDataSource.getWeChatUser(currentLoginToken, currentLoginUserGUID);
+            final WeChatUser weChatUser = weChatUserDataSource.getWeChatUser(currentLoginToken, currentLoginStationID);
 
             loginWithWeChatUser(callback, weChatUser);
 
@@ -166,9 +166,21 @@ public class LoginUseCase extends BaseDataRepository {
 
             initSystemState(loggedInUser.getToken(), loggedInUser.getGateway(), loggedInUser.getUser().getUuid());
 
-            callback.onSucceed(true, new OperationSuccess());
+            getUsers(loggedInUser.getUser().getUuid(), new BaseOperateDataCallback<Boolean>() {
+                @Override
+                public void onSucceed(Boolean data, OperationResult result) {
 
-            getUsers(loggedInUser.getUser().getUuid());
+                    callback.onSucceed(true, new OperationSuccess());
+
+                }
+
+                @Override
+                public void onFail(OperationResult result) {
+
+                    callback.onFail(result);
+
+                }
+            });
 
         }
     }
@@ -230,10 +242,52 @@ public class LoginUseCase extends BaseDataRepository {
         }
     }
 
-    private void getUsers(String currentUserUUID) {
+    private void getUsers(final String currentUserUUID, final BaseOperateDataCallback<Boolean> callback) {
 
         userDataRepository.setCacheDirty();
-        userDataRepository.getUsers(currentUserUUID, new BaseLoadDataCallbackImpl<User>());
+        userDataRepository.getUsers(currentUserUUID, new BaseLoadDataCallbackImpl<User>(){
+
+            @Override
+            public void onSucceed(final List<User> users, OperationResult operationResult) {
+                super.onSucceed(users, operationResult);
+
+                for (final User user:users){
+
+                    if(user.getUuid().equals(currentUserUUID)){
+
+                        userDataRepository.getCurrentUserHome(new BaseLoadDataCallback<String>() {
+                            @Override
+                            public void onSucceed(List<String> data, OperationResult operationResult) {
+
+                                user.setHome(data.get(0));
+
+                                userDataRepository.insertUsers(users);
+
+                                callback.onSucceed(true,new OperationSuccess());
+
+                            }
+
+                            @Override
+                            public void onFail(OperationResult operationResult) {
+                                callback.onFail(operationResult);
+                            }
+                        });
+
+                    }
+
+                }
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+                super.onFail(operationResult);
+
+                callback.onFail(operationResult);
+            }
+        });
+
+
 
     }
 
@@ -272,9 +326,9 @@ public class LoginUseCase extends BaseDataRepository {
         userDataRepository.setCacheDirty();
         userDataRepository.getUsers(loadTokenParam.getUserUUID(), new BaseLoadDataCallbackImpl<User>() {
             @Override
-            public void onSucceed(List<User> data, OperationResult operationResult) {
+            public void onSucceed(final List<User> users, OperationResult operationResult) {
 
-                for (final User user : data) {
+                for (final User user : users) {
                     if (user.getUuid().equals(loadTokenParam.getUserUUID())) {
 
                         userDataRepository.getCurrentUserHome(new BaseLoadDataCallback<String>() {
@@ -282,6 +336,8 @@ public class LoginUseCase extends BaseDataRepository {
                             public void onSucceed(List<String> data, OperationResult operationResult) {
 
                                 user.setHome(data.get(0));
+
+                                userDataRepository.insertUsers(users);
 
                                 systemSettingDataSource.setAutoUploadOrNot(false);
                                 systemSettingDataSource.setShowAutoUploadDialog(true);
@@ -361,7 +417,7 @@ public class LoginUseCase extends BaseDataRepository {
 
     }
 
-    private void loginWithLoggedInUserInThread(LoggedInUser currentLoggedInUser, BaseOperateDataCallback<Boolean> callback) {
+    private void loginWithLoggedInUserInThread(LoggedInUser currentLoggedInUser, final BaseOperateDataCallback<Boolean> callback) {
         Log.d(TAG, "loginWithLoggedInUser: http request factory set current data token:" + currentLoggedInUser.getToken() + " gateway: " + currentLoggedInUser.getGateway());
 
         mToken = currentLoggedInUser.getToken();
@@ -377,22 +433,26 @@ public class LoginUseCase extends BaseDataRepository {
 
         String preUploadUserUUID = systemSettingDataSource.getCurrentUploadUserUUID();
 
-        boolean result;
-
         if (preUploadUserUUID.equals(currentLoggedInUser.getUser().getUuid())) {
 
             systemSettingDataSource.setAutoUploadOrNot(true);
 
-            result = true;
         } else {
             systemSettingDataSource.setAutoUploadOrNot(false);
 
-            result = false;
         }
 
-        callback.onSucceed(result, new OperationSuccess());
+        getUsers(currentLoggedInUser.getUser().getUuid(), new BaseOperateDataCallback<Boolean>() {
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
+                callback.onSucceed(true, new OperationSuccess());
+            }
 
-        getUsers(currentLoggedInUser.getUser().getUuid());
+            @Override
+            public void onFail(OperationResult result) {
+                callback.onFail(result);
+            }
+        });
     }
 
     private void initSystemState(String token, String gateway, String loginUserUUID) {
@@ -440,7 +500,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                 //TODO: check get gateway and user when login by wechat code
 
-                Log.d(TAG, "loginWithNoParam: http request factory set current data token:" + token + " gateway: "
+                Log.d(TAG, "loginWithWeChatCode: http request factory set current data token:" + token + " gateway: "
                         + HttpRequestFactory.CLOUD_IP + " guid: " + weChatTokenUserWrapper.getGuid());
 
                 mToken = token;
@@ -471,6 +531,8 @@ public class LoginUseCase extends BaseDataRepository {
             @Override
             public void onSucceed(List<Station> data, OperationResult operationResult) {
 
+                Log.d(TAG, "onSucceed: station size: " + data.size());
+
                 if (data.size() == 1) {
 
                     getUsersAfterChooseStationID(weChatTokenUserWrapper, data.get(0).getId(), callback);
@@ -499,6 +561,8 @@ public class LoginUseCase extends BaseDataRepository {
     }
 
     public void getUsersAfterChooseStationID(final WeChatTokenUserWrapper weChatTokenUserWrapper, final String stationID, final BaseOperateDataCallback<Boolean> callback) {
+
+        Log.d(TAG, "getUsersAfterChooseStationID: stationID: " + stationID);
 
         httpRequestFactory.setStationID(stationID);
         httpRequestFactory.setDefaultFactory(true);
@@ -564,11 +628,15 @@ public class LoginUseCase extends BaseDataRepository {
 
                     if (user.getUuid().equals(currentUser.getUuid())) {
 
+                        Log.d(TAG, "onSucceed: currentUser isAdmin: " + user.isAdmin());
+
                         currentUser.setAdmin(user.isAdmin());
 
                         userDataRepository.getCurrentUserHome(new BaseLoadDataCallback<String>() {
                             @Override
                             public void onSucceed(List<String> data, OperationResult operationResult) {
+
+                                Log.d(TAG, "onSucceed: current User Home: " + data.get(0));
 
                                 currentUser.setHome(data.get(0));
 
@@ -623,6 +691,9 @@ public class LoginUseCase extends BaseDataRepository {
     public void loginWithOtherWeChatUserBindingLocalUser(LoggedInWeChatUser loggedInWeChatUser, final BaseOperateDataCallback<Boolean> callback) {
 
         final WeChatUser weChatUser = new WeChatUser(loggedInWeChatUser.getToken(), loggedInWeChatUser.getUser().getAssociatedWechatGUID(), loggedInWeChatUser.getStationID());
+
+        Log.d(TAG, "loginWithOtherWeChatUserBindingLocalUser: weChatUserToken: " + weChatUser.getToken()
+                + " weChatUserGUID: " + weChatUser.getGuid() + " weChatUserStationID: " + weChatUser.getStationID());
 
         loginWithWeChatUser(new BaseOperateDataCallback<Boolean>() {
             @Override

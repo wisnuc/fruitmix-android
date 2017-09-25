@@ -322,6 +322,11 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
     }
 
     @Override
+    public void refreshViewForce() {
+        refreshView();
+    }
+
+    @Override
     public void onActivityReenter(int resultCode, Intent data) {
 
     }

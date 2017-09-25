@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.logout;
 
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
@@ -37,16 +38,20 @@ public class LogoutUseCaseTest {
     @Mock
     private WeChatUserDataSource weChatUserDataSource;
 
+    @Mock
+    private HttpRequestFactory httpRequestFactory;
+
     private String testToken = "testToken";
 
-    private String testGUID = "testGUID";
+    private String testStationID = "testStationID";
 
     @Before
     public void setup() {
 
         MockitoAnnotations.initMocks(this);
 
-        logoutUseCase = LogoutUseCase.getInstance(systemSettingDataSource, loggedInUserDataSource, uploadMediaUseCase, weChatUserDataSource);
+        logoutUseCase = LogoutUseCase.getInstance(systemSettingDataSource, loggedInUserDataSource,
+                uploadMediaUseCase, weChatUserDataSource,httpRequestFactory);
     }
 
     @After
@@ -76,8 +81,6 @@ public class LogoutUseCaseTest {
 
         when(systemSettingDataSource.getCurrentLoginToken()).thenReturn(testToken);
 
-        when(systemSettingDataSource.getCurrentLoginUserGUID()).thenReturn(testGUID);
-
         when(loggedInUserDataSource.getLoggedInUserByToken(testToken)).thenReturn(new LoggedInUser("", "", "", "", new User()));
 
         logoutUseCase.logout();
@@ -90,7 +93,7 @@ public class LogoutUseCaseTest {
 
         verify(weChatUserDataSource, never()).deleteWeChatUser(anyString());
 
-        verify(systemSettingDataSource).setCurrentLoginToken(eq(""));
+        handleLogout();
 
         testChangeLoginUserResult();
 
@@ -101,11 +104,11 @@ public class LogoutUseCaseTest {
 
         when(systemSettingDataSource.getCurrentLoginToken()).thenReturn(testToken);
 
-        when(systemSettingDataSource.getCurrentLoginUserGUID()).thenReturn(testGUID);
+        when(systemSettingDataSource.getCurrentLoginStationID()).thenReturn(testStationID);
 
         when(loggedInUserDataSource.getLoggedInUserByToken(testToken)).thenReturn(null);
 
-        when(weChatUserDataSource.getWeChatUser(testToken, testGUID)).thenReturn(new WeChatUser(testToken, testGUID, ""));
+        when(weChatUserDataSource.getWeChatUser(testToken, testStationID)).thenReturn(new WeChatUser(testToken, "", testStationID));
 
         logoutUseCase.logout();
 
@@ -113,16 +116,24 @@ public class LogoutUseCaseTest {
 
         verify(loggedInUserDataSource, never()).deleteLoggedInUsers(ArgumentMatchers.<LoggedInUser>anyCollection());
 
-        verify(weChatUserDataSource).getWeChatUser(eq(testToken), eq(testGUID));
+        verify(weChatUserDataSource).getWeChatUser(eq(testToken), eq(testStationID));
 
         verify(weChatUserDataSource).deleteWeChatUser(eq(testToken));
 
+        handleLogout();
+
+        testChangeLoginUserResult();
+
+    }
+
+    private void handleLogout() {
         verify(systemSettingDataSource).setCurrentLoginToken(eq(""));
 
         verify(systemSettingDataSource).setCurrentLoginUserGUID(eq(""));
 
-        testChangeLoginUserResult();
+        verify(systemSettingDataSource).setCurrentLoginStationID(eq(""));
 
+        verify(httpRequestFactory).reset();
     }
 
 

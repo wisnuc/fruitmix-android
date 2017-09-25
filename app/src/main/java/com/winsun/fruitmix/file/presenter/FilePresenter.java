@@ -54,7 +54,6 @@ import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
 import com.winsun.fruitmix.file.view.viewmodel.FileItemViewModel;
 import com.winsun.fruitmix.file.view.viewmodel.FileViewModel;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
@@ -71,6 +70,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created by Administrator on 2017/7/27.
@@ -138,9 +138,13 @@ public class FilePresenter implements OnViewSelectListener {
 
     private FileDownloadManager fileDownloadManager;
 
+    private UserDataRepository userDataRepository;
+
+    private SystemSettingDataSource systemSettingDataSource;
+
     private FileListSelectModeListener fileListSelectModeListener;
 
-    public FilePresenter(Activity activity, FileView fileView, FileListSelectModeListener fileListSelectModeListener, StationFileRepository stationFileRepository, NoContentViewModel noContentViewModel, LoadingViewModel loadingViewModel, FileViewModel fileViewModel,
+    public FilePresenter(final Activity activity, FileView fileView, FileListSelectModeListener fileListSelectModeListener, StationFileRepository stationFileRepository, NoContentViewModel noContentViewModel, LoadingViewModel loadingViewModel, FileViewModel fileViewModel,
                          HandleFileListOperateCallback handleFileListOperateCallback, UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource, FileDownloadManager fileDownloadManager) {
         this.activity = activity;
         this.fileView = fileView;
@@ -152,19 +156,10 @@ public class FilePresenter implements OnViewSelectListener {
         this.handleFileListOperateCallback = handleFileListOperateCallback;
         this.fileDownloadManager = fileDownloadManager;
 
-        currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
-        rootUUID = userDataRepository.getUserByUUID(currentUserUUID).getHome();
+        this.userDataRepository = userDataRepository;
+        this.systemSettingDataSource = systemSettingDataSource;
 
-        init();
-    }
-
-    private void init() {
-        abstractRemoteFiles = new ArrayList<>();
-
-        retrievedFolderUUIDList = new ArrayList<>();
-        retrievedFolderNameList = new ArrayList<>();
-
-        selectedFiles = new ArrayList<>();
+        initCurrentUserUUIDAndRootUUID(userDataRepository, systemSettingDataSource);
 
         showUnSelectModeViewCommand = new ShowUnSelectModeViewCommand(this);
 
@@ -180,6 +175,22 @@ public class FilePresenter implements OnViewSelectListener {
         };
 
         fileRecyclerViewAdapter = new FileRecyclerViewAdapter();
+
+        init();
+    }
+
+    private void initCurrentUserUUIDAndRootUUID(UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource) {
+        currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
+        rootUUID = userDataRepository.getUserByUUID(currentUserUUID).getHome();
+    }
+
+    private void init() {
+        abstractRemoteFiles = new ArrayList<>();
+
+        retrievedFolderUUIDList = new ArrayList<>();
+        retrievedFolderNameList = new ArrayList<>();
+
+        selectedFiles = new ArrayList<>();
 
         currentFolderUUID = rootUUID;
         currentFolderName = activity.getString(R.string.file);
@@ -270,6 +281,15 @@ public class FilePresenter implements OnViewSelectListener {
             remoteFileLoaded = false;
 
         if (!remoteFileLoaded) {
+
+            initCurrentUserUUIDAndRootUUID(userDataRepository, systemSettingDataSource);
+
+            if(force){
+
+                init();
+
+            }
+
 
             if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
                 retrievedFolderUUIDList.add(currentFolderUUID);

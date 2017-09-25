@@ -94,6 +94,11 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
     }
 
     @Override
+    public void refreshViewForce() {
+
+    }
+
+    @Override
     public void onActivityReenter(int resultCode, Intent data) {
 
     }

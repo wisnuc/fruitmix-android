@@ -33,6 +33,9 @@ public class RemoteStationParser extends BaseRemoteDataParser implements RemoteD
             station.setId(jsonObject.optString("id"));
             station.setLabel(jsonObject.optString("name"));
 
+            station.setIp(jsonObject.optString("LANIP"));
+            station.setOnline(jsonObject.optBoolean("isOnline"));
+
             stations.add(station);
 
         }

@@ -20,8 +20,8 @@ public class WeChatUserDBDDataSource implements WeChatUserDataSource {
     }
 
     @Override
-    public WeChatUser getWeChatUser(String token, String guid) {
-        return dbUtils.getWeChatUserByToken(token,guid);
+    public WeChatUser getWeChatUser(String token, String stationID) {
+        return dbUtils.getWeChatUserByToken(token,stationID);
     }
 
     @Override
