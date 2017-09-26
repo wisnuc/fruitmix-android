@@ -87,7 +87,7 @@ public class RemoteDatasParserUnitTest {
         assertEquals("91e4ff515f445c16f2b5697040c79b980396248c057ea7e04ad761e635cae062", media.getUuid());
         assertEquals("5203", media.getWidth());
         assertEquals("3451", media.getHeight());
-        assertEquals("2016-09-25", media.getTime());
+        assertEquals("2016-09-25 17:54:53", media.getTime());
 
     }
 

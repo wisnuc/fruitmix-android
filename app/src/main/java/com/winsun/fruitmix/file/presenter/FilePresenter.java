@@ -402,7 +402,7 @@ public class FilePresenter implements OnViewSelectListener {
                 break;
             case DOWNLOADING:
 
-                if (mCurrentDownloadFileCommand != null){
+                if (mCurrentDownloadFileCommand != null) {
 
                     FileDownloadItem fileDownloadItem = mCurrentDownloadFileCommand.getFileDownloadItem();
                     currentDownloadFileProgressDialog.setProgress(fileDownloadItem.getCurrentProgress(progressMax));
@@ -416,12 +416,17 @@ public class FilePresenter implements OnViewSelectListener {
 
                     FileDownloadItem fileDownloadItem = mCurrentDownloadFileCommand.getFileDownloadItem();
 
-                    mCurrentDownloadFileCommand = null;
+                    if (fileDownloadItem.getDownloadState().equals(DownloadState.FINISHED)) {
 
-                    currentDownloadFileProgressDialog.dismiss();
+                        mCurrentDownloadFileCommand = null;
 
-                    OpenFileCommand openFileCommand = new OpenFileCommand(activity, fileDownloadItem.getFileName());
-                    openFileCommand.execute();
+                        currentDownloadFileProgressDialog.dismiss();
+
+                        OpenFileCommand openFileCommand = new OpenFileCommand(activity, fileDownloadItem.getFileName());
+                        openFileCommand.execute();
+
+                    }
+
 
                 } else {
 
@@ -441,7 +446,7 @@ public class FilePresenter implements OnViewSelectListener {
                 break;
             case ERROR:
 
-                if (mCurrentDownloadFileCommand != null) {
+                if (mCurrentDownloadFileCommand != null && mCurrentDownloadFileCommand.getFileDownloadItem().getDownloadState().equals(DownloadState.ERROR)) {
 
                     mCurrentDownloadFileCommand.unExecute();
 
@@ -454,16 +459,32 @@ public class FilePresenter implements OnViewSelectListener {
                     else
                         Toast.makeText(activity, activity.getText(R.string.download_failed), Toast.LENGTH_SHORT).show();
 
-                } else {
+                } else if (currentDownloadFileForShareCommand != null) {
 
-                    currentDownloadFileForShareCommand.unExecute();
+                    boolean occurError = false;
 
-                    currentDownloadFileForShareCommand = null;
+                    for (AbstractRemoteFile file : needDownloadFilesForShare) {
 
-                    currentDownloadFileForShareProgressDialog.dismiss();
+                        FileDownloadItem fileDownloadItem = fileDownloadManager.getFileDownloadItem(file.getUuid());
 
-                    Toast.makeText(activity, activity.getString(R.string.download_failed), Toast.LENGTH_SHORT).show();
+                        if (fileDownloadItem.getDownloadState().equals(DownloadState.ERROR)) {
+                            occurError = true;
+                            break;
+                        }
 
+                    }
+
+                    if (occurError) {
+
+                        currentDownloadFileForShareCommand.unExecute();
+
+                        currentDownloadFileForShareCommand = null;
+
+                        currentDownloadFileForShareProgressDialog.dismiss();
+
+                        Toast.makeText(activity, activity.getString(R.string.download_failed), Toast.LENGTH_SHORT).show();
+
+                    }
 
                 }
 
@@ -482,13 +503,30 @@ public class FilePresenter implements OnViewSelectListener {
 
                 } else {
 
-                    currentDownloadFileForShareCommand.unExecute();
+                    boolean occurNoEnoughSpace = false;
 
-                    currentDownloadFileForShareCommand = null;
+                    for (AbstractRemoteFile file : needDownloadFilesForShare) {
 
-                    currentDownloadFileForShareProgressDialog.dismiss();
+                        FileDownloadItem fileDownloadItem = fileDownloadManager.getFileDownloadItem(file.getUuid());
 
-                    Toast.makeText(activity, activity.getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+                        if (fileDownloadItem.getDownloadState().equals(DownloadState.NO_ENOUGH_SPACE)) {
+                            occurNoEnoughSpace = true;
+                            break;
+                        }
+
+                    }
+
+                    if (occurNoEnoughSpace) {
+
+                        currentDownloadFileForShareCommand.unExecute();
+
+                        currentDownloadFileForShareCommand = null;
+
+                        currentDownloadFileForShareProgressDialog.dismiss();
+
+                        Toast.makeText(activity, activity.getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+
+                    }
 
                 }
 
@@ -675,7 +713,20 @@ public class FilePresenter implements OnViewSelectListener {
 
     private void openFileWhenOnClick() {
 
-        mCurrentDownloadFileCommand = new DownloadFileCommand(fileDownloadManager, selectedFiles.get(0), stationFileRepository, currentFolderUUID, rootUUID);
+        AbstractRemoteFile file = selectedFiles.get(0);
+
+        FileDownloadItem fileDownloadItem = fileDownloadManager.getFileDownloadItem(file.getUuid());
+
+        if (fileDownloadItem != null) {
+
+            AbstractCommand command = new ChangeToDownloadPageCommand(changeToDownloadPageCallback);
+            command.execute();
+
+            return;
+
+        }
+
+        mCurrentDownloadFileCommand = new DownloadFileCommand(fileDownloadManager, file, stationFileRepository, currentFolderUUID, rootUUID);
 
         currentDownloadFileProgressDialog = new ProgressDialog(activity);
 

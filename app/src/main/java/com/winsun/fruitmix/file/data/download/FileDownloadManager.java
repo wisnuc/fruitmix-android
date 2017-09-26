@@ -47,7 +47,7 @@ public class FileDownloadManager {
 
     }
 
-    public void addFileDownloadItem(FileDownloadItem fileDownloadItem, StationFileRepository stationFileRepository,String currentUserUUID) {
+    public void addFileDownloadItem(FileDownloadItem fileDownloadItem, StationFileRepository stationFileRepository, String currentUserUUID) {
 
         if (checkIsAlreadyDownloadingStateOrDownloadedState(fileDownloadItem.getFileUUID())) return;
 
@@ -55,11 +55,11 @@ public class FileDownloadManager {
 
         if (checkDownloadingItemIsMax()) {
 
-            fileDownloadState = new FileDownloadPendingState(fileDownloadItem,stationFileRepository,currentUserUUID);
+            fileDownloadState = new FileDownloadPendingState(fileDownloadItem, stationFileRepository, currentUserUUID);
 
         } else {
 
-            fileDownloadState = new FileStartDownloadState(fileDownloadItem, stationFileRepository, ThreadManagerImpl.getInstance(),currentUserUUID);
+            fileDownloadState = new FileStartDownloadState(fileDownloadItem, stationFileRepository, ThreadManagerImpl.getInstance(), currentUserUUID);
         }
 
         // must first add and then set,because setFileDownloadState will call notifyDownloadStateChanged,update ui using fileDownloadItems
@@ -106,29 +106,33 @@ public class FileDownloadManager {
 
     private boolean checkIsAlreadyDownloadingStateOrDownloadedState(String fileUUID) {
 
-        List<FileDownloadItem> fileDownloadItems = getFileDownloadItems();
+        FileDownloadItem fileDownloadItem = getFileDownloadItem(fileUUID);
 
-        for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
-            if (fileDownloadItem.getFileUUID().equals(fileUUID) && (fileDownloadItem.getDownloadState() == DownloadState.START_DOWNLOAD || fileDownloadItem.getDownloadState() == DownloadState.DOWNLOADING || fileDownloadItem.getDownloadState() == DownloadState.FINISHED)) {
-                return true;
-            }
-        }
+        return fileDownloadItem != null && (fileDownloadItem.getDownloadState() == DownloadState.START_DOWNLOAD ||
+                fileDownloadItem.getDownloadState() == DownloadState.DOWNLOADING || fileDownloadItem.getDownloadState() == DownloadState.FINISHED);
 
-        return false;
     }
 
     public boolean checkIsDownloaded(String fileUUID) {
 
+        FileDownloadItem fileDownloadItem = getFileDownloadItem(fileUUID);
+
+        return fileDownloadItem != null && fileDownloadItem.getDownloadState() == DownloadState.FINISHED;
+
+    }
+
+    public FileDownloadItem getFileDownloadItem(String fileUUID) {
+
         for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
 
-            if (fileDownloadItem.getFileUUID().equals(fileUUID) && fileDownloadItem.getDownloadState() == DownloadState.FINISHED) {
-                return true;
+            if (fileDownloadItem.getFileUUID().equals(fileUUID)) {
+                return fileDownloadItem;
             }
         }
 
-        return false;
-    }
+        return null;
 
+    }
 
     void startPendingDownloadItem() {
 
@@ -140,7 +144,7 @@ public class FileDownloadManager {
 
                 Log.d(TAG, "startPendingDownloadItem: " + fileDownloadItem.getFileName());
 
-                fileDownloadItem.setFileDownloadState(new FileStartDownloadState(fileDownloadItem, state.getStationFileRepository(),ThreadManagerImpl.getInstance(), state.getCurrentUserUUID()));
+                fileDownloadItem.setFileDownloadState(new FileStartDownloadState(fileDownloadItem, state.getStationFileRepository(), ThreadManagerImpl.getInstance(), state.getCurrentUserUUID()));
             }
         }
     }
