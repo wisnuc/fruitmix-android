@@ -1003,7 +1003,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         switch (v.getId()) {
             case R.id.system_share:
 
-                if (!Util.getNetworkState(mContext)) {
+                if (!Util.isNetworkConnected(mContext)) {
                     Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
                     return;
                 }

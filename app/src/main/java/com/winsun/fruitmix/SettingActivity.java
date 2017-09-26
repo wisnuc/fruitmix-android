@@ -71,7 +71,7 @@ public class SettingActivity extends BaseActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                settingPresenter.onCheckedChanged(isChecked);
+                settingPresenter.onCheckedChanged(buttonView,isChecked);
 
             }
         });
@@ -106,6 +106,7 @@ public class SettingActivity extends BaseActivity {
 
         public final ObservableBoolean autoUploadOrNot = new ObservableBoolean(false);
         public final ObservableBoolean alreadyUploadMediaCountTextViewVisibility = new ObservableBoolean(false);
+        public final ObservableBoolean autoUploadWhenConnectedWithMobileNetwork = new ObservableBoolean(false);
         public final ObservableField<String> alreadyUploadMediaCountText = new ObservableField<>();
         public final ObservableField<String> cacheSizeText = new ObservableField<>();
 

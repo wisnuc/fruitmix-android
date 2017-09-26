@@ -398,7 +398,7 @@ public class GifTouchNetworkImageView extends PinchImageView {
             @Override
             public void run() {
 
-                Log.d(TAG, "onResponse Url:" + mUrl);
+                Log.d(TAG, "onErrorResponse Url:" + mUrl);
                 if (mImageLoadListener != null) {
                     mImageLoadListener.onImageLoadFail(mUrl, GifTouchNetworkImageView.this);
                 }

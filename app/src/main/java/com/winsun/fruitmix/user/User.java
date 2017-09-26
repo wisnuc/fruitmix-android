@@ -19,7 +19,8 @@ public class User {
     private String library;
     private boolean admin;
 
-    private String associatedWechatGUID;
+    private String associatedWeChatGUID;
+    private String associatedWeChatUserName;
 
     public User() {
 
@@ -31,7 +32,8 @@ public class User {
         setHome("");
         setLibrary("");
 
-        setAssociatedWechatGUID("");
+        setAssociatedWeChatGUID("");
+        setAssociatedWeChatUserName("");
 
     }
 
@@ -122,12 +124,20 @@ public class User {
         this.admin = admin;
     }
 
-    public void setAssociatedWechatGUID(String associatedWechatGUID) {
-        this.associatedWechatGUID = associatedWechatGUID;
+    public void setAssociatedWeChatGUID(String associatedWeChatGUID) {
+        this.associatedWeChatGUID = associatedWeChatGUID;
     }
 
-    public String getAssociatedWechatGUID() {
-        return associatedWechatGUID;
+    public String getAssociatedWeChatGUID() {
+        return associatedWeChatGUID;
+    }
+
+    public void setAssociatedWeChatUserName(String associatedWeChatUserName) {
+        this.associatedWeChatUserName = associatedWeChatUserName;
+    }
+
+    public String getAssociatedWeChatUserName() {
+        return associatedWeChatUserName;
     }
 
     public static String generateCreateRemoteUserBody(String userName, String userPassword) {

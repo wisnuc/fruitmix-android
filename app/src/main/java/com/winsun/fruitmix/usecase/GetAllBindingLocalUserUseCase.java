@@ -1,8 +1,6 @@
 package com.winsun.fruitmix.usecase;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.logged.in.user.LoggedInUser;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -13,7 +11,6 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -75,7 +72,7 @@ public class GetAllBindingLocalUserUseCase {
 
         final Station station = data.get(0);
 
-        userDataRepository.getUsersByStationID(station.getId(), new BaseLoadDataCallback<User>() {
+        userDataRepository.getUsersByStationIDWithCloudAPI(station.getId(), new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(List<User> users, OperationResult operationResult) {
 
@@ -83,7 +80,7 @@ public class GetAllBindingLocalUserUseCase {
 
                 for (User user : users) {
 
-                    if (user.getAssociatedWechatGUID().equals(guid)) {
+                    if (user.getAssociatedWeChatGUID().equals(guid)) {
 
                         currentLocalUser = user;
                         break;

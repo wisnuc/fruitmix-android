@@ -448,7 +448,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     }
 
     private void showCreateShareBottomDialog() {
-        if (!Util.getNetworkState(mContext)) {
+        if (!Util.isNetworkConnected(mContext)) {
             Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
             return;
         }

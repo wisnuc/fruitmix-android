@@ -27,6 +27,7 @@ public class SystemSettingDataSource {
 
     public static final String CURRENT_EQUIPMENT_IP = "current_equipment_ip";
 
+    public static final String AUTO_UPLOAD_WHEN_CONNECTED_WITH_MOBILE_NETWORK = "auto_upload_when_connected_with_mobile_network";
 
     private static SystemSettingDataSource instance;
 
@@ -73,6 +74,21 @@ public class SystemSettingDataSource {
 
         editor = sharedPreferences.edit();
         editor.putBoolean(Util.AUTO_UPLOAD_OR_NOT, autoUploadOrNot);
+        editor.apply();
+    }
+
+    public boolean getAutoUploadWhenConnectedWithMobileNetwork() {
+
+        return sharedPreferences.getBoolean(AUTO_UPLOAD_WHEN_CONNECTED_WITH_MOBILE_NETWORK, false);
+
+    }
+
+    public void setAutoUploadWhenConnectedWithMobileNetwork(boolean autoUploadWhenConnectedWithMobileNetwork) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putBoolean(AUTO_UPLOAD_WHEN_CONNECTED_WITH_MOBILE_NETWORK, autoUploadWhenConnectedWithMobileNetwork);
         editor.apply();
     }
 
@@ -172,6 +188,5 @@ public class SystemSettingDataSource {
         editor.apply();
 
     }
-
 
 }

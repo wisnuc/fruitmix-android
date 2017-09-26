@@ -66,7 +66,7 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
 
         createUserView.hideSoftInput();
 
-        if (!Util.getNetworkState(context)) {
+        if (!Util.isNetworkConnected(context)) {
             createUserView.showToast(context.getString(R.string.no_network));
             return;
         }

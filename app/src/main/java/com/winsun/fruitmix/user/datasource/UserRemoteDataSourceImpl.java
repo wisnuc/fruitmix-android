@@ -140,7 +140,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     //TODO: refactor get users:save current user name,avatar,and do not insert into db
 
     @Override
-    public void getUsersByStationID(String stationID, BaseLoadDataCallback<User> callback) {
+    public void getUsersByStationIDWithCloudAPI(String stationID, BaseLoadDataCallback<User> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithWrap(USER_PARAMETER, stationID);
 
@@ -149,7 +149,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     }
 
     @Override
-    public void getUserByUUID(String userUUID, BaseLoadDataCallback<User> callback) {
+    public void getUserDetailedInfoByUUID(String userUUID, BaseLoadDataCallback<User> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER + "/" + userUUID);
 
@@ -158,7 +158,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     }
 
     @Override
-    public void getUserByGUID(String guid, BaseLoadDataCallback<User> callback) {
+    public void getUserByGUIDWithCloudAPI(String guid, BaseLoadDataCallback<User> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap(HttpRequestFactory.CLOUD_API_LEVEL + "/users/" + guid);
 

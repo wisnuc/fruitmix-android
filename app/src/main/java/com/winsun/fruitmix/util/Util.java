@@ -266,12 +266,13 @@ public class Util {
         }
     }
 
-    public static boolean getNetworkState(Context context) {
+    public static boolean isNetworkConnected(Context context) {
         ConnectivityManager manager = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         if (manager != null) {
             NetworkInfo info = manager.getActiveNetworkInfo();
             if (info != null && info.isConnected()) {
+
                 if (info.getState() == NetworkInfo.State.CONNECTED) {
                     return true;
                 }
@@ -279,6 +280,26 @@ public class Util {
         }
         return false;
     }
+
+    public static NetworkState getNetworkState(Context context) {
+
+        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+
+        NetworkState networkState = new NetworkState(false, false);
+
+        if (networkInfo != null && networkInfo.isConnected()) {
+
+            networkState.setMobileConnected(networkInfo.getType() == ConnectivityManager.TYPE_MOBILE);
+            networkState.setWifiConnected(networkInfo.getType() == ConnectivityManager.TYPE_WIFI);
+
+        }
+
+        return networkState;
+
+    }
+
 
     public static String createLocalUUid() {
         return UUID.randomUUID().toString();

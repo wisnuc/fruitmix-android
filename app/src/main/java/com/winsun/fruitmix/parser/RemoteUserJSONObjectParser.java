@@ -83,7 +83,7 @@ public class RemoteUserJSONObjectParser {
 
         JSONObject global = itemRaw.optJSONObject("global");
         if(global != null){
-            user.setAssociatedWechatGUID(global.optString("id"));
+            user.setAssociatedWeChatGUID(global.optString("id"));
         }
 
         return user;

@@ -806,7 +806,14 @@ public class NavPagerActivity extends BaseActivity
 
         User user = userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
 
-        String userName = user.getUserName();
+        String userAssociatedWeChatUserName = user.getAssociatedWeChatUserName();
+
+        String userName;
+
+        if (userAssociatedWeChatUserName.isEmpty())
+            userName = user.getUserName();
+        else
+            userName = userAssociatedWeChatUserName;
 
         navPagerViewModel.userNameText.set(userName);
 

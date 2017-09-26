@@ -183,7 +183,7 @@ public class LoginUseCaseTest {
 
         ArgumentCaptor<BaseLoadDataCallback<User>> getUserByGUIDCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(userDataRepository).getUserByGUID(eq(testGUID), getUserByGUIDCaptor.capture());
+        verify(userDataRepository).getUserByGUIDWithCloudAPI(eq(testGUID), getUserByGUIDCaptor.capture());
 
         User user = new User();
         user.setUserName(testUserName);
@@ -327,7 +327,6 @@ public class LoginUseCaseTest {
 
         verify(callback).onSucceed(ArgumentMatchers.<String>anyList(), any(OperationResult.class));
 
-        verify(eventBus).postSticky(ArgumentMatchers.any(OperationEvent.class));
 
     }
 
@@ -490,17 +489,17 @@ public class LoginUseCaseTest {
     private void testAfterChooseStationID() {
         ArgumentCaptor<BaseLoadDataCallback<User>> getUserByStationIDCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(userDataRepository).getUsersByStationID(eq(testStationID), getUserByStationIDCaptor.capture());
+        verify(userDataRepository).getUsersByStationIDWithCloudAPI(eq(testStationID), getUserByStationIDCaptor.capture());
 
         User user = new User();
         user.setUuid(testUserUUID);
-        user.setAssociatedWechatGUID(testGUID);
+        user.setAssociatedWeChatGUID(testGUID);
 
         getUserByStationIDCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess());
 
         ArgumentCaptor<BaseLoadDataCallback<User>> getUsersCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(userDataRepository).getUserByUUID(eq(testUserUUID), getUsersCaptor.capture());
+        verify(userDataRepository).getUserDetailedInfoByUUID(eq(testUserUUID), getUsersCaptor.capture());
 
         getUsersCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess());
 

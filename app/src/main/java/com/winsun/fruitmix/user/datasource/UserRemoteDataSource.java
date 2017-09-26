@@ -16,10 +16,10 @@ public interface UserRemoteDataSource {
 
     void getCurrentUserHome(BaseLoadDataCallback<String> callback);
 
-    void getUsersByStationID(String stationID, BaseLoadDataCallback<User> callback);
+    void getUsersByStationIDWithCloudAPI(String stationID, BaseLoadDataCallback<User> callback);
 
-    void getUserByUUID(String userUUID,BaseLoadDataCallback<User> callback);
+    void getUserDetailedInfoByUUID(String userUUID, BaseLoadDataCallback<User> callback);
 
-    void getUserByGUID(String guid,BaseLoadDataCallback<User> callback);
+    void getUserByGUIDWithCloudAPI(String guid, BaseLoadDataCallback<User> callback);
 
 }

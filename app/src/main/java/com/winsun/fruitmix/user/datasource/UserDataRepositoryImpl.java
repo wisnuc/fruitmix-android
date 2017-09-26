@@ -168,24 +168,24 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
     }
 
     @Override
-    public void getUsersByStationID(final String stationID, final BaseLoadDataCallback<User> callback) {
+    public void getUsersByStationIDWithCloudAPI(final String stationID, final BaseLoadDataCallback<User> callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                userRemoteDataSource.getUsersByStationID(stationID, createLoadCallbackRunOnMainThread(callback));
+                userRemoteDataSource.getUsersByStationIDWithCloudAPI(stationID, createLoadCallbackRunOnMainThread(callback));
             }
         });
 
     }
 
     @Override
-    public void getUserByUUID(final String userUUID, final BaseLoadDataCallback<User> callback) {
+    public void getUserDetailedInfoByUUID(final String userUUID, final BaseLoadDataCallback<User> callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                userRemoteDataSource.getUserByUUID(userUUID, createLoadCallbackRunOnMainThread(callback));
+                userRemoteDataSource.getUserDetailedInfoByUUID(userUUID, createLoadCallbackRunOnMainThread(callback));
             }
         });
 
@@ -221,12 +221,12 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
     }
 
     @Override
-    public void getUserByGUID(final String guid, final BaseLoadDataCallback<User> callback) {
+    public void getUserByGUIDWithCloudAPI(final String guid, final BaseLoadDataCallback<User> callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                userRemoteDataSource.getUserByGUID(guid,createLoadCallbackRunOnMainThread(callback));
+                userRemoteDataSource.getUserByGUIDWithCloudAPI(guid,createLoadCallbackRunOnMainThread(callback));
             }
         });
 

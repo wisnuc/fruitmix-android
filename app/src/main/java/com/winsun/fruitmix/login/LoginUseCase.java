@@ -198,7 +198,7 @@ public class LoginUseCase extends BaseDataRepository {
 
             httpRequestFactory.setPort(HttpRequestFactory.CLOUD_PORT);
 
-            userDataRepository.getUserByGUID(weChatUser.getGuid(), new BaseLoadDataCallback<User>() {
+            userDataRepository.getUserByGUIDWithCloudAPI(weChatUser.getGuid(), new BaseLoadDataCallback<User>() {
                 @Override
                 public void onSucceed(final List<User> data, OperationResult operationResult) {
 
@@ -354,7 +354,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                                 callback.onSucceed(Collections.singletonList(token), new OperationSuccess());
 
-                                eventBus.postSticky(new OperationEvent(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN, new OperationSuccess()));
+//                                eventBus.postSticky(new OperationEvent(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN, new OperationSuccess()));
 
                             }
 
@@ -567,7 +567,7 @@ public class LoginUseCase extends BaseDataRepository {
         httpRequestFactory.setStationID(stationID);
         httpRequestFactory.setDefaultFactory(true);
 
-        userDataRepository.getUsersByStationID(stationID, new BaseLoadDataCallback<User>() {
+        userDataRepository.getUsersByStationIDWithCloudAPI(stationID, new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
 
@@ -575,7 +575,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                 for (User user : data) {
 
-                    if (user.getAssociatedWechatGUID().equals(weChatTokenUserWrapper.getGuid())) {
+                    if (user.getAssociatedWeChatGUID().equals(weChatTokenUserWrapper.getGuid())) {
 
                         currentLocalUser = user;
                         break;
@@ -591,7 +591,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                 } else {
 
-                    currentLocalUser.setUserName(weChatTokenUserWrapper.getNickName());
+                    currentLocalUser.setAssociatedWeChatUserName(weChatTokenUserWrapper.getNickName());
                     currentLocalUser.setAvatar(weChatTokenUserWrapper.getAvatarUrl());
 
                     getUserByUserUUID(stationID, currentLocalUser, data, new BaseOperateDataCallbackImpl<Boolean>() {
@@ -620,7 +620,7 @@ public class LoginUseCase extends BaseDataRepository {
 
     private void getUserByUserUUID(final String stationID, final User currentUser, final List<User> users, final BaseOperateDataCallback<Boolean> callback) {
 
-        userDataRepository.getUserByUUID(currentUser.getUuid(), new BaseLoadDataCallback<User>() {
+        userDataRepository.getUserDetailedInfoByUUID(currentUser.getUuid(), new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
 
@@ -646,7 +646,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                                 systemSettingDataSource.setCurrentLoginStationID(stationID);
 
-                                eventBus.postSticky(new OperationEvent(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN, new OperationSuccess()));
+//                                eventBus.postSticky(new OperationEvent(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN, new OperationSuccess()));
 
                                 callback.onSucceed(true, new OperationSuccess());
 
@@ -674,7 +674,6 @@ public class LoginUseCase extends BaseDataRepository {
             }
         });
 
-
     }
 
     private void handleLoginWithWeChatCodeSucceed(String guid, String token, String stationID) {
@@ -690,7 +689,7 @@ public class LoginUseCase extends BaseDataRepository {
 
     public void loginWithOtherWeChatUserBindingLocalUser(LoggedInWeChatUser loggedInWeChatUser, final BaseOperateDataCallback<Boolean> callback) {
 
-        final WeChatUser weChatUser = new WeChatUser(loggedInWeChatUser.getToken(), loggedInWeChatUser.getUser().getAssociatedWechatGUID(), loggedInWeChatUser.getStationID());
+        final WeChatUser weChatUser = new WeChatUser(loggedInWeChatUser.getToken(), loggedInWeChatUser.getUser().getAssociatedWeChatGUID(), loggedInWeChatUser.getStationID());
 
         Log.d(TAG, "loginWithOtherWeChatUserBindingLocalUser: weChatUserToken: " + weChatUser.getToken()
                 + " weChatUserGUID: " + weChatUser.getGuid() + " weChatUserStationID: " + weChatUser.getStationID());

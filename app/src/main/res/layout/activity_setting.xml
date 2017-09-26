@@ -148,7 +148,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -162,6 +162,7 @@
                 <android.support.v7.widget.SwitchCompat
                     android:id="@+id/mobile_network_upload_switch"
                     android:layout_width="wrap_content"
+                    android:checked="@{setting.autoUploadWhenConnectedWithMobileNetwork}"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true" />

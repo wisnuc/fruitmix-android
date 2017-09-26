@@ -1,18 +1,14 @@
 package com.winsun.fruitmix.usecase;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.stations.Station;
 import com.winsun.fruitmix.stations.StationsDataSource;
-import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
-import com.winsun.fruitmix.wechat.user.WeChatUser;
-import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
 import org.junit.After;
 import org.junit.Before;
@@ -135,21 +131,21 @@ public class GetAllBindingLocalUserUseCaseTest {
 
         ArgumentCaptor<BaseLoadDataCallback<User>> getUser1Captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(userDataRepository).getUsersByStationID(eq(stationID1), getUser1Captor.capture());
+        verify(userDataRepository).getUsersByStationIDWithCloudAPI(eq(stationID1), getUser1Captor.capture());
 
         User user1 = new User();
         user1.setUserName(testUserName1);
-        user1.setAssociatedWechatGUID(testGUID);
+        user1.setAssociatedWeChatGUID(testGUID);
 
         getUser1Captor.getValue().onSucceed(Collections.singletonList(user1), new OperationSuccess());
 
         ArgumentCaptor<BaseLoadDataCallback<User>> getUser2Captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(userDataRepository).getUsersByStationID(eq(stationID2), getUser2Captor.capture());
+        verify(userDataRepository).getUsersByStationIDWithCloudAPI(eq(stationID2), getUser2Captor.capture());
 
         User user2 = new User();
         user2.setUserName(testUserName2);
-        user2.setAssociatedWechatGUID(testGUID);
+        user2.setAssociatedWeChatGUID(testGUID);
 
         getUser2Captor.getValue().onSucceed(Collections.singletonList(user2), new OperationSuccess());
 

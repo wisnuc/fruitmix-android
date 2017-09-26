@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
+import android.widget.CompoundButton;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.SettingActivity;
@@ -35,6 +36,8 @@ import java.util.List;
 public class SettingPresenterImpl implements SettingPresenter {
 
     private boolean mAutoUploadOrNot = false;
+
+    private boolean mAutoUploadWhenConnectedWithMobileNetwork = false;
 
     private int mAlreadyUploadMediaCount = -1;
 
@@ -75,6 +78,9 @@ public class SettingPresenterImpl implements SettingPresenter {
 
         mAutoUploadOrNot = systemSettingDataSource.getAutoUploadOrNot();
         settingViewModel.autoUploadOrNot.set(mAutoUploadOrNot);
+
+        mAutoUploadWhenConnectedWithMobileNetwork = systemSettingDataSource.getAutoUploadWhenConnectedWithMobileNetwork();
+        settingViewModel.autoUploadWhenConnectedWithMobileNetwork.set(mAutoUploadWhenConnectedWithMobileNetwork);
 
         calcAlreadyUploadMediaCountAndTotalCacheSize(context);
 
@@ -209,8 +215,22 @@ public class SettingPresenterImpl implements SettingPresenter {
     }
 
     @Override
-    public void onCheckedChanged(boolean isChecked) {
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
+        switch (buttonView.getId()) {
+
+            case R.id.auto_upload_photos_switch:
+                handleAutoUploadCheckedChange(isChecked);
+                break;
+            case R.id.mobile_network_upload_switch:
+                handleAutoUploadWhenConnectedWithMobileNetwork(isChecked);
+                break;
+
+        }
+
+    }
+
+    private void handleAutoUploadCheckedChange(boolean isChecked) {
         if (mAutoUploadOrNot != isChecked) {
 
             mAutoUploadOrNot = isChecked;
@@ -226,8 +246,26 @@ public class SettingPresenterImpl implements SettingPresenter {
                 EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
             }
         }
+    }
+
+    private void handleAutoUploadWhenConnectedWithMobileNetwork(boolean isChecked) {
+
+        if (mAutoUploadWhenConnectedWithMobileNetwork != isChecked) {
+
+            mAutoUploadWhenConnectedWithMobileNetwork = isChecked;
+
+            systemSettingDataSource.setAutoUploadWhenConnectedWithMobileNetwork(isChecked);
+
+            if (isChecked) {
+
+                EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
+
+            }
+
+        }
 
     }
+
 
     @Override
     public void onDestroy(Context context) {
