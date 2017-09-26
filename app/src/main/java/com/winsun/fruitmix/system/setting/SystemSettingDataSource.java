@@ -19,6 +19,16 @@ public class SystemSettingDataSource {
 
     public static final String CURRENT_LOGIN_USER_UUID = "current_login_user_uuid";
 
+    public static final String CURRENT_LOGIN_TOKEN = "current_login_token";
+
+    public static final String CURRENT_LOGIN_USER_GUID = "current_login_user_guid";
+
+    public static final String CURRENT_LOGIN_STATION_ID = "current_login_station_id";
+
+    public static final String CURRENT_EQUIPMENT_IP = "current_equipment_ip";
+
+    public static final String AUTO_UPLOAD_WHEN_CONNECTED_WITH_MOBILE_NETWORK = "auto_upload_when_connected_with_mobile_network";
+
     private static SystemSettingDataSource instance;
 
     static SystemSettingDataSource getInstance(Context context) {
@@ -67,6 +77,21 @@ public class SystemSettingDataSource {
         editor.apply();
     }
 
+    public boolean getAutoUploadWhenConnectedWithMobileNetwork() {
+
+        return sharedPreferences.getBoolean(AUTO_UPLOAD_WHEN_CONNECTED_WITH_MOBILE_NETWORK, false);
+
+    }
+
+    public void setAutoUploadWhenConnectedWithMobileNetwork(boolean autoUploadWhenConnectedWithMobileNetwork) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putBoolean(AUTO_UPLOAD_WHEN_CONNECTED_WITH_MOBILE_NETWORK, autoUploadWhenConnectedWithMobileNetwork);
+        editor.apply();
+    }
+
     public void setShowAutoUploadDialog(boolean showAutoUploadDialog) {
 
         SharedPreferences.Editor editor;
@@ -95,6 +120,71 @@ public class SystemSettingDataSource {
 
         editor = sharedPreferences.edit();
         editor.putString(CURRENT_LOGIN_USER_UUID, currentLoginUserUUID);
+        editor.apply();
+
+    }
+
+    public String getCurrentLoginToken() {
+
+        return sharedPreferences.getString(CURRENT_LOGIN_TOKEN, "");
+
+    }
+
+    public void setCurrentLoginToken(String token) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putString(CURRENT_LOGIN_TOKEN, token);
+        editor.apply();
+
+    }
+
+    public String getCurrentLoginUserGUID() {
+
+        return sharedPreferences.getString(CURRENT_LOGIN_USER_GUID, "");
+
+    }
+
+    public void setCurrentLoginUserGUID(String guid) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putString(CURRENT_LOGIN_USER_GUID, guid);
+        editor.apply();
+
+    }
+
+
+    public String getCurrentLoginStationID() {
+
+        return sharedPreferences.getString(CURRENT_LOGIN_STATION_ID, "");
+
+    }
+
+    public void setCurrentLoginStationID(String currentLoginUserUUID) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putString(CURRENT_LOGIN_STATION_ID, currentLoginUserUUID);
+        editor.apply();
+
+    }
+
+    public String getCurrentEquipmentIp() {
+
+        return sharedPreferences.getString(CURRENT_EQUIPMENT_IP, "");
+
+    }
+
+    public void setCurrentEquipmentIp(String currentEquipmentIp) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putString(CURRENT_EQUIPMENT_IP, currentEquipmentIp);
         editor.apply();
 
     }

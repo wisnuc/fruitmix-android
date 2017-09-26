@@ -1,9 +1,12 @@
 package com.winsun.fruitmix.logout;
 
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
+import com.winsun.fruitmix.wechat.user.WeChatUser;
+import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
 import java.util.Collections;
 
@@ -19,23 +22,40 @@ public class LogoutUseCase {
 
     private LoggedInUserDataSource loggedInUserDataSource;
 
+    private WeChatUserDataSource weChatUserDataSource;
+
     private UploadMediaUseCase uploadMediaUseCase;
 
-    public static LogoutUseCase getInstance(SystemSettingDataSource systemSettingDataSource, LoggedInUserDataSource loggedInUserDataSource,UploadMediaUseCase uploadMediaUseCase) {
+    private HttpRequestFactory httpRequestFactory;
+
+    public static LogoutUseCase getInstance(SystemSettingDataSource systemSettingDataSource,
+                                            LoggedInUserDataSource loggedInUserDataSource, UploadMediaUseCase uploadMediaUseCase,
+                                            WeChatUserDataSource weChatUserDataSource, HttpRequestFactory httpRequestFactory) {
         if (ourInstance == null)
-            ourInstance = new LogoutUseCase(systemSettingDataSource, loggedInUserDataSource,uploadMediaUseCase);
+            ourInstance = new LogoutUseCase(systemSettingDataSource, loggedInUserDataSource,
+                    uploadMediaUseCase, weChatUserDataSource,httpRequestFactory);
         return ourInstance;
     }
 
-    private LogoutUseCase(SystemSettingDataSource systemSettingDataSource, LoggedInUserDataSource loggedInUserDataSource,UploadMediaUseCase uploadMediaUseCase) {
+    public static void destroyInstance(){
+
+        ourInstance = null;
+
+    }
+
+    private LogoutUseCase(SystemSettingDataSource systemSettingDataSource,
+                          LoggedInUserDataSource loggedInUserDataSource, UploadMediaUseCase uploadMediaUseCase,
+                          WeChatUserDataSource weChatUserDataSource, HttpRequestFactory httpRequestFactory) {
 
         this.systemSettingDataSource = systemSettingDataSource;
         this.loggedInUserDataSource = loggedInUserDataSource;
         this.uploadMediaUseCase = uploadMediaUseCase;
+        this.weChatUserDataSource = weChatUserDataSource;
+        this.httpRequestFactory = httpRequestFactory;
 
     }
 
-    public void changeLoginUser(){
+    public void changeLoginUser() {
 
         uploadMediaUseCase.stopUploadMedia();
 
@@ -43,16 +63,32 @@ public class LogoutUseCase {
 
     }
 
-
     public void logout() {
 
-        String currentLoginUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
+        String currentLoginToken = systemSettingDataSource.getCurrentLoginToken();
 
-        LoggedInUser loggedInUser = loggedInUserDataSource.getLoggedInUserByUserUUID(currentLoginUserUUID);
+        LoggedInUser loggedInUser = loggedInUserDataSource.getLoggedInUserByToken(currentLoginToken);
 
-        loggedInUserDataSource.deleteLoggedInUsers(Collections.singletonList(loggedInUser));
+        if (loggedInUser != null)
+            loggedInUserDataSource.deleteLoggedInUsers(Collections.singletonList(loggedInUser));
+        else {
 
-        systemSettingDataSource.setCurrentLoginUserUUID("");
+            String currentLoginStationID = systemSettingDataSource.getCurrentLoginStationID();
+
+            WeChatUser weChatUser = weChatUserDataSource.getWeChatUser(currentLoginToken,currentLoginStationID);
+
+            if (weChatUser != null)
+                weChatUserDataSource.deleteWeChatUser(currentLoginToken);
+
+        }
+
+        systemSettingDataSource.setCurrentLoginToken("");
+
+        systemSettingDataSource.setCurrentLoginUserGUID("");
+
+        systemSettingDataSource.setCurrentLoginStationID("");
+
+        httpRequestFactory.reset();
 
         changeLoginUser();
 

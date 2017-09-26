@@ -21,5 +21,5 @@ public interface SettingPresenter {
 
     void onDestroy(Context context);
 
-    void onCheckedChanged(boolean isChecked);
+    void onCheckedChanged(CompoundButton buttonView,boolean isChecked);
 }

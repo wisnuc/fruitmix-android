@@ -16,12 +16,14 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/8/31.
  */
-public class RemoteMediaParser implements RemoteDatasParser<Media> {
+public class RemoteMediaParser extends BaseRemoteDataParser implements RemoteDatasParser<Media> {
 
     public static final String TAG = RemoteMediaParser.class.getSimpleName();
 
     @Override
     public List<Media> parse(String json) throws JSONException {
+
+        String rootStr = checkHasWrapper(json);
 
         List<Media> medias = new ArrayList<>();
 
@@ -29,7 +31,7 @@ public class RemoteMediaParser implements RemoteDatasParser<Media> {
 
         Media media;
 
-        jsonArray = new JSONArray(json);
+        jsonArray = new JSONArray(rootStr);
 
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject root = jsonArray.getJSONObject(i);

@@ -241,7 +241,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private void initImageLoader() {
 
-        ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderIntance();
+        ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderInstance(containerActivity);
         mImageLoader = imageGifLoaderInstance.getImageLoader(containerActivity);
 
     }
@@ -302,6 +302,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
+    @Override
     public void refreshViewForce() {
 
         mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallback<Media>() {
@@ -729,7 +730,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 if (currentMedia == null) return;
 
-                View newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageThumbUrl());
+                View newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageThumbUrl(containerActivity));
 
                 if (newSharedElement == null)
                     newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageSmallThumbUrl(containerActivity));
@@ -1236,7 +1237,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (!mIsFling) {
 
-                imageUrl = currentMedia.getImageThumbUrl();
+                imageUrl = currentMedia.getImageThumbUrl(containerActivity);
 
             } else {
 
@@ -1254,9 +1255,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (mediaList == null) {
 
-                Log.d(TAG, "refreshView: medialist is null,currentMedia getDate:" + currentMedia.getDate());
+                Log.d(TAG, "refreshView: media list is null,currentMedia getDate:" + currentMedia.getDate());
 
-                Log.d(TAG, "refreshView: medialist is null,map key is date,key:" + mMapKeyIsDateValueIsPhotoList.keySet());
+                Log.d(TAG, "refreshView: media list is null,map key is date,key:" + mMapKeyIsDateValueIsPhotoList.keySet());
 
             } else {
 

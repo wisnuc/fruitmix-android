@@ -2,6 +2,9 @@ package com.winsun.fruitmix.http;
 
 import android.content.Context;
 
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+
 /**
  * Created by Administrator on 2017/7/14.
  */
@@ -21,18 +24,19 @@ public class InjectHttp {
 
     }
 
-    public static HttpRequestFactory provideHttpRequestFactory() {
+    public static HttpRequestFactory provideHttpRequestFactory(Context context) {
 
-        return HttpRequestFactory.getInstance();
+        return HttpRequestFactory.getInstance(InjectSystemSettingDataSource.provideSystemSettingDataSource(context));
+
     }
 
     public static IHttpFileUtil provideIHttpFileUtil() {
         return OkHttpUtil.getInstance();
     }
 
-    public static ImageGifLoaderInstance provideImageGifLoaderIntance(){
+    public static ImageGifLoaderInstance provideImageGifLoaderInstance(Context context){
 
-        return ImageGifLoaderInstance.getInstance();
+        return ImageGifLoaderInstance.getInstance(InjectHttp.provideHttpRequestFactory(context));
 
     }
 

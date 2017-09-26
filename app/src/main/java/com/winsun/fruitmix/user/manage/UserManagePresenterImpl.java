@@ -8,14 +8,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.UserManageItemBinding;
 import com.winsun.fruitmix.equipment.EquipmentItemViewModel;
 import com.winsun.fruitmix.equipment.data.EquipmentDataRepository;
 import com.winsun.fruitmix.equipment.data.EquipmentDataSource;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.model.EquipmentInfo;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.stations.Station;
+import com.winsun.fruitmix.stations.StationsDataSource;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
@@ -49,17 +55,30 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
     private UserDataRepository userDataRepository;
 
+    private SystemSettingDataSource systemSettingDataSource;
+
+    private StationsDataSource stationsDataSource;
+
+    private ImageLoader imageLoader;
+
     private EquipmentDataSource equipmentDataSource;
     private String currentIP;
+    private String currentLoginUserUUID;
 
     public UserManagePresenterImpl(UserManageView userManageView, EquipmentItemViewModel equipmentItemViewModel, UserManageActivity.UserManageViewModel userManageViewModel, UserDataRepository userDataRepository,
-                                   EquipmentDataSource equipmentDataSource, String currentIP) {
+                                   EquipmentDataSource equipmentDataSource, SystemSettingDataSource systemSettingDataSource, StationsDataSource stationsDataSource,
+                                   ImageLoader imageLoader) {
         this.userManageView = userManageView;
         this.userDataRepository = userDataRepository;
         this.userManageViewModel = userManageViewModel;
         this.equipmentItemViewModel = equipmentItemViewModel;
         this.equipmentDataSource = equipmentDataSource;
-        this.currentIP = currentIP;
+        this.systemSettingDataSource = systemSettingDataSource;
+        this.stationsDataSource = stationsDataSource;
+
+        this.imageLoader = imageLoader;
+
+        this.currentLoginUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
 
         mUserListAdapter = new UserListAdapter();
     }
@@ -72,6 +91,59 @@ public class UserManagePresenterImpl implements UserMangePresenter {
     @Override
     public void refreshView() {
 
+        String currentIPWithHttpHead = systemSettingDataSource.getCurrentEquipmentIp();
+
+        if(currentIPWithHttpHead.equals(HttpRequestFactory.CLOUD_IP)){
+
+            stationsDataSource.getStationsByWechatGUID(systemSettingDataSource.getCurrentLoginUserGUID(), new BaseLoadDataCallback<Station>() {
+                @Override
+                public void onSucceed(List<Station> data, OperationResult operationResult) {
+
+                    String currentStationID = systemSettingDataSource.getCurrentLoginStationID();
+
+                    for (Station station:data){
+
+                        if(station.getId().equals(currentStationID)){
+
+                            currentIP = station.getIp();
+
+                            getEquipmentInfo();
+
+                        }
+
+                    }
+
+                }
+
+                @Override
+                public void onFail(OperationResult operationResult) {
+
+                    handleGetEquipmentInfoFail();
+
+                }
+            });
+
+
+        }else {
+
+            if (currentIPWithHttpHead.contains(Util.HTTP)) {
+                String[] result = currentIPWithHttpHead.split(Util.HTTP);
+
+                currentIP = result[1];
+
+            } else {
+                currentIP = currentIPWithHttpHead;
+            }
+
+            getEquipmentInfo();
+
+        }
+
+        getUserInThread();
+
+    }
+
+    private void getEquipmentInfo() {
         equipmentDataSource.getEquipmentInfo(currentIP, new BaseLoadDataCallback<EquipmentInfo>() {
             @Override
             public void onSucceed(List<EquipmentInfo> data, OperationResult operationResult) {
@@ -85,15 +157,16 @@ public class UserManagePresenterImpl implements UserMangePresenter {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                EquipmentInfo equipmentInfo = new EquipmentInfo();
-
-                setEquipmentInfo(equipmentInfo);
+                handleGetEquipmentInfoFail();
 
             }
         });
+    }
 
-        getUserInThread();
+    private void handleGetEquipmentInfoFail() {
+        EquipmentInfo equipmentInfo = new EquipmentInfo();
 
+        setEquipmentInfo(equipmentInfo);
     }
 
     private void setEquipmentInfo(EquipmentInfo equipmentInfo) {
@@ -110,7 +183,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
     private void getUserInThread() {
 
-        userDataRepository.getUsers(new BaseLoadDataCallback<User>() {
+        userDataRepository.getUsers(currentLoginUserUUID,new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(final List<User> data, OperationResult operationResult) {
 
@@ -195,10 +268,11 @@ public class UserManagePresenterImpl implements UserMangePresenter {
                 binding = DataBindingUtil.getBinding(convertView);
             }
 
-            binding.setUser(new UserManageWrap(mUserList.get(position)));
+            User user = mUserList.get(position);
+
+            binding.setUser(new UserManageWrap(user));
 
             binding.executePendingBindings();
-
 
 /*            convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -210,6 +284,10 @@ public class UserManagePresenterImpl implements UserMangePresenter {
                     }
                 }
             });*/
+
+            UserAvatar userAvatar =binding.userAvatar;
+
+            userAvatar.setUser(user,imageLoader);
 
             return convertView;
         }
@@ -232,10 +310,6 @@ public class UserManagePresenterImpl implements UserMangePresenter {
             }
 
             return userName;
-        }
-
-        public String getDefaultAvatar() {
-            return Util.getUserNameFirstLetter(user.getUserName());
         }
 
         public String getEmail() {

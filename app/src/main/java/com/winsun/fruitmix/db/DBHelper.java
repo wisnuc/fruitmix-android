@@ -14,6 +14,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final int ADD_MEDIA_LATITUDE_L0NGITUDE_DB_VERSION = 28;
 
+    public static final int ADD_LOGGED_IN_WECHAT_USER_DB_VERSION = 30;
 
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
@@ -54,6 +55,11 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String LOGGED_IN_USER_TOKEN = "logged_in_user_token";
     public static final String LOGGED_IN_USER_DEVICE_ID = "logged_in_user_device_id";
 
+    public static final String LOGGED_IN_WECHAT_USER_ID = "id";
+    public static final String LOGGED_IN_WECHAT_USER_GUID = "logged_in_wechat_user_guid";
+    public static final String LOGGED_IN_WECAHT_USER_TOKEN = "logged_in_wechat_user_token";
+    public static final String LOGGED_IN_WECHAT_USER_STATION_ID = "logged_in_wechat_user_station_id";
+
     private static final String DB_NAME = "fruitmix";
     private static final String REMOTE_COMMENT_TABLE_NAME = "remote_comment";
     private static final String LOCAL_COMMENT_TABLE_NAME = "local_comment";
@@ -66,39 +72,60 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME = "local_media_share_content";
     static final String DOWNLOADED_FILE_TABLE_NAME = "downloaded_file";
     static final String LOGGED_IN_USER_TABLE_NAME = "logged_in_user";
+    public static final String LOGGED_IN_WECHAT_USER_TABLE_NAME = "logged_in_wechat_user";
 
-    private static final int DB_VERSION = 29;
+    private static final int DB_VERSION = 30;
 
     private static final String CREATE_TABLE = "create table if not exists ";
 
     private static final String DROP_TABLE = "DROP TABLE IF EXISTS ";
 
-    private static final String DATABASE_MEDIA_CREATE = " (" + MEDIA_KEY_ID + " integer primary key autoincrement,"
-            + MEDIA_KEY_UUID + " text not null," + MEDIA_KEY_TIME + " text not null," + MEDIA_KEY_WIDTH + " text not null,"
-            + MEDIA_KEY_HEIGHT + " text not null," + MEDIA_KEY_THUMB + " text," + MEDIA_KEY_LOCAL + " integer not null,"
-            + MEDIA_KEY_UPLOADED_USER_UUID + " text," + MEDIA_KEY_SHARING + " integer not null,"
-            + MEDIA_KEY_ORIENTATION_NUMBER + " integer," + MEDIA_KEY_TYPE + " text,"
-            + MEDIA_KEY_MINI_THUMB + " text," + MEDIA_KEY_ORIGINAL_PHOTO_PATH + " text,"
-            + MEDIA_KEY_LONGITUDE + " text," + MEDIA_KEY_LATITUDE + " text)";
+    private static final String BEGIN_SQL = " (";
+
+    private static final String END_SQL = ")";
+
+    public static final String INTEGER_PRIMARY_KEY_AUTOINCREMENT = " integer primary key autoincrement,";
+
+    public static final String TEXT_NOT_NULL = " text not null,";
+
+    public static final String INTEGER_NOT_NULL = " integer not null,";
+
+    public static final String TEXT = " text,";
+
+    public static final String TEXT_NOT_NULL_WITHOUT_COMMA = " text not null";
+
+    private static final String DATABASE_MEDIA_CREATE = BEGIN_SQL + MEDIA_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT
+            + MEDIA_KEY_UUID + TEXT_NOT_NULL + MEDIA_KEY_TIME + TEXT_NOT_NULL + MEDIA_KEY_WIDTH + TEXT_NOT_NULL
+            + MEDIA_KEY_HEIGHT + TEXT_NOT_NULL + MEDIA_KEY_THUMB + TEXT + MEDIA_KEY_LOCAL + INTEGER_NOT_NULL
+            + MEDIA_KEY_UPLOADED_USER_UUID + TEXT + MEDIA_KEY_SHARING + INTEGER_NOT_NULL
+            + MEDIA_KEY_ORIENTATION_NUMBER + " integer," + MEDIA_KEY_TYPE + TEXT
+            + MEDIA_KEY_MINI_THUMB + TEXT + MEDIA_KEY_ORIGINAL_PHOTO_PATH + TEXT
+            + MEDIA_KEY_LONGITUDE + TEXT + MEDIA_KEY_LATITUDE + " text" + END_SQL;
 
     private static final String DATABASE_REMOTE_MEDIA_CREATE = CREATE_TABLE + REMOTE_MEDIA_TABLE_NAME + DATABASE_MEDIA_CREATE;
 
     private static final String DATABASE_LOCAL_MEDIA_CREATE = CREATE_TABLE + LOCAL_MEDIA_TABLE_NAME + DATABASE_MEDIA_CREATE;
 
-    private static final String USER_FIELD_CREATE = " ("
-            + USER_KEY_ID + " integer primary key autoincrement," + USER_KEY_UUID + " text not null,"
-            + USER_KEY_USERNAME + " text not null," + USER_KEY_AVATAR + " text not null,"
-            + USER_KEY_EMAIL + " text," + USER_KEY_DEFAULT_AVATAR + " text not null," + USER_KEY_DEFAULT_AVATAR_BG_COLOR + " integer not null,"
-            + USER_KEY_HOME + " text not null," + USER_KEY_LIBRARY + " text not null," + USER_KEY_IS_ADMIN + " integer not null";
+    private static final String USER_FIELD_CREATE = BEGIN_SQL
+            + USER_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT + USER_KEY_UUID + TEXT_NOT_NULL
+            + USER_KEY_USERNAME + TEXT_NOT_NULL + USER_KEY_AVATAR + TEXT_NOT_NULL
+            + USER_KEY_EMAIL + TEXT + USER_KEY_DEFAULT_AVATAR + TEXT_NOT_NULL + USER_KEY_DEFAULT_AVATAR_BG_COLOR + INTEGER_NOT_NULL
+            + USER_KEY_HOME + TEXT_NOT_NULL + USER_KEY_LIBRARY + TEXT_NOT_NULL + USER_KEY_IS_ADMIN + " integer not null";
 
-    private static final String DATABASE_REMOTE_USER_CREATE = CREATE_TABLE + REMOTE_USER_TABLE_NAME + USER_FIELD_CREATE + ")";
+    private static final String DATABASE_REMOTE_USER_CREATE = CREATE_TABLE + REMOTE_USER_TABLE_NAME + USER_FIELD_CREATE + END_SQL;
 
-    private static final String DATABASE_DOWNLOADED_FILE_CREATE = CREATE_TABLE + DOWNLOADED_FILE_TABLE_NAME + " (" + FILE_KEY_ID + " integer primary key autoincrement,"
-            + FILE_KEY_NAME + " text," + FILE_KEY_UUID + " text not null," + FILE_KEY_TIME + " text," + FILE_KEY_SIZE + " text," + FILE_KEY_CREATOR_UUID + " text not null)";
+
+    private static final String DATABASE_DOWNLOADED_FILE_CREATE = CREATE_TABLE + DOWNLOADED_FILE_TABLE_NAME + BEGIN_SQL + FILE_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT
+            + FILE_KEY_NAME + TEXT + FILE_KEY_UUID + TEXT_NOT_NULL + FILE_KEY_TIME + TEXT + FILE_KEY_SIZE + TEXT + FILE_KEY_CREATOR_UUID + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
     private static final String DATABASE_LOGGED_IN_USER_CREATE = CREATE_TABLE + LOGGED_IN_USER_TABLE_NAME + USER_FIELD_CREATE + ","
-            + LOGGED_IN_USER_GATEWAY + " text not null," + LOGGED_IN_USER_EQUIPMENT_NAME + " text not null," + LOGGED_IN_USER_TOKEN + " text not null,"
-            + LOGGED_IN_USER_DEVICE_ID + " text not null)";
+            + LOGGED_IN_USER_GATEWAY + TEXT_NOT_NULL + LOGGED_IN_USER_EQUIPMENT_NAME + TEXT_NOT_NULL + LOGGED_IN_USER_TOKEN + TEXT_NOT_NULL
+            + LOGGED_IN_USER_DEVICE_ID + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
+
+    private static final String DATABASE_LOGGED_IN_WECHAT_USER_CREATE = CREATE_TABLE + LOGGED_IN_WECHAT_USER_TABLE_NAME
+            + BEGIN_SQL + LOGGED_IN_WECHAT_USER_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT + LOGGED_IN_WECHAT_USER_GUID + TEXT_NOT_NULL
+            + LOGGED_IN_WECAHT_USER_TOKEN + TEXT_NOT_NULL + LOGGED_IN_WECHAT_USER_STATION_ID + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
+
 
     DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -113,6 +140,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
         db.execSQL(DATABASE_DOWNLOADED_FILE_CREATE);
         db.execSQL(DATABASE_LOGGED_IN_USER_CREATE);
+
+        db.execSQL(DATABASE_LOGGED_IN_WECHAT_USER_CREATE);
     }
 
     @Override
@@ -121,11 +150,16 @@ public class DBHelper extends SQLiteOpenHelper {
         Log.i(TAG, "Upgrading database from version " + oldVersion + "to " +
                 newVersion);
 
-        if(oldVersion < ADD_MEDIA_LATITUDE_L0NGITUDE_DB_VERSION){
+        if (oldVersion < ADD_MEDIA_LATITUDE_L0NGITUDE_DB_VERSION) {
 
             db.execSQL(DROP_TABLE + REMOTE_MEDIA_TABLE_NAME);
             db.execSQL(DROP_TABLE + LOCAL_MEDIA_TABLE_NAME);
             db.execSQL(DROP_TABLE + REMOTE_USER_TABLE_NAME);
+
+            onCreate(db);
+        }else if(oldVersion < ADD_LOGGED_IN_WECHAT_USER_DB_VERSION){
+
+            db.execSQL(DROP_TABLE + LOGGED_IN_WECHAT_USER_TABLE_NAME);
 
             onCreate(db);
         }

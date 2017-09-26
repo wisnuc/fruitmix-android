@@ -25,16 +25,22 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp">
 
-        <TextView
+        <!--<TextView-->
+        <!--android:id="@+id/avatar"-->
+        <!--android:layout_width="64dp"-->
+        <!--android:layout_height="64dp"-->
+        <!--android:layout_marginTop="14dp"-->
+        <!--android:background="@{viewModel.userAvatarBackgroundResID,default=@drawable/share_portrait_bg}"-->
+        <!--android:gravity="center"-->
+        <!--android:text="@{viewModel.userAvatarText}"-->
+        <!--android:textColor="@color/eighty_seven_percent_white"-->
+        <!--android:textSize="18dp" />-->
+
+        <com.winsun.fruitmix.component.UserAvatar
             android:id="@+id/avatar"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_marginTop="14dp"
-            android:background="@{viewModel.userAvatarBackgroundResID,default=@drawable/share_portrait_bg}"
-            android:gravity="center"
-            android:text="@{viewModel.userAvatarText}"
-            android:textColor="@color/eighty_seven_percent_white"
-            android:textSize="18dp" />
+            android:layout_marginTop="14dp" />
 
         <ImageButton
             android:id="@+id/navigation_header_arrow_imageview"

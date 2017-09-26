@@ -5,19 +5,16 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.model.operationResult.OperationIOException;
-import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -136,7 +133,7 @@ public class UserRemoteDataSourceTest {
 
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(httpResponse);
 
-            userRemoteDataSource.getUsers(callback);
+            userRemoteDataSource.getUsers("",callback);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -182,7 +179,7 @@ public class UserRemoteDataSourceTest {
 
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(httpResponse).thenReturn(new HttpResponse(404, ""));
 
-            userRemoteDataSource.getUsers(new BaseLoadDataCallbackImpl<User>());
+            userRemoteDataSource.getUsers("",new BaseLoadDataCallbackImpl<User>());
 
             verify(iHttpUtil, times(2)).remoteCall(any(HttpRequest.class));
 
@@ -252,7 +249,7 @@ public class UserRemoteDataSourceTest {
 
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(firstResponse).thenReturn(secondResponse);
 
-            userRemoteDataSource.getUsers(callback);
+            userRemoteDataSource.getUsers("",callback);
 
         } catch (IOException e) {
             e.printStackTrace();

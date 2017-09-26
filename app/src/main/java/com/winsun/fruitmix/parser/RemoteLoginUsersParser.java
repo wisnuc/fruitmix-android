@@ -12,17 +12,19 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/8/31.
  */
-public class RemoteLoginUsersParser implements RemoteDatasParser<User> {
+public class RemoteLoginUsersParser extends BaseRemoteDataParser implements RemoteDatasParser<User> {
 
     @Override
     public List<User> parse(String json) throws JSONException {
+
+        String root = checkHasWrapper(json);
 
         List<User> users = new ArrayList<>();
         JSONArray jsonArray;
         JSONObject itemRaw;
 
         RemoteUserJSONObjectParser remoteUserJSONObjectParser = new RemoteUserJSONObjectParser();
-        jsonArray = new JSONArray(json);
+        jsonArray = new JSONArray(root);
 
         for (int i = 0; i < jsonArray.length(); i++) {
             itemRaw = jsonArray.getJSONObject(i);

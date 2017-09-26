@@ -20,4 +20,6 @@ public interface LoggedInUserDataSource {
 
     LoggedInUser getLoggedInUserByUserUUID(String userUUID);
 
+    LoggedInUser getLoggedInUserByToken(String token);
+
 }

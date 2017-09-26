@@ -163,7 +163,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
     private void initImageLoader() {
 
-        ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderIntance();
+        ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderInstance(mContext);
         mImageLoader = imageGifLoaderInstance.getImageLoader(this);
 
     }
@@ -409,7 +409,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
             if (!mIsFling) {
 
-                imageUrl = currentMedia.getImageThumbUrl();
+                imageUrl = currentMedia.getImageThumbUrl(mContext);
 
             } else {
 

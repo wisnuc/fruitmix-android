@@ -109,7 +109,7 @@ public class LoggedInUserRepository implements LoggedInUserDataSource {
     @Override
     public LoggedInUser getLoggedInUserByUserUUID(String userUUID) {
 
-        if (currentLoggedInUser == null || currentLoggedInUser.getUser() == null || preQueryUserUUID == null || !preQueryUserUUID.equals(userUUID)) {
+/*        if (currentLoggedInUser == null || currentLoggedInUser.getUser() == null || preQueryUserUUID == null || !preQueryUserUUID.equals(userUUID)) {
 
             currentLoggedInUser = loggedInUserDBDataSource.getLoggedInUserByUserUUID(userUUID);
 
@@ -117,7 +117,16 @@ public class LoggedInUserRepository implements LoggedInUserDataSource {
 
         }
 
-        return currentLoggedInUser;
+        return currentLoggedInUser;*/
+
+        return loggedInUserDBDataSource.getLoggedInUserByUserUUID(userUUID);
+
     }
 
+    @Override
+    public LoggedInUser getLoggedInUserByToken(String token) {
+
+        return loggedInUserDBDataSource.getLoggedInUserByToken(token);
+
+    }
 }

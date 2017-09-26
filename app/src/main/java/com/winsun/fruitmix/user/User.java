@@ -7,6 +7,8 @@ import com.winsun.fruitmix.R;
  */
 public class User {
 
+    public static final String DEFAULT_AVATAR = "defaultAvatar.jpg";
+
     private String userName;
     private String uuid;
     private String avatar;
@@ -17,15 +19,21 @@ public class User {
     private String library;
     private boolean admin;
 
+    private String associatedWeChatGUID;
+    private String associatedWeChatUserName;
+
     public User() {
 
         setUserName("");
         setUuid("");
-        setAvatar("defaultAvatar.jpg");
+        setAvatar(DEFAULT_AVATAR);
         setEmail("");
         setDefaultAvatar("");
         setHome("");
         setLibrary("");
+
+        setAssociatedWeChatGUID("");
+        setAssociatedWeChatUserName("");
 
     }
 
@@ -114,6 +122,22 @@ public class User {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    public void setAssociatedWeChatGUID(String associatedWeChatGUID) {
+        this.associatedWeChatGUID = associatedWeChatGUID;
+    }
+
+    public String getAssociatedWeChatGUID() {
+        return associatedWeChatGUID;
+    }
+
+    public void setAssociatedWeChatUserName(String associatedWeChatUserName) {
+        this.associatedWeChatUserName = associatedWeChatUserName;
+    }
+
+    public String getAssociatedWeChatUserName() {
+        return associatedWeChatUserName;
     }
 
     public static String generateCreateRemoteUserBody(String userName, String userPassword) {

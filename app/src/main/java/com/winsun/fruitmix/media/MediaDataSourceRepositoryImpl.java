@@ -28,6 +28,8 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
 
     public static final String TAG = MediaDataSourceRepositoryImpl.class.getSimpleName();
 
+    //TODO: check local media thumbnail exist
+
     private static MediaDataSourceRepositoryImpl ourInstance;
 
     private LocalMediaRepository localMediaRepository;

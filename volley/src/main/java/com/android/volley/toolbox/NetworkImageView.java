@@ -223,7 +223,12 @@ public class NetworkImageView extends ImageView {
 
                         setDefaultBackground();
 
-                        if (error.networkResponse != null && error.networkResponse.statusCode == 500 && !cancelRequest) {
+                        if (error.networkResponse == null)
+                            return;
+
+                        Log.d(TAG, "onErrorResponse: statusCode: " + error.networkResponse.statusCode);
+
+                        if (error.networkResponse.statusCode == 500 && !cancelRequest) {
 
                             String status = "";
 
@@ -268,6 +273,8 @@ public class NetworkImageView extends ImageView {
                         }
 
                         if (response.getBitmap() != null && mUrl.contains((String) getTag())) {
+
+                            Log.d(TAG, "onResponse Url: " + mUrl);
 
                             Bitmap bitmap;
 

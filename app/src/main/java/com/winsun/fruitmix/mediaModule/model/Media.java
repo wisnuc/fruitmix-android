@@ -8,12 +8,8 @@ import android.util.Log;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.InjectHttp;
-import com.winsun.fruitmix.http.OkHttpUtil;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 /**
@@ -309,6 +305,8 @@ public class Media implements Parcelable {
         return true;
     }
 
+    //TODO:refactor create request url
+
     public String getImageSmallThumbUrl(Context context) {
 
         String imageUrl;
@@ -326,8 +324,7 @@ public class Media implements Parcelable {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            imageUrl = String.format(thumbPhotoFormatCode, getRemoteMediaThumbUrl(),
-                    String.valueOf(64), String.valueOf(64));
+            imageUrl = getRemoteMediaThumbUrl(context, 64, 64);
 
             Log.d(TAG, "getImageSmallThumbUrl: " + imageUrl);
 
@@ -336,7 +333,7 @@ public class Media implements Parcelable {
 
     }
 
-    public String getImageThumbUrl() {
+    public String getImageThumbUrl(Context context) {
 
         String imageUrl;
         if (isLocal()) {
@@ -350,8 +347,7 @@ public class Media implements Parcelable {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            imageUrl = String.format(thumbPhotoFormatCode, getRemoteMediaThumbUrl(),
-                    String.valueOf(200), String.valueOf(200));
+            imageUrl = getRemoteMediaThumbUrl(context, 200, 200);
 
             Log.d(TAG, "getImageThumbUrl: " + imageUrl);
 
@@ -360,29 +356,30 @@ public class Media implements Parcelable {
 
     }
 
-    private String generateUrl(String req) {
+    private String generateUrl(Context context, String req) {
 
-        HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory();
+        HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
 
-        String gateway = httpRequestFactory.getGateway();
-        int port = httpRequestFactory.getPort();
-
-        return gateway + ":" + port + req;
-    }
-
-    private String getRemoteMediaThumbUrl() {
-
-        return generateUrl(Util.MEDIA_PARAMETER + "/" + getUuid());
+        return httpRequestFactory.createHttpGetFileRequest(req).getUrl();
 
     }
 
-    private String getRemoteMediaOriginalUrl() {
+    private String getRemoteMediaThumbUrl(Context context, int width, int height) {
 
-        return generateUrl(getRemoteMediaRequestPath());
+        String httpPath = String.format(thumbPhotoFormatCode, Util.MEDIA_PARAMETER + "/" + getUuid(),
+                String.valueOf(width), String.valueOf(height));
+
+        return generateUrl(context, httpPath);
 
     }
 
-    public String getRemoteMediaRequestPath(){
+    private String getRemoteMediaOriginalUrl(Context context) {
+
+        return generateUrl(context, getRemoteMediaRequestPath());
+
+    }
+
+    public String getRemoteMediaRequestPath() {
         return Util.MEDIA_PARAMETER + "/" + getUuid() + "?alt=data";
     }
 
@@ -393,7 +390,7 @@ public class Media implements Parcelable {
         if (isLocal()) {
             imageUrl = getOriginalPhotoPath();
         } else {
-            imageUrl = getRemoteMediaOriginalUrl();
+            imageUrl = getRemoteMediaOriginalUrl(context);
         }
         return imageUrl;
     }

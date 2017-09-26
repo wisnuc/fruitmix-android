@@ -8,10 +8,18 @@ import com.winsun.fruitmix.user.User;
  * Created by Administrator on 2017/7/7.
  */
 
-public interface UserRemoteDataSource extends BaseUserDataSource {
+public interface UserRemoteDataSource {
+
+    void getUsers(String currentLoginUserUUID,BaseLoadDataCallback<User> callback);
 
     void insertUser(String userName, String userPwd, BaseOperateDataCallback<User> callback);
 
     void getCurrentUserHome(BaseLoadDataCallback<String> callback);
+
+    void getUsersByStationIDWithCloudAPI(String stationID, BaseLoadDataCallback<User> callback);
+
+    void getUserDetailedInfoByUUID(String userUUID, BaseLoadDataCallback<User> callback);
+
+    void getUserByGUIDWithCloudAPI(String guid, BaseLoadDataCallback<User> callback);
 
 }

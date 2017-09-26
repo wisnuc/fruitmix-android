@@ -11,7 +11,7 @@ import com.winsun.fruitmix.eventbus.TokenRequestEvent;
 import com.winsun.fruitmix.eventbus.UserRequestEvent;
 import com.winsun.fruitmix.http.CheckIpHttpUtil;
 import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.http.OkHttpUtil;
@@ -143,26 +143,19 @@ public class FNAS {
         EventBus.getDefault().post(new MediaRequestEvent(OperationType.CREATE, OperationTargetType.REMOTE_MEDIA, media));
     }
 
-    public static String generateUrl(String req) {
+    public static String generateUrl(Context context,String req) {
 
-        HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory();
+        HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
 
         return httpRequestFactory.getGateway() + ":" + httpRequestFactory.getPort() + req;
     }
 
-    public static String getDownloadOriginalMediaUrl(Media media) {
-        return generateUrl(Util.MEDIA_PARAMETER + "/" + media.getUuid() + "/download");
-    }
-
-    public static String getDownloadFileUrl(String fileUUID, String parentFolderUUID) {
-        return generateUrl(Util.DOWNLOAD_FILE_PARAMETER + "/" + parentFolderUUID + "/" + fileUUID);
-    }
 
     private static HttpResponse RemoteCall(Context context, String req) throws MalformedURLException, IOException, SocketTimeoutException {
 
 //        return GetRemoteCall(Gateway + ":" + FNAS.PORT + req);
 
-        HttpRequest httpRequest = new HttpRequest(generateUrl(req), Util.HTTP_GET_METHOD);
+        HttpRequest httpRequest = new HttpRequest(generateUrl(context,req), Util.HTTP_GET_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
 
 //        return new OkHttpUtil().remoteCall(httpRequest);
@@ -205,7 +198,7 @@ public class FNAS {
     public static HttpResponse PostRemoteCall(Context context, String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
 //        return RemoteCallMethod(Util.HTTP_POST_METHOD, req, data);
 
-        HttpRequest httpRequest = new HttpRequest(generateUrl(req), Util.HTTP_POST_METHOD);
+        HttpRequest httpRequest = new HttpRequest(generateUrl(context,req), Util.HTTP_POST_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         httpRequest.setBody(data);
 
@@ -216,7 +209,7 @@ public class FNAS {
     public static HttpResponse PatchRemoteCall(Context context, String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
 //        return RemoteCallMethod(Util.HTTP_PATCH_METHOD, req, data);
 
-        HttpRequest httpRequest = new HttpRequest(generateUrl(req), Util.HTTP_PATCH_METHOD);
+        HttpRequest httpRequest = new HttpRequest(generateUrl(context,req), Util.HTTP_PATCH_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         httpRequest.setBody(data);
 
@@ -226,7 +219,7 @@ public class FNAS {
     public static HttpResponse DeleteRemoteCall(Context context, String req, String data) throws MalformedURLException, IOException, SocketTimeoutException {
 //        return RemoteCallMethod(Util.HTTP_DELETE_METHOD, req, data);
 
-        HttpRequest httpRequest = new HttpRequest(generateUrl(req), Util.HTTP_DELETE_METHOD);
+        HttpRequest httpRequest = new HttpRequest(generateUrl(context,req), Util.HTTP_DELETE_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + JWT);
         httpRequest.setBody(data);
 

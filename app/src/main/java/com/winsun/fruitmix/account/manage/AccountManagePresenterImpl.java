@@ -3,7 +3,6 @@ package com.winsun.fruitmix.account.manage;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +10,17 @@ import android.widget.BaseExpandableListAdapter;
 
 import com.winsun.fruitmix.AccountManageActivity;
 import com.winsun.fruitmix.NavPagerActivity;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.databinding.AccountChildItemBinding;
 import com.winsun.fruitmix.databinding.AccountGroupItemBinding;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.logout.LogoutUseCase;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -36,6 +38,10 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
     private AccountManageView view;
     private LoggedInUserDataSource loggedInUserDataSource;
 
+    private SystemSettingDataSource systemSettingDataSource;
+
+    private GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase;
+
     private List<String> mEquipmentNames;
     private List<List<LoggedInUser>> mUsers;
 
@@ -52,11 +58,14 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
     private LogoutUseCase logoutUseCase;
 
     public AccountManagePresenterImpl(AccountManageView view, LoggedInUserDataSource loggedInUserDataSource, SystemSettingDataSource systemSettingDataSource,
-                                      LogoutUseCase logoutUseCase) {
+                                      GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase,LogoutUseCase logoutUseCase) {
         this.view = view;
         this.loggedInUserDataSource = loggedInUserDataSource;
+        this.systemSettingDataSource = systemSettingDataSource;
+        this.getAllBindingLocalUserUseCase = getAllBindingLocalUserUseCase;
 
         this.logoutUseCase = logoutUseCase;
+
 
         mEquipmentNames = new ArrayList<>();
         mUsers = new ArrayList<>();
@@ -77,10 +86,42 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
         loggedInUsers.clear();
         loggedInUsers.addAll(loggedInUserDataSource.getAllLoggedInUsers());
 
-        fillData();
+        final String guid = systemSettingDataSource.getCurrentLoginUserGUID();
 
-        mAdapter.setData(mEquipmentNames, mUsers);
-        mAdapter.notifyDataSetChanged();
+        if (guid == null || guid.isEmpty()) {
+
+            fillData();
+            mAdapter.setData(mEquipmentNames, mUsers);
+            mAdapter.notifyDataSetChanged();
+
+        } else {
+
+            String token = systemSettingDataSource.getCurrentLoginToken();
+
+            getAllBindingLocalUserUseCase.getAllBindingLocalUser(guid, token, new BaseLoadDataCallback<LoggedInWeChatUser>() {
+                @Override
+                public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
+
+                    loggedInUsers.addAll(data);
+
+                    fillData();
+                    mAdapter.setData(mEquipmentNames, mUsers);
+                    mAdapter.notifyDataSetChanged();
+
+                }
+
+                @Override
+                public void onFail(OperationResult operationResult) {
+
+                    fillData();
+                    mAdapter.setData(mEquipmentNames, mUsers);
+                    mAdapter.notifyDataSetChanged();
+
+                }
+            });
+
+        }
+
     }
 
     @Override

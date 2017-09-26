@@ -24,6 +24,7 @@ import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
@@ -66,7 +67,7 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         String currentLoginUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(containerActivity).getCurrentLoginUserUUID();
 
-        User currentUser = InjectLoggedInUser.provideLoggedInUserRepository(containerActivity).getLoggedInUserByUserUUID(currentLoginUserUUID).getUser();
+        User currentUser = InjectUser.provideRepository(containerActivity).getUserByUUID(currentLoginUserUUID);
 
         groupRepository.setCurrentUser(currentUser);
 
@@ -89,6 +90,11 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
     @Override
     public void refreshView() {
+
+    }
+
+    @Override
+    public void refreshViewForce() {
 
     }
 

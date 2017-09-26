@@ -12,12 +12,14 @@ import java.util.List;
  * Created by Administrator on 2017/8/17.
  */
 
-public class RemoteUserHomeParser implements RemoteDatasParser<String> {
+public class RemoteUserHomeParser extends BaseRemoteDataParser implements RemoteDatasParser<String> {
 
     @Override
     public List<String> parse(String json) throws JSONException {
 
-        JSONArray jsonArray = new JSONArray(json);
+        String root = checkHasWrapper(json);
+
+        JSONArray jsonArray = new JSONArray(root);
 
         for (int i = 0; i < jsonArray.length(); i++) {
 

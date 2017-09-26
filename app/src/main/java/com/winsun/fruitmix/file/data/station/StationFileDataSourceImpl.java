@@ -10,15 +10,13 @@ import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
-import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.HttpRequestFactory;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
-import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -26,12 +24,8 @@ import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.util.Util;
-
-import org.json.JSONException;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
@@ -82,7 +76,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         String encodedFileName = URLEncoder.encode(fileDownloadState.getFileName(), "UTF-8");
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(DOWNLOAD_FILE_PARAMETER + "/"
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetFileRequest(DOWNLOAD_FILE_PARAMETER + "/"
                 + fileDownloadState.getDriveUUID() + "/dirs/" + fileDownloadState.getParentFolderUUID()
                 + "/entries/" + fileDownloadState.getFileUUID() + "?name=" + encodedFileName);
 
@@ -119,7 +113,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         String path = "/drives/" + driveUUID + "/dirs/" + dirUUID + "/entries";
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(path);
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path,"");
 
         Log.i(TAG, "createFolder: start create");
 

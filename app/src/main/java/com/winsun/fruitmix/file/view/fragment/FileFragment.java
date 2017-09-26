@@ -29,6 +29,7 @@ import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
@@ -65,7 +66,7 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
 
         filePresenter = new FilePresenter(activity, this, fileListSelectModeListener, InjectStationFileRepository.provideStationFileRepository(activity),
                 noContentViewModel, loadingViewModel, fileViewModel, handleFileListOperateCallback,
-                InjectLoggedInUser.provideLoggedInUserRepository(activity),
+                InjectUser.provideRepository(activity),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(activity), FileDownloadManager.getInstance());
 
         initSwipeRefreshLayout();
@@ -119,6 +120,7 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
         swipeRefreshLayout.setRefreshing(refreshing);
     }
 
+    @Override
     public void refreshViewForce() {
         filePresenter.refreshView(true);
     }

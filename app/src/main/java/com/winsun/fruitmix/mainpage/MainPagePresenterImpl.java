@@ -13,13 +13,19 @@ import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.invitation.data.InjectInvitationDataSource;
 import com.winsun.fruitmix.invitation.data.InvitationDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
+import com.winsun.fruitmix.model.operationResult.OperationFail;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
@@ -68,7 +74,13 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     private SystemSettingDataSource systemSettingDataSource;
 
-    public MainPagePresenterImpl(Context context, SystemSettingDataSource systemSettingDataSource, LoggedInUserDataSource loggedInUserDataSource, NavPagerActivity.NavPagerViewModel navPagerViewModel, MainPageView mainPageView) {
+    private GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase;
+
+    private List<LoggedInUser> bindingWeChatLoggedInUser;
+
+    public MainPagePresenterImpl(Context context, SystemSettingDataSource systemSettingDataSource, LoggedInUserDataSource loggedInUserDataSource,
+                                 NavPagerActivity.NavPagerViewModel navPagerViewModel, MainPageView mainPageView,
+                                 GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase) {
 
         mNavigationMenuItems = new ArrayList<>();
         mNavigationMenuLoggedInUsers = new ArrayList<>();
@@ -83,6 +95,8 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         this.systemSettingDataSource = systemSettingDataSource;
 
+        this.getAllBindingLocalUserUseCase = getAllBindingLocalUserUseCase;
+
         initNavigationAccountManageViewModel(context);
 
         initNavigationMenuItems(context);
@@ -94,6 +108,8 @@ public class MainPagePresenterImpl implements MainPagePresenter {
         invitationDataSource = InjectInvitationDataSource.provideInvitationDataSource(context);
 
         resources = context.getResources();
+
+        bindingWeChatLoggedInUser = new ArrayList<>();
 
     }
 
@@ -128,11 +144,32 @@ public class MainPagePresenterImpl implements MainPagePresenter {
     @Override
     public void refreshNavigationLoggedInUsers() {
 
+        getBindingWeChatLoggedInUser(new BaseOperateDataCallback<Boolean>() {
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
+
+                refreshAllLoggedInUsers();
+
+            }
+
+            @Override
+            public void onFail(OperationResult result) {
+
+                refreshAllLoggedInUsers();
+
+            }
+        });
+
+    }
+
+    private void refreshAllLoggedInUsers() {
         if (loggedInUserDataSource == null) return;
 
         String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
 
         List<LoggedInUser> loggedInUsers = new ArrayList<>(loggedInUserDataSource.getAllLoggedInUsers());
+
+        loggedInUsers.addAll(bindingWeChatLoggedInUser);
 
         int loggedInUserListSize = loggedInUsers.size();
 
@@ -177,6 +214,50 @@ public class MainPagePresenterImpl implements MainPagePresenter {
             mNavigationMenuLoggedInUsers.add(navigationAccountManageViewModel);
 
         }
+    }
+
+    private void getBindingWeChatLoggedInUser(final BaseOperateDataCallback<Boolean> callback) {
+
+        final String guid = systemSettingDataSource.getCurrentLoginUserGUID();
+
+        if (guid == null || guid.isEmpty()) {
+            callback.onFail(new OperationFail("no guid"));
+            return;
+        }
+
+        String token = systemSettingDataSource.getCurrentLoginToken();
+
+        getAllBindingLocalUserUseCase.getAllBindingLocalUser(guid, token, new BaseLoadDataCallback<LoggedInWeChatUser>() {
+            @Override
+            public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
+
+                String stationID = systemSettingDataSource.getCurrentLoginStationID();
+
+                bindingWeChatLoggedInUser.clear();
+
+                for (LoggedInWeChatUser loggedInUser : data) {
+
+                    if (!loggedInUser.getStationID().equals(stationID)) {
+
+                        bindingWeChatLoggedInUser.add(loggedInUser);
+
+                    }
+
+                }
+
+                callback.onSucceed(true, new OperationSuccess());
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                Log.d(TAG, "onFail: get all binding local user");
+
+                callback.onFail(new OperationFail("fail on get binding local user"));
+
+            }
+        });
 
     }
 
@@ -334,8 +415,8 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         toggleUserManageNavigationItem(context, user);
         refreshNavigationLoggedInUsers();
-    }
 
+    }
 
     private class NavigationItemAdapter extends RecyclerView.Adapter<BindingViewHolder> {
 

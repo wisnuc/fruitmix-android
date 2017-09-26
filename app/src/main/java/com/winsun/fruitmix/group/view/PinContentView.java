@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.group.view;
 
+import android.content.Context;
+
 import com.winsun.fruitmix.interfaces.BaseView;
 
 /**
@@ -11,5 +13,7 @@ public interface PinContentView extends BaseView{
     void dismissMenu();
 
     void showMenu();
+
+    Context getContext();
 
 }

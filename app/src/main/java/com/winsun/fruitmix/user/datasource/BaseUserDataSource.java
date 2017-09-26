@@ -9,6 +9,6 @@ import com.winsun.fruitmix.user.User;
 
 public interface BaseUserDataSource {
 
-    void getUsers(BaseLoadDataCallback<User> callback);
+    void getUsers(String currentLoginUserUUID,BaseLoadDataCallback<User> callback);
 
 }

@@ -59,7 +59,7 @@ public class SingleFileCommentView extends UserCommentView {
 
             Media media = comment.getMedia();
 
-            String url = media.getImageThumbUrl();
+            String url = media.getImageThumbUrl(context);
 
             media.setImageUrl(networkImageView, url, imageLoader);
 

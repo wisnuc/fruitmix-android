@@ -20,7 +20,7 @@ public class InjectStationFileRepository {
 
     private static StationFileDataSource provideStationFileDataSource(Context context) {
 
-        return StationFileDataSourceImpl.getInstance(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory(), InjectHttp.provideIHttpFileUtil());
+        return StationFileDataSourceImpl.getInstance(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory(context), InjectHttp.provideIHttpFileUtil());
 
     }
 

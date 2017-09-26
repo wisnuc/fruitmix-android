@@ -17,7 +17,6 @@ import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginPresenter;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.login.LoginViewModel;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.Util;
@@ -157,7 +156,7 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
 
         Util.hideSoftInput(LoginActivity.this);
 
-        if (!Util.getNetworkState(mContext)) {
+        if (!Util.isNetworkConnected(mContext)) {
             Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
             return;
         }

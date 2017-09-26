@@ -5,25 +5,21 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.HttpRequestFactory;
-import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.RemoteCurrentUserParser;
 import com.winsun.fruitmix.parser.RemoteInsertUserParser;
 import com.winsun.fruitmix.parser.RemoteUserHomeParser;
+import com.winsun.fruitmix.parser.RemoteWeChatUser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -68,11 +64,11 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     }
 
     @Override
-    public void getUsers(final BaseLoadDataCallback<User> callback) {
+    public void getUsers(String currentLoginUserUUID, final BaseLoadDataCallback<User> callback) {
 
         final List<User> users = new ArrayList<>();
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER + "/" + systemSettingDataSource.getCurrentLoginUserUUID());
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER + "/" + currentLoginUserUUID);
 
         wrapper.loadCall(httpRequest, new BaseLoadDataCallback<User>() {
 
@@ -137,7 +133,36 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_HOME_PARAMETER);
 
-        wrapper.loadCall(httpRequest,callback,new RemoteUserHomeParser());
+        wrapper.loadCall(httpRequest, callback, new RemoteUserHomeParser());
+
+    }
+
+    //TODO: refactor get users:save current user name,avatar,and do not insert into db
+
+    @Override
+    public void getUsersByStationIDWithCloudAPI(String stationID, BaseLoadDataCallback<User> callback) {
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithWrap(USER_PARAMETER, stationID);
+
+        wrapper.loadCall(httpRequest, callback, new RemoteLoginUsersParser());
+
+    }
+
+    @Override
+    public void getUserDetailedInfoByUUID(String userUUID, BaseLoadDataCallback<User> callback) {
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER + "/" + userUUID);
+
+        wrapper.loadCall(httpRequest, callback, new RemoteCurrentUserParser());
+
+    }
+
+    @Override
+    public void getUserByGUIDWithCloudAPI(String guid, BaseLoadDataCallback<User> callback) {
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap(HttpRequestFactory.CLOUD_API_LEVEL + "/users/" + guid);
+
+        wrapper.loadCall(httpRequest, callback, new RemoteWeChatUser());
 
     }
 }

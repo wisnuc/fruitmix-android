@@ -30,6 +30,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
 import com.winsun.fruitmix.equipment.data.InjectEquipment;
 import com.winsun.fruitmix.eventbus.OperationEvent;
@@ -41,6 +42,7 @@ import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
 import com.winsun.fruitmix.invitation.ConfirmInviteUserActivity;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.logout.InjectLogoutUseCase;
@@ -63,10 +65,12 @@ import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState;
+import com.winsun.fruitmix.usecase.InjectGetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
+import com.winsun.fruitmix.user.datasource.InjectUser;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.user.manage.UserManageActivity;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -88,6 +92,8 @@ public class NavPagerActivity extends BaseActivity
         implements OnMainFragmentInteractionListener, MainPageView, UploadMediaCountChangeListener {
 
     public static final String TAG = NavPagerActivity.class.getSimpleName();
+
+    UserAvatar userAvatar;
 
     DrawerLayout mDrawerLayout;
 
@@ -123,9 +129,40 @@ public class NavPagerActivity extends BaseActivity
 
         showProgressDialog(String.format(getString(R.string.operating_title), getString(R.string.change_user)));
 
-        startDiscovery(loggedInUser);
+        if (loggedInUser instanceof LoggedInWeChatUser) {
 
-        mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT_MESSAGE, DISCOVERY_TIMEOUT_TIME);
+            LoggedInWeChatUser loggedInWeChatUser = (LoggedInWeChatUser) loggedInUser;
+
+            loginUseCase.loginWithOtherWeChatUserBindingLocalUser(loggedInWeChatUser, new BaseOperateDataCallback<Boolean>() {
+                @Override
+                public void onSucceed(Boolean data, OperationResult result) {
+
+                    logoutUseCase.changeLoginUser();
+
+                    dismissDialog();
+
+                    handleChangeUserSucceed(data);
+
+                }
+
+                @Override
+                public void onFail(OperationResult result) {
+
+                    dismissDialog();
+
+                    Toast.makeText(mContext, result.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+
+                }
+            });
+
+        } else {
+
+            startDiscovery(loggedInUser);
+
+            mCustomHandler.sendEmptyMessageDelayed(DISCOVERY_TIMEOUT_MESSAGE, DISCOVERY_TIMEOUT_TIME);
+
+        }
+
     }
 
     @Override
@@ -261,6 +298,8 @@ public class NavPagerActivity extends BaseActivity
 
     private LoggedInUserDataSource loggedInUserDataSource;
 
+    private UserDataRepository userDataRepository;
+
     private UploadMediaCountChangeListener uploadMediaCountChangeListener;
 
     private UploadMediaUseCase uploadMediaUseCase;
@@ -281,7 +320,11 @@ public class NavPagerActivity extends BaseActivity
 
         mNavigationMenuRecyclerView = binding.navigationMenuRecyclerView;
 
+        userAvatar = binding.leftDrawerHeadLayout.avatar;
+
         navPagerViewModel = new NavPagerViewModel();
+
+        userDataRepository = InjectUser.provideRepository(mContext);
 
         loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
 
@@ -293,7 +336,8 @@ public class NavPagerActivity extends BaseActivity
 
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
 
-        mainPagePresenter = new MainPagePresenterImpl(mContext, systemSettingDataSource, loggedInUserDataSource, navPagerViewModel, this);
+        mainPagePresenter = new MainPagePresenterImpl(mContext, systemSettingDataSource, loggedInUserDataSource,
+                navPagerViewModel, this, InjectGetAllBindingLocalUserUseCase.provideInstance(this));
 
         binding.setViewModel(navPagerViewModel);
 
@@ -561,16 +605,7 @@ public class NavPagerActivity extends BaseActivity
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
 
-                refreshUserInNavigationView();
-
-                navPagerViewModel.showLoadingUploadProgress.set(true);
-
-                uploadMediaUseCase.startUploadMedia();
-
-                if (data)
-                    handleLoginWithLoggedInUserSucceed();
-                else
-                    handleLoginWithLoggedInUserFail();
+                handleChangeUserSucceed(data);
 
             }
 
@@ -579,9 +614,24 @@ public class NavPagerActivity extends BaseActivity
 
                 Log.d(TAG, "onFail: login with logged in user failed");
 
+                Toast.makeText(mContext, result.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+
             }
         });
 
+    }
+
+    private void handleChangeUserSucceed(Boolean data) {
+        refreshUserInNavigationView();
+
+        navPagerViewModel.showLoadingUploadProgress.set(true);
+
+        uploadMediaUseCase.startUploadMedia();
+
+        if (systemSettingDataSource.getAutoUploadOrNot())
+            handleLoginWithLoggedInUserSucceed();
+        else
+            handleLoginWithLoggedInUserFail();
     }
 
     private void handleLoginWithLoggedInUserSucceed() {
@@ -597,7 +647,7 @@ public class NavPagerActivity extends BaseActivity
     }
 
     private void handleFinishLoginWithLoggedInUser() {
-        mediaMainFragment.refreshAllViews();
+        mediaMainFragment.refreshAllViewsForce();
 
         mDrawerLayout.closeDrawer(GravityCompat.START);
     }
@@ -660,7 +710,7 @@ public class NavPagerActivity extends BaseActivity
     protected void onDestroy() {
         super.onDestroy();
 
-        InjectHttp.provideImageGifLoaderIntance().getImageLoader(mContext).cancelAllPreLoadMedia();
+        InjectHttp.provideImageGifLoaderInstance(mContext).getImageLoader(mContext).cancelAllPreLoadMedia();
 
 //        ButlerService.unregisterUploadMediaCountChangeListener(this);
         uploadMediaUseCase.unregisterUploadMediaCountChangeListener(this);
@@ -756,19 +806,22 @@ public class NavPagerActivity extends BaseActivity
 
     private void refreshUserInNavigationView() {
 
-        LoggedInUser loggedInUser = loggedInUserDataSource.getLoggedInUserByUserUUID(systemSettingDataSource.getCurrentLoginUserUUID());
+        User user = userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
 
-        if (loggedInUser == null)
-            return;
+        String userAssociatedWeChatUserName = user.getAssociatedWeChatUserName();
 
-        User user = loggedInUser.getUser();
+        String userName;
 
-        String userName = user.getUserName();
+        if (userAssociatedWeChatUserName.isEmpty())
+            userName = user.getUserName();
+        else
+            userName = userAssociatedWeChatUserName;
 
         navPagerViewModel.userNameText.set(userName);
 
-        navPagerViewModel.userAvatarText.set(user.getDefaultAvatar());
-        navPagerViewModel.userAvatarBackgroundResID.set(user.getDefaultAvatarBgColorResourceId());
+        userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
+//        navPagerViewModel.userAvatarText.set(user.getDefaultAvatar());
+//        navPagerViewModel.userAvatarBackgroundResID.set(user.getDefaultAvatarBgColorResourceId());
 
         mainPagePresenter.refreshUserInNavigationView(mContext, user);
 

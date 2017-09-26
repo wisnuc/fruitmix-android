@@ -142,7 +142,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 Media media = mediaList.get(currentPhotoPosition);
 
-                String imageTag = media.getImageThumbUrl();
+                String imageTag = media.getImageThumbUrl(mContext);
 
                 PinchImageView view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
 
@@ -448,7 +448,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     }
 
     private void showCreateShareBottomDialog() {
-        if (!Util.getNetworkState(mContext)) {
+        if (!Util.isNetworkConnected(mContext)) {
             Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
             return;
         }
@@ -555,7 +555,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     }
 
     private void initImageLoaderAndGifLoader() {
-        ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderIntance();
+        ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderInstance(mContext);
         mImageLoader = imageGifLoaderInstance.getImageLoader(mContext);
         mGifLoader = imageGifLoaderInstance.getGifLoader(mContext);
     }
@@ -839,7 +839,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                     if (position == initialPhotoPosition)
                         ViewCompat.setTransitionName(mainPic, media.getKey());
 
-                    String thumbImageUrl = media.getImageThumbUrl();
+                    String thumbImageUrl = media.getImageThumbUrl(mContext);
                     mainPic.setTag(thumbImageUrl);
 
                     mainPic.setImageUrl(thumbImageUrl, mImageLoader);
@@ -851,7 +851,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                     mainPic.setOrientationNumber(media.getOrientationNumber());
 
-                    String imageThumbUrl = media.getImageThumbUrl();
+                    String imageThumbUrl = media.getImageThumbUrl(mContext);
                     mainPic.setTag(imageThumbUrl);
 
                     if (imageThumbUrl.endsWith(".gif")) {

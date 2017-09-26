@@ -28,6 +28,8 @@ import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
@@ -88,7 +90,7 @@ public class UploadMediaUseCase {
 
     int alreadyUploadedMediaCount = 0;
 
-    private LoggedInUserDataSource loggedInUserDataSource;
+    private UserDataRepository userDataRepository;
 
     List<String> uploadedMediaHashs;
 
@@ -99,12 +101,12 @@ public class UploadMediaUseCase {
     private static List<UploadMediaCountChangeListener> uploadMediaCountChangeListeners = new ArrayList<>();
 
     public static UploadMediaUseCase getInstance(MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
-                                                 LoggedInUserDataSource loggedInUserDataSource, ThreadManager threadManager,
+                                                 UserDataRepository userDataRepository, ThreadManager threadManager,
                                                  SystemSettingDataSource systemSettingDataSource, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
                                                  CheckMediaIsExistStrategy checkMediaIsExistStrategy, String uploadFolderName, EventBus eventBus,
                                                  CalcMediaDigestStrategy calcMediaDigestStrategy) {
         if (instance == null)
-            instance = new UploadMediaUseCase(mediaDataSourceRepository, stationFileRepository, loggedInUserDataSource, threadManager,
+            instance = new UploadMediaUseCase(mediaDataSourceRepository, stationFileRepository, userDataRepository, threadManager,
                     systemSettingDataSource, checkMediaIsUploadStrategy, checkMediaIsExistStrategy, uploadFolderName, eventBus, calcMediaDigestStrategy);
         return instance;
     }
@@ -117,7 +119,7 @@ public class UploadMediaUseCase {
     }
 
     private UploadMediaUseCase(MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
-                               LoggedInUserDataSource loggedInUserDataSource, ThreadManager threadManager,
+                               UserDataRepository userDataRepository, ThreadManager threadManager,
                                SystemSettingDataSource systemSettingDataSource, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
                                CheckMediaIsExistStrategy checkMediaIsExistStrategy, String uploadFolderName, EventBus eventBus,
                                CalcMediaDigestStrategy calcMediaDigestStrategy) {
@@ -126,7 +128,7 @@ public class UploadMediaUseCase {
         this.systemSettingDataSource = systemSettingDataSource;
         this.checkMediaIsUploadStrategy = checkMediaIsUploadStrategy;
         this.checkMediaIsExistStrategy = checkMediaIsExistStrategy;
-        this.loggedInUserDataSource = loggedInUserDataSource;
+        this.userDataRepository = userDataRepository;
         this.calcMediaDigestStrategy = calcMediaDigestStrategy;
 
         this.threadManager = threadManager;
@@ -162,6 +164,7 @@ public class UploadMediaUseCase {
     }
 
     public void startUploadMedia() {
+/*
 
         threadManager.runOnCacheThread(new Runnable() {
             @Override
@@ -169,6 +172,7 @@ public class UploadMediaUseCase {
                 startUploadMediaInThread();
             }
         });
+*/
 
     }
 
@@ -184,11 +188,11 @@ public class UploadMediaUseCase {
 
         currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
 
-        LoggedInUser loggedInUser = loggedInUserDataSource.getLoggedInUserByUserUUID(currentUserUUID);
+        User user = userDataRepository.getUserByUUID(currentUserUUID);
 
-        if (loggedInUser == null) {
+        if (user == null) {
 
-            Log.i(TAG, "no logged in user,stop upload");
+            Log.i(TAG, "current user is null,stop upload");
 
             stopUploadMedia();
 
@@ -198,7 +202,7 @@ public class UploadMediaUseCase {
 
         }
 
-        currentUserHome = loggedInUser.getUser().getHome();
+        currentUserHome = user.getHome();
 
         Log.d(TAG, "startUploadMedia: ");
 

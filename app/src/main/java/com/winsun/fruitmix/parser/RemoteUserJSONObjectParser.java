@@ -36,7 +36,7 @@ public class RemoteUserJSONObjectParser {
 
         String avatar = itemRaw.optString("avatar");
         if (avatar.equals("null")) {
-            user.setAvatar("defaultAvatar.jpg");
+            user.setAvatar(User.DEFAULT_AVATAR);
         } else {
             user.setAvatar(avatar);
         }
@@ -80,6 +80,11 @@ public class RemoteUserJSONObjectParser {
 
         user.setHome(itemRaw.optString("home"));
         user.setLibrary(itemRaw.optString("library"));
+
+        JSONObject global = itemRaw.optJSONObject("global");
+        if(global != null){
+            user.setAssociatedWeChatGUID(global.optString("id"));
+        }
 
         return user;
     }

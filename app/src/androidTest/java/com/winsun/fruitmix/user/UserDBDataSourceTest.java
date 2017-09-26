@@ -58,20 +58,11 @@ public class UserDBDataSourceTest {
 
         userDBDataSource.insertUser(Collections.singletonList(user));
 
-        userDBDataSource.getUsers(new BaseLoadDataCallback<User>() {
-            @Override
-            public void onSucceed(List<User> data, OperationResult operationResult) {
+        List<User> data = userDBDataSource.getUsers();
 
-                assertEquals(1, data.size());
-                assertEquals(USER_UUID, data.get(0).getUuid());
-                assertEquals(USER_NAME, data.get(0).getUserName());
-            }
-
-            @Override
-            public void onFail(OperationResult operationResult) {
-                assertTrue("can not enter here", false);
-            }
-        });
+        assertEquals(1, data.size());
+        assertEquals(USER_UUID, data.get(0).getUuid());
+        assertEquals(USER_NAME, data.get(0).getUserName());
 
     }
 
