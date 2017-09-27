@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.util;
+package com.winsun.fruitmix.network;
 
 /**
  * Created by Administrator on 2017/9/26.

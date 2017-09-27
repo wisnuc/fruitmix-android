@@ -10,7 +10,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
@@ -26,10 +25,9 @@ import android.view.inputmethod.InputMethodManager;
 import com.github.druk.rxdnssd.BonjourService;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.GravityArcMotion;
-import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.LoginType;
+import com.winsun.fruitmix.network.NetworkState;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -101,6 +99,8 @@ public class Util {
     public static final String RECOMMEND_ALBUM_CREATED = "recommend_album_created";
 
     public static final String TOKEN_INVALID = "token_invalid";
+
+    public static final String NETWORK_CHANGED = "network_changed";
 
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
     public static final String KEY_AUTHORIZATION = "Authorization";
@@ -280,26 +280,6 @@ public class Util {
         }
         return false;
     }
-
-    public static NetworkState getNetworkState(Context context) {
-
-        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
-
-        NetworkState networkState = new NetworkState(false, false);
-
-        if (networkInfo != null && networkInfo.isConnected()) {
-
-            networkState.setMobileConnected(networkInfo.getType() == ConnectivityManager.TYPE_MOBILE);
-            networkState.setWifiConnected(networkInfo.getType() == ConnectivityManager.TYPE_WIFI);
-
-        }
-
-        return networkState;
-
-    }
-
 
     public static String createLocalUUid() {
         return UUID.randomUUID().toString();

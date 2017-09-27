@@ -207,7 +207,7 @@ public class HttpRequestFactory {
 
     private boolean checkIsLoginWithWeChatCode() {
 
-        return getStationID().length() > 0;
+        return systemSettingDataSource.getLoginWithWechatCodeOrNot();
 
     }
 

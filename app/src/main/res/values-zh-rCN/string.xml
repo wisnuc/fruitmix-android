@@ -73,6 +73,9 @@
     <string name="need_auto_upload">是否自动备份该手机的照片至WISNUC服务器?</string>
     <string name="photo_auto_upload_already_close">照片自动备份功能被关闭，可以到设置中打开</string>
 
+    <string name="go_to_setting">去设置</string>
+
+
     <!-- 侧边栏 -->
     <string name="person_data">个人信息</string>
     <string name="user_manage">用户管理</string>

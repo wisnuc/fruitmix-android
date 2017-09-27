@@ -193,6 +193,7 @@ public class LoginUseCaseTest {
 
         testAfterChooseStationID();
 
+        verify(systemSettingDataSource).setCurrentLoginUserGUID(testGUID);
     }
 
 
@@ -226,6 +227,8 @@ public class LoginUseCaseTest {
         verify(httpRequestFactory).setCurrentData(anyString(), anyString());
 
         initSystemStateAndVerify();
+
+        verify(systemSettingDataSource).setLoginWithWechatCodeOrNot(false);
 
         verify(userDataRepository, never()).clearAllUsersInDB();
 
@@ -295,6 +298,8 @@ public class LoginUseCaseTest {
 
         verify(userDataRepository).clearAllUsersInDB();
 
+        verify(systemSettingDataSource).setLoginWithWechatCodeOrNot(false);
+
         verify(userDataRepository).getUsers(eq(testUserUUID), loadUserCallbackArgumentCaptor.capture());
 
     }
@@ -303,6 +308,8 @@ public class LoginUseCaseTest {
     public void testLoadUserSuccessAfterLoginSuccess() {
 
         testLoginWithLoadTokenParam_succeed();
+
+        verify(systemSettingDataSource).setLoginWithWechatCodeOrNot(false);
 
         User user = new User();
         user.setUuid(testUserUUID);
@@ -409,6 +416,8 @@ public class LoginUseCaseTest {
 
         verify(mediaDataSourceRepository).resetState();
 
+        verify(systemSettingDataSource).setLoginWithWechatCodeOrNot(false);
+
         verify(userDataRepository).getUsers(eq(testUserUUID), any(BaseLoadDataCallback.class));
 
         verify(systemSettingDataSource).getCurrentUploadUserUUID();
@@ -483,6 +492,10 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).setCurrentLoginUserGUID(testGUID);
 
+        verify(systemSettingDataSource).setAutoUploadOrNot(false);
+
+        verify(systemSettingDataSource).setShowAutoUploadDialog(true);
+
         verify(mediaDataSourceRepository).clearAllStationMediasInDB();
 
         verify(mediaDataSourceRepository).resetState();
@@ -501,6 +514,8 @@ public class LoginUseCaseTest {
         user.setAssociatedWeChatGUID(testGUID);
 
         getUserByStationIDCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess());
+
+        verify(systemSettingDataSource).setLoginWithWechatCodeOrNot(true);
 
         ArgumentCaptor<BaseLoadDataCallback<User>> getUsersCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 

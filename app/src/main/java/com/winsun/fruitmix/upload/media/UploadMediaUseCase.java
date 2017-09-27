@@ -24,12 +24,15 @@ import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.network.NetworkState;
+import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
@@ -76,6 +79,8 @@ public class UploadMediaUseCase {
 
     private StationFileRepository stationFileRepository;
 
+    private NetworkStateManager networkStateManager;
+
     boolean mStopUpload = false;
 
     boolean mAlreadyStartUpload = false;
@@ -104,10 +109,11 @@ public class UploadMediaUseCase {
                                                  UserDataRepository userDataRepository, ThreadManager threadManager,
                                                  SystemSettingDataSource systemSettingDataSource, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
                                                  CheckMediaIsExistStrategy checkMediaIsExistStrategy, String uploadFolderName, EventBus eventBus,
-                                                 CalcMediaDigestStrategy calcMediaDigestStrategy) {
+                                                 CalcMediaDigestStrategy calcMediaDigestStrategy, NetworkStateManager networkStateManager) {
         if (instance == null)
             instance = new UploadMediaUseCase(mediaDataSourceRepository, stationFileRepository, userDataRepository, threadManager,
-                    systemSettingDataSource, checkMediaIsUploadStrategy, checkMediaIsExistStrategy, uploadFolderName, eventBus, calcMediaDigestStrategy);
+                    systemSettingDataSource, checkMediaIsUploadStrategy, checkMediaIsExistStrategy,
+                    uploadFolderName, eventBus, calcMediaDigestStrategy, networkStateManager);
         return instance;
     }
 
@@ -122,7 +128,7 @@ public class UploadMediaUseCase {
                                UserDataRepository userDataRepository, ThreadManager threadManager,
                                SystemSettingDataSource systemSettingDataSource, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
                                CheckMediaIsExistStrategy checkMediaIsExistStrategy, String uploadFolderName, EventBus eventBus,
-                               CalcMediaDigestStrategy calcMediaDigestStrategy) {
+                               CalcMediaDigestStrategy calcMediaDigestStrategy, NetworkStateManager networkStateManager) {
         this.mediaDataSourceRepository = mediaDataSourceRepository;
         this.stationFileRepository = stationFileRepository;
         this.systemSettingDataSource = systemSettingDataSource;
@@ -130,6 +136,7 @@ public class UploadMediaUseCase {
         this.checkMediaIsExistStrategy = checkMediaIsExistStrategy;
         this.userDataRepository = userDataRepository;
         this.calcMediaDigestStrategy = calcMediaDigestStrategy;
+        this.networkStateManager = networkStateManager;
 
         this.threadManager = threadManager;
 
@@ -259,7 +266,6 @@ public class UploadMediaUseCase {
 
             }
         });
-
 
     }
 
@@ -630,6 +636,30 @@ public class UploadMediaUseCase {
                 sendRetryUploadMessage();
 
                 break;
+            }
+
+            NetworkState networkState = networkStateManager.getNetworkState();
+
+            if (!networkState.isWifiConnected()) {
+
+                if (networkState.isMobileConnected()) {
+
+                    if (!systemSettingDataSource.getAutoUploadWhenConnectedWithMobileNetwork()) {
+
+                        stopUploadMedia();
+
+                        sendRetryUploadMessage();
+
+                    }
+
+                } else {
+
+                    stopUploadMedia();
+
+                    sendRetryUploadMessage();
+
+                }
+
             }
 
             if (needUploadedMedias.size() == 0) {

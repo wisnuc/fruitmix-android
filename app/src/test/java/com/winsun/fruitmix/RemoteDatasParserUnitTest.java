@@ -7,6 +7,8 @@ import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.parser.RemoteFileShareParser;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
+import com.winsun.fruitmix.parser.RemoteStationParser;
+import com.winsun.fruitmix.stations.Station;
 
 import static org.junit.Assert.*;
 
@@ -146,6 +148,49 @@ public class RemoteDatasParserUnitTest {
         assertEquals("1ed05292-5e98-4fb4-9307-e4e561411af1", abstractRemoteFile.getUuid());
         assertEquals("e9ccf83b68ff0a2e4664.hot-update.json", abstractRemoteFile.getName());
         assertEquals("43", abstractRemoteFile.getSize());
+
+    }
+
+    @Test
+    public void parseRemoteStations() {
+
+        String json = "{\n" +
+                "    \"code\": 200,\n" +
+                "    \"message\": \"ok\",\n" +
+                "    \"data\": [\n" +
+                "        {\n" +
+                "            \"id\": \"9bfad174-151e-4e59-bb26-6e80e7790b24\",\n" +
+                "            \"name\": \"station_1506478105047\",\n" +
+                "            \"LANIP\": [\n" +
+                "                \"10.10.9.170\"\n" +
+                "            ],\n" +
+                "            \"isOnline\": true\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"id\": \"278ac47c-7cce-4fd4-a6b6-bf0f996157fa\",\n" +
+                "            \"name\": \"HomeStation\",\n" +
+                "            \"LANIP\": [\n" +
+                "                \"10.10.9.189\"\n" +
+                "            ],\n" +
+                "            \"isOnline\": false\n" +
+                "        }\n" +
+                "    ]\n" +
+                "}";
+
+        RemoteDatasParser<Station> parser = new RemoteStationParser();
+
+        List<Station> stations = new ArrayList<>();
+
+        try {
+            stations = parser.parse(json);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Station station = stations.get(0);
+
+        assertEquals("10.10.9.170", station.getFirstIp());
 
     }
 

@@ -29,6 +29,10 @@ public class SystemSettingDataSource {
 
     public static final String AUTO_UPLOAD_WHEN_CONNECTED_WITH_MOBILE_NETWORK = "auto_upload_when_connected_with_mobile_network";
 
+    public static final String LOGIN_WITH_WECHAT_CODE_OR_NOT = "login_with_wechat_code_or_not";
+
+    public static final String SHOW_AUTO_UPLOAD_WHEN_CONNECT_WITH_MOBILE_NETWORK_DIALOG = "show_auto_upload_when_connected_with_mobile_network_dialog";
+
     private static SystemSettingDataSource instance;
 
     static SystemSettingDataSource getInstance(Context context) {
@@ -188,5 +192,38 @@ public class SystemSettingDataSource {
         editor.apply();
 
     }
+
+    public boolean getLoginWithWechatCodeOrNot() {
+
+        return sharedPreferences.getBoolean(LOGIN_WITH_WECHAT_CODE_OR_NOT, false);
+
+    }
+
+    public void setLoginWithWechatCodeOrNot(boolean isLoginWithWeChatCodeOrNot) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putBoolean(LOGIN_WITH_WECHAT_CODE_OR_NOT, isLoginWithWeChatCodeOrNot);
+        editor.apply();
+
+    }
+
+    public boolean isShowAutoUploadWhenConnectedWithMobileNetworkDialog() {
+
+        return sharedPreferences.getBoolean(SHOW_AUTO_UPLOAD_WHEN_CONNECT_WITH_MOBILE_NETWORK_DIALOG, true);
+
+    }
+
+    public void setShowAutoUploadWhenConnectedWithMobileNetworkDialog(boolean showAutoUploadWhenConnectedWithMobileNetworkDialog) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putBoolean(SHOW_AUTO_UPLOAD_WHEN_CONNECT_WITH_MOBILE_NETWORK_DIALOG, showAutoUploadWhenConnectedWithMobileNetworkDialog);
+        editor.apply();
+
+    }
+
 
 }

@@ -105,9 +105,9 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
                         if(station.getId().equals(currentStationID)){
 
-                            currentIP = station.getIp();
+                            currentIP = station.getFirstIp();
 
-                            getEquipmentInfo();
+                            getEquipmentInfo(station);
 
                         }
 
@@ -140,6 +140,30 @@ public class UserManagePresenterImpl implements UserMangePresenter {
         }
 
         getUserInThread();
+
+    }
+
+    private void getEquipmentInfo(final Station station){
+
+        equipmentDataSource.getEquipmentInfo(currentIP, new BaseLoadDataCallback<EquipmentInfo>() {
+            @Override
+            public void onSucceed(List<EquipmentInfo> data, OperationResult operationResult) {
+
+                EquipmentInfo equipmentInfo = data.get(0);
+
+                equipmentInfo.setLabel(station.getLabel());
+
+                setEquipmentInfo(equipmentInfo);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                handleGetEquipmentInfoFail();
+
+            }
+        });
 
     }
 

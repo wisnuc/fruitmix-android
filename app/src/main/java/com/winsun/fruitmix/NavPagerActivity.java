@@ -59,6 +59,8 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.network.InjectNetworkStateManager;
+import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
@@ -380,6 +382,8 @@ public class NavPagerActivity extends BaseActivity
 
         mCustomHandler = new CustomHandler(this);
 
+        checkShowAutoUploadDialog();
+
         refreshUserInNavigationView();
 
         uploadMediaUseCase = InjectUploadMediaUseCase.provideUploadMediaUseCase(this);
@@ -656,36 +660,6 @@ public class NavPagerActivity extends BaseActivity
         mEquipmentSearchManager.stopDiscovery();
     }
 
-    private void showNeedAutoUploadDialog() {
-        new AlertDialog.Builder(mContext).setMessage(getString(R.string.need_auto_upload)).setPositiveButton(getString(R.string.backup), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                systemSettingDataSource.setShowAutoUploadDialog(false);
-
-                systemSettingDataSource.setCurrentUploadUserUUID(systemSettingDataSource.getCurrentLoginUserUUID());
-
-                systemSettingDataSource.setAutoUploadOrNot(true);
-
-                EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
-
-
-            }
-        }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                systemSettingDataSource.setShowAutoUploadDialog(false);
-
-                systemSettingDataSource.setAutoUploadOrNot(false);
-
-                EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
-
-
-            }
-        }).setCancelable(false).create().show();
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -832,7 +806,40 @@ public class NavPagerActivity extends BaseActivity
     private void checkShowAutoUploadDialog() {
         if (systemSettingDataSource.getShowAutoUploadDialog()) {
             showNeedAutoUploadDialog();
-        }
+        }else
+            checkShowAutoUploadWhenConnectedWithMobileNetwork();
+    }
+
+    private void showNeedAutoUploadDialog() {
+        new AlertDialog.Builder(mContext).setMessage(getString(R.string.need_auto_upload)).setPositiveButton(getString(R.string.backup), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                systemSettingDataSource.setShowAutoUploadDialog(false);
+
+                systemSettingDataSource.setCurrentUploadUserUUID(systemSettingDataSource.getCurrentLoginUserUUID());
+
+                systemSettingDataSource.setAutoUploadOrNot(true);
+
+                EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
+
+                checkShowAutoUploadWhenConnectedWithMobileNetwork();
+
+            }
+        }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                systemSettingDataSource.setShowAutoUploadDialog(false);
+
+                systemSettingDataSource.setAutoUploadOrNot(false);
+
+                EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
+
+                checkShowAutoUploadWhenConnectedWithMobileNetwork();
+
+            }
+        }).setCancelable(false).create().show();
     }
 
     private void showExplanation(String title, String message) {

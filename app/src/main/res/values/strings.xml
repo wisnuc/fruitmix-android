@@ -76,6 +76,8 @@
     <string name="need_auto_upload">Automatic backup your photos?</string>
     <string name="photo_auto_upload_already_close">Automatic backup turn off, you can turn on in \'Setting\'.</string>
 
+    <string name="go_to_setting">Go to Setting</string>
+
     <!-- slide menu -->
 
     <string name="person_data">Biography</string>

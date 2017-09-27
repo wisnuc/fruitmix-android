@@ -257,10 +257,14 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                         showLoadingDialog();
 
-                        loginUseCase.getUsersAfterChooseStationID(weChatTokenUserWrapper, loggedInWeChatUsers.get(selectItem.getSelectItemPosition()).getStationID(),
+                        final String stationID = loggedInWeChatUsers.get(selectItem.getSelectItemPosition()).getStationID();
+
+                        loginUseCase.getUsersAfterChooseStationID(weChatTokenUserWrapper, stationID,
                                 new BaseOperateDataCallback<Boolean>() {
                                     @Override
                                     public void onSucceed(Boolean data, OperationResult result) {
+
+                                        loginUseCase.handleLoginWithWeChatCodeSucceed(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(), stationID);
 
                                         handleLoginSucceed();
 

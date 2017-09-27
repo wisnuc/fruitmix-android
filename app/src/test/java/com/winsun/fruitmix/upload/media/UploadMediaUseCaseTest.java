@@ -20,6 +20,7 @@ import com.winsun.fruitmix.mock.MockThreadManager;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
@@ -79,6 +80,9 @@ public class UploadMediaUseCaseTest {
     @Mock
     private EventBus eventBus;
 
+    @Mock
+    private NetworkStateManager networkStateManager;
+
     private ThreadManager threadManager;
 
     private String testUserUUID;
@@ -103,7 +107,7 @@ public class UploadMediaUseCaseTest {
 
         uploadMediaUseCase = UploadMediaUseCase.getInstance(mediaDataSourceRepository, stationFileRepository,
                 userDataRepository, threadManager, systemSettingDataSource, checkMediaIsUploadStrategy, checkMediaIsExistStrategy, testUploadFolderName, eventBus,
-                calcMediaDigestStrategy);
+                calcMediaDigestStrategy,networkStateManager);
 
     }
 

@@ -2,6 +2,13 @@ package com.winsun.fruitmix;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
@@ -9,6 +16,11 @@ import com.winsun.fruitmix.dialog.DialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.logout.InjectLogoutUseCase;
+import com.winsun.fruitmix.network.InjectNetworkStateManager;
+import com.winsun.fruitmix.network.NetworkReceiver;
+import com.winsun.fruitmix.network.NetworkState;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
 
@@ -25,6 +37,19 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     protected String action;
 
     private ProgressDialog mDialog;
+
+    private NetworkReceiver networkReceiver;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        networkReceiver = new NetworkReceiver();
+
+        IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkReceiver, intentFilter);
+
+    }
 
     @Override
     protected void onStart() {
@@ -64,6 +89,11 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
         dismissDialog();
 
         mDialog = null;
+
+        if (networkReceiver != null) {
+            unregisterReceiver(networkReceiver);
+        }
+
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -78,6 +108,11 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
             showToast("token失效");
 
             EquipmentSearchActivity.gotoEquipmentActivity(this, true);
+        } else if (action.equals(Util.NETWORK_CHANGED)) {
+
+            checkShowAutoUploadWhenConnectedWithMobileNetwork();
+
+
         }
 
     }
@@ -114,5 +149,43 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     public void showCustomErrorCode(String text) {
         Toast.makeText(this, String.format(getString(R.string.server_exception), text), Toast.LENGTH_SHORT).show();
     }
+
+    public void checkShowAutoUploadWhenConnectedWithMobileNetwork() {
+
+        SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
+
+        if (systemSettingDataSource.isShowAutoUploadWhenConnectedWithMobileNetworkDialog() && systemSettingDataSource.getLoginWithWechatCodeOrNot()) {
+
+            NetworkState networkState = InjectNetworkStateManager.provideNetworkStateManager(this).getNetworkState();
+
+            if (!networkState.isWifiConnected() && networkState.isMobileConnected()) {
+
+                systemSettingDataSource.setShowAutoUploadWhenConnectedWithMobileNetworkDialog(false);
+
+                showNeedAutoUploadWhenConnectedWithMobileNetwork();
+
+            }
+
+        }
+    }
+
+    public void showNeedAutoUploadWhenConnectedWithMobileNetwork() {
+
+        new AlertDialog.Builder(this).setMessage(getString(R.string.go_to_setting)).setPositiveButton(getString(R.string.backup), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                if (!(BaseActivity.this instanceof SettingActivity)) {
+
+                    Intent intent = new Intent(BaseActivity.this, SettingActivity.class);
+                    startActivity(intent);
+
+                }
+
+            }
+        }).setNegativeButton(getString(R.string.cancel), null).setCancelable(false).create().show();
+
+    }
+
 
 }

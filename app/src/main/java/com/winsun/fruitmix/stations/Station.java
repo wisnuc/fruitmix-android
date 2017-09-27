@@ -1,5 +1,9 @@
 package com.winsun.fruitmix.stations;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by Administrator on 2017/9/14.
  */
@@ -8,8 +12,14 @@ public class Station {
 
     private String id;
     private String label;
-    private String ip;
+    private List<String> ips;
     private boolean isOnline;
+
+    public Station() {
+
+        ips = new ArrayList<>();
+
+    }
 
     public String getId() {
         return id;
@@ -27,14 +37,6 @@ public class Station {
         this.label = label;
     }
 
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
     public boolean isOnline() {
         return isOnline;
     }
@@ -42,4 +44,18 @@ public class Station {
     public void setOnline(boolean online) {
         isOnline = online;
     }
+
+    public void addIp(String ip) {
+        ips.add(ip);
+    }
+
+    public List<String> getIps() {
+        return Collections.unmodifiableList(ips);
+    }
+
+    public String getFirstIp() {
+        return ips.get(0);
+    }
+
+
 }
