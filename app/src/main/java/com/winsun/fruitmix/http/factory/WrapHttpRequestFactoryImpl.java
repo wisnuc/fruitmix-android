@@ -63,16 +63,16 @@ public class WrapHttpRequestFactoryImpl extends BaseHttpRequestFactoryImpl imple
     }
 
     @Override
-    public HttpRequest createHttpPostRequest(String httpPath, String body) {
+    public HttpRequest createHttpPostRequest(String httpPath, String body,boolean isPipe) {
 
-        return createHasBodyRequestThroughPipe(httpPath, Util.HTTP_POST_METHOD, body);
+        return createHasBodyRequestThroughPipe(httpPath, Util.HTTP_POST_METHOD, body,isPipe);
     }
 
-    private HttpRequest createHasBodyRequestThroughPipe(String httpPath, String method, String body) {
+    private HttpRequest createHasBodyRequestThroughPipe(String httpPath, String method, String body,boolean isPipe) {
 
         Log.d(TAG, "createHasBodyRequestThroughPipe: " + getGateway() + ":" + getPort() + httpPath);
 
-        HttpRequest httpRequest = new HttpRequest(createUrl(CALL_STATION_THROUGH_CLOUD_PRE + getStationID() + CALL_STATION_THROUGH_CLOUD_END_FOR_JSON), method);
+        HttpRequest httpRequest = new HttpRequest(createUrl(CALL_STATION_THROUGH_CLOUD_PRE + getStationID() + (isPipe ? CALL_STATION_THROUGH_CLOUD_END_FOR_PIPE : CALL_STATION_THROUGH_CLOUD_END_FOR_JSON)), method);
 
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, getToken());
 

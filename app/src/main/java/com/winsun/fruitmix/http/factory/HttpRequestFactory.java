@@ -266,11 +266,24 @@ public class HttpRequestFactory {
         }
     }
 
-    public HttpRequest createHttpPostRequest(String httpPath, String body) {
+
+    public HttpRequest createHttpPostFileRequest(String httpPath,String body){
+
+        return createHttpPostRequest(httpPath,body,true);
+    }
+
+    public HttpRequest createHttpPostRequest(String httpPath,String body){
+
+        return createHttpPostRequest(httpPath,body,false);
+
+    }
+
+
+    private HttpRequest createHttpPostRequest(String httpPath, String body,boolean isPipe) {
 
         setDefaultFactoryState();
 
-        return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body);
+        return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body,isPipe);
 
     }
 

@@ -70,7 +70,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
     private static Interceptor createHttpInterceptor() {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
         return loggingInterceptor;
     }
 
@@ -178,23 +178,51 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
         try {
 
-            Request.Builder builder = generateRequestBuilder(httpRequest);
+            Request.Builder builder;
+            RequestBody requestBody;
 
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put(SIZE_STRING, Integer.valueOf(localFile.getSize()));
-            jsonObject.put(SHA_256_STRING, localFile.getFileHash());
+            if (httpRequest.getBody().length() != 0) {
 
-            String fileName = jsonObject.toString();
+                JSONObject jsonObject = new JSONObject(httpRequest.getBody());
+
+                jsonObject.put("op", "newfile");
+                jsonObject.put("toName", localFile.getName());
+                jsonObject.put(SHA_256_STRING, localFile.getFileHash());
+                jsonObject.put(SIZE_STRING, Integer.valueOf(localFile.getSize()));
+
+                String jsonOjbectStr = jsonObject.toString();
+
+                Log.d(TAG, "uploadFile: " + jsonOjbectStr);
+
+                builder = generateRequestBuilder(httpRequest);
+
+                requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                        .addFormDataPart("manifest",jsonOjbectStr)
+                        .addFormDataPart("", localFile.getName(), RequestBody.create(MediaType.parse(JPEG_STRING), new File(localFile.getPath())))
+                        .build();
+
+            } else {
+
+                builder = generateRequestBuilder(httpRequest);
+
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put(SIZE_STRING, Integer.valueOf(localFile.getSize()));
+                jsonObject.put(SHA_256_STRING, localFile.getFileHash());
+
+                String jsonObjectStr = jsonObject.toString();
+
+                Log.d(TAG, "uploadFile: " + jsonObjectStr);
 
 //            String fileName = "{" +
 //                    "\"size\":" + localFile.getSize() + "," +
 //                    "\"sha256\":\"" + localFile.getFileHash() + "\"" +
 //                    "}";
 
-            RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart(localFile.getName(), fileName, RequestBody.create(MediaType.parse(JPEG_STRING), new File(localFile.getPath())))
-                    .build();
+                requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                        .addFormDataPart(localFile.getName(), jsonObjectStr, RequestBody.create(MediaType.parse(JPEG_STRING), new File(localFile.getPath())))
+                        .build();
 
+            }
 
             Request request = builder.post(requestBody).build();
 
@@ -229,6 +257,18 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
         try {
 
+            if (httpRequest.getBody().length() != 0) {
+
+                JSONObject jsonObject = new JSONObject(httpRequest.getBody());
+
+                jsonObject.put("op", "mkdir");
+                jsonObject.put("toName", folderName);
+
+                httpRequest.setBody(jsonObject.toString());
+
+                return remoteCall(httpRequest);
+            }
+
             Request.Builder builder = generateRequestBuilder(httpRequest);
 
             RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
@@ -255,6 +295,10 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
             return new HttpResponse(responseCode, str);
 
         } catch (IOException e) {
+            e.printStackTrace();
+
+            return null;
+        } catch (JSONException e) {
             e.printStackTrace();
 
             return null;

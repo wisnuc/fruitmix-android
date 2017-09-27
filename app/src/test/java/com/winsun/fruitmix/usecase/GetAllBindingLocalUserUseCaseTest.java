@@ -121,10 +121,12 @@ public class GetAllBindingLocalUserUseCaseTest {
 
         Station station1 = new Station();
         station1.setId(stationID1);
+        station1.addIp("testIP1");
         stations.add(station1);
 
         Station station2 = new Station();
         station2.setId(stationID2);
+        station2.addIp("testIP2");
         stations.add(station2);
 
         getStationsCaptor.getValue().onSucceed(stations, new OperationSuccess());

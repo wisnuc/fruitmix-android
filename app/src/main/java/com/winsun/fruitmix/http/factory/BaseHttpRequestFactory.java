@@ -18,7 +18,7 @@ public interface BaseHttpRequestFactory {
 
     HttpRequest createHttpGetRequest(String httpPath, boolean isPipe);
 
-    HttpRequest createHttpPostRequest(String httpPath, String body);
+    HttpRequest createHttpPostRequest(String httpPath, String body,boolean isPipe);
 
     HttpRequest createGetRequestByPathWithoutToken(String httpPath);
 

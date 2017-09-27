@@ -27,7 +27,9 @@ import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
+import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
+import com.winsun.fruitmix.parser.RemoteMkDirParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
@@ -171,7 +173,6 @@ public class UploadMediaUseCase {
     }
 
     public void startUploadMedia() {
-/*
 
         threadManager.runOnCacheThread(new Runnable() {
             @Override
@@ -179,7 +180,6 @@ public class UploadMediaUseCase {
                 startUploadMediaInThread();
             }
         });
-*/
 
     }
 
@@ -452,13 +452,17 @@ public class UploadMediaUseCase {
             public void onSucceed(HttpResponse data, OperationResult result) {
                 super.onSucceed(data, result);
 
-                RemoteFileFolderParser parser = new RemoteFileFolderParser();
+                RemoteDataParser<AbstractRemoteFile> parser = new RemoteMkDirParser();
 
                 try {
 
-                    List<AbstractRemoteFile> files = parser.parse(data.getResponseData());
+//                    List<AbstractRemoteFile> files = parser.parse(data.getResponseData());
+//
+//                    uploadParentFolderUUID = getFolderUUIDByName(files, UPLOAD_PARENT_FOLDER_NAME);
 
-                    uploadParentFolderUUID = getFolderUUIDByName(files, UPLOAD_PARENT_FOLDER_NAME);
+                    AbstractRemoteFile file = parser.parse(data.getResponseData());
+
+                    uploadParentFolderUUID = file.getUuid();
 
                     if (uploadParentFolderUUID.length() != 0) {
 
@@ -497,13 +501,17 @@ public class UploadMediaUseCase {
             public void onSucceed(HttpResponse data, OperationResult result) {
                 super.onSucceed(data, result);
 
-                RemoteFileFolderParser parser = new RemoteFileFolderParser();
+                RemoteDataParser<AbstractRemoteFile> parser = new RemoteMkDirParser();
 
                 try {
 
-                    List<AbstractRemoteFile> files = parser.parse(data.getResponseData());
+//                    List<AbstractRemoteFile> files = parser.parse(data.getResponseData());
+//
+//                    uploadFolderUUID = getFolderUUIDByName(files, getUploadFolderName());
 
-                    uploadFolderUUID = getFolderUUIDByName(files, getUploadFolderName());
+                    AbstractRemoteFile file = parser.parse(data.getResponseData());
+
+                    uploadFolderUUID = file.getUuid();
 
                     if (!uploadFolderUUID.isEmpty()) {
 

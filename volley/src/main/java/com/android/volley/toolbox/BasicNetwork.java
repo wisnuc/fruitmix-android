@@ -148,8 +148,6 @@ public class BasicNetwork implements Network {
                     throw new IOException();
                 }
 
-                Log.d(TAG, "performRequest: succeed statusCode: " + statusCode);
-
                 return new NetworkResponse(statusCode, responseContents, responseHeaders, false,
                         SystemClock.elapsedRealtime() - requestStart);
             } catch (SocketTimeoutException e) {

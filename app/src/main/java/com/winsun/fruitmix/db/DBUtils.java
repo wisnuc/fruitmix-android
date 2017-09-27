@@ -95,6 +95,8 @@ public class DBUtils {
 
             contentValues = createUserContentValues(user);
 
+            contentValues.put(DBHelper.USER_ASSOCIATED_WECHAT_USER_NAME,user.getAssociatedWeChatUserName());
+
             returnValue = database.insert(DBHelper.REMOTE_USER_TABLE_NAME, null, contentValues);
         }
 

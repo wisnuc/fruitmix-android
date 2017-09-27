@@ -3,10 +3,12 @@ package com.winsun.fruitmix;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mock.MockApplication;
+import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.parser.RemoteFileShareParser;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
+import com.winsun.fruitmix.parser.RemoteMkDirParser;
 import com.winsun.fruitmix.parser.RemoteStationParser;
 import com.winsun.fruitmix.stations.Station;
 
@@ -193,6 +195,45 @@ public class RemoteDatasParserUnitTest {
         assertEquals("10.10.9.170", station.getFirstIp());
 
     }
+
+    @Test
+    public void parseRemoteMkDirResult() {
+
+        String json = "{\"code\":200,\"message\":\"ok\",\"data\":{\"uuid\":\"3269d04b-6646-438d-80e4-4026c752e28e\",\"type\":\"directory\",\"name\":\"来自Huawei-Nexus 6P\",\"mtime\":1506505327067}}";
+
+        RemoteDataParser<AbstractRemoteFile> parser = new RemoteMkDirParser();
+
+        try {
+            AbstractRemoteFile file = parser.parse(json);
+
+            assertEquals("3269d04b-6646-438d-80e4-4026c752e28e", file.getUuid());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static final String localMkdirResult = "[{\"number\":0,\"op\":\"mkdir\",\"name\":\"来自Huawei-Nexus 6P\",\"data\":{\"uuid\":\"9b174a5f-9db5-4599-9694-3e0d5115ae44\",\"type\":\"directory\",\"name\":\"来自Huawei-Nexus 6P\",\"mtime\":1506509766789}}]";
+
+    @Test
+    public void parseLocalMkDirResult(){
+
+        String json = localMkdirResult;
+
+        RemoteDataParser<AbstractRemoteFile> parser = new RemoteMkDirParser();
+
+        try {
+            AbstractRemoteFile file = parser.parse(json);
+
+            assertEquals("9b174a5f-9db5-4599-9694-3e0d5115ae44", file.getUuid());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
 
 }

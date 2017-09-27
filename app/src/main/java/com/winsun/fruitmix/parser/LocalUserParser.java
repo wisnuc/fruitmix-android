@@ -23,6 +23,10 @@ public class LocalUserParser implements LocalDataParser<User> {
         user.setLibrary(cursor.getString(cursor.getColumnIndex(DBHelper.USER_KEY_LIBRARY)));
         user.setAdmin(cursor.getInt(cursor.getColumnIndex(DBHelper.USER_KEY_IS_ADMIN)) == 1);
 
+        if(cursor.getColumnIndex(DBHelper.USER_ASSOCIATED_WECHAT_USER_NAME) != -1){
+            user.setAssociatedWeChatUserName(cursor.getString(cursor.getColumnIndex(DBHelper.USER_ASSOCIATED_WECHAT_USER_NAME)));
+        }
+
         return user;
     }
 }

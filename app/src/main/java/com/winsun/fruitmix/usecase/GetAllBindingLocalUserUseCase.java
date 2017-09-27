@@ -94,7 +94,7 @@ public class GetAllBindingLocalUserUseCase {
 
                 } else {
 
-                    LoggedInWeChatUser loggedInUser = new LoggedInWeChatUser("", token, "", station.getLabel(), currentLocalUser,station.getId());
+                    LoggedInWeChatUser loggedInUser = new LoggedInWeChatUser("", token, station.getFirstIp(), station.getLabel(), currentLocalUser,station.getId());
 
                     loggedInUsers.add(loggedInUser);
 

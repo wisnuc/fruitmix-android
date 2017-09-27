@@ -121,7 +121,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         Log.i(TAG, "createFolder: result: " + (httpResponse != null ? "succeed" : "fail"));
 
-        if (httpResponse != null)
+        if (httpResponse != null && httpResponse.getResponseCode() == 200)
             callback.onSucceed(httpResponse, new OperationSuccess());
         else
             callback.onFail(new OperationIOException());
@@ -132,7 +132,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         String path = "/drives/" + driveUUID + "/dirs/" + dirUUID + "/entries";
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(path);
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path,"");
 
         Log.i(TAG, "uploadFile: start upload: " + httpRequest.getUrl());
 

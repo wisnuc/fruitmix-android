@@ -3,6 +3,7 @@ package com.winsun.fruitmix.upload.media;
 import android.support.annotation.NonNull;
 
 import com.winsun.fruitmix.BuildConfig;
+import com.winsun.fruitmix.RemoteDatasParserUnitTest;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
@@ -20,6 +21,7 @@ import com.winsun.fruitmix.mock.MockThreadManager;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
@@ -160,6 +162,8 @@ public class UploadMediaUseCaseTest {
         when(checkMediaIsExistStrategy.checkMediaIsExist(any(Media.class))).thenReturn(true);
 
         when(calcMediaDigestStrategy.isFinishCalcMediaDigest()).thenReturn(true);
+
+        when(networkStateManager.getNetworkState()).thenReturn(new NetworkState(true,false));
     }
 
     private void assertStringIsEmpty(String param) {
@@ -201,23 +205,8 @@ public class UploadMediaUseCaseTest {
         verify(stationFileRepository).createFolder(eq(uploadMediaUseCase.UPLOAD_PARENT_FOLDER_NAME), eq(testUserHome), eq(testUserHome), createUploadParentFolderCaptor.capture());
 
         HttpResponse httpResponse = new HttpResponse();
-        httpResponse.setResponseData("{\n" +
-                "    \"path\": [\n" +
-                "        {\n" +
-                "            \"uuid\": \"4a857fb9-e84d-4d11-a074-c79139b9d230\",\n" +
-                "            \"name\": \"4a857fb9-e84d-4d11-a074-c79139b9d230\",\n" +
-                "            \"mtime\": 1503366632432\n" +
-                "        }\n" +
-                "    ],\n" +
-                "    \"entries\": [\n" +
-                "        {\n" +
-                "            \"uuid\": \"" + testUploadParentFolderUUID + "\",\n" +
-                "            \"type\": \"directory\",\n" +
-                "            \"name\": \"" + uploadMediaUseCase.UPLOAD_PARENT_FOLDER_NAME + "\",\n" +
-                "            \"mtime\": 1503366446508\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}");
+
+        httpResponse.setResponseData("[{\"number\":0,\"op\":\"mkdir\",\"name\":\"来自Huawei-Nexus 6P\",\"data\":{\"uuid\":\""+testUploadParentFolderUUID+"\",\"type\":\"directory\",\"name\":\""+uploadMediaUseCase.UPLOAD_PARENT_FOLDER_NAME+"\",\"mtime\":1503366446508}}]");
 
         createUploadParentFolderCaptor.getValue().onSucceed(httpResponse, new OperationSuccess());
 
@@ -226,23 +215,8 @@ public class UploadMediaUseCaseTest {
         verify(stationFileRepository).createFolder(eq(uploadMediaUseCase.UPLOAD_FOLDER_NAME_PREFIX + testUploadFolderName), eq(testUserHome), eq(testUploadParentFolderUUID), createUploadFolderCaptor.capture());
 
         HttpResponse uploadFolderResponse = new HttpResponse();
-        uploadFolderResponse.setResponseData("{\n" +
-                "    \"path\": [\n" +
-                "        {\n" +
-                "            \"uuid\": \"4a857fb9-e84d-4d11-a074-c79139b9d230\",\n" +
-                "            \"name\": \"4a857fb9-e84d-4d11-a074-c79139b9d230\",\n" +
-                "            \"mtime\": 1503366632432\n" +
-                "        }\n" +
-                "    ],\n" +
-                "    \"entries\": [\n" +
-                "        {\n" +
-                "            \"uuid\": \"" + testUploadFolderUUID + "\",\n" +
-                "            \"type\": \"directory\",\n" +
-                "            \"name\": \"" + uploadMediaUseCase.UPLOAD_FOLDER_NAME_PREFIX + testUploadFolderName + "\",\n" +
-                "            \"mtime\": 1503366446508\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}");
+
+        uploadFolderResponse.setResponseData("[{\"number\":0,\"op\":\"mkdir\",\"name\":\"来自Huawei-Nexus 6P\",\"data\":{\"uuid\":\""+testUploadFolderUUID+"\",\"type\":\"directory\",\"name\":\""+uploadMediaUseCase.UPLOAD_FOLDER_NAME_PREFIX + testUploadFolderName+"\",\"mtime\":1503366446508}}]");
 
         createUploadFolderCaptor.getValue().onSucceed(uploadFolderResponse, new OperationSuccess());
 
@@ -301,23 +275,7 @@ public class UploadMediaUseCaseTest {
         verify(stationFileRepository).createFolder(eq(uploadMediaUseCase.UPLOAD_FOLDER_NAME_PREFIX + testUploadFolderName), eq(testUserHome), eq(testUploadParentFolderUUID), createUploadFolderCaptor.capture());
 
         HttpResponse uploadFolderResponse = new HttpResponse();
-        uploadFolderResponse.setResponseData("{\n" +
-                "    \"path\": [\n" +
-                "        {\n" +
-                "            \"uuid\": \"4a857fb9-e84d-4d11-a074-c79139b9d230\",\n" +
-                "            \"name\": \"4a857fb9-e84d-4d11-a074-c79139b9d230\",\n" +
-                "            \"mtime\": 1503366632432\n" +
-                "        }\n" +
-                "    ],\n" +
-                "    \"entries\": [\n" +
-                "        {\n" +
-                "            \"uuid\": \"" + testUploadFolderUUID + "\",\n" +
-                "            \"type\": \"directory\",\n" +
-                "            \"name\": \"" + uploadMediaUseCase.UPLOAD_FOLDER_NAME_PREFIX + testUploadFolderName + "\",\n" +
-                "            \"mtime\": 1503366446508\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}");
+        uploadFolderResponse.setResponseData(RemoteDatasParserUnitTest.localMkdirResult);
 
         createUploadFolderCaptor.getValue().onSucceed(uploadFolderResponse, new OperationSuccess());
 

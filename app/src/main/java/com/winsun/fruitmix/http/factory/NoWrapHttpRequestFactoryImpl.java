@@ -23,7 +23,7 @@ public class NoWrapHttpRequestFactoryImpl extends BaseHttpRequestFactoryImpl imp
     }
 
     @Override
-    public HttpRequest createHttpPostRequest(String httpPath, String body) {
+    public HttpRequest createHttpPostRequest(String httpPath, String body,boolean isPipe) {
 
         return createHasBodyRequest(createUrl(httpPath), Util.HTTP_POST_METHOD, body);
     }

@@ -148,21 +148,21 @@ public class MainPagePresenterImpl implements MainPagePresenter {
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
 
-                refreshAllLoggedInUsers();
+                refreshAllLoggedInUsers(true);
 
             }
 
             @Override
             public void onFail(OperationResult result) {
 
-                refreshAllLoggedInUsers();
+                refreshAllLoggedInUsers(false);
 
             }
         });
 
     }
 
-    private void refreshAllLoggedInUsers() {
+    private void refreshAllLoggedInUsers(boolean getBindingWeChatLoggedInUserSucceed) {
         if (loggedInUserDataSource == null) return;
 
         String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
@@ -173,17 +173,21 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         int loggedInUserListSize = loggedInUsers.size();
 
-        navPagerViewModel.equipmentNameVisibility.set(loggedInUserListSize != 1);
+        if(!getBindingWeChatLoggedInUserSucceed){
 
-        Iterator<LoggedInUser> iterator = loggedInUsers.iterator();
-        while (iterator.hasNext()) {
-            LoggedInUser loggedInUser = iterator.next();
-            if (loggedInUser.getUser().getUuid().equals(currentUserUUID)) {
+            navPagerViewModel.equipmentNameVisibility.set(loggedInUserListSize != 1);
 
-                navPagerViewModel.equipmentNameText.set(loggedInUser.getEquipmentName());
+            Iterator<LoggedInUser> iterator = loggedInUsers.iterator();
+            while (iterator.hasNext()) {
+                LoggedInUser loggedInUser = iterator.next();
+                if (loggedInUser.getUser().getUuid().equals(currentUserUUID)) {
 
-                iterator.remove();
+                    navPagerViewModel.equipmentNameText.set(loggedInUser.getEquipmentName());
+
+                    iterator.remove();
+                }
             }
+
         }
 
         if (loggedInUserListSize > 0) {
@@ -240,6 +244,11 @@ public class MainPagePresenterImpl implements MainPagePresenter {
                     if (!loggedInUser.getStationID().equals(stationID)) {
 
                         bindingWeChatLoggedInUser.add(loggedInUser);
+
+                    }else {
+
+                        navPagerViewModel.equipmentNameVisibility.set(true);
+                        navPagerViewModel.equipmentNameText.set(loggedInUser.getGateway());
 
                     }
 

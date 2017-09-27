@@ -443,6 +443,8 @@ public class NavPagerActivity extends BaseActivity
 //            showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_UPLOADED_MEDIA + httpErrorCode);
 
         binding.setViewModel(navPagerViewModel);
+
+        binding.executePendingBindings();
     }
 
     private void handleUploadStateChangeToUploadMediaFail(int httpErrorCode) {
@@ -450,6 +452,8 @@ public class NavPagerActivity extends BaseActivity
 //            showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_UPLOAD_MEDIA + httpErrorCode);
 
         binding.setViewModel(navPagerViewModel);
+
+        binding.executePendingBindings();
     }
 
     private void handleUploadStateChangeToCreateFolderFail(int httpErrorCode) {
@@ -462,6 +466,8 @@ public class NavPagerActivity extends BaseActivity
 //            showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_CREATE_FOLDER + httpErrorCode);
 
         binding.setViewModel(navPagerViewModel);
+
+        binding.executePendingBindings();
     }
 
     private void handleUploadStateChangeToGetFolderFail(int httpErrorCode) {
@@ -474,6 +480,8 @@ public class NavPagerActivity extends BaseActivity
 //            showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_FOLDER + httpErrorCode);
 
         binding.setViewModel(navPagerViewModel);
+
+        binding.executePendingBindings();
     }
 
     private void handleUploadStateChangeToUploadMediaCountChanged(int uploadedMediaCount, int totalCount) {
@@ -488,6 +496,8 @@ public class NavPagerActivity extends BaseActivity
         handleUploadMediaCount();
 
         binding.setViewModel(navPagerViewModel);
+
+        binding.executePendingBindings();
     }
 
     private void handleUploadStateChangeToStartGetUploadMediaCount() {
@@ -495,6 +505,10 @@ public class NavPagerActivity extends BaseActivity
 
         navPagerViewModel.showConnectServerFailed.set(false);
         navPagerViewModel.showUploadProgress.set(false);
+
+        binding.setViewModel(navPagerViewModel);
+
+        binding.executePendingBindings();
     }
 
     private void calcAlreadyUploadMediaCount(final List<Media> medias) {
@@ -806,7 +820,7 @@ public class NavPagerActivity extends BaseActivity
     private void checkShowAutoUploadDialog() {
         if (systemSettingDataSource.getShowAutoUploadDialog()) {
             showNeedAutoUploadDialog();
-        }else
+        } else
             checkShowAutoUploadWhenConnectedWithMobileNetwork();
     }
 
