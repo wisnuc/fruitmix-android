@@ -3,6 +3,7 @@ package com.winsun.fruitmix.http.factory;
 import android.util.Base64;
 
 import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.util.Util;
 
@@ -11,6 +12,10 @@ import com.winsun.fruitmix.util.Util;
  */
 
 public class NoWrapHttpRequestFactoryImpl extends BaseHttpRequestFactoryImpl implements NoWrapHttpRequestFactory{
+
+    public NoWrapHttpRequestFactoryImpl(SystemSettingDataSource systemSettingDataSource) {
+        super(systemSettingDataSource);
+    }
 
     @Override
     public HttpRequest createHttpGetRequest(String httpPath, boolean isPipe) {

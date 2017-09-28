@@ -14,6 +14,7 @@ import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.mock.MockThreadManager;
+import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -192,6 +193,8 @@ public class LoginUseCaseTest {
         getUserByGUIDCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess());
 
         testAfterChooseStationID();
+
+        initSystemStateAndVerify();
 
         verify(systemSettingDataSource).setCurrentLoginUserGUID(testGUID);
     }
@@ -465,9 +468,33 @@ public class LoginUseCaseTest {
 
         captor.getValue().onSucceed(Collections.singletonList(weChatTokenUserWrapper), new OperationSuccess());
 
+        verify(systemSettingDataSource).setCurrentLoginToken(testToken);
+
         verify(httpRequestFactory).setCurrentData(anyString(), anyString());
 
+        verify(systemSettingDataSource).setCurrentLoginToken(testToken);
+
     }
+
+    public void testGetStationListAndGetLocalUserAndLoginWithWeChatCodeFail(){
+
+        testLoginWithWeChatCode_succeed();
+
+        ArgumentCaptor<BaseLoadDataCallback<Station>> stationLoadCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(stationsDataSource).getStationsByWechatGUID(eq(testGUID), stationLoadCaptor.capture());
+
+        Station station = new Station();
+
+        station.setId(testStationID);
+        station.setLabel("testStationLabel");
+
+        stationLoadCaptor.getValue().onFail(new OperationFail("fail"));
+
+        verify(systemSettingDataSource).setCurrentLoginToken(eq(""));
+
+    }
+
 
     @Test
     public void testGetStationListAndGetLocalUserAndLoginWithWeChatCodeSucceed() {
@@ -489,6 +516,8 @@ public class LoginUseCaseTest {
         verify(httpRequestFactory).setDefaultFactory(eq(true));
 
         testAfterChooseStationID();
+
+        initSystemStateAndVerifyAfterChooseStationID();
 
         verify(systemSettingDataSource).setCurrentLoginUserGUID(testGUID);
 
@@ -531,10 +560,33 @@ public class LoginUseCaseTest {
 
         verify(userDataRepository).insertUsers(ArgumentMatchers.<User>anyCollection());
 
-        initSystemStateAndVerify();
-
         verify(systemSettingDataSource).setCurrentLoginStationID(eq(testStationID));
 
+    }
+
+    private void initSystemStateAndVerifyAfterChooseStationID() {
+
+        verify(checkMediaIsUploadStrategy).setCurrentUserUUID(testUserUUID);
+
+        verify(checkMediaIsUploadStrategy).setUploadedMediaHashs(Collections.<String>emptyList());
+
+        verify(uploadMediaUseCase).resetState();
+
+        verify(imageGifLoaderInstance).setToken(anyString());
+
+        verify(systemSettingDataSource).setCurrentLoginUserUUID(anyString());
+
+        verify(systemSettingDataSource,times(2)).setCurrentLoginToken(anyString());
+
+        verify(systemSettingDataSource).setCurrentEquipmentIp(anyString());
+
+        verify(systemSettingDataSource).setCurrentLoginUserGUID(eq(""));
+
+        verify(systemSettingDataSource).setCurrentLoginStationID(eq(""));
+
+        verify(stationFileRepository).clearDownloadFileRecordInCache();
+
+        verify(newPhotoListDataLoader).setNeedRefreshData(eq(true));
 
     }
 

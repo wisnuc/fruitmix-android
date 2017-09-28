@@ -73,8 +73,8 @@ public class HttpRequestFactory {
 
             Log.d(TAG, "getInstance: create new instance");
 
-            BaseHttpRequestFactory wrapHttpRequestFactory = new WrapHttpRequestFactoryImpl();
-            NoWrapHttpRequestFactory noWrapHttpRequestFactory = new NoWrapHttpRequestFactoryImpl();
+            BaseHttpRequestFactory wrapHttpRequestFactory = new WrapHttpRequestFactoryImpl(systemSettingDataSource);
+            NoWrapHttpRequestFactory noWrapHttpRequestFactory = new NoWrapHttpRequestFactoryImpl(systemSettingDataSource);
 
             instance = new HttpRequestFactory(systemSettingDataSource, wrapHttpRequestFactory, noWrapHttpRequestFactory);
 
@@ -254,6 +254,7 @@ public class HttpRequestFactory {
 
             currentDefaultHttpRequestFactory.setStationID(getStationID());
             currentDefaultHttpRequestFactory.setToken(getToken());
+
         } else {
 
             currentDefaultHttpRequestFactory = noWrapHttpRequestFactory;

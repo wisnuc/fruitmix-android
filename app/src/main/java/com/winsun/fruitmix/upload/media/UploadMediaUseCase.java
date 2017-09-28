@@ -238,7 +238,6 @@ public class UploadMediaUseCase {
 
                     return;
 
-
                 }
 
                 if (uploadParentFolderUUID.isEmpty() || uploadFolderUUID.isEmpty())
@@ -1009,6 +1008,8 @@ public class UploadMediaUseCase {
 
         Log.i(TAG, "stopUploadMedia: stop thread");
 
+        threadManager.stopUploadMediaThreadNow();
+
         mStopUpload = true;
 
         mAlreadyStartUpload = false;
@@ -1020,8 +1021,6 @@ public class UploadMediaUseCase {
         currentUserUUID = "";
 
         currentUserHome = "";
-
-        threadManager.stopUploadMediaThreadNow();
 
     }
 

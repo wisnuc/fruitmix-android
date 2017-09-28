@@ -164,8 +164,6 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                     final WeChatTokenUserWrapper weChatTokenUserWrapper = operationMoreThanOneStation.getWeChatTokenUserWrapper();
 
-                    final List<Station> stations = operationMoreThanOneStation.getStations();
-
                     InjectGetAllBindingLocalUserUseCase.provideInstance(WXEntryActivity.this).
                             getAllBindingLocalUser(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(), new BaseLoadDataCallback<LoggedInWeChatUser>() {
                                 @Override
@@ -173,7 +171,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                                     if (data.isEmpty()) {
 
-                                        handleLoginFail(new OperationFail("logged in wechat user is empty"));
+                                        handleLoginFail(new OperationFail("未找到绑定的本地用户"));
 
                                     } else {
 

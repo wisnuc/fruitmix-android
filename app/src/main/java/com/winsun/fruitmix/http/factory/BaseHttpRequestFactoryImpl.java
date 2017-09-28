@@ -2,6 +2,8 @@ package com.winsun.fruitmix.http.factory;
 
 import android.util.Log;
 
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+
 /**
  * Created by Administrator on 2017/9/18.
  */
@@ -17,11 +19,15 @@ public class BaseHttpRequestFactoryImpl {
 
     private String stationID;
 
-    BaseHttpRequestFactoryImpl() {
+    protected SystemSettingDataSource systemSettingDataSource;
+
+    BaseHttpRequestFactoryImpl(SystemSettingDataSource systemSettingDataSource) {
         gateway = "";
         token = "";
 
         stationID = "";
+
+        this.systemSettingDataSource = systemSettingDataSource;
     }
 
     public void setStationID(String stationID) {

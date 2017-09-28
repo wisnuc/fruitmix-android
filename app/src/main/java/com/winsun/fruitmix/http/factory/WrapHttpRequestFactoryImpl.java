@@ -4,6 +4,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONException;
@@ -22,6 +23,10 @@ public class WrapHttpRequestFactoryImpl extends BaseHttpRequestFactoryImpl imple
     private static final String CALL_STATION_THROUGH_CLOUD_END_FOR_JSON = "/json";
 
     private static final String CALL_STATION_THROUGH_CLOUD_END_FOR_PIPE = "/pipe";
+
+    public WrapHttpRequestFactoryImpl(SystemSettingDataSource systemSettingDataSource) {
+        super(systemSettingDataSource);
+    }
 
     @Override
     public HttpRequest createHttpGetRequest(String httpPath, boolean isPipe) {
@@ -63,12 +68,12 @@ public class WrapHttpRequestFactoryImpl extends BaseHttpRequestFactoryImpl imple
     }
 
     @Override
-    public HttpRequest createHttpPostRequest(String httpPath, String body,boolean isPipe) {
+    public HttpRequest createHttpPostRequest(String httpPath, String body, boolean isPipe) {
 
-        return createHasBodyRequestThroughPipe(httpPath, Util.HTTP_POST_METHOD, body,isPipe);
+        return createHasBodyRequestThroughPipe(httpPath, Util.HTTP_POST_METHOD, body, isPipe);
     }
 
-    private HttpRequest createHasBodyRequestThroughPipe(String httpPath, String method, String body,boolean isPipe) {
+    private HttpRequest createHasBodyRequestThroughPipe(String httpPath, String method, String body, boolean isPipe) {
 
         Log.d(TAG, "createHasBodyRequestThroughPipe: " + getGateway() + ":" + getPort() + httpPath);
 
@@ -101,6 +106,16 @@ public class WrapHttpRequestFactoryImpl extends BaseHttpRequestFactoryImpl imple
 
     @Override
     public HttpRequest createGetRequestByPathWithoutToken(String httpPath) {
-        return createHttpGetRequest(httpPath,false);
+        return createHttpGetRequest(httpPath, false);
+    }
+
+
+    @Override
+    protected String getToken() {
+
+        if (token == null || token.isEmpty())
+            token = systemSettingDataSource.getCurrentLoginToken();
+
+        return token;
     }
 }

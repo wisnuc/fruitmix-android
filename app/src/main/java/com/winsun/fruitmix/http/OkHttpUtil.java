@@ -43,7 +43,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     private OkHttpClient okHttpClient;
 
     private static final String APPLICATION_JSON_STRING = "application/json";
-    private static final String JPEG_STRING = "image/jpeg";
+    private static final String JPEG_STRING = "image/*";
 
     private static final String SHA_256_STRING = "sha256";
     private static final String SIZE_STRING = "size";
@@ -53,7 +53,8 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     private OkHttpUtil() {
 
         okHttpClient = new OkHttpClient.Builder().retryOnConnectionFailure(true).connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
-                .readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).addInterceptor(createHttpInterceptor()).build();
+                .readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).writeTimeout(Util.HTTP_CONNECT_TIMEOUT,TimeUnit.MILLISECONDS)
+                .addInterceptor(createHttpInterceptor()).build();
     }
 
     public static OkHttpUtil getInstance() {

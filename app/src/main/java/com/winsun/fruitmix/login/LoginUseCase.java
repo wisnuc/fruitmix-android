@@ -305,7 +305,7 @@ public class LoginUseCase extends BaseDataRepository {
                 mToken = token;
                 mGateway = loadTokenParam.getGateway();
 
-                httpRequestFactory.setCurrentData(token, mGateway);
+                httpRequestFactory.setCurrentData(mToken, mGateway);
 
                 userDataRepository.clearAllUsersInDB();
 
@@ -515,11 +515,27 @@ public class LoginUseCase extends BaseDataRepository {
 
                 mGateway = HttpRequestFactory.CLOUD_IP;
 
-                httpRequestFactory.setCurrentData(token, mGateway);
+                httpRequestFactory.setCurrentData(mToken, mGateway);
 
                 httpRequestFactory.setPort(HttpRequestFactory.CLOUD_PORT);
 
-                getStationList(weChatTokenUserWrapper, runOnMainThreadCallback);
+                systemSettingDataSource.setCurrentLoginToken(mToken);
+
+                getStationList(weChatTokenUserWrapper, new BaseOperateDataCallback<Boolean>() {
+                    @Override
+                    public void onSucceed(Boolean data, OperationResult result) {
+                        runOnMainThreadCallback.onSucceed(data, result);
+                    }
+
+                    @Override
+                    public void onFail(OperationResult result) {
+
+                        systemSettingDataSource.setCurrentLoginToken("");
+
+                        runOnMainThreadCallback.onFail(result);
+
+                    }
+                });
 
             }
 
@@ -551,7 +567,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                             handleLoginWithWeChatCodeSucceed(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(), stationID);
 
-                            callback.onSucceed(data,result);
+                            callback.onSucceed(data, result);
                         }
 
                         @Override
@@ -629,6 +645,13 @@ public class LoginUseCase extends BaseDataRepository {
 
                             callback.onSucceed(data, result);
                         }
+
+                        @Override
+                        public void onFail(OperationResult result) {
+                            super.onFail(result);
+
+                            callback.onFail(result);
+                        }
                     });
 
                 }
@@ -650,9 +673,13 @@ public class LoginUseCase extends BaseDataRepository {
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
 
+                boolean findUser = false;
+
                 for (final User user : data) {
 
                     if (user.getUuid().equals(currentUser.getUuid())) {
+
+                        findUser = true;
 
                         Log.d(TAG, "onSucceed: currentUser isAdmin: " + user.isAdmin());
 
@@ -688,6 +715,10 @@ public class LoginUseCase extends BaseDataRepository {
 
                     }
 
+                }
+
+                if (!findUser) {
+                    callback.onFail(new OperationFail("get user detailed info failed"));
                 }
 
             }
