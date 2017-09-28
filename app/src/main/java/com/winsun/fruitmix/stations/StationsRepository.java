@@ -2,6 +2,7 @@ package com.winsun.fruitmix.stations;
 
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
@@ -72,6 +73,18 @@ public class StationsRepository extends BaseDataRepository implements StationsDa
                     }
                 });
 
+            }
+        });
+
+    }
+
+    @Override
+    public void getStationInfoByStationAPI(final String ip,final BaseLoadDataCallback<Station> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                stationsDataSource.getStationInfoByStationAPI(ip,createLoadCallbackRunOnMainThread(callback));
             }
         });
 

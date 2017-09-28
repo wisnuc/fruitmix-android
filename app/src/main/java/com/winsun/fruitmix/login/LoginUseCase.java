@@ -144,9 +144,14 @@ public class LoginUseCase extends BaseDataRepository {
 
         String currentLoginToken = systemSettingDataSource.getCurrentLoginToken();
 
-        LoggedInUser loggedInUser = loggedInUserDataSource.getLoggedInUserByToken(currentLoginToken);
+        if (currentLoginToken.isEmpty()) {
+            callback.onFail(new OperationFail("no token"));
+            return;
+        }
 
-        if (loggedInUser == null) {
+        boolean loginWithWeChatCodeOrNot = systemSettingDataSource.getLoginWithWechatCodeOrNot();
+
+        if (loginWithWeChatCodeOrNot) {
 
             String currentLoginStationID = systemSettingDataSource.getCurrentLoginStationID();
 
@@ -157,16 +162,18 @@ public class LoginUseCase extends BaseDataRepository {
 
         } else {
 
-            Log.d(TAG, "loginWithNoParam: http request factory set current data token:" + loggedInUser.getToken() + " gateway: " + loggedInUser.getGateway());
+            mToken = currentLoginToken;
+            mGateway = systemSettingDataSource.getCurrentEquipmentIp();
 
-            mToken = loggedInUser.getToken();
-            mGateway = loggedInUser.getGateway();
+            Log.d(TAG, "loginWithNoParam: http request factory set current data token:" + mToken + " gateway: " + mGateway);
 
             httpRequestFactory.setCurrentData(mToken, mGateway);
 
-            initSystemState(loggedInUser.getToken(), loggedInUser.getGateway(), loggedInUser.getUser().getUuid());
+            String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
 
-            getUsers(loggedInUser.getUser().getUuid(), new BaseOperateDataCallback<Boolean>() {
+            initSystemState(mToken, mGateway, currentUserUUID);
+
+            getUsers(currentUserUUID, new BaseOperateDataCallback<Boolean>() {
                 @Override
                 public void onSucceed(Boolean data, OperationResult result) {
 
@@ -551,7 +558,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                             handleLoginWithWeChatCodeSucceed(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(), stationID);
 
-                            callback.onSucceed(data,result);
+                            callback.onSucceed(data, result);
                         }
 
                         @Override
@@ -669,6 +676,8 @@ public class LoginUseCase extends BaseDataRepository {
                                 userDataRepository.insertUsers(users);
 
                                 initSystemState(mToken, mGateway, currentUser.getUuid());
+
+                                systemSettingDataSource.setCurrentWAToken(mToken);
 
                                 systemSettingDataSource.setCurrentLoginStationID(stationID);
 

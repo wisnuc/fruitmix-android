@@ -83,9 +83,9 @@ public class HttpRequestFactory {
         return instance;
     }
 
-    public void reset(){
+    public void reset() {
 
-        setCurrentData("","");
+        setCurrentData("", "");
         setStationID("");
 
     }
@@ -104,14 +104,16 @@ public class HttpRequestFactory {
         this.gateway = gateway;
     }
 
-    public String getGateway() {
+    //synchronized for set gateway and token when network changed
+
+    public synchronized String getGateway() {
         if (gateway == null || gateway.isEmpty())
             gateway = systemSettingDataSource.getCurrentEquipmentIp();
 
         return gateway;
     }
 
-    private String getToken() {
+    private synchronized String getToken() {
 
         if (token == null || token.isEmpty())
             token = systemSettingDataSource.getCurrentLoginToken();
@@ -119,7 +121,7 @@ public class HttpRequestFactory {
         return token;
     }
 
-    public void setCurrentData(String token, String gateway) {
+    public synchronized void setCurrentData(String token, String gateway) {
 
         Log.d(TAG, "setCurrentData: token: " + token + " gateway: " + gateway);
 
@@ -181,8 +183,6 @@ public class HttpRequestFactory {
 
     public HttpRequest createGetRequestWithoutToken(String ip, String httpPath) {
 
-        //TODO:set gateway,port,token before create http request
-
         noWrapHttpRequestFactory.setGateway(Util.HTTP + ip);
         noWrapHttpRequestFactory.setPort(STATION_PORT);
 
@@ -211,14 +211,14 @@ public class HttpRequestFactory {
 
     }
 
-    public HttpRequest createHttpGetRequestByCloudAPIWithWrap(String httpPath,String stationID){
+    public HttpRequest createHttpGetRequestByCloudAPIWithWrap(String httpPath, String stationID) {
 
         wrapHttpRequestFactory.setGateway(CLOUD_IP);
         wrapHttpRequestFactory.setPort(CLOUD_PORT);
         wrapHttpRequestFactory.setToken(getToken());
         wrapHttpRequestFactory.setStationID(stationID);
 
-        return wrapHttpRequestFactory.createHttpGetRequest(httpPath,false);
+        return wrapHttpRequestFactory.createHttpGetRequest(httpPath, false);
     }
 
 
@@ -254,6 +254,7 @@ public class HttpRequestFactory {
 
             currentDefaultHttpRequestFactory.setStationID(getStationID());
             currentDefaultHttpRequestFactory.setToken(getToken());
+
         } else {
 
             currentDefaultHttpRequestFactory = noWrapHttpRequestFactory;
@@ -267,23 +268,23 @@ public class HttpRequestFactory {
     }
 
 
-    public HttpRequest createHttpPostFileRequest(String httpPath,String body){
+    public HttpRequest createHttpPostFileRequest(String httpPath, String body) {
 
-        return createHttpPostRequest(httpPath,body,true);
+        return createHttpPostRequest(httpPath, body, true);
     }
 
-    public HttpRequest createHttpPostRequest(String httpPath,String body){
+    public HttpRequest createHttpPostRequest(String httpPath, String body) {
 
-        return createHttpPostRequest(httpPath,body,false);
+        return createHttpPostRequest(httpPath, body, false);
 
     }
 
 
-    private HttpRequest createHttpPostRequest(String httpPath, String body,boolean isPipe) {
+    private HttpRequest createHttpPostRequest(String httpPath, String body, boolean isPipe) {
 
         setDefaultFactoryState();
 
-        return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body,isPipe);
+        return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body, isPipe);
 
     }
 

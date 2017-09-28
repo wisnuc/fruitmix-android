@@ -40,6 +40,8 @@ import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.network.change.InjectNetworkChangeUseCase;
+import com.winsun.fruitmix.network.change.NetworkChangeUseCase;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
@@ -58,7 +60,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ButlerService extends Service implements UploadMediaCountChangeListener{
+public class ButlerService extends Service implements UploadMediaCountChangeListener {
 
     private static final String TAG = ButlerService.class.getSimpleName();
 
@@ -82,6 +84,8 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
     private CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback;
 
     private static List<UploadMediaCountChangeListener> uploadMediaCountChangeListeners = new ArrayList<>();
+
+    private NetworkChangeUseCase networkChangeUseCase;
 
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
@@ -137,6 +141,8 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
 //        uploadMediaUseCase.registerUploadMediaCountChangeListener(this);
 
+        networkChangeUseCase = InjectNetworkChangeUseCase.provideInstance(this);
+
     }
 
     public static void registerUploadMediaCountChangeListener(UploadMediaCountChangeListener uploadMediaCountChangeListener) {
@@ -157,7 +163,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
     @Override
     public void onGetUploadMediaCountFail(int httpErrorCode) {
 
-        for (UploadMediaCountChangeListener uploadMediaCountChangeListener:uploadMediaCountChangeListeners){
+        for (UploadMediaCountChangeListener uploadMediaCountChangeListener : uploadMediaCountChangeListeners) {
 
             Log.d(TAG, "onGetUploadMediaCountFail: " + uploadMediaCountChangeListener);
 
@@ -169,7 +175,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
     @Override
     public void onUploadMediaFail(int httpErrorCode) {
 
-        for (UploadMediaCountChangeListener uploadMediaCountChangeListener:uploadMediaCountChangeListeners){
+        for (UploadMediaCountChangeListener uploadMediaCountChangeListener : uploadMediaCountChangeListeners) {
 
             Log.d(TAG, "onUploadMediaFail: " + uploadMediaCountChangeListener);
 
@@ -181,7 +187,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
     @Override
     public void onCreateFolderFail(int httpErrorCode) {
 
-        for (UploadMediaCountChangeListener uploadMediaCountChangeListener:uploadMediaCountChangeListeners){
+        for (UploadMediaCountChangeListener uploadMediaCountChangeListener : uploadMediaCountChangeListeners) {
 
             Log.d(TAG, "onCreateFolderFail: " + uploadMediaCountChangeListener);
 
@@ -193,7 +199,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
     @Override
     public void onGetFolderFail(int httpErrorCode) {
 
-        for (UploadMediaCountChangeListener uploadMediaCountChangeListener:uploadMediaCountChangeListeners){
+        for (UploadMediaCountChangeListener uploadMediaCountChangeListener : uploadMediaCountChangeListeners) {
 
             Log.d(TAG, "onGetFolderFail: " + uploadMediaCountChangeListener);
 
@@ -205,7 +211,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
     @Override
     public void onStartGetUploadMediaCount() {
 
-        for (UploadMediaCountChangeListener uploadMediaCountChangeListener:uploadMediaCountChangeListeners){
+        for (UploadMediaCountChangeListener uploadMediaCountChangeListener : uploadMediaCountChangeListeners) {
 
             Log.d(TAG, "onStartGetUploadMediaCount: " + uploadMediaCountChangeListener);
 
@@ -217,11 +223,11 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
     @Override
     public void onUploadMediaCountChanged(int uploadedMediaCount, int totalCount) {
 
-        for (UploadMediaCountChangeListener uploadMediaCountChangeListener:uploadMediaCountChangeListeners){
+        for (UploadMediaCountChangeListener uploadMediaCountChangeListener : uploadMediaCountChangeListeners) {
 
             Log.d(TAG, "call notifyUploadMediaCountChange " + uploadMediaCountChangeListener + " alreadyUploadedMediaCount: " + uploadedMediaCount + " localMedias Size: " + totalCount);
 
-            uploadMediaCountChangeListener.onUploadMediaCountChanged(uploadedMediaCount,totalCount);
+            uploadMediaCountChangeListener.onUploadMediaCountChanged(uploadedMediaCount, totalCount);
         }
 
     }
@@ -269,7 +275,6 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
         uploadMediaUseCase.stopUploadMedia();
 
         uploadMediaUseCase.stopRetryUploadForever();
-
 
 
 //        uploadMediaUseCase.unregisterUploadMediaCountChangeListener(this);
@@ -359,6 +364,12 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
                 if (operationResultType == OperationResultType.SUCCEED)
                     FNAS.retrieveRemoteMedia(this);
+
+                break;
+
+            case Util.NETWORK_CHANGED:
+
+//                networkChangeUseCase.handleNetworkChange();
 
                 break;
         }

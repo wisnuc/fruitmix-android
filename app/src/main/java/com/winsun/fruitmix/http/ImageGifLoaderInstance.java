@@ -78,20 +78,14 @@ public class ImageGifLoaderInstance {
 
     public ImageLoader getImageLoader(Context context) {
 
-        if (mImageLoader == null) {
+        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(context).getRequestQueue();
+        mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
 
-            RequestQueue mRequestQueue = RequestQueueInstance.getInstance(context).getRequestQueue();
-            mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
+        Log.d(TAG, "getImageLoader: create header");
 
-            if (headers == null) {
+        createHeader();
 
-                Log.d(TAG, "getImageLoader: create header");
-
-                createHeader();
-            }
-
-            mImageLoader.setHeaders(headers);
-        }
+        mImageLoader.setHeaders(headers);
 
         return mImageLoader;
 
@@ -106,21 +100,14 @@ public class ImageGifLoaderInstance {
 
     public GifLoader getGifLoader(Context context) {
 
-        if (mGifLoader == null) {
+        RequestQueue mRequestQueue = RequestQueueInstance.getInstance(context).getRequestQueue();
+        mGifLoader = new GifLoader(mRequestQueue, GifLruCache.instance());
 
-            RequestQueue mRequestQueue = RequestQueueInstance.getInstance(context).getRequestQueue();
-            mGifLoader = new GifLoader(mRequestQueue, GifLruCache.instance());
+        Log.d(TAG, "getGifLoader: create header");
 
-            if (headers == null) {
+        createHeader();
 
-                Log.d(TAG, "getGifLoader: create header");
-
-                createHeader();
-            }
-
-            mImageLoader.setHeaders(headers);
-
-        }
+        mImageLoader.setHeaders(headers);
 
         return mGifLoader;
 
