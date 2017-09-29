@@ -3,11 +3,13 @@ package com.winsun.fruitmix.mediaModule.model;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.util.ArrayMap;
 import android.util.Log;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.util.Util;
@@ -307,9 +309,12 @@ public class Media implements Parcelable {
 
     //TODO:refactor create request url
 
-    public String getImageSmallThumbUrl(Context context) {
+    public HttpRequest getImageSmallThumbUrl(Context context) {
 
         String imageUrl;
+
+        HttpRequest httpRequest;
+
         if (isLocal()) {
             imageUrl = getMiniThumbPath();
 
@@ -320,22 +325,28 @@ public class Media implements Parcelable {
                 imageUrl = getOriginalPhotoPath();
             }
 
+            HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
+            httpRequest = httpRequestFactory.createHttpGetRequestForLocalMedia(imageUrl);
+
         } else {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            imageUrl = getRemoteMediaThumbUrl(context, 64, 64);
+            httpRequest = getRemoteMediaThumbUrl(context, 64, 64);
 
-            Log.d(TAG, "getImageSmallThumbUrl: " + imageUrl);
+            Log.d(TAG, "getImageSmallThumbUrl: " + httpRequest.getUrl());
 
         }
-        return imageUrl;
+        return httpRequest;
 
     }
 
-    public String getImageThumbUrl(Context context) {
+    public HttpRequest getImageThumbUrl(Context context) {
 
         String imageUrl;
+
+        HttpRequest httpRequest;
+
         if (isLocal()) {
             imageUrl = getThumb();
 
@@ -343,28 +354,31 @@ public class Media implements Parcelable {
                 imageUrl = getOriginalPhotoPath();
             }
 
+            HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
+            httpRequest = httpRequestFactory.createHttpGetRequestForLocalMedia(imageUrl);
+
         } else {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            imageUrl = getRemoteMediaThumbUrl(context, 200, 200);
+            httpRequest = getRemoteMediaThumbUrl(context, 200, 200);
 
-            Log.d(TAG, "getImageThumbUrl: " + imageUrl);
+            Log.d(TAG, "getImageThumbUrl: " + httpRequest.getUrl());
 
         }
-        return imageUrl;
+        return httpRequest;
 
     }
 
-    private String generateUrl(Context context, String req) {
+    private HttpRequest generateUrl(Context context, String req) {
 
         HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
 
-        return httpRequestFactory.createHttpGetFileRequest(req).getUrl();
+        return httpRequestFactory.createHttpGetFileRequest(req);
 
     }
 
-    private String getRemoteMediaThumbUrl(Context context, int width, int height) {
+    private HttpRequest getRemoteMediaThumbUrl(Context context, int width, int height) {
 
         String httpPath = String.format(thumbPhotoFormatCode, Util.MEDIA_PARAMETER + "/" + getUuid(),
                 String.valueOf(width), String.valueOf(height));
@@ -373,7 +387,7 @@ public class Media implements Parcelable {
 
     }
 
-    private String getRemoteMediaOriginalUrl(Context context) {
+    private HttpRequest getRemoteMediaOriginalUrl(Context context) {
 
         return generateUrl(context, getRemoteMediaRequestPath());
 
@@ -384,15 +398,25 @@ public class Media implements Parcelable {
     }
 
 
-    public String getImageOriginalUrl(Context context) {
+    public HttpRequest getImageOriginalUrl(Context context) {
 
         String imageUrl;
+
+        HttpRequest httpRequest;
+
         if (isLocal()) {
             imageUrl = getOriginalPhotoPath();
+
+            HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
+            httpRequest = httpRequestFactory.createHttpGetRequestForLocalMedia(imageUrl);
+
         } else {
-            imageUrl = getRemoteMediaOriginalUrl(context);
+
+            httpRequest = getRemoteMediaOriginalUrl(context);
         }
-        return imageUrl;
+
+        return httpRequest;
+
     }
 
     public String getKey() {
@@ -402,16 +426,21 @@ public class Media implements Parcelable {
             return getUuid();
     }
 
-    public void setImageUrl(NetworkImageView networkImageView, String url, ImageLoader imageLoader) {
+    public void setImageUrl(NetworkImageView networkImageView, HttpRequest httpRequest, ImageLoader imageLoader) {
 
         imageLoader.setShouldCache(!isLocal());
 
         if (isLocal())
             networkImageView.setOrientationNumber(getOrientationNumber());
 
-        networkImageView.setTag(url);
+        networkImageView.setTag(httpRequest.getUrl());
 
-        networkImageView.setImageUrl(url, imageLoader);
+        ArrayMap<String, String> header = new ArrayMap<>();
+        header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
+
+        imageLoader.setHeaders(header);
+
+        networkImageView.setImageUrl(httpRequest.getUrl(), imageLoader);
     }
 
 }

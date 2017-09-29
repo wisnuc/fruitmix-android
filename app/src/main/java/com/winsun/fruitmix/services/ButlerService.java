@@ -369,7 +369,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
             case Util.NETWORK_CHANGED:
 
-//                networkChangeUseCase.handleNetworkChange();
+                networkChangeUseCase.handleNetworkChange();
 
                 break;
         }

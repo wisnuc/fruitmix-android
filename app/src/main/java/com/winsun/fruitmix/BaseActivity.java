@@ -110,7 +110,7 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
             EquipmentSearchActivity.gotoEquipmentActivity(this, true);
         } else if (action.equals(Util.NETWORK_CHANGED)) {
 
-            checkShowAutoUploadWhenConnectedWithMobileNetwork();
+//            checkShowAutoUploadWhenConnectedWithMobileNetwork();
 
         }
 

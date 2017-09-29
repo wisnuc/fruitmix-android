@@ -46,6 +46,8 @@ public class HttpRequestFactory {
 
     private String stationID;
 
+    public static final Object httpCreateRequestLock = new Object();
+
     private HttpRequestFactory(SystemSettingDataSource systemSettingDataSource, BaseHttpRequestFactory wrapHttpRequestFactory,
                                NoWrapHttpRequestFactory noWrapHttpRequestFactory) {
 
@@ -104,16 +106,14 @@ public class HttpRequestFactory {
         this.gateway = gateway;
     }
 
-    //synchronized for set gateway and token when network changed
-
-    public synchronized String getGateway() {
+    public String getGateway() {
         if (gateway == null || gateway.isEmpty())
             gateway = systemSettingDataSource.getCurrentEquipmentIp();
 
         return gateway;
     }
 
-    private synchronized String getToken() {
+    private String getToken() {
 
         if (token == null || token.isEmpty())
             token = systemSettingDataSource.getCurrentLoginToken();
@@ -121,7 +121,7 @@ public class HttpRequestFactory {
         return token;
     }
 
-    public synchronized void setCurrentData(String token, String gateway) {
+    public void setCurrentData(String token, String gateway) {
 
         Log.d(TAG, "setCurrentData: token: " + token + " gateway: " + gateway);
 
@@ -183,7 +183,12 @@ public class HttpRequestFactory {
 
     public HttpRequest createGetRequestWithoutToken(String ip, String httpPath) {
 
-        noWrapHttpRequestFactory.setGateway(Util.HTTP + ip);
+        if (ip.startsWith(Util.HTTP)) {
+            noWrapHttpRequestFactory.setGateway(ip);
+        } else {
+            noWrapHttpRequestFactory.setGateway(Util.HTTP + ip);
+        }
+
         noWrapHttpRequestFactory.setPort(STATION_PORT);
 
         return noWrapHttpRequestFactory.createGetRequestByPathWithoutToken(httpPath);
@@ -213,12 +218,17 @@ public class HttpRequestFactory {
 
     public HttpRequest createHttpGetRequestByCloudAPIWithWrap(String httpPath, String stationID) {
 
-        wrapHttpRequestFactory.setGateway(CLOUD_IP);
-        wrapHttpRequestFactory.setPort(CLOUD_PORT);
-        wrapHttpRequestFactory.setToken(getToken());
-        wrapHttpRequestFactory.setStationID(stationID);
+        synchronized (httpCreateRequestLock) {
 
-        return wrapHttpRequestFactory.createHttpGetRequest(httpPath, false);
+            wrapHttpRequestFactory.setGateway(CLOUD_IP);
+            wrapHttpRequestFactory.setPort(CLOUD_PORT);
+            wrapHttpRequestFactory.setToken(getToken());
+            wrapHttpRequestFactory.setStationID(stationID);
+
+            return wrapHttpRequestFactory.createHttpGetRequest(httpPath, false);
+
+        }
+
     }
 
 
@@ -237,9 +247,13 @@ public class HttpRequestFactory {
 
     private HttpRequest createHttpGetRequest(String httpPath, boolean isPipe) {
 
-        setDefaultFactoryState();
+        synchronized (httpCreateRequestLock) {
 
-        return currentDefaultHttpRequestFactory.createHttpGetRequest(httpPath, isPipe);
+            setDefaultFactoryState();
+
+            return currentDefaultHttpRequestFactory.createHttpGetRequest(httpPath, isPipe);
+
+        }
 
     }
 
@@ -282,9 +296,13 @@ public class HttpRequestFactory {
 
     private HttpRequest createHttpPostRequest(String httpPath, String body, boolean isPipe) {
 
-        setDefaultFactoryState();
+        synchronized (httpCreateRequestLock) {
 
-        return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body, isPipe);
+            setDefaultFactoryState();
+
+            return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body, isPipe);
+
+        }
 
     }
 
@@ -299,5 +317,20 @@ public class HttpRequestFactory {
         else
             return getTokenWithHead();
     }
+
+    public HttpRequest createHttpGetRequestForLocalMedia(String url) {
+
+        synchronized (httpCreateRequestLock) {
+
+            HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
+
+            httpRequest.setHeader(Util.KEY_AUTHORIZATION, getJWT());
+
+            return httpRequest;
+
+        }
+
+    }
+
 
 }

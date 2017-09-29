@@ -91,6 +91,13 @@ public class NetworkChangeUseCase {
                 stationsDataSource.getStationInfoByStationAPI(currentIP, new BaseLoadDataCallbackImpl<Station>() {
 
                     @Override
+                    public void onSucceed(List<Station> data, OperationResult operationResult) {
+                        super.onSucceed(data, operationResult);
+
+                        Log.d(TAG, "onSucceed: check station ip succeed");
+                    }
+
+                    @Override
                     public void onFail(OperationResult operationResult) {
                         super.onFail(operationResult);
 
@@ -148,28 +155,39 @@ public class NetworkChangeUseCase {
 
     private void checkToLocalUser(String token, String ip) {
 
-        systemSettingDataSource.setCurrentLoginToken(token);
+        synchronized (HttpRequestFactory.httpCreateRequestLock){
 
-        systemSettingDataSource.setCurrentEquipmentIp(Util.HTTP + ip);
+            systemSettingDataSource.setCurrentLoginToken(token);
 
-        systemSettingDataSource.setLoginWithWechatCodeOrNot(false);
+            systemSettingDataSource.setCurrentEquipmentIp(Util.HTTP + ip);
 
-        httpRequestFactory.setCurrentData(token, Util.HTTP + ip);
+            systemSettingDataSource.setLoginWithWechatCodeOrNot(false);
 
-        httpRequestFactory.setPort(HttpRequestFactory.STATION_PORT);
+            httpRequestFactory.setCurrentData(token, Util.HTTP + ip);
+
+            httpRequestFactory.setPort(HttpRequestFactory.STATION_PORT);
+
+        }
+
+
     }
 
     private void checkToWeChatUser(String token) {
 
-        systemSettingDataSource.setCurrentLoginToken(token);
+        synchronized (HttpRequestFactory.httpCreateRequestLock){
 
-        systemSettingDataSource.setLoginWithWechatCodeOrNot(true);
+            systemSettingDataSource.setCurrentLoginToken(token);
 
-        httpRequestFactory.setCurrentData(token, HttpRequestFactory.CLOUD_IP);
+            systemSettingDataSource.setLoginWithWechatCodeOrNot(true);
 
-        httpRequestFactory.setStationID(systemSettingDataSource.getCurrentLoginStationID());
+            httpRequestFactory.setCurrentData(token, HttpRequestFactory.CLOUD_IP);
 
-        httpRequestFactory.setPort(HttpRequestFactory.CLOUD_PORT);
+            httpRequestFactory.setStationID(systemSettingDataSource.getCurrentLoginStationID());
+
+            httpRequestFactory.setPort(HttpRequestFactory.CLOUD_PORT);
+
+        }
+
 
     }
 

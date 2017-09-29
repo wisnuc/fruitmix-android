@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
+import android.support.v4.util.ArrayMap;
 import android.support.v4.util.Pair;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
@@ -48,6 +49,7 @@ import com.winsun.fruitmix.dialog.PhotoOperationAlertDialogFactory;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.gif.GifLoader;
+import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
@@ -142,12 +144,12 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 Media media = mediaList.get(currentPhotoPosition);
 
-                String imageTag = media.getImageThumbUrl(mContext);
+                String imageTag = media.getImageThumbUrl(mContext).getUrl();
 
                 PinchImageView view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
 
                 if (view == null) {
-                    imageTag = media.getImageOriginalUrl(mContext);
+                    imageTag = media.getImageOriginalUrl(mContext).getUrl();
 
                     view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
                 }
@@ -773,7 +775,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private void startLoadingOriginalPhoto(View view, Media media) {
 
-        String remoteUrl = media.getImageOriginalUrl(mContext);
+        HttpRequest httpRequest = media.getImageOriginalUrl(mContext);
+
+        String remoteUrl = httpRequest.getUrl();
 
         GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view;
 
@@ -781,9 +785,18 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         mainPic.setTag(remoteUrl);
 
+        ArrayMap<String, String> header = new ArrayMap<>();
+        header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
+
         if (media.getType().equalsIgnoreCase("gif")) {
+
+            mGifLoader.setHeaders(header);
+
             mainPic.setGifUrl(remoteUrl, mGifLoader);
         } else {
+
+            mImageLoader.setHeaders(header);
+
             mainPic.setImageUrl(remoteUrl, mImageLoader);
         }
 
@@ -834,12 +847,20 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 mainPic.setCurrentMedia(media);
 
+                HttpRequest httpRequest = media.getImageThumbUrl(mContext);
+
+                ArrayMap<String, String> header = new ArrayMap<>();
+                header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
+
                 if (transitionMediaNeedShowThumb && !media.isLocal()) {
 
                     if (position == initialPhotoPosition)
                         ViewCompat.setTransitionName(mainPic, media.getKey());
 
-                    String thumbImageUrl = media.getImageThumbUrl(mContext);
+                    String thumbImageUrl = httpRequest.getUrl();
+
+                    mImageLoader.setHeaders(header);
+
                     mainPic.setTag(thumbImageUrl);
 
                     mainPic.setImageUrl(thumbImageUrl, mImageLoader);
@@ -851,12 +872,19 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                     mainPic.setOrientationNumber(media.getOrientationNumber());
 
-                    String imageThumbUrl = media.getImageThumbUrl(mContext);
+                    String imageThumbUrl = httpRequest.getUrl();
+
                     mainPic.setTag(imageThumbUrl);
 
                     if (imageThumbUrl.endsWith(".gif")) {
+
+                        mGifLoader.setHeaders(header);
+
                         mainPic.setGifUrl(imageThumbUrl, mGifLoader);
                     } else {
+
+                        mImageLoader.setHeaders(header);
+
                         mainPic.setImageUrl(imageThumbUrl, mImageLoader);
                     }
 
@@ -988,10 +1016,10 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                     Log.d(TAG, "handleTouchEvent: action up lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
 
-                    if(view.isEnlargeState())
+                    if (view.isEnlargeState())
                         return;
 
-                    if (lastY - y > Util.dip2px(mContext, 60) ) {
+                    if (lastY - y > Util.dip2px(mContext, 60)) {
 
                         finishActivity();
 
