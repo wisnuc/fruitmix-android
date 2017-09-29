@@ -580,7 +580,7 @@ public class FileUtil {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND_MULTIPLE);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        intent.setType("*/*");
+        intent.setType("image/*");
         context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_text)));
 
     }
