@@ -43,4 +43,11 @@ captures/
 *.jks
 
 #custom ignore
-.idea/*
+.idea/
+.git/
+projectFilesBackup/
+projectFilesBackup1/
+recycled/
+gradlew
+gradlew.bat
+

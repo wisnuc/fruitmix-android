@@ -83,12 +83,11 @@ public class ImageGifLoaderInstance {
             RequestQueue mRequestQueue = RequestQueueInstance.getInstance(context).getRequestQueue();
             mImageLoader = new ImageLoader(mRequestQueue, ImageLruCache.instance());
 
-            if (headers == null) {
 
-                Log.d(TAG, "getImageLoader: create header");
+            Log.d(TAG, "getImageLoader: create header");
 
-                createHeader();
-            }
+            createHeader();
+
 
             mImageLoader.setHeaders(headers);
         }
@@ -100,8 +99,10 @@ public class ImageGifLoaderInstance {
     private void createHeader() {
         headers = new ArrayMap<>();
 
-        headers.put(Util.KEY_AUTHORIZATION, httpRequestFactory.getJWT());
-        Log.i(TAG, "FNAS JWT: " + httpRequestFactory.getJWT());
+        String token = httpRequestFactory.getJWT();
+
+        headers.put(Util.KEY_AUTHORIZATION, token);
+        Log.i(TAG, "FNAS JWT: " + token);
     }
 
     public GifLoader getGifLoader(Context context) {
@@ -111,12 +112,11 @@ public class ImageGifLoaderInstance {
             RequestQueue mRequestQueue = RequestQueueInstance.getInstance(context).getRequestQueue();
             mGifLoader = new GifLoader(mRequestQueue, GifLruCache.instance());
 
-            if (headers == null) {
 
-                Log.d(TAG, "getGifLoader: create header");
+            Log.d(TAG, "getGifLoader: create header");
 
-                createHeader();
-            }
+            createHeader();
+
 
             mImageLoader.setHeaders(headers);
 

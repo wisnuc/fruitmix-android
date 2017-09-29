@@ -17,12 +17,10 @@ package com.winsun.fruitmix.component;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.ImageView;
 
 import com.android.volley.VolleyError;
 import com.android.volley.orientation.OrientationOperation;
@@ -392,7 +390,7 @@ public class GifTouchNetworkImageView extends PinchImageView {
         });
     }
 
-    private void deliverImageLoadFail(){
+    private void deliverImageLoadFail() {
 
         post(new Runnable() {
             @Override

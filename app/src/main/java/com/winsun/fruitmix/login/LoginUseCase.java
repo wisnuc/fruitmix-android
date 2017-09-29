@@ -508,7 +508,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                 //TODO: check get gateway and user when login by wechat code
 
-                Log.d(TAG, "loginWithWeChatCode: http request factory set current data token:" + token + " gateway: "
+                Log.d(TAG, "loginWithWeChatCode: http request factory set current data token: " + token + " gateway: "
                         + HttpRequestFactory.CLOUD_IP + " guid: " + weChatTokenUserWrapper.getGuid());
 
                 mToken = token;
@@ -580,10 +580,6 @@ public class LoginUseCase extends BaseDataRepository {
                 } else if (data.size() > 1) {
 
                     callback.onSucceed(true, new OperationMoreThanOneStation(data, weChatTokenUserWrapper));
-
-                } else {
-
-                    callback.onFail(new OperationFail("未绑定nas用户，请绑定"));
 
                 }
 

@@ -9,32 +9,26 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
-import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
 import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.HttpResponse;
-import com.winsun.fruitmix.logged.in.user.LoggedInUser;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.parser.RemoteDataParser;
-import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.parser.RemoteMkDirParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
-import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
@@ -647,25 +641,13 @@ public class UploadMediaUseCase {
 
             NetworkState networkState = networkStateManager.getNetworkState();
 
-            if (!networkState.isWifiConnected()) {
+            if(systemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi() && !networkState.isWifiConnected()){
 
-                if (networkState.isMobileConnected()) {
+                stopUploadMedia();
 
-                    if (!systemSettingDataSource.getAutoUploadWhenConnectedWithMobileNetwork()) {
+                sendRetryUploadMessage();
 
-                        stopUploadMedia();
-
-                        sendRetryUploadMessage();
-
-                    }
-
-                } else {
-
-                    stopUploadMedia();
-
-                    sendRetryUploadMessage();
-
-                }
+                break;
 
             }
 
@@ -748,27 +730,31 @@ public class UploadMediaUseCase {
 
                         if (code == 404) {
                             return 404;
-                        } else if (code == 403) {
+                        } else {
 
                             HttpErrorBodyParser parser = new HttpErrorBodyParser();
-                            try {
-                                String codeInBody = parser.parse(((OperationNetworkException) result).getHttpResponseBody());
 
-                                if (codeInBody.equals(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE))
+                            try {
+                                String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseBody());
+
+                                if (messageInBody.contains(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE))
                                     handleUploadMediaSucceed(media, needUploadedMedias, uploadFolderUUID);
+                                else {
+
+                                    notifyUploadMediaFail(-1);
+
+                                    handleUploadMediaFail(needUploadedMedias,media,uploadFolderUUID);
+                                }
+
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
 
+                                notifyUploadMediaFail(-1);
+
                                 handleUploadMediaFail(needUploadedMedias, media, uploadFolderUUID);
 
                             }
-
-                        } else {
-
-                            notifyUploadMediaFail(code);
-
-                            handleUploadMediaFail(needUploadedMedias, media, uploadFolderUUID);
 
                         }
 
@@ -805,7 +791,6 @@ public class UploadMediaUseCase {
 
     private void handleUploadMediaFail(List<Media> needUploadedMedias, Media media, String uploadFolderUUID) {
         needUploadedMedias.remove(media);
-
     }
 
     private void handleUploadMediaSucceed(Media media, List<Media> needUploadedMedias, String uploadFolderUUID) {

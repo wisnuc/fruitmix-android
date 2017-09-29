@@ -229,6 +229,57 @@ public class FileUtil {
 
     }
 
+    public static boolean writeBitmapToFolder(Bitmap bitmap, String name) {
+
+        String fileName = name + ".jpg";
+
+        File file = new File(getDownloadFileStoreFolderPath(), fileName);
+
+        FileOutputStream outputStream = null;
+
+        try {
+
+            if (file.createNewFile() || file.isFile()) {
+
+                outputStream = new FileOutputStream(file);
+
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                outputStream.flush();
+
+                Log.d(TAG, "writeBitmapToFolder fileName:" + fileName);
+
+                return true;
+
+            }
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            boolean result = file.delete();
+
+            Log.d(TAG, "writeBitmapToLocalPhotoThumbnailFolder: io exception occur,delete file: " + result);
+
+        } finally {
+
+            bitmap = null;
+
+            try {
+                if (outputStream != null)
+                    outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        return false;
+
+
+    }
+
     public static boolean writeBitmapToLocalPhotoThumbnailFolder(Media media) {
 
         if (!media.getThumb().isEmpty())

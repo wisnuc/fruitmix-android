@@ -2,6 +2,7 @@ package com.winsun.fruitmix.stations;
 
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
@@ -51,6 +52,12 @@ public class StationsRepository extends BaseDataRepository implements StationsDa
                     @Override
                     public void onSucceed(List<Station> data, OperationResult operationResult) {
 
+                        if (data.isEmpty()) {
+                            runOnMainThread.onFail(new OperationFail("未绑定nas用户，请绑定"));
+
+                            return;
+                        }
+
                         Iterator<Station> iterator = data.iterator();
 
                         while (iterator.hasNext()) {
@@ -60,6 +67,13 @@ public class StationsRepository extends BaseDataRepository implements StationsDa
                             if (!station.isOnline())
                                 iterator.remove();
 
+                        }
+
+                        if (data.isEmpty()) {
+
+                            runOnMainThread.onFail(new OperationFail("绑定的设备都未在线,请确认"));
+
+                            return;
                         }
 
                         runOnMainThread.onSucceed(data, operationResult);

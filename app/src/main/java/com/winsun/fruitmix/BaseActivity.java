@@ -44,10 +44,10 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        networkReceiver = new NetworkReceiver();
+/*        networkReceiver = new NetworkReceiver();
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        registerReceiver(networkReceiver, intentFilter);
+        registerReceiver(networkReceiver, intentFilter);*/
 
     }
 
@@ -90,9 +90,11 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
 
         mDialog = null;
 
+/*
         if (networkReceiver != null) {
             unregisterReceiver(networkReceiver);
         }
+*/
 
     }
 
@@ -108,10 +110,6 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
             showToast("token失效");
 
             EquipmentSearchActivity.gotoEquipmentActivity(this, true);
-        } else if (action.equals(Util.NETWORK_CHANGED)) {
-
-            checkShowAutoUploadWhenConnectedWithMobileNetwork();
-
         }
 
     }
@@ -148,43 +146,5 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     public void showCustomErrorCode(String text) {
         Toast.makeText(this, String.format(getString(R.string.server_exception), text), Toast.LENGTH_SHORT).show();
     }
-
-    public void checkShowAutoUploadWhenConnectedWithMobileNetwork() {
-
-        SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
-
-        if (systemSettingDataSource.isShowAutoUploadWhenConnectedWithMobileNetworkDialog() && systemSettingDataSource.getLoginWithWechatCodeOrNot()) {
-
-            NetworkState networkState = InjectNetworkStateManager.provideNetworkStateManager(this).getNetworkState();
-
-            if (!networkState.isWifiConnected() && networkState.isMobileConnected()) {
-
-                systemSettingDataSource.setShowAutoUploadWhenConnectedWithMobileNetworkDialog(false);
-
-                showNeedAutoUploadWhenConnectedWithMobileNetwork();
-
-            }
-
-        }
-    }
-
-    public void showNeedAutoUploadWhenConnectedWithMobileNetwork() {
-
-        new AlertDialog.Builder(this).setMessage(getString(R.string.go_to_setting)).setPositiveButton(getString(R.string.backup), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                if (!(BaseActivity.this instanceof SettingActivity)) {
-
-                    Intent intent = new Intent(BaseActivity.this, SettingActivity.class);
-                    startActivity(intent);
-
-                }
-
-            }
-        }).setNegativeButton(getString(R.string.cancel), null).setCancelable(false).create().show();
-
-    }
-
 
 }

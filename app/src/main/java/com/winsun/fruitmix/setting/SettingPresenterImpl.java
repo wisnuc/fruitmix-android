@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.setting;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
@@ -9,13 +8,10 @@ import android.widget.CompoundButton;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.SettingActivity;
-import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
-import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationType;
-import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
@@ -24,10 +20,6 @@ import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
-
-import java.util.AbstractCollection;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Created by Administrator on 2017/6/22.
@@ -79,8 +71,8 @@ public class SettingPresenterImpl implements SettingPresenter {
         mAutoUploadOrNot = systemSettingDataSource.getAutoUploadOrNot();
         settingViewModel.autoUploadOrNot.set(mAutoUploadOrNot);
 
-        mAutoUploadWhenConnectedWithMobileNetwork = systemSettingDataSource.getAutoUploadWhenConnectedWithMobileNetwork();
-        settingViewModel.autoUploadWhenConnectedWithMobileNetwork.set(mAutoUploadWhenConnectedWithMobileNetwork);
+        mAutoUploadWhenConnectedWithMobileNetwork = systemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi();
+        settingViewModel.onlyAutoUploadWhenConnectedWithWifi.set(mAutoUploadWhenConnectedWithMobileNetwork);
 
         calcAlreadyUploadMediaCountAndTotalCacheSize(context);
 
@@ -245,9 +237,9 @@ public class SettingPresenterImpl implements SettingPresenter {
 
             mAutoUploadWhenConnectedWithMobileNetwork = isChecked;
 
-            systemSettingDataSource.setAutoUploadWhenConnectedWithMobileNetwork(isChecked);
+            systemSettingDataSource.setOnlyAutoUploadWhenConnectedWithWifi(isChecked);
 
-            if (isChecked) {
+            if (!isChecked) {
 
                 EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
 

@@ -78,6 +78,8 @@
 
     <string name="go_to_setting">Go to Setting</string>
 
+    <string name="no_photo">No photo</string>
+
     <!-- slide menu -->
 
     <string name="person_data">Biography</string>
@@ -186,7 +188,7 @@
 
     <string name="setting_text">Setting</string>
     <string name="photo_auto_upload_setting_text">Automatic backup</string>
-    <string name="mobile_network_upload">Mobile network backup</string>
+    <string name="only_auto_upload_when_connect_with_wifi">Only auto upload when connected with wifi</string>
     <string name="clear_cache">Clear temporary files</string>
     <string name="already_upload_media_count_hint">Backups / Total Photos</string>
     <string name="already_upload_media_count_text">%1$d/%2$d</string>

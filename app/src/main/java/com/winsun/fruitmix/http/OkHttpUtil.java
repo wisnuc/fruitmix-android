@@ -53,7 +53,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     private OkHttpUtil() {
 
         okHttpClient = new OkHttpClient.Builder().retryOnConnectionFailure(true).connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
-                .readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).writeTimeout(Util.HTTP_CONNECT_TIMEOUT,TimeUnit.MILLISECONDS)
+                .readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).writeTimeout(60, TimeUnit.SECONDS)
                 .addInterceptor(createHttpInterceptor()).build();
     }
 
@@ -198,7 +198,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
                 builder = generateRequestBuilder(httpRequest);
 
                 requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                        .addFormDataPart("manifest",jsonOjbectStr)
+                        .addFormDataPart("manifest", jsonOjbectStr)
                         .addFormDataPart("", localFile.getName(), RequestBody.create(MediaType.parse(JPEG_STRING), new File(localFile.getPath())))
                         .build();
 

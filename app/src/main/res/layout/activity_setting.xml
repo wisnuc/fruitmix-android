@@ -155,14 +155,14 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
-                    android:text="@string/mobile_network_upload"
+                    android:text="@string/only_auto_upload_when_connect_with_wifi"
                     android:textColor="@color/eighty_seven_percent_black"
                     android:textSize="16dp" />
 
                 <android.support.v7.widget.SwitchCompat
                     android:id="@+id/mobile_network_upload_switch"
                     android:layout_width="wrap_content"
-                    android:checked="@{setting.autoUploadWhenConnectedWithMobileNetwork}"
+                    android:checked="@{setting.onlyAutoUploadWhenConnectedWithWifi}"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true" />

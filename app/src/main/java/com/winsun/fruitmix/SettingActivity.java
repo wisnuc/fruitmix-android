@@ -106,7 +106,7 @@ public class SettingActivity extends BaseActivity {
 
         public final ObservableBoolean autoUploadOrNot = new ObservableBoolean(false);
         public final ObservableBoolean alreadyUploadMediaCountTextViewVisibility = new ObservableBoolean(false);
-        public final ObservableBoolean autoUploadWhenConnectedWithMobileNetwork = new ObservableBoolean(false);
+        public final ObservableBoolean onlyAutoUploadWhenConnectedWithWifi = new ObservableBoolean(true);
         public final ObservableField<String> alreadyUploadMediaCountText = new ObservableField<>();
         public final ObservableField<String> cacheSizeText = new ObservableField<>();
 

@@ -213,7 +213,11 @@ public class NavPagerActivity extends BaseActivity
 
         public final ObservableInt uploadPercentProgress = new ObservableInt();
 
+        public final ObservableBoolean uploadPercentProgressVisibility = new ObservableBoolean(true);
+
         public final ObservableField<String> uploadCountText = new ObservableField<>();
+
+        public final ObservableBoolean uploadCountTextVisibility = new ObservableBoolean(true);
 
         public final ObservableInt headerArrowResID = new ObservableInt();
 
@@ -557,6 +561,25 @@ public class NavPagerActivity extends BaseActivity
     }
 
     private void handleUploadMediaCount() {
+
+        if (mTotalLocalMediaCount == 0) {
+
+            navPagerViewModel.uploadMediaPercentText.set(getString(R.string.no_photo));
+
+            navPagerViewModel.uploadPercentProgressVisibility.set(false);
+
+            navPagerViewModel.uploadCountTextVisibility.set(false);
+
+            return;
+
+        } else {
+
+            navPagerViewModel.uploadPercentProgressVisibility.set(true);
+
+            navPagerViewModel.uploadCountTextVisibility.set(true);
+
+        }
+
         if (mAlreadyUploadMediaCount == mTotalLocalMediaCount) {
 
             navPagerViewModel.uploadMediaPercentText.set(getString(R.string.already_upload_finished));
@@ -820,8 +843,7 @@ public class NavPagerActivity extends BaseActivity
     private void checkShowAutoUploadDialog() {
         if (systemSettingDataSource.getShowAutoUploadDialog()) {
             showNeedAutoUploadDialog();
-        } else
-            checkShowAutoUploadWhenConnectedWithMobileNetwork();
+        }
     }
 
     private void showNeedAutoUploadDialog() {
@@ -837,8 +859,6 @@ public class NavPagerActivity extends BaseActivity
 
                 EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
 
-                checkShowAutoUploadWhenConnectedWithMobileNetwork();
-
             }
         }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
             @Override
@@ -849,8 +869,6 @@ public class NavPagerActivity extends BaseActivity
                 systemSettingDataSource.setAutoUploadOrNot(false);
 
                 EventBus.getDefault().post(new RequestEvent(OperationType.STOP_UPLOAD, null));
-
-                checkShowAutoUploadWhenConnectedWithMobileNetwork();
 
             }
         }).setCancelable(false).create().show();

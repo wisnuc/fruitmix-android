@@ -27,11 +27,9 @@ public class SystemSettingDataSource {
 
     public static final String CURRENT_EQUIPMENT_IP = "current_equipment_ip";
 
-    public static final String AUTO_UPLOAD_WHEN_CONNECTED_WITH_MOBILE_NETWORK = "auto_upload_when_connected_with_mobile_network";
+    public static final String ONLY_AUTO_UPLOAD_WHEN_CONNECTED_WITH_WIFI = "only_auto_upload_when_connected_with_wifi";
 
     public static final String LOGIN_WITH_WECHAT_CODE_OR_NOT = "login_with_wechat_code_or_not";
-
-    public static final String SHOW_AUTO_UPLOAD_WHEN_CONNECT_WITH_MOBILE_NETWORK_DIALOG = "show_auto_upload_when_connected_with_mobile_network_dialog";
 
     private static SystemSettingDataSource instance;
 
@@ -81,19 +79,20 @@ public class SystemSettingDataSource {
         editor.apply();
     }
 
-    public boolean getAutoUploadWhenConnectedWithMobileNetwork() {
+    public boolean getOnlyAutoUploadWhenConnectedWithWifi() {
 
-        return sharedPreferences.getBoolean(AUTO_UPLOAD_WHEN_CONNECTED_WITH_MOBILE_NETWORK, false);
+        return sharedPreferences.getBoolean(ONLY_AUTO_UPLOAD_WHEN_CONNECTED_WITH_WIFI, true);
 
     }
 
-    public void setAutoUploadWhenConnectedWithMobileNetwork(boolean autoUploadWhenConnectedWithMobileNetwork) {
+    public void setOnlyAutoUploadWhenConnectedWithWifi(boolean onlyAutoUploadWhenConnectedWithWifi) {
 
         SharedPreferences.Editor editor;
 
         editor = sharedPreferences.edit();
-        editor.putBoolean(AUTO_UPLOAD_WHEN_CONNECTED_WITH_MOBILE_NETWORK, autoUploadWhenConnectedWithMobileNetwork);
+        editor.putBoolean(ONLY_AUTO_UPLOAD_WHEN_CONNECTED_WITH_WIFI, onlyAutoUploadWhenConnectedWithWifi);
         editor.apply();
+
     }
 
     public void setShowAutoUploadDialog(boolean showAutoUploadDialog) {
@@ -205,22 +204,6 @@ public class SystemSettingDataSource {
 
         editor = sharedPreferences.edit();
         editor.putBoolean(LOGIN_WITH_WECHAT_CODE_OR_NOT, isLoginWithWeChatCodeOrNot);
-        editor.apply();
-
-    }
-
-    public boolean isShowAutoUploadWhenConnectedWithMobileNetworkDialog() {
-
-        return sharedPreferences.getBoolean(SHOW_AUTO_UPLOAD_WHEN_CONNECT_WITH_MOBILE_NETWORK_DIALOG, true);
-
-    }
-
-    public void setShowAutoUploadWhenConnectedWithMobileNetworkDialog(boolean showAutoUploadWhenConnectedWithMobileNetworkDialog) {
-
-        SharedPreferences.Editor editor;
-
-        editor = sharedPreferences.edit();
-        editor.putBoolean(SHOW_AUTO_UPLOAD_WHEN_CONNECT_WITH_MOBILE_NETWORK_DIALOG, showAutoUploadWhenConnectedWithMobileNetworkDialog);
         editor.apply();
 
     }

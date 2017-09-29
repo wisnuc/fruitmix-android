@@ -16,6 +16,6 @@ public class HttpErrorBodyParser implements RemoteDataParser<String> {
 
         JSONObject jsonObject = new JSONObject(json);
 
-        return jsonObject.optString("code");
+        return jsonObject.optString("message");
     }
 }
