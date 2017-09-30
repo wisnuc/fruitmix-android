@@ -193,11 +193,13 @@ public class UploadMediaUseCase {
 
         if (user == null) {
 
-            Log.i(TAG, "current user is null,stop upload");
+            Log.i(TAG, "current user is null,stop upload and send retry");
+
+            notifyGetFolderFail(-1);
 
             stopUploadMedia();
 
-            notifyGetFolderFail(-1);
+            sendRetryUploadMessage();
 
             return;
 
@@ -253,6 +255,8 @@ public class UploadMediaUseCase {
             @Override
             public void onFail(OperationResult operationResult) {
 
+                Log.d(TAG, "onFail: get local media fail,stop upload media and send retry");
+
                 stopUploadMedia();
 
                 sendRetryUploadMessage();
@@ -280,7 +284,11 @@ public class UploadMediaUseCase {
                 } else
                     notifyGetFolderFail(-1);
 
+                Log.d(TAG, "onFail: get folder fail,stop upload and send retry");
+
                 stopUploadMedia();
+
+                sendRetryUploadMessage();
 
             }
         });
@@ -465,21 +473,25 @@ public class UploadMediaUseCase {
 
                     } else {
 
-                        Log.i(TAG, "create upload folder succeed but can not find folder uuid");
-
                         notifyCreateFolderFail(-1);
 
+                        Log.i(TAG, "create upload folder succeed but can not find folder uuid,stop upload media and send retry");
+
                         stopUploadMedia();
+
+                        sendRetryUploadMessage();
                     }
 
                 } catch (JSONException e) {
                     e.printStackTrace();
 
-                    Log.d(TAG, "create upload folder fail");
-
                     notifyCreateFolderFail(-1);
 
+                    Log.d(TAG, "parse upload parent folder result fail,stop upload media and send retry");
+
                     stopUploadMedia();
+
+                    sendRetryUploadMessage();
                 }
 
             }
@@ -513,11 +525,14 @@ public class UploadMediaUseCase {
                         calcNeedUploadMediaAndUpload(medias);
 
                     } else {
-                        Log.i(TAG, "create upload folder succeed but can not find folder uuid");
+
+                        notifyCreateFolderFail(-1);
+
+                        Log.i(TAG, "create upload folder succeed but can not find folder uuid,stop upload and send retry");
 
                         stopUploadMedia();
 
-                        notifyCreateFolderFail(-1);
+                        sendRetryUploadMessage();
 
                     }
 
@@ -525,11 +540,13 @@ public class UploadMediaUseCase {
                 } catch (JSONException e) {
                     e.printStackTrace();
 
-                    Log.d(TAG, "create upload folder fail");
-
                     notifyCreateFolderFail(-1);
 
+                    Log.d(TAG, "parse create upload folder result fail,stop upload and send retry");
+
                     stopUploadMedia();
+
+                    sendRetryUploadMessage();
 
                 }
 
@@ -553,7 +570,12 @@ public class UploadMediaUseCase {
                 else
                     notifyCreateFolderFail(-1);
 
+                Log.d(TAG, "onFail: create folder fail,stop upload media and send retry");
+
                 stopUploadMedia();
+
+                sendRetryUploadMessage();
+
             }
         });
     }
@@ -622,6 +644,8 @@ public class UploadMediaUseCase {
 
             if (mStopUpload) {
 
+                Log.d(TAG, "uploadMediaInThread: mStop upload true,stop upload and send retry");
+
                 stopUploadMedia();
 
                 sendRetryUploadMessage();
@@ -632,6 +656,8 @@ public class UploadMediaUseCase {
 
             if (!systemSettingDataSource.getAutoUploadOrNot()) {
 
+                Log.d(TAG, "uploadMediaInThread: auto upload false,stop upload and send retry");
+
                 stopUploadMedia();
 
                 sendRetryUploadMessage();
@@ -641,7 +667,9 @@ public class UploadMediaUseCase {
 
             NetworkState networkState = networkStateManager.getNetworkState();
 
-            if(systemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi() && !networkState.isWifiConnected()){
+            if (systemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi() && !networkState.isWifiConnected()) {
+
+                Log.d(TAG, "uploadMediaInThread: only auto upload when connect with wifi is true,but wifi is not connected,stop upload and send retry");
 
                 stopUploadMedia();
 
@@ -670,6 +698,8 @@ public class UploadMediaUseCase {
                 int code = uploadOneMedia(needUploadedMedias, uploadFolderUUID);
 
                 if (code == 404) {
+
+                    Log.d(TAG, "uploadMediaInThread: upload return 404,reset state and start upload media");
 
                     resetState();
 
@@ -737,13 +767,16 @@ public class UploadMediaUseCase {
                             try {
                                 String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseBody());
 
-                                if (messageInBody.contains(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE))
+                                if (messageInBody.contains(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE)) {
+
+                                    Log.d(TAG, "uploadOneMedia: file exist,upload succeed");
+
                                     handleUploadMediaSucceed(media, needUploadedMedias, uploadFolderUUID);
-                                else {
+                                } else {
 
                                     notifyUploadMediaFail(-1);
 
-                                    handleUploadMediaFail(needUploadedMedias,media,uploadFolderUUID);
+                                    handleUploadMediaFail(needUploadedMedias, media, uploadFolderUUID);
                                 }
 
 
@@ -790,14 +823,23 @@ public class UploadMediaUseCase {
     }
 
     private void handleUploadMediaFail(List<Media> needUploadedMedias, Media media, String uploadFolderUUID) {
+
+        Log.d(TAG, "handleUploadMediaFail: media uuid: " + media.getUuid());
+
         needUploadedMedias.remove(media);
     }
 
     private void handleUploadMediaSucceed(Media media, List<Media> needUploadedMedias, String uploadFolderUUID) {
         Log.i(TAG, "upload onSucceed: media uuid: " + media.getUuid() + " user uuid: " + currentUserUUID);
 
-        if (currentUserUUID.isEmpty() || mStopUpload)
+        if (currentUserUUID.isEmpty() || mStopUpload) {
+
+            Log.d(TAG, "handleUploadMediaSucceed: currentUserUUID is empty or mStopUpload is true,return.");
+            Log.d(TAG, "handleUploadMediaSucceed: currentUserUUID: " + currentUserUUID + " mStopUpload: " + mStopUpload);
+
             return;
+        }
+
 
         needUploadedMedias.remove(media);
 
@@ -855,7 +897,6 @@ public class UploadMediaUseCase {
 
         eventBus.postSticky(state);*/
 
-        sendRetryUploadMessage();
     }
 
     private void notifyGetUploadMediaCountFailInThread(int httpErrorCode) {
@@ -897,7 +938,6 @@ public class UploadMediaUseCase {
 
         eventBus.postSticky(state);*/
 
-        sendRetryUploadMessage();
 
     }
 
@@ -927,9 +967,6 @@ public class UploadMediaUseCase {
         state.setErrorCode(httpErrorCode);
 
         eventBus.postSticky(state);*/
-
-        sendRetryUploadMessage();
-
 
     }
 

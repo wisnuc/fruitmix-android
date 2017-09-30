@@ -582,9 +582,6 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         EventBus.getDefault().removeStickyEvent(downloadStateChangedEvent);
 
-        if (!mIsResume)
-            return;
-
         fileFragment.handleEvent(downloadStateChangedEvent);
 
     }

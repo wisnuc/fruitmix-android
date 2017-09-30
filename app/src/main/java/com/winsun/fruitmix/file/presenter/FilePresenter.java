@@ -55,6 +55,7 @@ import com.winsun.fruitmix.file.view.viewmodel.FileItemViewModel;
 import com.winsun.fruitmix.file.view.viewmodel.FileViewModel;
 import com.winsun.fruitmix.interfaces.OnViewSelectListener;
 import com.winsun.fruitmix.model.BottomMenuItem;
+import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
@@ -284,7 +285,7 @@ public class FilePresenter implements OnViewSelectListener {
 
             initCurrentUserUUIDAndRootUUID(userDataRepository, systemSettingDataSource);
 
-            if(force){
+            if (force) {
 
                 init();
 
@@ -333,6 +334,10 @@ public class FilePresenter implements OnViewSelectListener {
 
             @Override
             public void onFail(OperationResult operationResult) {
+
+                if (operationResult instanceof OperationNetworkException) {
+                    Toast.makeText(activity, operationResult.getResultMessage(activity), Toast.LENGTH_SHORT).show();
+                }
 
                 handleGetFileFail();
 
@@ -738,7 +743,8 @@ public class FilePresenter implements OnViewSelectListener {
 
         FileDownloadItem fileDownloadItem = fileDownloadManager.getFileDownloadItem(file.getUuid());
 
-        if (fileDownloadItem != null) {
+        if (fileDownloadItem != null &&
+                (fileDownloadItem.getDownloadState().equals(DownloadState.PENDING) || fileDownloadItem.getDownloadState().equals(DownloadState.DOWNLOADING) || fileDownloadItem.getDownloadState().equals(DownloadState.START_DOWNLOAD))) {
 
             AbstractCommand command = new ChangeToDownloadPageCommand(changeToDownloadPageCallback);
             command.execute();

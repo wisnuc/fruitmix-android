@@ -16,6 +16,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.UserAvatarBinding;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.MediaUtil;
+import com.winsun.fruitmix.util.Util;
 
 /**
  * Created by Administrator on 2017/9/19.
@@ -56,7 +57,9 @@ public class UserAvatar extends FrameLayout {
 
     public void setUser(User user, ImageLoader imageLoader) {
 
-        if (user.getAvatar().equals(User.DEFAULT_AVATAR)) {
+        String url = user.getAvatar();
+
+        if (url.equals(User.DEFAULT_AVATAR) || !url.startsWith(Util.HTTP)) {
 
             avatarTextView.setVisibility(VISIBLE);
             avatarImageView.setVisibility(GONE);
@@ -67,8 +70,6 @@ public class UserAvatar extends FrameLayout {
 
             avatarImageView.setVisibility(VISIBLE);
             avatarTextView.setVisibility(GONE);
-
-            String url = user.getAvatar();
 
             MediaUtil.startLoadRemoteImageUrl(url,avatarImageView,imageLoader);
 

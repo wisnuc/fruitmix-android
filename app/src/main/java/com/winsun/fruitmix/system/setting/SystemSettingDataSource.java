@@ -2,6 +2,7 @@ package com.winsun.fruitmix.system.setting;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.winsun.fruitmix.util.Util;
 
@@ -10,6 +11,8 @@ import com.winsun.fruitmix.util.Util;
  */
 
 public class SystemSettingDataSource {
+
+    public static final String TAG = SystemSettingDataSource.class.getSimpleName();
 
     private SharedPreferences sharedPreferences;
 
@@ -129,11 +132,16 @@ public class SystemSettingDataSource {
 
     public String getCurrentLoginToken() {
 
-        return sharedPreferences.getString(CURRENT_LOGIN_TOKEN, "");
+        String token = sharedPreferences.getString(CURRENT_LOGIN_TOKEN, "");
 
+        Log.d(TAG, "getCurrentLoginToken: " + token);
+
+        return token;
     }
 
     public void setCurrentLoginToken(String token) {
+
+        Log.d(TAG, "setCurrentLoginToken: " + token);
 
         SharedPreferences.Editor editor;
 

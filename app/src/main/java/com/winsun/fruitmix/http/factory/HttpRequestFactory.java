@@ -83,9 +83,11 @@ public class HttpRequestFactory {
         return instance;
     }
 
-    public void reset(){
+    public void reset() {
 
-        setCurrentData("","");
+        Log.d(TAG, "reset: set token,gateway station to empty");
+
+        setCurrentData("", "");
         setStationID("");
 
     }
@@ -105,18 +107,39 @@ public class HttpRequestFactory {
     }
 
     public String getGateway() {
-        if (gateway == null || gateway.isEmpty())
+        if (gateway == null || gateway.isEmpty()) {
+
+            Log.d(TAG, "getGateway: gateway is null or empty");
+
             gateway = systemSettingDataSource.getCurrentEquipmentIp();
+
+            Log.d(TAG, "getGateway: " + gateway);
+
+        }
 
         return gateway;
     }
 
     private String getToken() {
 
-        if (token == null || token.isEmpty())
-            token = systemSettingDataSource.getCurrentLoginToken();
+        String tokenInDB = systemSettingDataSource.getCurrentLoginToken();
 
-        return token;
+        if (tokenInDB == null || tokenInDB.isEmpty()) {
+
+            Log.d(TAG, "getTokenInDB: token is null or empty");
+
+            Log.d(TAG, "getToken: " + token);
+
+            return token;
+
+        } else {
+
+            Log.d(TAG, "getTokenInDB: " + tokenInDB);
+
+            return tokenInDB;
+
+        }
+
     }
 
     public void setCurrentData(String token, String gateway) {
@@ -138,13 +161,24 @@ public class HttpRequestFactory {
     }
 
     public void setStationID(String stationID) {
+
+        Log.d(TAG, "setStationID: " + stationID);
+
         this.stationID = stationID;
+
     }
 
     private String getStationID() {
 
-        if (stationID == null || stationID.isEmpty())
+        if (stationID == null || stationID.isEmpty()) {
+
+            Log.d(TAG, "getStationID: station is null or empty");
+
             stationID = systemSettingDataSource.getCurrentLoginStationID();
+
+            Log.d(TAG, "getStationID: station is null or empty");
+
+        }
 
         return stationID;
     }
@@ -207,18 +241,22 @@ public class HttpRequestFactory {
 
     private boolean checkIsLoginWithWeChatCode() {
 
-        return systemSettingDataSource.getLoginWithWechatCodeOrNot();
+        boolean loginWithWeChatCodeOrNot = systemSettingDataSource.getLoginWithWechatCodeOrNot();
+
+        Log.d(TAG, "checkIsLoginWithWeChatCode: loginWithWeChatCodeOrNot: " + loginWithWeChatCodeOrNot);
+
+        return loginWithWeChatCodeOrNot;
 
     }
 
-    public HttpRequest createHttpGetRequestByCloudAPIWithWrap(String httpPath,String stationID){
+    public HttpRequest createHttpGetRequestByCloudAPIWithWrap(String httpPath, String stationID) {
 
         wrapHttpRequestFactory.setGateway(CLOUD_IP);
         wrapHttpRequestFactory.setPort(CLOUD_PORT);
         wrapHttpRequestFactory.setToken(getToken());
         wrapHttpRequestFactory.setStationID(stationID);
 
-        return wrapHttpRequestFactory.createHttpGetRequest(httpPath,false);
+        return wrapHttpRequestFactory.createHttpGetRequest(httpPath, false);
     }
 
 
@@ -268,23 +306,23 @@ public class HttpRequestFactory {
     }
 
 
-    public HttpRequest createHttpPostFileRequest(String httpPath,String body){
+    public HttpRequest createHttpPostFileRequest(String httpPath, String body) {
 
-        return createHttpPostRequest(httpPath,body,true);
+        return createHttpPostRequest(httpPath, body, true);
     }
 
-    public HttpRequest createHttpPostRequest(String httpPath,String body){
+    public HttpRequest createHttpPostRequest(String httpPath, String body) {
 
-        return createHttpPostRequest(httpPath,body,false);
+        return createHttpPostRequest(httpPath, body, false);
 
     }
 
 
-    private HttpRequest createHttpPostRequest(String httpPath, String body,boolean isPipe) {
+    private HttpRequest createHttpPostRequest(String httpPath, String body, boolean isPipe) {
 
         setDefaultFactoryState();
 
-        return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body,isPipe);
+        return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body, isPipe);
 
     }
 
