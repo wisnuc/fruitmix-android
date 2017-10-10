@@ -110,6 +110,11 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
             showToast("token失效");
 
             EquipmentSearchActivity.gotoEquipmentActivity(this, true);
+
+        } else if (action.equals(Util.NETWORK_CHANGED)) {
+
+//            checkShowAutoUploadWhenConnectedWithMobileNetwork();
+
         }
 
     }

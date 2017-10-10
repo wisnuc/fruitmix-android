@@ -24,6 +24,8 @@ public class SystemSettingDataSource {
 
     public static final String CURRENT_LOGIN_TOKEN = "current_login_token";
 
+    public static final String CURRENT_WA_TOKEN = "current_wa_token";
+
     public static final String CURRENT_LOGIN_USER_GUID = "current_login_user_guid";
 
     public static final String CURRENT_LOGIN_STATION_ID = "current_login_station_id";
@@ -147,6 +149,22 @@ public class SystemSettingDataSource {
 
         editor = sharedPreferences.edit();
         editor.putString(CURRENT_LOGIN_TOKEN, token);
+        editor.apply();
+
+    }
+
+    public String getCurrentWAToken() {
+
+        return sharedPreferences.getString(CURRENT_WA_TOKEN, "");
+
+    }
+
+    public void setCurrentWAToken(String token) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putString(CURRENT_WA_TOKEN, token);
         editor.apply();
 
     }

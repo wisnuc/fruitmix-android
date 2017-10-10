@@ -41,8 +41,16 @@ public class NetworkStateManager {
 
         if (networkInfo != null && networkInfo.isConnected()) {
 
-            networkState.setMobileConnected(networkInfo.getType() == ConnectivityManager.TYPE_MOBILE);
-            networkState.setWifiConnected(networkInfo.getType() == ConnectivityManager.TYPE_WIFI);
+            int type = networkInfo.getType();
+
+            if(type == ConnectivityManager.TYPE_WIFI){
+                networkState.setWifiConnected(true);
+            }
+
+            if(type == ConnectivityManager.TYPE_MOBILE){
+
+                networkState.setMobileConnected(true);
+            }
 
         }
 

@@ -11,6 +11,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Process;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.util.ArrayMap;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -37,6 +38,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.NewPhotoLayoutBinding;
 import com.winsun.fruitmix.databinding.NewPhotoTitleItemBinding;
+import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.media.InjectMedia;
@@ -524,7 +526,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                     media = preLoadMediaMiniThumbs.get(i);
 
-                    url = media.getImageSmallThumbUrl(containerActivity);
+                    HttpRequest httpRequest = media.getImageSmallThumbUrl(containerActivity);
+
+                    url = httpRequest.getUrl();
+
+                    ArrayMap<String, String> header = new ArrayMap<>();
+                    header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
+
+                    mImageLoader.setHeaders(header);
 
                     mImageLoader.preLoadMediaSmallThumb(url, mItemWidth, mItemWidth);
 
@@ -1236,15 +1245,26 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
 //            mPhotoIv.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
 
+            HttpRequest httpRequest;
+
             if (!mIsFling) {
 
-                imageUrl = currentMedia.getImageThumbUrl(containerActivity);
+                httpRequest = currentMedia.getImageThumbUrl(containerActivity);
+
+                imageUrl = httpRequest.getUrl();
 
             } else {
 
-                imageUrl = currentMedia.getImageSmallThumbUrl(containerActivity);
+                httpRequest = currentMedia.getImageSmallThumbUrl(containerActivity);
+
+                imageUrl = httpRequest.getUrl();
 
             }
+
+            ArrayMap<String, String> header = new ArrayMap<>();
+            header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
+
+            mImageLoader.setHeaders(header);
 
             mPhotoIv.setTag(imageUrl);
 

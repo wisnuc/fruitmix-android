@@ -14,6 +14,7 @@ import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.group.data.model.MultiPhotoComment;
 import com.winsun.fruitmix.group.data.model.MultiFileComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
+import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.mediaModule.model.Media;
 
 import java.util.List;
@@ -61,13 +62,13 @@ public class MultiFileCommentView extends UserCommentView {
 
                 Media media = medias.get(i);
 
-                String url = media.getImageThumbUrl(context);
+                HttpRequest httpRequest = media.getImageThumbUrl(context);
 
                 SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), null, false);
 
                 frameLayouts[i].addView(singlePhotoBinding.getRoot());
 
-                media.setImageUrl(singlePhotoBinding.coverImg, url, imageLoader);
+                media.setImageUrl(singlePhotoBinding.coverImg, httpRequest, imageLoader);
 
             }
 

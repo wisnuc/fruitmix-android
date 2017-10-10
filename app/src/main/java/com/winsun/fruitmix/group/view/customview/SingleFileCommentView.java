@@ -14,6 +14,7 @@ import com.winsun.fruitmix.databinding.SinglePhotoBinding;
 import com.winsun.fruitmix.group.data.model.SingleFileComment;
 import com.winsun.fruitmix.group.data.model.SinglePhotoComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
+import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.Util;
 
@@ -59,9 +60,9 @@ public class SingleFileCommentView extends UserCommentView {
 
             Media media = comment.getMedia();
 
-            String url = media.getImageThumbUrl(context);
+            HttpRequest httpRequest = media.getImageThumbUrl(context);
 
-            media.setImageUrl(networkImageView, url, imageLoader);
+            media.setImageUrl(networkImageView, httpRequest, imageLoader);
 
         } else if (data instanceof SingleFileComment) {
 

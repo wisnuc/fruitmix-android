@@ -12,4 +12,7 @@ public interface TokenDataSource {
 
     void getToken(String wechatCode, BaseLoadDataCallback<WeChatTokenUserWrapper> callback);
 
+    void getTokenThroughWAToken(BaseLoadDataCallback<String> callback);
+
+
 }

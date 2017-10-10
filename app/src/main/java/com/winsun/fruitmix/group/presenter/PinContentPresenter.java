@@ -20,6 +20,7 @@ import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.viewmodel.PinContentItemViewModel;
 import com.winsun.fruitmix.group.interfaces.OnPinContentItemClickListener;
 import com.winsun.fruitmix.group.view.PinContentView;
+import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
@@ -352,9 +353,9 @@ public class PinContentPresenter implements OnPinContentItemClickListener {
 
                 Media media = ((MediaPinItemView) pinItemView).getMedia();
 
-                String url = media.getImageThumbUrl(pinContentView.getContext());
+                HttpRequest httpRequest = media.getImageThumbUrl(pinContentView.getContext());
 
-                media.setImageUrl(networkImageView, url, imageLoader);
+                media.setImageUrl(networkImageView, httpRequest, imageLoader);
 
             } else {
 

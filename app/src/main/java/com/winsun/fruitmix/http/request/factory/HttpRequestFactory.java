@@ -33,6 +33,8 @@ public class HttpRequestFactory {
 
     private String stationID;
 
+    public static final Object httpCreateRequestLock = new Object();
+
     private HttpRequestFactory(SystemSettingDataSource systemSettingDataSource) {
 
         this.systemSettingDataSource = systemSettingDataSource;
@@ -210,9 +212,14 @@ public class HttpRequestFactory {
 
     public HttpRequest createHttpGetRequestByCloudAPIWithWrap(String httpPath, String stationID) {
 
-        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderForCloudAPI(), stationID);
+        synchronized (httpCreateRequestLock){
 
-        return factory.createHttpGetRequest(httpPath, false);
+            BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderForCloudAPI(), stationID);
+
+            return factory.createHttpGetRequest(httpPath, false);
+
+        }
+
     }
 
 
@@ -231,9 +238,13 @@ public class HttpRequestFactory {
 
     private HttpRequest createHttpGetRequest(String httpPath, boolean isGetStream) {
 
-        setDefaultFactoryState();
+        synchronized (httpCreateRequestLock){
 
-        return currentDefaultHttpRequestFactory.createHttpGetRequest(httpPath, isGetStream);
+            setDefaultFactoryState();
+
+            return currentDefaultHttpRequestFactory.createHttpGetRequest(httpPath, isGetStream);
+
+        }
 
     }
 
@@ -270,9 +281,13 @@ public class HttpRequestFactory {
 
     private HttpRequest createHttpPostRequest(String httpPath, String body, boolean isPostStream) {
 
-        setDefaultFactoryState();
+        synchronized (httpCreateRequestLock){
 
-        return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body, isPostStream);
+            setDefaultFactoryState();
+
+            return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body, isPostStream);
+
+        }
 
     }
 
@@ -287,5 +302,20 @@ public class HttpRequestFactory {
         else
             return getTokenWithPrefix();
     }
+
+    public HttpRequest createHttpGetRequestForLocalMedia(String url) {
+
+        synchronized (httpCreateRequestLock) {
+
+            HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
+
+            httpRequest.setHeader(Util.KEY_AUTHORIZATION, getTokenForHeaderValue());
+
+            return httpRequest;
+
+        }
+
+    }
+
 
 }

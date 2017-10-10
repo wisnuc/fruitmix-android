@@ -40,4 +40,16 @@ public class TokenDataRepository extends BaseDataRepository implements TokenData
         });
 
     }
+
+    @Override
+    public void getTokenThroughWAToken(final BaseLoadDataCallback<String> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                tokenRemoteDataSource.getTokenThroughWAToken(createLoadCallbackRunOnMainThread(callback));
+            }
+        });
+
+    }
 }

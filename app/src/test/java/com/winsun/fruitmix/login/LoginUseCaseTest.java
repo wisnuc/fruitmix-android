@@ -129,8 +129,6 @@ public class LoginUseCaseTest {
 
         when(systemSettingDataSource.getCurrentLoginToken()).thenReturn("");
 
-        when(systemSettingDataSource.getCurrentLoginStationID()).thenReturn("");
-
         loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>() {
 
             @Override
@@ -148,11 +146,11 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).getCurrentLoginToken();
 
-        verify(systemSettingDataSource).getCurrentLoginStationID();
+        verify(systemSettingDataSource, never()).getLoginWithWechatCodeOrNot();
 
-        verify(weChatUserDataSource).getWeChatUser(eq(""), eq(""));
+        verify(systemSettingDataSource, never()).getCurrentLoginStationID();
 
-        verify(loggedInUserDataSource).getLoggedInUserByToken(eq(""));
+        verify(weChatUserDataSource, never()).getWeChatUser(eq(""), eq(""));
 
         verify(stationFileRepository, never()).clearDownloadFileRecordInCache();
 
@@ -165,7 +163,7 @@ public class LoginUseCaseTest {
 
         when(systemSettingDataSource.getCurrentLoginStationID()).thenReturn(testStationID);
 
-        when(loggedInUserDataSource.getLoggedInUserByToken(testToken)).thenReturn(null);
+        when(systemSettingDataSource.getLoginWithWechatCodeOrNot()).thenReturn(true);
 
         WeChatUser weChatUser = new WeChatUser(testToken, testGUID, testStationID);
 
@@ -175,7 +173,7 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).getCurrentLoginToken();
 
-        verify(loggedInUserDataSource).getLoggedInUserByToken(eq(testToken));
+        verify(systemSettingDataSource).getLoginWithWechatCodeOrNot();
 
         verify(systemSettingDataSource).getCurrentLoginStationID();
 
@@ -195,6 +193,8 @@ public class LoginUseCaseTest {
 
         initSystemStateAndVerify();
 
+        verify(systemSettingDataSource).setCurrentWAToken(eq(testToken));
+
         verify(systemSettingDataSource).setCurrentLoginUserGUID(testGUID);
     }
 
@@ -207,7 +207,11 @@ public class LoginUseCaseTest {
         User user = new User();
         user.setUuid(testUserUUID);
 
-        when(loggedInUserDataSource.getLoggedInUserByToken(testToken)).thenReturn(new LoggedInUser(testDeviceID, testToken, testGateway, testEquipmentName, user));
+        when(systemSettingDataSource.getLoginWithWechatCodeOrNot()).thenReturn(false);
+
+        when(systemSettingDataSource.getCurrentEquipmentIp()).thenReturn("");
+
+        when(systemSettingDataSource.getCurrentLoginUserUUID()).thenReturn(testUserUUID);
 
         loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>() {
             @Override
@@ -224,9 +228,13 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).getCurrentLoginToken();
 
-        verify(loggedInUserDataSource).getLoggedInUserByToken(anyString());
+        verify(systemSettingDataSource).getLoginWithWechatCodeOrNot();
 
-        verify(httpRequestFactory).setCurrentData(anyString(), anyString());
+        verify(systemSettingDataSource).getCurrentEquipmentIp();
+
+        verify(systemSettingDataSource).getCurrentLoginUserUUID();
+
+        verify(httpRequestFactory).setCurrentData(eq(testToken), eq(""));
 
         initSystemStateAndVerify();
 
@@ -557,6 +565,8 @@ public class LoginUseCaseTest {
         getUserHomeCaptor.getValue().onSucceed(Collections.singletonList(testUserHome), new OperationSuccess());
 
         verify(userDataRepository).insertUsers(ArgumentMatchers.<User>anyCollection());
+
+        verify(systemSettingDataSource).setCurrentWAToken(eq(testToken));
 
         verify(systemSettingDataSource).setCurrentLoginStationID(eq(testStationID));
 
