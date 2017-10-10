@@ -28,6 +28,8 @@ import java.util.Queue;
  */
 public class PinchImageView extends AppCompatImageView {
 
+    //TODO:pinch to not local photo thumbnail will cause bug
+
     public static final String TAG = PinchImageView.class.getSimpleName();
 
     ////////////////////////////////配置参数////////////////////////////////

@@ -1180,6 +1180,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 objectAnimator.setDuration(200);
 
             objectAnimator.start();
+
         }
 
     }
@@ -1357,6 +1358,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                                 break;
 
                         }
+
+                        Log.d(TAG, "start photo slider activity initial photo position: " + initialPhotoPosition);
 
                         Intent intent = new Intent();
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);

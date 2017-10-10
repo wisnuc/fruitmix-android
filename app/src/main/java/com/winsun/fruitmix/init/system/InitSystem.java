@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.winsun.fruitmix.file.data.station.StationFileRepositoryImpl;
-import com.winsun.fruitmix.http.factory.HttpRequestFactory;
+import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
@@ -15,7 +15,6 @@ import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.stations.StationsRepository;
-import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.datasource.UserDataRepositoryImpl;
 import com.winsun.fruitmix.util.FileUtil;

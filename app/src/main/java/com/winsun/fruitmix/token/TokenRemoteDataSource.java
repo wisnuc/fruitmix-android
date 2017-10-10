@@ -3,8 +3,9 @@ package com.winsun.fruitmix.token;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.factory.HttpRequestFactory;
+import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
+import com.winsun.fruitmix.http.request.factory.CloudHttpRequestFactory;
 import com.winsun.fruitmix.parser.RemoteTokenParser;
 import com.winsun.fruitmix.parser.RemoteWeChatTokenParser;
 
@@ -28,7 +29,9 @@ public class TokenRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     public void getToken(String wechatCode, BaseLoadDataCallback<WeChatTokenUserWrapper> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createGetRequestWithWeChatCode(wechatCode);
+        String path = CloudHttpRequestFactory.CLOUD_API_LEVEL + "/token?code=" + wechatCode + "&platform=mobile";
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetTokenRequestByCloudAPI(path);
 
         wrapper.loadCall(httpRequest, callback, new RemoteWeChatTokenParser());
 

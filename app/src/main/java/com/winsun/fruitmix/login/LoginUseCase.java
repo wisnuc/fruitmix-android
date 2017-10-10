@@ -7,9 +7,8 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
-import com.winsun.fruitmix.http.factory.HttpRequestFactory;
+import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
@@ -33,7 +32,6 @@ import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
-import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
 import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
@@ -195,8 +193,6 @@ public class LoginUseCase extends BaseDataRepository {
             mGateway = HttpRequestFactory.CLOUD_IP;
 
             httpRequestFactory.setCurrentData(mToken, mGateway);
-
-            httpRequestFactory.setPort(HttpRequestFactory.CLOUD_PORT);
 
             userDataRepository.getUserByGUIDWithCloudAPI(weChatUser.getGuid(), new BaseLoadDataCallback<User>() {
                 @Override
@@ -517,8 +513,6 @@ public class LoginUseCase extends BaseDataRepository {
 
                 httpRequestFactory.setCurrentData(mToken, mGateway);
 
-                httpRequestFactory.setPort(HttpRequestFactory.CLOUD_PORT);
-
                 systemSettingDataSource.setCurrentLoginToken(mToken);
 
                 getStationList(weChatTokenUserWrapper, new BaseOperateDataCallback<Boolean>() {
@@ -603,7 +597,6 @@ public class LoginUseCase extends BaseDataRepository {
         systemSettingDataSource.setLoginWithWechatCodeOrNot(true);
 
         httpRequestFactory.setStationID(stationID);
-        httpRequestFactory.setDefaultFactory(true);
 
         userDataRepository.getUsersByStationIDWithCloudAPI(stationID, new BaseLoadDataCallback<User>() {
             @Override

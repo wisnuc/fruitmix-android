@@ -31,6 +31,9 @@ public class BaseHttpRequestFactoryImpl {
     }
 
     public void setStationID(String stationID) {
+
+        Log.d(TAG, "setStationID: " + stationID);
+
         this.stationID = stationID;
     }
 
@@ -43,6 +46,9 @@ public class BaseHttpRequestFactoryImpl {
     }
 
     public void setToken(String token) {
+
+        Log.d(TAG, "setToken: " + token);
+
         this.token = token;
     }
 
@@ -55,10 +61,16 @@ public class BaseHttpRequestFactoryImpl {
     }
 
     protected String getToken() {
+
+        Log.d(TAG, "getToken: " + token);
+
         return token;
     }
 
     String getStationID() {
+
+        Log.d(TAG, "getStationID: " + stationID);
+
         return stationID;
     }
 

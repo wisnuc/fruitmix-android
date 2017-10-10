@@ -8,7 +8,7 @@ import android.util.Log;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.http.factory.HttpRequestFactory;
+import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.util.Util;
 
@@ -326,9 +326,10 @@ public class Media implements Parcelable {
 
             imageUrl = getRemoteMediaThumbUrl(context, 64, 64);
 
-            Log.d(TAG, "getImageSmallThumbUrl: " + imageUrl);
-
         }
+
+        Log.d(TAG, "media uuid: " + getUuid() + " getImageSmallThumbUrl: " + imageUrl);
+
         return imageUrl;
 
     }
@@ -349,9 +350,10 @@ public class Media implements Parcelable {
 
             imageUrl = getRemoteMediaThumbUrl(context, 200, 200);
 
-            Log.d(TAG, "getImageThumbUrl: " + imageUrl);
-
         }
+
+        Log.d(TAG, "media uuid: " + getUuid() + " getImageThumbUrl: " + imageUrl);
+
         return imageUrl;
 
     }
@@ -381,8 +383,8 @@ public class Media implements Parcelable {
 
     public String getRemoteMediaRequestPath() {
         return Util.MEDIA_PARAMETER + "/" + getUuid() + "?alt=data";
-    }
 
+    }
 
     public String getImageOriginalUrl(Context context) {
 
@@ -392,6 +394,9 @@ public class Media implements Parcelable {
         } else {
             imageUrl = getRemoteMediaOriginalUrl(context);
         }
+
+        Log.d(TAG, "media uuid: " + getUuid() + " getImageOriginalUrl: " + imageUrl);
+
         return imageUrl;
     }
 

@@ -73,21 +73,6 @@
         <service
             android:name=".services.RetrieveLocalMediaService"
             android:exported="false" />
-        <service
-            android:name=".services.RetrieveRemoteMediaService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveRemoteUserService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveTokenService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveDeviceIdService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveRemoteFileService"
-            android:exported="false" />
 
         <activity
             android:name=".CreateNewEquipmentActivity"
@@ -103,10 +88,6 @@
         <activity
             android:name=".CreateUserActivity"
             android:screenOrientation="portrait" />
-
-        <service
-            android:name=".services.CreateRemoteUserService"
-            android:exported="false" />
 
         <activity
             android:name=".SettingActivity"

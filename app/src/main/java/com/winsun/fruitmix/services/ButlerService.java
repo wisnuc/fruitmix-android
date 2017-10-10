@@ -336,82 +336,10 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
             case Util.REMOTE_MEDIA_RETRIEVED:
                 mRetrieveRemoteMediaFinished = true;
                 break;
-            case Util.REMOTE_TOKEN_RETRIEVED:
 
-                handleRemoteTokenRetrieved(operationResult, operationResultType);
-
-                break;
-            case Util.REMOTE_DEVICE_ID_RETRIEVED:
-
-                handleRemoteDeviceIdRetrieved(operationResult, operationResultType);
-                break;
-            case Util.REMOTE_USER_RETRIEVED:
-
-                /*if (Util.loginType == LoginType.LOGIN) {
-                    EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
-                } else {
-                    EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
-                }*/
-
-                EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
-
-                if (operationResultType == OperationResultType.SUCCEED)
-                    FNAS.retrieveRemoteMedia(this);
-
-                break;
-        }
-
-    }
-
-    private void handleRemoteDeviceIdRetrieved(OperationResult operationResult, OperationResultType operationResultType) {
-        switch (operationResultType) {
-            case SUCCEED:
-                FNAS.retrieveUser(this);
-                break;
-            default:
-
-                if (Util.loginType == LoginType.SPLASH_SCREEN) {
-                    LocalCache.DeviceID = LocalCache.getGlobalData(this, Util.DEVICE_ID_MAP_NAME);
-
-                    FNAS.retrieveUser(this);
-
-                    Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
-
-                } else {
-                    EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
-                }
 
         }
-    }
 
-    private void handleRemoteTokenRetrieved(OperationResult operationResult, OperationResultType operationResultType) {
-        switch (operationResultType) {
-            case SUCCEED:
-                if (Util.loginType == LoginType.LOGIN) {
-                    LocalCache.CleanAll(this);
-                    LocalCache.Init();
-                }
-//                FNAS.retrieveUser(this);
-
-                EventBus.getDefault().postSticky(new OperationEvent(Util.REMOTE_USER_RETRIEVED, new OperationSuccess()));
-
-                break;
-            default:
-
-                if (Util.loginType == LoginType.SPLASH_SCREEN) {
-                    FNAS.JWT = LocalCache.getToken(this);
-
-                    LocalCache.DeviceID = LocalCache.getGlobalData(this, Util.DEVICE_ID_MAP_NAME);
-
-                    FNAS.retrieveUser(this);
-
-                    Toast.makeText(this, operationResult.getResultMessage(this), Toast.LENGTH_SHORT).show();
-
-                } else {
-                    EventBus.getDefault().postSticky(new OperationEvent(Util.REFRESH_VIEW_AFTER_DATA_RETRIEVED, operationResult));
-                }
-
-        }
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING)
@@ -470,12 +398,6 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
             case REMOTE_USER:
 
-                UserRequestEvent userRequestEvent = (UserRequestEvent) requestEvent;
-                String userName = userRequestEvent.getmUserName();
-                String userPassword = userRequestEvent.getmUserPassword();
-
-                CreateRemoteUserService.startActionCreateRemoteUser(this, userName, userPassword);
-
                 break;
             case LOCAL_LOGGED_IN_USER:
                 LoggedInUserRequestEvent loggedInUserRequestEvent = (LoggedInUserRequestEvent) requestEvent;
@@ -530,24 +452,16 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
                 break;
 
             case REMOTE_USER:
-                RetrieveRemoteUserService.startActionRetrieveRemoteUser(this);
+
                 break;
             case REMOTE_MEDIA:
-                RetrieveRemoteMediaService.startActionRetrieveRemoteMedia(this);
+
                 break;
 
             case REMOTE_DEVICE_ID:
-                RetrieveDeviceIdService.startActionRetrieveDeviceId(this);
+
                 break;
             case REMOTE_TOKEN:
-
-                TokenRequestEvent tokenRequestEvent = (TokenRequestEvent) requestEvent;
-
-                String gateway = tokenRequestEvent.getGateway();
-                String userUUID = tokenRequestEvent.getUserUUID();
-                String userPassword = tokenRequestEvent.getUserPassword();
-
-                RetrieveTokenService.startActionRetrieveToken(this, gateway, userUUID, userPassword);
 
                 break;
             case LOCAL_MEDIA_IN_CAMERA:
@@ -555,11 +469,6 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
                 break;
             case REMOTE_FILE:
 
-                AbstractFileRequestEvent fileRequestEvent = (AbstractFileRequestEvent) requestEvent;
-
-                String folderUUID = fileRequestEvent.getFolderUUID();
-                String rootUUID = fileRequestEvent.getRootUUID();
-                RetrieveRemoteFileService.startActionRetrieveRemoteFile(this, folderUUID, rootUUID);
                 break;
             case DOWNLOADED_FILE:
                 RetrieveDownloadedFileService.startActionRetrieveDownloadedFile(this);

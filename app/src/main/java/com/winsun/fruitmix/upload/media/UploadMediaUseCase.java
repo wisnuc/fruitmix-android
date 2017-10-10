@@ -99,6 +99,8 @@ public class UploadMediaUseCase {
 
     private boolean stopRetryUpload = false;
 
+    private boolean stopRetryUploadTemporary = false;
+
     private static List<UploadMediaCountChangeListener> uploadMediaCountChangeListeners = new ArrayList<>();
 
     public static UploadMediaUseCase getInstance(MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
@@ -212,6 +214,9 @@ public class UploadMediaUseCase {
         if (mStopUpload)
             mStopUpload = false;
 
+        if (stopRetryUploadTemporary)
+            stopRetryUploadTemporary = false;
+
         mAlreadyStartUpload = true;
 
         alreadyUploadedMediaCount = 0;
@@ -268,7 +273,7 @@ public class UploadMediaUseCase {
 
     private void checkFolderExist(String rootUUID, String dirUUID, final BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
-        Log.i(TAG, "start checkUploadParentFolderExist");
+        Log.i(TAG, "start check folder exist");
 
         stationFileRepository.getFile(rootUUID, dirUUID, new BaseLoadDataCallback<AbstractRemoteFile>() {
             @Override
@@ -653,7 +658,6 @@ public class UploadMediaUseCase {
                 break;
             }
 
-
             if (!systemSettingDataSource.getAutoUploadOrNot()) {
 
                 Log.d(TAG, "uploadMediaInThread: auto upload false,stop upload and send retry");
@@ -692,8 +696,6 @@ public class UploadMediaUseCase {
                 break;
 
             } else {
-
-                stopRetryUploadTemporary();
 
                 int code = uploadOneMedia(needUploadedMedias, uploadFolderUUID);
 
@@ -738,7 +740,7 @@ public class UploadMediaUseCase {
             localFile.setPath(media.getOriginalPhotoPath());
             localFile.setSize(file.length() + "");
 
-            Log.d(TAG, "upload file: media uuid: " + media.getUuid());
+            Log.d(TAG, "upload file: media uuid: " + media.getUuid() + " media originalPath: " + media.getOriginalPhotoPath());
 
             OperationResult result = stationFileRepository.uploadFile(localFile, currentUserHome, uploadFolderUUID);
 
@@ -750,7 +752,7 @@ public class UploadMediaUseCase {
 
             } else {
 
-                Log.i(TAG, "upload onFail: media uuid: " + media.getUuid());
+                Log.i(TAG, "upload onFail: media uuid: " + media.getUuid() + " media originalPath: " + media.getOriginalPhotoPath());
 
                 if (!mStopUpload) {
 
@@ -1030,9 +1032,9 @@ public class UploadMediaUseCase {
 
         Log.i(TAG, "stopUploadMedia: stop thread");
 
-        threadManager.stopUploadMediaThreadNow();
-
         mStopUpload = true;
+
+        threadManager.stopUploadMediaThreadNow();
 
         mAlreadyStartUpload = false;
 
@@ -1081,6 +1083,8 @@ public class UploadMediaUseCase {
 
         Log.d(TAG, "stopRetryUploadTemporary: ");
 
+        stopRetryUploadTemporary = true;
+
         if (retryUploadHandler != null) {
 
             retryUploadHandler.removeMessages(RETRY_UPLOAD);
@@ -1106,6 +1110,9 @@ public class UploadMediaUseCase {
     private void sendRetryUploadMessage() {
 
         Log.d(TAG, "sendRetryUploadMessage: delay time " + RETRY_INTERVAL);
+
+        if (stopRetryUploadTemporary)
+            return;
 
         if (stopRetryUpload)
             return;

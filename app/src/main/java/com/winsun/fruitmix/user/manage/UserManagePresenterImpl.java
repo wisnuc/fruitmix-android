@@ -2,7 +2,6 @@ package com.winsun.fruitmix.user.manage;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,18 +13,15 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.UserManageItemBinding;
 import com.winsun.fruitmix.equipment.EquipmentItemViewModel;
-import com.winsun.fruitmix.equipment.data.EquipmentDataRepository;
 import com.winsun.fruitmix.equipment.data.EquipmentDataSource;
-import com.winsun.fruitmix.http.factory.HttpRequestFactory;
+import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.model.EquipmentInfo;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.stations.Station;
 import com.winsun.fruitmix.stations.StationsDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.text.Collator;

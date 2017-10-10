@@ -4,9 +4,8 @@ import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
-import com.winsun.fruitmix.http.factory.HttpRequestFactory;
+import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
@@ -513,7 +512,6 @@ public class LoginUseCaseTest {
         stationLoadCaptor.getValue().onSucceed(Collections.singletonList(station), new OperationSuccess());
 
         verify(httpRequestFactory).setStationID(eq(testStationID));
-        verify(httpRequestFactory).setDefaultFactory(eq(true));
 
         testAfterChooseStationID();
 

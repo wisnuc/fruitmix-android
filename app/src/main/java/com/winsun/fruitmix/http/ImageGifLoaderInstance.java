@@ -9,7 +9,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageLruCache;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.gif.GifLruCache;
-import com.winsun.fruitmix.http.factory.HttpRequestFactory;
+import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.model.RequestQueueInstance;
 import com.winsun.fruitmix.util.Util;
 
@@ -88,7 +88,6 @@ public class ImageGifLoaderInstance {
 
             createHeader();
 
-
             mImageLoader.setHeaders(headers);
         }
 
@@ -99,7 +98,7 @@ public class ImageGifLoaderInstance {
     private void createHeader() {
         headers = new ArrayMap<>();
 
-        String token = httpRequestFactory.getJWT();
+        String token = httpRequestFactory.getTokenForHeaderValue();
 
         headers.put(Util.KEY_AUTHORIZATION, token);
         Log.i(TAG, "FNAS JWT: " + token);
@@ -116,7 +115,6 @@ public class ImageGifLoaderInstance {
             Log.d(TAG, "getGifLoader: create header");
 
             createHeader();
-
 
             mImageLoader.setHeaders(headers);
 

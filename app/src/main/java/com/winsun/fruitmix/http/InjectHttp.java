@@ -2,7 +2,7 @@ package com.winsun.fruitmix.http;
 
 import android.content.Context;
 
-import com.winsun.fruitmix.http.factory.HttpRequestFactory;
+import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 
 /**

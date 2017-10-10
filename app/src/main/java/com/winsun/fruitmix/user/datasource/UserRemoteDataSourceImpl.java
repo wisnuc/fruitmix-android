@@ -5,8 +5,9 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
-import com.winsun.fruitmix.http.factory.HttpRequestFactory;
+import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
+import com.winsun.fruitmix.http.request.factory.CloudHttpRequestFactory;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.RemoteCurrentUserParser;
 import com.winsun.fruitmix.parser.RemoteInsertUserParser;
@@ -160,7 +161,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     @Override
     public void getUserByGUIDWithCloudAPI(String guid, BaseLoadDataCallback<User> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap(HttpRequestFactory.CLOUD_API_LEVEL + "/users/" + guid);
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap(CloudHttpRequestFactory.CLOUD_API_LEVEL + "/users/" + guid);
 
         wrapper.loadCall(httpRequest, callback, new RemoteWeChatUser());
 
