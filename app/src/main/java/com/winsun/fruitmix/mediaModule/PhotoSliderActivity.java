@@ -984,12 +984,12 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 Log.d(TAG, "handleTouchEvent: isEnlargeState: " + view.isEnlargeState());
 
+                if(view.isEnlargeState())
+                    return;
+
                 if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
 
                     Log.d(TAG, "handleTouchEvent: action up lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
-
-                    if(view.isEnlargeState())
-                        return;
 
                     if (lastY - y > Util.dip2px(mContext, 60) ) {
 

@@ -210,9 +210,9 @@ public class PinchImageView extends AppCompatImageView {
      * @see #getOuterMatrix(Matrix)
      * @see #getInnerMatrix(Matrix, boolean)
      */
-    public Matrix getCurrentImageMatrix(Matrix matrix) {
+    public Matrix getCurrentImageMatrix(Matrix matrix, boolean useMatchViewWidthHeight) {
         //获取内部变换矩阵
-        matrix = getInnerMatrix(matrix, false);
+        matrix = getInnerMatrix(matrix, useMatchViewWidthHeight);
         //乘上外部变换矩阵
         matrix.postConcat(mOuterMatrix);
         return matrix;
@@ -225,7 +225,7 @@ public class PinchImageView extends AppCompatImageView {
      *
      * @param rectF 用于填充结果的对象
      * @return 如果传了rectF参数则将rectF填充后返回, 否则new一个填充返回
-     * @see #getCurrentImageMatrix(Matrix)
+     * @see #getCurrentImageMatrix(Matrix, boolean)
      */
     public RectF getImageBound(RectF rectF) {
         if (rectF == null) {
@@ -239,7 +239,7 @@ public class PinchImageView extends AppCompatImageView {
             //申请一个空matrix
             Matrix matrix = MathUtils.matrixTake();
             //获取当前总变换矩阵
-            getCurrentImageMatrix(matrix);
+            getCurrentImageMatrix(matrix, false);
             //对原图矩形进行变换得到当前显示矩形
             rectF.set(0, 0, getDrawable().getIntrinsicWidth(), getDrawable().getIntrinsicHeight());
             matrix.mapRect(rectF);
@@ -441,7 +441,7 @@ public class PinchImageView extends AppCompatImageView {
          *
          * @param pinchImageView
          * @see #getOuterMatrix(Matrix)
-         * @see #getCurrentImageMatrix(Matrix)
+         * @see #getCurrentImageMatrix(Matrix, boolean)
          * @see #getImageBound(RectF)
          */
         void onOuterMatrixChanged(PinchImageView pinchImageView);
@@ -654,7 +654,7 @@ public class PinchImageView extends AppCompatImageView {
         //在绘制前设置变换矩阵
         if (isReady()) {
             Matrix matrix = MathUtils.matrixTake();
-            setImageMatrix(getCurrentImageMatrix(matrix));
+            setImageMatrix(getCurrentImageMatrix(matrix, false));
             MathUtils.matrixGiven(matrix);
         }
         //对图像做遮罩处理
@@ -1186,7 +1186,7 @@ public class PinchImageView extends AppCompatImageView {
         return viewSize;
     }
 
-    // use matchViewWidth and matchViewHeight to avoid getIntrinsicWidth when media is thumb cause strange action
+    // modify by liang.wu:use matchViewWidth and matchViewHeight to avoid getIntrinsicWidth when media is thumb cause strange action
 
     private int getIntrinsicWidth(boolean useMatchViewWidth) {
 
@@ -1197,6 +1197,7 @@ public class PinchImageView extends AppCompatImageView {
     }
 
     private int getIntrinsicHeight(boolean useMatchViewHeight) {
+
         if (useMatchViewHeight)
             return (int) matchViewHeight;
         else
@@ -1307,11 +1308,12 @@ public class PinchImageView extends AppCompatImageView {
         boolean change = false;
         //获取图片整体的变换矩阵
         Matrix currentMatrix = MathUtils.matrixTake();
-        getCurrentImageMatrix(currentMatrix);
+        getCurrentImageMatrix(currentMatrix, true);
         //整体缩放比例
         float currentScale = MathUtils.getMatrixScale(currentMatrix)[0];
         //第二层缩放比例
         float outerScale = MathUtils.getMatrixScale(mOuterMatrix)[0];
+
         //控件大小
         float displayWidth = getWidth();
         float displayHeight = getHeight();
