@@ -1161,10 +1161,10 @@ public class PinchImageView extends AppCompatImageView {
      *
      * @param mode
      * @param size
-     * @param drawableWidth
+     * @param drawableSize
      * @return
      */
-    private int setViewSize(int mode, int size, int drawableWidth) {
+    private int setViewSize(int mode, int size, int drawableSize) {
         int viewSize;
         switch (mode) {
             case MeasureSpec.EXACTLY:
@@ -1172,11 +1172,11 @@ public class PinchImageView extends AppCompatImageView {
                 break;
 
             case MeasureSpec.AT_MOST:
-                viewSize = Math.min(drawableWidth, size);
+                viewSize = Math.min(drawableSize, size);
                 break;
 
             case MeasureSpec.UNSPECIFIED:
-                viewSize = drawableWidth;
+                viewSize = drawableSize;
                 break;
 
             default:

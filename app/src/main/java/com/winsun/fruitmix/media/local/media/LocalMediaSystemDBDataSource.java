@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -17,7 +16,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -66,13 +64,13 @@ public class LocalMediaSystemDBDataSource {
 
         String data = MediaStore.Images.Media.DATA;
 
-        String thumbnailFolderPath = FileUtil.getLocalPhotoThumbnailFolderPath();
+        String miniThumbnailFolderPath = FileUtil.getLocalPhotoMiniThumbnailFolderPath();
         String oldThumbnailFolderPath = FileUtil.getOldLocalPhotoThumbnailFolderPath();
-        String thumbnailFolder200Path = FileUtil.getFolderPathForLocalPhotoThumbnailFolderName200();
+        String thumbnailFolderPath = FileUtil.getLocalPhotoThumbnailFolderPath();
         String originalPhotoFolderPath = FileUtil.getOriginalPhotoFolderPath();
 
         String selection = data + " not like ? and " + data + " not like ? and " + data + " not like ? and " + data + " not like ?";
-        String[] selectionArgs = {thumbnailFolderPath + "%", oldThumbnailFolderPath + "%", thumbnailFolder200Path + "%", originalPhotoFolderPath + "%"};
+        String[] selectionArgs = {miniThumbnailFolderPath + "%", oldThumbnailFolderPath + "%", thumbnailFolderPath + "%", originalPhotoFolderPath + "%"};
 
 //        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "='" + bucketName + "'", null, null);
 
@@ -91,8 +89,8 @@ public class LocalMediaSystemDBDataSource {
 
             String originalPhotoPath = cursor.getString(cursor.getColumnIndexOrThrow(data));
 
-            if (originalPhotoPath.contains(thumbnailFolderPath) || originalPhotoPath.contains(oldThumbnailFolderPath)
-                    || originalPhotoPath.contains(thumbnailFolder200Path)
+            if (originalPhotoPath.contains(miniThumbnailFolderPath) || originalPhotoPath.contains(oldThumbnailFolderPath)
+                    || originalPhotoPath.contains(thumbnailFolderPath)
                     || originalPhotoPath.contains(originalPhotoFolderPath)) {
                 continue;
             }

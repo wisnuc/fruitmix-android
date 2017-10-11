@@ -175,9 +175,9 @@ public class LocalCache {
 
         String data = MediaStore.Images.Media.DATA;
 
-        String thumbnailFolderPath = FileUtil.getLocalPhotoThumbnailFolderPath();
+        String thumbnailFolderPath = FileUtil.getLocalPhotoMiniThumbnailFolderPath();
         String oldThumbnailFolderPath = FileUtil.getOldLocalPhotoThumbnailFolderPath();
-        String thumbnailFolder200Path = FileUtil.getFolderPathForLocalPhotoThumbnailFolderName200();
+        String thumbnailFolder200Path = FileUtil.getLocalPhotoThumbnailFolderPath();
         String originalFolderPath = FileUtil.getOriginalPhotoFolderPath();
 
         String selection = data + " not like ? and " + data + " not like ? and " + data + " not like ? and " + data + " not like ?";
@@ -207,7 +207,7 @@ public class LocalCache {
                 continue;
             }
 
-            if (originalPhotoPath.contains(FileUtil.getLocalPhotoThumbnailFolderPath())) {
+            if (originalPhotoPath.contains(FileUtil.getLocalPhotoMiniThumbnailFolderPath())) {
                 continue;
             }
 
@@ -215,7 +215,7 @@ public class LocalCache {
                 continue;
             }
 
-            if (originalPhotoPath.contains(FileUtil.getFolderPathForLocalPhotoThumbnailFolderName200())) {
+            if (originalPhotoPath.contains(FileUtil.getLocalPhotoThumbnailFolderPath())) {
                 continue;
             }
 

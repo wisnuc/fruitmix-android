@@ -187,6 +187,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     }
 
     @Override
+    public int getCurrentViewPagerItem() {
+        return equipmentViewPager.getCurrentItem();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
@@ -259,7 +264,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             @Override
             public void loginSucceed() {
 
-                Log.d(TAG, "loginSucceed: ");
+                Log.d(TAG, "login with wechat code succeed and finish EquipmentSearchActivity");
 
                 finish();
             }
@@ -267,7 +272,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             @Override
             public void loginFail() {
 
-                Log.d(TAG, "loginFail: ");
+                Log.d(TAG, "login with wechat code fail");
             }
         });
 

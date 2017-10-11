@@ -92,6 +92,8 @@ public class EquipmentPresenter {
 
     private boolean hasFindEquipment = false;
 
+    private boolean hasRefreshFirstEquipmentUsers = false;
+
     private class CustomHandler extends Handler {
 
         WeakReference<EquipmentPresenter> weakReference = null;
@@ -190,7 +192,14 @@ public class EquipmentPresenter {
 
             adapter.notifyDataSetChanged();
 
-            refreshEquipment(0);
+            if (equipmentSearchView.getCurrentViewPagerItem() == 0 && !hasRefreshFirstEquipmentUsers) {
+
+                refreshEquipment(0);
+
+                hasRefreshFirstEquipmentUsers = true;
+
+            }
+
         }
     }
 

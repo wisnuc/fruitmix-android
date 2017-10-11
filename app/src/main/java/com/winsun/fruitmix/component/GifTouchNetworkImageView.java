@@ -361,6 +361,8 @@ public class GifTouchNetworkImageView extends PinchImageView {
 
                             Bitmap bitmap;
 
+                            Log.d(TAG, "onResponse: orientationNumber: " + orientationNumber);
+
                             if (orientationNumber >= 1 && orientationNumber <= 8) {
                                 OrientationOperation orientationOperation = OrientationOperationFactory.createOrientationOperation(orientationNumber);
                                 bitmap = orientationOperation.handleOrientationOperate(response.getBitmap());

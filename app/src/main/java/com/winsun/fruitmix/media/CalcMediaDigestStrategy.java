@@ -3,6 +3,7 @@ package com.winsun.fruitmix.media;
 import android.util.Log;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.util.Util;
 
 import java.io.FileInputStream;
 import java.security.MessageDigest;
@@ -32,7 +33,7 @@ public class CalcMediaDigestStrategy {
 
     private CalcMediaDigestCallback calcMediaDigestCallback;
 
-    private boolean finishCalcMediaDigest = false;
+    private volatile boolean finishCalcMediaDigest = false;
 
     public static CalcMediaDigestStrategy getInstance() {
 
@@ -62,7 +63,7 @@ public class CalcMediaDigestStrategy {
 
         for (Media media : medias) {
             if (media.getUuid().isEmpty()) {
-                String uuid = calcSHA256OfFile(media.getOriginalPhotoPath());
+                String uuid = Util.calcSHA256OfFile(media.getOriginalPhotoPath());
                 media.setUuid(uuid);
 
                 newMediaList.add(media);
@@ -89,36 +90,6 @@ public class CalcMediaDigestStrategy {
 
         return newMediaList;
 
-    }
-
-    private String calcSHA256OfFile(String fname) {
-        MessageDigest md;
-        FileInputStream fin;
-        byte[] buffer;
-        byte[] digest;
-        String digits = "0123456789abcdef";
-        int len, i;
-        String st;
-
-        try {
-            buffer = new byte[15000];
-            md = MessageDigest.getInstance("SHA-256");
-            fin = new FileInputStream(fname);
-            len = 0;
-            while ((len = fin.read(buffer)) != -1) {
-                md.update(buffer, 0, len);
-            }
-            fin.close();
-            digest = md.digest();
-            st = "";
-            for (i = 0; i < digest.length; i++) {
-                st += digits.charAt((digest[i] >> 4) & 0xf);
-                st += digits.charAt(digest[i] & 0xf);
-            }
-            return st;
-        } catch (Exception e) {
-            return "";
-        }
     }
 
 

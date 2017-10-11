@@ -28,8 +28,6 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
 
     public static final String TAG = MediaDataSourceRepositoryImpl.class.getSimpleName();
 
-    //TODO: check local media thumbnail exist
-
     private static MediaDataSourceRepositoryImpl ourInstance;
 
     private LocalMediaRepository localMediaRepository;
@@ -155,11 +153,10 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
 
         if (!hasCallGetStationMedia) {
 
-            stationMediaRepository.getMedia(new BaseLoadDataCallbackImpl<Media>() {
+            stationMediaRepository.getMedia(new BaseLoadDataCallback<Media>() {
 
                 @Override
                 public void onSucceed(List<Media> data, OperationResult operationResult) {
-                    super.onSucceed(data, operationResult);
 
                     Log.d(TAG, "onSucceed: get media from station media repository,data size: " + data.size());
 
@@ -172,7 +169,8 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
 
                 @Override
                 public void onFail(OperationResult operationResult) {
-                    super.onFail(operationResult);
+
+                    Log.d(TAG, "onFail: get media from station media repository,type: " + operationResult.getOperationResultType());
 
                     getStationMediaCallbackReturn = true;
 
@@ -197,6 +195,8 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
                 result = new OperationMediaDataChanged();
             } else
                 result = new OperationSuccess();
+
+            Log.d(TAG, "checkAllDataRetrieved: mediaDataChanged: " + mediaDataChanged);
 
             callback.onSucceed(filterLocalStationMediaStrategy.filter(localMedias, stationMedias), result);
         }

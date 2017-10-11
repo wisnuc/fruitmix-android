@@ -459,7 +459,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         String mediaUUID = media.getUuid();
         if (mediaUUID.isEmpty()) {
-            mediaUUID = Util.CalcSHA256OfFile(media.getOriginalPhotoPath());
+            mediaUUID = Util.calcSHA256OfFile(media.getOriginalPhotoPath());
             media.setUuid(mediaUUID);
         }
 
@@ -748,7 +748,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         if (media.isLocal()) {
 
-            return imageUrl.contains(FileUtil.getFolderPathForLocalPhotoThumbnailFolderName200());
+            return imageUrl.contains(FileUtil.getLocalPhotoThumbnailFolderPath());
 
         } else {
             return imageUrl.contains("thumb");

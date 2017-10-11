@@ -54,8 +54,6 @@ import com.winsun.fruitmix.mediaModule.model.NewPhotoListViewModel;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -63,7 +61,6 @@ import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -672,7 +669,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                     String mediaUUID = media.getUuid();
                     if (mediaUUID.isEmpty()) {
-                        mediaUUID = Util.CalcSHA256OfFile(media.getOriginalPhotoPath());
+                        mediaUUID = Util.calcSHA256OfFile(media.getOriginalPhotoPath());
                         media.setUuid(mediaUUID);
                     }
 
@@ -1194,7 +1191,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
-    class PhotoHolder extends BindingViewHolder {
+    private class PhotoHolder extends BindingViewHolder {
 
         NetworkImageView mPhotoIv;
 
@@ -1202,10 +1199,12 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         ImageView photoSelectImg;
 
+        private NewPhotoGridlayoutItemBinding binding;
+
         PhotoHolder(ViewDataBinding viewDataBinding) {
             super(viewDataBinding);
 
-            NewPhotoGridlayoutItemBinding binding = (NewPhotoGridlayoutItemBinding) viewDataBinding;
+            binding = (NewPhotoGridlayoutItemBinding) viewDataBinding;
 
             mPhotoIv = binding.photoIv;
 
@@ -1226,7 +1225,18 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(currentMedia.getKey()))
                 currentMedia.setSelected(true);
 
-            final ObservableBoolean showPhotoSelectImg = new ObservableBoolean(currentMedia.isSelected());
+            ObservableBoolean preShowPhotoSelectImg = binding.getShowPhotoSelectImg();
+
+            final ObservableBoolean showPhotoSelectImg;
+
+            if (preShowPhotoSelectImg != null) {
+
+                showPhotoSelectImg = preShowPhotoSelectImg;
+            } else {
+                showPhotoSelectImg = new ObservableBoolean(currentMedia.isSelected());
+
+                binding.setShowPhotoSelectImg(showPhotoSelectImg);
+            }
 
             mImageLoader.setTag(position);
 
@@ -1296,12 +1306,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                     scalePhoto(true);
 
                     showPhotoSelectImg.set(true);
+//                    photoSelectImg.setVisibility(View.VISIBLE);
 
                 } else if (!selected && mPhotoIv.getScaleX() != 1) {
 
                     restorePhoto(true);
 
                     showPhotoSelectImg.set(false);
+//                    photoSelectImg.setVisibility(View.INVISIBLE);
 
                 }
             } else {
@@ -1310,13 +1322,15 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 if (mPhotoIv.getScaleX() != 1) {
                     restorePhoto(true);
+
                     showPhotoSelectImg.set(false);
+//                    photoSelectImg.setVisibility(View.INVISIBLE);
                 }
 
             }
 
-            getViewDataBinding().setVariable(BR.showPhotoSelectImg, showPhotoSelectImg);
-            getViewDataBinding().executePendingBindings();
+//            getViewDataBinding().setVariable(BR.showPhotoSelectImg, showPhotoSelectImg);
+//            getViewDataBinding().executePendingBindings();
 
             mImageLayout.setOnClickListener(new View.OnClickListener() {
                 @Override

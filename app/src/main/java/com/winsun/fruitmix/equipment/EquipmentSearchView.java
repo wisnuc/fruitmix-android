@@ -15,4 +15,6 @@ public interface EquipmentSearchView {
 
     void setBackgroundColor(int color);
 
+    int getCurrentViewPagerItem();
+
 }

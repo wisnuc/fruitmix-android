@@ -328,9 +328,6 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
         String action = operationEvent.getAction();
 
-        OperationResult operationResult = operationEvent.getOperationResult();
-        OperationResultType operationResultType = operationResult.getOperationResultType();
-
         Log.i(TAG, "handleOperationEvent: action:" + action);
 
         switch (action) {

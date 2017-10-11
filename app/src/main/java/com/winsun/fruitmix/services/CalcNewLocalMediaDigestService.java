@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
-import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -79,7 +78,7 @@ public class CalcNewLocalMediaDigestService extends IntentService {
 
         for (Media media : medias) {
             if (media.getUuid().isEmpty()) {
-                String uuid = Util.CalcSHA256OfFile(media.getOriginalPhotoPath());
+                String uuid = Util.calcSHA256OfFile(media.getOriginalPhotoPath());
                 media.setUuid(uuid);
 
                 newMediaList.add(media);

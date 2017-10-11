@@ -86,5 +86,6 @@ public class InitSystem {
         if (!result) {
             Log.i(TAG, "onCreate: Create audio record folder failed");
         }
+
     }
 }

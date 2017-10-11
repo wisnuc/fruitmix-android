@@ -236,7 +236,7 @@ public class Util {
         return metric.heightPixels;
     }
 
-    public static String CalcSHA256OfFile(String fname) {
+    public static String calcSHA256OfFile(String fname) {
         MessageDigest md;
         FileInputStream fin;
         byte[] buffer;
