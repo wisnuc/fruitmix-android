@@ -343,6 +343,12 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
                 mRetrieveRemoteMediaFinished = true;
                 break;
 
+            case Util.NETWORK_CHANGED:
+
+                networkChangeUseCase.handleNetworkChange();
+
+                break;
+
         }
 
     }

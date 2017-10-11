@@ -66,7 +66,6 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
 
         this.logoutUseCase = logoutUseCase;
 
-
         mEquipmentNames = new ArrayList<>();
         mUsers = new ArrayList<>();
 

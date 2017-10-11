@@ -44,10 +44,10 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-/*        networkReceiver = new NetworkReceiver();
+        networkReceiver = new NetworkReceiver();
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        registerReceiver(networkReceiver, intentFilter);*/
+        registerReceiver(networkReceiver, intentFilter);
 
     }
 
@@ -90,11 +90,9 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
 
         mDialog = null;
 
-/*
         if (networkReceiver != null) {
             unregisterReceiver(networkReceiver);
         }
-*/
 
     }
 
