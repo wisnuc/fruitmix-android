@@ -28,21 +28,19 @@ public class HttpRequestFactory {
 
     private BaseAbsHttpRequestFactory currentDefaultHttpRequestFactory;
 
-    private String token;
-    private String gateway;
+    private String mToken;
+    private String mGateway;
 
-    private String stationID;
-
-    private static final Object httpCreateRequestLock = new Object();
+    private String mStationID;
 
     private HttpRequestFactory(SystemSettingDataSource systemSettingDataSource) {
 
         this.systemSettingDataSource = systemSettingDataSource;
 
-        token = "";
-        gateway = "";
+        mToken = "";
+        mGateway = "";
 
-        stationID = "";
+        mStationID = "";
 
     }
 
@@ -66,157 +64,130 @@ public class HttpRequestFactory {
         return instance;
     }
 
-    public void reset() {
+    public synchronized void reset() {
 
-        Log.d(TAG, "reset: set token,gateway station to empty");
+        Log.d(TAG, "reset: set mToken,mGateway station to empty");
 
-        synchronized (httpCreateRequestLock){
-
-            setCurrentData("", "");
-            setStationID("");
-
-        }
+        setCurrentData("", "");
+        setStationID("");
 
     }
 
     public void setGateway(String gateway) {
 
-        synchronized (httpCreateRequestLock) {
+        Log.d(TAG, "setGateway: " + gateway);
 
-            Log.d(TAG, "setGateway: " + gateway);
+        this.mGateway = gateway;
 
-            this.gateway = gateway;
-
-        }
-
+        Log.d(TAG, "finish setGateway: getGateway: " + getGateway() + " threadID: " + Thread.currentThread().getId());
     }
 
-    private String getGateway() {
+    private synchronized String getGateway() {
 
-        synchronized (httpCreateRequestLock) {
+        Log.d(TAG, "getGateway: this: " + this);
 
-            if (gateway == null || gateway.isEmpty()) {
+        if (mGateway == null || mGateway.isEmpty()) {
 
-                Log.d(TAG, "getGateway: gateway is null or empty");
+            Log.d(TAG, "getGateway: mGateway is null or empty");
 
-                gateway = systemSettingDataSource.getCurrentEquipmentIp();
-
-            }
-
-            Log.d(TAG, "getGateway: " + gateway);
-
-            return gateway;
+            mGateway = systemSettingDataSource.getCurrentEquipmentIp();
 
         }
+
+        Log.d(TAG, "getGateway: " + mGateway + " threadID: " + Thread.currentThread().getId());
+
+        return mGateway;
 
     }
 
     private void setToken(String token) {
 
-        synchronized (httpCreateRequestLock) {
+        Log.d(TAG, "setToken: " + token);
 
-            Log.d(TAG, "setToken: " + token);
+        this.mToken = token;
 
-            this.token = token;
-
-        }
-
+        Log.d(TAG, "finish setToken: getToken: " + getToken() + " threadID: " + Thread.currentThread().getId());
     }
 
-    private String getToken() {
+    private synchronized String getToken() {
 
-        synchronized (httpCreateRequestLock) {
+        if (mToken == null || mToken.isEmpty()) {
 
-            if (token == null || token.isEmpty()) {
+            Log.d(TAG, "getToken: mToken is null or empty");
 
-                Log.d(TAG, "getToken: token is null or empty");
-
-                token = systemSettingDataSource.getCurrentLoginToken();
-
-            }
-
-            Log.d(TAG, "getToken: " + token);
-
-            return token;
+            mToken = systemSettingDataSource.getCurrentLoginToken();
 
         }
+
+        Log.d(TAG, "getToken: " + mToken + " threadID: " + Thread.currentThread().getId());
+
+        return mToken;
+
 
     }
 
     public void setStationID(String stationID) {
 
-        synchronized (httpCreateRequestLock) {
+        Log.d(TAG, "setStationID: " + stationID);
 
-            Log.d(TAG, "setStationID: " + stationID);
-
-            this.stationID = stationID;
-
-        }
+        this.mStationID = stationID;
 
     }
 
-    private String getStationID() {
+    private synchronized String getStationID() {
 
-        synchronized (httpCreateRequestLock) {
+        if (mStationID == null || mStationID.isEmpty()) {
 
-            if (stationID == null || stationID.isEmpty()) {
+            Log.d(TAG, "getStationID: station is null or empty");
 
-                Log.d(TAG, "getStationID: station is null or empty");
-
-                stationID = systemSettingDataSource.getCurrentLoginStationID();
-
-            }
-
-            Log.d(TAG, "getStationID: " + stationID);
-
-            return stationID;
+            mStationID = systemSettingDataSource.getCurrentLoginStationID();
 
         }
+
+        Log.d(TAG, "getStationID: " + mStationID);
+
+        return mStationID;
+
 
     }
 
-    public void checkToLocalUser(String token, String ip) {
+    public synchronized void checkToLocalUser(String token, String ip) {
 
-        Log.d(TAG, "checkToLocalUser token: " + token + " ip: " + ip);
+        Log.d(TAG, "checkToLocalUser mToken: " + token + " ip: " + ip);
 
-        synchronized (httpCreateRequestLock) {
+        systemSettingDataSource.setCurrentLoginToken(token);
 
-            systemSettingDataSource.setCurrentLoginToken(token);
+        systemSettingDataSource.setCurrentEquipmentIp(Util.HTTP + ip);
 
-            systemSettingDataSource.setCurrentEquipmentIp(Util.HTTP + ip);
+        systemSettingDataSource.setLoginWithWechatCodeOrNot(false);
 
-            systemSettingDataSource.setLoginWithWechatCodeOrNot(false);
+        setCurrentData(token, Util.HTTP + ip);
 
-            setCurrentData(token, Util.HTTP + ip);
+        setStationID("");
 
-            setStationID("");
-        }
 
     }
 
-    public void checkToWeChatUser(String token) {
+    public synchronized void checkToWeChatUser(String token) {
 
-        Log.d(TAG, "checkToWeChatUser: token: " + token);
+        Log.d(TAG, "checkToWeChatUser: mToken: " + token);
 
-        synchronized (httpCreateRequestLock) {
+        systemSettingDataSource.setCurrentLoginToken(token);
 
-            systemSettingDataSource.setCurrentLoginToken(token);
+        systemSettingDataSource.setCurrentEquipmentIp("");
 
-            systemSettingDataSource.setCurrentEquipmentIp("");
+        systemSettingDataSource.setLoginWithWechatCodeOrNot(true);
 
-            systemSettingDataSource.setLoginWithWechatCodeOrNot(true);
+        setCurrentData(token, CLOUD_IP);
 
-            setCurrentData(token, CLOUD_IP);
+        setStationID(systemSettingDataSource.getCurrentLoginStationID());
 
-            setStationID(systemSettingDataSource.getCurrentLoginStationID());
-
-        }
 
     }
 
     public void setCurrentData(String token, String gateway) {
 
-        Log.d(TAG, "setCurrentData: token: " + token + " gateway: " + gateway);
+        Log.d(TAG, "setCurrentData: mToken: " + token + " mGateway: " + gateway);
 
         setToken(token);
         setGateway(gateway);
@@ -245,15 +216,13 @@ public class HttpRequestFactory {
         return new HttpHeader(Util.KEY_AUTHORIZATION, getToken());
     }
 
-    public HttpRequest createHttpGetRequestByCloudAPIWithoutWrap(String httpPath) {
+    public synchronized HttpRequest createHttpGetRequestByCloudAPIWithoutWrap(String httpPath) {
 
-        synchronized (httpCreateRequestLock) {
 
-            BaseAbsHttpRequestFactory factory = new CloudHttpRequestFactory(createTokenHeaderUsingCloudToken());
+        BaseAbsHttpRequestFactory factory = new CloudHttpRequestFactory(createTokenHeaderUsingCloudToken());
 
-            return factory.createHttpGetRequest(httpPath, false);
+        return factory.createHttpGetRequest(httpPath, false);
 
-        }
 
     }
 
@@ -295,15 +264,13 @@ public class HttpRequestFactory {
 
     }
 
-    public HttpRequest createHttpGetRequestByCloudAPIWithWrap(String httpPath, String stationID) {
+    public synchronized HttpRequest createHttpGetRequestByCloudAPIWithWrap(String httpPath, String stationID) {
 
-        synchronized (httpCreateRequestLock) {
 
-            BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
 
-            return factory.createHttpGetRequest(httpPath, false);
+        return factory.createHttpGetRequest(httpPath, false);
 
-        }
 
     }
 
@@ -321,15 +288,13 @@ public class HttpRequestFactory {
 
     }
 
-    private HttpRequest createHttpGetRequest(String httpPath, boolean isGetStream) {
+    private synchronized HttpRequest createHttpGetRequest(String httpPath, boolean isGetStream) {
 
-        synchronized (httpCreateRequestLock) {
 
-            setDefaultFactoryState();
+        setDefaultFactoryState();
 
-            return currentDefaultHttpRequestFactory.createHttpGetRequest(httpPath, isGetStream);
+        return currentDefaultHttpRequestFactory.createHttpGetRequest(httpPath, isGetStream);
 
-        }
 
     }
 
@@ -338,7 +303,6 @@ public class HttpRequestFactory {
         if (checkIsLoginWithWeChatCode()) {
 
             currentDefaultHttpRequestFactory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderForCloudAPI(), getStationID());
-
 
         } else {
 
@@ -364,15 +328,13 @@ public class HttpRequestFactory {
 
     }
 
-    private HttpRequest createHttpPostRequest(String httpPath, String body, boolean isPostStream) {
+    private synchronized HttpRequest createHttpPostRequest(String httpPath, String body, boolean isPostStream) {
 
-        synchronized (httpCreateRequestLock) {
 
-            setDefaultFactoryState();
+        setDefaultFactoryState();
 
-            return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body, isPostStream);
+        return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body, isPostStream);
 
-        }
 
     }
 
@@ -388,17 +350,17 @@ public class HttpRequestFactory {
             return getTokenWithPrefix();
     }
 
-    public HttpRequest createHttpGetRequestForLocalMedia(String url) {
+    public synchronized HttpRequest createHttpGetRequestForLocalMedia(String url) {
 
-        synchronized (httpCreateRequestLock) {
 
-            HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
+        Log.d(TAG, "createHttpGetRequestForLocalMedia: url: " + url);
 
-            httpRequest.setHeader(Util.KEY_AUTHORIZATION, getTokenForHeaderValue());
+        HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
 
-            return httpRequest;
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, getTokenForHeaderValue());
 
-        }
+        return httpRequest;
+
 
     }
 

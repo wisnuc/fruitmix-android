@@ -43,7 +43,6 @@ public class BaseAbsHttpRequestFactory {
         this.port = port;
     }
 
-
     public HttpRequest createHttpGetRequest(String httpPath, boolean isGetStream) {
 
         HttpRequest httpRequest = new HttpRequest(createUrl(httpPath), Util.HTTP_GET_METHOD);

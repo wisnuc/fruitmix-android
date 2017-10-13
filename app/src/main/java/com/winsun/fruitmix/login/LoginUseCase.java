@@ -8,6 +8,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
+import com.winsun.fruitmix.http.CheckIpHttpUtil;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
@@ -21,6 +22,7 @@ import com.winsun.fruitmix.model.operationResult.OperationMoreThanOneStation;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.network.change.NetworkChangeUseCase;
 import com.winsun.fruitmix.stations.Station;
 import com.winsun.fruitmix.stations.StationsDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
@@ -32,6 +34,7 @@ import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
 import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
@@ -140,9 +143,12 @@ public class LoginUseCase extends BaseDataRepository {
 
     public void loginWithNoParam(final BaseOperateDataCallback<Boolean> callback) {
 
-        String currentLoginToken = systemSettingDataSource.getCurrentLoginToken();
+        final String currentLoginToken = systemSettingDataSource.getCurrentLoginToken();
 
         if (currentLoginToken.isEmpty()) {
+
+            Log.d(TAG, "loginWithNoParam: no token,callback on fail");
+
             callback.onFail(new OperationFail("no token"));
             return;
         }
@@ -150,6 +156,8 @@ public class LoginUseCase extends BaseDataRepository {
         boolean loginWithWeChatCodeOrNot = systemSettingDataSource.getLoginWithWechatCodeOrNot();
 
         if (loginWithWeChatCodeOrNot) {
+
+            Log.d(TAG, "loginWithNoParam: loginWithWeChatCodeOrNot is true,login with wechat user");
 
             String currentLoginStationID = systemSettingDataSource.getCurrentLoginStationID();
 
@@ -160,32 +168,77 @@ public class LoginUseCase extends BaseDataRepository {
 
         } else {
 
-            mToken = currentLoginToken;
             mGateway = systemSettingDataSource.getCurrentEquipmentIp();
 
-            Log.d(TAG, "loginWithNoParam: http request factory set current data token:" + mToken + " gateway: " + mGateway);
-
-            httpRequestFactory.setCurrentData(mToken, mGateway);
-
-            String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
-
-            initSystemState(mToken, mGateway, currentUserUUID);
-
-            getUsers(currentUserUUID, new BaseOperateDataCallback<Boolean>() {
+            stationsDataSource.checkStationIP(mGateway, new BaseOperateDataCallback<Boolean>() {
                 @Override
-                public void onSucceed(Boolean data, OperationResult result) {
+                public void onSucceed(Boolean data, OperationResult operationResult) {
 
-                    callback.onSucceed(true, new OperationSuccess());
+                    handleGetStationInfoSucceed(callback, currentLoginToken);
 
                 }
 
                 @Override
-                public void onFail(OperationResult result) {
+                public void onFail(OperationResult operationResult) {
 
-                    callback.onFail(result);
+                    handleGetStationInfoFailed(callback);
 
                 }
             });
+
+        }
+    }
+
+    private void handleGetStationInfoSucceed(final BaseOperateDataCallback<Boolean> callback, String currentLoginToken) {
+        mToken = currentLoginToken;
+
+        Log.d(TAG, "loginWithNoParam: station ip is reachable http request factory set current data token:" + mToken + " gateway: " + mGateway);
+
+        httpRequestFactory.setCurrentData(mToken, mGateway);
+
+        String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
+
+        initSystemState(mToken, mGateway, currentUserUUID);
+
+        getUsers(currentUserUUID, new BaseOperateDataCallback<Boolean>() {
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
+
+                callback.onSucceed(true, new OperationSuccess());
+
+            }
+
+            @Override
+            public void onFail(OperationResult result) {
+
+                callback.onFail(result);
+
+            }
+        });
+    }
+
+    private void handleGetStationInfoFailed(BaseOperateDataCallback<Boolean> callback) {
+        Log.d(TAG, "loginWithNoParam: station ip is unreachable");
+
+        String currentWAToken = systemSettingDataSource.getCurrentWAToken();
+
+        if (currentWAToken.length() != 0) {
+
+            Log.d(TAG, "loginWithNoParam: wechat token is exist,login with wechat token");
+
+            String currentLoginStationID = systemSettingDataSource.getCurrentLoginStationID();
+
+            Log.d(TAG, "loginWithNoParam: currentLoginStationID: " + currentLoginStationID);
+
+            WeChatUser weChatUser = weChatUserDataSource.getWeChatUser(currentWAToken, currentLoginStationID);
+            loginWithWeChatUser(callback, weChatUser);
+
+
+        } else {
+
+            Log.d(TAG, "loginWithNoParam: wechat token is not exist,callback on fail");
+
+            callback.onFail(new OperationFail("ip is unreachable"));
 
         }
     }
@@ -357,6 +410,8 @@ public class LoginUseCase extends BaseDataRepository {
 
                                 initSystemState(token, loadTokenParam.getGateway(), loadTokenParam.getUserUUID());
 
+                                systemSettingDataSource.setCurrentLoginStationID("");
+
                                 mediaDataSourceRepository.clearAllStationMediasInDB();
 
                                 mediaDataSourceRepository.resetState();
@@ -486,8 +541,6 @@ public class LoginUseCase extends BaseDataRepository {
 
         systemSettingDataSource.setCurrentLoginUserGUID("");
 
-        systemSettingDataSource.setCurrentLoginStationID("");
-
         stationFileRepository.clearDownloadFileRecordInCache();
 
         newPhotoListDataLoader.setNeedRefreshData(true);
@@ -522,6 +575,8 @@ public class LoginUseCase extends BaseDataRepository {
 
                 systemSettingDataSource.setCurrentLoginToken(mToken);
 
+                systemSettingDataSource.setCurrentWAToken(mToken);
+
                 getStationList(weChatTokenUserWrapper, new BaseOperateDataCallback<Boolean>() {
                     @Override
                     public void onSucceed(Boolean data, OperationResult result) {
@@ -530,6 +585,8 @@ public class LoginUseCase extends BaseDataRepository {
 
                     @Override
                     public void onFail(OperationResult result) {
+
+                        systemSettingDataSource.setCurrentWAToken("");
 
                         systemSettingDataSource.setCurrentLoginToken("");
 
@@ -692,8 +749,6 @@ public class LoginUseCase extends BaseDataRepository {
                                 userDataRepository.insertUsers(users);
 
                                 initSystemState(mToken, mGateway, currentUser.getUuid());
-
-                                systemSettingDataSource.setCurrentWAToken(mToken);
 
                                 systemSettingDataSource.setCurrentLoginStationID(stationID);
 

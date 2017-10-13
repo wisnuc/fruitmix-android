@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.logout;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
@@ -15,6 +17,8 @@ import java.util.Collections;
  */
 
 public class LogoutUseCase {
+
+    public static final String TAG = LogoutUseCase.class.getSimpleName();
 
     private static LogoutUseCase ourInstance;
 
@@ -33,11 +37,11 @@ public class LogoutUseCase {
                                             WeChatUserDataSource weChatUserDataSource, HttpRequestFactory httpRequestFactory) {
         if (ourInstance == null)
             ourInstance = new LogoutUseCase(systemSettingDataSource, loggedInUserDataSource,
-                    uploadMediaUseCase, weChatUserDataSource,httpRequestFactory);
+                    uploadMediaUseCase, weChatUserDataSource, httpRequestFactory);
         return ourInstance;
     }
 
-    public static void destroyInstance(){
+    public static void destroyInstance() {
 
         ourInstance = null;
 
@@ -75,7 +79,7 @@ public class LogoutUseCase {
 
             String currentLoginStationID = systemSettingDataSource.getCurrentLoginStationID();
 
-            WeChatUser weChatUser = weChatUserDataSource.getWeChatUser(currentLoginToken,currentLoginStationID);
+            WeChatUser weChatUser = weChatUserDataSource.getWeChatUser(currentLoginToken, currentLoginStationID);
 
             if (weChatUser != null)
                 weChatUserDataSource.deleteWeChatUser(currentLoginToken);
@@ -84,9 +88,17 @@ public class LogoutUseCase {
 
         systemSettingDataSource.setCurrentLoginToken("");
 
+        systemSettingDataSource.setCurrentWAToken("");
+
         systemSettingDataSource.setCurrentLoginUserGUID("");
 
         systemSettingDataSource.setCurrentLoginStationID("");
+
+        systemSettingDataSource.setCurrentEquipmentIp("");
+
+        systemSettingDataSource.setCurrentLoginUserUUID("");
+
+        systemSettingDataSource.setCurrentUploadUserUUID("");
 
         httpRequestFactory.reset();
 

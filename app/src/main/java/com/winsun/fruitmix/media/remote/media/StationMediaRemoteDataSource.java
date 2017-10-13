@@ -37,6 +37,10 @@ public class StationMediaRemoteDataSource extends BaseRemoteDataSourceImpl {
         return instance;
     }
 
+    public static void destroyInstance() {
+        instance = null;
+    }
+
     private StationMediaRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory, IHttpFileUtil iHttpFileUtil) {
         super(iHttpUtil, httpRequestFactory);
         this.iHttpFileUtil = iHttpFileUtil;

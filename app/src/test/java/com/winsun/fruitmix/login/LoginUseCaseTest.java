@@ -175,6 +175,10 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).getLoginWithWechatCodeOrNot();
 
+        handleGetUserWhenLoginWithNoParamByWeChatToken();
+    }
+
+    private void handleGetUserWhenLoginWithNoParamByWeChatToken() {
         verify(systemSettingDataSource).getCurrentLoginStationID();
 
         verify(weChatUserDataSource).getWeChatUser(eq(testToken), eq(testStationID));
@@ -193,9 +197,60 @@ public class LoginUseCaseTest {
 
         initSystemStateAndVerify();
 
-        verify(systemSettingDataSource).setCurrentWAToken(eq(testToken));
-
         verify(systemSettingDataSource).setCurrentLoginUserGUID(testGUID);
+    }
+
+    @Test
+    public void loginWithNoParamStationIPIsUnreachableAndLoginWithWechatToken(){
+
+        WeChatUser weChatUser = new WeChatUser(testToken, testGUID, testStationID);
+
+        when(weChatUserDataSource.getWeChatUser(testToken, testStationID)).thenReturn(weChatUser);
+
+        when(systemSettingDataSource.getCurrentLoginToken()).thenReturn(testToken);
+
+        when(systemSettingDataSource.getCurrentWAToken()).thenReturn(testToken);
+
+        when(systemSettingDataSource.getCurrentLoginStationID()).thenReturn(testStationID);
+
+        User user = new User();
+        user.setUuid(testUserUUID);
+
+        when(systemSettingDataSource.getLoginWithWechatCodeOrNot()).thenReturn(false);
+
+        when(systemSettingDataSource.getCurrentEquipmentIp()).thenReturn("");
+
+        when(systemSettingDataSource.getCurrentLoginUserUUID()).thenReturn(testUserUUID);
+
+        loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>() {
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
+
+                assertTrue(data);
+            }
+
+            @Override
+            public void onFail(OperationResult result) {
+                toastFail();
+            }
+        });
+
+        verify(systemSettingDataSource).getCurrentLoginToken();
+
+        verify(systemSettingDataSource).getLoginWithWechatCodeOrNot();
+
+        verify(systemSettingDataSource).getCurrentEquipmentIp();
+
+        ArgumentCaptor<BaseOperateDataCallback<Boolean>> captor = ArgumentCaptor.forClass(BaseOperateDataCallback.class);
+
+        verify(stationsDataSource).checkStationIP(eq(""),captor.capture());
+
+        captor.getValue().onFail(new OperationFail(""));
+
+        verify(systemSettingDataSource).getCurrentWAToken();
+
+        handleGetUserWhenLoginWithNoParamByWeChatToken();
+
     }
 
 
@@ -232,6 +287,12 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).getCurrentEquipmentIp();
 
+        ArgumentCaptor<BaseOperateDataCallback<Boolean>> captor = ArgumentCaptor.forClass(BaseOperateDataCallback.class);
+
+        verify(stationsDataSource).checkStationIP(eq(""),captor.capture());
+
+        captor.getValue().onSucceed(true,new OperationSuccess());
+
         verify(systemSettingDataSource).getCurrentLoginUserUUID();
 
         verify(httpRequestFactory).setCurrentData(eq(testToken), eq(""));
@@ -263,8 +324,6 @@ public class LoginUseCaseTest {
         verify(systemSettingDataSource).setCurrentEquipmentIp(anyString());
 
         verify(systemSettingDataSource).setCurrentLoginUserGUID(eq(""));
-
-        verify(systemSettingDataSource).setCurrentLoginStationID(eq(""));
 
         verify(stationFileRepository).clearDownloadFileRecordInCache();
 
@@ -475,11 +534,12 @@ public class LoginUseCaseTest {
 
         captor.getValue().onSucceed(Collections.singletonList(weChatTokenUserWrapper), new OperationSuccess());
 
-        verify(systemSettingDataSource).setCurrentLoginToken(testToken);
+        verify(systemSettingDataSource).setCurrentLoginToken(eq(testToken));
+
+        verify(systemSettingDataSource).setCurrentWAToken(eq(testToken));
 
         verify(httpRequestFactory).setCurrentData(anyString(), anyString());
 
-        verify(systemSettingDataSource).setCurrentLoginToken(testToken);
 
     }
 
@@ -500,6 +560,7 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).setCurrentLoginToken(eq(""));
 
+        verify(systemSettingDataSource).setCurrentWAToken(eq(""));
     }
 
 
@@ -566,8 +627,6 @@ public class LoginUseCaseTest {
 
         verify(userDataRepository).insertUsers(ArgumentMatchers.<User>anyCollection());
 
-        verify(systemSettingDataSource).setCurrentWAToken(eq(testToken));
-
         verify(systemSettingDataSource).setCurrentLoginStationID(eq(testStationID));
 
     }
@@ -589,8 +648,6 @@ public class LoginUseCaseTest {
         verify(systemSettingDataSource).setCurrentEquipmentIp(anyString());
 
         verify(systemSettingDataSource).setCurrentLoginUserGUID(eq(""));
-
-        verify(systemSettingDataSource).setCurrentLoginStationID(eq(""));
 
         verify(stationFileRepository).clearDownloadFileRecordInCache();
 

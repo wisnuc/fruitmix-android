@@ -56,6 +56,12 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         return instance;
     }
 
+    public static void destroyInstance(){
+
+        instance = null;
+
+    }
+
 
     private StationFileDataSourceImpl(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory, IHttpFileUtil iHttpFileUtil) {
         super(iHttpUtil, httpRequestFactory);

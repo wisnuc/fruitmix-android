@@ -170,7 +170,7 @@ public class UploadMediaUseCase {
 
     public void startUploadMedia() {
 
-        threadManager.runOnCacheThread(new Runnable() {
+        threadManager.runOnUploadMediaThread(new Runnable() {
             @Override
             public void run() {
                 startUploadMediaInThread();
@@ -631,12 +631,9 @@ public class UploadMediaUseCase {
 //
 //        }
 
-        threadManager.runOnUploadMediaThread(new Runnable() {
-            @Override
-            public void run() {
-                uploadMediaInThread(needUploadedMedias, uploadFolderUUID);
-            }
-        });
+
+        uploadMediaInThread(needUploadedMedias, uploadFolderUUID);
+
 
     }
 
@@ -1042,9 +1039,10 @@ public class UploadMediaUseCase {
 
         uploadFolderUUID = "";
 
-        currentUserUUID = "";
+        //modify by liang.wu for bug:stop upload but currentUserUUID or currentUserHome is still used
+//        currentUserUUID = "";
 
-        currentUserHome = "";
+//        currentUserHome = "";
 
     }
 

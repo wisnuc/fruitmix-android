@@ -51,7 +51,7 @@ public class LogoutUseCaseTest {
         MockitoAnnotations.initMocks(this);
 
         logoutUseCase = LogoutUseCase.getInstance(systemSettingDataSource, loggedInUserDataSource,
-                uploadMediaUseCase, weChatUserDataSource,httpRequestFactory);
+                uploadMediaUseCase, weChatUserDataSource, httpRequestFactory);
     }
 
     @After
@@ -129,12 +129,20 @@ public class LogoutUseCaseTest {
     private void handleLogout() {
         verify(systemSettingDataSource).setCurrentLoginToken(eq(""));
 
+        verify(systemSettingDataSource).setCurrentWAToken(eq(""));
+
         verify(systemSettingDataSource).setCurrentLoginUserGUID(eq(""));
 
         verify(systemSettingDataSource).setCurrentLoginStationID(eq(""));
 
-        verify(httpRequestFactory).reset();
-    }
+        verify(systemSettingDataSource).setCurrentEquipmentIp(eq(""));
 
+        verify(systemSettingDataSource).setCurrentLoginUserUUID(eq(""));
+
+        verify(systemSettingDataSource).setCurrentUploadUserUUID(eq(""));
+
+        verify(httpRequestFactory).reset();
+
+    }
 
 }

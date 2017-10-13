@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.http.request.factory;
 
-import com.winsun.fruitmix.http.HttpRequest;
 
 /**
  * Created by Administrator on 2017/10/9.

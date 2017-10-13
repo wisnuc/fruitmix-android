@@ -3,17 +3,22 @@ package com.winsun.fruitmix.init.system;
 import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.file.data.station.StationFileDataSourceImpl;
 import com.winsun.fruitmix.file.data.station.StationFileRepositoryImpl;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.http.OkHttpUtil;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
+import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.media.MediaDataSourceRepositoryImpl;
 import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
+import com.winsun.fruitmix.media.remote.media.StationMediaRemoteDataSource;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.services.ButlerService;
+import com.winsun.fruitmix.stations.StationsDataSource;
+import com.winsun.fruitmix.stations.StationsRemoteDataSource;
 import com.winsun.fruitmix.stations.StationsRepository;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.datasource.UserDataRepositoryImpl;
@@ -31,9 +36,13 @@ public class InitSystem {
 
         LogoutUseCase.destroyInstance();
 
+        LoginUseCase.destroyInstance();
+
         OkHttpUtil.destroyInstance();
 
         StationsRepository.destroyInstance();
+
+        StationsRemoteDataSource.destroyInstance();
 
         HttpRequestFactory.destroyInstance();
 
@@ -43,11 +52,15 @@ public class InitSystem {
 
         StationMediaRepository.destroyInstance();
 
+        StationMediaRemoteDataSource.destroyInstance();
+
         LocalMediaRepository.destroyInstance();
 
         MediaDataSourceRepositoryImpl.destroyInstance();
 
         StationFileRepositoryImpl.destroyInstance();
+
+        StationFileDataSourceImpl.destroyInstance();
 
         LoggedInUserRepository.destroyInstance();
 

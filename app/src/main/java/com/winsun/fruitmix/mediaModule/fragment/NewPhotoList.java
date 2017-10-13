@@ -9,6 +9,8 @@ import android.databinding.ObservableBoolean;
 import android.databinding.ViewDataBinding;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.util.ArrayMap;
@@ -482,7 +484,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             newPhotoListViewModel.showContent.set(true);
 
-            mPhotoRecycleAdapter.notifyDataSetChanged();
+            //modify by liang.wu: add handler for crash:Cannot call this method while RecyclerView is computing a layout or scrolling
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    mPhotoRecycleAdapter.notifyDataSetChanged();
+                }
+            });
 
             if (mPhotoListListener != null)
                 mPhotoListListener.onNoPhotoItem(false);
@@ -723,7 +731,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (initialPhotoPosition != currentPhotoPosition) {
 
-                Media media = null;
+                Media media;
                 Media currentMedia = null;
 
                 int size = mMapKeyIsPhotoPositionValueIsPhoto.size();
@@ -736,10 +744,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 if (currentMedia == null) return;
 
-                View newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageThumbUrl(containerActivity));
+                View newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageThumbUrl(containerActivity).getUrl());
 
                 if (newSharedElement == null)
-                    newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageSmallThumbUrl(containerActivity));
+                    newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageSmallThumbUrl(containerActivity).getUrl());
 
                 names.clear();
                 sharedElements.clear();
@@ -775,7 +783,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             int scrollToPosition = 0;
 
-            Media media = null;
+            Media media;
 
             int size = mMapKeyIsPhotoPositionValueIsPhoto.size();
 
