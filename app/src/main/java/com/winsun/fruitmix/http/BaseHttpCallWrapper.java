@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.http;
 
+import android.util.Patterns;
+
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
@@ -77,7 +79,7 @@ public class BaseHttpCallWrapper {
 
     public <T> void loadCall(HttpRequest httpRequest, BaseLoadDataCallback<T> callback, RemoteDatasParser<T> parser) {
 
-        if (!httpRequest.getUrl().contains("http://")) {
+        if(!Patterns.WEB_URL.matcher(httpRequest.getUrl()).matches()){
             callback.onFail(new OperationMalformedUrlException());
             return;
         }

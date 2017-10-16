@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.android.volley.toolbox.StringRequest;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
@@ -16,9 +17,7 @@ import com.winsun.fruitmix.databinding.ConfirmInviteUserItemBinding;
 import com.winsun.fruitmix.databinding.ConfirmInviteUserItemHeaderBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
-import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.invitation.data.InvitationDataSource;
-import com.winsun.fruitmix.invitation.data.InvitationRemoteDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
@@ -53,12 +52,12 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
     private LoadingViewModel loadingViewModel;
     private NoContentViewModel noContentViewModel;
 
-    private BaseView baseView;
+    private ConfirmInviteUserView confirmInviteUserView;
 
-    public ConfirmInviteUserPresenterImpl(BaseView baseView, InvitationDataSource invitationDataSource, ImageLoader imageLoader, final LoadingViewModel loadingViewModel, final NoContentViewModel noContentViewModel) {
+    public ConfirmInviteUserPresenterImpl(ConfirmInviteUserView confirmInviteUserView, InvitationDataSource invitationDataSource, ImageLoader imageLoader, final LoadingViewModel loadingViewModel, final NoContentViewModel noContentViewModel) {
         mInvitationDataSource = invitationDataSource;
 
-        this.baseView = baseView;
+        this.confirmInviteUserView = confirmInviteUserView;
         this.loadingViewModel = loadingViewModel;
         this.noContentViewModel = noContentViewModel;
 
@@ -139,15 +138,17 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     private void postOperation(final ConfirmInviteUser confirmInviteUser) {
 
-        baseView.showProgressDialog("正在执行");
+        confirmInviteUserView.showProgressDialog(String.format(confirmInviteUserView.getString(R.string.operating_title),
+                confirmInviteUserView.getString(R.string.confirm_invitation)));
 
         mInvitationDataSource.confirmInvitation(confirmInviteUser, new BaseOperateDataCallback<String>() {
             @Override
             public void onSucceed(final String data, OperationResult result) {
 
-                baseView.dismissDialog();
+                confirmInviteUserView.dismissDialog();
 
-                baseView.showToast("执行成功");
+                confirmInviteUserView.showToast(String.format(confirmInviteUserView.getString(R.string.success),
+                        confirmInviteUserView.getString(R.string.confirm_invitation)));
 
                 handleOperateSucceed(confirmInviteUser.getTicketUUID());
 
@@ -156,9 +157,10 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
             @Override
             public void onFail(OperationResult result) {
 
-                baseView.dismissDialog();
+                confirmInviteUserView.dismissDialog();
 
-                baseView.showToast("执行失败");
+                confirmInviteUserView.showToast(String.format(confirmInviteUserView.getString(R.string.fail),
+                        confirmInviteUserView.getString(R.string.confirm_invitation)));
 
             }
         });

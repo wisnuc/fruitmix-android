@@ -23,6 +23,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
+import com.winsun.fruitmix.parser.RemoteRootDriveFolderParser;
 import com.winsun.fruitmix.util.FileUtil;
 
 import java.io.IOException;
@@ -41,6 +42,8 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     public static final String LIST_FILE_PARAMETER = "/drives";
 
     public static final String DOWNLOAD_FILE_PARAMETER = "/drives";
+
+    public static final String ROOT_DRIVE_PARAMETER = "/drives";
 
     public static final String TAG = StationFileDataSourceImpl.class.getSimpleName();
 
@@ -66,6 +69,15 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     private StationFileDataSourceImpl(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory, IHttpFileUtil iHttpFileUtil) {
         super(iHttpUtil, httpRequestFactory);
         this.iHttpFileUtil = iHttpFileUtil;
+    }
+
+    @Override
+    public void getRootDrive(BaseLoadDataCallback<AbstractRemoteFile> callback) {
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(ROOT_DRIVE_PARAMETER);
+
+        wrapper.loadCall(httpRequest,callback,new RemoteRootDriveFolderParser());
+
     }
 
     @Override

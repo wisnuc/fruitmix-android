@@ -1,8 +1,14 @@
 package com.winsun.fruitmix;
 
+import com.winsun.fruitmix.mock.MockApplication;
+import com.winsun.fruitmix.util.Util;
+
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +18,8 @@ import java.util.List;
 /**
  * Created by Administrator on 2017/7/27.
  */
-
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
 public class StringUtilTest {
 
     @Test
@@ -89,6 +96,27 @@ public class StringUtilTest {
 
         assertEquals("width",queryStrSplitResult[0]);
         assertEquals("64",queryStrSplitResult[1]);
+
+    }
+
+    @Test
+    public void testEnterIP(){
+
+        String ip = "10.2.10.55";
+
+        assertEquals(true, Util.checkIpLegal(ip));
+
+        ip = "10.2.10.115:3000";
+
+        assertEquals(false,Util.checkIpLegal(ip));
+
+        ip = "151.254.12.1.1";
+
+        assertEquals(false,Util.checkIpLegal(ip));
+
+        ip = "14.15.258.40";
+
+        assertEquals(false,Util.checkIpLegal(ip));
 
     }
 

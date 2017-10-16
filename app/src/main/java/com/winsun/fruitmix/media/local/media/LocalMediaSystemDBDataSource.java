@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Administrator on 2017/7/18.
@@ -80,7 +81,7 @@ public class LocalMediaSystemDBDataSource {
             callback.onSucceed(currentAllMediaPathInSystemDB, newMediaList, new OperationSuccess());
             return;
         }
-        df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         date = Calendar.getInstance();
 
         Log.i(TAG, "PhotoList: cursor count: " + cursor.getCount());

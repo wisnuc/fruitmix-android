@@ -11,6 +11,9 @@ import android.widget.Toast;
 
 import com.winsun.fruitmix.util.Util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -33,7 +36,7 @@ public class CreateNewEquipmentActivity extends AppCompatActivity implements Vie
 
         ButterKnife.bind(this);
 
-        mLayoutTitle.setText("手动输入ip");
+        mLayoutTitle.setText(getString(R.string.enter_ip));
 
         setSupportActionBar(mToolBar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -55,17 +58,30 @@ public class CreateNewEquipmentActivity extends AppCompatActivity implements Vie
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.select:
+
+                Util.hideSoftInput(CreateNewEquipmentActivity.this);
+
                 String ip = ipInputEditText.getText().toString();
 
                 if (ip.equals("")) {
 
-                    Toast.makeText(CreateNewEquipmentActivity.this, "请输入ip", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CreateNewEquipmentActivity.this, getString(R.string.enter_ip), Toast.LENGTH_SHORT).show();
 
                 } else {
-                    Intent intent = new Intent();
-                    intent.putExtra(Util.KEY_MANUAL_INPUT_IP, ip);
-                    setResult(RESULT_OK, intent);
-                    finish();
+
+                    if(Util.checkIpLegal(ip)){
+
+                        Intent intent = new Intent();
+                        intent.putExtra(Util.KEY_MANUAL_INPUT_IP, ip);
+                        setResult(RESULT_OK, intent);
+                        finish();
+
+                    }else {
+
+                        Toast.makeText(CreateNewEquipmentActivity.this, getString(R.string.ip_illegal), Toast.LENGTH_SHORT).show();
+
+                    }
+
                 }
                 break;
         }

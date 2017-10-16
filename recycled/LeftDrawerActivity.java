@@ -159,7 +159,7 @@ public class LeftDrawerActivity extends AppCompatActivity
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return "选X项" + position;
+            return "" + position;
         }
 
         @Override

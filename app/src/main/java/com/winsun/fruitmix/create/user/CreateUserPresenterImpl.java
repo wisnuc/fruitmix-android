@@ -110,7 +110,6 @@ public class CreateUserPresenterImpl implements CreateUserPresenter {
 
         String confirmPassword = createUserViewModel.getUserConfirmPassword();
 
-
         if (checkPasswordFirstWordIsIllegal(password)) {
 
             createUserViewModel.userPasswordErrorEnable.set(true);

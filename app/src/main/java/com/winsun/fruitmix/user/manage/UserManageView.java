@@ -8,5 +8,6 @@ public interface UserManageView {
 
     void gotoCreateUserActivity();
 
+    String getString(int resID);
 
 }

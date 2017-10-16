@@ -917,8 +917,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             if (title.contains(Util.DEFAULT_DATE)) {
                 return containerActivity.getString(R.string.unknown_time);
             } else {
-                String[] titleSplit = title.split("-");
-                return titleSplit[0] + "年" + titleSplit[1] + "月";
+
+                return title;
+
+//                String[] titleSplit = title.split("-");
+//                return titleSplit[0] + "年" + titleSplit[1] + "月";
 
             }
 

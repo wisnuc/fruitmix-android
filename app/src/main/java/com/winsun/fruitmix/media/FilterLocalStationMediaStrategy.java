@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class FilterLocalStationMediaStrategy {
 
     public List<Media> filter(Collection<Media> localMedias, Collection<Media> stationMedias) {
 
-        Log.i(TAG, "before filter :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "before filter :" + Util.getCurrentFormatTime());
 
         List<Media> result = new ArrayList<>(localMedias);
 
@@ -47,7 +48,7 @@ public class FilterLocalStationMediaStrategy {
 
         }
 
-        Log.i(TAG, "after filter : " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "after filter : " + Util.getCurrentFormatTime());
 
         result.addAll(stationMediaMap.values());
 

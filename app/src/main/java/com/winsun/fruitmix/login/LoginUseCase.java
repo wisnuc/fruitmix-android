@@ -230,6 +230,9 @@ public class LoginUseCase extends BaseDataRepository {
 
             Log.d(TAG, "loginWithNoParam: currentLoginStationID: " + currentLoginStationID);
 
+            if (currentLoginStationID.isEmpty())
+                callback.onFail(new OperationFail("current login station id is empty"));
+
             WeChatUser weChatUser = weChatUserDataSource.getWeChatUser(currentWAToken, currentLoginStationID);
             loginWithWeChatUser(callback, weChatUser);
 

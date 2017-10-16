@@ -35,6 +35,10 @@
 
     <string name="confirm">Confirm</string>
 
+    <string name="accept">Accept</string>
+
+    <string name="refuse">Refuse</string>
+
     <string name="finish_text">Done</string>
 
     <string name="choose_text">Select</string>
@@ -79,6 +83,10 @@
     <string name="go_to_setting">Go to Setting</string>
 
     <string name="no_photo">No photo</string>
+
+    <string name="send">Send</string>
+
+    <string name="getting_download_progress">Getting download progress</string>
 
     <!-- slide menu -->
 
@@ -141,6 +149,8 @@
 
     <string name="download_original_photo_fail">Download original photo failed!</string>
 
+    <string name="no_photo_for_select">No photo for select</string>
+
     <!-- share -->
 
     <string name="check_more_photos">Check more photos</string>
@@ -168,12 +178,24 @@
 
     <!-- equipment -->
 
+    <string name="user">User</string>
+
+    <string name="virtual_machine">Virtual Machine</string>
+
     <string name="search_equipment">Search WISNUC Server</string>
+
+    <string name="equipment_not_found">Equipment not found</string>
 
     <!-- 设备名 默认值-->
     <string name="equipment_group_default_text">WISNUC</string>
 
     <string name="search_equipment_failed">Search equipment failed</string>
+
+    <!-- enter equipment ip -->
+
+    <string name="enter_ip">Please enter IP without port</string>
+
+    <string name="ip_illegal">IP is illegal</string>
 
     <!-- share comment -->
 
@@ -192,7 +214,7 @@
     <string name="clear_cache">Clear temporary files</string>
     <string name="already_upload_media_count_hint">Backups / Total Photos</string>
     <string name="already_upload_media_count_text">%1$d/%2$d</string>
-    
+
     <string name="calculating">Calculating</string>
 
     <!-- create user -->
@@ -216,12 +238,19 @@
     <string name="download_the_item">Download</string>
     <string name="open_the_item">Open</string>
     <string name="re_download_the_item">Re Download</string>
+    <string name="need_download_and_cover_original_file">Download and cover original file?</string>
+    <string name="cover">Cover</string>
+    <string name="delete_original_file_fail">Delete original file failed!</string>
+    <string name="no_file_for_select">No file for select</string>
+
+    <string name="shared_drive">Shared Drive</string>
 
     <!-- file download -->
 
     <string name="downloading">Downloading</string>
     <string name="downloaded">Downloaded</string>
     <string name="download_failed">Download failed</string>
+    <string name="no_download_record">No download record</string>
 
     <!-- hints -->
     <string name="success">%1$s succeeded</string>
@@ -252,6 +281,17 @@
     <string name="errcode_deny">Send denied</string>
     <string name="errcode_unsupported">UnSupported Error</string>
     <string name="errcode_unknown">UnKnown Error</string>
+
+    <string name="no_binding_user_in_nas">No binding user in nas</string>
+    <string name="binding_user_station_offline">The device in which the user is bound is offline</string>
+
+    <string name="select_one_winsuc">Select one wisnuc</string>
+    <string name="on_equipment">On %1$s</string>
+    <string name="wechat_login">WeChat Login</string>
+    <!-- invite user -->
+    <string name="confirm_invitation">Confirm invitation</string>
+    <string name="no_invitation">No invitation</string>
+
 
     <!-- group -->
     <string name="group">Group</string>

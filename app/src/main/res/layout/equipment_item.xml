@@ -39,7 +39,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="未搜到服务器"
+                    android:text="@string/equipment_not_found"
                     android:textColor="@color/eighty_seven_percent_white"
                     android:textSize="16dp" />
 

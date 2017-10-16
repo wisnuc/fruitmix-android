@@ -102,7 +102,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="微信登录"
+                    android:text="@string/wechat_login"
                     android:textColor="@color/eighty_seven_percent_black"
                     android:textSize="14dp" />
 
@@ -158,7 +158,7 @@
                     android:background="#FAFAFA"
                     android:gravity="center_vertical"
                     android:paddingLeft="16dp"
-                    android:text="用户"
+                    android:text="@string/user"
                     android:textColor="@color/fifty_four_percent_black"
                     android:textSize="18dp"
                     android:visibility="@{equipmentSearchViewModel.showEquipmentUsers?View.VISIBLE:View.GONE,default=gone}" />

@@ -170,7 +170,7 @@ public class UploadMediaUseCase {
 
     public void startUploadMedia() {
 
-        threadManager.runOnUploadMediaThread(new Runnable() {
+        threadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
                 startUploadMediaInThread();
@@ -631,9 +631,12 @@ public class UploadMediaUseCase {
 //
 //        }
 
-
-        uploadMediaInThread(needUploadedMedias, uploadFolderUUID);
-
+        threadManager.runOnUploadMediaThread(new Runnable() {
+            @Override
+            public void run() {
+                uploadMediaInThread(needUploadedMedias, uploadFolderUUID);
+            }
+        });
 
     }
 

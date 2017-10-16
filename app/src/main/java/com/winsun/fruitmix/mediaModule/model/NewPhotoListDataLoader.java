@@ -7,6 +7,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -151,7 +152,7 @@ public class NewPhotoListDataLoader {
         mMapKeyIsPhotoPositionValueIsPhotoDate.clear();
         mMapKeyIsPhotoPositionValueIsPhoto.clear();
 
-        Log.i(TAG, "reloadData: before load list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "reloadData: before load list :" + Util.getCurrentFormatTime());
 
         for (Media media : medias) {
 
@@ -175,7 +176,7 @@ public class NewPhotoListDataLoader {
 
         }
 
-        Log.i(TAG, "reloadData: after list :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "reloadData: after list :" + Util.getCurrentFormatTime());
 
         Collections.sort(mPhotoDateGroups, new Comparator<String>() {
             @Override
@@ -184,11 +185,11 @@ public class NewPhotoListDataLoader {
             }
         });
 
-        Log.i(TAG, "reloadData: after sort photo date groups :" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "reloadData: after sort photo date groups :" + Util.getCurrentFormatTime());
 
         calcPhotoPositionNumber();
 
-        Log.i(TAG, "reloadData: after calc photo position number" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.i(TAG, "reloadData: after calc photo position number" + Util.getCurrentFormatTime());
     }
 
     public void calcPhotoPositionNumber() {

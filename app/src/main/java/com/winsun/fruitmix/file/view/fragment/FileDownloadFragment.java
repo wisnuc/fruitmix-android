@@ -461,7 +461,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
     public void selectMode() {
 
         if (!canEnterSelectMode()) {
-            Toast.makeText(activity, "没有下载记录可选", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, activity.getString(R.string.no_download_record), Toast.LENGTH_SHORT).show();
             return;
         }
 

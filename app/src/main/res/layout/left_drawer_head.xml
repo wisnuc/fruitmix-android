@@ -161,7 +161,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="正在获取下载进度"
+                    android:text="@string/getting_download_progress"
                     android:textColor="#8AFFFFFF"
                     android:textSize="12dp" />
 

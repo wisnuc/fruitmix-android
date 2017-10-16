@@ -142,7 +142,7 @@ public class UserRemoteDataSourceTest {
     }
 
     private void prepareHttpRequest() {
-        HttpRequest httpRequest = new HttpRequest("http://", "");
+        HttpRequest httpRequest = new HttpRequest("http://10.10.9.1/user", "");
 
         when(httpRequestFactory.createHttpGetRequest(anyString())).thenReturn(httpRequest);
         when(httpRequestFactory.createGetRequestByPathWithoutToken(anyString())).thenReturn(httpRequest);

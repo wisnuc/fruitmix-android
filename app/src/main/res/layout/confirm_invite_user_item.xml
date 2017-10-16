@@ -52,7 +52,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:onClick="@{()->confirmInviteUserPresenter.refuseInviteUser(confirmInviteUser)}"
-            android:text="拒绝" />
+            android:text="@string/refuse" />
 
 
         <Button
@@ -63,7 +63,7 @@
             android:layout_marginRight="16dp"
             android:layout_toLeftOf="@id/refuse"
             android:onClick="@{()->confirmInviteUserPresenter.acceptInviteUser(confirmInviteUser)}"
-            android:text="接受" />
+            android:text="@string/accept" />
 
     </RelativeLayout>
 

@@ -19,7 +19,7 @@ import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
-public class ConfirmInviteUserActivity extends BaseActivity {
+public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmInviteUserView{
 
     private RecyclerView recyclerView;
 
@@ -34,7 +34,7 @@ public class ConfirmInviteUserActivity extends BaseActivity {
         recyclerView = binding.confirmTicketRecyclerview;
 
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
-        toolbarViewModel.titleText.set("确认邀请");
+        toolbarViewModel.titleText.set(getString(R.string.confirm_invitation));
         toolbarViewModel.setBaseView(this);
 
         binding.setToolbarViewModel(toolbarViewModel);
@@ -44,7 +44,7 @@ public class ConfirmInviteUserActivity extends BaseActivity {
         binding.setLoadingViewModel(loadingViewModel);
 
         NoContentViewModel noContentViewModel = new NoContentViewModel();
-        noContentViewModel.setNoContentText("没有内容");
+        noContentViewModel.setNoContentText(getString(R.string.no_invitation));
         noContentViewModel.setNoContentImgResId(R.drawable.no_file);
 
         binding.setNoContentViewModel(noContentViewModel);

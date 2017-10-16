@@ -1,5 +1,10 @@
 package com.winsun.fruitmix.file.data.model;
 
+import com.winsun.fruitmix.util.Util;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by Administrator on 2017/8/9.
  */
@@ -13,8 +18,6 @@ public abstract class AbstractFile {
     private int fileTypeResID;
 
     public abstract boolean isFolder();
-
-    public abstract String getTimeDateText();
 
     public String getName() {
         return name;
@@ -39,4 +42,10 @@ public abstract class AbstractFile {
     public void setTime(String time) {
         this.time = time;
     }
+
+    public String getTimeDateText() {
+
+        return Util.formatDate(Long.parseLong(getTime()));
+    }
+
 }

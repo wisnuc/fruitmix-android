@@ -8,15 +8,13 @@ import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
 import com.winsun.fruitmix.file.data.download.DownloadedItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
-import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
-import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.file.data.model.RemoteFolder;
+import com.winsun.fruitmix.file.data.model.RemotePrivateDrive;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 
@@ -26,8 +24,6 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by Administrator on 2017/7/19.
@@ -52,6 +48,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
         this.downloadedFileDataSource = downloadedFileDataSource;
 
         stationFiles = new ArrayList<>();
+
     }
 
     public static StationFileRepositoryImpl getInstance(StationFileDataSource stationFileDataSource, DownloadedFileDataSource downloadedFileDataSource, ThreadManager threadManager) {
@@ -62,6 +59,18 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
     public static void destroyInstance() {
         instance = null;
+    }
+
+    @Override
+    public void getRootDrive(final BaseLoadDataCallback<AbstractRemoteFile> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                stationFileDataSource.getRootDrive(createLoadCallbackRunOnMainThread(callback));
+            }
+        });
+
     }
 
     public void getFile(final String rootUUID, final String folderUUID, final BaseLoadDataCallback<AbstractRemoteFile> callback) {
@@ -80,43 +89,48 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
             @Override
             public void run() {
 
-                stationFileDataSource.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
-
-                    @Override
-                    public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
-                        super.onSucceed(data, operationResult);
-
-                        currentFolderUUID = folderUUID;
-
-                        for (AbstractRemoteFile file : data) {
-                            file.setParentFolderUUID(folderUUID);
-                        }
-
-                        stationFiles.clear();
-
-                        stationFiles.addAll(data);
-
-                        runOnMainThreadCallback.onSucceed(data, operationResult);
-
-                        cacheDirty = false;
-
-                    }
-
-                    @Override
-                    public void onFail(OperationResult operationResult) {
-                        super.onFail(operationResult);
-
-                        currentFolderUUID = folderUUID;
-
-                        runOnMainThreadCallback.onFail(operationResult);
-
-                        cacheDirty = false;
-                    }
-                });
+                handleGeneralFolder(rootUUID, folderUUID, runOnMainThreadCallback);
 
             }
+
         });
 
+    }
+
+    private void handleGeneralFolder(final String rootUUID,final String folderUUID,final BaseLoadDataCallback<AbstractRemoteFile> runOnMainThreadCallback) {
+        stationFileDataSource.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
+
+            @Override
+            public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
+                super.onSucceed(data, operationResult);
+
+                currentFolderUUID = folderUUID;
+
+                for (AbstractRemoteFile file : data) {
+                    file.setParentFolderUUID(folderUUID);
+                }
+
+                stationFiles.clear();
+
+                stationFiles.addAll(data);
+
+                runOnMainThreadCallback.onSucceed(data, operationResult);
+
+                cacheDirty = false;
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+                super.onFail(operationResult);
+
+                currentFolderUUID = folderUUID;
+
+                runOnMainThreadCallback.onFail(operationResult);
+
+                cacheDirty = false;
+            }
+        });
     }
 
     @Override
@@ -133,7 +147,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
                 downloadedFileDataSource.insertDownloadedFileRecord(downloadedItem);
 
-                callback.onSucceed(fileDownloadState.getFileDownloadItem(),new OperationSuccess());
+                callback.onSucceed(fileDownloadState.getFileDownloadItem(), new OperationSuccess());
 
             }
 

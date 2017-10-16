@@ -19,6 +19,8 @@ public class User {
     private String library;
     private boolean admin;
 
+    private boolean disabled;
+
     private String associatedWeChatGUID;
     private String associatedWeChatUserName;
 
@@ -122,6 +124,14 @@ public class User {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 
     public void setAssociatedWeChatGUID(String associatedWeChatGUID) {

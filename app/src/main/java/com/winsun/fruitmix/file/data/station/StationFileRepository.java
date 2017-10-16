@@ -25,6 +25,8 @@ import java.util.List;
 
 public interface StationFileRepository {
 
+    void getRootDrive(BaseLoadDataCallback<AbstractRemoteFile> callback);
+
     void getFile(String rootUUID, final String folderUUID, final BaseLoadDataCallback<AbstractRemoteFile> callback);
 
     void downloadFile(String currentUserUUID, FileDownloadState fileDownloadState, BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException;

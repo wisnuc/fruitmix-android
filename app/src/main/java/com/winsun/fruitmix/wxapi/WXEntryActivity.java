@@ -171,7 +171,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                                     if (data.isEmpty()) {
 
-                                        handleLoginFail(new OperationFail("未找到绑定的本地用户"));
+                                        handleLoginFail(new OperationFail(R.string.no_binding_user_in_nas));
 
                                     } else {
 
@@ -230,7 +230,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             LoggedInWeChatUser loggedInWeChatUser = loggedInWeChatUsers.get(i);
 
             String item = loggedInWeChatUser.getUser().getUserName() + "\n" +
-                    "在" + loggedInWeChatUser.getEquipmentName() + "上";
+                    String.format(getString(R.string.on_equipment), loggedInWeChatUser.getEquipmentName());
 
             items[i] = item;
 
@@ -241,7 +241,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
         AlertDialog dialog;
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(WXEntryActivity.this).setTitle("选择一台wisnuc")
+        AlertDialog.Builder builder = new AlertDialog.Builder(WXEntryActivity.this).setTitle(getString(R.string.select_one_winsuc))
                 .setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -290,7 +290,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
         startNavPagerActivity();
 
-        Toast.makeText(mContext, "登录成功", Toast.LENGTH_SHORT).show();
+        Toast.makeText(mContext, String.format(getString(R.string.success), getString(R.string.login)), Toast.LENGTH_SHORT).show();
     }
 
     private void handleLoginFail(OperationResult result) {

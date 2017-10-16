@@ -562,17 +562,21 @@ public class EquipmentPresenter {
 
         if (equipmentInfo != null) {
 
-            equipmentItemViewModel.type.set(equipmentInfo.getType());
-            equipmentItemViewModel.label.set(equipmentInfo.getLabel());
+            String type = equipmentInfo.getType();
 
-            if (equipmentInfo.getType().equals(EquipmentInfo.WS215I)) {
+            equipmentItemViewModel.type.set(type);
+
+            if (type.equals(EquipmentInfo.WS215I)) {
+
+                equipmentItemViewModel.label.set(EquipmentInfo.WS215I);
 
                 equipmentItemViewModel.equipmentIconID.set(R.drawable.equipment_215i);
 
                 initEquipmentViewModelDefaultBackgroundColor(container, equipmentItemViewModel);
 
-
             } else {
+
+                equipmentItemViewModel.label.set(container.getContext().getString(R.string.virtual_machine));
 
                 equipmentItemViewModel.equipmentIconID.set(R.drawable.virtual_machine);
 
@@ -608,7 +612,14 @@ public class EquipmentPresenter {
         }
 
         public void setCurrentUsers(List<User> currentUsers) {
-            mCurrentUsers.addAll(currentUsers);
+
+            for (User user : currentUsers) {
+
+                if (!user.isDisabled())
+                    mCurrentUsers.add(user);
+
+            }
+
         }
 
         @Override

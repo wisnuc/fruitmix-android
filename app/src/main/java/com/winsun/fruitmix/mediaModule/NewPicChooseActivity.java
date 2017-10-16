@@ -96,7 +96,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
         viewModel.showRevealToolbar.set(true);
 
-        viewModel.enterSelectModeText.set("发送");
+        viewModel.enterSelectModeText.set(getString(R.string.send));
 
         binding.setRevealToolbarViewModel(viewModel);
 

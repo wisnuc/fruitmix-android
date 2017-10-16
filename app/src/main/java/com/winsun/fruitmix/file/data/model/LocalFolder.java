@@ -13,8 +13,4 @@ public class LocalFolder extends AbstractLocalFile {
         return true;
     }
 
-    @Override
-    public String getTimeDateText() {
-        return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(getTime())));
-    }
 }

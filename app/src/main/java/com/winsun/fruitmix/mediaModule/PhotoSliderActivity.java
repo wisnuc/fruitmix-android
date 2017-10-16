@@ -818,7 +818,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return "选X项" + position;
+            return "" + position;
         }
 
         @Override

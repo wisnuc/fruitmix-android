@@ -89,7 +89,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
         String currentIPWithHttpHead = systemSettingDataSource.getCurrentEquipmentIp();
 
-        if(currentIPWithHttpHead.equals(HttpRequestFactory.CLOUD_IP)){
+        if (currentIPWithHttpHead.equals(HttpRequestFactory.CLOUD_IP)) {
 
             stationsDataSource.getStationsByWechatGUID(systemSettingDataSource.getCurrentLoginUserGUID(), new BaseLoadDataCallback<Station>() {
                 @Override
@@ -97,9 +97,9 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
                     String currentStationID = systemSettingDataSource.getCurrentLoginStationID();
 
-                    for (Station station:data){
+                    for (Station station : data) {
 
-                        if(station.getId().equals(currentStationID)){
+                        if (station.getId().equals(currentStationID)) {
 
                             currentIP = station.getFirstIp();
 
@@ -120,7 +120,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
             });
 
 
-        }else {
+        } else {
 
             if (currentIPWithHttpHead.contains(Util.HTTP)) {
                 String[] result = currentIPWithHttpHead.split(Util.HTTP);
@@ -139,7 +139,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
     }
 
-    private void getEquipmentInfo(final Station station){
+    private void getEquipmentInfo(final Station station) {
 
         equipmentDataSource.getEquipmentInfo(currentIP, new BaseLoadDataCallback<EquipmentInfo>() {
             @Override
@@ -191,19 +191,32 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
     private void setEquipmentInfo(EquipmentInfo equipmentInfo) {
 
-        if (equipmentInfo.getType().equals(EquipmentInfo.WS215I))
+        String type = equipmentInfo.getType();
+
+        String label;
+
+        if (type.equals(EquipmentInfo.WS215I)) {
+
+            label = EquipmentInfo.WS215I;
+
             equipmentItemViewModel.equipmentIconID.set(R.drawable.equipment_215i);
-        else
+        } else {
+
+            label = userManageView.getString(R.string.virtual_machine);
+
             equipmentItemViewModel.equipmentIconID.set(R.drawable.virtual_machine);
+        }
 
         equipmentItemViewModel.type.set(equipmentInfo.getType());
-        equipmentItemViewModel.label.set(equipmentInfo.getLabel());
+
+        equipmentItemViewModel.label.set(label);
         equipmentItemViewModel.ip.set(currentIP);
     }
 
     private void getUserInThread() {
 
-        userDataRepository.getUsers(currentLoginUserUUID,new BaseLoadDataCallback<User>() {
+        userDataRepository.setCacheDirty();
+        userDataRepository.getUsers(currentLoginUserUUID, new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(final List<User> data, OperationResult operationResult) {
 
@@ -234,7 +247,12 @@ public class UserManagePresenterImpl implements UserMangePresenter {
         else
             mUserList.clear();
 
-        mUserList.addAll(users);
+        for (User user : users) {
+
+            if (!user.isDisabled())
+                mUserList.add(user);
+
+        }
 
         Collections.sort(mUserList, new Comparator<User>() {
             @Override
@@ -305,9 +323,9 @@ public class UserManagePresenterImpl implements UserMangePresenter {
                 }
             });*/
 
-            UserAvatar userAvatar =binding.userAvatar;
+            UserAvatar userAvatar = binding.userAvatar;
 
-            userAvatar.setUser(user,imageLoader);
+            userAvatar.setUser(user, imageLoader);
 
             return convertView;
         }

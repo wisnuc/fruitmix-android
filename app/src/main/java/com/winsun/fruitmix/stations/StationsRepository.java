@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.stations;
 
 import com.winsun.fruitmix.BaseDataRepository;
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
@@ -51,7 +52,7 @@ public class StationsRepository extends BaseDataRepository implements StationsDa
                     public void onSucceed(List<Station> data, OperationResult operationResult) {
 
                         if (data.isEmpty()) {
-                            runOnMainThread.onFail(new OperationFail("未绑定nas用户，请绑定"));
+                            runOnMainThread.onFail(new OperationFail(R.string.no_binding_user_in_nas));
 
                             return;
                         }
@@ -69,7 +70,7 @@ public class StationsRepository extends BaseDataRepository implements StationsDa
 
                         if (data.isEmpty()) {
 
-                            runOnMainThread.onFail(new OperationFail("绑定的设备都未在线,请确认"));
+                            runOnMainThread.onFail(new OperationFail(R.string.binding_user_station_offline));
 
                             return;
                         }

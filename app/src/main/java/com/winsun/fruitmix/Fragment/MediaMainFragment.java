@@ -252,7 +252,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 if (viewPager.getCurrentItem() == PAGE_PHOTO) {
 
                     if (!photoList.canEnterSelectMode()) {
-                        Toast.makeText(mContext, "没有照片可选", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, getString(R.string.no_photo_for_select), Toast.LENGTH_SHORT).show();
 
                         return;
                     }
@@ -260,7 +260,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 } else if (viewPager.getCurrentItem() == PAGE_FILE) {
 
                     if (!fileFragment.canEnterSelectMode()) {
-                        Toast.makeText(mContext, "没有文件可选", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, getString(R.string.no_file_for_select), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -1347,7 +1347,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return "选X项" + position;
+            return "" + position;
         }
 
         @Override

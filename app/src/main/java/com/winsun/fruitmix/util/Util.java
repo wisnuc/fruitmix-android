@@ -16,6 +16,7 @@ import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Patterns;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -35,6 +36,8 @@ import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -630,6 +633,37 @@ public class Util {
         return false;
     }
 
+    public static boolean checkIpLegal(String ip){
+
+        return Patterns.IP_ADDRESS.matcher(ip).matches();
+
+/*        String ipRegularExpression = "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})";
+
+        Pattern pattern = Pattern.compile(ipRegularExpression);
+
+        Matcher matcher = pattern.matcher(ip);
+
+        boolean result =  matcher.matches();
+
+        if(!result)
+            return false;
+
+        String[] ips = ip.split("\\.");
+
+        for (String item:ips){
+
+            long num = Long.valueOf(item);
+
+            if(num > 255)
+                return false;
+
+        }
+
+        return true;*/
+
+    }
+
+
     public static void startActivity(Context context, Class target) {
         context.startActivity(new Intent(context, target));
     }
@@ -730,6 +764,18 @@ public class Util {
 
         Matcher isNum = pattern.matcher(bigStr);
         return isNum.matches();
+    }
+
+    public static String formatDate(long time){
+
+        return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(time));
+
+    }
+
+    public static String getCurrentFormatTime(){
+
+        return formatDate(System.currentTimeMillis());
+
     }
 
 

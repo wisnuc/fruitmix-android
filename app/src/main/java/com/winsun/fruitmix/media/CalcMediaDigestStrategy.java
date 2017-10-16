@@ -57,7 +57,7 @@ public class CalcMediaDigestStrategy {
 
         List<Media> newMediaList = new ArrayList<>();
 
-        Log.d(TAG, "start calc media digest" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.d(TAG, "start calc media digest" + Util.getCurrentFormatTime());
 
         finishCalcMediaDigest = false;
 

@@ -34,7 +34,7 @@ public class RemoteFolder extends AbstractRemoteFile {
         if (getTime().equals(""))
             return "";
         else {
-            return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(getTime())));
+            return super.getTimeDateText();
         }
     }
 

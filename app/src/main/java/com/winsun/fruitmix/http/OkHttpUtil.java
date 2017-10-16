@@ -119,7 +119,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
         response.close();
 
-        Log.d(TAG, "remoteCallMethod: after read response body" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.d(TAG, "remoteCallMethod: after read response body" + Util.formatDate(System.currentTimeMillis()));
 
         return new HttpResponse(responseCode, str);
 
@@ -130,7 +130,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     private Response executeRequest(Request request) throws MalformedURLException, IOException, SocketTimeoutException {
-        Log.d(TAG, "remoteCallMethod: before execute" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+        Log.d(TAG, "remoteCallMethod: before execute" + Util.formatDate(System.currentTimeMillis()));
 
         try {
 
@@ -138,7 +138,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             Response response = call.execute();
 
-            Log.d(TAG, "remoteCallMethod: after execute " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.d(TAG, "remoteCallMethod: after execute " + Util.formatDate(System.currentTimeMillis()));
 
             return response;
 
@@ -241,7 +241,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             response.close();
 
-            Log.d(TAG, "remoteCallMethod: after read response body" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.d(TAG, "remoteCallMethod: after read response body" + Util.getCurrentFormatTime());
 
             return new HttpResponse(responseCode, str);
 
@@ -291,7 +291,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             response.close();
 
-            Log.d(TAG, "remoteCallMethod: after read response body" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis())));
+            Log.d(TAG, "remoteCallMethod: after read response body" + Util.formatDate(System.currentTimeMillis()));
 
             return new HttpResponse(responseCode, str);
 
