@@ -36,7 +36,7 @@ public class RemoteConfirmInviteUsersParser implements RemoteDatasParser<Confirm
                 ConfirmInviteUser confirmInviteUser = new ConfirmInviteUser();
 
                 confirmInviteUser.setTicketUUID(ticketID);
-                confirmInviteUser.setUserUUID(user.getString("userId"));
+                confirmInviteUser.setUserGUID(user.getString("userId"));
                 confirmInviteUser.setOperateType(user.getString("type"));
 
                 confirmInviteUsers.add(confirmInviteUser);

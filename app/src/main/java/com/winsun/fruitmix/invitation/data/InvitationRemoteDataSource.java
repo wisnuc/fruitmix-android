@@ -11,6 +11,9 @@ import com.winsun.fruitmix.parser.RemoteConfirmInviteUsersParser;
 import com.winsun.fruitmix.parser.RemoteConfirmTicketResultParser;
 import com.winsun.fruitmix.parser.RemoteTicketParser;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by Administrator on 2017/7/12.
  */
@@ -54,12 +57,16 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl impleme
 
         state = confirmInviteUser.getOperateType().equals(ConfirmInviteUser.OPERATE_TYPE_ACCEPT);
 
-        String body = "{\n" +
-                "\t\"guid\":\"" + confirmInviteUser.getUserUUID() + "\",\n" +
-                "\t\"state\":" + state + "\n" +
-                "}";
+        JSONObject jsonObject = new JSONObject();
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path, body);
+        try {
+            jsonObject.put("guid",confirmInviteUser.getUserGUID());
+            jsonObject.put("state",state);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path, jsonObject.toString());
 
         wrapper.operateCall(httpRequest, callback, new RemoteConfirmTicketResultParser());
 

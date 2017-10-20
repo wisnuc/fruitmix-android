@@ -42,8 +42,6 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     private InvitationDataSource mInvitationDataSource;
 
-    private ThreadManager threadManager;
-
     private Map<String, List<ConfirmInviteUser>> mConfirmInviteUserMaps;
     private ConfirmTicketAdapter adapter;
 
@@ -64,8 +62,6 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
         this.imageLoader = imageLoader;
 
         imageLoader.setShouldCache(true);
-
-        threadManager = ThreadManagerImpl.getInstance();
 
         mConfirmInviteUserMaps = new HashMap<>();
 

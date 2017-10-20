@@ -15,7 +15,7 @@ public class ConfirmInviteUser {
     private String userAvatar;
     private String station;
 
-    private String userUUID;
+    private String userGUID;
 
     private String operateType = OPERATE_TYPE_PENDING;
 
@@ -45,12 +45,12 @@ public class ConfirmInviteUser {
         this.userAvatar = userAvatar;
     }
 
-    public String getUserUUID() {
-        return userUUID;
+    public String getUserGUID() {
+        return userGUID;
     }
 
-    public void setUserUUID(String userUUID) {
-        this.userUUID = userUUID;
+    public void setUserGUID(String userUUID) {
+        this.userGUID = userUUID;
     }
 
     public String getTicketUUID() {
