@@ -1,6 +1,9 @@
 package com.winsun.fruitmix;
 
+import android.text.format.Formatter;
+
 import com.winsun.fruitmix.mock.MockApplication;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import static org.junit.Assert.*;
@@ -8,6 +11,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
@@ -89,18 +93,18 @@ public class StringUtilTest {
 
         String[] queryStrSplitResult = queryStrs[0].split("=");
 
-        assertEquals("alt",queryStrSplitResult[0]);
-        assertEquals("thumbnail",queryStrSplitResult[1]);
+        assertEquals("alt", queryStrSplitResult[0]);
+        assertEquals("thumbnail", queryStrSplitResult[1]);
 
         queryStrSplitResult = queryStrs[1].split("=");
 
-        assertEquals("width",queryStrSplitResult[0]);
-        assertEquals("64",queryStrSplitResult[1]);
+        assertEquals("width", queryStrSplitResult[0]);
+        assertEquals("64", queryStrSplitResult[1]);
 
     }
 
     @Test
-    public void testEnterIP(){
+    public void testEnterIP() {
 
         String ip = "10.2.10.55";
 
@@ -108,17 +112,48 @@ public class StringUtilTest {
 
         ip = "10.2.10.115:3000";
 
-        assertEquals(false,Util.checkIpLegal(ip));
+        assertEquals(false, Util.checkIpLegal(ip));
 
         ip = "151.254.12.1.1";
 
-        assertEquals(false,Util.checkIpLegal(ip));
+        assertEquals(false, Util.checkIpLegal(ip));
 
         ip = "14.15.258.40";
 
-        assertEquals(false,Util.checkIpLegal(ip));
+        assertEquals(false, Util.checkIpLegal(ip));
 
     }
 
+    @Test
+    public void testFindNumInStr() {
+
+        String testStr1 = "512 kB";
+
+        assertEquals(512, Util.getFirstNumInStr(testStr1));
+
+        String testStr2 = "1796336 kB";
+
+        assertEquals(1796336, Util.getFirstNumInStr(testStr2));
+
+        String testStr3 = "fadsf";
+
+        assertEquals(0, Util.getFirstNumInStr(testStr3));
+
+    }
+
+    @Test
+    public void testAndroidFormatSize(){
+
+        long size = 32 * 1024 * 1024;
+
+        assertEquals("32.00MB", Formatter.formatFileSize(RuntimeEnvironment.application,size));
+
+        String testSizeStr = "1796336 kB";
+
+        long testSize2 = Util.getFirstNumInStr(testSizeStr) * 1024;
+
+        assertEquals("1.71GB", Formatter.formatFileSize(RuntimeEnvironment.application,testSize2));
+
+    }
 
 }

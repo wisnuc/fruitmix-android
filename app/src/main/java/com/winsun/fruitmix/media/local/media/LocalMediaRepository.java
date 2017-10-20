@@ -108,6 +108,8 @@ public class LocalMediaRepository {
 
     }
 
+    //TODO:fix bug:when media path is same but hash is different
+
     private void getLocalMediaInSystemDB(final BaseLoadDataCallback<Media> callback) {
 
         Log.d(TAG, "getLocalMediaInSystemDB: start get media from system db");

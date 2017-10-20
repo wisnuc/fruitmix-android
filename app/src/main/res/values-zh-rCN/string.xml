@@ -267,6 +267,79 @@
     <string name="on_equipment">在%1$s上</string>
 
     <string name="wechat_login">微信登录</string>
+
+    <!-- equipment manage -->
+    <string name="equipment_manage">设备管理</string>
+    <string name="equiment">设备</string>
+    <string name="network">网络</string>
+    <string name="time">时间</string>
+    <string name="reboot_shutdown">重启与关机</string>
+    <string name="reboot">重启</string>
+    <string name="shutdown">关机</string>
+
+    <string name="equipment_info">设备信息</string>
+    <string name="network_info">网络设置</string>
+    <string name="time_info">时间与日期</string>
+
+    <string name="operation_not_support">操作不支持</string>
+
+    <string name="enter_maintenance">进入维护模式</string>
+    <string name="maintenance_explain">
+        重启后进入维护模式，可以在维护模式下执行磁盘操作或系统维护任务。
+    </string>
+
+    <string name="reboot_and_enter_maintenance">重启进入维护模式</string>
+
+    <string name="no_equipment_info">没有设备信息</string>
+
+    <!-- equipment info -->
+
+    <string name="equiment_name">设备名称</string>
+    <string name="equipment_type">设备型号</string>
+    <string name="hardware_serial_number">硬件序列号</string>
+    <string name="mac_address">Mac地址</string>
+    <string name="total_memory_size">总内存</string>
+    <string name="free_memory_size">未使用内存</string>
+    <string name="available_memory_size">可用内存</string>
+    <string name="cpu_core_number">CPU核心数</string>
+    <string name="cpu_type">CPU类型</string>
+    <string name="cpu_cache_size">CPU缓存数</string>
+    <string name="file_system_type">文件系统类型</string>
+    <string name="disk_count">磁盘数量</string>
+    <string name="disk_array_mode">磁盘阵列模式</string>
+    <string name="total_space">总空间</string>
+    <string name="user_data_space">用户数据空间</string>
+    <string name="available_space">可用空间</string>
+
+    <string name="nic_name">网卡名称</string>
+    <string name="bandwidth">带宽</string>
+    <string name="type">地址类型</string>
+    <string name="network_address">网络地址</string>
+    <string name="subnet_mask">子网掩码</string>
+    <string name="nic_mac_address">MAC地址</string>
+
+    <string name="local_time">本地时间</string>
+    <string name="universal_time">世界时</string>
+    <string name="rtc_time">RTC时间</string>
+    <string name="time_zone">时区</string>
+    <string name="ntp_synchronized">已完成时间同步</string>
+    <string name="network_time_on">使用网络时间</string>
+
+    <!-- person info -->
+    <string name="modify_password">修改密码</string>
+    <string name="modify_user_name">修改用户名</string>
+    <string name="modify_user_info">编辑用户信息</string>
+
+    <string name="initiate_binding_request">发起绑定请求</string>
+    <string name="get_wechat_user_info">获取微信用户信息</string>
+    <string name="send_wechat_user_info">发送微信用户信息</string>
+    <string name="bind_wechat_user">绑定微信用户</string>
+    <string name="bind">绑定</string>
+
+    <!-- modify user password -->
+    <string name="original_user_password">原密码</string>
+    <string name="new_user_password">新密码</string>
+
     <!-- invite user -->
     <string name="confirm_invitation">确认邀请</string>
     <string name="no_invitation">没有邀请</string>

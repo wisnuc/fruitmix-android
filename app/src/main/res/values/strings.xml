@@ -176,7 +176,7 @@
     <string name="edit_photo">Edit Photos</string>
     <string name="delete_album">Delete Album</string>
 
-    <!-- equipment -->
+    <!-- equipment_blue -->
 
     <string name="user">User</string>
 
@@ -191,7 +191,7 @@
 
     <string name="search_equipment_failed">Search equipment failed</string>
 
-    <!-- enter equipment ip -->
+    <!-- enter equipment_blue ip -->
 
     <string name="enter_ip">Please enter IP without port</string>
 
@@ -254,6 +254,7 @@
 
     <!-- hints -->
     <string name="success">%1$s succeeded</string>
+    <string name="fail">%1$s failed</string>
     <string name="local_media_share_uploading">Sorry,it is uploading,please wait!</string>
 
     <!-- Errors -->
@@ -288,10 +289,84 @@
     <string name="select_one_winsuc">Select one wisnuc</string>
     <string name="on_equipment">On %1$s</string>
     <string name="wechat_login">WeChat Login</string>
+
+    <!-- equipment manage -->
+    <string name="equipment_manage">Equipment Manage</string>
+    <string name="equiment">Equipment</string>
+    <string name="network">Network</string>
+    <string name="time">Time</string>
+    <string name="reboot_shutdown">Reboot And Shutdown</string>
+    <string name="reboot">Reboot</string>
+    <string name="shutdown">Shutdown</string>
+
+    <string name="equipment_info">Equipment Info</string>
+    <string name="network_info">Network Info</string>
+    <string name="time_info">Time Info</string>
+
+    <string name="operation_not_support">Operation not supported</string>
+
+    <string name="enter_maintenance">Enter Maintenance Mode</string>
+    <string name="maintenance_explain">
+        After reboot and enter the maintenance mode,you can perform disk operation or system maintenance task in the maintenance mode.
+    </string>
+
+    <string name="reboot_and_enter_maintenance">Reboot And Enter Maintenance</string>
+
+    <string name="no_equipment_info">No equipment info</string>
+
+    <!-- equipment info -->
+
+    <string name="equiment_name">Equipment Name</string>
+    <string name="equipment_type">Equipment Type</string>
+    <string name="hardware_serial_number">Hardware Serial Number</string>
+    <string name="mac_address">Mac Address</string>
+    <string name="total_memory_size">Total Memory Size</string>
+    <string name="free_memory_size">Free Memory Size</string>
+    <string name="available_memory_size">Available Memory Size</string>
+    <string name="cpu_core_number">CPU Core Number</string>
+    <string name="cpu_type">CPU Type</string>
+    <string name="cpu_cache_size">CPU Cache Size</string>
+    <string name="file_system_type">File System Type</string>
+    <string name="disk_count">Disk Count</string>
+    <string name="disk_array_mode">Disk Array Mode</string>
+    <string name="total_space">Total Space</string>
+    <string name="user_data_space">User Data Space</string>
+    <string name="available_space">Available Space</string>
+
+    <string name="nic_name">NIC Name</string>
+    <string name="bandwidth">Bandwidth</string>
+    <string name="type">Type</string>
+    <string name="network_address">Network Address</string>
+    <string name="subnet_mask">Subnet Mask</string>
+    <string name="nic_mac_address">NIC Mac Address</string>
+
+    <string name="local_time">Local Time</string>
+    <string name="universal_time">Universal Time</string>
+    <string name="rtc_time">RTC Time</string>
+    <string name="time_zone">Time Zone</string>
+    <string name="ntp_synchronized">NTP Synchronized</string>
+    <string name="network_time_on">Use Network Time</string>
+
+    <!-- person info -->
+    <string name="modify_password">Modify Password</string>
+    <string name="modify_user_name">Modify User Name</string>
+    <string name="modify_user_info">Modify User Info</string>
+
+    <string name="default_password">******</string>
+
+    <string name="initiate_binding_request">Initiate Binding Request</string>
+    <string name="get_wechat_user_info">Get WeChat User Info</string>
+    <string name="send_wechat_user_info">Send WeChat User Info</string>
+    <string name="bind_wechat_user">Bind WeChat User</string>
+    <string name="bind">Bind</string>
+
+    <!-- modify user password -->
+    <string name="original_user_password">Original User Password</string>
+    <string name="new_user_password">New User Password</string>
+
     <!-- invite user -->
     <string name="confirm_invitation">Confirm invitation</string>
     <string name="no_invitation">No invitation</string>
-
 
     <!-- group -->
     <string name="group">Group</string>

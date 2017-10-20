@@ -76,7 +76,8 @@
 
         <activity
             android:name=".CreateNewEquipmentActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateVisible|adjustPan" />
 
         <service
             android:name=".services.RetrieveDownloadedFileService"
@@ -88,7 +89,6 @@
         <activity
             android:name=".CreateUserActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".SettingActivity"
             android:screenOrientation="portrait" />
@@ -106,35 +106,84 @@
         <activity
             android:name=".file.view.FileDownloadActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:exported="true"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".invitation.ConfirmInviteUserActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".group.view.GroupContentActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".group.view.CreateGroupActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".group.view.OperatePinActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".group.view.AddFriendActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".group.view.PinContentActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".equipment.manage.EquipmentManageActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".equipment.manage.EquipmentInfoActivity"
+            android:screenOrientation="portrait" />
+        <!--        <activity
+                    android:name=".TestReceiveActivity"
+                    android:screenOrientation="portrait">
+                    <intent-filter>
+                        <action android:name="android.intent.action.SEND" />
 
+                        <category android:name="android.intent.category.DEFAULT" />
+
+                        <data android:mimeType="image/*" />
+                    </intent-filter>
+                    <intent-filter>
+                        <action android:name="android.intent.action.SEND" />
+
+                        <category android:name="android.intent.category.DEFAULT" />
+
+                        <data android:mimeType="application/pdf" />
+                    </intent-filter>
+                    <intent-filter>
+                        <action android:name="android.intent.action.SEND_MULTIPLE" />
+
+                        <category android:name="android.intent.category.DEFAULT" />
+
+                        <data android:mimeType="image/*" />
+                    </intent-filter>
+                    <intent-filter>
+                        <action android:name="android.intent.action.VIEW" />
+
+                        <category android:name="android.intent.category.DEFAULT" />
+                        <category android:name="android.intent.category.BROWSABLE" />
+
+                        <data android:mimeType="application/pdf" />
+                        <data android:mimeType="application/msword" />
+                        <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                        <data android:mimeType="application/vnd.ms-excel" />
+                        <data android:mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                        <data android:mimeType="application/vnd.ms-powerpoint" />
+                        <data android:mimeType="application/vnd.openxmlformats-officedocument.presentationml.presentation" />
+                        <data android:mimeType="text/plain" />
+                        <data android:scheme="file" />
+                    </intent-filter>
+                </activity>-->
+        <activity
+            android:name=".equipment.manage.ShutDownEquipmentActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ModifyUserNameActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ModifyUserPasswordActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

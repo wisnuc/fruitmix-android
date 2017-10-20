@@ -10,7 +10,7 @@ import com.winsun.fruitmix.user.User;
 
 public interface UserRemoteDataSource {
 
-    void getUsers(String currentLoginUserUUID,BaseLoadDataCallback<User> callback);
+    void getUsers(String currentLoginUserUUID, BaseLoadDataCallback<User> callback);
 
     void insertUser(String userName, String userPwd, BaseOperateDataCallback<User> callback);
 
@@ -21,5 +21,9 @@ public interface UserRemoteDataSource {
     void getUserDetailedInfoByUUID(String userUUID, BaseLoadDataCallback<User> callback);
 
     void getUserByGUIDWithCloudAPI(String guid, BaseLoadDataCallback<User> callback);
+
+    void modifyUserName(String userUUID,String userName, BaseOperateDataCallback<User> callback);
+
+    void modifyUserPassword(String userUUID,String originalPassword,String newPassword, BaseOperateDataCallback<Boolean> callback);
 
 }

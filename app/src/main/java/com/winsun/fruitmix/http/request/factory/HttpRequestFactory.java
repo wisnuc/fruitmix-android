@@ -16,11 +16,7 @@ public class HttpRequestFactory {
 
     public static final String TAG = HttpRequestFactory.class.getSimpleName();
 
-//    public static final String CLOUD_IP = Util.HTTP + "10.10.9.59";
-
-    public static final String CLOUD_IP = Util.HTTP + "www.siyouqun.org";
-
-//    public static final int CLOUD_PORT = 4000;
+    public static final String CLOUD_IP = Util.HTTP + CloudHttpRequestFactory.CLOUD_DOMAIN_NAME;
 
     public static HttpRequestFactory instance;
 
@@ -216,13 +212,21 @@ public class HttpRequestFactory {
         return new HttpHeader(Util.KEY_AUTHORIZATION, getToken());
     }
 
-    public synchronized HttpRequest createHttpGetRequestByCloudAPIWithoutWrap(String httpPath) {
+    public synchronized HttpRequest createHttpPostRequestByCloudAPIWithoutWrap(String httpPath, String body, String token) {
 
+        Log.d(TAG, "createHttpPostRequestByCloudAPIWithoutWrap: token: " + token);
+
+        BaseAbsHttpRequestFactory factory = new CloudHttpRequestFactory(new HttpHeader(Util.KEY_AUTHORIZATION, token));
+
+        return factory.createHttpPostRequest(httpPath, body, false);
+
+    }
+
+    public synchronized HttpRequest createHttpGetRequestByCloudAPIWithoutWrap(String httpPath) {
 
         BaseAbsHttpRequestFactory factory = new CloudHttpRequestFactory(createTokenHeaderUsingCloudToken());
 
         return factory.createHttpGetRequest(httpPath, false);
-
 
     }
 
@@ -246,7 +250,7 @@ public class HttpRequestFactory {
 
     //TODO:refactor create http request:use base class and subclass
 
-    public HttpRequest createGetRequestByPathWithoutToken(String httpPath) {
+    public synchronized HttpRequest createGetRequestByPathWithoutToken(String httpPath) {
 
         BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(getGateway(), null);
 
@@ -330,13 +334,44 @@ public class HttpRequestFactory {
 
     private synchronized HttpRequest createHttpPostRequest(String httpPath, String body, boolean isPostStream) {
 
-
         setDefaultFactoryState();
 
         return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body, isPostStream);
 
 
     }
+
+    public synchronized HttpRequest createPatchRequestByPathWithoutToken(String httpPath, String body) {
+
+        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(getGateway(), null);
+
+        return factory.createHttpPatchRequest(httpPath, body);
+
+    }
+
+    public synchronized HttpRequest createHttpPatchRequest(String httpPath, String body) {
+
+        setDefaultFactoryState();
+
+        return currentDefaultHttpRequestFactory.createHttpPatchRequest(httpPath, body);
+
+    }
+
+    public synchronized HttpRequest createModifyPasswordRequest(String httpPath, String body, String userUUID, String originalPassword) {
+
+        if (checkIsLoginWithWeChatCode()) {
+            currentDefaultHttpRequestFactory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderForCloudAPI(), getStationID());
+        } else {
+
+            HttpHeader httpHeader = new HttpHeader(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((userUUID + ":" + originalPassword).getBytes(), Base64.NO_WRAP));
+
+            currentDefaultHttpRequestFactory = new StationHttpRequestFactory(getGateway(),httpHeader);
+        }
+
+        return currentDefaultHttpRequestFactory.createHttpPutRequest(httpPath, body);
+
+    }
+
 
     private String getTokenWithPrefix() {
         return Util.KEY_JWT_HEAD + getToken();
@@ -351,7 +386,6 @@ public class HttpRequestFactory {
     }
 
     public synchronized HttpRequest createHttpGetRequestForLocalMedia(String url) {
-
 
         Log.d(TAG, "createHttpGetRequestForLocalMedia: url: " + url);
 

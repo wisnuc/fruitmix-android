@@ -10,6 +10,7 @@ import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.http.request.factory.CloudHttpRequestFactory;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.RemoteCurrentUserParser;
+import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteInsertUserParser;
 import com.winsun.fruitmix.parser.RemoteUserHomeParser;
 import com.winsun.fruitmix.parser.RemoteWeChatUser;
@@ -164,6 +165,47 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap(CloudHttpRequestFactory.CLOUD_API_LEVEL + "/users/" + guid);
 
         wrapper.loadCall(httpRequest, callback, new RemoteWeChatUser());
+
+    }
+
+    @Override
+    public void modifyUserName(String userUUID, String userName, BaseOperateDataCallback<User> callback) {
+
+        String path = USER_PARAMETER + "/" + userUUID;
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("username",userName);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(path,jsonObject.toString());
+
+        wrapper.operateCall(httpRequest,callback,new RemoteInsertUserParser());
+
+    }
+
+    @Override
+    public void modifyUserPassword(String userUUID, String originalPassword, String newPassword, BaseOperateDataCallback<Boolean> callback) {
+
+        String path = USER_PARAMETER + "/" + userUUID + "/password";
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("password",newPassword);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HttpRequest httpRequest = httpRequestFactory.createModifyPasswordRequest(path,jsonObject.toString(),userUUID,originalPassword);
+
+        wrapper.operateCall(httpRequest, callback, new RemoteDataParser<Boolean>() {
+            @Override
+            public Boolean parse(String json) throws JSONException {
+                return true;
+            }
+        });
 
     }
 }

@@ -54,6 +54,7 @@ public class BaseHttpCallWrapper {
             } else {
 
                 callback.onFail(new OperationNetworkException(httpResponse));
+
             }
 
 

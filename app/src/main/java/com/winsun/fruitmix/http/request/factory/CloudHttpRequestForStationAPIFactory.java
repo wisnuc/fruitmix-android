@@ -66,9 +66,25 @@ class CloudHttpRequestForStationAPIFactory extends CloudHttpRequestFactory {
     @Override
     public HttpRequest createHttpPostRequest(String httpPath, String body, boolean isPostStream) {
 
+        return createHttpHasBodyRequest(httpPath, Util.HTTP_POST_METHOD, body, isPostStream);
+
+    }
+
+    @Override
+    public HttpRequest createHttpPatchRequest(String httpPath, String body) {
+        return createHttpHasBodyRequest(httpPath, Util.HTTP_PATCH_METHOD, body, false);
+    }
+
+    @Override
+    public HttpRequest createHttpPutRequest(String httpPath, String body) {
+        return createHttpHasBodyRequest(httpPath, Util.HTTP_PUT_METHOD, body, false);
+    }
+
+    private HttpRequest createHttpHasBodyRequest(String httpPath, String method, String body, boolean isStream) {
+
         Log.d(TAG, "createHasBodyRequestThroughPipe: " + getGateway() + ":" + getPort() + httpPath);
 
-        HttpRequest httpRequest = new HttpRequest(createUrl(CALL_STATION_THROUGH_CLOUD_PRE + stationID + (isPostStream ? CALL_STATION_THROUGH_CLOUD_END_FOR_PIPE : CALL_STATION_THROUGH_CLOUD_END_FOR_JSON)),
+        HttpRequest httpRequest = new HttpRequest(createUrl(CALL_STATION_THROUGH_CLOUD_PRE + stationID + (isStream ? CALL_STATION_THROUGH_CLOUD_END_FOR_PIPE : CALL_STATION_THROUGH_CLOUD_END_FOR_JSON)),
                 Util.HTTP_POST_METHOD);
 
         setHeader(httpRequest);
@@ -85,7 +101,7 @@ class CloudHttpRequestForStationAPIFactory extends CloudHttpRequestFactory {
                 jsonObject = new JSONObject(body);
 
             jsonObject.put("resource", httpPathEncodeByBase64);
-            jsonObject.put("method", Util.HTTP_POST_METHOD);
+            jsonObject.put("method", method);
 
             httpRequest.setBody(jsonObject.toString());
 
@@ -96,4 +112,6 @@ class CloudHttpRequestForStationAPIFactory extends CloudHttpRequestFactory {
         return httpRequest;
 
     }
+
+
 }

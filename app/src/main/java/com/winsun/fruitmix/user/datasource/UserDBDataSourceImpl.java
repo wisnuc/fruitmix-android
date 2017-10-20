@@ -44,4 +44,17 @@ public class UserDBDataSourceImpl implements UserDBDataSource {
     public boolean clearUsers() {
         return dbUtils.deleteAllRemoteUser() > 0;
     }
+
+
+    @Override
+    public OperationResult modifyUserName(String userUUID, String newUserName) {
+
+        long result = dbUtils.updateRemoteUserName(userUUID, newUserName);
+
+        if (result > 0)
+            return new OperationSuccess();
+        else
+            return new OperationSQLException();
+
+    }
 }

@@ -27,7 +27,7 @@ public class BaseAbsHttpRequestFactory {
         this.gateway = gateway;
     }
 
-     String getGateway() {
+    String getGateway() {
         return Util.HTTP + gateway;
     }
 
@@ -35,7 +35,7 @@ public class BaseAbsHttpRequestFactory {
         return httpHeader;
     }
 
-     int getPort() {
+    int getPort() {
         return port;
     }
 
@@ -55,7 +55,25 @@ public class BaseAbsHttpRequestFactory {
 
     public HttpRequest createHttpPostRequest(String httpPath, String body, boolean isPostStream) {
 
-        HttpRequest httpRequest = new HttpRequest(createUrl(httpPath), Util.HTTP_POST_METHOD);
+        return createHttpHasBodyRequest(httpPath, body, Util.HTTP_POST_METHOD);
+
+    }
+
+    public HttpRequest createHttpPatchRequest(String httpPath, String body) {
+
+        return createHttpHasBodyRequest(httpPath, body, Util.HTTP_PATCH_METHOD);
+
+    }
+
+    public HttpRequest createHttpPutRequest(String httpPath, String body) {
+
+        return createHttpHasBodyRequest(httpPath, body, Util.HTTP_PUT_METHOD);
+
+    }
+
+    private HttpRequest createHttpHasBodyRequest(String httpPath, String body, String method) {
+
+        HttpRequest httpRequest = new HttpRequest(createUrl(httpPath), method);
 
         setHeader(httpRequest);
 
@@ -64,6 +82,7 @@ public class BaseAbsHttpRequestFactory {
         return httpRequest;
 
     }
+
 
     void setHeader(HttpRequest httpRequest) {
         if (getHttpHeader() != null)

@@ -5,8 +5,8 @@ import android.os.Message;
 import android.util.Log;
 
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
-import com.winsun.fruitmix.model.Equipment;
-import com.winsun.fruitmix.equipment.data.EquipmentSearchManager;
+import com.winsun.fruitmix.equipment.search.data.Equipment;
+import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.IOException;

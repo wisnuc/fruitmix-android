@@ -89,7 +89,6 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
                 request = builder.get().build();
                 break;
             case Util.HTTP_POST_METHOD:
-
                 requestBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_STRING), httpRequest.getBody());
                 request = builder.post(requestBody).build();
                 break;
@@ -100,6 +99,10 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
             case Util.HTTP_PATCH_METHOD:
                 requestBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_STRING), httpRequest.getBody());
                 request = builder.patch(requestBody).build();
+                break;
+            case Util.HTTP_PUT_METHOD:
+                requestBody = RequestBody.create(MediaType.parse(APPLICATION_JSON_STRING), httpRequest.getBody());
+                request = builder.put(requestBody).build();
                 break;
         }
 

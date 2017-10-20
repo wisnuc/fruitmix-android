@@ -26,9 +26,10 @@ import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationMoreThanOneStation;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.stations.Station;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
+import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.usecase.InjectGetAllBindingLocalUserUseCase;
 
@@ -40,13 +41,15 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
     private LoginUseCase loginUseCase;
 
+    private TokenDataSource tokenDataSource;
+
     private ProgressDialog dialog;
 
     private Context mContext;
 
     private ThreadManager threadManager;
 
-    public interface WXEntryCallback {
+    public interface WXEntryLoginCallback {
 
         void loginSucceed();
 
@@ -54,10 +57,24 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
     }
 
-    private static WXEntryCallback wxEntryCallback;
+    public interface WXEntryGetTokenCallback {
 
-    public static void setWxEntryCallback(WXEntryCallback wxEntryCallback) {
-        WXEntryActivity.wxEntryCallback = wxEntryCallback;
+        void succeed(String token);
+
+        void fail();
+
+    }
+
+    private static WXEntryGetTokenCallback wxEntryGetTokenCallback;
+
+    public static void setWxEntryGetTokenCallback(WXEntryGetTokenCallback wxEntryGetTokenCallback) {
+        WXEntryActivity.wxEntryGetTokenCallback = wxEntryGetTokenCallback;
+    }
+
+    private static WXEntryLoginCallback wxEntryLoginCallback;
+
+    public static void setWxEntryLoginCallback(WXEntryLoginCallback wxEntryLoginCallback) {
+        WXEntryActivity.wxEntryLoginCallback = wxEntryLoginCallback;
     }
 
     @Override
@@ -113,39 +130,118 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                 Log.d(TAG, "onResp: wechat code: " + code);
 
-                showLoadingDialog();
+                if (wxEntryLoginCallback != null) {
 
-                loginInThread(code);
+                    showLoadingDialog();
+
+                    loginInThread(code);
+
+                } else if (wxEntryGetTokenCallback != null) {
+
+                    showGetTokneDialog();
+
+                    getTokenInThread(code);
+
+                }
 
                 break;
             case BaseResp.ErrCode.ERR_USER_CANCEL:
                 result = R.string.errcode_cancel;
 
-                finishWhenLoginFail();
+                if (wxEntryLoginCallback != null)
+                    finishWhenLoginFail();
+                else if (wxEntryGetTokenCallback != null)
+                    finishWhenGetTokenFail();
 
                 break;
             case BaseResp.ErrCode.ERR_AUTH_DENIED:
                 result = R.string.errcode_deny;
 
-                finishWhenLoginFail();
+                if (wxEntryLoginCallback != null)
+                    finishWhenLoginFail();
+                else if (wxEntryGetTokenCallback != null)
+                    finishWhenGetTokenFail();
 
                 break;
             case BaseResp.ErrCode.ERR_UNSUPPORT:
                 result = R.string.errcode_unsupported;
 
-                finishWhenLoginFail();
+                if (wxEntryLoginCallback != null)
+                    finishWhenLoginFail();
+                else if (wxEntryGetTokenCallback != null)
+                    finishWhenGetTokenFail();
 
                 break;
             default:
                 result = R.string.errcode_unknown;
 
-                finishWhenLoginFail();
+                if (wxEntryLoginCallback != null)
+                    finishWhenLoginFail();
+                else if (wxEntryGetTokenCallback != null)
+                    finishWhenGetTokenFail();
 
                 break;
 
         }
 
         Log.d(TAG, "onResp: " + result);
+
+    }
+
+    private void showGetTokneDialog() {
+        dialog = ProgressDialog.show(this, null, String.format(getString(R.string.operating_title), getString(R.string.get_wechat_user_info)), true, false);
+    }
+
+    private void getTokenInThread(String code) {
+
+        tokenDataSource = InjectTokenRemoteDataSource.provideTokenDataSource(this);
+
+        tokenDataSource.getToken(code, new BaseLoadDataCallback<WeChatTokenUserWrapper>() {
+            @Override
+            public void onSucceed(List<WeChatTokenUserWrapper> data, OperationResult operationResult) {
+
+                dismissDialog();
+
+                finishWhenGetTokenSucceed(data.get(0).getToken());
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                dismissDialog();
+
+                finishWhenGetTokenFail();
+
+                Toast.makeText(WXEntryActivity.this, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+    private void finishWhenGetTokenSucceed(String token) {
+
+        finish();
+
+        if (wxEntryGetTokenCallback != null) {
+
+            wxEntryGetTokenCallback.succeed(token);
+            wxEntryGetTokenCallback = null;
+
+        }
+
+    }
+
+    private void finishWhenGetTokenFail() {
+
+        finish();
+
+        if (wxEntryGetTokenCallback != null) {
+
+            wxEntryGetTokenCallback.fail();
+            wxEntryGetTokenCallback = null;
+
+        }
 
     }
 
@@ -307,8 +403,13 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
         finish();
 
-        if (wxEntryCallback != null)
-            wxEntryCallback.loginSucceed();
+        if (wxEntryLoginCallback != null) {
+
+            wxEntryLoginCallback.loginSucceed();
+            wxEntryLoginCallback = null;
+
+        }
+
 
     }
 
@@ -316,8 +417,13 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
         finish();
 
-        if (wxEntryCallback != null)
-            wxEntryCallback.loginFail();
+        if (wxEntryLoginCallback != null) {
+
+            wxEntryLoginCallback.loginFail();
+            wxEntryLoginCallback = null;
+
+        }
+
 
     }
 

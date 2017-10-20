@@ -8,7 +8,7 @@ import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
 import com.winsun.fruitmix.parser.RemoteConfirmInviteUsersParser;
-import com.winsun.fruitmix.parser.RemoteConfirmUserResultParser;
+import com.winsun.fruitmix.parser.RemoteConfirmTicketResultParser;
 import com.winsun.fruitmix.parser.RemoteTicketParser;
 
 /**
@@ -48,7 +48,6 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl impleme
     @Override
     public void confirmInvitation(final ConfirmInviteUser confirmInviteUser, final BaseOperateDataCallback<String> callback) {
 
-
         String path = CONFIRM_TICKET_PARAMETER + confirmInviteUser.getTicketUUID();
 
         boolean state;
@@ -62,7 +61,7 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl impleme
 
         HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path, body);
 
-        wrapper.operateCall(httpRequest, callback, new RemoteConfirmUserResultParser());
+        wrapper.operateCall(httpRequest, callback, new RemoteConfirmTicketResultParser());
 
 
     }

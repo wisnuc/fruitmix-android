@@ -8,6 +8,8 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 
 public interface MainPageView {
 
+    void gotoEquipmentManageActivity();
+
     void gotoUserManageActivity();
 
     void gotoSettingActivity();

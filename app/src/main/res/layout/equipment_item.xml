@@ -7,7 +7,7 @@
 
         <variable
             name="equipmentItemViewModel"
-            type="com.winsun.fruitmix.equipment.EquipmentItemViewModel" />
+            type="com.winsun.fruitmix.equipment.search.EquipmentItemViewModel" />
 
         <import type="android.view.View" />
 

@@ -45,6 +45,7 @@ public class LocalMediaSystemDBDataSource {
 
     }
 
+
     public void getMedia(Collection<String> currentLocalMediaOriginalPaths, MediaInSystemDBLoadCallback callback) {
 
         ContentResolver cr = contentResolver;

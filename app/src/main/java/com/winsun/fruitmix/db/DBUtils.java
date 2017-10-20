@@ -95,7 +95,7 @@ public class DBUtils {
 
             contentValues = createUserContentValues(user);
 
-            contentValues.put(DBHelper.USER_ASSOCIATED_WECHAT_USER_NAME,user.getAssociatedWeChatUserName());
+            contentValues.put(DBHelper.USER_ASSOCIATED_WECHAT_USER_NAME, user.getAssociatedWeChatUserName());
 
             returnValue = database.insert(DBHelper.REMOTE_USER_TABLE_NAME, null, contentValues);
         }
@@ -642,6 +642,22 @@ public class DBUtils {
         contentValues.put(DBHelper.MEDIA_KEY_LATITUDE, media.getLatitude());
 
         return contentValues;
+    }
+
+    public long updateRemoteUserName(String userUUID, String newUserName) {
+
+        openWritableDB();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.USER_KEY_USERNAME, newUserName);
+
+        long returnValue = database.update(DBHelper.REMOTE_USER_TABLE_NAME, contentValues, DBHelper.USER_KEY_UUID + " = ?", new String[]{userUUID});
+
+        Log.d(TAG, "updateRemoteUserName: " + newUserName + " userUUID: " + userUUID + " result: " + returnValue);
+
+        close();
+
+        return returnValue;
     }
 
 

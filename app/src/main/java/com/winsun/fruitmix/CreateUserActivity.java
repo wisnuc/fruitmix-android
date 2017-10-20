@@ -15,6 +15,7 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.user.OperateUserViewModel;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
@@ -44,11 +45,12 @@ public class CreateUserActivity extends BaseActivity implements CreateUserView {
 
         Util.setStatusBarColor(this, R.color.login_ui_blue);
 
-        CreateUserViewModel createUserViewModel = new CreateUserViewModel();
+        OperateUserViewModel operateUserViewModel = new OperateUserViewModel();
 
-        createUserPresenter = new CreateUserPresenterImpl(this, InjectSystemSettingDataSource.provideSystemSettingDataSource(this).getCurrentLoginUserUUID(), InjectUser.provideRepository(this));
+        createUserPresenter = new CreateUserPresenterImpl(InjectUser.provideRepository(this),
+                InjectSystemSettingDataSource.provideSystemSettingDataSource(this),this);
 
-        binding.setCreateUserViewModel(createUserViewModel);
+        binding.setCreateUserViewModel(operateUserViewModel);
 
         binding.setCreateUserPresenter(createUserPresenter);
 
@@ -75,54 +77,6 @@ public class CreateUserActivity extends BaseActivity implements CreateUserView {
     @Override
     public void hideSoftInput() {
         Util.hideSoftInput(this);
-    }
-
-    public class CreateUserViewModel {
-
-        private String userName;
-        private String userPassword;
-        private String userConfirmPassword;
-
-        public CreateUserViewModel() {
-
-            userName = "";
-            userPassword = "";
-            userConfirmPassword = "";
-
-        }
-
-        public final ObservableBoolean userNameErrorEnable = new ObservableBoolean(false);
-        public final ObservableBoolean userPasswordErrorEnable = new ObservableBoolean(false);
-        public final ObservableBoolean userConfirmPasswordErrorEnable = new ObservableBoolean(false);
-
-        public final ObservableField<String> userNameError = new ObservableField<>();
-        public final ObservableField<String> userPasswordError = new ObservableField<>();
-        public final ObservableField<String> userConfirmPasswordError = new ObservableField<>();
-
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public void setUserName(String userName) {
-            this.userName = userName;
-        }
-
-        public String getUserPassword() {
-            return userPassword;
-        }
-
-        public void setUserPassword(String userPassword) {
-            this.userPassword = userPassword;
-        }
-
-        public String getUserConfirmPassword() {
-            return userConfirmPassword;
-        }
-
-        public void setUserConfirmPassword(String userConfirmPassword) {
-            this.userConfirmPassword = userConfirmPassword;
-        }
     }
 
 

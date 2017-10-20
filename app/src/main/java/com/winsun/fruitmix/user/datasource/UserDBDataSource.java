@@ -18,4 +18,7 @@ public interface UserDBDataSource  {
     OperationResult insertUser(Collection<User> users);
 
     boolean clearUsers();
+
+    OperationResult modifyUserName(String userUUID,String userName);
+
 }

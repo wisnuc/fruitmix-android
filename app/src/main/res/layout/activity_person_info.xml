@@ -1,178 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.winsun.fruitmix.PersonInfoActivity">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
+    <data>
+
+        <variable
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
+
+        <variable
+            name="user"
+            type="com.winsun.fruitmix.user.User" />
+
+        <variable
+            name="personInfoPresenter"
+            type="com.winsun.fruitmix.person.info.PersonInfoPresenter" />
+
+        <import type="android.view.View" />
+
+    </data>
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:background="#3F52B4">
-
-            <ImageView
-                android:id="@+id/back"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="16dp"
-                android:src="@drawable/ic_back" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/person_data"
-                android:textColor="@color/eighty_seven_percent_white"
-                android:textSize="24dp" />
-
-            <TextView
-                android:id="@+id/finish"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="16dp"
-                android:text="@string/finish_text"
-                android:textColor="@color/eighty_seven_percent_white"
-                android:textSize="22dp" />
-        </RelativeLayout>
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="@drawable/person_info_head_bg" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="40dp"
-        android:layout_marginRight="40dp"
-        android:layout_marginTop="240dp"
-        android:orientation="vertical">
+        android:background="@color/white"
+        tools:context="com.winsun.fruitmix.PersonInfoActivity">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/user_default_portrait"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:background="@drawable/user_portrait_bg_green"
-                android:gravity="center"
-                android:textSize="18dp"
-                android:textColor="@color/eighty_seven_percent_white"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginLeft="8dp"
-                android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="24dp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="16dp" />
+            <include
+                android:id="@+id/toolbar_layout"
+                layout="@layout/toolbar_layout"
+                bind:toolbarViewModel="@{toolbarViewModel}" />
 
-            <EditText
-                android:id="@+id/email_edit"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="18dp"
-                android:inputType="textEmailAddress"/>
+                android:layout_height="144dp"
+                android:background="@color/login_ui_blue"
+                android:gravity="center">
 
-        </LinearLayout>
+                <com.winsun.fruitmix.component.UserAvatar
+                    android:id="@+id/user_avatar"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:orientation="vertical">
+            </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="16dp" />
-
-            <EditText
-                android:id="@+id/password_edit"
+            <RelativeLayout
+                android:id="@+id/modify_user_name_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="18dp"
-                android:inputType="textPassword"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="60dp"
                 android:layout_marginBottom="8dp"
-                android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="16dp" />
+                android:layout_marginTop="8dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp">
 
-            <EditText
-                android:id="@+id/confirm_password_edit"
+                <ImageView
+                    android:id="@+id/username_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="32dp"
+                    android:src="@drawable/user_name" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@id/username_icon"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/user_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:text="@{user.userName}"
+                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textSize="16dp"
+                        tools:text="Mark Wang" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/user_name"
+                        android:textColor="@color/fifty_four_percent_black"
+                        android:textSize="12dp" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/modify_user_info" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/modify_password_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="18dp"
-                android:inputType="textPassword"/>
+                android:layout_height="60dp"
+                android:layout_marginTop="8dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp">
+
+                <ImageView
+                    android:id="@+id/password_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="32dp"
+                    android:src="@drawable/password" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@id/password_icon"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/modify_password"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:text="@string/default_password"
+                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textSize="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/modify_password"
+                        android:textColor="@color/fifty_four_percent_black"
+                        android:textSize="12dp" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/modify_user_info" />
+
+            </RelativeLayout>
 
         </LinearLayout>
 
-        <LinearLayout
+        <Button
+            android:id="@+id/login_btn"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="horizontal">
+            android:layout_height="36dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:background="@color/login_ui_blue"
+            android:onClick="@{()->personInfoPresenter.bindWeChatUser()}"
+            android:text="@string/bind_wechat_user"
+            android:textColor="@color/eighty_seven_percent_white"
+            android:textSize="16dp"
+            android:visibility="@{user.associatedWeChatGUID.length() > 0?View.GONE:View.VISIBLE}" />
 
-            <CheckBox
-                android:id="@+id/login_by_password_check"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:textColor="@color/eighty_seven_percent_black"
-                android:textSize="16dp" />
+    </RelativeLayout>
 
-        </LinearLayout>
 
-    </LinearLayout>
-
-</merge>
+</layout>

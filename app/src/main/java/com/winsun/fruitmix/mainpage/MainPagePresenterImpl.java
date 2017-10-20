@@ -141,166 +141,6 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     }
 
-    @Override
-    public void refreshNavigationLoggedInUsers() {
-
-        getBindingWeChatLoggedInUser(new BaseOperateDataCallback<Boolean>() {
-            @Override
-            public void onSucceed(Boolean data, OperationResult result) {
-
-                refreshAllLoggedInUsers(true);
-
-            }
-
-            @Override
-            public void onFail(OperationResult result) {
-
-                refreshAllLoggedInUsers(false);
-
-            }
-        });
-
-    }
-
-    private void refreshAllLoggedInUsers(boolean getBindingWeChatLoggedInUserSucceed) {
-        if (loggedInUserDataSource == null) return;
-
-        String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
-
-        List<LoggedInUser> loggedInUsers = new ArrayList<>(loggedInUserDataSource.getAllLoggedInUsers());
-
-        loggedInUsers.addAll(bindingWeChatLoggedInUser);
-
-        int loggedInUserListSize = loggedInUsers.size();
-
-        if(!getBindingWeChatLoggedInUserSucceed){
-
-            navPagerViewModel.equipmentNameVisibility.set(loggedInUserListSize != 1);
-
-            Iterator<LoggedInUser> iterator = loggedInUsers.iterator();
-            while (iterator.hasNext()) {
-                LoggedInUser loggedInUser = iterator.next();
-                if (loggedInUser.getUser().getUuid().equals(currentUserUUID)) {
-
-                    navPagerViewModel.equipmentNameText.set(loggedInUser.getEquipmentName());
-
-                    iterator.remove();
-                }
-            }
-
-        }
-
-        if (loggedInUserListSize > 0) {
-
-            mNavigationMenuLoggedInUsers.clear();
-
-            for (LoggedInUser loggedInUser : loggedInUsers) {
-
-                NavigationLoggedInUserViewModel model = new NavigationLoggedInUserViewModel(loggedInUser);
-
-                User user = loggedInUser.getUser();
-
-                model.setAvatarBackgroundResId(user.getDefaultAvatarBgColorResourceId());
-                model.setAvatarText(user.getDefaultAvatar());
-                model.setTitleText(user.getUserName());
-                model.setSubTitleText(loggedInUser.getEquipmentName());
-                model.setItemSubTitleVisibility(true);
-
-                mNavigationMenuLoggedInUsers.add(model);
-
-            }
-
-            mNavigationMenuLoggedInUsers.add(navigationAccountManageViewModel);
-
-        } else {
-
-            mNavigationMenuLoggedInUsers.clear();
-            mNavigationMenuLoggedInUsers.add(navigationAccountManageViewModel);
-
-        }
-    }
-
-    private void getBindingWeChatLoggedInUser(final BaseOperateDataCallback<Boolean> callback) {
-
-        final String guid = systemSettingDataSource.getCurrentLoginUserGUID();
-
-        if (guid == null || guid.isEmpty()) {
-            callback.onFail(new OperationFail("no guid"));
-            return;
-        }
-
-        String token = systemSettingDataSource.getCurrentLoginToken();
-
-        getAllBindingLocalUserUseCase.getAllBindingLocalUser(guid, token, new BaseLoadDataCallback<LoggedInWeChatUser>() {
-            @Override
-            public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
-
-                String stationID = systemSettingDataSource.getCurrentLoginStationID();
-
-                bindingWeChatLoggedInUser.clear();
-
-                for (LoggedInWeChatUser loggedInUser : data) {
-
-                    if (!loggedInUser.getStationID().equals(stationID)) {
-
-                        bindingWeChatLoggedInUser.add(loggedInUser);
-
-                    }else {
-
-                        navPagerViewModel.equipmentNameVisibility.set(true);
-                        navPagerViewModel.equipmentNameText.set(loggedInUser.getGateway());
-
-                    }
-
-                }
-
-                callback.onSucceed(true, new OperationSuccess());
-
-            }
-
-            @Override
-            public void onFail(OperationResult operationResult) {
-
-                Log.d(TAG, "onFail: get all binding local user");
-
-                callback.onFail(new OperationFail("fail on get binding local user"));
-
-            }
-        });
-
-    }
-
-    @Override
-    public void notifyAdapterDataSetChanged() {
-        navigationItemAdapter.notifyDataSetChanged();
-    }
-
-    private void toggleUserManageNavigationItem(Context context, User user) {
-        if (user.isAdmin()) {
-
-            if (((NavigationMenuViewModel) mNavigationMenuItems.get(2)).getMenuIconResId() != R.drawable.ic_person_add_black_24dp) {
-
-                NavigationMenuViewModel model = new NavigationMenuViewModel() {
-                    @Override
-                    public void onClick() {
-                        super.onClick();
-                        mainPageView.gotoUserManageActivity();
-                    }
-                };
-                model.setMenuIconResId(R.drawable.ic_person_add_black_24dp);
-                model.setMenuText(context.getString(R.string.user_manage));
-
-                mNavigationMenuItems.add(2, model);
-            }
-
-        } else {
-
-            if (((NavigationMenuViewModel) mNavigationMenuItems.get(2)).getMenuIconResId() == R.drawable.ic_person_add_black_24dp)
-                mNavigationMenuItems.remove(2);
-        }
-    }
-
-
     private void initNavigationMenuItems(Context context) {
 
         NavigationMenuViewModel model = new NavigationMenuViewModel() {
@@ -374,6 +214,176 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     }
 
+    @Override
+    public void refreshUserInNavigationView(Context context, User user) {
+
+        toggleEquipmentManageNavigationItem(context, user);
+        refreshNavigationLoggedInUsers();
+
+    }
+
+
+    @Override
+    public void refreshNavigationLoggedInUsers() {
+
+        getBindingWeChatLoggedInUser(new BaseOperateDataCallback<Boolean>() {
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
+
+                refreshAllLoggedInUsers(true);
+
+            }
+
+            @Override
+            public void onFail(OperationResult result) {
+
+                refreshAllLoggedInUsers(false);
+
+            }
+        });
+
+    }
+
+    private void refreshAllLoggedInUsers(boolean getBindingWeChatLoggedInUserSucceed) {
+        if (loggedInUserDataSource == null) return;
+
+        String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
+
+        List<LoggedInUser> loggedInUsers = new ArrayList<>(loggedInUserDataSource.getAllLoggedInUsers());
+
+        loggedInUsers.addAll(bindingWeChatLoggedInUser);
+
+        int loggedInUserListSize = loggedInUsers.size();
+
+        if (!getBindingWeChatLoggedInUserSucceed) {
+
+            navPagerViewModel.equipmentNameVisibility.set(loggedInUserListSize != 1);
+
+            Iterator<LoggedInUser> iterator = loggedInUsers.iterator();
+            while (iterator.hasNext()) {
+                LoggedInUser loggedInUser = iterator.next();
+                if (loggedInUser.getUser().getUuid().equals(currentUserUUID)) {
+
+                    navPagerViewModel.equipmentNameText.set(loggedInUser.getEquipmentName());
+
+                    iterator.remove();
+                }
+            }
+
+        }
+
+        if (loggedInUserListSize > 0) {
+
+            mNavigationMenuLoggedInUsers.clear();
+
+            for (LoggedInUser loggedInUser : loggedInUsers) {
+
+                NavigationLoggedInUserViewModel model = new NavigationLoggedInUserViewModel(loggedInUser);
+
+                User user = loggedInUser.getUser();
+
+                model.setAvatarBackgroundResId(user.getDefaultAvatarBgColorResourceId());
+                model.setAvatarText(user.getDefaultAvatar());
+                model.setTitleText(user.getUserName());
+                model.setSubTitleText(loggedInUser.getEquipmentName());
+                model.setItemSubTitleVisibility(true);
+
+                mNavigationMenuLoggedInUsers.add(model);
+
+            }
+
+            mNavigationMenuLoggedInUsers.add(navigationAccountManageViewModel);
+
+        } else {
+
+            mNavigationMenuLoggedInUsers.clear();
+            mNavigationMenuLoggedInUsers.add(navigationAccountManageViewModel);
+
+        }
+    }
+
+    private void getBindingWeChatLoggedInUser(final BaseOperateDataCallback<Boolean> callback) {
+
+        final String guid = systemSettingDataSource.getCurrentLoginUserGUID();
+
+        if (guid == null || guid.isEmpty()) {
+            callback.onFail(new OperationFail("no guid"));
+            return;
+        }
+
+        String token = systemSettingDataSource.getCurrentLoginToken();
+
+        getAllBindingLocalUserUseCase.getAllBindingLocalUser(guid, token, new BaseLoadDataCallback<LoggedInWeChatUser>() {
+            @Override
+            public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
+
+                String stationID = systemSettingDataSource.getCurrentLoginStationID();
+
+                bindingWeChatLoggedInUser.clear();
+
+                for (LoggedInWeChatUser loggedInUser : data) {
+
+                    if (!loggedInUser.getStationID().equals(stationID)) {
+
+                        bindingWeChatLoggedInUser.add(loggedInUser);
+
+                    } else {
+
+                        navPagerViewModel.equipmentNameVisibility.set(true);
+                        navPagerViewModel.equipmentNameText.set(loggedInUser.getGateway());
+
+                    }
+
+                }
+
+                callback.onSucceed(true, new OperationSuccess());
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                Log.d(TAG, "onFail: get all binding local user");
+
+                callback.onFail(new OperationFail("fail on get binding local user"));
+
+            }
+        });
+
+    }
+
+    @Override
+    public void notifyAdapterDataSetChanged() {
+        navigationItemAdapter.notifyDataSetChanged();
+    }
+
+    private void toggleEquipmentManageNavigationItem(Context context, User user) {
+        if (user.isAdmin()) {
+
+            if (((NavigationMenuViewModel) mNavigationMenuItems.get(2)).getMenuIconResId() != R.drawable.equipment_black) {
+
+                NavigationMenuViewModel model = new NavigationMenuViewModel() {
+                    @Override
+                    public void onClick() {
+                        super.onClick();
+                        mainPageView.gotoEquipmentManageActivity();
+                    }
+                };
+                model.setMenuIconResId(R.drawable.equipment_black);
+                model.setMenuText(context.getString(R.string.equipment_manage));
+
+                mNavigationMenuItems.add(2, model);
+            }
+
+        } else {
+
+            if (((NavigationMenuViewModel) mNavigationMenuItems.get(2)).getMenuIconResId() == R.drawable.equipment_black)
+                mNavigationMenuItems.remove(2);
+
+        }
+    }
+
+
     private void createInvitationInThread() {
         invitationDataSource.createInvitation(new BaseOperateDataCallbackImpl<String>() {
             @Override
@@ -417,14 +427,6 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         navigationItemAdapter.setmNavigationItems(mNavigationMenuLoggedInUsers);
         navigationItemAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void refreshUserInNavigationView(Context context, User user) {
-
-        toggleUserManageNavigationItem(context, user);
-        refreshNavigationLoggedInUsers();
-
     }
 
     private class NavigationItemAdapter extends RecyclerView.Adapter<BindingViewHolder> {

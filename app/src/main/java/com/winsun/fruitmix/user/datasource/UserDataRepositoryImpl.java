@@ -226,7 +226,49 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                userRemoteDataSource.getUserByGUIDWithCloudAPI(guid,createLoadCallbackRunOnMainThread(callback));
+                userRemoteDataSource.getUserByGUIDWithCloudAPI(guid, createLoadCallbackRunOnMainThread(callback));
+            }
+        });
+
+    }
+
+    @Override
+    public void modifyUserName(final String userUUID, final String userName, final BaseOperateDataCallback<User> callback) {
+
+        final BaseOperateDataCallback<User> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                userRemoteDataSource.modifyUserName(userUUID, userName, new BaseOperateDataCallback<User>() {
+                    @Override
+                    public void onSucceed(User data, OperationResult result) {
+
+                        userDBDataSource.modifyUserName(data.getUuid(), data.getUserName());
+
+                        cacheUsers.get(data.getUuid()).setUserName(data.getUserName());
+
+                        runOnMainThreadCallback.onSucceed(data, result);
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult result) {
+                        runOnMainThreadCallback.onFail(result);
+                    }
+                });
+            }
+        });
+
+    }
+
+    @Override
+    public void modifyUserPassword(final String userUUID, final String originalPassword, final String newPassword, final BaseOperateDataCallback<Boolean> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                userRemoteDataSource.modifyUserPassword(userUUID, originalPassword, newPassword, createOperateCallbackRunOnMainThread(callback));
             }
         });
 

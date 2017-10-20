@@ -24,12 +24,12 @@ import static org.junit.Assert.*;
 
 public class FileUtilTest {
 
-    @Ignore
+    @Test
     public void formatFileSizeTest() {
 
-        String size = FileUtil.formatFileSize(32 * 1000 * 1024);
+        String size = FileUtil.formatFileSize(32 * 1024 * 1024);
 
-        Assert.fail(size);
+        assertEquals("32.00 MB",size);
     }
 
     @Ignore

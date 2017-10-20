@@ -12,10 +12,10 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.UserManageItemBinding;
-import com.winsun.fruitmix.equipment.EquipmentItemViewModel;
-import com.winsun.fruitmix.equipment.data.EquipmentDataSource;
+import com.winsun.fruitmix.equipment.search.EquipmentItemViewModel;
+import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
-import com.winsun.fruitmix.model.EquipmentInfo;
+import com.winsun.fruitmix.equipment.search.data.EquipmentTypeInfo;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.stations.Station;
 import com.winsun.fruitmix.stations.StationsDataSource;
@@ -141,15 +141,15 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
     private void getEquipmentInfo(final Station station) {
 
-        equipmentDataSource.getEquipmentInfo(currentIP, new BaseLoadDataCallback<EquipmentInfo>() {
+        equipmentDataSource.getEquipmentTypeInfo(currentIP, new BaseLoadDataCallback<EquipmentTypeInfo>() {
             @Override
-            public void onSucceed(List<EquipmentInfo> data, OperationResult operationResult) {
+            public void onSucceed(List<EquipmentTypeInfo> data, OperationResult operationResult) {
 
-                EquipmentInfo equipmentInfo = data.get(0);
+                EquipmentTypeInfo equipmentTypeInfo = data.get(0);
 
-                equipmentInfo.setLabel(station.getLabel());
+                equipmentTypeInfo.setLabel(station.getLabel());
 
-                setEquipmentInfo(equipmentInfo);
+                setEquipmentInfo(equipmentTypeInfo);
 
             }
 
@@ -164,13 +164,13 @@ public class UserManagePresenterImpl implements UserMangePresenter {
     }
 
     private void getEquipmentInfo() {
-        equipmentDataSource.getEquipmentInfo(currentIP, new BaseLoadDataCallback<EquipmentInfo>() {
+        equipmentDataSource.getEquipmentTypeInfo(currentIP, new BaseLoadDataCallback<EquipmentTypeInfo>() {
             @Override
-            public void onSucceed(List<EquipmentInfo> data, OperationResult operationResult) {
+            public void onSucceed(List<EquipmentTypeInfo> data, OperationResult operationResult) {
 
-                EquipmentInfo equipmentInfo = data.get(0);
+                EquipmentTypeInfo equipmentTypeInfo = data.get(0);
 
-                setEquipmentInfo(equipmentInfo);
+                setEquipmentInfo(equipmentTypeInfo);
 
             }
 
@@ -184,20 +184,20 @@ public class UserManagePresenterImpl implements UserMangePresenter {
     }
 
     private void handleGetEquipmentInfoFail() {
-        EquipmentInfo equipmentInfo = new EquipmentInfo();
+        EquipmentTypeInfo equipmentTypeInfo = new EquipmentTypeInfo();
 
-        setEquipmentInfo(equipmentInfo);
+        setEquipmentInfo(equipmentTypeInfo);
     }
 
-    private void setEquipmentInfo(EquipmentInfo equipmentInfo) {
+    private void setEquipmentInfo(EquipmentTypeInfo equipmentTypeInfo) {
 
-        String type = equipmentInfo.getType();
+        String type = equipmentTypeInfo.getType();
 
         String label;
 
-        if (type.equals(EquipmentInfo.WS215I)) {
+        if (type.equals(EquipmentTypeInfo.WS215I)) {
 
-            label = EquipmentInfo.WS215I;
+            label = EquipmentTypeInfo.WS215I;
 
             equipmentItemViewModel.equipmentIconID.set(R.drawable.equipment_215i);
         } else {
@@ -207,7 +207,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
             equipmentItemViewModel.equipmentIconID.set(R.drawable.virtual_machine);
         }
 
-        equipmentItemViewModel.type.set(equipmentInfo.getType());
+        equipmentItemViewModel.type.set(equipmentTypeInfo.getType());
 
         equipmentItemViewModel.label.set(label);
         equipmentItemViewModel.ip.set(currentIP);

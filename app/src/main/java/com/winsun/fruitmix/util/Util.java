@@ -144,6 +144,7 @@ public class Util {
     public static final String HTTP_POST_METHOD = "POST";
     public static final String HTTP_PATCH_METHOD = "PATCH";
     public static final String HTTP_DELETE_METHOD = "DELETE";
+    public static final String HTTP_PUT_METHOD = "PUT";
     public static final int HTTP_CONNECT_TIMEOUT = 30 * 1000;
 
     public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
@@ -633,7 +634,7 @@ public class Util {
         return false;
     }
 
-    public static boolean checkIpLegal(String ip){
+    public static boolean checkIpLegal(String ip) {
 
         return Patterns.IP_ADDRESS.matcher(ip).matches();
 
@@ -766,16 +767,27 @@ public class Util {
         return isNum.matches();
     }
 
-    public static String formatDate(long time){
+    public static String formatDate(long time) {
 
         return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(time));
 
     }
 
-    public static String getCurrentFormatTime(){
+    public static String getCurrentFormatTime() {
 
         return formatDate(System.currentTimeMillis());
 
+    }
+
+    public static long getFirstNumInStr(String param) {
+
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(param);
+
+        if (matcher.find())
+            return Long.parseLong(matcher.group());
+        else
+            return 0;
     }
 
 

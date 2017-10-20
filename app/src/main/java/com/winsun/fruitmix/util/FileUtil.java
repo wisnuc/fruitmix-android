@@ -732,7 +732,11 @@ public class FileUtil {
 
         } else if (fileSize < 1024L * 1024L * 1024L * 1024L) {
 
-            formatFileSize = decimalFormat.format(fileSize / (float) 1024 / 1024 / 1024 / 1024) + " GB";
+            formatFileSize = decimalFormat.format(fileSize / (float) 1024 / 1024 / 1024) + " GB";
+
+        } else if (fileSize < 1024L * 1024L * 1024L * 1024L * 1024L) {
+
+            formatFileSize = decimalFormat.format(fileSize / (float) 1024 / 1024 / 1024 / 1024) + " TB";
 
         }
 
@@ -805,6 +809,12 @@ public class FileUtil {
         if (end.isEmpty())
             return R.drawable.file_icon;
 
+        String type = "";
+        for (String[] aMIME_MapTable : MIME_MapTable) {
+            if (end.equals(aMIME_MapTable[0]))
+                type = aMIME_MapTable[1];
+        }
+
         if (end.startsWith(".xls"))
             return R.drawable.excel;
         else if (end.startsWith(".doc"))
@@ -815,6 +825,10 @@ public class FileUtil {
             return R.drawable.power_point;
         else if (end.equals(".txt")) {
             return R.drawable.txt;
+        } else if (type.startsWith("video")) {
+            return R.drawable.video;
+        } else if (type.startsWith("audio")) {
+            return R.drawable.audio;
         } else
             return R.drawable.file_icon;
 

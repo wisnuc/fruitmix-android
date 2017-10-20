@@ -9,7 +9,7 @@
 
         <variable
             name="createUserViewModel"
-            type="com.winsun.fruitmix.CreateUserActivity.CreateUserViewModel" />
+            type="com.winsun.fruitmix.user.OperateUserViewModel" />
 
         <variable
             name="createUserPresenter"

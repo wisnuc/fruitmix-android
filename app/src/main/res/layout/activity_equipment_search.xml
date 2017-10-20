@@ -11,11 +11,11 @@
 
         <variable
             name="wechatLoginListener"
-            type="com.winsun.fruitmix.equipment.WeChatLoginListener" />
+            type="com.winsun.fruitmix.equipment.search.WeChatLoginListener" />
 
         <variable
             name="equipmentSearchViewModel"
-            type="com.winsun.fruitmix.equipment.EquipmentSearchViewModel" />
+            type="com.winsun.fruitmix.equipment.search.EquipmentSearchViewModel" />
 
         <import type="android.view.View" />
 

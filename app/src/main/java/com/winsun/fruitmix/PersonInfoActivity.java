@@ -2,91 +2,139 @@ package com.winsun.fruitmix;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.winsun.fruitmix.databinding.ActivityPersonInfoBinding;
+import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.person.info.InjectPersonInfoDataSource;
+import com.winsun.fruitmix.person.info.PersonInfoPresenter;
+import com.winsun.fruitmix.person.info.PersonInfoView;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.user.datasource.InjectUser;
+import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class PersonInfoActivity extends Activity implements EditText.OnFocusChangeListener, View.OnClickListener {
+public class PersonInfoActivity extends BaseActivity implements PersonInfoView, View.OnClickListener {
 
-    @BindView(R.id.back)
-    ImageView mBack;
+    public static final String TAG = PersonInfoActivity.class.getSimpleName();
 
-    @BindView(R.id.finish)
-    TextView mFinish;
+    private PersonInfoPresenter personInfoPresenter;
 
-    @BindView(R.id.email_edit)
-    EditText mEmailEdit;
+    private User currentUser;
 
-    @BindView(R.id.password_edit)
-    EditText mPasswordEdit;
+    public static final int GO_TO_MODIFY_USERNAME = 0;
 
-    @BindView(R.id.confirm_password_edit)
-    EditText mConfirmPasswordEdit;
-
-    @BindView(R.id.login_by_password_check)
-    CheckBox mLoginByPasswordCheckBox;
+    private ActivityPersonInfoBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_person_info);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_person_info);
 
-        ButterKnife.bind(this);
+        Toolbar mToolbar = binding.toolbarLayout.toolbar;
 
-        mEmailEdit.setOnFocusChangeListener(this);
-        mPasswordEdit.setOnFocusChangeListener(this);
-        mConfirmPasswordEdit.setOnFocusChangeListener(this);
+        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
 
-        mBack.setOnClickListener(this);
-        mFinish.setOnClickListener(this);
+        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
+        toolbarViewModel.setBaseView(this);
+
+        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
+        toolbarViewModel.titleText.set(getString(R.string.modify_user_info));
+
+        binding.setToolbarViewModel(toolbarViewModel);
+
+        mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
+
+        Util.setStatusBarColor(this, R.color.login_ui_blue);
+
+        personInfoPresenter = new PersonInfoPresenter(InjectUser.provideRepository(this),
+                InjectSystemSettingDataSource.provideSystemSettingDataSource(this), this, InjectPersonInfoDataSource.provideInstance(this));
+
+        currentUser = personInfoPresenter.getCurrentUser();
+
+        binding.setUser(currentUser);
+
+        binding.userAvatar.setUser(currentUser, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
+
+        binding.setPersonInfoPresenter(personInfoPresenter);
+
+        binding.modifyUserNameLayout.setOnClickListener(this);
+        binding.modifyPasswordLayout.setOnClickListener(this);
+
     }
 
     @Override
-    public void onFocusChange(View v, boolean hasFocus) {
-
-/*        EditText editText = (EditText) v;
-
-        switch (v.getId()) {
-            case R.id.email_edit:
-                if (hasFocus) {
-                    editText.setHint("");
-                } else {
-                    editText.setHint(getString(R.string.email_text));
-                }
-                break;
-            case R.id.password_edit:
-                if (hasFocus) {
-                    editText.setHint("");
-                } else {
-                    editText.setHint(getString(R.string.password_text));
-                }
-                break;
-            case R.id.confirm_password_edit:
-                if (hasFocus) {
-                    editText.setHint("");
-                } else {
-                    editText.setHint(getString(R.string.confirm_password_text));
-                }
-                break;
-            default:
-        }*/
+    public Context getContext() {
+        return this;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        personInfoPresenter.onDestroy();
+    }
+
+    /**
+     * Called when a view has been clicked.
+     *
+     * @param v The view that was clicked.
+     */
     @Override
     public void onClick(View v) {
+
+        Intent intent;
+
         switch (v.getId()) {
-            case R.id.back:
-                finish();
+            case R.id.modify_user_name_layout:
+
+                intent = new Intent(PersonInfoActivity.this, ModifyUserNameActivity.class);
+                intent.putExtra(ModifyUserNameActivity.USER_UUID_KEY, currentUser.getUuid());
+                intent.putExtra(ModifyUserNameActivity.USER_NAME_KEY, currentUser.getUserName());
+                startActivityForResult(intent, GO_TO_MODIFY_USERNAME);
+
                 break;
-            case R.id.finish:
+            case R.id.modify_password_layout:
+
+                intent = new Intent(PersonInfoActivity.this, ModifyUserPasswordActivity.class);
+                intent.putExtra(ModifyUserPasswordActivity.USER_UUID_KEY, currentUser.getUuid());
+                startActivity(intent);
+
                 break;
             default:
+                Log.d(TAG, "onClick: should not enter this case");
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == GO_TO_MODIFY_USERNAME && resultCode == RESULT_OK) {
+
+            setResultCode(RESULT_OK);
+
+            currentUser = personInfoPresenter.getCurrentUser();
+
+            binding.setUser(currentUser);
+
+            binding.userAvatar.setUser(currentUser, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
+
+        }
+
     }
 }

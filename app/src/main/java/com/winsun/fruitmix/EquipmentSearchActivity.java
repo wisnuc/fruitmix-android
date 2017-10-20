@@ -21,18 +21,19 @@ import android.widget.Toast;
 
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.databinding.ActivityEquipmentSearchBinding;
-import com.winsun.fruitmix.equipment.EquipmentPresenter;
-import com.winsun.fruitmix.equipment.data.EquipmentDataSource;
-import com.winsun.fruitmix.equipment.data.EquipmentRemoteDataSource;
-import com.winsun.fruitmix.equipment.EquipmentSearchView;
-import com.winsun.fruitmix.equipment.EquipmentSearchViewModel;
-import com.winsun.fruitmix.equipment.data.InjectEquipment;
-import com.winsun.fruitmix.equipment.WeChatLoginListener;
+
+import com.winsun.fruitmix.equipment.search.EquipmentPresenter;
+import com.winsun.fruitmix.equipment.search.EquipmentSearchView;
+import com.winsun.fruitmix.equipment.search.EquipmentSearchViewModel;
+import com.winsun.fruitmix.equipment.search.WeChatLoginListener;
+import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource;
+
+import com.winsun.fruitmix.equipment.search.data.InjectEquipment;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
-import com.winsun.fruitmix.model.Equipment;
-import com.winsun.fruitmix.equipment.data.EquipmentSearchManager;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.equipment.search.data.Equipment;
+import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.Util;
@@ -100,7 +101,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         LoginUseCase loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
 
         equipmentPresenter = new EquipmentPresenter(loadingViewModel, equipmentSearchViewModel, this,
-                mEquipmentSearchManager, mEquipmentDataSource, loginUseCase);
+                mEquipmentSearchManager, mEquipmentDataSource, loginUseCase,
+                InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
 
         binding.setWechatLoginListener(this);
 
@@ -141,10 +143,10 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             }
         });
 
-//        Equipment equipment = new Equipment("", Collections.singletonList("10.10.9.126"), 3000);
-//        equipment.setModel("");
-//        equipment.setSerialNumber("");
-//        getUserList(equipment);
+//        Equipment equipment_blue = new Equipment("", Collections.singletonList("10.10.9.126"), 3000);
+//        equipment_blue.setModel("");
+//        equipment_blue.setSerialNumber("");
+//        getUserList(equipment_blue);
 
         equipmentPresenter.onCreate();
 
@@ -260,7 +262,7 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     @Override
     public void wechatLogin() {
 
-        WXEntryActivity.setWxEntryCallback(new WXEntryActivity.WXEntryCallback() {
+        WXEntryActivity.setWxEntryLoginCallback(new WXEntryActivity.WXEntryLoginCallback() {
             @Override
             public void loginSucceed() {
 

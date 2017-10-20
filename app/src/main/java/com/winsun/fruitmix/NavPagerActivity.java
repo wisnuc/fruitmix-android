@@ -32,7 +32,8 @@ import android.widget.Toast;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
-import com.winsun.fruitmix.equipment.data.InjectEquipment;
+import com.winsun.fruitmix.equipment.manage.EquipmentManageActivity;
+import com.winsun.fruitmix.equipment.search.data.InjectEquipment;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.file.view.FileDownloadActivity;
@@ -53,14 +54,12 @@ import com.winsun.fruitmix.mainpage.MainPageView;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.Equipment;
-import com.winsun.fruitmix.equipment.data.EquipmentSearchManager;
+import com.winsun.fruitmix.equipment.search.data.Equipment;
+import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.network.InjectNetworkStateManager;
-import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
@@ -104,6 +103,11 @@ public class NavPagerActivity extends BaseActivity
     @Override
     public void gotoUserManageActivity() {
         Util.startActivity(mContext, UserManageActivity.class);
+    }
+
+    @Override
+    public void gotoEquipmentManageActivity() {
+        Util.startActivity(mContext, EquipmentManageActivity.class);
     }
 
     @Override
@@ -244,6 +248,8 @@ public class NavPagerActivity extends BaseActivity
 
     public static final int START_ACCOUNT_MANAGE = 0x1001;
 
+    public static final int START_PERSON_INFO = 0x1002;
+
     public static final int RESULT_REFRESH_LOGGED_IN_USER = 0x1002;
     public static final int RESULT_FINISH_ACTIVITY = 0x1003;
     public static final int RESULT_LOGOUT = 0x1004;
@@ -327,6 +333,13 @@ public class NavPagerActivity extends BaseActivity
         mNavigationMenuRecyclerView = binding.navigationMenuRecyclerView;
 
         userAvatar = binding.leftDrawerHeadLayout.avatar;
+
+        userAvatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(new Intent(mContext, PersonInfoActivity.class), START_PERSON_INFO);
+            }
+        });
 
         navPagerViewModel = new NavPagerViewModel();
 
@@ -629,7 +642,7 @@ public class NavPagerActivity extends BaseActivity
     }
 
     private void handleFoundEquipment(Equipment createdEquipment, final LoggedInUser loggedInUser) {
-        Log.d(TAG, "search equipment: loggedinuser equipment name: " + loggedInUser.getEquipmentName() + " createEquipment equipment name: " + createdEquipment.getEquipmentName());
+        Log.d(TAG, "search equipment_blue: loggedinuser equipment_blue name: " + loggedInUser.getEquipmentName() + " createEquipment equipment_blue name: " + createdEquipment.getEquipmentName());
 
         if (!loggedInUser.getEquipmentName().equals(createdEquipment.getEquipmentName()))
             return;
@@ -819,6 +832,19 @@ public class NavPagerActivity extends BaseActivity
 
         User user = userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
 
+        refreshUserName(user);
+
+        userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
+//        navPagerViewModel.userAvatarText.set(user.getDefaultAvatar());
+//        navPagerViewModel.userAvatarBackgroundResID.set(user.getDefaultAvatarBgColorResourceId());
+
+        mainPagePresenter.refreshUserInNavigationView(mContext, user);
+
+        mainPagePresenter.notifyAdapterDataSetChanged();
+
+    }
+
+    private void refreshUserName(User user) {
         String userAssociatedWeChatUserName = user.getAssociatedWeChatUserName();
 
         String userName;
@@ -829,15 +855,6 @@ public class NavPagerActivity extends BaseActivity
             userName = userAssociatedWeChatUserName;
 
         navPagerViewModel.userNameText.set(userName);
-
-        userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
-//        navPagerViewModel.userAvatarText.set(user.getDefaultAvatar());
-//        navPagerViewModel.userAvatarBackgroundResID.set(user.getDefaultAvatarBgColorResourceId());
-
-        mainPagePresenter.refreshUserInNavigationView(mContext, user);
-
-        mainPagePresenter.notifyAdapterDataSetChanged();
-
     }
 
     private void checkShowAutoUploadDialog() {
@@ -972,6 +989,14 @@ public class NavPagerActivity extends BaseActivity
             } else if (resultCode == RESULT_LOGOUT) {
                 handleLogoutOnClick();
             }
+
+        } else if (requestCode == START_PERSON_INFO && resultCode == RESULT_OK) {
+
+            User user = userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
+
+            refreshUserName(user);
+
+            userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
 
         } else {
 
