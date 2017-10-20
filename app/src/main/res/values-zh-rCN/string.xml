@@ -330,6 +330,8 @@
     <string name="modify_user_name">修改用户名</string>
     <string name="modify_user_info">编辑用户信息</string>
 
+    <string name="default_password">******</string>
+
     <string name="initiate_binding_request">发起绑定请求</string>
     <string name="get_wechat_user_info">获取微信用户信息</string>
     <string name="send_wechat_user_info">发送微信用户信息</string>
