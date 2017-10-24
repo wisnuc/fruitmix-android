@@ -81,11 +81,11 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
     public static boolean startRetrieveTicketTask = false;
 
+    private boolean alreadyStart = false;
+
     private CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback;
 
     private static List<UploadMediaCountChangeListener> uploadMediaCountChangeListeners = new ArrayList<>();
-
-    private NetworkChangeUseCase networkChangeUseCase;
 
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
@@ -130,6 +130,13 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
             }
         };
 
+        initInstance();
+
+        alreadyStart = true;
+
+    }
+
+    private void initInstance() {
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
 
         mediaDataSourceRepository.setCalcDigestCallback(calcMediaDigestCallback);
@@ -140,8 +147,6 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
         initInvitationRemoteDataSource();
 
 //        uploadMediaUseCase.registerUploadMediaCountChangeListener(this);
-
-        networkChangeUseCase = InjectNetworkChangeUseCase.provideInstance(this);
 
     }
 
@@ -248,9 +253,13 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        Log.d(TAG, "onStartCommand: ");
+        Log.d(TAG, "onStartCommand: " + alreadyStart);
 
-        mediaDataSourceRepository.setCalcDigestCallback(calcMediaDigestCallback);
+        //if app is killed by user,onCreate will not be called,so check alreadyStart and initInstance
+        if (!alreadyStart) {
+            initInstance();
+        } else
+            alreadyStart = false;
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -342,6 +351,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
             case Util.NETWORK_CHANGED:
 
+                NetworkChangeUseCase networkChangeUseCase = InjectNetworkChangeUseCase.provideInstance(this);
                 networkChangeUseCase.handleNetworkChange();
 
                 break;

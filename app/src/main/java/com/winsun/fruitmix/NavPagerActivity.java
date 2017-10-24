@@ -832,6 +832,8 @@ public class NavPagerActivity extends BaseActivity
 
         User user = userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
 
+        Log.d(TAG, "refreshUserInNavigationView: user is null:" + (user == null ? "true" : "false"));
+
         refreshUserName(user);
 
         userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));

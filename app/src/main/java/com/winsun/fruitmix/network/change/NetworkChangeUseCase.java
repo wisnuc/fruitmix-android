@@ -44,6 +44,8 @@ public class NetworkChangeUseCase {
 
     public void handleNetworkChange() {
 
+        Log.d(TAG, "handleNetworkChange: httpRequestFactory:" + httpRequestFactory);
+
         NetworkState networkState = networkStateManager.getNetworkState();
 
         if (networkState.isWifiConnected()) {

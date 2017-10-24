@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.user.datasource;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -20,6 +22,8 @@ import java.util.concurrent.ConcurrentMap;
  */
 
 public class UserDataRepositoryImpl extends BaseDataRepository implements UserDataRepository {
+
+    public static final String TAG = UserDataRepositoryImpl.class.getSimpleName();
 
     private static UserDataRepositoryImpl instance;
 
@@ -49,6 +53,8 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
     public static void destroyInstance() {
         instance = null;
     }
+
+    //TODO: when setCacheDirty need call insert user
 
     @Override
     public void setCacheDirty() {
@@ -82,7 +88,10 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
                     @Override
                     public void onFail(OperationResult operationResult) {
 
-                        getUserFromDB(runOnMainThreadCallback);
+//                        getUserFromDB(runOnMainThreadCallback);
+
+                        if (runOnMainThreadCallback != null)
+                            runOnMainThreadCallback.onFail(operationResult);
                     }
                 });
 
@@ -207,6 +216,8 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
 
     @Override
     public User getUserByUUID(String userUUID) {
+
+        Log.d(TAG, "getUserByUUID: cacheDirty: " + cacheDirty);
 
         if (cacheDirty || cacheUsers.isEmpty()) {
 

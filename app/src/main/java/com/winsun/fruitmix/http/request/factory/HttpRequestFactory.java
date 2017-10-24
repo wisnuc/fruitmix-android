@@ -42,7 +42,7 @@ public class HttpRequestFactory {
 
     public static void destroyInstance() {
 
-        Log.d(TAG, "destroyInstance: ");
+        Log.d(TAG, "destroyInstance: " + instance);
 
         instance = null;
     }
@@ -51,9 +51,9 @@ public class HttpRequestFactory {
 
         if (instance == null) {
 
-            Log.d(TAG, "getInstance: create new instance");
-
             instance = new HttpRequestFactory(systemSettingDataSource);
+
+            Log.d(TAG, "getInstance: create new instance: " + instance);
 
         }
 
@@ -75,7 +75,7 @@ public class HttpRequestFactory {
 
         this.mGateway = gateway;
 
-        Log.d(TAG, "finish setGateway: getGateway: " + getGateway() + " threadID: " + Thread.currentThread().getId());
+        Log.d(TAG, "finish setGateway: getGateway: " + getGateway() + " this: " + this);
     }
 
     private synchronized String getGateway() {
@@ -102,7 +102,7 @@ public class HttpRequestFactory {
 
         this.mToken = token;
 
-        Log.d(TAG, "finish setToken: getToken: " + getToken() + " threadID: " + Thread.currentThread().getId());
+        Log.d(TAG, "finish setToken: getToken: " + getToken() + " this: " + this);
     }
 
     private synchronized String getToken() {
@@ -115,7 +115,7 @@ public class HttpRequestFactory {
 
         }
 
-        Log.d(TAG, "getToken: " + mToken + " threadID: " + Thread.currentThread().getId());
+        Log.d(TAG, "getToken: " + mToken + " this: " + this);
 
         return mToken;
 
@@ -124,7 +124,7 @@ public class HttpRequestFactory {
 
     public void setStationID(String stationID) {
 
-        Log.d(TAG, "setStationID: " + stationID);
+        Log.d(TAG, "setStationID: " + stationID + " this: " + this);
 
         this.mStationID = stationID;
 
@@ -140,7 +140,7 @@ public class HttpRequestFactory {
 
         }
 
-        Log.d(TAG, "getStationID: " + mStationID);
+        Log.d(TAG, "getStationID: " + mStationID + " this:" + this);
 
         return mStationID;
 
@@ -149,7 +149,7 @@ public class HttpRequestFactory {
 
     public synchronized void checkToLocalUser(String token, String ip) {
 
-        Log.d(TAG, "checkToLocalUser mToken: " + token + " ip: " + ip);
+        Log.d(TAG, "checkToLocalUser mToken: " + token + " ip: " + ip + " this: " + this);
 
         systemSettingDataSource.setCurrentLoginToken(token);
 
@@ -161,12 +161,11 @@ public class HttpRequestFactory {
 
         setStationID("");
 
-
     }
 
     public synchronized void checkToWeChatUser(String token) {
 
-        Log.d(TAG, "checkToWeChatUser: mToken: " + token);
+        Log.d(TAG, "checkToWeChatUser: mToken: " + token + " this:" + this);
 
         systemSettingDataSource.setCurrentLoginToken(token);
 
@@ -365,7 +364,7 @@ public class HttpRequestFactory {
 
             HttpHeader httpHeader = new HttpHeader(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((userUUID + ":" + originalPassword).getBytes(), Base64.NO_WRAP));
 
-            currentDefaultHttpRequestFactory = new StationHttpRequestFactory(getGateway(),httpHeader);
+            currentDefaultHttpRequestFactory = new StationHttpRequestFactory(getGateway(), httpHeader);
         }
 
         return currentDefaultHttpRequestFactory.createHttpPutRequest(httpPath, body);

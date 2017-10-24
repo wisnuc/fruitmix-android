@@ -34,6 +34,8 @@ public class InitSystem {
 
     public static void initSystem(Context context) {
 
+        HttpRequestFactory.destroyInstance();
+
         LogoutUseCase.destroyInstance();
 
         LoginUseCase.destroyInstance();
@@ -43,8 +45,6 @@ public class InitSystem {
         StationsRepository.destroyInstance();
 
         StationsRemoteDataSource.destroyInstance();
-
-        HttpRequestFactory.destroyInstance();
 
         ImageGifLoaderInstance.destroyInstance();
 

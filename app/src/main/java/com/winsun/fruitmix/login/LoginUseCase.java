@@ -132,15 +132,6 @@ public class LoginUseCase extends BaseDataRepository {
         instance = null;
     }
 
-    public static String getToken() {
-
-        return mToken;
-    }
-
-    public static String getGateway() {
-        return mGateway;
-    }
-
     public void loginWithNoParam(final BaseOperateDataCallback<Boolean> callback) {
 
         final String currentLoginToken = systemSettingDataSource.getCurrentLoginToken();

@@ -16,8 +16,8 @@ public class InjectUser {
     public static UserDataRepository provideRepository(Context context) {
 
         return UserDataRepositoryImpl.getInstance(new UserDBDataSourceImpl(DBUtils.getInstance(context)),
-                new UserRemoteDataSourceImpl(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory(context),
-                        InjectSystemSettingDataSource.provideSystemSettingDataSource(context)), ThreadManagerImpl.getInstance());
+                new UserRemoteDataSourceImpl(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory(context)),
+                ThreadManagerImpl.getInstance());
 
     }
 

@@ -36,12 +36,9 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
     public static final String USER_HOME_PARAMETER = "/drives";
 
-    private SystemSettingDataSource systemSettingDataSource;
-
-    public UserRemoteDataSourceImpl(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory, SystemSettingDataSource systemSettingDataSource) {
+    public UserRemoteDataSourceImpl(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
         super(iHttpUtil, httpRequestFactory);
 
-        this.systemSettingDataSource = systemSettingDataSource;
     }
 
     @Override

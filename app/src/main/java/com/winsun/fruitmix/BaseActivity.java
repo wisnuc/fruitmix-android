@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.dialog.DialogFactory;
@@ -33,6 +34,8 @@ import org.greenrobot.eventbus.ThreadMode;
  */
 
 public class BaseActivity extends AppCompatActivity implements BaseView {
+
+    public static final String TAG = BaseActivity.class.getSimpleName();
 
     protected String action;
 
