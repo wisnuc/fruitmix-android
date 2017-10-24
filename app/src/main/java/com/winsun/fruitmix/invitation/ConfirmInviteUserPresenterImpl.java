@@ -13,6 +13,7 @@ import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.ConfirmInviteUserItemBinding;
 import com.winsun.fruitmix.databinding.ConfirmInviteUserItemHeaderBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
@@ -21,7 +22,9 @@ import com.winsun.fruitmix.invitation.data.InvitationDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.MediaUtil;
+import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -30,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -52,6 +56,8 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     private ConfirmInviteUserView confirmInviteUserView;
 
+    private Random random;
+
     public ConfirmInviteUserPresenterImpl(ConfirmInviteUserView confirmInviteUserView, InvitationDataSource invitationDataSource, ImageLoader imageLoader, final LoadingViewModel loadingViewModel, final NoContentViewModel noContentViewModel) {
         mInvitationDataSource = invitationDataSource;
 
@@ -68,6 +74,8 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 //        createFakeConfirmInviteUser();
 
         adapter = new ConfirmTicketAdapter();
+
+        random = new Random();
 
     }
 
@@ -222,18 +230,35 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         for (String ticket : tickets) {
 
-            ViewHeader viewHeader = new ViewHeader();
-            viewHeader.setTicketID(ticket);
-
-            viewItems.add(viewHeader);
+            List<ViewItem> temporaryViewItems = null;
 
             List<ConfirmInviteUser> confirmInviteUsers = map.get(ticket);
 
             for (ConfirmInviteUser confirmInviteUser : confirmInviteUsers) {
-                ViewContent viewContent = new ViewContent();
-                viewContent.setConfirmInviteUser(confirmInviteUser);
-                viewItems.add(viewContent);
+
+                if (confirmInviteUser.getOperateType().equals(ConfirmInviteUser.OPERATE_TYPE_PENDING)) {
+
+                    if (temporaryViewItems == null)
+                        temporaryViewItems = new ArrayList<>();
+
+                    ViewContent viewContent = new ViewContent();
+                    viewContent.setConfirmInviteUser(confirmInviteUser);
+
+                    temporaryViewItems.add(viewContent);
+
+                }
+
             }
+
+            if (temporaryViewItems != null) {
+                ViewHeader viewHeader = new ViewHeader();
+                viewHeader.setTicketID(ticket);
+
+                viewItems.add(viewHeader);
+
+                viewItems.addAll(temporaryViewItems);
+            }
+
 
         }
 
@@ -321,27 +346,28 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     private class ConfirmTicketContentViewHolder extends BindingViewHolder {
 
-//        NetworkImageView userAvatar;
+        private UserAvatar userAvatar;
 
         public ConfirmTicketContentViewHolder(ViewDataBinding viewDataBinding) {
             super(viewDataBinding);
 
             ConfirmInviteUserItemBinding binding = (ConfirmInviteUserItemBinding) viewDataBinding;
-//            userAvatar = binding.userAvatar;
+            userAvatar = binding.userAvatar;
 
         }
 
         public void refreshView(final ConfirmInviteUser confirmInviteUser) {
 
-//            retrieveUserAvatar(confirmInviteUser.getUserAvatar(), userAvatar);
+            User user = new User();
+            user.setUserName(confirmInviteUser.getUserName());
+            user.setAvatar(confirmInviteUser.getUserAvatar());
+
+            user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
+            user.setDefaultAvatarBgColor(random.nextInt(3) + 1);
+
+            userAvatar.setUser(user, imageLoader);
 
         }
-
-    }
-
-    private void retrieveUserAvatar(String userAvatarUrl, NetworkImageView imageView) {
-
-        MediaUtil.startLoadRemoteImageUrl(userAvatarUrl, imageView, imageLoader);
 
     }
 

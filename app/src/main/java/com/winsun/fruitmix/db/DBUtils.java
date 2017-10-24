@@ -660,5 +660,20 @@ public class DBUtils {
         return returnValue;
     }
 
+    public boolean updateUser(User user) {
+
+        openWritableDB();
+
+        long returnValue;
+
+        ContentValues contentValues = createUserContentValues(user);
+
+        returnValue = database.update(DBHelper.REMOTE_USER_TABLE_NAME, contentValues, DBHelper.USER_KEY_UUID + " = ?", new String[]{user.getUuid()});
+
+        close();
+
+        return returnValue > 0;
+    }
+
 
 }

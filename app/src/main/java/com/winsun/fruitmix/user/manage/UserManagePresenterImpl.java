@@ -215,6 +215,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
     private void getUserInThread() {
 
+        userDataRepository.setCacheDirty();
         userDataRepository.getUsers(currentLoginUserUUID, new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(final List<User> data, OperationResult operationResult) {

@@ -8,7 +8,6 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
-import com.winsun.fruitmix.http.CheckIpHttpUtil;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
@@ -22,7 +21,6 @@ import com.winsun.fruitmix.model.operationResult.OperationMoreThanOneStation;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.network.change.NetworkChangeUseCase;
 import com.winsun.fruitmix.stations.Station;
 import com.winsun.fruitmix.stations.StationsDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
@@ -34,7 +32,6 @@ import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
-import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
 import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
@@ -248,7 +245,7 @@ public class LoginUseCase extends BaseDataRepository {
 
             httpRequestFactory.setCurrentData(mToken, mGateway);
 
-            userDataRepository.getUserByGUIDWithCloudAPI(weChatUser.getGuid(), new BaseLoadDataCallback<User>() {
+            userDataRepository.getWeUserInfoByGUIDWithCloudAPI(weChatUser.getGuid(), new BaseLoadDataCallback<User>() {
                 @Override
                 public void onSucceed(final List<User> data, OperationResult operationResult) {
 

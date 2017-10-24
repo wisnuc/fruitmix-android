@@ -17,6 +17,7 @@ package com.winsun.fruitmix.component;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -30,6 +31,11 @@ import com.android.volley.toolbox.IImageLoadListener;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.gif.GifLoader.GifContainer;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.Util;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -339,6 +345,14 @@ public class GifTouchNetworkImageView extends PinchImageView {
 //                        }
 
                         deliverImageLoadFail();
+
+                        if (error.networkResponse == null)
+                            return;
+
+                        String status = new String(error.networkResponse.data);
+
+                        Log.d(TAG, "onErrorResponse: status:" + status);
+
                     }
 
                     @Override
@@ -371,6 +385,8 @@ public class GifTouchNetworkImageView extends PinchImageView {
                             }
 
                             setImageBitmap(bitmap);
+
+                            Log.d(TAG, "onResponse: url:" + mUrl + " bitmap size:" + FileUtil.formatFileSize(Util.getBitmapSize(bitmap)));
 
                             deliverImageLoadFinish();
 

@@ -21,4 +21,6 @@ public interface UserDBDataSource  {
 
     OperationResult modifyUserName(String userUUID,String userName);
 
+    boolean updateUser(User user);
+
 }

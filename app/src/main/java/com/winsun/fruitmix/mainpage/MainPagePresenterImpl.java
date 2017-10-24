@@ -173,7 +173,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         mNavigationMenuItems.add(model);
 
- /*       model = new NavigationMenuViewModel() {
+        model = new NavigationMenuViewModel() {
             @Override
             public void onClick() {
                 super.onClick();
@@ -198,7 +198,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         model.setMenuIconResId(R.drawable.ic_settings_black_24dp);
         model.setMenuText("确认邀请");
-        mNavigationMenuItems.add(model);*/
+        mNavigationMenuItems.add(model);
 
         model = new NavigationMenuViewModel() {
             @Override
@@ -389,7 +389,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
             @Override
             public void onSucceed(final String data, OperationResult result) {
 
-                Log.d(TAG, "onSucceed: data: " + data);
+                Log.d(TAG, "onSucceed: create invitation,ticket: " + data);
 
                 MiniProgram.shareMiniWXApp(iwxapi, resources, data);
 

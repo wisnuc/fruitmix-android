@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -239,6 +240,14 @@ public class Util {
 
         return metric.heightPixels;
     }
+
+    public static DisplayMetrics getDisplayMetrics(Activity activity) {
+        DisplayMetrics metric = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metric);
+
+        return metric;
+    }
+
 
     public static String calcSHA256OfFile(String fname) {
         MessageDigest md;
@@ -788,6 +797,19 @@ public class Util {
             return Long.parseLong(matcher.group());
         else
             return 0;
+    }
+
+    public static int getBitmapSize(Bitmap bitmap) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {    //API 19
+            return bitmap.getAllocationByteCount();
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {//API 16
+            return bitmap.getByteCount();
+        }
+
+        return bitmap.getRowBytes() * bitmap.getHeight();
+
     }
 
 

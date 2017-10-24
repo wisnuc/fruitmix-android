@@ -13,11 +13,14 @@ import java.util.List;
  * Created by Administrator on 2017/7/13.
  */
 
-public class RemoteConfirmInviteUsersParser implements RemoteDatasParser<ConfirmInviteUser> {
+public class RemoteConfirmInviteUsersParser extends BaseRemoteDataParser implements RemoteDatasParser<ConfirmInviteUser> {
 
     @Override
     public List<ConfirmInviteUser> parse(String json) throws JSONException {
-        JSONArray jsonArray = new JSONArray(json);
+
+        String root = checkHasWrapper(json);
+
+        JSONArray jsonArray = new JSONArray(root);
 
         List<ConfirmInviteUser> confirmInviteUsers = new ArrayList<>(jsonArray.length());
 
@@ -27,7 +30,9 @@ public class RemoteConfirmInviteUsersParser implements RemoteDatasParser<Confirm
 
             String ticketID = rootObject.optString("id");
 
-            JSONArray users = rootObject.getJSONArray("users");
+            String stationID = rootObject.optString("stationId");
+
+            JSONArray users = rootObject.optJSONArray("users");
 
             for (int j = 0; j < users.length(); j++) {
 
@@ -35,9 +40,14 @@ public class RemoteConfirmInviteUsersParser implements RemoteDatasParser<Confirm
 
                 ConfirmInviteUser confirmInviteUser = new ConfirmInviteUser();
 
+                confirmInviteUser.setStation(stationID);
+
                 confirmInviteUser.setTicketUUID(ticketID);
-                confirmInviteUser.setUserGUID(user.getString("userId"));
-                confirmInviteUser.setOperateType(user.getString("type"));
+                confirmInviteUser.setUserGUID(user.optString("userId"));
+                confirmInviteUser.setOperateType(user.optString("type"));
+
+                confirmInviteUser.setUserName(user.optString("nickName"));
+                confirmInviteUser.setUserAvatar(user.optString("avatarUrl"));
 
                 confirmInviteUsers.add(confirmInviteUser);
             }

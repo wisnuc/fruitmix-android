@@ -33,6 +33,12 @@ public class BaseHttpCallWrapper {
     }
 
     public <T> void operateCall(HttpRequest httpRequest, BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser) {
+
+        if(!Patterns.WEB_URL.matcher(httpRequest.getUrl()).matches()){
+            callback.onFail(new OperationMalformedUrlException());
+            return;
+        }
+
         operateCall(httpRequest, callback, parser, 0);
     }
 

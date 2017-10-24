@@ -20,6 +20,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.transition.Transition;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -58,6 +59,8 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
@@ -136,6 +139,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private CheckMediaIsUploadStrategy checkMediaIsUploadStrategy;
 
+    private SystemSettingDataSource systemSettingDataSource;
+
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -211,13 +216,15 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mContext = this;
+
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
 
         checkMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
 
-        ActivityPhotoSliderBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_photo_slider);
+        systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(mContext);
 
-        mContext = this;
+        ActivityPhotoSliderBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_photo_slider);
 
         ivComment = binding.commentLayout;
 
@@ -723,7 +730,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         } else {
 
-            startLoadingOriginalPhoto(view, media);
+            startLoadingOriginalPhotoOrLargePhoto(view, media);
         }
 
     }
@@ -751,7 +758,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             return imageUrl.contains(FileUtil.getLocalPhotoThumbnailFolderPath());
 
         } else {
-            return imageUrl.contains("thumb");
+            return imageUrl.contains("width=200");
         }
 
     }
@@ -763,25 +770,48 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 public void onTransitionEnd(Transition transition) {
                     super.onTransitionEnd(transition);
 
-                    startLoadingOriginalPhoto(view, media);
+                    startLoadingOriginalPhotoOrLargePhoto(view, media);
 
                 }
             });
 
         } else {
-            startLoadingOriginalPhoto(view, media);
+            startLoadingOriginalPhotoOrLargePhoto(view, media);
         }
     }
 
-    private void startLoadingOriginalPhoto(View view, Media media) {
+    private void startLoadingOriginalPhotoOrLargePhoto(View view, Media media) {
 
-        HttpRequest httpRequest = media.getImageOriginalUrl(mContext);
+        String remoteUrl;
 
-        String remoteUrl = httpRequest.getUrl();
+        HttpRequest httpRequest;
 
         GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view;
 
-        mainPic.setOrientationNumber(media.getOrientationNumber());
+        if (systemSettingDataSource.getLoginWithWechatCodeOrNot()) {
+
+            DisplayMetrics displayMetrics = Util.getDisplayMetrics(this);
+
+            int screenWidth = displayMetrics.widthPixels;
+            int screenHeight = displayMetrics.heightPixels;
+
+            int mediaWidth = Integer.parseInt(media.getWidth());
+            int mediaHeight = Integer.parseInt(media.getHeight());
+
+            if (screenWidth / screenHeight > mediaWidth / mediaHeight)
+                httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight);
+            else
+                httpRequest = media.getImageThumbUrl(mContext, screenWidth,-1);
+
+            remoteUrl = httpRequest.getUrl();
+
+        } else {
+
+            httpRequest = media.getImageOriginalUrl(mContext);
+            remoteUrl = httpRequest.getUrl();
+
+            mainPic.setOrientationNumber(media.getOrientationNumber());
+        }
 
         mainPic.setTag(remoteUrl);
 
@@ -1012,14 +1042,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 Log.d(TAG, "handleTouchEvent: isEnlargeState: " + view.isEnlargeState());
 
-                if(view.isEnlargeState())
+                if (view.isEnlargeState())
                     return;
 
                 if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
 
                     Log.d(TAG, "handleTouchEvent: action up lastX" + lastX + " lastY:" + lastY + " y:" + y + " x:" + x);
 
-                    if (lastY - y > Util.dip2px(mContext, 60) ) {
+                    if (lastY - y > Util.dip2px(mContext, 60)) {
 
                         finishActivity();
 

@@ -75,7 +75,6 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
     private InvitationDataSource invitationDataSource;
 
-    private MediaDataSourceRepository mediaDataSourceRepository;
     private GenerateMediaThumbUseCase generateMediaThumbUseCase;
     private UploadMediaUseCase uploadMediaUseCase;
 
@@ -137,7 +136,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
     }
 
     private void initInstance() {
-        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
+        MediaDataSourceRepository mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
 
         mediaDataSourceRepository.setCalcDigestCallback(calcMediaDigestCallback);
 

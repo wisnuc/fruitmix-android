@@ -34,9 +34,6 @@ public class BaseHttpCallWrapperTest {
     private IHttpUtil iHttpUtil;
 
     @Mock
-    private HttpRequest httpRequest;
-
-    @Mock
     BaseOperateDataCallback operateDataCallback;
 
     @Mock
@@ -62,9 +59,11 @@ public class BaseHttpCallWrapperTest {
         try {
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(new HttpResponse(404, ""));
 
+            HttpRequest httpRequest = new HttpRequest("", "");
+
             baseHttpCallWrapper.operateCall(httpRequest, operateDataCallback, remoteDataParser);
 
-            verify(iHttpUtil).remoteCall(any(HttpRequest.class));
+            verify(iHttpUtil, never()).remoteCall(any(HttpRequest.class));
             verify(operateDataCallback).onFail(any(OperationResult.class));
 
         } catch (IOException e) {

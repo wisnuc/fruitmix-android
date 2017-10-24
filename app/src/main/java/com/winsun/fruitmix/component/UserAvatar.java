@@ -6,6 +6,7 @@ import android.support.annotation.AttrRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -59,7 +60,7 @@ public class UserAvatar extends FrameLayout {
 
         String url = user.getAvatar();
 
-        if (url.equals(User.DEFAULT_AVATAR) || !url.startsWith(Util.HTTP)) {
+        if (url.equals(User.DEFAULT_AVATAR) || !Patterns.WEB_URL.matcher(url).matches()) {
 
             avatarTextView.setVisibility(VISIBLE);
             avatarImageView.setVisibility(GONE);

@@ -81,8 +81,40 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
                     @Override
                     public void onSucceed(List<User> data, OperationResult operationResult) {
 
-                        if (runOnMainThreadCallback != null)
-                            runOnMainThreadCallback.onSucceed(data, operationResult);
+                        if (cacheUsers.isEmpty()) {
+
+                            if (runOnMainThreadCallback != null)
+                                runOnMainThreadCallback.onSucceed(data, operationResult);
+
+                        } else {
+
+                            for (User user : data) {
+
+                                User originalUser = cacheUsers.get(user.getUuid());
+
+                                if (originalUser != null) {
+
+                                    user.setHome(originalUser.getHome());
+
+                                    userDBDataSource.updateUser(user);
+
+                                    cacheUsers.put(user.getUuid(), user);
+                                } else {
+
+                                    userDBDataSource.insertUser(Collections.singletonList(user));
+
+                                    cacheUsers.putIfAbsent(user.getUuid(), user);
+                                }
+
+                            }
+
+                            cacheDirty = false;
+
+                            if (runOnMainThreadCallback != null)
+                                runOnMainThreadCallback.onSucceed(new ArrayList<>(cacheUsers.values()), operationResult);
+
+                        }
+
                     }
 
                     @Override
@@ -232,12 +264,12 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
     }
 
     @Override
-    public void getUserByGUIDWithCloudAPI(final String guid, final BaseLoadDataCallback<User> callback) {
+    public void getWeUserInfoByGUIDWithCloudAPI(final String guid, final BaseLoadDataCallback<User> callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                userRemoteDataSource.getUserByGUIDWithCloudAPI(guid, createLoadCallbackRunOnMainThread(callback));
+                userRemoteDataSource.getWeUserInfoByGUIDWithCloudAPI(guid, createLoadCallbackRunOnMainThread(callback));
             }
         });
 

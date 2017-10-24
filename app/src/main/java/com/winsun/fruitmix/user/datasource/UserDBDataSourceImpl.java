@@ -57,4 +57,10 @@ public class UserDBDataSourceImpl implements UserDBDataSource {
             return new OperationSQLException();
 
     }
+
+    @Override
+    public boolean updateUser(User user) {
+
+        return dbUtils.updateUser(user);
+    }
 }

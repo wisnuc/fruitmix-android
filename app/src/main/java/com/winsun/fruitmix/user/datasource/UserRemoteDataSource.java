@@ -20,7 +20,7 @@ public interface UserRemoteDataSource {
 
     void getUserDetailedInfoByUUID(String userUUID, BaseLoadDataCallback<User> callback);
 
-    void getUserByGUIDWithCloudAPI(String guid, BaseLoadDataCallback<User> callback);
+    void getWeUserInfoByGUIDWithCloudAPI(String guid, BaseLoadDataCallback<User> callback);
 
     void modifyUserName(String userUUID,String userName, BaseOperateDataCallback<User> callback);
 

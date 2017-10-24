@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:bind="http://schemas.android.com/apk/res-auto">
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -20,50 +21,55 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp">
 
-        <ImageView
+        <com.winsun.fruitmix.component.UserAvatar
             android:id="@+id/user_avatar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_centerVertical="true"
-            android:layout_marginRight="16dp"
-            android:background="@mipmap/launcher_logo" />
+            android:layout_marginRight="16dp" />
 
-        <TextView
-            android:id="@+id/station"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_toRightOf="@id/user_avatar"
-            android:text="@{confirmInviteUser.station}" />
+        <!--        <TextView
+                    android:id="@+id/station"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@id/user_avatar"
+                    android:text="@{confirmInviteUser.station}" />-->
 
         <TextView
             android:id="@+id/user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/station"
+            android:layout_centerVertical="true"
             android:layout_marginTop="8dp"
             android:layout_toRightOf="@id/user_avatar"
-            android:text="@{confirmInviteUser.userName}" />
+            android:gravity="center_vertical"
+            android:text="@{confirmInviteUser.userName}"
+            android:textColor="@color/eighty_seven_percent_black"
+            android:textSize="16dp"
+            tools:text="Andy" />
 
         <Button
             android:id="@+id/refuse"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:onClick="@{()->confirmInviteUserPresenter.refuseInviteUser(confirmInviteUser)}"
-            android:text="@string/refuse" />
+            android:text="@string/refuse"
+            android:textSize="12dp" />
 
 
         <Button
             android:id="@+id/accept"
-            android:layout_width="60dp"
+            android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_centerVertical="true"
             android:layout_marginRight="16dp"
             android:layout_toLeftOf="@id/refuse"
             android:onClick="@{()->confirmInviteUserPresenter.acceptInviteUser(confirmInviteUser)}"
-            android:text="@string/accept" />
+            android:text="@string/accept"
+            android:textSize="12dp" />
 
     </RelativeLayout>
 

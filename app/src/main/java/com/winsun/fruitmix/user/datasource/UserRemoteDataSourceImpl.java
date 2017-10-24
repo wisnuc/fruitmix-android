@@ -157,7 +157,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     }
 
     @Override
-    public void getUserByGUIDWithCloudAPI(String guid, BaseLoadDataCallback<User> callback) {
+    public void getWeUserInfoByGUIDWithCloudAPI(String guid, BaseLoadDataCallback<User> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap(CloudHttpRequestFactory.CLOUD_API_LEVEL + "/users/" + guid);
 

@@ -21,7 +21,10 @@ public class Media implements Parcelable {
 
     private static final String TAG = Media.class.getSimpleName();
 
-    private static final String thumbPhotoFormatCode = "%1$s?alt=thumbnail&width=%2$s&height=%3$s&autoOrient=true&modifier=caret";
+    private static final String THUMB_PHOTO_FORMAT_CODE = "%1$s?alt=thumbnail&width=%2$s&height=%3$s&autoOrient=true&modifier=caret";
+    private static final String THUMB_PHOTO_FORMAT_CODE_WITHOUT_WIDTH = "%1$s?alt=thumbnail&height=%2$s&autoOrient=true&modifier=caret";
+    private static final String THUMB_PHOTO_FORMAT_CODE_WITHOUT_HEIGHT = "%1$s?alt=thumbnail&width=%2$s&autoOrient=true&modifier=caret";
+
 
     private String uuid;
     private String thumb;
@@ -335,8 +338,7 @@ public class Media implements Parcelable {
             httpRequest = getRemoteMediaThumbUrl(context, 64, 64);
 
 
-
-        Log.d(TAG, "media uuid: " + getUuid() + " getImageSmallThumbUrl: " + httpRequest.getUrl());
+            Log.d(TAG, "media uuid: " + getUuid() + " getImageSmallThumbUrl: " + httpRequest.getUrl());
 
 
         }
@@ -345,6 +347,12 @@ public class Media implements Parcelable {
     }
 
     public HttpRequest getImageThumbUrl(Context context) {
+
+        return getImageThumbUrl(context, 200, 200);
+
+    }
+
+    public HttpRequest getImageThumbUrl(Context context, int width, int height) {
 
         String imageUrl;
 
@@ -364,15 +372,15 @@ public class Media implements Parcelable {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            httpRequest = getRemoteMediaThumbUrl(context, 200, 200);
+            httpRequest = getRemoteMediaThumbUrl(context, width, height);
 
-
-        Log.d(TAG, "media uuid: " + getUuid() + " getImageThumbUrl: " + httpRequest.getUrl());
+            Log.d(TAG, "media uuid: " + getUuid() + " getImageThumbUrl: " + httpRequest.getUrl());
 
         }
         return httpRequest;
 
     }
+
 
     private HttpRequest generateUrl(Context context, String req) {
 
@@ -384,8 +392,18 @@ public class Media implements Parcelable {
 
     private HttpRequest getRemoteMediaThumbUrl(Context context, int width, int height) {
 
-        String httpPath = String.format(thumbPhotoFormatCode, Util.MEDIA_PARAMETER + "/" + getUuid(),
-                String.valueOf(width), String.valueOf(height));
+        String httpPath;
+
+        if(width == -1){
+            httpPath = String.format(THUMB_PHOTO_FORMAT_CODE_WITHOUT_WIDTH, Util.MEDIA_PARAMETER + "/" + getUuid(),
+                    String.valueOf(height));
+        }else if(height == -1){
+            httpPath = String.format(THUMB_PHOTO_FORMAT_CODE_WITHOUT_HEIGHT, Util.MEDIA_PARAMETER + "/" + getUuid(),
+                    String.valueOf(width));
+        }else {
+            httpPath = String.format(THUMB_PHOTO_FORMAT_CODE, Util.MEDIA_PARAMETER + "/" + getUuid(),
+                    String.valueOf(width), String.valueOf(height));
+        }
 
         return generateUrl(context, httpPath);
 

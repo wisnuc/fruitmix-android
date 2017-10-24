@@ -185,7 +185,7 @@ public class LoginUseCaseTest {
 
         ArgumentCaptor<BaseLoadDataCallback<User>> getUserByGUIDCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(userDataRepository).getUserByGUIDWithCloudAPI(eq(testGUID), getUserByGUIDCaptor.capture());
+        verify(userDataRepository).getWeUserInfoByGUIDWithCloudAPI(eq(testGUID), getUserByGUIDCaptor.capture());
 
         User user = new User();
         user.setUserName(testUserName);
