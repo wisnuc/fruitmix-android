@@ -154,9 +154,18 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 PinchImageView view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
 
                 if (view == null) {
+
                     imageTag = media.getImageOriginalUrl(mContext).getUrl();
 
                     view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
+                }
+
+                if (view == null) {
+
+                    imageTag = getLargeImageHttpRequest(media).getUrl();
+
+                    view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
+
                 }
 
                 view.setDoMatrixOnDraw(false);
@@ -790,18 +799,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         if (systemSettingDataSource.getLoginWithWechatCodeOrNot()) {
 
-            DisplayMetrics displayMetrics = Util.getDisplayMetrics(this);
-
-            int screenWidth = displayMetrics.widthPixels;
-            int screenHeight = displayMetrics.heightPixels;
-
-            int mediaWidth = Integer.parseInt(media.getWidth());
-            int mediaHeight = Integer.parseInt(media.getHeight());
-
-            if (screenWidth / screenHeight > mediaWidth / mediaHeight)
-                httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight);
-            else
-                httpRequest = media.getImageThumbUrl(mContext, screenWidth,-1);
+            httpRequest = getLargeImageHttpRequest(media);
 
             remoteUrl = httpRequest.getUrl();
 
@@ -830,6 +828,23 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             mainPic.setImageUrl(remoteUrl, mImageLoader);
         }
 
+    }
+
+    private HttpRequest getLargeImageHttpRequest(Media media) {
+        HttpRequest httpRequest;
+        DisplayMetrics displayMetrics = Util.getDisplayMetrics(this);
+
+        int screenWidth = displayMetrics.widthPixels;
+        int screenHeight = displayMetrics.heightPixels;
+
+        int mediaWidth = Integer.parseInt(media.getWidth());
+        int mediaHeight = Integer.parseInt(media.getHeight());
+
+        if (screenWidth / screenHeight > mediaWidth / mediaHeight)
+            httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight);
+        else
+            httpRequest = media.getImageThumbUrl(mContext, screenWidth, -1);
+        return httpRequest;
     }
 
     private class MyAdapter extends PagerAdapter {

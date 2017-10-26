@@ -95,6 +95,7 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
                                 if (originalUser != null) {
 
                                     user.setHome(originalUser.getHome());
+                                    user.setAvatar(originalUser.getAvatar());
 
                                     userDBDataSource.updateUser(user);
 
@@ -244,6 +245,16 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
         cacheUsers.clear();
         cacheUsers.putAll(buildRemoteUserMapKeyIsUUID(users));
 
+    }
+
+    @Override
+    public boolean updateUser(User user) {
+
+        boolean result = userDBDataSource.updateUser(user);
+
+        cacheUsers.put(user.getUuid(), user);
+
+        return result;
     }
 
     @Override

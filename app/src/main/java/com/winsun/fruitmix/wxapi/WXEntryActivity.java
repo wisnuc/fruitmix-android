@@ -26,8 +26,6 @@ import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationMoreThanOneStation;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
 import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
@@ -41,13 +39,9 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
     private LoginUseCase loginUseCase;
 
-    private TokenDataSource tokenDataSource;
-
     private ProgressDialog dialog;
 
     private Context mContext;
-
-    private ThreadManager threadManager;
 
     public interface WXEntryLoginCallback {
 
@@ -59,7 +53,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
     public interface WXEntryGetTokenCallback {
 
-        void succeed(String token);
+        void succeed(WeChatTokenUserWrapper weChatTokenUserWrapper);
 
         void fail();
 
@@ -84,8 +78,6 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
         mContext = this;
 
         loginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
-
-        threadManager = ThreadManagerImpl.getInstance();
 
         Log.d(TAG, "onCreate: ");
 
@@ -138,7 +130,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                 } else if (wxEntryGetTokenCallback != null) {
 
-                    showGetTokneDialog();
+                    showGetTokenDialog();
 
                     getTokenInThread(code);
 
@@ -188,13 +180,13 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
     }
 
-    private void showGetTokneDialog() {
+    private void showGetTokenDialog() {
         dialog = ProgressDialog.show(this, null, String.format(getString(R.string.operating_title), getString(R.string.get_wechat_user_info)), true, false);
     }
 
     private void getTokenInThread(String code) {
 
-        tokenDataSource = InjectTokenRemoteDataSource.provideTokenDataSource(this);
+        TokenDataSource tokenDataSource = InjectTokenRemoteDataSource.provideTokenDataSource(this);
 
         tokenDataSource.getToken(code, new BaseLoadDataCallback<WeChatTokenUserWrapper>() {
             @Override
@@ -202,7 +194,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                 dismissDialog();
 
-                finishWhenGetTokenSucceed(data.get(0).getToken());
+                finishWhenGetTokenSucceed(data.get(0));
 
             }
 
@@ -219,13 +211,13 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
     }
 
-    private void finishWhenGetTokenSucceed(String token) {
+    private void finishWhenGetTokenSucceed(WeChatTokenUserWrapper weChatTokenUserWrapper) {
 
         finish();
 
         if (wxEntryGetTokenCallback != null) {
 
-            wxEntryGetTokenCallback.succeed(token);
+            wxEntryGetTokenCallback.succeed(weChatTokenUserWrapper);
             wxEntryGetTokenCallback = null;
 
         }
@@ -371,6 +363,13 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                                     }
                                 });
+
+                    }
+                }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        handleLoginFail(new OperationFail(getString(R.string.success, getString(R.string.cancel_login))));
 
                     }
                 }).setCancelable(false);

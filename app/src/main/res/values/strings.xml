@@ -118,6 +118,8 @@
     <string name="password_error">Wrong password. Try again.</string>
     <string name="password_text">Password</string>
 
+    <string name="cancel_login">Cancel Login</string>
+
     <!-- personal data -->
 
     <!--
@@ -367,6 +369,8 @@
     <!-- invite user -->
     <string name="confirm_invitation">Confirm invitation</string>
     <string name="no_invitation">No invitation</string>
+    <string name="accept_invitation">Accept invitation</string>
+    <string name="refuse_invitation">Refuse invitation</string>
 
     <!-- group -->
     <string name="group">Group</string>

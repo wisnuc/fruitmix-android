@@ -356,7 +356,7 @@ public class NavPagerActivity extends BaseActivity
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
 
         mainPagePresenter = new MainPagePresenterImpl(mContext, systemSettingDataSource, loggedInUserDataSource,
-                navPagerViewModel, this, InjectGetAllBindingLocalUserUseCase.provideInstance(this));
+                navPagerViewModel, this, InjectGetAllBindingLocalUserUseCase.provideInstance(this),InjectEquipment.provideEquipmentDataSource(this));
 
         binding.setViewModel(navPagerViewModel);
 

@@ -193,23 +193,18 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
         String type = equipmentTypeInfo.getType();
 
-        String label;
-
         if (type.equals(EquipmentTypeInfo.WS215I)) {
-
-            label = EquipmentTypeInfo.WS215I;
 
             equipmentItemViewModel.equipmentIconID.set(R.drawable.equipment_215i);
         } else {
 
-            label = userManageView.getString(R.string.virtual_machine);
-
             equipmentItemViewModel.equipmentIconID.set(R.drawable.virtual_machine);
         }
 
-        equipmentItemViewModel.type.set(equipmentTypeInfo.getType());
+        equipmentItemViewModel.type.set(type);
 
-        equipmentItemViewModel.label.set(label);
+        equipmentItemViewModel.label.set(equipmentTypeInfo.getLabel());
+
         equipmentItemViewModel.ip.set(currentIP);
     }
 

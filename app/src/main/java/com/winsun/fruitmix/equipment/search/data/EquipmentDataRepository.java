@@ -61,16 +61,16 @@ public class EquipmentDataRepository extends BaseDataRepository implements Equip
 
         final BaseLoadDataCallback<EquipmentTypeInfo> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
 
-        if (currentIP != null && currentEquipmentTypeInfo != null && currentIP.equals(equipmentIP)) {
+/*        if (currentIP != null && currentEquipmentTypeInfo != null && currentIP.equals(equipmentIP)) {
 
-            Log.d(TAG, "getEquipmentTypeInfo: return equipment_blue info in memory cache");
+            Log.d(TAG, "getEquipmentTypeInfo: return equipment info in memory cache");
 
             runOnMainThreadCallback.onSucceed(Collections.singletonList(currentEquipmentTypeInfo), new OperationSuccess());
 
             return;
-        }
+        }*/
 
-        Log.d(TAG, "getEquipmentTypeInfo: get equipment_blue info from station");
+        Log.d(TAG, "getEquipmentTypeInfo: get equipment info from station");
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override

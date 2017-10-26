@@ -16,4 +16,6 @@ public interface PersonInfoView extends BaseView {
 
     Context getContext();
 
+    void handleBindSucceed();
+
 }

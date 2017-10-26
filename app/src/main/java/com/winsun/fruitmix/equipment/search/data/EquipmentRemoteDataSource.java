@@ -5,11 +5,20 @@ import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentTypeInfoParser;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.parser.RemoteEquipmentHostAliasParser;
 import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
 import com.winsun.fruitmix.util.Util;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/7/11.
@@ -23,6 +32,8 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
 
     private static final String EQUIPMENT_CONTROL_SYSTEM = "/control/system";
 
+    private static final String EQUIPMENT_NAME = "/station/info";
+
     public EquipmentRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
         super(iHttpUtil, httpRequestFactory);
     }
@@ -30,7 +41,7 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
     @Override
     public void getUsersInEquipment(Equipment equipment, BaseLoadDataCallback<User> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(equipment.getHosts().get(0),Util.LOGIN_PARAMETER);
+        HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(equipment.getHosts().get(0), Util.LOGIN_PARAMETER);
 
         wrapper.loadCall(httpRequest, callback, new RemoteLoginUsersParser());
 
@@ -38,19 +49,60 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
 
     public void getEquipmentHostAlias(Equipment equipment, BaseLoadDataCallback<String> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(equipment.getHosts().get(0),IPALIASING);
+        HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(equipment.getHosts().get(0), IPALIASING);
 
         wrapper.loadCall(httpRequest, callback, new RemoteEquipmentHostAliasParser());
 
     }
 
     @Override
-    public void getEquipmentTypeInfo(String equipmentIP, BaseLoadDataCallback<EquipmentTypeInfo> callback) {
+    public void getEquipmentTypeInfo(final String equipmentIP, final BaseLoadDataCallback<EquipmentTypeInfo> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(equipmentIP, EQUIPMENT_CONTROL_SYSTEM);
 
-        wrapper.loadCall(httpRequest, callback, new RemoteEquipmentTypeInfoParser());
+        wrapper.loadCall(httpRequest, new BaseLoadDataCallback<EquipmentTypeInfo>() {
+            @Override
+            public void onSucceed(List<EquipmentTypeInfo> data, OperationResult operationResult) {
 
+                getEquipmentName(callback, equipmentIP, data.get(0));
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+                callback.onFail(operationResult);
+            }
+        }, new RemoteEquipmentTypeInfoParser());
+
+    }
+
+    private void getEquipmentName(final BaseLoadDataCallback<EquipmentTypeInfo> callback, String equipmentIP, final EquipmentTypeInfo equipmentTypeInfo) {
+        HttpRequest getEquipmentNameHttpRequest = httpRequestFactory.createGetRequestWithoutToken(equipmentIP, EQUIPMENT_NAME);
+        wrapper.loadCall(getEquipmentNameHttpRequest, new BaseLoadDataCallback<String>() {
+            @Override
+            public void onSucceed(List<String> data, OperationResult operationResult) {
+
+                equipmentTypeInfo.setLabel(data.get(0));
+                callback.onSucceed(Collections.singletonList(equipmentTypeInfo), new OperationSuccess());
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+                callback.onFail(operationResult);
+            }
+
+        }, new RemoteDatasParser<String>() {
+            @Override
+            public List<String> parse(String json) throws JSONException {
+
+                JSONObject jsonObject = new JSONObject(json);
+
+                String name = jsonObject.optString("name");
+
+                return Collections.singletonList(name);
+            }
+        });
     }
 
 

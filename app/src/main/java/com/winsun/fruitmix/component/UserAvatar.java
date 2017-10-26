@@ -6,6 +6,7 @@ import android.support.annotation.AttrRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
@@ -25,10 +26,14 @@ import com.winsun.fruitmix.util.Util;
 
 public class UserAvatar extends FrameLayout {
 
+    public static final String TAG = UserAvatar.class.getSimpleName();
+
     private TextView avatarTextView;
     private NetworkImageView avatarImageView;
 
     private UserAvatarBinding binding;
+
+    private String preUrl;
 
     public UserAvatar(@NonNull Context context) {
         super(context);
@@ -69,10 +74,19 @@ public class UserAvatar extends FrameLayout {
 
         } else {
 
+            if (preUrl == null)
+                preUrl = url;
+            else if (preUrl.equals(url)) {
+
+                Log.d(TAG, "setUser: url is as same as pre url,url: " + url);
+
+                return;
+            }
+
             avatarImageView.setVisibility(VISIBLE);
             avatarTextView.setVisibility(GONE);
 
-            MediaUtil.startLoadRemoteImageUrl(url,avatarImageView,imageLoader);
+            MediaUtil.startLoadRemoteImageUrl(url, avatarImageView, imageLoader);
 
         }
 

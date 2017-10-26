@@ -17,6 +17,7 @@ import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -59,7 +60,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         return instance;
     }
 
-    public static void destroyInstance(){
+    public static void destroyInstance() {
 
         instance = null;
 
@@ -76,7 +77,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(ROOT_DRIVE_PARAMETER);
 
-        wrapper.loadCall(httpRequest,callback,new RemoteRootDriveFolderParser());
+        wrapper.loadCall(httpRequest, callback, new RemoteRootDriveFolderParser());
 
     }
 
@@ -97,6 +98,11 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         HttpRequest httpRequest = httpRequestFactory.createHttpGetFileRequest(DOWNLOAD_FILE_PARAMETER + "/"
                 + fileDownloadState.getDriveUUID() + "/dirs/" + fileDownloadState.getParentFolderUUID()
                 + "/entries/" + fileDownloadState.getFileUUID() + "?name=" + encodedFileName);
+
+        if (!wrapper.checkUrl(httpRequest.getUrl())) {
+            callback.onFail(new OperationMalformedUrlException());
+            return;
+        }
 
         ResponseBody responseBody = null;
         try {
@@ -131,18 +137,38 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         String path = "/drives/" + driveUUID + "/dirs/" + dirUUID + "/entries";
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path,"");
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path, "");
+
+        if (!wrapper.checkUrl(httpRequest.getUrl())) {
+            callback.onFail(new OperationMalformedUrlException());
+            return;
+        }
 
         Log.i(TAG, "createFolder: start create");
 
-        HttpResponse httpResponse = iHttpFileUtil.createFolder(httpRequest, folderName);
+        HttpResponse httpResponse;
+        try {
+            httpResponse = iHttpFileUtil.createFolder(httpRequest, folderName);
 
-        Log.i(TAG, "createFolder: result: " + (httpResponse != null ? "succeed" : "fail"));
+            if (httpResponse != null && httpResponse.getResponseCode() == 200)
+                callback.onSucceed(httpResponse, new OperationSuccess());
+            else
+                callback.onFail(new OperationJSONException());
 
-        if (httpResponse != null && httpResponse.getResponseCode() == 200)
-            callback.onSucceed(httpResponse, new OperationSuccess());
-        else
+        } catch (MalformedURLException e) {
+
+            callback.onFail(new OperationMalformedUrlException());
+
+        } catch (SocketTimeoutException ex) {
+
+            callback.onFail(new OperationSocketTimeoutException());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
             callback.onFail(new OperationIOException());
+        }
+
     }
 
     @Override
@@ -150,7 +176,11 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         String path = "/drives/" + driveUUID + "/dirs/" + dirUUID + "/entries";
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path,"");
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "");
+
+        if (!wrapper.checkUrl(httpRequest.getUrl())) {
+            return new OperationMalformedUrlException();
+        }
 
         Log.i(TAG, "uploadFile: start upload: " + httpRequest.getUrl());
 
@@ -160,12 +190,10 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
             httpResponse = iHttpFileUtil.uploadFile(httpRequest, file);
 
-            Log.i(TAG, "uploadFile: http response code: " + httpResponse.getResponseCode());
-
-            if (httpResponse.getResponseCode() == 200)
+            if (httpResponse != null && httpResponse.getResponseCode() == 200)
                 return new OperationSuccess();
             else
-                return new OperationNetworkException(httpResponse);
+                return new OperationJSONException();
 
         } catch (MalformedURLException e) {
 

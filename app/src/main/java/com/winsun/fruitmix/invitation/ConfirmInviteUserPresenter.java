@@ -18,4 +18,5 @@ public interface ConfirmInviteUserPresenter {
 
     void handleOperationEvent(OperationEvent operationEvent);
 
+    void onDestroy();
 }

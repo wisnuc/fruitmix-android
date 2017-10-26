@@ -32,9 +32,13 @@ public class BaseHttpCallWrapper {
         this.iHttpUtil = iHttpUtil;
     }
 
+    public boolean checkUrl(String url) {
+        return Patterns.WEB_URL.matcher(url).matches();
+    }
+
     public <T> void operateCall(HttpRequest httpRequest, BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser) {
 
-        if(!Patterns.WEB_URL.matcher(httpRequest.getUrl()).matches()){
+        if (!checkUrl(httpRequest.getUrl())) {
             callback.onFail(new OperationMalformedUrlException());
             return;
         }
@@ -86,7 +90,7 @@ public class BaseHttpCallWrapper {
 
     public <T> void loadCall(HttpRequest httpRequest, BaseLoadDataCallback<T> callback, RemoteDatasParser<T> parser) {
 
-        if(!Patterns.WEB_URL.matcher(httpRequest.getUrl()).matches()){
+        if (!checkUrl(httpRequest.getUrl())) {
             callback.onFail(new OperationMalformedUrlException());
             return;
         }

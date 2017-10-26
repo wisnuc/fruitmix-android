@@ -709,6 +709,14 @@ public class UploadMediaUseCase {
 
                     break;
 
+                } else if (code == 403) {
+
+                    Log.d(TAG, "uploadMediaInThread: upload error EEXIST,user uuid for name and retry upload");
+
+                    String fileName = needUploadedMedias.get(0).getUuid() + ".jpg";
+
+                    uploadOneMedia(needUploadedMedias, fileName, uploadFolderUUID);
+
                 }
 
             }
@@ -718,6 +726,12 @@ public class UploadMediaUseCase {
     }
 
     private int uploadOneMedia(final List<Media> needUploadedMedias, final String uploadFolderUUID) {
+
+        return uploadOneMedia(needUploadedMedias, "", uploadFolderUUID);
+
+    }
+
+    private int uploadOneMedia(final List<Media> needUploadedMedias, String fileName, final String uploadFolderUUID) {
 
         final Media media = needUploadedMedias.get(0);
 
@@ -736,11 +750,17 @@ public class UploadMediaUseCase {
             }
 
             localFile.setFileHash(media.getUuid());
-            localFile.setName(file.getName());
+
+            if (fileName.isEmpty())
+                localFile.setName(file.getName());
+            else
+                localFile.setName(fileName);
+
             localFile.setPath(media.getOriginalPhotoPath());
             localFile.setSize(file.length() + "");
 
-            Log.d(TAG, "upload file: media uuid: " + media.getUuid() + " media originalPath: " + media.getOriginalPhotoPath());
+            Log.d(TAG, "upload file: media uuid: " + media.getUuid() + " media originalPath: " + media.getOriginalPhotoPath()
+                    + " fileName: " + localFile.getName());
 
             OperationResult result = stationFileRepository.uploadFile(localFile, currentUserHome, uploadFolderUUID);
 
@@ -773,7 +793,12 @@ public class UploadMediaUseCase {
 
                                     Log.d(TAG, "uploadOneMedia: file exist,upload succeed");
 
-                                    handleUploadMediaSucceed(media, needUploadedMedias, uploadFolderUUID);
+                                    if (fileName.isEmpty()) {
+                                        return 403;
+                                    } else {
+                                        handleUploadMediaSucceed(media, needUploadedMedias, uploadFolderUUID);
+                                    }
+
                                 } else {
 
                                     notifyUploadMediaFail(-1);

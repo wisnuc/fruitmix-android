@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.invitation;
 
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -9,17 +10,23 @@ import android.support.v7.widget.RecyclerView;
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.databinding.ActivityConfirmInviteUserBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.invitation.data.InjectInvitationDataSource;
 import com.winsun.fruitmix.invitation.data.InvitationDataSource;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
-public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmInviteUserView{
+import java.util.Collections;
+
+public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmInviteUserView {
 
     private RecyclerView recyclerView;
 
@@ -51,6 +58,8 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
 
         InvitationDataSource invitationDataSource = InjectInvitationDataSource.provideInvitationDataSource(this);
 
+//        InvitationDataSource invitationDataSource = new FakeInvitationDataSource();
+
         ImageLoader imageLoader = InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this);
 
         confirmInviteUserPresenter = new ConfirmInviteUserPresenterImpl(this, invitationDataSource, imageLoader, loadingViewModel, noContentViewModel);
@@ -61,6 +70,8 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
         recyclerView.setAdapter(((ConfirmInviteUserPresenterImpl) confirmInviteUserPresenter).getAdapter());
 
         confirmInviteUserPresenter.getInvitations();
+
+        ButlerService.startRetrieveTicketTask();
     }
 
     @Override
@@ -71,4 +82,38 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
             confirmInviteUserPresenter.handleOperationEvent(operationEvent);
 
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        confirmInviteUserPresenter.onDestroy();
+
+        ButlerService.stopRetrieveTicketTask();
+    }
+
+    @Override
+    public Context getContext() {
+        return this;
+    }
+
+    private class FakeInvitationDataSource implements InvitationDataSource {
+
+        @Override
+        public void createInvitation(BaseOperateDataCallback<String> callback) {
+
+        }
+
+        @Override
+        public void getInvitation(BaseLoadDataCallback<ConfirmInviteUser> callback) {
+            callback.onSucceed(Collections.<ConfirmInviteUser>emptyList(), new OperationSuccess());
+        }
+
+        @Override
+        public void confirmInvitation(ConfirmInviteUser confirmInviteUser, BaseOperateDataCallback<String> callback) {
+            callback.onSucceed("", new OperationSuccess());
+        }
+
+    }
+
 }

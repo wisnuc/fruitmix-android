@@ -19,7 +19,9 @@ import com.winsun.fruitmix.databinding.ConfirmInviteUserItemHeaderBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
 import com.winsun.fruitmix.invitation.data.InvitationDataSource;
+import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.user.User;
@@ -28,6 +30,8 @@ import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,6 +81,12 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         random = new Random();
 
+    }
+
+    @Override
+    public void onDestroy() {
+
+        confirmInviteUserView = null;
     }
 
     public ConfirmTicketAdapter getAdapter() {
@@ -140,7 +150,29 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     }
 
-    private void postOperation(final ConfirmInviteUser confirmInviteUser) {
+    @Override
+    public void acceptInviteUser(final ConfirmInviteUser confirmInviteUser) {
+
+        Log.d(TAG, "acceptInviteUser: " + confirmInviteUser.getUserName());
+
+        confirmInviteUser.setOperateType(ConfirmInviteUser.OPERATE_TYPE_ACCEPT);
+
+        postOperation(confirmInviteUser, R.string.accept_invitation);
+
+    }
+
+    @Override
+    public void refuseInviteUser(final ConfirmInviteUser confirmInviteUser) {
+
+        Log.d(TAG, "refuseInviteUser: " + confirmInviteUser.getUserName());
+
+        confirmInviteUser.setOperateType(ConfirmInviteUser.OPERATE_TYPE_REFUSE);
+
+        postOperation(confirmInviteUser, R.string.refuse_invitation);
+
+    }
+
+    private void postOperation(final ConfirmInviteUser confirmInviteUser, final int resID) {
 
         confirmInviteUserView.showProgressDialog(String.format(confirmInviteUserView.getString(R.string.operating_title),
                 confirmInviteUserView.getString(R.string.confirm_invitation)));
@@ -152,9 +184,9 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
                 confirmInviteUserView.dismissDialog();
 
                 confirmInviteUserView.showToast(String.format(confirmInviteUserView.getString(R.string.success),
-                        confirmInviteUserView.getString(R.string.confirm_invitation)));
+                        confirmInviteUserView.getString(resID)));
 
-                handleOperateSucceed(confirmInviteUser.getTicketUUID());
+                handleOperateSucceed(confirmInviteUser);
 
             }
 
@@ -163,8 +195,26 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
                 confirmInviteUserView.dismissDialog();
 
-                confirmInviteUserView.showToast(String.format(confirmInviteUserView.getString(R.string.fail),
-                        confirmInviteUserView.getString(R.string.confirm_invitation)));
+                if (result instanceof OperationNetworkException) {
+
+                    HttpErrorBodyParser parser = new HttpErrorBodyParser();
+
+                    try {
+                        String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseBody());
+
+                        confirmInviteUserView.showToast(messageInBody);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+
+                        confirmInviteUserView.showToast(result.getResultMessage(confirmInviteUserView.getContext()));
+                    }
+
+                } else {
+
+                    confirmInviteUserView.showToast(result.getResultMessage(confirmInviteUserView.getContext()));
+
+                }
 
             }
         });
@@ -172,33 +222,18 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     }
 
-    @Override
-    public void acceptInviteUser(final ConfirmInviteUser confirmInviteUser) {
+    private void handleOperateSucceed(ConfirmInviteUser confirmInviteUser) {
 
-        Log.d(TAG, "acceptInviteUser: " + confirmInviteUser.getUserName());
+        String ticketUUID = confirmInviteUser.getTicketUUID();
 
-        confirmInviteUser.setOperateType(ConfirmInviteUser.OPERATE_TYPE_ACCEPT);
+        if (mConfirmInviteUserMaps.containsKey(ticketUUID)) {
 
-        postOperation(confirmInviteUser);
+            List<ConfirmInviteUser> confirmInviteUsers = mConfirmInviteUserMaps.get(ticketUUID);
 
-    }
+            confirmInviteUsers.remove(confirmInviteUser);
 
-    @Override
-    public void refuseInviteUser(final ConfirmInviteUser confirmInviteUser) {
-
-        Log.d(TAG, "refuseInviteUser: " + confirmInviteUser.getUserName());
-
-        confirmInviteUser.setOperateType(ConfirmInviteUser.OPERATE_TYPE_REFUSE);
-
-        postOperation(confirmInviteUser);
-
-    }
-
-    private void handleOperateSucceed(String ticketID) {
-
-        if (mConfirmInviteUserMaps.containsKey(ticketID)) {
-
-            mConfirmInviteUserMaps.remove(ticketID);
+            if (confirmInviteUsers.isEmpty())
+                mConfirmInviteUserMaps.remove(ticketUUID);
 
             adapter.setViewItems(createViewItems(mConfirmInviteUserMaps));
             adapter.notifyDataSetChanged();
@@ -208,17 +243,24 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     private void createFakeConfirmInviteUser() {
 
+        List<ConfirmInviteUser> users = new ArrayList<>();
+
+        String ticketID = "test Ticket" + 0;
+
         for (int i = 0; i < 10; i++) {
 
             ConfirmInviteUser confirmInviteUser = new ConfirmInviteUser();
             confirmInviteUser.setStation("test station " + i);
             confirmInviteUser.setUserName("test username " + i);
+            confirmInviteUser.setOperateType(ConfirmInviteUser.OPERATE_TYPE_PENDING);
+            confirmInviteUser.setUserAvatar(User.DEFAULT_AVATAR);
+            confirmInviteUser.setTicketUUID(ticketID);
 
-            List<ConfirmInviteUser> users = new ArrayList<>();
             users.add(confirmInviteUser);
 
-            mConfirmInviteUserMaps.put("test Ticket" + i, users);
         }
+
+        mConfirmInviteUserMaps.put(ticketID, users);
 
     }
 
@@ -378,8 +420,11 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         List<ConfirmInviteUser> confirmInviteUsers = ticketOperationEvent.getConfirmInviteUsers();
 
-        filterConfirmInviteUser(confirmInviteUsers);
+        mConfirmInviteUserMaps.clear();
+        createMap(confirmInviteUsers);
 
+        adapter.setViewItems(createViewItems(mConfirmInviteUserMaps));
+        adapter.notifyDataSetChanged();
 
     }
 

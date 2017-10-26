@@ -18,4 +18,6 @@ public interface UserDataRepository extends UserRemoteDataSource{
 
     void insertUsers(Collection<User> users);
 
+    boolean updateUser(User user);
+
 }

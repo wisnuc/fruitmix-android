@@ -28,7 +28,6 @@ import com.github.druk.rxdnssd.BonjourService;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.GravityArcMotion;
 import com.winsun.fruitmix.model.LoginType;
-import com.winsun.fruitmix.network.NetworkState;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -37,8 +36,6 @@ import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -176,9 +173,9 @@ public class Util {
 
     public static final String NEED_SHOW_AUTO_UPLOAD_DIALOG = "need_show_auto_upload_dialog";
 
-    public static final long DEFAULT_REFRESH_MEDIA_SHARE_DELAY_TIME = 20 * 1000;
+    public static final long DEFAULT_REFRESH_TICKET_DELAY_TIME = 20 * 1000;
 
-    public static long refreshMediaShareDelayTime = DEFAULT_REFRESH_MEDIA_SHARE_DELAY_TIME;
+    public static long refreshTicketsDelayTime = DEFAULT_REFRESH_TICKET_DELAY_TIME;
 
     public static final long MAX_REFRESH_MEDIA_SHARE_DELAY_TIME = 60 * 1000;
 

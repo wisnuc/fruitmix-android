@@ -384,7 +384,7 @@ public class EquipmentPresenter {
 
                 EquipmentTypeInfo equipmentTypeInfo = data.get(0);
 
-                Log.d(TAG, "onSucceed: equipment_blue info: " + equipmentTypeInfo);
+                Log.d(TAG, "onSucceed: equipment info: " + equipmentTypeInfo);
 
                 if (equipmentTypeInfo == null) {
                     equipmentTypeInfo = new EquipmentTypeInfo();
@@ -399,7 +399,7 @@ public class EquipmentPresenter {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                Log.d(TAG, "onFail: get equipment_blue info");
+                Log.d(TAG, "onFail: get equipment info");
 
                 EquipmentTypeInfo equipmentTypeInfo = new EquipmentTypeInfo();
 
@@ -571,17 +571,15 @@ public class EquipmentPresenter {
 
             equipmentItemViewModel.type.set(type);
 
-            if (type.equals(EquipmentTypeInfo.WS215I)) {
+            equipmentItemViewModel.label.set(equipmentTypeInfo.getLabel());
 
-                equipmentItemViewModel.label.set(EquipmentTypeInfo.WS215I);
+            if (type.equals(EquipmentTypeInfo.WS215I)) {
 
                 equipmentItemViewModel.equipmentIconID.set(R.drawable.equipment_215i);
 
                 initEquipmentViewModelDefaultBackgroundColor(container, equipmentItemViewModel);
 
             } else {
-
-                equipmentItemViewModel.label.set(container.getContext().getString(R.string.virtual_machine));
 
                 equipmentItemViewModel.equipmentIconID.set(R.drawable.virtual_machine);
 

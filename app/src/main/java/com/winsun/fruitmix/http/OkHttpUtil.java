@@ -2,23 +2,17 @@ package com.winsun.fruitmix.http;
 
 import android.util.Log;
 
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.file.data.model.LocalFile;
-import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.util.Util;
 
-import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -108,23 +102,11 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
         Response response = executeRequest(request);
 
-        String str = "";
-
-        int responseCode = response.code();
-
-        if (checkResponseCode(handleResponse(response))) {
-
-            str = response.body().string();
-
-        }
-
-        Log.d(TAG, "remoteCall succeed body: " + str);
-
-        response.close();
+        HttpResponse httpResponse = getHttpResponse(response);
 
         Log.d(TAG, "remoteCallMethod: after read response body" + Util.formatDate(System.currentTimeMillis()));
 
-        return new HttpResponse(responseCode, str);
+        return httpResponse;
 
     }
 
@@ -167,12 +149,12 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
         Response response = executeRequest(request);
 
-        int code = handleResponse(response);
+        int code = response.code();
 
         if (checkResponseCode(code)) {
             return response.body();
         } else {
-            throw new NetworkException("download api return http error code", new HttpResponse(code, ""));
+            throw new NetworkException("download api return http error code", new HttpResponse(code, response.body().string()));
         }
 
     }
@@ -232,21 +214,11 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             Response response = executeRequest(request);
 
-            String str = "";
-
-            int responseCode = response.code();
-
-            if (checkResponseCode(handleResponse(response))) {
-
-                str = response.body().string();
-
-            }
-
-            response.close();
+            HttpResponse httpResponse = getHttpResponse(response);
 
             Log.d(TAG, "remoteCallMethod: after read response body" + Util.getCurrentFormatTime());
 
-            return new HttpResponse(responseCode, str);
+            return httpResponse;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -257,7 +229,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     @Override
-    public HttpResponse createFolder(HttpRequest httpRequest, String folderName) {
+    public HttpResponse createFolder(HttpRequest httpRequest, String folderName) throws MalformedURLException, IOException, SocketTimeoutException {
 
         try {
 
@@ -282,27 +254,13 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             Response response = executeRequest(request);
 
-            String str = "";
-
-            int responseCode = response.code();
-
-            if (checkResponseCode(handleResponse(response))) {
-
-                str = response.body().string();
-
-            }
-
-            response.close();
+            HttpResponse httpResponse = getHttpResponse(response);
 
             Log.d(TAG, "remoteCallMethod: after read response body" + Util.formatDate(System.currentTimeMillis()));
 
-            return new HttpResponse(responseCode, str);
+            return httpResponse;
 
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            return null;
-        } catch (JSONException e) {
+        }  catch (JSONException e) {
             e.printStackTrace();
 
             return null;
@@ -320,26 +278,21 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
         return builder;
     }
 
-    private int handleResponse(Response response) {
+    private HttpResponse getHttpResponse(Response response) throws IOException {
 
         int code = response.code();
 
-        if (code == 200) {
-            return code;
-        } else {
+        Log.d(TAG, "response code: " + code);
 
-            Log.d(TAG, "handleResponse: " + code);
+        String bodyStr = response.body().string();
 
-            try {
-                Log.d(TAG, "handleResponse body: " + response.body().string());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        Log.d(TAG, "getHttpResponse body: " + bodyStr);
 
-            response.close();
+        HttpResponse httpResponse = new HttpResponse(code, bodyStr);
 
-            return code;
-        }
+        response.close();
+
+        return httpResponse;
 
     }
 

@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.invitation;
 
+import android.content.Context;
+
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.interfaces.BaseView;
 
@@ -11,5 +13,6 @@ public interface ConfirmInviteUserView extends BaseView {
 
     String getString(int resID);
 
+    Context getContext();
 
 }

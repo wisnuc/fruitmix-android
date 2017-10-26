@@ -16,6 +16,8 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
+import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource;
+import com.winsun.fruitmix.equipment.search.data.EquipmentTypeInfo;
 import com.winsun.fruitmix.invitation.data.InjectInvitationDataSource;
 import com.winsun.fruitmix.invitation.data.InvitationDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
@@ -29,6 +31,7 @@ import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.wxapi.MiniProgram;
 
@@ -78,9 +81,11 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     private List<LoggedInUser> bindingWeChatLoggedInUser;
 
+    private EquipmentDataSource equipmentDataSource;
+
     public MainPagePresenterImpl(Context context, SystemSettingDataSource systemSettingDataSource, LoggedInUserDataSource loggedInUserDataSource,
                                  NavPagerActivity.NavPagerViewModel navPagerViewModel, MainPageView mainPageView,
-                                 GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase) {
+                                 GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase, EquipmentDataSource equipmentDataSource) {
 
         mNavigationMenuItems = new ArrayList<>();
         mNavigationMenuLoggedInUsers = new ArrayList<>();
@@ -96,6 +101,8 @@ public class MainPagePresenterImpl implements MainPagePresenter {
         this.systemSettingDataSource = systemSettingDataSource;
 
         this.getAllBindingLocalUserUseCase = getAllBindingLocalUserUseCase;
+
+        this.equipmentDataSource = equipmentDataSource;
 
         initNavigationAccountManageViewModel(context);
 
@@ -197,7 +204,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
         };
 
         model.setMenuIconResId(R.drawable.ic_settings_black_24dp);
-        model.setMenuText("确认邀请");
+        model.setMenuText(context.getString(R.string.confirm_invitation));
         mNavigationMenuItems.add(model);
 
         model = new NavigationMenuViewModel() {
@@ -257,14 +264,35 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         if (!getBindingWeChatLoggedInUserSucceed) {
 
-            navPagerViewModel.equipmentNameVisibility.set(loggedInUserListSize != 1);
+            String currentIPWithHttpHead = systemSettingDataSource.getCurrentEquipmentIp();
+            String currentIP;
+            if (currentIPWithHttpHead.contains(Util.HTTP)) {
+                String[] result = currentIPWithHttpHead.split(Util.HTTP);
+
+                currentIP = result[1];
+
+            } else {
+                currentIP = currentIPWithHttpHead;
+            }
+
+            equipmentDataSource.getEquipmentTypeInfo(currentIP, new BaseLoadDataCallback<EquipmentTypeInfo>() {
+                @Override
+                public void onSucceed(List<EquipmentTypeInfo> data, OperationResult operationResult) {
+
+                    navPagerViewModel.equipmentNameVisibility.set(true);
+                    navPagerViewModel.equipmentNameText.set(data.get(0).getLabel());
+                }
+
+                @Override
+                public void onFail(OperationResult operationResult) {
+                    navPagerViewModel.equipmentNameVisibility.set(false);
+                }
+            });
 
             Iterator<LoggedInUser> iterator = loggedInUsers.iterator();
             while (iterator.hasNext()) {
                 LoggedInUser loggedInUser = iterator.next();
                 if (loggedInUser.getUser().getUuid().equals(currentUserUUID)) {
-
-                    navPagerViewModel.equipmentNameText.set(loggedInUser.getEquipmentName());
 
                     iterator.remove();
                 }

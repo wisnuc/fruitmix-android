@@ -126,15 +126,26 @@ public class PersonInfoActivity extends BaseActivity implements PersonInfoView, 
 
         if (requestCode == GO_TO_MODIFY_USERNAME && resultCode == RESULT_OK) {
 
-            setResultCode(RESULT_OK);
-
-            currentUser = personInfoPresenter.getCurrentUser();
-
-            binding.setUser(currentUser);
-
-            binding.userAvatar.setUser(currentUser, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
+            handleModifyUserInfoSucceed();
 
         }
+
+    }
+
+    private void handleModifyUserInfoSucceed() {
+        setResultCode(RESULT_OK);
+
+        currentUser = personInfoPresenter.getCurrentUser();
+
+        binding.setUser(currentUser);
+
+        binding.userAvatar.setUser(currentUser, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
+    }
+
+    @Override
+    public void handleBindSucceed() {
+
+        handleModifyUserInfoSucceed();
 
     }
 }

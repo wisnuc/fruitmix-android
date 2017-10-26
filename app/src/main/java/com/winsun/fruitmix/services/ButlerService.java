@@ -8,36 +8,28 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.eventbus.AbstractFileRequestEvent;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
 import com.winsun.fruitmix.eventbus.LoggedInUserRequestEvent;
 import com.winsun.fruitmix.eventbus.MediaRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
-import com.winsun.fruitmix.eventbus.TokenRequestEvent;
-import com.winsun.fruitmix.eventbus.UserRequestEvent;
 import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.UploadMediaTask;
 import com.winsun.fruitmix.generate.media.GenerateMediaThumbUseCase;
 import com.winsun.fruitmix.generate.media.InjectGenerateMediaThumbUseCase;
-import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
 import com.winsun.fruitmix.invitation.data.InjectInvitationDataSource;
 import com.winsun.fruitmix.invitation.data.InvitationDataSource;
-import com.winsun.fruitmix.invitation.data.InvitationRemoteDataSource;
 import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
-import com.winsun.fruitmix.model.LoginType;
-import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.network.change.InjectNetworkChangeUseCase;
@@ -45,7 +37,6 @@ import com.winsun.fruitmix.network.change.NetworkChangeUseCase;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
-import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
@@ -78,7 +69,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
     private GenerateMediaThumbUseCase generateMediaThumbUseCase;
     private UploadMediaUseCase uploadMediaUseCase;
 
-    public static boolean startRetrieveTicketTask = false;
+    private static boolean startRetrieveTicketTask = false;
 
     private boolean alreadyStart = false;
 
@@ -103,9 +94,9 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
         EventBus.getDefault().register(this);
 
-//        task = new TimingRetrieveTicketsTask(this,getMainLooper());
-//
-//        task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS,20 * 1000);
+        task = new TimingRetrieveTicketsTask(this, getMainLooper());
+
+        task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
 
         calcMediaDigestCallback = new CalcMediaDigestStrategy.CalcMediaDigestCallback() {
             @Override
@@ -242,6 +233,11 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
     }
 
+    public static void stopRetrieveTicketTask() {
+
+        startRetrieveTicketTask = false;
+    }
+
     private void initInvitationRemoteDataSource() {
 
         if (invitationDataSource == null)
@@ -273,7 +269,9 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
     public void onDestroy() {
         EventBus.getDefault().unregister(this);
 
-//        task.removeMessages(RETRIEVE_REMOTE_TICKETS);
+        stopRetrieveTicketTask();
+
+        task.removeMessages(RETRIEVE_REMOTE_TICKETS);
 
         task = null;
 
@@ -308,8 +306,12 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
                     ButlerService butlerService = weakReference.get();
 
-                    if (!ButlerService.startRetrieveTicketTask)
+                    Log.d(TAG, "start RetrieveTicketTask :" + startRetrieveTicketTask);
+
+                    if (!ButlerService.startRetrieveTicketTask) {
+                        task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
                         return;
+                    }
 
                     //TODO: check token is exist when call getInvitation
                     butlerService.initInvitationRemoteDataSource();
@@ -319,12 +321,24 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
                         public void onSucceed(List<ConfirmInviteUser> data, OperationResult operationResult) {
                             super.onSucceed(data, operationResult);
 
+                            Log.d(ButlerService.TAG, "onSucceed: retrieve tickets in service, data size:" + data.size());
+
                             if (!data.isEmpty())
                                 EventBus.getDefault().post(new RetrieveTicketOperationEvent(Util.REMOTE_CONFIRM_INVITE_USER_RETRIEVED, new OperationSuccess(), new ArrayList<>(data)));
+
+                            task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
+
+                        }
+
+                        @Override
+                        public void onFail(OperationResult operationResult) {
+                            super.onFail(operationResult);
+
+                            Log.d(ButlerService.TAG, "onFail: retrieve tickets in service");
+
+                            task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
                         }
                     });
-
-                    task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshMediaShareDelayTime);
 
                     break;
             }

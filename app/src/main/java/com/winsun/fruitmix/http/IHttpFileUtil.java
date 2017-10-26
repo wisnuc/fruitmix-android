@@ -21,6 +21,6 @@ public interface IHttpFileUtil {
 
     HttpResponse uploadFile(HttpRequest httpRequest, LocalFile localFile) throws MalformedURLException, IOException, SocketTimeoutException;
 
-    HttpResponse createFolder(HttpRequest httpRequest,String folderName);
+    HttpResponse createFolder(HttpRequest httpRequest,String folderName) throws MalformedURLException, IOException, SocketTimeoutException;
 
 }

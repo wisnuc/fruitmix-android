@@ -12,6 +12,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final String TAG = DBHelper.class.getSimpleName();
 
+    public static final int ADD_FILE_KEY_CREATOR_UUID_DB_VERSION = 21;
+
     public static final int ADD_MEDIA_LATITUDE_L0NGITUDE_DB_VERSION = 28;
 
     public static final int ADD_LOGGED_IN_WECHAT_USER_DB_VERSION = 30;
@@ -77,7 +79,7 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String LOGGED_IN_USER_TABLE_NAME = "logged_in_user";
     public static final String LOGGED_IN_WECHAT_USER_TABLE_NAME = "logged_in_wechat_user";
 
-    private static final int DB_VERSION = 31;
+    private static final int DB_VERSION = ADD_USER_ASSOCIATED_WECHAT_USER_NAME;
 
     private static final String CREATE_TABLE = "create table if not exists ";
 
@@ -115,7 +117,7 @@ public class DBHelper extends SQLiteOpenHelper {
             + USER_KEY_EMAIL + TEXT + USER_KEY_DEFAULT_AVATAR + TEXT_NOT_NULL + USER_KEY_DEFAULT_AVATAR_BG_COLOR + INTEGER_NOT_NULL
             + USER_KEY_HOME + TEXT_NOT_NULL + USER_KEY_LIBRARY + TEXT_NOT_NULL + USER_KEY_IS_ADMIN + " integer not null";
 
-    private static final String DATABASE_REMOTE_USER_CREATE = CREATE_TABLE + REMOTE_USER_TABLE_NAME + USER_FIELD_CREATE +"," + USER_ASSOCIATED_WECHAT_USER_NAME + " text" + END_SQL;
+    private static final String DATABASE_REMOTE_USER_CREATE = CREATE_TABLE + REMOTE_USER_TABLE_NAME + USER_FIELD_CREATE + "," + USER_ASSOCIATED_WECHAT_USER_NAME + " text" + END_SQL;
 
     private static final String DATABASE_DOWNLOADED_FILE_CREATE = CREATE_TABLE + DOWNLOADED_FILE_TABLE_NAME + BEGIN_SQL + FILE_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT
             + FILE_KEY_NAME + TEXT + FILE_KEY_UUID + TEXT_NOT_NULL + FILE_KEY_TIME + TEXT + FILE_KEY_SIZE + TEXT + FILE_KEY_CREATOR_UUID + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
@@ -152,26 +154,33 @@ public class DBHelper extends SQLiteOpenHelper {
         Log.i(TAG, "Upgrading database from version " + oldVersion + "to " +
                 newVersion);
 
+        if (oldVersion < ADD_FILE_KEY_CREATOR_UUID_DB_VERSION) {
+
+            db.execSQL(DROP_TABLE + DOWNLOADED_FILE_TABLE_NAME);
+
+        }
+
         if (oldVersion < ADD_MEDIA_LATITUDE_L0NGITUDE_DB_VERSION) {
 
             db.execSQL(DROP_TABLE + REMOTE_MEDIA_TABLE_NAME);
             db.execSQL(DROP_TABLE + LOCAL_MEDIA_TABLE_NAME);
             db.execSQL(DROP_TABLE + REMOTE_USER_TABLE_NAME);
 
-            onCreate(db);
-        }else if(oldVersion < ADD_LOGGED_IN_WECHAT_USER_DB_VERSION){
+        }
+
+        if (oldVersion < ADD_LOGGED_IN_WECHAT_USER_DB_VERSION) {
 
             db.execSQL(DROP_TABLE + LOGGED_IN_WECHAT_USER_TABLE_NAME);
 
-            onCreate(db);
-        }else if(oldVersion < ADD_USER_ASSOCIATED_WECHAT_USER_NAME){
+        }
+
+        if (oldVersion < ADD_USER_ASSOCIATED_WECHAT_USER_NAME) {
 
             db.execSQL(DROP_TABLE + REMOTE_USER_TABLE_NAME);
 
-            onCreate(db);
-
         }
 
+        onCreate(db);
 
     }
 }

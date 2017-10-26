@@ -11,8 +11,11 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.interfaces.BaseView;
+import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.user.BaseOperateUserPresenter;
 import com.winsun.fruitmix.user.OperateUserViewModel;
 import com.winsun.fruitmix.user.User;
@@ -20,6 +23,8 @@ import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.wxapi.MiniProgram;
 import com.winsun.fruitmix.wxapi.WXEntryActivity;
+
+import org.json.JSONException;
 
 /**
  * Created by Administrator on 2017/10/19.
@@ -39,6 +44,8 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
     private String ticketID;
 
+    private WeChatTokenUserWrapper mWeChatTokenUserWrapper;
+
     public PersonInfoPresenter(UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
                                PersonInfoView personInfoView, PersonInfoDataSource personInfoDataSource) {
         this.userDataRepository = userDataRepository;
@@ -51,7 +58,7 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
         return userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
     }
 
-    public void onDestroy(){
+    public void onDestroy() {
 
         personInfoView = null;
 
@@ -91,11 +98,13 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
     }
 
     @Override
-    public void succeed(String token) {
+    public void succeed(WeChatTokenUserWrapper weChatTokenUserWrapper) {
 
         personInfoView.showProgressDialog(personInfoView.getString(R.string.operating_title, personInfoView.getString(R.string.send_wechat_user_info)));
 
-        personInfoDataSource.fillBindWeChatUserTicket(ticketID, token, new BaseOperateDataCallback<String>() {
+        mWeChatTokenUserWrapper = weChatTokenUserWrapper;
+
+        personInfoDataSource.fillBindWeChatUserTicket(ticketID, weChatTokenUserWrapper.getToken(), new BaseOperateDataCallback<String>() {
             @Override
             public void onSucceed(String data, OperationResult result) {
 
@@ -141,6 +150,8 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
                                 personInfoView.showToast(personInfoView.getString(R.string.success, personInfoView.getString(R.string.bind_wechat_user)));
 
+                                handleBindSucceed();
+
                             }
 
                             @Override
@@ -148,7 +159,24 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
                                 personInfoView.dismissDialog();
 
-                                personInfoView.showToast(result.getResultMessage(personInfoView.getContext()));
+                                if (result instanceof OperationNetworkException) {
+
+                                    HttpErrorBodyParser parser = new HttpErrorBodyParser();
+
+                                    try {
+                                        String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseBody());
+
+                                        personInfoView.showToast(messageInBody);
+
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+
+                                        personInfoView.showToast(result.getResultMessage(personInfoView.getContext()));
+                                    }
+
+                                } else {
+                                    personInfoView.showToast(result.getResultMessage(personInfoView.getContext()));
+                                }
 
                             }
                         });
@@ -162,6 +190,17 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
             }
         }).setCancelable(false).create().show();
+
+    }
+
+    private void handleBindSucceed() {
+
+        User user = getCurrentUser();
+        user.setAvatar(mWeChatTokenUserWrapper.getAvatarUrl());
+
+        userDataRepository.updateUser(user);
+
+        personInfoView.handleBindSucceed();
 
     }
 

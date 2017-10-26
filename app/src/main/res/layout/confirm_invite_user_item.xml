@@ -36,19 +36,6 @@
                     android:layout_toRightOf="@id/user_avatar"
                     android:text="@{confirmInviteUser.station}" />-->
 
-        <TextView
-            android:id="@+id/user_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginTop="8dp"
-            android:layout_toRightOf="@id/user_avatar"
-            android:gravity="center_vertical"
-            android:text="@{confirmInviteUser.userName}"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="16dp"
-            tools:text="Andy" />
-
         <Button
             android:id="@+id/refuse"
             android:layout_width="wrap_content"
@@ -65,11 +52,24 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_centerVertical="true"
-            android:layout_marginRight="16dp"
+            android:layout_marginRight="8dp"
             android:layout_toLeftOf="@id/refuse"
             android:onClick="@{()->confirmInviteUserPresenter.acceptInviteUser(confirmInviteUser)}"
             android:text="@string/accept"
             android:textSize="12dp" />
+
+        <TextView
+            android:id="@+id/user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="8dp"
+            android:layout_toRightOf="@id/user_avatar"
+            android:gravity="center_vertical"
+            android:text="@{confirmInviteUser.userName}"
+            android:textColor="@color/eighty_seven_percent_black"
+            android:textSize="16dp"
+            tools:text="test username 1" />
 
     </RelativeLayout>
 
