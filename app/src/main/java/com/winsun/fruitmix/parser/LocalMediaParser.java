@@ -4,6 +4,8 @@ import android.database.Cursor;
 
 import com.winsun.fruitmix.db.DBHelper;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.Video;
+import com.winsun.fruitmix.util.FileUtil;
 
 /**
  * Created by Administrator on 2016/8/31.
@@ -13,7 +15,23 @@ public class LocalMediaParser implements LocalDataParser<Media> {
     @Override
     public Media parse(Cursor cursor) {
 
-        Media media = new Media();
+        String path = cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH));
+
+        Media media;
+
+        if (FileUtil.checkFileIsVideo(path)) {
+
+            return null;
+
+        } else
+            media = new Media();
+
+        setMediaValue(cursor, path, media);
+
+        return media;
+    }
+
+    void setMediaValue(Cursor cursor, String path, Media media) {
         media.setUuid(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_UUID)));
 
         media.setTime(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_TIME)));
@@ -30,11 +48,9 @@ public class LocalMediaParser implements LocalDataParser<Media> {
         media.setSharing(cursor.getInt(cursor.getColumnIndex(DBHelper.MEDIA_KEY_SHARING)) == 1);
         media.setType(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_TYPE)));
         media.setMiniThumbPath(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_MINI_THUMB)));
-        media.setOriginalPhotoPath(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH)));
+        media.setOriginalPhotoPath(path);
 
         media.setLongitude(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_LONGITUDE)));
         media.setLatitude(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_LATITUDE)));
-
-        return media;
     }
 }

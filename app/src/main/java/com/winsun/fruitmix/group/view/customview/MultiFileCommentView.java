@@ -16,6 +16,7 @@ import com.winsun.fruitmix.group.data.model.MultiFileComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.util.MediaUtil;
 
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class MultiFileCommentView extends UserCommentView {
 
                 frameLayouts[i].addView(singlePhotoBinding.getRoot());
 
-                media.setImageUrl(singlePhotoBinding.coverImg, httpRequest, imageLoader);
+                MediaUtil.setMediaImageUrl(media,singlePhotoBinding.coverImg, httpRequest, imageLoader);
 
             }
 

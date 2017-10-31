@@ -134,7 +134,8 @@
         <activity
             android:name=".equipment.manage.EquipmentInfoActivity"
             android:screenOrientation="portrait" />
-        <!--        <activity
+        <!--
+                    <activity
                     android:name=".TestReceiveActivity"
                     android:screenOrientation="portrait">
                     <intent-filter>
@@ -174,7 +175,8 @@
                         <data android:mimeType="text/plain" />
                         <data android:scheme="file" />
                     </intent-filter>
-                </activity>-->
+                </activity>
+        -->
         <activity
             android:name=".equipment.manage.ShutDownEquipmentActivity"
             android:screenOrientation="portrait" />
@@ -184,6 +186,12 @@
         <activity
             android:name=".ModifyUserPasswordActivity"
             android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".video.PlayVideoActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/FullScreenAppTheme" />
+
     </application>
 
 </manifest>

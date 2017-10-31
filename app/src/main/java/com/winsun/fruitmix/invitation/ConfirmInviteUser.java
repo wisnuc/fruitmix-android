@@ -11,6 +11,7 @@ public class ConfirmInviteUser {
 
     public static final String OPERATE_TYPE_PENDING = "pending";
 
+    private String createFormatTime;
     private String userName;
     private String userAvatar;
     private String station;
@@ -20,6 +21,14 @@ public class ConfirmInviteUser {
     private String operateType = OPERATE_TYPE_PENDING;
 
     private String ticketUUID;
+
+    public String getCreateFormatTime() {
+        return createFormatTime.substring(0, 10);
+    }
+
+    public void setCreateFormatTime(String createFormatTime) {
+        this.createFormatTime = createFormatTime;
+    }
 
     public String getUserName() {
         return userName;

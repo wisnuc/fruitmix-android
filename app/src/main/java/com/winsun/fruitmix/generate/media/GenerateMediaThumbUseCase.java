@@ -6,6 +6,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
@@ -34,18 +35,10 @@ public class GenerateMediaThumbUseCase {
 
     private boolean mStopGenerateMiniThumb = false;
 
-    public static GenerateMediaThumbUseCase getInstance(MediaDataSourceRepository mediaDataSourceRepository) {
-
-        if (instance == null)
-            instance = new GenerateMediaThumbUseCase(mediaDataSourceRepository);
-
-        return instance;
-    }
-
-    private GenerateMediaThumbUseCase(MediaDataSourceRepository mediaDataSourceRepository) {
+    GenerateMediaThumbUseCase(MediaDataSourceRepository mediaDataSourceRepository, ThreadManager threadManager) {
         this.mediaDataSourceRepository = mediaDataSourceRepository;
 
-        threadManager = ThreadManagerImpl.getInstance();
+        this.threadManager = threadManager;
     }
 
     public void startGenerateMediaThumb() {
@@ -57,6 +50,8 @@ public class GenerateMediaThumbUseCase {
             public void onSucceed(List<Media> data, OperationResult operationResult) {
 
                 List<Media> needOperateMedias = new ArrayList<>();
+
+                Log.d(TAG, "onSucceed: get media for generate thumb,medias size: " + data.size());
 
                 File file;
 
@@ -111,13 +106,32 @@ public class GenerateMediaThumbUseCase {
                         if (mStopGenerateThumb)
                             return;
 
-                        boolean result = FileUtil.writeBitmapToLocalPhotoThumbnailFolder(media);
+                        boolean result;
 
-                        if (result && !mStopGenerateThumb) {
+                        if (media instanceof Video) {
 
-                            mediaDataSourceRepository.updateMedia(media);
+                            Video video = (Video) media;
+
+                            result = FileUtil.generateLocalVideoThumbnail(video);
+
+                            if (result && !mStopGenerateThumb) {
+
+                                mediaDataSourceRepository.updateVideo(video);
+
+                            }
+
+                        } else {
+
+                            result = FileUtil.writeBitmapToLocalPhotoThumbnailFolder(media);
+
+                            if (result && !mStopGenerateThumb) {
+
+                                mediaDataSourceRepository.updateMedia(media);
+
+                            }
 
                         }
+
 
                     }
                 });
@@ -144,6 +158,8 @@ public class GenerateMediaThumbUseCase {
             public void onSucceed(List<Media> data, OperationResult operationResult) {
 
                 List<Media> needOperateMedias = new ArrayList<>();
+
+                Log.d(TAG, "onSucceed: get media for generate mini thumb,medias size: " + data.size());
 
                 for (Media media : data) {
 
@@ -190,11 +206,28 @@ public class GenerateMediaThumbUseCase {
                         if (mStopGenerateMiniThumb)
                             return false;
 
-                        boolean result = FileUtil.writeBitmapToLocalPhotoMiniThumbnailFolder(media);
+                        boolean result;
 
-                        if (result && !mStopGenerateMiniThumb) {
+                        if (media instanceof Video) {
 
-                            mediaDataSourceRepository.updateMedia(media);
+                            Video video = (Video) media;
+
+                            result = FileUtil.generateLocalVideoMiniThumbnail(video);
+
+                            if (result && !mStopGenerateMiniThumb) {
+
+                                mediaDataSourceRepository.updateVideo(video);
+
+                            }
+
+                        } else {
+                            result = FileUtil.writeBitmapToLocalPhotoMiniThumbnailFolder(media);
+
+                            if (result && !mStopGenerateMiniThumb) {
+
+                                mediaDataSourceRepository.updateMedia(media);
+
+                            }
 
                         }
 
@@ -213,6 +246,7 @@ public class GenerateMediaThumbUseCase {
         mStopGenerateMiniThumb = true;
 
         threadManager.stopGenerateMiniThumbThreadNow();
+
     }
 
 

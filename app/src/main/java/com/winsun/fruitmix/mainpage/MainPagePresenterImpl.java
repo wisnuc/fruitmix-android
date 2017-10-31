@@ -69,10 +69,6 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     private InvitationDataSource invitationDataSource;
 
-    private Resources resources;
-
-    private IWXAPI iwxapi;
-
     private LoggedInUserDataSource loggedInUserDataSource;
 
     private SystemSettingDataSource systemSettingDataSource;
@@ -110,11 +106,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         threadManager = ThreadManagerImpl.getInstance();
 
-        iwxapi = MiniProgram.registerToWX(context);
-
         invitationDataSource = InjectInvitationDataSource.provideInvitationDataSource(context);
-
-        resources = context.getResources();
 
         bindingWeChatLoggedInUser = new ArrayList<>();
 
@@ -178,33 +170,6 @@ public class MainPagePresenterImpl implements MainPagePresenter {
         model.setMenuIconResId(R.drawable.ic_settings_black_24dp);
         model.setMenuText(context.getString(R.string.setting));
 
-        mNavigationMenuItems.add(model);
-
-        model = new NavigationMenuViewModel() {
-            @Override
-            public void onClick() {
-                super.onClick();
-
-                createInvitationInThread();
-
-            }
-        };
-
-        model.setMenuIconResId(R.drawable.ic_settings_black_24dp);
-        model.setMenuText("发起邀请");
-        mNavigationMenuItems.add(model);
-
-        model = new NavigationMenuViewModel() {
-            @Override
-            public void onClick() {
-                super.onClick();
-
-                mainPageView.gotoConfirmInviteUserActivity();
-            }
-        };
-
-        model.setMenuIconResId(R.drawable.ic_settings_black_24dp);
-        model.setMenuText(context.getString(R.string.confirm_invitation));
         mNavigationMenuItems.add(model);
 
         model = new NavigationMenuViewModel() {
@@ -386,7 +351,36 @@ public class MainPagePresenterImpl implements MainPagePresenter {
     }
 
     private void toggleEquipmentManageNavigationItem(Context context, User user) {
+
+        int navigationMenuItemSize = mNavigationMenuItems.size();
+
+        int personAddItemPosition = getPersonAddItemPosition();
+
         if (user.isAdmin()) {
+
+            if (user.getAssociatedWeChatGUID().length() > 0) {
+
+                if (personAddItemPosition == -1) {
+
+                    NavigationMenuViewModel model = new NavigationMenuViewModel() {
+                        @Override
+                        public void onClick() {
+                            super.onClick();
+
+                            mainPageView.gotoConfirmInviteUserActivity();
+
+                        }
+                    };
+
+                    model.setMenuIconResId(R.drawable.ic_person_add_black_24dp);
+                    model.setMenuText(context.getString(R.string.invitation));
+                    mNavigationMenuItems.add(navigationMenuItemSize - 2, model);
+
+                }
+
+            } else if (personAddItemPosition != -1) {
+                mNavigationMenuItems.remove(personAddItemPosition);
+            }
 
             if (((NavigationMenuViewModel) mNavigationMenuItems.get(2)).getMenuIconResId() != R.drawable.equipment_black) {
 
@@ -405,25 +399,35 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         } else {
 
+            if (personAddItemPosition != -1) {
+                mNavigationMenuItems.remove(personAddItemPosition);
+            }
+
             if (((NavigationMenuViewModel) mNavigationMenuItems.get(2)).getMenuIconResId() == R.drawable.equipment_black)
                 mNavigationMenuItems.remove(2);
 
         }
     }
 
+    private int getPersonAddItemPosition() {
+        int personAddItemPosition = -1;
 
-    private void createInvitationInThread() {
-        invitationDataSource.createInvitation(new BaseOperateDataCallbackImpl<String>() {
-            @Override
-            public void onSucceed(final String data, OperationResult result) {
+        for (int i = 0; i < mNavigationMenuItems.size(); i++) {
 
-                Log.d(TAG, "onSucceed: create invitation,ticket: " + data);
+            BaseNavigationItemViewModel baseNavigationItemViewModel = mNavigationMenuItems.get(i);
 
-                MiniProgram.shareMiniWXApp(iwxapi, resources, data);
+            if (baseNavigationItemViewModel instanceof NavigationMenuViewModel) {
+
+                if (((NavigationMenuViewModel) baseNavigationItemViewModel).getMenuIconResId() == R.drawable.ic_person_add_black_24dp) {
+
+                    personAddItemPosition = i;
+                    break;
+                }
 
             }
 
-        });
+        }
+        return personAddItemPosition;
     }
 
     @Override

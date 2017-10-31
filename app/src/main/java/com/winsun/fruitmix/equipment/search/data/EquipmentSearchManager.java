@@ -45,6 +45,10 @@ public class EquipmentSearchManager {
         return instance;
     }
 
+    private void destroyInstance() {
+        instance = null;
+    }
+
     public void startDiscovery(final IEquipmentDiscoveryListener listener) {
 
         mSubscription = mRxDnssd.browse(SERVICE_PORT, DEMAIN)
@@ -84,6 +88,7 @@ public class EquipmentSearchManager {
             mSubscription = null;
         }
 
+        destroyInstance();
     }
 
     public interface IEquipmentDiscoveryListener {

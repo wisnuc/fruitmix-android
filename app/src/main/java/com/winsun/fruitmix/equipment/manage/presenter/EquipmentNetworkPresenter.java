@@ -32,6 +32,9 @@ public class EquipmentNetworkPresenter extends BaseEquipmentInfoPresenter {
             @Override
             public void onSucceed(List<EquipmentNetworkInfo> data, OperationResult operationResult) {
 
+                if(equipmentInfoView == null)
+                    return;
+
                 handleGetEquipmentNetworkInfoSucceed(data.get(0), callback);
 
             }

@@ -12,6 +12,8 @@ import com.winsun.fruitmix.file.data.download.DownloadedItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
+import com.winsun.fruitmix.mediaModule.model.Video;
+import com.winsun.fruitmix.parser.LocalVideoParser;
 import com.winsun.fruitmix.parser.LocalWeChatUserParser;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.parser.LocalDataParser;
@@ -197,6 +199,77 @@ public class DBUtils {
         return contentValues;
     }
 
+    private void bindVideoWhenCreate(SQLiteStatement sqLiteStatement, Video video) {
+
+        bindMediaWhenCreate(sqLiteStatement, video);
+
+        sqLiteStatement.bindString(15, video.getName());
+        sqLiteStatement.bindLong(16, video.getSize());
+        sqLiteStatement.bindLong(17, video.getDuration());
+
+    }
+
+    private String createInsertVideoSql(String DBName) {
+
+        return "insert into " + DBName + "(" +
+                DBHelper.MEDIA_KEY_UUID + "," +
+                DBHelper.MEDIA_KEY_TIME + "," +
+                DBHelper.MEDIA_KEY_WIDTH + "," +
+                DBHelper.MEDIA_KEY_HEIGHT + "," +
+                DBHelper.MEDIA_KEY_THUMB + "," +
+                DBHelper.MEDIA_KEY_LOCAL + "," +
+                DBHelper.MEDIA_KEY_UPLOADED_USER_UUID + "," +
+                DBHelper.MEDIA_KEY_SHARING + "," +
+                DBHelper.MEDIA_KEY_ORIENTATION_NUMBER + "," +
+                DBHelper.MEDIA_KEY_TYPE + "," +
+                DBHelper.MEDIA_KEY_MINI_THUMB + "," +
+                DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH + "," +
+                DBHelper.MEDIA_KEY_LONGITUDE + "," +
+                DBHelper.MEDIA_KEY_LATITUDE + "," +
+                DBHelper.VIDEO_KEY_NAME + "," +
+                DBHelper.VIDEO_KEY_SIZE + "," +
+                DBHelper.VIDEO_KEY_DURATION + ")" +
+                "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    }
+
+    private long insertVideos(String dbName, Collection<Video> videos) {
+
+        long returnValue = 0;
+
+        try {
+            openWritableDB();
+
+            String sql = createInsertVideoSql(dbName);
+
+            SQLiteStatement sqLiteStatement = database.compileStatement(sql);
+            database.beginTransaction();
+
+            for (Video video : videos) {
+
+                bindVideoWhenCreate(sqLiteStatement, video);
+
+                returnValue = sqLiteStatement.executeInsert();
+
+            }
+            database.setTransactionSuccessful();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+
+            database.endTransaction();
+
+            close();
+        }
+
+        return returnValue;
+    }
+
+    public long insertLocalVideos(Collection<Video> videos) {
+
+        return insertVideos(DBHelper.LOCAL_VIDEO_TABLE_NAME, videos);
+
+    }
 
     private void bindMediaWhenCreate(SQLiteStatement sqLiteStatement, Media media) {
         sqLiteStatement.bindString(1, media.getUuid());
@@ -359,7 +432,11 @@ public class DBUtils {
     }
 
     public long deleteLocalMedias(Collection<String> mediaPaths) {
-        return deleteMediasByPath(DBHelper.LOCAL_MEDIA_TABLE_NAME, mediaPaths);
+        return deleteMediasByPath(DBHelper.LOCAL_MEDIA_TABLE_NAME,mediaPaths);
+    }
+
+    public long deleteLocalVideos(Collection<String> mediaPaths) {
+        return deleteMediasByPath(DBHelper.LOCAL_VIDEO_TABLE_NAME,mediaPaths);
     }
 
     private long deleteMediasByPath(String dbName, Collection<String> mediaPaths) {
@@ -562,6 +639,35 @@ public class DBUtils {
 
     }
 
+    private List<Video> getAllVideos(String DBName) {
+
+        openReadableDB();
+
+        List<Video> videos = new ArrayList<>();
+
+        LocalDataParser<Media> parser = new LocalVideoParser();
+
+        Cursor cursor = database.rawQuery("select * from " + DBName, null);
+
+        while (cursor.moveToNext()) {
+
+            Video video = (Video) parser.parse(cursor);
+
+            videos.add(video);
+
+        }
+
+        cursor.close();
+
+        close();
+
+        return videos;
+
+    }
+
+    public List<Video> getAllLocalVideos() {
+        return getAllVideos(DBHelper.LOCAL_VIDEO_TABLE_NAME);
+    }
 
     private List<Media> getAllMedia(String dbName) {
         openReadableDB();
@@ -576,7 +682,9 @@ public class DBUtils {
 
             Media media = parser.parse(cursor);
 
-            medias.add(media);
+            if (media != null)
+                medias.add(media);
+
         }
 
         cursor.close();
@@ -611,11 +719,21 @@ public class DBUtils {
     }
 
     public long updateLocalMedia(Media media) {
+
+        return updateLocalMedia(media, DBHelper.LOCAL_MEDIA_TABLE_NAME);
+
+    }
+
+    public long updateLocalVideo(Video video) {
+        return updateLocalMedia(video, DBHelper.LOCAL_VIDEO_TABLE_NAME);
+    }
+
+    private long updateLocalMedia(Media media, String DBName) {
         openWritableDB();
 
         ContentValues contentValues = createMediaContentValues(media);
 
-        long returnValue = database.update(DBHelper.LOCAL_MEDIA_TABLE_NAME, contentValues, DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH + " = ?", new String[]{media.getOriginalPhotoPath()});
+        long returnValue = database.update(DBName, contentValues, DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH + " = ?", new String[]{media.getOriginalPhotoPath()});
 
         Log.d(TAG, "update media original photo path:" + media.getOriginalPhotoPath());
 

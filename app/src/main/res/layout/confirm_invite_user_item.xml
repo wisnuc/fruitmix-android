@@ -17,15 +17,14 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp">
+        android:layout_height="64dp">
 
         <com.winsun.fruitmix.component.UserAvatar
             android:id="@+id/user_avatar"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp" />
 
         <!--        <TextView
@@ -36,40 +35,74 @@
                     android:layout_toRightOf="@id/user_avatar"
                     android:text="@{confirmInviteUser.station}" />-->
 
-        <Button
-            android:id="@+id/refuse"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:onClick="@{()->confirmInviteUserPresenter.refuseInviteUser(confirmInviteUser)}"
-            android:text="@string/refuse"
-            android:textSize="12dp" />
-
-
-        <Button
-            android:id="@+id/accept"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="8dp"
-            android:layout_toLeftOf="@id/refuse"
-            android:onClick="@{()->confirmInviteUserPresenter.acceptInviteUser(confirmInviteUser)}"
-            android:text="@string/accept"
-            android:textSize="12dp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_alignParentBottom="true"
+            android:layout_toRightOf="@id/user_avatar"
+            android:background="@color/divide_bg" />
 
         <TextView
-            android:id="@+id/user_name"
+            android:id="@+id/refuse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:onClick="@{()->confirmInviteUserPresenter.refuseInviteUser(confirmInviteUser)}"
+            android:padding="8dp"
+            android:text="@string/refuse"
+            android:textColor="@color/fab_bg_color"
+            android:textSize="14dp" />
+
+
+        <TextView
+            android:id="@+id/accept"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginTop="8dp"
+            android:layout_marginRight="16dp"
+            android:layout_toLeftOf="@id/refuse"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:onClick="@{()->confirmInviteUserPresenter.acceptInviteUser(confirmInviteUser)}"
+            android:padding="8dp"
+            android:text="@string/accept"
+            android:textColor="@color/fab_bg_color"
+            android:textSize="14dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:layout_toRightOf="@id/user_avatar"
             android:gravity="center_vertical"
-            android:text="@{confirmInviteUser.userName}"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="16dp"
-            tools:text="test username 1" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:text="@{confirmInviteUser.userName}"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="18dp"
+                tools:text="test username 1" />
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:text="@{confirmInviteUser.createFormatTime}"
+                android:textColor="@color/fifty_four_percent_black"
+                android:textSize="12dp"
+                tools:text="2017-10-29" />
+
+        </LinearLayout>
+
 
     </RelativeLayout>
 

@@ -6,7 +6,7 @@
     <string name="android_version_name">WISNUC V%1$s</string>
     <string name="android_finishAppToast">再次点击返回键退出WISNUC</string>
 
-    <string name="and"> 和 </string>
+    <string name="and">&#160;和&#160;</string>
 
     <!-- 格式化时间-->
     <string name="android_yesterday">昨天</string>
@@ -345,6 +345,7 @@
     <string name="new_user_password">新密码</string>
 
     <!-- invite user -->
+    <string name="invitation">邀请</string>
     <string name="confirm_invitation">确认邀请</string>
     <string name="no_invitation">没有邀请</string>
     <string name="accept_invitation">接受邀请</string>

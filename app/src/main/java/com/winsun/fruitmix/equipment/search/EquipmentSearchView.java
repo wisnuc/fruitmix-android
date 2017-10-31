@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.equipment.search;
 
 import com.winsun.fruitmix.equipment.search.data.Equipment;
+import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.user.User;
 
 /**
@@ -16,5 +17,7 @@ public interface EquipmentSearchView {
     void setBackgroundColor(int color);
 
     int getCurrentViewPagerItem();
+
+    EquipmentSearchManager getEquipmentSearchManager();
 
 }

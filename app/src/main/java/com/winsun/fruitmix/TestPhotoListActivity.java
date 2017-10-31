@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
@@ -23,6 +24,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -389,37 +391,19 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
             if (currentMedia == null) return;
 
-            mImageLoader.setTag(position);
-
-            String imageUrl;
-
-//            mImageLoader.setShouldCache(!currentMedia.isLocal());
-            mImageLoader.setShouldCache(true);
-
-            if (currentMedia.isLocal())
-                mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
-
-            mPhotoIv.setBackgroundResource(R.drawable.default_place_holder);
-
-//            mPhotoIv.setBackgroundColor(ContextCompat.getColor(mContext, R.color.default_imageview_color));
-
-            mPhotoIv.setDefaultImageResId(R.drawable.default_place_holder);
-
-//            mPhotoIv.setDefaultBackgroundColor(ContextCompat.getColor(mContext, R.color.default_imageview_color));
+            HttpRequest httpRequest;
 
             if (!mIsFling) {
 
-                imageUrl = currentMedia.getImageThumbUrl(mContext).getUrl();
+                httpRequest = currentMedia.getImageThumbUrl(mContext);
 
             } else {
 
-                imageUrl = currentMedia.getImageSmallThumbUrl(mContext).getUrl();
+                httpRequest = currentMedia.getImageSmallThumbUrl(mContext);
 
             }
 
-            mPhotoIv.setTag(imageUrl);
-
-            mPhotoIv.setImageUrl(imageUrl, mImageLoader);
+            MediaUtil.setMediaImageUrl(currentMedia,mPhotoIv,httpRequest,mImageLoader);
 
 
             List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());

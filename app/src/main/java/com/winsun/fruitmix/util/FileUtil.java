@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -17,6 +18,7 @@ import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.download.FileDownloadingState;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.Video;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -243,13 +245,7 @@ public class FileUtil {
             createDownloadFileStoreFolder();
     }
 
-    public static boolean writeBitmapToFolder(Bitmap bitmap, String name) {
-
-        checkIfNoExistThenCreateDownloadFileStoreFolder();
-
-        String fileName = name + ".jpg";
-
-        File file = new File(getDownloadFileStoreFolderPath(), fileName);
+    public static boolean writeBitmapToFolder(Bitmap bitmap, File file) {
 
         FileOutputStream outputStream = null;
 
@@ -262,7 +258,7 @@ public class FileUtil {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                 outputStream.flush();
 
-                Log.d(TAG, "writeBitmapToFolder fileName:" + fileName);
+                Log.d(TAG, "writeBitmapToFolder fileName:" + file.getName());
 
                 return true;
 
@@ -296,6 +292,96 @@ public class FileUtil {
 
     }
 
+    public static boolean generateLocalVideoMiniThumbnail(Video video) {
+
+        checkIfNoExistThenCreateDownloadFileStoreFolder();
+
+        File miniThumbnailFolder = new File(getLocalPhotoMiniThumbnailFolderPath());
+
+        if (!miniThumbnailFolder.exists()) {
+            createLocalPhotoMiniThumbnailFolder();
+        }
+
+        if (video.getMiniThumbPath().length() != 0)
+            return false;
+
+        String originalPhotoPath = video.getOriginalPhotoPath();
+
+        if (video.getUuid().isEmpty()) {
+            video.setUuid(Util.calcSHA256OfFile(originalPhotoPath));
+        }
+
+        String thumbName = video.getUuid() + ".jpg";
+
+        File file = new File(getLocalPhotoMiniThumbnailFolderPath(), thumbName);
+
+        if (file.exists()) {
+
+            Log.d(TAG, "writeBitmapToLocalVideoMiniThumbnailFolder: exist mini thumb: " + file.getAbsolutePath());
+
+            video.setMiniThumbPath(file.getAbsolutePath());
+            return true;
+        }
+
+        Bitmap originalBitmap = ThumbnailUtils.createVideoThumbnail(originalPhotoPath, -1);
+
+        Bitmap thumbBitmap = ThumbnailUtils.extractThumbnail(originalBitmap, 64, 64, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+
+        boolean result = writeBitmapToFolder(thumbBitmap, file);
+
+        if (result)
+            video.setMiniThumbPath(file.getAbsolutePath());
+
+        return result;
+
+    }
+
+
+    public static boolean generateLocalVideoThumbnail(Video video) {
+
+        checkIfNoExistThenCreateDownloadFileStoreFolder();
+
+        File thumbnailFolder = new File(getLocalPhotoThumbnailFolderPath());
+
+        if (!thumbnailFolder.exists()) {
+            createLocalPhotoThumbnailFolder();
+        }
+
+        if (video.getThumb().length() != 0)
+            return false;
+
+        String originalPhotoPath = video.getOriginalPhotoPath();
+
+        if (video.getUuid().isEmpty()) {
+            video.setUuid(Util.calcSHA256OfFile(originalPhotoPath));
+        }
+
+        String thumbName = video.getUuid() + ".jpg";
+
+        File file = new File(getLocalPhotoThumbnailFolderPath(), thumbName);
+
+        if (file.exists()) {
+
+            Log.d(TAG, "writeBitmapToLocalVideoThumbnailFolder: exist thumb: " + file.getAbsolutePath());
+
+            video.setThumb(file.getAbsolutePath());
+            return true;
+        }
+
+        Bitmap originalBitmap = ThumbnailUtils.createVideoThumbnail(originalPhotoPath, -1);
+
+        Bitmap thumbBitmap = ThumbnailUtils.extractThumbnail(originalBitmap, 200, 200, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+
+        boolean result = writeBitmapToFolder(thumbBitmap, file);
+
+        if (result)
+            video.setThumb(file.getAbsolutePath());
+
+        return result;
+
+    }
+
+
     public static boolean writeBitmapToLocalPhotoThumbnailFolder(Media media) {
 
         checkIfNoExistThenCreateDownloadFileStoreFolder();
@@ -321,7 +407,7 @@ public class FileUtil {
 
         if (file.exists()) {
 
-            Log.d(TAG, "writeBitmapToLocalPhotoMiniThumbnailFolder: exist thumb: " + file.getAbsolutePath());
+            Log.d(TAG, "writeBitmapToLocalPhotoThumbnailFolder: exist thumb: " + file.getAbsolutePath());
 
             media.setThumb(file.getAbsolutePath());
             return true;
@@ -795,6 +881,28 @@ public class FileUtil {
 
         }
         return dir == null || dir.delete();
+    }
+
+    public static boolean checkFileIsVideo(String fileName) {
+
+        int dotIndex = fileName.lastIndexOf(".");
+
+        if (dotIndex < 0)
+            return false;
+
+        String end = fileName.substring(dotIndex, fileName.length()).toLowerCase();
+
+        if (end.isEmpty())
+            return false;
+
+        String type = "";
+        for (String[] aMIME_MapTable : MIME_MapTable) {
+            if (end.equals(aMIME_MapTable[0]))
+                type = aMIME_MapTable[1];
+        }
+
+        return type.startsWith("video");
+
     }
 
     public static int getFileTypeResID(String fileName) {

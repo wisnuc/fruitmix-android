@@ -6,7 +6,7 @@
 
     <string name="android_finishAppToast">Please click BACK again to exit</string>
 
-    <string name="and"> and </string>
+    <string name="and">&#160;and&#160;</string>
 
     <!-- time format -->
     <string name="android_yesterday">yesterday</string>
@@ -367,6 +367,7 @@
     <string name="new_user_password">New User Password</string>
 
     <!-- invite user -->
+    <string name="invitation">Invitation</string>
     <string name="confirm_invitation">Confirm invitation</string>
     <string name="no_invitation">No invitation</string>
     <string name="accept_invitation">Accept invitation</string>
@@ -374,6 +375,5 @@
 
     <!-- group -->
     <string name="group">Group</string>
-
 
 </resources>

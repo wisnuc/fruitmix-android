@@ -2,6 +2,7 @@ package com.winsun.fruitmix.media.local.media;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 
 import java.util.List;
@@ -12,6 +13,6 @@ import java.util.List;
 
 public interface MediaInSystemDBLoadCallback {
 
-    void onSucceed(List<String> currentAllMediaPathInSystemDB, List<Media> newMedia, OperationResult operationResult);
+    void onSucceed(List<String> currentAllMediaPathInSystemDB,List<String> currentAllVideoPathInSystemDB, List<Media> newMedia, List<Video> newVideos, OperationResult operationResult);
 
 }

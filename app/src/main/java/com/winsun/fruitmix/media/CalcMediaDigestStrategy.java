@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.media;
 
+import android.media.ThumbnailUtils;
 import android.util.Log;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -53,15 +54,15 @@ public class CalcMediaDigestStrategy {
         calcMediaDigestCallback = callback;
     }
 
-    public Collection<Media> handleMedia(Collection<Media> medias) {
+    public <T extends Media> Collection<T> handleMedia(Collection<T> medias) {
 
-        List<Media> newMediaList = new ArrayList<>();
+        List<T> newMediaList = new ArrayList<>();
 
         Log.d(TAG, "start calc media digest" + Util.getCurrentFormatTime());
 
         finishCalcMediaDigest = false;
 
-        for (Media media : medias) {
+        for (T media : medias) {
             if (media.getUuid().isEmpty()) {
                 String uuid = Util.calcSHA256OfFile(media.getOriginalPhotoPath());
                 media.setUuid(uuid);
@@ -74,8 +75,13 @@ public class CalcMediaDigestStrategy {
 
         finishCalcMediaDigest = true;
 
+        return newMediaList;
+
+    }
+
+    public void notifyCalcFinished(int newMediaListSize) {
         if (calcMediaDigestCallback != null) {
-            if (newMediaList.size() > 0) {
+            if (newMediaListSize > 0) {
 
                 Log.d(TAG, "handleMedia: finish calc");
 
@@ -87,9 +93,6 @@ public class CalcMediaDigestStrategy {
                 calcMediaDigestCallback.handleNothing();
             }
         }
-
-        return newMediaList;
-
     }
 
 

@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpRequest;
@@ -24,7 +25,6 @@ public class Media implements Parcelable {
     private static final String THUMB_PHOTO_FORMAT_CODE = "%1$s?alt=thumbnail&width=%2$s&height=%3$s&autoOrient=true&modifier=caret";
     private static final String THUMB_PHOTO_FORMAT_CODE_WITHOUT_WIDTH = "%1$s?alt=thumbnail&height=%2$s&autoOrient=true&modifier=caret";
     private static final String THUMB_PHOTO_FORMAT_CODE_WITHOUT_HEIGHT = "%1$s?alt=thumbnail&width=%2$s&autoOrient=true&modifier=caret";
-
 
     private String uuid;
     private String thumb;
@@ -394,13 +394,13 @@ public class Media implements Parcelable {
 
         String httpPath;
 
-        if(width == -1){
+        if (width == -1) {
             httpPath = String.format(THUMB_PHOTO_FORMAT_CODE_WITHOUT_WIDTH, Util.MEDIA_PARAMETER + "/" + getUuid(),
                     String.valueOf(height));
-        }else if(height == -1){
+        } else if (height == -1) {
             httpPath = String.format(THUMB_PHOTO_FORMAT_CODE_WITHOUT_HEIGHT, Util.MEDIA_PARAMETER + "/" + getUuid(),
                     String.valueOf(width));
-        }else {
+        } else {
             httpPath = String.format(THUMB_PHOTO_FORMAT_CODE, Util.MEDIA_PARAMETER + "/" + getUuid(),
                     String.valueOf(width), String.valueOf(height));
         }
@@ -448,23 +448,6 @@ public class Media implements Parcelable {
             return getOriginalPhotoPath();
         else
             return getUuid();
-    }
-
-    public void setImageUrl(NetworkImageView networkImageView, HttpRequest httpRequest, ImageLoader imageLoader) {
-
-        imageLoader.setShouldCache(!isLocal());
-
-        if (isLocal())
-            networkImageView.setOrientationNumber(getOrientationNumber());
-
-        networkImageView.setTag(httpRequest.getUrl());
-
-        ArrayMap<String, String> header = new ArrayMap<>();
-        header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
-
-        imageLoader.setHeaders(header);
-
-        networkImageView.setImageUrl(httpRequest.getUrl(), imageLoader);
     }
 
 }

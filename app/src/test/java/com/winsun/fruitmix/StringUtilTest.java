@@ -142,18 +142,45 @@ public class StringUtilTest {
     }
 
     @Test
-    public void testAndroidFormatSize(){
+    public void testAndroidFormatSize() {
 
         long size = 32 * 1024 * 1024;
 
-        assertEquals("32.00MB", Formatter.formatFileSize(RuntimeEnvironment.application,size));
+        assertEquals("32.00MB", Formatter.formatFileSize(RuntimeEnvironment.application, size));
 
         String testSizeStr = "1796336 kB";
 
         long testSize2 = Util.getFirstNumInStr(testSizeStr) * 1024;
 
-        assertEquals("1.71GB", Formatter.formatFileSize(RuntimeEnvironment.application,testSize2));
+        assertEquals("1.71GB", Formatter.formatFileSize(RuntimeEnvironment.application, testSize2));
 
     }
+
+    @Test
+    public void testGetLastParam() {
+
+        String fileName = "20171026_155540.mp4";
+
+        String filePath = "/DCIM/Camera/" + fileName;
+
+        int start = filePath.lastIndexOf("/");
+
+        int end = filePath.length();
+
+        assertEquals(fileName, filePath.substring(start + 1, end));
+
+    }
+
+    @Test
+    public void testFormatDuration(){
+
+        long duration = 22037;
+
+        String date = Util.formatDuration(duration);
+
+        assertEquals("00:00:22",date);
+
+    }
+
 
 }

@@ -140,10 +140,10 @@ public class LocalCache {
         return mediaConcurrentMap;
     }
 
-    public static ConcurrentMap<String, Media> BuildMediaMapKeyIsThumb(List<Media> medias) {
+    public static <T extends Media >ConcurrentMap<String, T> BuildMediaMapKeyIsThumb(List<T> medias) {
 
-        ConcurrentMap<String, Media> mediaConcurrentMap = new ConcurrentHashMap<>(medias.size());
-        for (Media media : medias) {
+        ConcurrentMap<String, T> mediaConcurrentMap = new ConcurrentHashMap<>(medias.size());
+        for (T media : medias) {
             mediaConcurrentMap.put(media.getOriginalPhotoPath(), media);
         }
         return mediaConcurrentMap;

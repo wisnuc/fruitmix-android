@@ -8,10 +8,8 @@ import java.util.List;
  * Created by Administrator on 2017/7/7.
  */
 
-public interface BaseLoadDataCallback<T> {
+public interface BaseLoadDataCallback<T> extends BaseDataCallback{
 
     void onSucceed(List<T> data, OperationResult operationResult);
-
-    void onFail(OperationResult operationResult);
 
 }

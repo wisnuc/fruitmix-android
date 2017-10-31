@@ -35,6 +35,7 @@ import com.winsun.fruitmix.databinding.NavPagerMainBinding;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
 import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.eventbus.RetrieveVideoThumbnailEvent;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
 import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
@@ -49,6 +50,7 @@ import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
+import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
@@ -646,6 +648,14 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             case Util.REMOTE_FILE_RETRIEVED:
 
                 fileFragment.handleOperationEvent(operationEvent);
+
+                break;
+
+            case Util.LOCAL_VIDEO_THUMBNAIL_RETRIEVED:
+
+                RetrieveVideoThumbnailEvent retrieveVideoThumbnailEvent = (RetrieveVideoThumbnailEvent) operationEvent;
+
+                photoList.refreshVideo((Video) retrieveVideoThumbnailEvent.getMedia());
 
                 break;
         }

@@ -14,11 +14,13 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final int ADD_FILE_KEY_CREATOR_UUID_DB_VERSION = 21;
 
-    public static final int ADD_MEDIA_LATITUDE_L0NGITUDE_DB_VERSION = 28;
+    public static final int ADD_MEDIA_LATITUDE_LONGITUDE_DB_VERSION = 28;
 
     public static final int ADD_LOGGED_IN_WECHAT_USER_DB_VERSION = 30;
 
-    public static final int ADD_USER_ASSOCIATED_WECHAT_USER_NAME = 31;
+    public static final int ADD_USER_ASSOCIATED_WECHAT_USER_NAME_DB_VERSION = 31;
+
+    public static final int ADD_LOCAL_VIDEO_TABLE_VERSION = 32;
 
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
@@ -47,6 +49,10 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String MEDIA_KEY_ORIGINAL_PHOTO_PATH = "media_key_original_photo_path";
     public static final String MEDIA_KEY_LATITUDE = "media_key_latitude";
     public static final String MEDIA_KEY_LONGITUDE = "media_key_longitude";
+
+    public static final String VIDEO_KEY_NAME = "video_key_name";
+    public static final String VIDEO_KEY_SIZE = "video_key_size";
+    public static final String VIDEO_KEY_DURATION = "video_key_duration";
 
     public static final String FILE_KEY_ID = "id";
     public static final String FILE_KEY_NAME = "file_name";
@@ -77,9 +83,10 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME = "local_media_share_content";
     static final String DOWNLOADED_FILE_TABLE_NAME = "downloaded_file";
     static final String LOGGED_IN_USER_TABLE_NAME = "logged_in_user";
-    public static final String LOGGED_IN_WECHAT_USER_TABLE_NAME = "logged_in_wechat_user";
+    static final String LOGGED_IN_WECHAT_USER_TABLE_NAME = "logged_in_wechat_user";
+    static final String LOCAL_VIDEO_TABLE_NAME = "local_video";
 
-    private static final int DB_VERSION = ADD_USER_ASSOCIATED_WECHAT_USER_NAME;
+    private static final int DB_VERSION = ADD_LOCAL_VIDEO_TABLE_VERSION;
 
     private static final String CREATE_TABLE = "create table if not exists ";
 
@@ -99,17 +106,19 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final String TEXT_NOT_NULL_WITHOUT_COMMA = " text not null";
 
+    public static final String INTEGER_NOT_NULL_WITHOUT_COMMA = " integer not null";
+
     private static final String DATABASE_MEDIA_CREATE = BEGIN_SQL + MEDIA_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT
             + MEDIA_KEY_UUID + TEXT_NOT_NULL + MEDIA_KEY_TIME + TEXT_NOT_NULL + MEDIA_KEY_WIDTH + TEXT_NOT_NULL
             + MEDIA_KEY_HEIGHT + TEXT_NOT_NULL + MEDIA_KEY_THUMB + TEXT + MEDIA_KEY_LOCAL + INTEGER_NOT_NULL
             + MEDIA_KEY_UPLOADED_USER_UUID + TEXT + MEDIA_KEY_SHARING + INTEGER_NOT_NULL
             + MEDIA_KEY_ORIENTATION_NUMBER + " integer," + MEDIA_KEY_TYPE + TEXT
             + MEDIA_KEY_MINI_THUMB + TEXT + MEDIA_KEY_ORIGINAL_PHOTO_PATH + TEXT
-            + MEDIA_KEY_LONGITUDE + TEXT + MEDIA_KEY_LATITUDE + " text" + END_SQL;
+            + MEDIA_KEY_LONGITUDE + TEXT + MEDIA_KEY_LATITUDE + " text";
 
-    private static final String DATABASE_REMOTE_MEDIA_CREATE = CREATE_TABLE + REMOTE_MEDIA_TABLE_NAME + DATABASE_MEDIA_CREATE;
+    private static final String DATABASE_REMOTE_MEDIA_CREATE = CREATE_TABLE + REMOTE_MEDIA_TABLE_NAME + DATABASE_MEDIA_CREATE + END_SQL;
 
-    private static final String DATABASE_LOCAL_MEDIA_CREATE = CREATE_TABLE + LOCAL_MEDIA_TABLE_NAME + DATABASE_MEDIA_CREATE;
+    private static final String DATABASE_LOCAL_MEDIA_CREATE = CREATE_TABLE + LOCAL_MEDIA_TABLE_NAME + DATABASE_MEDIA_CREATE + END_SQL;
 
     private static final String USER_FIELD_CREATE = BEGIN_SQL
             + USER_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT + USER_KEY_UUID + TEXT_NOT_NULL
@@ -130,6 +139,10 @@ public class DBHelper extends SQLiteOpenHelper {
             + BEGIN_SQL + LOGGED_IN_WECHAT_USER_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT + LOGGED_IN_WECHAT_USER_GUID + TEXT_NOT_NULL
             + LOGGED_IN_WECAHT_USER_TOKEN + TEXT_NOT_NULL + LOGGED_IN_WECHAT_USER_STATION_ID + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
+    private static final String DATABASE_LOCAL_VIDEO_CREATE = CREATE_TABLE + LOCAL_VIDEO_TABLE_NAME + DATABASE_MEDIA_CREATE
+            + "," + VIDEO_KEY_NAME + TEXT_NOT_NULL + VIDEO_KEY_SIZE + INTEGER_NOT_NULL
+            + VIDEO_KEY_DURATION + INTEGER_NOT_NULL_WITHOUT_COMMA + END_SQL;
+
 
     DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -146,6 +159,8 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DATABASE_LOGGED_IN_USER_CREATE);
 
         db.execSQL(DATABASE_LOGGED_IN_WECHAT_USER_CREATE);
+
+        db.execSQL(DATABASE_LOCAL_VIDEO_CREATE);
     }
 
     @Override
@@ -160,7 +175,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         }
 
-        if (oldVersion < ADD_MEDIA_LATITUDE_L0NGITUDE_DB_VERSION) {
+        if (oldVersion < ADD_MEDIA_LATITUDE_LONGITUDE_DB_VERSION) {
 
             db.execSQL(DROP_TABLE + REMOTE_MEDIA_TABLE_NAME);
             db.execSQL(DROP_TABLE + LOCAL_MEDIA_TABLE_NAME);
@@ -174,9 +189,15 @@ public class DBHelper extends SQLiteOpenHelper {
 
         }
 
-        if (oldVersion < ADD_USER_ASSOCIATED_WECHAT_USER_NAME) {
+        if (oldVersion < ADD_USER_ASSOCIATED_WECHAT_USER_NAME_DB_VERSION) {
 
             db.execSQL(DROP_TABLE + REMOTE_USER_TABLE_NAME);
+
+        }
+
+        if (oldVersion < ADD_LOCAL_VIDEO_TABLE_VERSION) {
+
+            db.execSQL(DROP_TABLE + LOCAL_VIDEO_TABLE_NAME);
 
         }
 

@@ -97,7 +97,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
     }
 
-    private void handleGeneralFolder(final String rootUUID,final String folderUUID,final BaseLoadDataCallback<AbstractRemoteFile> runOnMainThreadCallback) {
+    private void handleGeneralFolder(final String rootUUID, final String folderUUID, final BaseLoadDataCallback<AbstractRemoteFile> runOnMainThreadCallback) {
         stationFileDataSource.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
 
             @Override
@@ -229,4 +229,5 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
         return stationFileDataSource.uploadFile(file, driveUUID, dirUUID);
 
     }
+
 }

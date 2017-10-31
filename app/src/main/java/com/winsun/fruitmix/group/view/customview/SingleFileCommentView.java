@@ -16,6 +16,7 @@ import com.winsun.fruitmix.group.data.model.SinglePhotoComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
 
 /**
@@ -62,7 +63,7 @@ public class SingleFileCommentView extends UserCommentView {
 
             HttpRequest httpRequest = media.getImageThumbUrl(context);
 
-            media.setImageUrl(networkImageView, httpRequest, imageLoader);
+            MediaUtil.setMediaImageUrl(media,networkImageView, httpRequest, imageLoader);
 
         } else if (data instanceof SingleFileComment) {
 

@@ -17,6 +17,7 @@ import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -29,6 +30,7 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
@@ -228,6 +230,8 @@ public class UploadMediaUseCase {
             public void onSucceed(List<Media> data, OperationResult operationResult) {
 
                 localMedias = data;
+
+                Log.d(TAG, "onSucceed: localMedias size: " + localMedias.size());
 
                 if (!calcMediaDigestStrategy.isFinishCalcMediaDigest()) {
 
@@ -736,6 +740,7 @@ public class UploadMediaUseCase {
         final Media media = needUploadedMedias.get(0);
 
         if (!checkMediaIsUploadStrategy.isMediaUploaded(media)) {
+
             LocalFile localFile = new LocalFile();
 
             File file = new File(media.getOriginalPhotoPath());

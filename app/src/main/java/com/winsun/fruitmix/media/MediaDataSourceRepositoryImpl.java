@@ -6,15 +6,20 @@ import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.eventbus.RetrieveVideoThumbnailEvent;
 import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -85,6 +90,8 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
     public void getLocalMedia(BaseLoadDataCallback<Media> mediaBaseLoadDataCallback) {
 
         final BaseLoadDataCallback<Media> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(mediaBaseLoadDataCallback);
+
+        Log.d(TAG, "getLocalMedia: size: " + localMedias.size());
 
         if (getLocalMediaCallbackReturn)
             runOnMainThreadCallback.onSucceed(localMedias, new OperationSuccess());
@@ -238,7 +245,22 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
     public void updateMedia(Media media) {
 
         if (media.isLocal()) {
+
             localMediaRepository.updateMedia(media);
+
+        }
+
+    }
+
+    @Override
+    public void updateVideo(Video video) {
+
+        if (video.isLocal()) {
+
+            EventBus.getDefault().post(new RetrieveVideoThumbnailEvent(Util.LOCAL_VIDEO_THUMBNAIL_RETRIEVED, new OperationSuccess(), video));
+
+            localMediaRepository.updateVideo(video);
+
         }
 
     }

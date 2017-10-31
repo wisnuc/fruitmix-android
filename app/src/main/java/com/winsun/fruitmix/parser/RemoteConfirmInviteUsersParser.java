@@ -28,6 +28,8 @@ public class RemoteConfirmInviteUsersParser extends BaseRemoteDataParser impleme
 
             JSONObject rootObject = jsonArray.getJSONObject(i);
 
+            String time = rootObject.optString("createdAt");
+
             String ticketID = rootObject.optString("id");
 
             String stationID = rootObject.optString("stationId");
@@ -41,7 +43,7 @@ public class RemoteConfirmInviteUsersParser extends BaseRemoteDataParser impleme
                 ConfirmInviteUser confirmInviteUser = new ConfirmInviteUser();
 
                 confirmInviteUser.setStation(stationID);
-
+                confirmInviteUser.setCreateFormatTime(time);
                 confirmInviteUser.setTicketUUID(ticketID);
                 confirmInviteUser.setUserGUID(user.optString("userId"));
                 confirmInviteUser.setOperateType(user.optString("type"));

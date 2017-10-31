@@ -650,7 +650,7 @@ public class ImageLoader {
             @Override
             public void onErrorResponse(VolleyError error) {
 
-                if (error.networkResponse != null && error.networkResponse.statusCode == 500 && !cancelRetry) {
+                /*if (error.networkResponse != null && error.networkResponse.statusCode == 500 && !cancelRetry) {
 
                     if (handler == null) {
 
@@ -673,7 +673,7 @@ public class ImageLoader {
                         }
                     }, 60 * 1000);
 
-                }
+                }*/
 
             }
         }) {

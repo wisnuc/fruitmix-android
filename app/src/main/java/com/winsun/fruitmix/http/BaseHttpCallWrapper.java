@@ -2,6 +2,7 @@ package com.winsun.fruitmix.http;
 
 import android.util.Patterns;
 
+import com.winsun.fruitmix.callback.BaseDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
@@ -28,8 +29,18 @@ public class BaseHttpCallWrapper {
 
     private IHttpUtil iHttpUtil;
 
-    public BaseHttpCallWrapper(IHttpUtil iHttpUtil) {
+    BaseHttpCallWrapper(IHttpUtil iHttpUtil) {
         this.iHttpUtil = iHttpUtil;
+    }
+
+    public boolean checkPreCondition(HttpRequest httpRequest, BaseDataCallback callback) {
+        if (checkUrl(httpRequest.getUrl())) {
+            return true;
+        }else {
+            callback.onFail(new OperationMalformedUrlException());
+            return false;
+        }
+
     }
 
     public boolean checkUrl(String url) {
@@ -38,10 +49,7 @@ public class BaseHttpCallWrapper {
 
     public <T> void operateCall(HttpRequest httpRequest, BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser) {
 
-        if (!checkUrl(httpRequest.getUrl())) {
-            callback.onFail(new OperationMalformedUrlException());
-            return;
-        }
+        if (!checkPreCondition(httpRequest, callback)) return;
 
         operateCall(httpRequest, callback, parser, 0);
     }
@@ -90,10 +98,7 @@ public class BaseHttpCallWrapper {
 
     public <T> void loadCall(HttpRequest httpRequest, BaseLoadDataCallback<T> callback, RemoteDatasParser<T> parser) {
 
-        if (!checkUrl(httpRequest.getUrl())) {
-            callback.onFail(new OperationMalformedUrlException());
-            return;
-        }
+        if (!checkPreCondition(httpRequest, callback)) return;
 
         loadCall(httpRequest, callback, parser, 0);
     }

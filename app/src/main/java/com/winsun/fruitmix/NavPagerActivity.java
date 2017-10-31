@@ -356,7 +356,7 @@ public class NavPagerActivity extends BaseActivity
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
 
         mainPagePresenter = new MainPagePresenterImpl(mContext, systemSettingDataSource, loggedInUserDataSource,
-                navPagerViewModel, this, InjectGetAllBindingLocalUserUseCase.provideInstance(this),InjectEquipment.provideEquipmentDataSource(this));
+                navPagerViewModel, this, InjectGetAllBindingLocalUserUseCase.provideInstance(this), InjectEquipment.provideEquipmentDataSource(this));
 
         binding.setViewModel(navPagerViewModel);
 
@@ -628,9 +628,7 @@ public class NavPagerActivity extends BaseActivity
 
     private void startDiscovery(final LoggedInUser loggedInUser) {
 
-        if (mEquipmentSearchManager == null) {
-            mEquipmentSearchManager = InjectEquipment.provideEquipmentSearchManager(mContext);
-        }
+        mEquipmentSearchManager = InjectEquipment.provideEquipmentSearchManager(mContext);
 
         mEquipmentSearchManager.startDiscovery(new EquipmentSearchManager.IEquipmentDiscoveryListener() {
             @Override

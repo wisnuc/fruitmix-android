@@ -114,27 +114,32 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             case BaseResp.ErrCode.ERR_OK:
                 result = R.string.errcode_success;
 
-                final SendAuth.Resp resp = (SendAuth.Resp) baseResp;
+                if (baseResp instanceof SendAuth.Resp) {
 
-                final String code = resp.code;
+                    final SendAuth.Resp resp = (SendAuth.Resp) baseResp;
+
+                    final String code = resp.code;
 
 //                Toast.makeText(this, "baseresp.getType = " + baseResp.getType() + "onResp: state: " + resp.state + " code: " + code, Toast.LENGTH_LONG).show();
 
-                Log.d(TAG, "onResp: wechat code: " + code);
+                    Log.d(TAG, "onResp: wechat code: " + code);
 
-                if (wxEntryLoginCallback != null) {
+                    if (wxEntryLoginCallback != null) {
 
-                    showLoadingDialog();
+                        showLoadingDialog();
 
-                    loginInThread(code);
+                        loginInThread(code);
 
-                } else if (wxEntryGetTokenCallback != null) {
+                    } else if (wxEntryGetTokenCallback != null) {
 
-                    showGetTokenDialog();
+                        showGetTokenDialog();
 
-                    getTokenInThread(code);
+                        getTokenInThread(code);
 
-                }
+                    }
+
+                } else
+                    finish();
 
                 break;
             case BaseResp.ErrCode.ERR_USER_CANCEL:
@@ -144,6 +149,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                     finishWhenLoginFail();
                 else if (wxEntryGetTokenCallback != null)
                     finishWhenGetTokenFail();
+                else
+                    finish();
 
                 break;
             case BaseResp.ErrCode.ERR_AUTH_DENIED:
@@ -153,6 +160,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                     finishWhenLoginFail();
                 else if (wxEntryGetTokenCallback != null)
                     finishWhenGetTokenFail();
+                else
+                    finish();
 
                 break;
             case BaseResp.ErrCode.ERR_UNSUPPORT:
@@ -162,6 +171,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                     finishWhenLoginFail();
                 else if (wxEntryGetTokenCallback != null)
                     finishWhenGetTokenFail();
+                else
+                    finish();
 
                 break;
             default:
@@ -171,12 +182,14 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                     finishWhenLoginFail();
                 else if (wxEntryGetTokenCallback != null)
                     finishWhenGetTokenFail();
+                else
+                    finish();
 
                 break;
 
         }
 
-        Log.d(TAG, "onResp: " + result);
+        Log.d(TAG, "onResp: " + getString(result));
 
     }
 

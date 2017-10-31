@@ -3,6 +3,7 @@ package com.winsun.fruitmix.invitation;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,6 +31,8 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
 
     private RecyclerView recyclerView;
 
+    private FloatingActionButton inviteUserFab;
+
     private ConfirmInviteUserPresenter confirmInviteUserPresenter;
 
     @Override
@@ -39,6 +42,8 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
         ActivityConfirmInviteUserBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_confirm_invite_user);
 
         recyclerView = binding.confirmTicketRecyclerview;
+
+        inviteUserFab = binding.inviteUser;
 
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
         toolbarViewModel.titleText.set(getString(R.string.confirm_invitation));
@@ -63,6 +68,8 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
         ImageLoader imageLoader = InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this);
 
         confirmInviteUserPresenter = new ConfirmInviteUserPresenterImpl(this, invitationDataSource, imageLoader, loadingViewModel, noContentViewModel);
+
+        binding.setConfirmInviteUserPresenter(confirmInviteUserPresenter);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -95,6 +102,11 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
     @Override
     public Context getContext() {
         return this;
+    }
+
+    @Override
+    public void setInviteUserFabVisibility(int visibility) {
+        inviteUserFab.setVisibility(visibility);
     }
 
     private class FakeInvitationDataSource implements InvitationDataSource {

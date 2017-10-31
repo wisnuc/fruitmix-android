@@ -77,6 +77,9 @@ public abstract class BaseEquipmentInfoPresenter {
             @Override
             public void onFail(OperationResult operationResult) {
 
+                if(equipmentInfoView == null)
+                    return;
+
                 loadingViewModel.showLoading.set(false);
                 noContentViewModel.showNoContent.set(true);
                 equipmentInfoView.dismissEquipmentInfoRecyclerView();

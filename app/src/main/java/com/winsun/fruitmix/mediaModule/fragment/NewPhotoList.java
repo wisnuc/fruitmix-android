@@ -40,6 +40,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.NewPhotoLayoutBinding;
 import com.winsun.fruitmix.databinding.NewPhotoTitleItemBinding;
+import com.winsun.fruitmix.databinding.VideoItemBinding;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
@@ -53,10 +54,13 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListViewModel;
+import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
+import com.winsun.fruitmix.util.MediaUtil;
+import com.winsun.fruitmix.video.PlayVideoActivity;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.util.Util;
@@ -353,6 +357,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
+
     @Override
     public void refreshView() {
 
@@ -530,6 +535,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                         break;
 
                     media = preLoadMediaMiniThumbs.get(i);
+
+                    if (media instanceof Video)
+                        continue;
 
                     HttpRequest httpRequest = media.getImageSmallThumbUrl(containerActivity);
 
@@ -813,10 +821,21 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
+    public void refreshVideo(Video video) {
+
+        int index = mMapKeyIsPhotoPositionValueIsPhoto.indexOfValue(video);
+        int key = mMapKeyIsPhotoPositionValueIsPhoto.keyAt(index);
+
+        mPhotoRecycleAdapter.notifyItemChanged(key);
+
+    }
+
     private class PhotoRecycleAdapter extends RecyclerView.Adapter<BindingViewHolder> {
 
         private static final int VIEW_TYPE_HEAD = 0x1000;
         private static final int VIEW_TYPE_CONTENT = 0x1001;
+
+        private static final int VIEW_TYPE_VIDEO = 0x1002;
 
         private int mSubHeaderHeight = containerActivity.getResources().getDimensionPixelSize(R.dimen.photo_title_height);
 
@@ -833,6 +852,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             } else if (holder instanceof PhotoHolder) {
                 PhotoHolder photoHolder = (PhotoHolder) holder;
                 photoHolder.refreshView(position);
+            } else if (holder instanceof VideoViewHolder) {
+                VideoViewHolder videoViewHolder = (VideoViewHolder) holder;
+                videoViewHolder.refreshView(position);
             }
 
         }
@@ -851,6 +873,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                     NewPhotoGridlayoutItemBinding binding = NewPhotoGridlayoutItemBinding.inflate(LayoutInflater.from(containerActivity), parent, false);
 
                     return new PhotoHolder(binding);
+                }
+                case VIEW_TYPE_VIDEO: {
+
+
+                    VideoItemBinding binding = VideoItemBinding.inflate(LayoutInflater.from(containerActivity), parent, false);
+
+                    return new VideoViewHolder(binding);
+
                 }
             }
 
@@ -871,8 +901,17 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         public int getItemViewType(int position) {
             if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsKey(position))
                 return VIEW_TYPE_HEAD;
-            else
-                return VIEW_TYPE_CONTENT;
+            else {
+
+                Media media = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
+
+                if (media instanceof Video)
+                    return VIEW_TYPE_VIDEO;
+                else
+                    return VIEW_TYPE_CONTENT;
+
+            }
+
         }
 
         int getSpanSize(int position) {
@@ -1251,45 +1290,19 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             mImageLoader.setTag(position);
 
-            String imageUrl;
-
-            mImageLoader.setShouldCache(!currentMedia.isLocal());
-
-            if (currentMedia.isLocal())
-                mPhotoIv.setOrientationNumber(currentMedia.getOrientationNumber());
-
-            mPhotoIv.setBackgroundResource(R.drawable.default_place_holder);
-
-//            mPhotoIv.setBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
-
-            mPhotoIv.setDefaultImageResId(R.drawable.default_place_holder);
-
-//            mPhotoIv.setDefaultBackgroundColor(ContextCompat.getColor(containerActivity,R.color.default_imageview_color));
-
             HttpRequest httpRequest;
 
             if (!mIsFling) {
 
                 httpRequest = currentMedia.getImageThumbUrl(containerActivity);
 
-                imageUrl = httpRequest.getUrl();
-
             } else {
 
                 httpRequest = currentMedia.getImageSmallThumbUrl(containerActivity);
 
-                imageUrl = httpRequest.getUrl();
-
             }
 
-            ArrayMap<String, String> header = new ArrayMap<>();
-            header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
-
-            mImageLoader.setHeaders(header);
-
-            mPhotoIv.setTag(imageUrl);
-
-            mPhotoIv.setImageUrl(imageUrl, mImageLoader);
+            MediaUtil.setMediaImageUrl(currentMedia, mPhotoIv, httpRequest, mImageLoader);
 
             List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());
 
@@ -1299,17 +1312,15 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 Log.d(TAG, "refreshView: media list is null,currentMedia getDate:" + currentMedia.getDate());
 
-                Log.d(TAG, "refreshView: media list is null,map key is date,key:" + mMapKeyIsDateValueIsPhotoList.keySet());
-
             } else {
 
-                temporaryPosition = getPosition(mediaList, currentMedia);
+                temporaryPosition = getMediaPosition(mediaList, currentMedia);
 
             }
 
             final int mediaInListPosition = temporaryPosition;
 
-            setPhotoItemMargin(mediaInListPosition);
+            setPhotoItemMargin(mediaInListPosition, mImageLayout);
 
             if (mSelectMode) {
                 boolean selected = currentMedia.isSelected();
@@ -1445,22 +1456,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         }
 
-        private void setPhotoItemMargin(int mediaInListPosition) {
-
-            int normalMargin = Util.dip2px(containerActivity, 2.5f);
-
-            if ((mediaInListPosition + 1) % mSpanCount == 0) {
-
-                Util.setMarginAndHeight(mImageLayout, mItemWidth, normalMargin, normalMargin, normalMargin, 0);
-
-            } else {
-
-                Util.setMarginAndHeight(mImageLayout, mItemWidth, normalMargin, normalMargin, 0, 0);
-
-            }
-
-        }
-
         private void scalePhoto(boolean immediate) {
 
             if (scaleAnimator != null)
@@ -1492,26 +1487,119 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
         }
 
-        private void setPhotoIvLayoutParams(int margin) {
+    }
 
-            Util.setMargin(mPhotoIv, margin, margin, margin, margin);
+    private class VideoViewHolder extends BindingViewHolder {
 
+        VideoItemBinding binding;
+
+        ViewGroup viewGroup;
+
+        NetworkImageView networkImageView;
+
+        TextView durationTv;
+
+        VideoViewHolder(ViewDataBinding viewDataBinding) {
+            super(viewDataBinding);
+
+            binding = (VideoItemBinding) viewDataBinding;
+
+            viewGroup = binding.videoLayout;
+            networkImageView = binding.videoNetworkImageview;
+            durationTv = binding.duration;
         }
 
-        private int getPosition(List<Media> mediaList, Media media) {
+        void refreshView(int position) {
 
-            int position = 0;
-            int size = mediaList.size();
+            durationTv.setTypeface(mTypeface);
 
-            for (int i = 0; i < size; i++) {
-                Media media1 = mediaList.get(i);
+            final Video video = (Video) mMapKeyIsPhotoPositionValueIsPhoto.get(position);
 
-                if (media.getKey().equals(media1.getKey())) {
-                    position = i;
-                }
+            binding.setVideo(video);
+
+            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(video.getDate());
+
+            int temporaryPosition = 0;
+
+            if (mediaList == null) {
+
+                Log.d(TAG, "refreshView: media list is null,currentVideo getDate:" + video.getDate());
+
+            } else {
+
+                temporaryPosition = getMediaPosition(mediaList, video);
+
             }
-            return position;
+
+            final int mediaInListPosition = temporaryPosition;
+
+            setPhotoItemMargin(mediaInListPosition, viewGroup);
+
+            if (video.getThumb().isEmpty() && video.getMiniThumbPath().isEmpty())
+                return;
+
+            if (mSelectMode)
+                return;
+
+            mImageLoader.setTag(position);
+
+            HttpRequest httpRequest;
+
+            if (!mIsFling) {
+
+                httpRequest = video.getImageThumbUrl(containerActivity);
+
+            } else {
+
+                httpRequest = video.getImageSmallThumbUrl(containerActivity);
+
+            }
+
+            MediaUtil.setMediaImageUrl(video, networkImageView, httpRequest, mImageLoader);
+
+            viewGroup.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    PlayVideoActivity.startPlayVideoActivity(containerActivity, video);
+
+                }
+            });
         }
+
+    }
+
+    private void setPhotoItemMargin(int mediaInListPosition, ViewGroup viewGroup) {
+
+        int normalMargin = Util.dip2px(containerActivity, 2.5f);
+
+        int height = mItemWidth;
+
+        if ((mediaInListPosition + 1) % mSpanCount == 0) {
+
+            Util.setMarginAndHeight(viewGroup, height, normalMargin, normalMargin, normalMargin, 0);
+
+        } else {
+
+            Util.setMarginAndHeight(viewGroup, height, normalMargin, normalMargin, 0, 0);
+
+        }
+
+    }
+
+    private int getMediaPosition(List<Media> mediaList, Media media) {
+
+        int position = 0;
+        int size = mediaList.size();
+
+        for (int i = 0; i < size; i++) {
+            Media media1 = mediaList.get(i);
+
+            if (media.getKey().equals(media1.getKey())) {
+                position = i;
+            }
+        }
+        return position;
     }
 
     private class NewPhotoListScrollListener extends RecyclerView.OnScrollListener {
@@ -1592,6 +1680,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 //
 //        }
     }
+
 
     private class PinchScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         private int mSpanMaxCount = 6;

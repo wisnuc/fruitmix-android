@@ -71,6 +71,8 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
     private static boolean startRetrieveTicketTask = false;
 
+    private static boolean stopRetrieveTicketTask = false;
+
     private boolean alreadyStart = false;
 
     private CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback;
@@ -238,6 +240,10 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
         startRetrieveTicketTask = false;
     }
 
+    private static void stopRetrieveTicketTaskForever() {
+        stopRetrieveTicketTask = true;
+    }
+
     private void initInvitationRemoteDataSource() {
 
         if (invitationDataSource == null)
@@ -270,6 +276,8 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
         EventBus.getDefault().unregister(this);
 
         stopRetrieveTicketTask();
+
+        stopRetrieveTicketTaskForever();
 
         task.removeMessages(RETRIEVE_REMOTE_TICKETS);
 
@@ -309,7 +317,10 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
                     Log.d(TAG, "start RetrieveTicketTask :" + startRetrieveTicketTask);
 
                     if (!ButlerService.startRetrieveTicketTask) {
-                        task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
+
+                        if (!ButlerService.stopRetrieveTicketTask)
+                            task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
+
                         return;
                     }
 

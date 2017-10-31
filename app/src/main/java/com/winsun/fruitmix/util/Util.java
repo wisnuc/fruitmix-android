@@ -43,6 +43,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.datatype.Duration;
+
 /**
  * Created by Administrator on 2016/4/29.
  */
@@ -90,6 +92,8 @@ public class Util {
     public static final String REMOTE_FILE_SHARE_RETRIEVED = "remote_file_share_retrieved";
 
     public static final String REMOTE_CONFIRM_INVITE_USER_RETRIEVED = "remote_confirm_invite_user_retrieved";
+
+    public static final String LOCAL_VIDEO_THUMBNAIL_RETRIEVED = "local_video_thumbnail_retrieved";
 
     public static final String REFRESH_VIEW_AFTER_DATA_RETRIEVED = "refresh_view_after_data_retrieved";
 
@@ -807,6 +811,20 @@ public class Util {
 
         return bitmap.getRowBytes() * bitmap.getHeight();
 
+    }
+
+    public static String formatDuration(long durationInMills){
+
+        long s = (durationInMills / 1000) % 60;
+        long m = ((durationInMills / 1000) / 60) % 60;
+        long h = ((durationInMills / 1000) / (60 * 60)) % 24;
+
+        return getType(h) + ":" + getType(m) + ":" + getType(s);
+
+    }
+
+    private static String getType(long time) {
+        return time < 10 ? "0" + time : String.valueOf(time);
     }
 
 

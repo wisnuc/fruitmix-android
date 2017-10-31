@@ -3,6 +3,7 @@ package com.winsun.fruitmix.media;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.Video;
 
 import java.util.List;
 
@@ -17,6 +18,8 @@ public interface MediaDataSourceRepository {
     void downloadMedia(List<Media> medias, BaseOperateDataCallback<Boolean> callback);
 
     void updateMedia(Media media);
+
+    void updateVideo(Video video);
 
     void setCalcDigestCallback(CalcMediaDigestStrategy.CalcMediaDigestCallback calcDigestCallback);
 

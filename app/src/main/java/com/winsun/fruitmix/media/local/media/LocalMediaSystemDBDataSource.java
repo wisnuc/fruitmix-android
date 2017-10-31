@@ -4,9 +4,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
+import android.text.format.Formatter;
 import android.util.Log;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FileUtil;
@@ -45,20 +47,34 @@ public class LocalMediaSystemDBDataSource {
 
     }
 
-
     public void getMedia(Collection<String> currentLocalMediaOriginalPaths, MediaInSystemDBLoadCallback callback) {
-
-        ContentResolver cr = contentResolver;
-
-        Cursor cursor;
 
         List<String> currentAllMediaPathInSystemDB = new ArrayList<>();
 
-        List<Media> newMediaList = new ArrayList<>();
+        List<String> currentAllVideoPathInSystemDB = new ArrayList<>();
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+        Calendar date = Calendar.getInstance();
+
+        List<Media> medias = getAllMedias(currentLocalMediaOriginalPaths, currentAllMediaPathInSystemDB, df, date);
+
+        List<Video> videos = getAllVideos(df, date, currentLocalMediaOriginalPaths, currentAllVideoPathInSystemDB);
+
+        if (medias.isEmpty() && videos.isEmpty())
+            callback.onSucceed(currentAllMediaPathInSystemDB, currentAllVideoPathInSystemDB, medias, videos, new OperationSuccess());
+        else
+            callback.onSucceed(currentAllMediaPathInSystemDB, currentAllVideoPathInSystemDB, medias, videos, new OperationMediaDataChanged());
+
+    }
+
+    private List<Media> getAllMedias(Collection<String> currentLocalMediaOriginalPaths, List<String> currentAllMediaPathInSystemDB, SimpleDateFormat df, Calendar date) {
+
+        List<Media> medias = new ArrayList<>();
+
         Media media;
         File f;
-        SimpleDateFormat df;
-        Calendar date;
+
+        Cursor cursor;
 
         String[] fields = {MediaStore.Images.Media._ID, MediaStore.Images.Media.HEIGHT,
                 MediaStore.Images.Media.WIDTH, MediaStore.Images.Media.DATA, MediaStore.Images.Media.ORIENTATION,
@@ -76,16 +92,13 @@ public class LocalMediaSystemDBDataSource {
 
 //        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "='" + bucketName + "'", null, null);
 
-        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, selection, selectionArgs, null);
+        cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, selection, selectionArgs, null);
 
         if (cursor == null || !cursor.moveToFirst()) {
-            callback.onSucceed(currentAllMediaPathInSystemDB, newMediaList, new OperationSuccess());
-            return;
+            return medias;
         }
-        df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-        date = Calendar.getInstance();
 
-        Log.i(TAG, "PhotoList: cursor count: " + cursor.getCount());
+        Log.i(TAG, "getAllMedias: cursor count: " + cursor.getCount());
 
         do {
 
@@ -122,12 +135,12 @@ public class LocalMediaSystemDBDataSource {
             String longitude = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.LONGITUDE));
             String latitude = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.LATITUDE));
 
-            Log.d(TAG, "PhotoList: originalPhotoPath: " + media.getOriginalPhotoPath() + " longitude: " + longitude + " latitude: " + latitude);
+            Log.d(TAG, "getAllMedias: originalPhotoPath: " + media.getOriginalPhotoPath() + " longitude: " + longitude + " latitude: " + latitude);
 
             media.setLongitude(longitude);
             media.setLatitude(latitude);
 
-            newMediaList.add(media);
+            medias.add(media);
 
 //            Log.i(TAG, "insert local media to map key is originalPhotoPath result:" + (mapResult != null ? "true" : "false"));
 
@@ -136,11 +149,7 @@ public class LocalMediaSystemDBDataSource {
 
         cursor.close();
 
-        if (newMediaList.isEmpty())
-            callback.onSucceed(currentAllMediaPathInSystemDB, newMediaList, new OperationSuccess());
-        else
-            callback.onSucceed(currentAllMediaPathInSystemDB, newMediaList, new OperationMediaDataChanged());
-
+        return medias;
     }
 
     private void setMediaOrientationNumber(Cursor cursor, Media media) {
@@ -163,5 +172,77 @@ public class LocalMediaSystemDBDataSource {
                 media.setOrientationNumber(1);
         }
     }
+
+
+    private List<Video> getAllVideos(SimpleDateFormat df, Calendar date, Collection<String> currentLocalMediaOriginalPaths, List<String> currentAllVideoPathInSystemDB) {
+
+        List<Video> videos = new ArrayList<>();
+
+        String queryName = MediaStore.Video.Media.DISPLAY_NAME;
+        String queryPath = MediaStore.Video.Media.DATA;
+        String queryTitle = MediaStore.Video.Media.TITLE;
+        String queryAlbum = MediaStore.Video.Media.ALBUM;
+        String queryArtist = MediaStore.Video.Media.ARTIST;
+        String queryTakeDate = MediaStore.Video.Media.DATE_TAKEN;
+        String queryDescription = MediaStore.Video.Media.DESCRIPTION;
+        String queryDuration = MediaStore.Video.Media.DURATION;
+        String queryLanguage = MediaStore.Video.Media.LANGUAGE;
+        String queryResolution = MediaStore.Video.Media.RESOLUTION;
+        String querySize = MediaStore.Video.Media.SIZE;
+
+
+        Cursor cursor = contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                new String[]{queryName, queryPath, queryTitle, queryAlbum, queryArtist, queryTakeDate, queryDescription, queryDuration,
+                        queryLanguage, queryResolution, querySize}, null, null, null);
+
+        if (cursor == null || !cursor.moveToFirst()) {
+            return videos;
+        }
+
+        Log.d(TAG, "getAllVideos: cursor count: " + cursor.getCount());
+
+        do {
+
+            String path = cursor.getString(cursor.getColumnIndex(queryPath));
+
+            if (!path.toLowerCase().contains("camera"))
+                continue;
+
+            currentAllVideoPathInSystemDB.add(path);
+
+            if (currentLocalMediaOriginalPaths.contains(path))
+                continue;
+
+            Video video = new Video();
+
+            video.setName(cursor.getString(cursor.getColumnIndex(queryName)));
+            video.setOriginalPhotoPath(path);
+
+            date.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(queryTakeDate)));
+            video.setTime(df.format(date.getTime()));
+
+            long duration = cursor.getLong(cursor.getColumnIndex(queryDuration));
+
+            video.setDuration(duration);
+
+            long size = cursor.getLong(cursor.getColumnIndex(querySize));
+
+            video.setSize(size);
+
+            video.setSelected(false);
+            video.setLoaded(false);
+
+            video.setLocal(true);
+            video.setUuid("");
+
+            videos.add(video);
+
+        } while (cursor.moveToNext());
+
+        cursor.close();
+
+        return videos;
+    }
+
 
 }

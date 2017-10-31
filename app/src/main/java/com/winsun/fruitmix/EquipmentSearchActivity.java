@@ -94,14 +94,12 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        EquipmentSearchManager mEquipmentSearchManager = InjectEquipment.provideEquipmentSearchManager(mContext);
-
         EquipmentDataSource mEquipmentDataSource = InjectEquipment.provideEquipmentDataSource(mContext);
 
         LoginUseCase loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
 
         equipmentPresenter = new EquipmentPresenter(loadingViewModel, equipmentSearchViewModel, this,
-                mEquipmentSearchManager, mEquipmentDataSource, loginUseCase,
+                mEquipmentDataSource, loginUseCase,
                 InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
 
         binding.setWechatLoginListener(this);
@@ -180,7 +178,13 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
         Intent intent = new Intent(mContext, LoginActivity.class);
         intent.putExtra(Util.GATEWAY, Util.HTTP + equipment.getHosts().get(0));
-        intent.putExtra(Util.USER_GROUP_NAME, equipment.getEquipmentName());
+
+        String label = equipment.getEquipmentTypeInfo().getLabel();
+
+        if (label.isEmpty())
+            label = equipment.getEquipmentName();
+
+        intent.putExtra(Util.USER_GROUP_NAME, label);
         intent.putExtra(Util.USER_NAME, user.getUserName());
         intent.putExtra(Util.USER_UUID, user.getUuid());
         intent.putExtra(Util.USER_BG_COLOR, user.getDefaultAvatarBgColor());
@@ -285,4 +289,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
     }
 
+    @Override
+    public EquipmentSearchManager getEquipmentSearchManager() {
+        return InjectEquipment.provideEquipmentSearchManager(mContext);
+    }
 }

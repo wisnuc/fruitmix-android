@@ -28,7 +28,7 @@ public class NetworkStateManager {
 
     }
 
-    public NetworkStateManager(Context context) {
+    private NetworkStateManager(Context context) {
 
         manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     }

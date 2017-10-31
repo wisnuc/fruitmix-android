@@ -1,7 +1,5 @@
 package com.winsun.fruitmix.invitation;
 
-import android.widget.ImageView;
-
 import com.winsun.fruitmix.eventbus.OperationEvent;
 
 /**
@@ -9,6 +7,8 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
  */
 
 public interface ConfirmInviteUserPresenter {
+
+    void createInvitation();
 
     void getInvitations();
 

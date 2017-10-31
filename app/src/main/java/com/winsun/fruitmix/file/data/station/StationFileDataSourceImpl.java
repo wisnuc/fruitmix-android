@@ -99,10 +99,8 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
                 + fileDownloadState.getDriveUUID() + "/dirs/" + fileDownloadState.getParentFolderUUID()
                 + "/entries/" + fileDownloadState.getFileUUID() + "?name=" + encodedFileName);
 
-        if (!wrapper.checkUrl(httpRequest.getUrl())) {
-            callback.onFail(new OperationMalformedUrlException());
+        if(!wrapper.checkPreCondition(httpRequest,callback))
             return;
-        }
 
         ResponseBody responseBody = null;
         try {
@@ -139,8 +137,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path, "");
 
-        if (!wrapper.checkUrl(httpRequest.getUrl())) {
-            callback.onFail(new OperationMalformedUrlException());
+        if (!wrapper.checkPreCondition(httpRequest,callback)) {
             return;
         }
 

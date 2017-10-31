@@ -158,6 +158,8 @@ public class LoginUseCase extends BaseDataRepository {
 
             mGateway = systemSettingDataSource.getCurrentEquipmentIp();
 
+            Log.d(TAG, "loginWithNoParam: login with station ip: " + mGateway);
+
             stationsDataSource.checkStationIP(mGateway, new BaseOperateDataCallback<Boolean>() {
                 @Override
                 public void onSucceed(Boolean data, OperationResult operationResult) {

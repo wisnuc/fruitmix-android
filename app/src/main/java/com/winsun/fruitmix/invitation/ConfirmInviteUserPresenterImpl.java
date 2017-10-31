@@ -1,18 +1,22 @@
 package com.winsun.fruitmix.invitation;
 
+import android.content.res.Resources;
 import android.databinding.ViewDataBinding;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.StringRequest;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.ConfirmInviteUserItemBinding;
 import com.winsun.fruitmix.databinding.ConfirmInviteUserItemHeaderBinding;
@@ -30,6 +34,7 @@ import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
+import com.winsun.fruitmix.wxapi.MiniProgram;
 
 import org.json.JSONException;
 
@@ -62,6 +67,10 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     private Random random;
 
+    private Resources resources;
+
+    private IWXAPI iwxapi;
+
     public ConfirmInviteUserPresenterImpl(ConfirmInviteUserView confirmInviteUserView, InvitationDataSource invitationDataSource, ImageLoader imageLoader, final LoadingViewModel loadingViewModel, final NoContentViewModel noContentViewModel) {
         mInvitationDataSource = invitationDataSource;
 
@@ -81,6 +90,9 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         random = new Random();
 
+        iwxapi = MiniProgram.registerToWX(confirmInviteUserView.getContext());
+
+        resources = confirmInviteUserView.getContext().getResources();
     }
 
     @Override
@@ -91,6 +103,25 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
     public ConfirmTicketAdapter getAdapter() {
         return adapter;
+    }
+
+    @Override
+    public void createInvitation() {
+        createInvitationInThread();
+    }
+
+    private void createInvitationInThread() {
+        mInvitationDataSource.createInvitation(new BaseOperateDataCallbackImpl<String>() {
+            @Override
+            public void onSucceed(final String data, OperationResult result) {
+
+                Log.d(TAG, "onSucceed: create invitation,ticket: " + data);
+
+                MiniProgram.shareMiniWXApp(iwxapi, resources, data);
+
+            }
+
+        });
     }
 
     @Override
@@ -105,9 +136,14 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
             @Override
             public void onSucceed(final List<ConfirmInviteUser> data, OperationResult operationResult) {
 
+                if (confirmInviteUserView == null)
+                    return;
+
                 loadingViewModel.showLoading.set(false);
 
                 noContentViewModel.showNoContent.set(false);
+
+                confirmInviteUserView.setInviteUserFabVisibility(View.VISIBLE);
 
                 createMap(data);
 
@@ -119,9 +155,14 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
             @Override
             public void onFail(OperationResult operationResult) {
 
+                if (confirmInviteUserView == null)
+                    return;
+
                 loadingViewModel.showLoading.set(false);
 
                 noContentViewModel.showNoContent.set(true);
+
+                confirmInviteUserView.setInviteUserFabVisibility(View.VISIBLE);
 
             }
         });
@@ -293,14 +334,13 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
             }
 
             if (temporaryViewItems != null) {
-                ViewHeader viewHeader = new ViewHeader();
+/*                ViewHeader viewHeader = new ViewHeader();
                 viewHeader.setTicketID(ticket);
 
-                viewItems.add(viewHeader);
+                viewItems.add(viewHeader);*/
 
                 viewItems.addAll(temporaryViewItems);
             }
-
 
         }
 

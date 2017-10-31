@@ -39,6 +39,9 @@ public class EquipmentInfoPresenter extends BaseEquipmentInfoPresenter {
             @Override
             public void onSucceed(List<BaseEquipmentInfo> data, OperationResult operationResult) {
 
+                if(equipmentInfoView == null)
+                    return;
+
                 handleGetBaseEquipmentInfoSucceed(data.get(0), callback);
 
             }

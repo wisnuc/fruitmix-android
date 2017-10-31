@@ -120,6 +120,9 @@ public class EquipmentPresenter {
                     if (!hasFindEquipment)
                         hasFindEquipment = true;
 
+                    if (equipmentSearchView == null)
+                        return;
+
                     handleFindEquipment(adapter);
 
                     break;
@@ -209,12 +212,10 @@ public class EquipmentPresenter {
     }
 
     public EquipmentPresenter(LoadingViewModel loadingViewModel, EquipmentSearchViewModel equipmentSearchViewModel, EquipmentSearchView equipmentSearchView,
-                              EquipmentSearchManager mEquipmentSearchManager, EquipmentDataSource equipmentDataSource,
-                              LoginUseCase loginUseCase, ImageLoader imageLoader) {
+                              EquipmentDataSource equipmentDataSource, LoginUseCase loginUseCase, ImageLoader imageLoader) {
         this.loadingViewModel = loadingViewModel;
         this.equipmentSearchViewModel = equipmentSearchViewModel;
         this.equipmentSearchView = equipmentSearchView;
-        this.mEquipmentSearchManager = mEquipmentSearchManager;
         this.mEquipmentDataSource = equipmentDataSource;
         this.loginUseCase = loginUseCase;
 
@@ -312,6 +313,8 @@ public class EquipmentPresenter {
     }
 
     private void startDiscovery() {
+
+        mEquipmentSearchManager = equipmentSearchView.getEquipmentSearchManager();
 
         mEquipmentSearchManager.startDiscovery(new EquipmentSearchManager.IEquipmentDiscoveryListener() {
             @Override
@@ -508,6 +511,17 @@ public class EquipmentPresenter {
 
                 initEquipmentViewModelDefaultBackgroundColor(container, equipmentItemViewModel);
 
+                binding.research.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        stopDiscovery();
+                        startDiscovery();
+
+                    }
+                });
+
+
             } else {
 
                 equipmentItemViewModel.showNoEquipment.set(false);
@@ -593,13 +607,20 @@ public class EquipmentPresenter {
 
         String and = container.getContext().getString(R.string.and);
 
+        int size = hosts.size();
+
         StringBuilder builder = new StringBuilder();
-        for (String host : hosts) {
-            builder.append(and);
+        for (int i = 0; i < size; i++) {
+
+            if (i != 0)
+                builder.append(and);
+
+            String host = hosts.get(i);
+
             builder.append(host);
         }
 
-        equipmentItemViewModel.ip.set(builder.substring(1));
+        equipmentItemViewModel.ip.set(builder.toString());
     }
 
     private class EquipmentUserRecyclerViewAdapter extends RecyclerView.Adapter<EquipmentUserViewHolder> {
@@ -730,14 +751,16 @@ public class EquipmentPresenter {
             @Override
             public void onSucceed(final Boolean data, OperationResult result) {
 
-                equipmentSearchView.handleLoginWithUserSucceed(data);
+                if (equipmentSearchView != null)
+                    equipmentSearchView.handleLoginWithUserSucceed(data);
 
             }
 
             @Override
             public void onFail(OperationResult result) {
 
-                equipmentSearchView.handleLoginWithUserFail(currentEquipment, user);
+                if (equipmentSearchView != null)
+                    equipmentSearchView.handleLoginWithUserFail(currentEquipment, user);
 
             }
 

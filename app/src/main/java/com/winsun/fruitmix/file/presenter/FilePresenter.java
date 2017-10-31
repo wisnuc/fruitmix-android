@@ -14,12 +14,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.BR;
@@ -64,6 +66,7 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.video.PlayVideoActivity;
 import com.winsun.fruitmix.viewholder.BaseBindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -1072,6 +1075,8 @@ public class FilePresenter implements OnViewSelectListener {
 
         ImageButton itemMenu;
 
+        TextView fileSizeTv;
+
         private RemoteFileItemLayoutBinding binding;
 
         FileViewHolder(ViewDataBinding viewDataBinding) {
@@ -1082,6 +1087,7 @@ public class FilePresenter implements OnViewSelectListener {
             contentLayout = binding.contentLayout;
             remoteFileItemLayout = binding.remoteFileItemLayout;
             itemMenu = binding.itemMenu;
+            fileSizeTv = binding.fileSize;
 
         }
 
@@ -1095,6 +1101,8 @@ public class FilePresenter implements OnViewSelectListener {
             }
 
             final RemoteFile abstractRemoteFile = (RemoteFile) abstractRemoteFiles.get(position);
+
+            fileSizeTv.setText(Formatter.formatFileSize(activity, Long.valueOf(abstractRemoteFile.getSize())));
 
             FileItemViewModel fileItemViewModel = binding.getFileItemViewModel();
 
@@ -1167,6 +1175,13 @@ public class FilePresenter implements OnViewSelectListener {
                             }
 
                         } else {
+
+                            if(FileUtil.checkFileIsVideo(abstractRemoteFile.getName())){
+
+                                PlayVideoActivity.startPlayVideoActivity(activity,driveRootUUID,abstractRemoteFile);
+
+                                return;
+                            }
 
                             selectedFiles.clear();
                             selectedFiles.add(abstractRemoteFile);

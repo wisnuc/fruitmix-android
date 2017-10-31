@@ -17,6 +17,10 @@
             name="noContentViewModel"
             type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
 
+        <variable
+            name="confirmInviteUserPresenter"
+            type="com.winsun.fruitmix.invitation.ConfirmInviteUserPresenter" />
+
     </data>
 
     <LinearLayout
@@ -33,12 +37,14 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@color/fafafa">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/confirm_ticket_recyclerview"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:paddingTop="8dp"/>
 
             <include
                 layout="@layout/new_loading_layout"
@@ -47,6 +53,19 @@
             <include
                 layout="@layout/new_no_content_layout"
                 bind:noContentViewModel="@{noContentViewModel}" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/invite_user"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_marginBottom="60dp"
+                android:layout_marginRight="30dp"
+                android:onClick="@{()->confirmInviteUserPresenter.createInvitation()}"
+                android:src="@drawable/ic_person_add_white_24dp"
+                android:visibility="invisible"
+                bind:borderWidth="0dp"
+                bind:fabSize="normal" />
 
         </FrameLayout>
 

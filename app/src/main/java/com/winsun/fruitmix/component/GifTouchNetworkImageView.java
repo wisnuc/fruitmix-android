@@ -346,13 +346,6 @@ public class GifTouchNetworkImageView extends PinchImageView {
 
                         deliverImageLoadFail();
 
-                        if (error.networkResponse == null)
-                            return;
-
-                        String status = new String(error.networkResponse.data);
-
-                        Log.d(TAG, "onErrorResponse: status:" + status);
-
                     }
 
                     @Override

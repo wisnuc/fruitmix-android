@@ -15,4 +15,6 @@ public interface ConfirmInviteUserView extends BaseView {
 
     Context getContext();
 
+    void setInviteUserFabVisibility(int visibility);
+
 }

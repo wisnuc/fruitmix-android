@@ -6,6 +6,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
@@ -116,49 +117,76 @@ public class LocalMediaRepository {
 
         localMediaSystemDBDataSource.getMedia(mediaConcurrentMapKeyIsOriginalPath.keySet(), new MediaInSystemDBLoadCallback() {
 
-            public void onSucceed(List<String> currentAllMediaPathInSystemDB, List<Media> newMedia, OperationResult operationResult) {
+            public void onSucceed(List<String> currentAllMediaPathInSystemDB, List<String> currentAllVideoPathInSystemDB, List<Media> newMedia, List<Video> newVideos, OperationResult operationResult) {
 
                 Log.d(TAG, "onSucceed: finish get media from system db,data size: " + currentAllMediaPathInSystemDB.size()
-                        + " newMedia size: " + newMedia.size());
+                        + " newMedia size: " + newMedia.size() + " newVideo size: " + newVideos.size());
 
                 boolean hasDeleteMedia = false;
 
+                boolean hasDeleteVideo = false;
+
                 List<String> needDeleteMediaPaths = null;
+
+                List<String> needDeleteVideoPaths = null;
 
                 for (String mediaPathInAppDB : mediaConcurrentMapKeyIsOriginalPath.keySet()) {
 
-                    if (!currentAllMediaPathInSystemDB.contains(mediaPathInAppDB)) {
+                    if (!currentAllMediaPathInSystemDB.contains(mediaPathInAppDB) && !currentAllVideoPathInSystemDB.contains(mediaPathInAppDB)) {
 
-                        if (needDeleteMediaPaths == null)
-                            needDeleteMediaPaths = new ArrayList<>();
+                        Media media = mediaConcurrentMapKeyIsOriginalPath.remove(mediaPathInAppDB);
 
-                        needDeleteMediaPaths.add(mediaPathInAppDB);
+                        if(media instanceof Video){
 
-                        mediaConcurrentMapKeyIsOriginalPath.remove(mediaPathInAppDB);
+                            if (needDeleteVideoPaths == null)
+                                needDeleteVideoPaths = new ArrayList<>();
 
-                        hasDeleteMedia = true;
+                            needDeleteVideoPaths.add(mediaPathInAppDB);
+
+                            mediaConcurrentMapKeyIsOriginalPath.remove(mediaPathInAppDB);
+
+                            hasDeleteVideo = true;
+
+                        }else {
+
+                            if (needDeleteMediaPaths == null)
+                                needDeleteMediaPaths = new ArrayList<>();
+
+                            needDeleteMediaPaths.add(mediaPathInAppDB);
+
+                            hasDeleteMedia = true;
+
+                        }
+
                     }
 
                 }
 
-                Log.d(TAG, "onSucceed: finish check there is some media has deleted,result: " + hasDeleteMedia);
+                Log.d(TAG, "onSucceed: finish check there is some media has deleted,result: " + hasDeleteMedia
+                        + " some video has deleted,result: " + hasDeleteVideo);
 
                 OperationResult result = operationResult;
 
-                if (hasDeleteMedia) {
+                if (hasDeleteMedia || hasDeleteVideo) {
                     result = new OperationMediaDataChanged();
                 }
 
                 mediaConcurrentMapKeyIsOriginalPath.putAll(LocalCache.BuildMediaMapKeyIsThumb(newMedia));
 
+                mediaConcurrentMapKeyIsOriginalPath.putAll(LocalCache.BuildMediaMapKeyIsThumb(newVideos));
+
                 List<Media> returnValue = new ArrayList<>(mediaConcurrentMapKeyIsOriginalPath.values());
 
-                calcMediaDigest(newMedia);
+                calcMediaDigest(newMedia, newVideos);
 
                 callback.onSucceed(new ArrayList<>(returnValue), result);
 
                 if (needDeleteMediaPaths != null && needDeleteMediaPaths.size() != 0) {
                     localMediaAppDBDataSource.deleteMediaByPath(needDeleteMediaPaths);
+                }
+
+                if (needDeleteVideoPaths != null && needDeleteVideoPaths.size() != 0) {
+                    localMediaAppDBDataSource.deleteVideoByPath(needDeleteVideoPaths);
                 }
 
                 gettingMediaFromAppDB = false;
@@ -167,18 +195,25 @@ public class LocalMediaRepository {
         });
     }
 
-    private void calcMediaDigest(final List<Media> medias) {
+    private void calcMediaDigest(final List<Media> medias, final List<Video> videos) {
 
         threadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                calcMediaDigestInThread(medias);
+                Collection<Media> calcMediaResult = calcMediaDigestInThread(medias);
+
+                Collection<Video> calcVideoResult = calcVideoDigestInThread(videos);
+
+                int size = calcMediaResult.size() + calcVideoResult.size();
+
+                calcMediaDigestStrategy.notifyCalcFinished(size);
+
             }
         });
 
     }
 
-    private void calcMediaDigestInThread(List<Media> data) {
+    private Collection<Media> calcMediaDigestInThread(List<Media> data) {
 
         Collection<Media> result = data;
 
@@ -187,11 +222,31 @@ public class LocalMediaRepository {
 
         if (result.size() != 0)
             localMediaAppDBDataSource.insertMedias(result);
+
+        return result;
     }
+
+
+    private Collection<Video> calcVideoDigestInThread(List<Video> data) {
+
+        Collection<Video> result = data;
+
+        if (calcMediaDigestStrategy != null)
+            result = calcMediaDigestStrategy.handleMedia(data);
+
+        if (result.size() != 0)
+            localMediaAppDBDataSource.insertVideos(data);
+
+        return result;
+    }
+
 
     public boolean updateMedia(Media media) {
         return localMediaAppDBDataSource.updateMedia(media);
     }
 
+    public boolean updateVideo(Video video) {
+        return localMediaAppDBDataSource.updateVideo(video);
+    }
 
 }
