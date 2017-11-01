@@ -13,7 +13,7 @@ import java.util.List;
  * Created by Administrator on 2017/9/14.
  */
 
-public class RemoteStationParser extends BaseRemoteDataParser implements RemoteDatasParser<Station> {
+public class RemoteStationsCallByCloudAPIParser extends BaseRemoteDataParser implements RemoteDatasParser<Station> {
 
     @Override
     public List<Station> parse(String json) throws JSONException {

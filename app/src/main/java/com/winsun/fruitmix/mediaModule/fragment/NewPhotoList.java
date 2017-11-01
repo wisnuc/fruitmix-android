@@ -1318,38 +1318,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             }
 
+            setPhotoItemMargin(temporaryPosition, mImageLayout);
+
             final int mediaInListPosition = temporaryPosition;
 
-            setPhotoItemMargin(mediaInListPosition, mImageLayout);
-
-            if (mSelectMode) {
-                boolean selected = currentMedia.isSelected();
-                if (selected && mPhotoIv.getScaleX() == 1) {
-                    scalePhoto(true);
-
-                    showPhotoSelectImg.set(true);
-//                    photoSelectImg.setVisibility(View.VISIBLE);
-
-                } else if (!selected && mPhotoIv.getScaleX() != 1) {
-
-                    restorePhoto(true);
-
-                    showPhotoSelectImg.set(false);
-//                    photoSelectImg.setVisibility(View.INVISIBLE);
-
-                }
-            } else {
-
-                currentMedia.setSelected(false);
-
-                if (mPhotoIv.getScaleX() != 1) {
-                    restorePhoto(true);
-
-                    showPhotoSelectImg.set(false);
-//                    photoSelectImg.setVisibility(View.INVISIBLE);
-                }
-
-            }
+            setMediaSelectImg(mPhotoIv, currentMedia, showPhotoSelectImg);
 
 //            getViewDataBinding().setVariable(BR.showPhotoSelectImg, showPhotoSelectImg);
 //            getViewDataBinding().executePendingBindings();
@@ -1359,43 +1332,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 public void onClick(View v) {
                     if (mSelectMode) {
 
-                        if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(currentMedia.getKey())) {
-                            Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        calcSelectedPhoto();
-
-                        boolean selected = currentMedia.isSelected();
-
-                        if (!selected && mSelectCount >= Util.MAX_PHOTO_SIZE) {
-
-                            Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
-
-                            return;
-                        }
-
-                        selected = !selected;
-
-                        if (selected) {
-                            scalePhoto(false);
-
-                            showPhotoSelectImg.set(true);
-
-                        } else {
-                            restorePhoto(false);
-
-                            showPhotoSelectImg.set(false);
-
-                        }
-
-                        currentMedia.setSelected(selected);
-
-                        mPhotoRecycleAdapter.notifyDataSetChanged();
-
-                        calcSelectedPhoto();
-
-                        onPhotoItemClick();
+                        handleMediaOnClickWhenSelectMode(currentMedia, mPhotoIv, showPhotoSelectImg);
 
                     } else {
 
@@ -1436,54 +1373,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 @Override
                 public boolean onLongClick(View v) {
 
-                    if (mSelectMode)
-                        return true;
+                    return handleMediaOnLongClick(currentMedia, mPhotoIv, showPhotoSelectImg);
 
-                    if (mPhotoListListener != null)
-                        mPhotoListListener.onPhotoItemLongClick();
-
-                    currentMedia.setSelected(true);
-
-                    mSelectCount = 1;
-
-                    scalePhoto(false);
-
-                    showPhotoSelectImg.set(true);
-
-                    return true;
                 }
             });
-
-        }
-
-        private void scalePhoto(boolean immediate) {
-
-            if (scaleAnimator != null)
-                scaleAnimator.cancel();
-
-            scaleAnimator = AnimatorInflater.loadAnimator(containerActivity, R.animator.photo_scale);
-            scaleAnimator.setTarget(mPhotoIv);
-
-            if (immediate) {
-                scaleAnimator.setDuration(0);
-            }
-
-            scaleAnimator.start();
-        }
-
-        private void restorePhoto(boolean immediate) {
-
-            if (scaleAnimator != null)
-                scaleAnimator.cancel();
-
-            scaleAnimator = AnimatorInflater.loadAnimator(containerActivity, R.animator.photo_restore);
-            scaleAnimator.setTarget(mPhotoIv);
-
-            if (immediate) {
-                scaleAnimator.setDuration(0);
-            }
-
-            scaleAnimator.start();
 
         }
 
@@ -1515,7 +1408,25 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             final Video video = (Video) mMapKeyIsPhotoPositionValueIsPhoto.get(position);
 
+            if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(video.getKey()))
+                video.setSelected(true);
+
+            ObservableBoolean preShowPhotoSelectImg = binding.getShowPhotoSelectImg();
+
+            final ObservableBoolean showPhotoSelectImg;
+
+            if (preShowPhotoSelectImg != null) {
+
+                showPhotoSelectImg = preShowPhotoSelectImg;
+            } else {
+                showPhotoSelectImg = new ObservableBoolean(video.isSelected());
+
+                binding.setShowPhotoSelectImg(showPhotoSelectImg);
+            }
+
             binding.setVideo(video);
+
+            setMediaSelectImg(networkImageView, video, showPhotoSelectImg);
 
             List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(video.getDate());
 
@@ -1538,9 +1449,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             if (video.getThumb().isEmpty() && video.getMiniThumbPath().isEmpty())
                 return;
 
-            if (mSelectMode)
-                return;
-
             mImageLoader.setTag(position);
 
             HttpRequest httpRequest;
@@ -1561,13 +1469,151 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 @Override
                 public void onClick(View v) {
 
-                    PlayVideoActivity.startPlayVideoActivity(containerActivity, video);
+                    if (mSelectMode) {
+
+                        handleMediaOnClickWhenSelectMode(video, networkImageView, showPhotoSelectImg);
+
+                    } else
+                        PlayVideoActivity.startPlayVideoActivity(containerActivity, video);
 
                 }
             });
+
+
+            viewGroup.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    return handleMediaOnLongClick(video, networkImageView, showPhotoSelectImg);
+                }
+            });
+
         }
 
     }
+
+
+    private void handleMediaOnClickWhenSelectMode(Media currentMedia, View view, ObservableBoolean showPhotoSelectImg) {
+        if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(currentMedia.getKey())) {
+            Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        calcSelectedPhoto();
+
+        boolean selected = currentMedia.isSelected();
+
+        if (!selected && mSelectCount >= Util.MAX_PHOTO_SIZE) {
+
+            Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
+
+            return;
+        }
+
+        selected = !selected;
+
+        if (selected) {
+            scalePhoto(view, false);
+
+            showPhotoSelectImg.set(true);
+
+        } else {
+            restorePhoto(view, false);
+
+            showPhotoSelectImg.set(false);
+
+        }
+
+        currentMedia.setSelected(selected);
+
+        mPhotoRecycleAdapter.notifyDataSetChanged();
+
+        calcSelectedPhoto();
+
+        onPhotoItemClick();
+
+    }
+
+    private boolean handleMediaOnLongClick(Media media, View view, ObservableBoolean showPhotoSelectImg) {
+        if (mSelectMode)
+            return true;
+
+        if (mPhotoListListener != null)
+            mPhotoListListener.onPhotoItemLongClick();
+
+        media.setSelected(true);
+
+        mSelectCount = 1;
+
+        scalePhoto(view, false);
+
+        showPhotoSelectImg.set(true);
+
+        return true;
+    }
+
+    private void setMediaSelectImg(View view, Media currentMedia, ObservableBoolean showPhotoSelectImg) {
+
+        if (mSelectMode) {
+            boolean selected = currentMedia.isSelected();
+            if (selected && view.getScaleX() == 1) {
+                scalePhoto(view, true);
+
+                showPhotoSelectImg.set(true);
+//                    photoSelectImg.setVisibility(View.VISIBLE);
+
+            } else if (!selected && view.getScaleX() != 1) {
+
+                restorePhoto(view, true);
+
+                showPhotoSelectImg.set(false);
+//                    photoSelectImg.setVisibility(View.INVISIBLE);
+
+            }
+        } else {
+
+            currentMedia.setSelected(false);
+
+            if (view.getScaleX() != 1) {
+                restorePhoto(view, true);
+
+                showPhotoSelectImg.set(false);
+//                    photoSelectImg.setVisibility(View.INVISIBLE);
+            }
+
+        }
+    }
+
+    private void scalePhoto(View view, boolean immediate) {
+
+        if (scaleAnimator != null)
+            scaleAnimator.cancel();
+
+        scaleAnimator = AnimatorInflater.loadAnimator(containerActivity, R.animator.photo_scale);
+        scaleAnimator.setTarget(view);
+
+        if (immediate) {
+            scaleAnimator.setDuration(0);
+        }
+
+        scaleAnimator.start();
+    }
+
+    private void restorePhoto(View view, boolean immediate) {
+
+        if (scaleAnimator != null)
+            scaleAnimator.cancel();
+
+        scaleAnimator = AnimatorInflater.loadAnimator(containerActivity, R.animator.photo_restore);
+        scaleAnimator.setTarget(view);
+
+        if (immediate) {
+            scaleAnimator.setDuration(0);
+        }
+
+        scaleAnimator.start();
+
+    }
+
 
     private void setPhotoItemMargin(int mediaInListPosition, ViewGroup viewGroup) {
 

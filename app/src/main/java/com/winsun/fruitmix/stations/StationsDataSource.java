@@ -11,7 +11,7 @@ public interface StationsDataSource {
 
     void getStationsByWechatGUID(String guid, BaseLoadDataCallback<Station> callback);
 
-    void getStationInfoByStationAPI(String ip, BaseLoadDataCallback<Station> callback);
+    void getStationInfoByStationAPI(String ip, BaseLoadDataCallback<StationInfoCallByStationAPI> callback);
 
     void checkStationIP(String ip, BaseOperateDataCallback<Boolean> callback);
 

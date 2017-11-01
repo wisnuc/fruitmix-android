@@ -172,15 +172,31 @@ public class StringUtilTest {
     }
 
     @Test
-    public void testFormatDuration(){
+    public void testFormatDuration() {
 
         long duration = 22037;
 
         String date = Util.formatDuration(duration);
 
-        assertEquals("00:00:22",date);
+        assertEquals("0:22", date);
+
+        long largeDuration = 90725000L;
+
+        String largeDate = Util.formatDuration(largeDuration);
+
+        assertEquals("25:12:05", largeDate);
 
     }
 
+    @Test
+    public void testDoubleToLong(){
+
+        double durationSec = 2.84;
+
+        long duration = (long) (durationSec * 1000);
+
+        assertEquals(2840,duration);
+
+    }
 
 }

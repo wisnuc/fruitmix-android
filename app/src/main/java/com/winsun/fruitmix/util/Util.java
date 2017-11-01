@@ -43,8 +43,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.datatype.Duration;
-
 /**
  * Created by Administrator on 2016/4/29.
  */
@@ -813,18 +811,33 @@ public class Util {
 
     }
 
-    public static String formatDuration(long durationInMills){
+    public static String formatDuration(long durationInMills) {
 
-        long s = (durationInMills / 1000) % 60;
-        long m = ((durationInMills / 1000) / 60) % 60;
-        long h = ((durationInMills / 1000) / (60 * 60)) % 24;
+        long durationInSec = durationInMills / 1000;
+        long durationHour = durationInSec / 3600;
+        long durationMinute = durationInSec % 3600 / 60;
+        long durationSecond = durationInSec % 3600 % 60;
 
-        return getType(h) + ":" + getType(m) + ":" + getType(s);
+        String hourStr;
+
+        if (durationHour == 0) {
+
+            hourStr = "";
+
+        } else {
+
+            hourStr = String.valueOf(durationHour) + ":";
+
+        }
+
+        return hourStr + durationMinute + ":" + formatHourMinSec(durationSecond);
 
     }
 
-    private static String getType(long time) {
+    private static String formatHourMinSec(long time) {
+
         return time < 10 ? "0" + time : String.valueOf(time);
+
     }
 
 

@@ -8,6 +8,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.stations.Station;
+import com.winsun.fruitmix.stations.StationInfoCallByStationAPI;
 import com.winsun.fruitmix.stations.StationsDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.token.TokenDataSource;
@@ -94,10 +95,10 @@ public class NetworkChangeUseCase {
 
                 Log.d(TAG, "handleNetworkChange: currentIP: " + currentIP);
 
-                stationsDataSource.getStationInfoByStationAPI(currentIP, new BaseLoadDataCallbackImpl<Station>() {
+                stationsDataSource.getStationInfoByStationAPI(currentIP, new BaseLoadDataCallbackImpl<StationInfoCallByStationAPI>() {
 
                     @Override
-                    public void onSucceed(List<Station> data, OperationResult operationResult) {
+                    public void onSucceed(List<StationInfoCallByStationAPI> data, OperationResult operationResult) {
                         super.onSucceed(data, operationResult);
 
                         Log.d(TAG, "get station info succeed: check station ip succeed");
@@ -131,13 +132,13 @@ public class NetworkChangeUseCase {
 
         Log.d(TAG, "checkStation: ip: " + ip + " stationID: " + stationID);
 
-        stationsDataSource.getStationInfoByStationAPI(ip, new BaseLoadDataCallbackImpl<Station>() {
+        stationsDataSource.getStationInfoByStationAPI(ip, new BaseLoadDataCallbackImpl<StationInfoCallByStationAPI>() {
             @Override
-            public void onSucceed(List<Station> data, OperationResult operationResult) {
+            public void onSucceed(List<StationInfoCallByStationAPI> data, OperationResult operationResult) {
 
-                Station station = data.get(0);
+                StationInfoCallByStationAPI stationInfoCallByStationAPI = data.get(0);
 
-                if (station.getId().equals(stationID)) {
+                if (stationInfoCallByStationAPI.getId().equals(stationID)) {
 
                     tokenDataSource.getTokenThroughWAToken(new BaseLoadDataCallbackImpl<String>() {
                         @Override

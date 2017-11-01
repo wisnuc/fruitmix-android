@@ -495,6 +495,11 @@ public class FileUtil {
 
         File file = new File(getOriginalPhotoFolderPath(), media.getUuid() + ".jpg");
 
+        if (file.exists()) {
+            media.setOriginalPhotoPath(file.getAbsolutePath());
+            return true;
+        }
+
         InputStream inputStream = null;
         OutputStream outputStream = null;
 
@@ -695,15 +700,36 @@ public class FileUtil {
     public static void sendShareToOtherApp(Context context, List<String> filePaths) {
         ArrayList<Uri> uris = new ArrayList<>();
 
+        List<String> types = new ArrayList<>();
+
         for (String filePath : filePaths) {
-            Uri uri = Uri.fromFile(new File(filePath));
+
+            File file = new File(filePath);
+
+            Uri uri = Uri.fromFile(file);
             uris.add(uri);
+
+            String type = getMIMEType(file);
+
+            if (!types.contains(type))
+                types.add(type);
+
         }
+
+        StringBuilder builder = new StringBuilder();
+        for (String type : types) {
+            builder.append(type);
+            builder.append(";");
+        }
+
+        String shareType = builder.toString();
+
+        Log.d(TAG, "sendShareToOtherApp: shareType: " + shareType);
 
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND_MULTIPLE);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        intent.setType("image/*");
+        intent.setType(shareType);
         context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_text)));
 
     }

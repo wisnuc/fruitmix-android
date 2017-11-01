@@ -91,7 +91,7 @@ public class StationsRepository extends BaseDataRepository implements StationsDa
     }
 
     @Override
-    public void getStationInfoByStationAPI(final String ip,final BaseLoadDataCallback<Station> callback) {
+    public void getStationInfoByStationAPI(final String ip,final BaseLoadDataCallback<StationInfoCallByStationAPI> callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override

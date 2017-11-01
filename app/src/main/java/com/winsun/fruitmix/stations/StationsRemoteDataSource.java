@@ -10,7 +10,8 @@ import com.winsun.fruitmix.http.request.factory.CloudHttpRequestFactory;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDatasParser;
-import com.winsun.fruitmix.parser.RemoteStationParser;
+import com.winsun.fruitmix.parser.RemoteStationsCallByCloudAPIParser;
+import com.winsun.fruitmix.parser.RemoteStationsCallByStationAPIParser;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONException;
@@ -48,27 +49,16 @@ public class StationsRemoteDataSource extends BaseRemoteDataSourceImpl implement
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap(CloudHttpRequestFactory.CLOUD_API_LEVEL + "/users/" + guid + "/stations");
 
-        wrapper.loadCall(httpRequest, callback, new RemoteStationParser());
+        wrapper.loadCall(httpRequest, callback, new RemoteStationsCallByCloudAPIParser());
 
     }
 
     @Override
-    public void getStationInfoByStationAPI(String ip, BaseLoadDataCallback<Station> callback) {
+    public void getStationInfoByStationAPI(String ip, BaseLoadDataCallback<StationInfoCallByStationAPI> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(ip, "/station/info");
 
-        wrapper.loadCall(httpRequest, callback, new RemoteDatasParser<Station>() {
-            @Override
-            public List<Station> parse(String json) throws JSONException {
-
-                JSONObject jsonObject = new JSONObject(json);
-
-                Station station = new Station();
-                station.setId(jsonObject.optString("id"));
-
-                return Collections.singletonList(station);
-            }
-        });
+        wrapper.loadCall(httpRequest, callback, new RemoteStationsCallByStationAPIParser());
 
     }
 

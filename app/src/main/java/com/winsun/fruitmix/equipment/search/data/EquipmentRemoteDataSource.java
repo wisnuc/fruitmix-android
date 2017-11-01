@@ -9,6 +9,8 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentTypeInfoParser;
+import com.winsun.fruitmix.parser.RemoteStationsCallByStationAPIParser;
+import com.winsun.fruitmix.stations.StationInfoCallByStationAPI;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.parser.RemoteEquipmentHostAliasParser;
 import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
@@ -78,11 +80,11 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
 
     private void getEquipmentName(final BaseLoadDataCallback<EquipmentTypeInfo> callback, String equipmentIP, final EquipmentTypeInfo equipmentTypeInfo) {
         HttpRequest getEquipmentNameHttpRequest = httpRequestFactory.createGetRequestWithoutToken(equipmentIP, EQUIPMENT_NAME);
-        wrapper.loadCall(getEquipmentNameHttpRequest, new BaseLoadDataCallback<String>() {
+        wrapper.loadCall(getEquipmentNameHttpRequest, new BaseLoadDataCallback<StationInfoCallByStationAPI>() {
             @Override
-            public void onSucceed(List<String> data, OperationResult operationResult) {
+            public void onSucceed(List<StationInfoCallByStationAPI> data, OperationResult operationResult) {
 
-                equipmentTypeInfo.setLabel(data.get(0));
+                equipmentTypeInfo.setLabel(data.get(0).getName());
                 callback.onSucceed(Collections.singletonList(equipmentTypeInfo), new OperationSuccess());
 
             }
@@ -92,17 +94,7 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
                 callback.onFail(operationResult);
             }
 
-        }, new RemoteDatasParser<String>() {
-            @Override
-            public List<String> parse(String json) throws JSONException {
-
-                JSONObject jsonObject = new JSONObject(json);
-
-                String name = jsonObject.optString("name");
-
-                return Collections.singletonList(name);
-            }
-        });
+        }, new RemoteStationsCallByStationAPIParser());
     }
 
 

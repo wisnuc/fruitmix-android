@@ -6,16 +6,14 @@ import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
-import com.winsun.fruitmix.parser.RemoteFileShareParser;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
 import com.winsun.fruitmix.parser.RemoteMkDirParser;
-import com.winsun.fruitmix.parser.RemoteStationParser;
+import com.winsun.fruitmix.parser.RemoteStationsCallByCloudAPIParser;
 import com.winsun.fruitmix.stations.Station;
 
 import static org.junit.Assert.*;
 
 import org.json.JSONException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -179,7 +177,7 @@ public class RemoteDatasParserUnitTest {
                 "    ]\n" +
                 "}";
 
-        RemoteDatasParser<Station> parser = new RemoteStationParser();
+        RemoteDatasParser<Station> parser = new RemoteStationsCallByCloudAPIParser();
 
         List<Station> stations = new ArrayList<>();
 

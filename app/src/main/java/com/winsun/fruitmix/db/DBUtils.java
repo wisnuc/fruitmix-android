@@ -271,6 +271,10 @@ public class DBUtils {
 
     }
 
+    public long insertRemoteVideos(Collection<Video> videos) {
+        return insertVideos(DBHelper.REMOTE_VIDEO_TABLE_NAME, videos);
+    }
+
     private void bindMediaWhenCreate(SQLiteStatement sqLiteStatement, Media media) {
         sqLiteStatement.bindString(1, media.getUuid());
         sqLiteStatement.bindString(2, media.getTime());
@@ -426,17 +430,22 @@ public class DBUtils {
         return deleteAllDataInTable(DBHelper.REMOTE_MEDIA_TABLE_NAME);
     }
 
+    public long deleteAllRemoteVideo() {
+        return deleteAllDataInTable(DBHelper.REMOTE_VIDEO_TABLE_NAME);
+    }
+
+
     public long deleteAllLocalMedia() {
 
         return deleteAllDataInTable(DBHelper.LOCAL_MEDIA_TABLE_NAME);
     }
 
     public long deleteLocalMedias(Collection<String> mediaPaths) {
-        return deleteMediasByPath(DBHelper.LOCAL_MEDIA_TABLE_NAME,mediaPaths);
+        return deleteMediasByPath(DBHelper.LOCAL_MEDIA_TABLE_NAME, mediaPaths);
     }
 
     public long deleteLocalVideos(Collection<String> mediaPaths) {
-        return deleteMediasByPath(DBHelper.LOCAL_VIDEO_TABLE_NAME,mediaPaths);
+        return deleteMediasByPath(DBHelper.LOCAL_VIDEO_TABLE_NAME, mediaPaths);
     }
 
     private long deleteMediasByPath(String dbName, Collection<String> mediaPaths) {
@@ -665,6 +674,10 @@ public class DBUtils {
 
     }
 
+    public List<Video> getAllRemoteVideos() {
+        return getAllVideos(DBHelper.REMOTE_VIDEO_TABLE_NAME);
+    }
+
     public List<Video> getAllLocalVideos() {
         return getAllVideos(DBHelper.LOCAL_VIDEO_TABLE_NAME);
     }
@@ -704,11 +717,23 @@ public class DBUtils {
 
     public long updateRemoteMedia(Media media) {
 
+        return updateRemoteMedia(media, DBHelper.REMOTE_MEDIA_TABLE_NAME);
+
+    }
+
+    public long updateRemoteVideo(Video video) {
+
+        return updateRemoteMedia(video, DBHelper.REMOTE_VIDEO_TABLE_NAME);
+
+    }
+
+    private long updateRemoteMedia(Media media, String DBName) {
+
         openWritableDB();
 
         ContentValues contentValues = createMediaContentValues(media);
 
-        long returnValue = database.update(DBHelper.REMOTE_MEDIA_TABLE_NAME, contentValues, DBHelper.MEDIA_KEY_UUID + " = ?", new String[]{media.getUuid()});
+        long returnValue = database.update(DBName, contentValues, DBHelper.MEDIA_KEY_UUID + " = ?", new String[]{media.getUuid()});
 
         Log.d(TAG, "update media uuid:" + media.getUuid());
 
@@ -719,9 +744,7 @@ public class DBUtils {
     }
 
     public long updateLocalMedia(Media media) {
-
         return updateLocalMedia(media, DBHelper.LOCAL_MEDIA_TABLE_NAME);
-
     }
 
     public long updateLocalVideo(Video video) {

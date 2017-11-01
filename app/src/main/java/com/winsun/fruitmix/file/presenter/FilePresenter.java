@@ -410,7 +410,7 @@ public class FilePresenter implements OnViewSelectListener {
 
         if (sharedDriveFiles.size() != 0) {
 
-            AbstractRemoteFile file = new RemoteFolder();
+            AbstractRemoteFile file = new RemotePublicDrive();
             file.setName(activity.getString(R.string.shared_drive));
             file.setUuid(SHARED_DRIVE_UUID);
 

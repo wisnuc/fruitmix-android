@@ -8,6 +8,12 @@
             name="video"
             type="com.winsun.fruitmix.mediaModule.model.Video" />
 
+        <variable
+            name="showPhotoSelectImg"
+            type="android.databinding.ObservableBoolean"/>
+
+        <import type="android.view.View" />
+
     </data>
 
     <FrameLayout
@@ -50,6 +56,16 @@
                 android:src="@drawable/play_video_icon" />
 
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/photo_select_img"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="end|top"
+            android:layout_margin="10dp"
+            android:src="@drawable/select"
+            android:visibility="@{showPhotoSelectImg?View.VISIBLE:View.INVISIBLE,default=invisible}" />
+
 
 
     </FrameLayout>

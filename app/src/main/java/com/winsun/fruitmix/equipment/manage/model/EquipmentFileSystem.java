@@ -6,9 +6,18 @@ package com.winsun.fruitmix.equipment.manage.model;
 
 public class EquipmentFileSystem {
 
+    private String uuid = "";
     private String type = "";
     private int number;
     private String mode = "";
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public String getType() {
         return type;

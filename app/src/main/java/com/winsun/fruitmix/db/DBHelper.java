@@ -22,6 +22,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final int ADD_LOCAL_VIDEO_TABLE_VERSION = 32;
 
+    public static final int ADD_REMOTE_VIDEO_TABLE_VERSION = 33;
+
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
     public static final String USER_KEY_UUID = "user_uuid";
@@ -85,8 +87,9 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String LOGGED_IN_USER_TABLE_NAME = "logged_in_user";
     static final String LOGGED_IN_WECHAT_USER_TABLE_NAME = "logged_in_wechat_user";
     static final String LOCAL_VIDEO_TABLE_NAME = "local_video";
+    static final String REMOTE_VIDEO_TABLE_NAME = "remote_video";
 
-    private static final int DB_VERSION = ADD_LOCAL_VIDEO_TABLE_VERSION;
+    private static final int DB_VERSION = ADD_REMOTE_VIDEO_TABLE_VERSION;
 
     private static final String CREATE_TABLE = "create table if not exists ";
 
@@ -143,6 +146,10 @@ public class DBHelper extends SQLiteOpenHelper {
             + "," + VIDEO_KEY_NAME + TEXT_NOT_NULL + VIDEO_KEY_SIZE + INTEGER_NOT_NULL
             + VIDEO_KEY_DURATION + INTEGER_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
+    private static final String DATABASE_REMOTE_VIDEO_CREATE = CREATE_TABLE + REMOTE_VIDEO_TABLE_NAME + DATABASE_MEDIA_CREATE
+            + "," + VIDEO_KEY_NAME + TEXT + VIDEO_KEY_SIZE + " integer,"
+            + VIDEO_KEY_DURATION + " integer" + END_SQL;
+
 
     DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -161,6 +168,8 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DATABASE_LOGGED_IN_WECHAT_USER_CREATE);
 
         db.execSQL(DATABASE_LOCAL_VIDEO_CREATE);
+
+        db.execSQL(DATABASE_REMOTE_VIDEO_CREATE);
     }
 
     @Override
@@ -200,6 +209,9 @@ public class DBHelper extends SQLiteOpenHelper {
             db.execSQL(DROP_TABLE + LOCAL_VIDEO_TABLE_NAME);
 
         }
+
+        if (oldVersion < ADD_REMOTE_VIDEO_TABLE_VERSION)
+            db.execSQL(DROP_TABLE + REMOTE_VIDEO_TABLE_NAME);
 
         onCreate(db);
 

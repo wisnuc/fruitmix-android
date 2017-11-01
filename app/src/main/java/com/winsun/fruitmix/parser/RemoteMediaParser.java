@@ -3,6 +3,7 @@ package com.winsun.fruitmix.parser;
 import android.util.Log;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONArray;
@@ -36,7 +37,22 @@ public class RemoteMediaParser extends BaseRemoteDataParser implements RemoteDat
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject root = jsonArray.getJSONObject(i);
 
-            media = new Media();
+            String type = root.optString("m");
+
+            if (type.equals("MOV") || type.equals("MP4") || type.equals("3GP")) {
+
+                media = new Video();
+
+                double durationSec = root.optDouble("dur");
+
+                long duration = (long) (durationSec * 1000);
+
+                ((Video) media).setDuration(duration);
+
+                ((Video) media).setSize(root.optLong("size"));
+
+            } else
+                media = new Media();
 
             media.setUuid(root.optString("hash"));
 
@@ -46,7 +62,10 @@ public class RemoteMediaParser extends BaseRemoteDataParser implements RemoteDat
             media.setWidth(width);
             media.setHeight(height);
 
-            String dateTime = root.optString("datetime");
+            String dateTime = root.optString("date");
+            if (dateTime.isEmpty()) {
+                dateTime = root.optString("datetime");
+            }
 
             if (dateTime.equals("") || dateTime.length() < 10) {
                 media.setTime(Util.DEFAULT_DATE);
@@ -86,7 +105,7 @@ public class RemoteMediaParser extends BaseRemoteDataParser implements RemoteDat
 
             media.setLocal(false);
 
-            media.setType(root.optString("m"));
+            media.setType(type);
 
             media.setLatitude(root.optString("lat"));
             media.setLongitude(root.optString("long"));

@@ -13,11 +13,15 @@ import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.parser.RemoteBootParser;
 import com.winsun.fruitmix.parser.RemoteDataParser;
+import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentInfoInControlSystemParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentInfoInStorageParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentNetworkInfoParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentTimeInfoParser;
+import com.winsun.fruitmix.parser.RemoteStationsCallByStationAPIParser;
+import com.winsun.fruitmix.stations.StationInfoCallByStationAPI;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +36,8 @@ import java.util.List;
 public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl implements EquipmentInfoDataSource {
 
     private static final String EQUIPMENT_CONTROL_SYSTEM = "/control/system";
+
+    private static final String EQUIPMENT_INFO = "/station/info";
 
     private static final String EQUIPMENT_STORAGE = "/storage";
 
@@ -54,7 +60,7 @@ public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl impl
             @Override
             public void onSucceed(List<EquipmentInfoInControlSystem> data, OperationResult operationResult) {
 
-                handleGetEquipmentInfoInControlSystemSucceed(data.get(0), callback);
+                getEquipmentInfo(data.get(0), callback);
 
             }
 
@@ -66,7 +72,56 @@ public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl impl
 
     }
 
-    private void handleGetEquipmentInfoInControlSystemSucceed(final EquipmentInfoInControlSystem equipmentInfoInControlSystem, final BaseLoadDataCallback<BaseEquipmentInfo> callback) {
+    private void getEquipmentInfo(final EquipmentInfoInControlSystem equipmentInfoInControlSystem, final BaseLoadDataCallback<BaseEquipmentInfo> callback) {
+
+        HttpRequest equipmentInfoHttpRequest = httpRequestFactory.createGetRequestByPathWithoutToken(EQUIPMENT_INFO);
+
+        wrapper.loadCall(equipmentInfoHttpRequest, new BaseLoadDataCallback<StationInfoCallByStationAPI>() {
+            @Override
+            public void onSucceed(List<StationInfoCallByStationAPI> data, OperationResult operationResult) {
+
+                equipmentInfoInControlSystem.setEquipmentName(data.get(0).getName());
+
+                getBoot(equipmentInfoInControlSystem, callback);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                getBoot(equipmentInfoInControlSystem, callback);
+
+            }
+        }, new RemoteStationsCallByStationAPIParser());
+
+    }
+
+
+    private void getBoot(final EquipmentInfoInControlSystem equipmentInfoInControlSystem, final BaseLoadDataCallback<BaseEquipmentInfo> callback) {
+
+        HttpRequest httpRequest = httpRequestFactory.createGetRequestByPathWithoutToken(MANAGE_EQUIPMENT);
+
+        wrapper.loadCall(httpRequest, new BaseLoadDataCallback<Boot>() {
+
+            @Override
+            public void onSucceed(List<Boot> data, OperationResult operationResult) {
+
+                getEquipmentInfoInStorage(data.get(0), equipmentInfoInControlSystem, callback);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                callback.onFail(operationResult);
+
+            }
+        }, new RemoteBootParser());
+
+    }
+
+
+    private void getEquipmentInfoInStorage(final Boot boot, final EquipmentInfoInControlSystem equipmentInfoInControlSystem, final BaseLoadDataCallback<BaseEquipmentInfo> callback) {
 
         HttpRequest storageHttpRequest = httpRequestFactory.createGetRequestByPathWithoutToken(EQUIPMENT_STORAGE);
 
@@ -75,6 +130,15 @@ public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl impl
             public void onSucceed(List<EquipmentInfoInStorage> data, OperationResult operationResult) {
 
                 EquipmentInfoInStorage equipmentInfoInStorage = data.get(0);
+
+                for (EquipmentInfoInStorage storage : data) {
+
+                    if (storage.getEquipmentFileSystem().getUuid().equals(boot.getCurrentFileSystemUUID())) {
+                        equipmentInfoInStorage = storage;
+                        break;
+                    }
+
+                }
 
                 BaseEquipmentInfo baseEquipmentInfo = new BaseEquipmentInfo();
 
@@ -86,6 +150,7 @@ public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl impl
                 baseEquipmentInfo.setEquipmentMemory(equipmentInfoInControlSystem.getEquipmentMemory());
 
                 callback.onSucceed(Collections.singletonList(baseEquipmentInfo), new OperationSuccess());
+
 
             }
 
