@@ -24,4 +24,6 @@ public interface EquipmentInfoDataSource {
 
     void rebootAndEnterMaintenanceMode(BaseOperateDataCallback<Boolean> callback);
 
+    void modifyEquipmentLabel(String newEquipmentLabel,BaseOperateDataCallback<Boolean> callback);
+
 }

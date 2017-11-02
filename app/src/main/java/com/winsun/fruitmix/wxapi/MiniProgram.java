@@ -49,7 +49,7 @@ public class MiniProgram {
         return iwxapi;
     }
 
-    public static void shareMiniWXApp(IWXAPI iwxapi, Resources resources, String ticket) {
+    public static void shareMiniWXApp(Context context, IWXAPI iwxapi, Resources resources, String ticket) {
 
         WXMiniProgramObject wxMiniProgramObject = new WXMiniProgramObject();
 
@@ -62,8 +62,7 @@ public class MiniProgram {
 
         WXMediaMessage wxMediaMessage = new WXMediaMessage(wxMiniProgramObject);
 
-        wxMediaMessage.title = "test";
-        wxMediaMessage.description = "test android share mini wx app";
+        wxMediaMessage.title = context.getString(R.string.invite_mini_program_title);
 
         Bitmap bitmap = BitmapFactory.decodeResource(resources, R.mipmap.launcher_logo);
 

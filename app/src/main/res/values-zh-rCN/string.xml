@@ -97,6 +97,8 @@
 
     <string name="account_manage">帐号管理</string>
 
+    <string name="main_menu">主菜单</string>
+
     <string name="already_upload_media_percent_text">已上传%1$s</string>
     <string name="already_upload_finished">已完全上传</string>
 
@@ -272,7 +274,7 @@
 
     <!-- equipment manage -->
     <string name="equipment_manage">设备管理</string>
-    <string name="equiment">设备</string>
+    <string name="equipment">设备</string>
     <string name="network">网络</string>
     <string name="time">时间</string>
     <string name="reboot_shutdown">重启与关机</string>
@@ -296,7 +298,7 @@
 
     <!-- equipment info -->
 
-    <string name="equiment_name">设备名称</string>
+    <string name="equipment_label">设备名称</string>
     <string name="equipment_type">设备型号</string>
     <string name="hardware_serial_number">硬件序列号</string>
     <string name="mac_address">Mac地址</string>
@@ -327,6 +329,8 @@
     <string name="ntp_synchronized">已完成时间同步</string>
     <string name="network_time_on">使用网络时间</string>
 
+    <string name="modify_equipment_label">编辑设备名</string>
+
     <!-- person info -->
     <string name="modify_password">修改密码</string>
     <string name="modify_user_name">修改用户名</string>
@@ -350,6 +354,8 @@
     <string name="no_invitation">没有邀请</string>
     <string name="accept_invitation">接受邀请</string>
     <string name="refuse_invitation">拒绝邀请</string>
+
+    <string name="invite_mini_program_title">邀请您加入私友群</string>
 
     <!-- group -->
     <string name="group">"私友群"</string>

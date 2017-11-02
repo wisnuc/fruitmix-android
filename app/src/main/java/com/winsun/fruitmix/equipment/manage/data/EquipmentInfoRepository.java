@@ -92,4 +92,16 @@ public class EquipmentInfoRepository extends BaseDataRepository implements Equip
         });
 
     }
+
+    @Override
+    public void modifyEquipmentLabel(final String newEquipmentLabel, final BaseOperateDataCallback<Boolean> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                equipmentInfoDataSource.modifyEquipmentLabel(newEquipmentLabel, createOperateCallbackRunOnMainThread(callback));
+            }
+        });
+
+    }
 }

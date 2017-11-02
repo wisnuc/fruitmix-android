@@ -40,7 +40,9 @@ public abstract class BaseEquipmentInfoPresenter {
 
     EquipmentInfoDataSource equipmentInfoDataSource;
 
-    public BaseEquipmentInfoPresenter(EquipmentInfoDataSource equipmentInfoDataSource,EquipmentInfoView equipmentInfoView, LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel) {
+    List<EquipmentInfoItem> equipmentInfoItems;
+
+    public BaseEquipmentInfoPresenter(EquipmentInfoDataSource equipmentInfoDataSource, EquipmentInfoView equipmentInfoView, LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel) {
 
         mEquipmentInfoRecyclerViewAdapter = new EquipmentInfoRecyclerViewAdapter();
 
@@ -49,9 +51,10 @@ public abstract class BaseEquipmentInfoPresenter {
         this.loadingViewModel = loadingViewModel;
         this.noContentViewModel = noContentViewModel;
 
+        equipmentInfoItems = new ArrayList<>();
     }
 
-    public void onDestroy(){
+    public void onDestroy() {
 
         equipmentInfoView = null;
 
@@ -59,17 +62,29 @@ public abstract class BaseEquipmentInfoPresenter {
 
     protected abstract void getEquipmentInfoItem(BaseLoadDataCallback<EquipmentInfoItem> callback);
 
+    void refreshEquipmentInfoItem(int position) {
+
+        mEquipmentInfoRecyclerViewAdapter.setEquipmentInfoItems(equipmentInfoItems);
+
+        mEquipmentInfoRecyclerViewAdapter.notifyItemChanged(position);
+    }
+
     public void refreshEquipmentInfoItem() {
 
         getEquipmentInfoItem(new BaseLoadDataCallback<EquipmentInfoItem>() {
             @Override
             public void onSucceed(List<EquipmentInfoItem> data, OperationResult operationResult) {
 
+                if (equipmentInfoView == null)
+                    return;
+
                 loadingViewModel.showLoading.set(false);
                 noContentViewModel.showNoContent.set(false);
                 equipmentInfoView.showEquipmentInfoRecyclerView();
 
-                mEquipmentInfoRecyclerViewAdapter.setEquipmentInfoItems(data);
+                equipmentInfoItems.addAll(data);
+
+                mEquipmentInfoRecyclerViewAdapter.setEquipmentInfoItems(equipmentInfoItems);
                 mEquipmentInfoRecyclerViewAdapter.notifyDataSetChanged();
 
             }
@@ -77,7 +92,7 @@ public abstract class BaseEquipmentInfoPresenter {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                if(equipmentInfoView == null)
+                if (equipmentInfoView == null)
                     return;
 
                 loadingViewModel.showLoading.set(false);
@@ -89,7 +104,7 @@ public abstract class BaseEquipmentInfoPresenter {
 
     }
 
-    public EquipmentInfoRecyclerViewAdapter getmEquipmentInfoRecyclerViewAdapter() {
+    public EquipmentInfoRecyclerViewAdapter getEquipmentInfoRecyclerViewAdapter() {
         return mEquipmentInfoRecyclerViewAdapter;
     }
 
@@ -170,14 +185,17 @@ public abstract class BaseEquipmentInfoPresenter {
 
         private ImageView equipmentInfoIcon;
 
+        private ViewGroup equipmentLayout;
+
         EquipmentInfoViewHolder(ViewDataBinding viewDataBinding) {
             super(viewDataBinding);
 
             EquipmentInfoItemBinding binding = (EquipmentInfoItemBinding) viewDataBinding;
             equipmentInfoIcon = binding.infoIcon;
+            equipmentLayout = binding.equipmentInfoLayout;
         }
 
-        public void refreshView(EquipmentInfoViewModel equipmentInfoViewModel) {
+        public void refreshView(final EquipmentInfoViewModel equipmentInfoViewModel) {
 
             if (equipmentInfoViewModel.getIconResID() == 0) {
                 equipmentInfoIcon.setVisibility(View.INVISIBLE);
@@ -186,7 +204,18 @@ public abstract class BaseEquipmentInfoPresenter {
                 equipmentInfoIcon.setImageResource(equipmentInfoViewModel.getIconResID());
             }
 
+            equipmentLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    equipmentItemOnClick(equipmentInfoViewModel);
+                }
+            });
+
         }
+
+    }
+
+    protected void equipmentItemOnClick(EquipmentInfoViewModel equipmentInfoViewModel) {
 
     }
 

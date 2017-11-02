@@ -711,6 +711,9 @@ public class FileUtil {
 
             String type = getMIMEType(file);
 
+            int index = type.indexOf("/");
+            type = type.substring(0, index) + "/*";
+
             if (!types.contains(type))
                 types.add(type);
 
@@ -727,8 +730,18 @@ public class FileUtil {
         Log.d(TAG, "sendShareToOtherApp: shareType: " + shareType);
 
         Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_SEND_MULTIPLE);
-        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+
+        if (uris.size() == 1) {
+            intent.setAction(Intent.ACTION_SEND);
+
+            intent.putExtra(Intent.EXTRA_STREAM,uris.get(0));
+
+        } else {
+            intent.setAction(Intent.ACTION_SEND_MULTIPLE);
+
+            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+        }
+
         intent.setType(shareType);
         context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_text)));
 

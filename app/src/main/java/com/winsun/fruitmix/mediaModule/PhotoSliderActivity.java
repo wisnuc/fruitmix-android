@@ -11,6 +11,7 @@ import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
@@ -58,12 +59,14 @@ import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
+import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.video.PlayVideoFragment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -191,6 +194,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     public static void startPhotoSliderActivity(View toolbar, Activity activity, List<Media> transitionMedias, Intent intent, int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
+        //TODO:add video support when scroll page
+
         setMediaList(transitionMedias);
 
         if (transitionView == null || transitionView.isLoaded()) {
@@ -220,6 +225,16 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
 
     }
+
+    public static void startPhotoSliderActivity(Activity activity, List<Media> transitionMedias, Intent intent) {
+
+        setMediaList(transitionMedias);
+
+        intent.putExtra(Util.KEY_NEED_TRANSITION, false);
+        activity.startActivity(intent);
+
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -376,8 +391,10 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         finishActivity();
     }
 
-    public static void setMediaList(List<Media> mediaList) {
-        PhotoSliderActivity.mediaList = new ArrayList<>(mediaList);
+    public static void setMediaList(List<Media> medias) {
+
+        mediaList = new ArrayList<>(medias);
+
     }
 
     private void initViewPager() {
@@ -791,6 +808,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private void startLoadingOriginalPhotoOrLargePhoto(View view, Media media) {
 
+        if (media instanceof Video)
+            return;
+
         String remoteUrl;
 
         HttpRequest httpRequest;
@@ -871,94 +891,27 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             View view;
 
-            view = LayoutInflater.from(mContext).inflate(R.layout.photo_slider_cell, null);
-
-            GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view.findViewById(R.id.mainPic);
-
-            if (medias.size() > position && position > -1) {
-
-                Media media = medias.get(position);
+            final Media media = medias.get(position);
 
 //                setMainPicScreenWidthHeight(mainPic, media);
 
-                Log.d(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
+            view = getViewForMedia(position, media);
 
-                mainPic.registerImageLoadListener(PhotoSliderActivity.this);
+/*            if (media instanceof Video) {
 
-                mainPic.setDefaultImageResId(R.drawable.new_placeholder);
-//                mainPic.setDefaultBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
+                final PlayVideoFragment playVideoFragment = new PlayVideoFragment(mContext);
 
-                mImageLoader.setShouldCache(!media.isLocal());
+                view = playVideoFragment.getView();
 
-                mainPic.setCurrentMedia(media);
-
-                HttpRequest httpRequest = media.getImageThumbUrl(mContext);
-
-                ArrayMap<String, String> header = new ArrayMap<>();
-                header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
-
-                if (transitionMediaNeedShowThumb && !media.isLocal()) {
-
-                    if (position == initialPhotoPosition)
-                        ViewCompat.setTransitionName(mainPic, media.getKey());
-
-                    String thumbImageUrl = httpRequest.getUrl();
-
-                    mImageLoader.setHeaders(header);
-
-                    mainPic.setTag(thumbImageUrl);
-
-                    mainPic.setImageUrl(thumbImageUrl, mImageLoader);
-
-                } else {
-
-                    if (position == initialPhotoPosition)
-                        ViewCompat.setTransitionName(mainPic, media.getKey());
-
-                    mainPic.setOrientationNumber(media.getOrientationNumber());
-
-                    String imageThumbUrl = httpRequest.getUrl();
-
-                    mainPic.setTag(imageThumbUrl);
-
-                    if (imageThumbUrl.endsWith(".gif")) {
-
-                        mGifLoader.setHeaders(header);
-
-                        mainPic.setGifUrl(imageThumbUrl, mGifLoader);
-                    } else {
-
-                        mImageLoader.setHeaders(header);
-
-                        mainPic.setImageUrl(imageThumbUrl, mImageLoader);
-                    }
-
-                }
-
-                mainPic.setUserTouchListener(new CustomTouchListener());
-                mainPic.setUserDoubleTapListener(new CustomTapListener(mainPic));
-
-                mainPic.setOnClickListener(new View.OnClickListener() {
+                view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        convertEditState();
-                        toggleFullScreenState(getWindow().getDecorView());
+                        playVideoFragment.startPlayVideo((Video) media, mContext);
                     }
                 });
 
-                mainPic.setUserScaleGestureListener(new CustomScaleListener(mainPic));
-
-                mainPic.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-
-                        handleOnLongClick();
-
-                        return false;
-                    }
-                });
-
-            }
+            } else
+                view = getViewForMedia(position, media);*/
 
             container.addView(view);
 
@@ -966,6 +919,92 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             return view;
 
+        }
+
+        @NonNull
+        private View getViewForMedia(int position, Media media) {
+            View view;
+            view = LayoutInflater.from(mContext).inflate(R.layout.photo_slider_cell, null);
+
+            GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view.findViewById(R.id.mainPic);
+
+            Log.d(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
+
+            mainPic.registerImageLoadListener(PhotoSliderActivity.this);
+
+            mainPic.setDefaultImageResId(R.drawable.new_placeholder);
+//                mainPic.setDefaultBackgroundColor(ContextCompat.getColor(mContext,R.color.default_imageview_color));
+
+            mImageLoader.setShouldCache(!media.isLocal());
+
+            mainPic.setCurrentMedia(media);
+
+            HttpRequest httpRequest = media.getImageThumbUrl(mContext);
+
+            ArrayMap<String, String> header = new ArrayMap<>();
+            header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
+
+            if (transitionMediaNeedShowThumb && !media.isLocal()) {
+
+                if (position == initialPhotoPosition)
+                    ViewCompat.setTransitionName(mainPic, media.getKey());
+
+                String thumbImageUrl = httpRequest.getUrl();
+
+                mImageLoader.setHeaders(header);
+
+                mainPic.setTag(thumbImageUrl);
+
+                mainPic.setImageUrl(thumbImageUrl, mImageLoader);
+
+            } else {
+
+                if (position == initialPhotoPosition)
+                    ViewCompat.setTransitionName(mainPic, media.getKey());
+
+                mainPic.setOrientationNumber(media.getOrientationNumber());
+
+                String imageThumbUrl = httpRequest.getUrl();
+
+                mainPic.setTag(imageThumbUrl);
+
+                if (imageThumbUrl.endsWith(".gif")) {
+
+                    mGifLoader.setHeaders(header);
+
+                    mainPic.setGifUrl(imageThumbUrl, mGifLoader);
+                } else {
+
+                    mImageLoader.setHeaders(header);
+
+                    mainPic.setImageUrl(imageThumbUrl, mImageLoader);
+                }
+
+            }
+
+            mainPic.setUserTouchListener(new CustomTouchListener());
+            mainPic.setUserDoubleTapListener(new CustomTapListener(mainPic));
+
+            mainPic.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    convertEditState();
+                    toggleFullScreenState(getWindow().getDecorView());
+                }
+            });
+
+            mainPic.setUserScaleGestureListener(new CustomScaleListener(mainPic));
+
+            mainPic.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+
+                    handleOnLongClick();
+
+                    return false;
+                }
+            });
+            return view;
         }
 
         private void handleOnLongClick() {
@@ -1136,9 +1175,12 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         public void destroyItem(ViewGroup container, int position, Object object) {
 
             GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) ((View) object).findViewById(R.id.mainPic);
-            mainPic.unregisterImageLoadListener();
+
+            if (mainPic != null)
+                mainPic.unregisterImageLoadListener();
 
             container.removeView((View) object);
+
         }
 
         @Override

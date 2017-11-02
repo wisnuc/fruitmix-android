@@ -117,7 +117,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
                 Log.d(TAG, "onSucceed: create invitation,ticket: " + data);
 
-                MiniProgram.shareMiniWXApp(iwxapi, resources, data);
+                MiniProgram.shareMiniWXApp(confirmInviteUserView.getContext(),iwxapi, resources, data);
 
             }
 

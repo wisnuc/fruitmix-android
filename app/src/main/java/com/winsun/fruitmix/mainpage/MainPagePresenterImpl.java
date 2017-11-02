@@ -1,6 +1,8 @@
 package com.winsun.fruitmix.mainpage;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
@@ -23,6 +25,7 @@ import com.winsun.fruitmix.invitation.data.InvitationDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
+import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
@@ -32,6 +35,7 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.video.PlayVideoActivity;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.wxapi.MiniProgram;
 
@@ -140,7 +144,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     }
 
-    private void initNavigationMenuItems(Context context) {
+    private void initNavigationMenuItems(final Context context) {
 
         NavigationMenuViewModel model = new NavigationMenuViewModel() {
             @Override
@@ -183,6 +187,23 @@ public class MainPagePresenterImpl implements MainPagePresenter {
         model.setMenuText(context.getString(R.string.logout));
 
         mNavigationMenuItems.add(model);
+
+/*        model = new NavigationMenuViewModel() {
+            @Override
+            public void onClick() {
+                super.onClick();
+
+                Video video = new Video();
+                video.setLocal(true);
+                video.setOriginalPhotoPath("http://movies.apple.com/media/us/iphone/2010/tours/apple-iphone4-design_video-us-20100607_848x480.mov");
+                PlayVideoActivity.startPlayVideoActivity((Activity) context, video);
+
+            }
+        };
+        model.setMenuIconResId(R.drawable.ic_power_settings_new_black_24dp);
+        model.setMenuText("测试mov在线视频播放");
+
+        mNavigationMenuItems.add(model);*/
 
     }
 
@@ -445,6 +466,8 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         mNavigationHeaderArrowDown = true;
 
+        navPagerViewModel.headerArrowStr.set(R.string.main_menu);
+
         navPagerViewModel.headerArrowResID.set(R.drawable.navigation_header_arrow_down);
 
         navigationItemAdapter.setmNavigationItems(mNavigationMenuItems);
@@ -454,6 +477,8 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     private void switchToNavigationItemLoggedInUsers() {
         mNavigationHeaderArrowDown = false;
+
+        navPagerViewModel.headerArrowStr.set(R.string.account_manage);
 
         navPagerViewModel.headerArrowResID.set(R.drawable.navigation_header_arrow_up);
 

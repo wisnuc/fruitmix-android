@@ -15,7 +15,6 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteBootParser;
 import com.winsun.fruitmix.parser.RemoteDataParser;
-import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentInfoInControlSystemParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentInfoInStorageParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentNetworkInfoParser;
@@ -242,4 +241,28 @@ public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl impl
         manageEquipment(jsonObject.toString(), callback);
 
     }
+
+    @Override
+    public void modifyEquipmentLabel(String newEquipmentLabel, BaseOperateDataCallback<Boolean> callback) {
+
+        JSONObject jsonObject = new JSONObject();
+
+        try {
+            jsonObject.put("name", newEquipmentLabel);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(EQUIPMENT_INFO, jsonObject.toString());
+
+        wrapper.operateCall(httpRequest, callback, new RemoteDataParser<Boolean>() {
+            @Override
+            public Boolean parse(String json) throws JSONException {
+                return true;
+            }
+        });
+
+    }
+
+
 }

@@ -12,4 +12,6 @@ public interface EquipmentInfoView {
 
     String getString(int resID);
 
+    void enterModifyEquipmentLabelActivity(String equipmentLabel);
+
 }

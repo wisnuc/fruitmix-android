@@ -39,7 +39,7 @@ public class EquipmentInfoPresenter extends BaseEquipmentInfoPresenter {
             @Override
             public void onSucceed(List<BaseEquipmentInfo> data, OperationResult operationResult) {
 
-                if(equipmentInfoView == null)
+                if (equipmentInfoView == null)
                     return;
 
                 handleGetBaseEquipmentInfoSucceed(data.get(0), callback);
@@ -61,7 +61,7 @@ public class EquipmentInfoPresenter extends BaseEquipmentInfoPresenter {
 
         EquipmentInfoViewModel equipmentInfoViewModel = new EquipmentInfoViewModel();
         equipmentInfoViewModel.setIconResID(R.drawable.my_equipment);
-        equipmentInfoViewModel.setInfoKey(equipmentInfoView.getString(R.string.equiment_name));
+        equipmentInfoViewModel.setInfoKey(equipmentInfoView.getString(R.string.equipment_label));
         equipmentInfoViewModel.setInfoValue(baseEquipmentInfo.getEquipmentName());
 
         equipmentInfoItems.add(equipmentInfoViewModel);
@@ -70,7 +70,7 @@ public class EquipmentInfoPresenter extends BaseEquipmentInfoPresenter {
 
         EquipmentHardware equipmentHardware = baseEquipmentInfo.getEquipmentHardware();
 
-        if(equipmentHardware != null){
+        if (equipmentHardware != null) {
 
             EquipmentInfoViewModel equipmentTypeViewModel = new EquipmentInfoViewModel();
             equipmentTypeViewModel.setIconResID(R.drawable.equipment_blue);
@@ -186,6 +186,28 @@ public class EquipmentInfoPresenter extends BaseEquipmentInfoPresenter {
         equipmentInfoItems.add(availableSpace);
 
         callback.onSucceed(equipmentInfoItems, new OperationSuccess());
+
+    }
+
+    public void refreshEquipmentLabel(String equipmentLabel) {
+
+        EquipmentInfoViewModel equipmentInfoViewModel = (EquipmentInfoViewModel) equipmentInfoItems.get(0);
+
+        equipmentInfoViewModel.setInfoValue(equipmentLabel);
+
+        refreshEquipmentInfoItem(0);
+
+    }
+
+    @Override
+    protected void equipmentItemOnClick(EquipmentInfoViewModel equipmentInfoViewModel) {
+        super.equipmentItemOnClick(equipmentInfoViewModel);
+
+        if(equipmentInfoViewModel.getInfoKey().equals(equipmentInfoView.getString(R.string.equipment_label))){
+
+            equipmentInfoView.enterModifyEquipmentLabelActivity(equipmentInfoViewModel.getInfoValue());
+
+        }
 
     }
 }

@@ -88,7 +88,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_toRightOf="@id/equipment_icon"
-                    android:text="@string/equiment"
+                    android:text="@string/equipment"
                     android:textColor="@color/eighty_seven_percent_black"
                     android:textSize="16dp" />
 

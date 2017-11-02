@@ -103,6 +103,8 @@
 
     <string name="account_manage">Manage Account</string>
 
+    <string name="main_menu">Main Menu</string>
+
     <string name="already_upload_media_percent_text">Already upload %1$s</string>
     <string name="already_upload_finished">Backup Completed</string>
 
@@ -294,7 +296,7 @@
 
     <!-- equipment manage -->
     <string name="equipment_manage">Equipment Manage</string>
-    <string name="equiment">Equipment</string>
+    <string name="equipment">Equipment</string>
     <string name="network">Network</string>
     <string name="time">Time</string>
     <string name="reboot_shutdown">Reboot And Shutdown</string>
@@ -318,7 +320,7 @@
 
     <!-- equipment info -->
 
-    <string name="equiment_name">Equipment Name</string>
+    <string name="equipment_label">Equipment Label</string>
     <string name="equipment_type">Equipment Type</string>
     <string name="hardware_serial_number">Hardware Serial Number</string>
     <string name="mac_address">Mac Address</string>
@@ -349,6 +351,8 @@
     <string name="ntp_synchronized">NTP Synchronized</string>
     <string name="network_time_on">Use Network Time</string>
 
+    <string name="modify_equipment_label">Modify Equipment Label</string>
+
     <!-- person info -->
     <string name="modify_password">Modify Password</string>
     <string name="modify_user_name">Modify User Name</string>
@@ -372,6 +376,8 @@
     <string name="no_invitation">No invitation</string>
     <string name="accept_invitation">Accept invitation</string>
     <string name="refuse_invitation">Refuse invitation</string>
+
+    <string name="invite_mini_program_title">邀请您加入私友群</string>
 
     <!-- group -->
     <string name="group">Group</string>

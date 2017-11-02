@@ -225,6 +225,8 @@ public class NavPagerActivity extends BaseActivity
 
         public final ObservableInt headerArrowResID = new ObservableInt();
 
+        public final ObservableInt headerArrowStr = new ObservableInt(R.string.main_menu);
+
         public final ObservableBoolean showUploadProgress = new ObservableBoolean(false);
 
         public final ObservableBoolean showConnectServerFailed = new ObservableBoolean(false);
@@ -318,8 +320,6 @@ public class NavPagerActivity extends BaseActivity
 
     private ActivityNavPagerBinding binding;
 
-    private MediaDataSourceRepository mediaDataSourceRepository;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -352,8 +352,6 @@ public class NavPagerActivity extends BaseActivity
         loggedInUserDataSource = InjectLoggedInUser.provideLoggedInUserRepository(mContext);
 
         systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
-
-        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
 
         mainPagePresenter = new MainPagePresenterImpl(mContext, systemSettingDataSource, loggedInUserDataSource,
                 navPagerViewModel, this, InjectGetAllBindingLocalUserUseCase.provideInstance(this), InjectEquipment.provideEquipmentDataSource(this));

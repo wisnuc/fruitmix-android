@@ -1339,20 +1339,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                         if (mEnteringPhotoSlider)
                             return;
 
-                        int initialPhotoPosition;
-
-                        int size = medias.size();
-
-                        for (initialPhotoPosition = 0; initialPhotoPosition < size; initialPhotoPosition++) {
-
-                            Media media = medias.get(initialPhotoPosition);
-
-                            if (media.getKey().equals(currentMedia.getKey()))
-                                break;
-
-                        }
-
-                        Log.d(TAG, "start photo slider activity initial photo position: " + initialPhotoPosition);
+                        int initialPhotoPosition = getInitialPhotoPosition(currentMedia);
 
                         Intent intent = new Intent();
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
@@ -1382,6 +1369,24 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     }
 
+    private int getInitialPhotoPosition(Media currentMedia) {
+        int initialPhotoPosition;
+
+        int size = medias.size();
+
+        for (initialPhotoPosition = 0; initialPhotoPosition < size; initialPhotoPosition++) {
+
+            Media media = medias.get(initialPhotoPosition);
+
+            if (media.getKey().equals(currentMedia.getKey()))
+                break;
+
+        }
+
+        Log.d(TAG, "start photo slider activity initial photo position: " + initialPhotoPosition);
+        return initialPhotoPosition;
+    }
+
     private class VideoViewHolder extends BindingViewHolder {
 
         VideoItemBinding binding;
@@ -1402,7 +1407,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             durationTv = binding.duration;
         }
 
-        void refreshView(int position) {
+        void refreshView(final int position) {
 
             durationTv.setTypeface(mTypeface);
 
@@ -1446,7 +1451,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             setPhotoItemMargin(mediaInListPosition, viewGroup);
 
-            if (video.getThumb().isEmpty() && video.getMiniThumbPath().isEmpty())
+            if (video.isLocal() && video.getThumb().isEmpty() && video.getMiniThumbPath().isEmpty())
                 return;
 
             mImageLoader.setTag(position);
@@ -1473,8 +1478,20 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                         handleMediaOnClickWhenSelectMode(video, networkImageView, showPhotoSelectImg);
 
-                    } else
+                    } else {
+
                         PlayVideoActivity.startPlayVideoActivity(containerActivity, video);
+
+/*                        int initialPhotoPosition = getInitialPhotoPosition(video);
+
+                        Intent intent = new Intent();
+                        intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
+                        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
+                        intent.setClass(containerActivity, PhotoSliderActivity.class);
+
+                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity, medias, intent);*/
+
+                    }
 
                 }
             });

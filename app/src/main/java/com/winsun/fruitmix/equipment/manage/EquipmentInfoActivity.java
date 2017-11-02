@@ -1,8 +1,8 @@
 package com.winsun.fruitmix.equipment.manage;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -38,7 +38,11 @@ public class EquipmentInfoActivity extends BaseActivity implements EquipmentInfo
 
     private RecyclerView equipmentInfoRecyclerView;
 
-    private BaseEquipmentInfoPresenter equipmentInfoPresenter;;
+    private BaseEquipmentInfoPresenter equipmentInfoPresenter;
+
+    public static final int ENTER_MODIFY_EQUIPMENT_LABEL_REQUEST_CODE = 0x1004;
+
+    public static final String NEW_EQUIPMENT_LABEL_KEY = "new_equipment_label_key";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +113,7 @@ public class EquipmentInfoActivity extends BaseActivity implements EquipmentInfo
         equipmentInfoRecyclerView.setItemAnimator(new DefaultItemAnimator());
         equipmentInfoRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        equipmentInfoRecyclerView.setAdapter(equipmentInfoPresenter.getmEquipmentInfoRecyclerViewAdapter());
+        equipmentInfoRecyclerView.setAdapter(equipmentInfoPresenter.getEquipmentInfoRecyclerViewAdapter());
 
         equipmentInfoPresenter.refreshEquipmentInfoItem();
 
@@ -130,5 +134,29 @@ public class EquipmentInfoActivity extends BaseActivity implements EquipmentInfo
     @Override
     public void dismissEquipmentInfoRecyclerView() {
         equipmentInfoRecyclerView.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void enterModifyEquipmentLabelActivity(String equipmentLabel) {
+
+        Intent intent = new Intent(this,ModifyEquipmentLabelActivity.class);
+        intent.putExtra(ModifyEquipmentLabelActivity.EQUIPMENT_LABEL_KEY,equipmentLabel);
+
+        startActivityForResult(intent,ENTER_MODIFY_EQUIPMENT_LABEL_REQUEST_CODE);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == ENTER_MODIFY_EQUIPMENT_LABEL_REQUEST_CODE && resultCode == RESULT_OK){
+
+            String modifiedEquipmentLabel = data.getStringExtra(NEW_EQUIPMENT_LABEL_KEY);
+
+            ((EquipmentInfoPresenter)equipmentInfoPresenter).refreshEquipmentLabel(modifiedEquipmentLabel);
+
+        }
+
     }
 }
