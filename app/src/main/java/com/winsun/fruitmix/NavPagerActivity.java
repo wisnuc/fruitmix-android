@@ -172,8 +172,8 @@ public class NavPagerActivity extends BaseActivity
     }
 
     @Override
-    public void logout() {
-        handleLogoutOnClick();
+    public void quitApp() {
+        finishApp();
     }
 
     @Override
@@ -988,13 +988,19 @@ public class NavPagerActivity extends BaseActivity
                 handleLogoutOnClick();
             }
 
-        } else if (requestCode == START_PERSON_INFO && resultCode == RESULT_OK) {
+        } else if (requestCode == START_PERSON_INFO) {
 
-            User user = userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
+            if (resultCode == RESULT_OK) {
 
-            refreshUserName(user);
+                User user = userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
 
-            userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
+                refreshUserName(user);
+
+                userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
+
+            } else if (resultCode == RESULT_FINISH_ACTIVITY) {
+                finish();
+            }
 
         } else {
 

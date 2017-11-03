@@ -265,6 +265,8 @@ public class GifTouchNetworkImageView extends PinchImageView {
                                 setDefaultColor();
                             }
 
+                            Log.d(TAG, "onResponse: gif url:" + mUrl);
+
                             deliverImageLoadFinish();
 
                         }

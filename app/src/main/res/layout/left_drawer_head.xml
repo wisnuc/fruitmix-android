@@ -73,10 +73,10 @@
 
 
         <LinearLayout
+            android:id="@+id/name_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_below="@id/avatar"
-            android:layout_marginBottom="12dp"
             android:layout_toLeftOf="@id/navigation_header_arrow_imageview"
             android:orientation="vertical">
 
@@ -106,6 +106,16 @@
                 android:textColor="#8AFFFFFF"
                 android:textSize="14dp"
                 android:visibility="@{viewModel.equipmentNameVisibility?View.VISIBLE:View.GONE}" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/name_layout"
+            android:layout_marginBottom="12dp"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:id="@+id/upload_layout"
@@ -186,6 +196,7 @@
             </LinearLayout>
 
         </LinearLayout>
+
 
     </RelativeLayout>
 

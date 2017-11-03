@@ -1,9 +1,6 @@
 package com.winsun.fruitmix.mainpage;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
 import android.support.v7.widget.RecyclerView;
@@ -11,13 +8,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource;
 import com.winsun.fruitmix.equipment.search.data.EquipmentTypeInfo;
 import com.winsun.fruitmix.invitation.data.InjectInvitationDataSource;
@@ -25,7 +20,6 @@ import com.winsun.fruitmix.invitation.data.InvitationDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
-import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
@@ -35,9 +29,7 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.video.PlayVideoActivity;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
-import com.winsun.fruitmix.wxapi.MiniProgram;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -63,7 +55,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     private NavPagerActivity.NavPagerViewModel navPagerViewModel;
 
-    private NavigationLoggedInUserViewModel navigationAccountManageViewModel;
+    private NavigationMenuViewModel navigationAccountManageViewModel;
 
     private boolean mNavigationHeaderArrowDown = true;
 
@@ -123,7 +115,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
     private void initNavigationAccountManageViewModel(Context context) {
 
-        navigationAccountManageViewModel = new NavigationLoggedInUserViewModel(null) {
+        navigationAccountManageViewModel = new NavigationMenuViewModel() {
             @Override
             public void onClick() {
                 mainPageView.closeDrawer();
@@ -134,13 +126,9 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         String title = context.getString(R.string.account_manage);
 
-        navigationAccountManageViewModel.setTitleText(title);
+        navigationAccountManageViewModel.setMenuText(title);
 
-        String avatar = title.substring(0, 1).toUpperCase();
-
-        navigationAccountManageViewModel.setAvatarText(avatar);
-
-        navigationAccountManageViewModel.setItemSubTitleVisibility(false);
+        navigationAccountManageViewModel.setMenuIconResId(R.drawable.ic_settings_black_24dp);
 
     }
 
@@ -180,11 +168,11 @@ public class MainPagePresenterImpl implements MainPagePresenter {
             @Override
             public void onClick() {
                 super.onClick();
-                mainPageView.logout();
+                mainPageView.quitApp();
             }
         };
         model.setMenuIconResId(R.drawable.ic_power_settings_new_black_24dp);
-        model.setMenuText(context.getString(R.string.logout));
+        model.setMenuText(context.getString(R.string.quit));
 
         mNavigationMenuItems.add(model);
 
@@ -304,6 +292,10 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
                 mNavigationMenuLoggedInUsers.add(model);
 
+            }
+
+            if (loggedInUsers.size() > 0) {
+                mNavigationMenuLoggedInUsers.add(new NavigationDividerViewModel());
             }
 
             mNavigationMenuLoggedInUsers.add(navigationAccountManageViewModel);
@@ -466,7 +458,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         mNavigationHeaderArrowDown = true;
 
-        navPagerViewModel.headerArrowStr.set(R.string.main_menu);
+        navPagerViewModel.headerArrowStr.set(R.string.account_manage);
 
         navPagerViewModel.headerArrowResID.set(R.drawable.navigation_header_arrow_down);
 
@@ -478,7 +470,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
     private void switchToNavigationItemLoggedInUsers() {
         mNavigationHeaderArrowDown = false;
 
-        navPagerViewModel.headerArrowStr.set(R.string.account_manage);
+        navPagerViewModel.headerArrowStr.set(R.string.main_menu);
 
         navPagerViewModel.headerArrowResID.set(R.drawable.navigation_header_arrow_up);
 

@@ -1,5 +1,8 @@
 package com.winsun.fruitmix.equipment.manage.presenter;
 
+import android.view.View;
+import android.widget.ImageView;
+
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.equipment.manage.data.EquipmentInfoDataSource;
@@ -203,11 +206,21 @@ public class EquipmentInfoPresenter extends BaseEquipmentInfoPresenter {
     protected void equipmentItemOnClick(EquipmentInfoViewModel equipmentInfoViewModel) {
         super.equipmentItemOnClick(equipmentInfoViewModel);
 
-        if(equipmentInfoViewModel.getInfoKey().equals(equipmentInfoView.getString(R.string.equipment_label))){
+        if (equipmentInfoViewModel.getInfoKey().equals(equipmentInfoView.getString(R.string.equipment_label))) {
 
             equipmentInfoView.enterModifyEquipmentLabelActivity(equipmentInfoViewModel.getInfoValue());
 
         }
+
+    }
+
+    @Override
+    protected void setModifyIconVisibility(EquipmentInfoViewModel equipmentInfoViewModel, ImageView modifyIcon) {
+
+        if (equipmentInfoViewModel.getInfoKey().equals(equipmentInfoView.getString(R.string.equipment_label))) {
+            modifyIcon.setVisibility(View.VISIBLE);
+        } else
+            super.setModifyIconVisibility(equipmentInfoViewModel, modifyIcon);
 
     }
 }

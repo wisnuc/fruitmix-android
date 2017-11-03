@@ -187,12 +187,15 @@ public abstract class BaseEquipmentInfoPresenter {
 
         private ViewGroup equipmentLayout;
 
+        private ImageView modifyIcon;
+
         EquipmentInfoViewHolder(ViewDataBinding viewDataBinding) {
             super(viewDataBinding);
 
             EquipmentInfoItemBinding binding = (EquipmentInfoItemBinding) viewDataBinding;
             equipmentInfoIcon = binding.infoIcon;
             equipmentLayout = binding.equipmentInfoLayout;
+            modifyIcon = binding.modifyIcon;
         }
 
         public void refreshView(final EquipmentInfoViewModel equipmentInfoViewModel) {
@@ -211,12 +214,17 @@ public abstract class BaseEquipmentInfoPresenter {
                 }
             });
 
+            setModifyIconVisibility(equipmentInfoViewModel,modifyIcon);
         }
 
     }
 
     protected void equipmentItemOnClick(EquipmentInfoViewModel equipmentInfoViewModel) {
 
+    }
+
+    protected void setModifyIconVisibility(EquipmentInfoViewModel equipmentInfoViewModel,ImageView modifyIcon) {
+        modifyIcon.setVisibility(View.GONE);
     }
 
     private class EquipmentDivideViewHolder extends BindingViewHolder {

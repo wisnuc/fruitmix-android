@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.winsun.fruitmix.databinding.ActivityPersonInfoBinding;
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.logout.InjectLogoutUseCase;
 import com.winsun.fruitmix.person.info.InjectPersonInfoDataSource;
 import com.winsun.fruitmix.person.info.PersonInfoPresenter;
 import com.winsun.fruitmix.person.info.PersonInfoView;
@@ -62,7 +63,8 @@ public class PersonInfoActivity extends BaseActivity implements PersonInfoView, 
         Util.setStatusBarColor(this, R.color.login_ui_blue);
 
         personInfoPresenter = new PersonInfoPresenter(InjectUser.provideRepository(this),
-                InjectSystemSettingDataSource.provideSystemSettingDataSource(this), this, InjectPersonInfoDataSource.provideInstance(this));
+                InjectSystemSettingDataSource.provideSystemSettingDataSource(this), this, InjectPersonInfoDataSource.provideInstance(this),
+                InjectLogoutUseCase.provideLogoutUseCase(this));
 
         currentUser = personInfoPresenter.getCurrentUser();
 

@@ -34,6 +34,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.IImageLoadListener;
@@ -70,6 +71,7 @@ import com.winsun.fruitmix.video.PlayVideoFragment;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -235,10 +237,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     }
 
+    private Map<Integer, PlayVideoFragment> playVideoFragments;
+    private int currentItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        playVideoFragments = new HashMap<>();
 
         mContext = this;
 
@@ -384,6 +390,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         mContext = null;
 
         NewPhotoList.mEnteringPhotoSlider = false;
+
+        for (PlayVideoFragment playVideoFragment : playVideoFragments.values()) {
+            playVideoFragment.getVideoView().stopPlayback();
+            playVideoFragment.getVideoView().suspend();
+        }
+
+        playVideoFragments.clear();
+
     }
 
     @Override
@@ -655,6 +669,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     }
 
     public void setPosition(int position) {
+
         currentPhotoPosition = position;
 
         if (mediaList.size() > position && position > -1) {
@@ -681,6 +696,28 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             } else
                 photoSliderViewModel.showCloudOff.set(false);
+
+        }
+
+        int lastItem = currentItem;
+        currentItem = position;
+
+        if (playVideoFragments.containsKey(lastItem)) {
+
+            PlayVideoFragment playVideoFragment = playVideoFragments.get(lastItem);
+
+            VideoView videoView = playVideoFragment.getVideoView();
+            videoView.stopPlayback();
+            videoView.suspend();
+
+            playVideoFragment.getPlayVideoView().setVisibility(View.VISIBLE);
+
+        }
+
+        if (playVideoFragments.containsKey(currentItem)) {
+
+            PlayVideoFragment currentPlayVideoFragment = playVideoFragments.get(currentItem);
+            currentPlayVideoFragment.startPlayVideo((Video) mediaList.get(currentItem), mContext);
 
         }
 
@@ -895,9 +932,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
 //                setMainPicScreenWidthHeight(mainPic, media);
 
-            view = getViewForMedia(position, media);
-
-/*            if (media instanceof Video) {
+            if (media instanceof Video) {
 
                 final PlayVideoFragment playVideoFragment = new PlayVideoFragment(mContext);
 
@@ -910,8 +945,24 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                     }
                 });
 
+                view.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+
+                        handleOnLongClick();
+
+                        return false;
+                    }
+                });
+
+                playVideoFragments.put(position, playVideoFragment);
+
+                if (position == initialPhotoPosition) {
+                    playVideoFragment.startPlayVideo((Video) media, mContext);
+                }
+
             } else
-                view = getViewForMedia(position, media);*/
+                view = getViewForMedia(position, media);
 
             container.addView(view);
 

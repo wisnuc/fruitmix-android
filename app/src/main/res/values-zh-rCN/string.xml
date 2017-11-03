@@ -90,7 +90,7 @@
     <string name="user_manage">用户管理</string>
     <string name="setting">设置</string>
     <string name="help">帮助</string>
-    <string name="logout">注销</string>
+    <string name="quit">退出</string>
     <string name="my_file">我的文件</string>
     <string name="my_photo">我的照片</string>
     <string name="download_manage">下载管理</string>
@@ -114,13 +114,6 @@
     <string name="password_text">密码</string>
 
     <string name="cancel_login">取消登录</string>
-
-    <!-- 个人信息界面 -->
-    <!--
-    <string name="confirm_password_text">确认密码</string>
-    <string name="login_by_password_text">通过密码登录</string>
-    <string name="email_text">电子邮件</string>
-     -->
 
     <!-- 主界面-相册模块 -->
     <string name="album">相册</string>
@@ -343,6 +336,8 @@
     <string name="send_wechat_user_info">发送微信用户信息</string>
     <string name="bind_wechat_user">绑定微信用户</string>
     <string name="bind">绑定</string>
+
+    <string name="logout">注销</string>
 
     <!-- modify user password -->
     <string name="original_user_password">原密码</string>

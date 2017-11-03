@@ -55,6 +55,7 @@ import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListViewModel;
 import com.winsun.fruitmix.mediaModule.model.Video;
+import com.winsun.fruitmix.mediaModule.viewmodel.PhotoItemViewModel;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -1275,18 +1276,23 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
             if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(currentMedia.getKey()))
                 currentMedia.setSelected(true);
 
-            ObservableBoolean preShowPhotoSelectImg = binding.getShowPhotoSelectImg();
+            PhotoItemViewModel prePhotoItemViewModel = binding.getPhotoItemViewModel();
 
-            final ObservableBoolean showPhotoSelectImg;
+            final PhotoItemViewModel photoItemViewModel;
 
-            if (preShowPhotoSelectImg != null) {
+            if (prePhotoItemViewModel != null) {
 
-                showPhotoSelectImg = preShowPhotoSelectImg;
+                photoItemViewModel = prePhotoItemViewModel;
+
             } else {
-                showPhotoSelectImg = new ObservableBoolean(currentMedia.isSelected());
+                photoItemViewModel = new PhotoItemViewModel();
+                photoItemViewModel.showPhotoSelectImg.set(currentMedia.isSelected());
 
-                binding.setShowPhotoSelectImg(showPhotoSelectImg);
             }
+
+            photoItemViewModel.showGifCorner.set(currentMedia.getType().equalsIgnoreCase("gif"));
+
+            binding.setPhotoItemViewModel(photoItemViewModel);
 
             mImageLoader.setTag(position);
 
@@ -1322,7 +1328,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             final int mediaInListPosition = temporaryPosition;
 
-            setMediaSelectImg(mPhotoIv, currentMedia, showPhotoSelectImg);
+            setMediaSelectImg(mPhotoIv, currentMedia, photoItemViewModel.showPhotoSelectImg);
 
 //            getViewDataBinding().setVariable(BR.showPhotoSelectImg, showPhotoSelectImg);
 //            getViewDataBinding().executePendingBindings();
@@ -1332,7 +1338,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 public void onClick(View v) {
                     if (mSelectMode) {
 
-                        handleMediaOnClickWhenSelectMode(currentMedia, mPhotoIv, showPhotoSelectImg);
+                        handleMediaOnClickWhenSelectMode(currentMedia, mPhotoIv, photoItemViewModel.showPhotoSelectImg);
 
                     } else {
 
@@ -1360,7 +1366,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 @Override
                 public boolean onLongClick(View v) {
 
-                    return handleMediaOnLongClick(currentMedia, mPhotoIv, showPhotoSelectImg);
+                    return handleMediaOnLongClick(currentMedia, mPhotoIv, photoItemViewModel.showPhotoSelectImg);
 
                 }
             });
@@ -1480,16 +1486,16 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                     } else {
 
-                        PlayVideoActivity.startPlayVideoActivity(containerActivity, video);
+//                        PlayVideoActivity.startPlayVideoActivity(containerActivity, video);
 
-/*                        int initialPhotoPosition = getInitialPhotoPosition(video);
+                        int initialPhotoPosition = getInitialPhotoPosition(video);
 
                         Intent intent = new Intent();
                         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity, medias, intent);*/
+                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity, medias, intent);
 
                     }
 

@@ -62,6 +62,8 @@
 
     <color name="fafafa">#fafafa</color>
 
+    <color name="logout_btn_bg">#f44336</color>
+
     <!-- finish add by liang.wu-->
 
 </resources>

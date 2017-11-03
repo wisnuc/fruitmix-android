@@ -734,7 +734,7 @@ public class FileUtil {
         if (uris.size() == 1) {
             intent.setAction(Intent.ACTION_SEND);
 
-            intent.putExtra(Intent.EXTRA_STREAM,uris.get(0));
+            intent.putExtra(Intent.EXTRA_STREAM, uris.get(0));
 
         } else {
             intent.setAction(Intent.ACTION_SEND_MULTIPLE);
@@ -973,9 +973,22 @@ public class FileUtil {
         else if (end.equals(".txt")) {
             return R.drawable.txt;
         } else if (type.startsWith("video")) {
-            return R.drawable.video;
+
+            if (type.contains("mp4")) {
+                return R.drawable.mp4;
+            } else if (type.contains("quicktime")) {
+                return R.drawable.mov;
+            } else
+                return R.drawable.video;
+
         } else if (type.startsWith("audio")) {
             return R.drawable.audio;
+        } else if (type.contains("gif")) {
+            return R.drawable.gif;
+        } else if (type.contains("jpeg")) {
+            return R.drawable.jpg;
+        } else if (type.contains("png")) {
+            return R.drawable.png;
         } else
             return R.drawable.file_icon;
 

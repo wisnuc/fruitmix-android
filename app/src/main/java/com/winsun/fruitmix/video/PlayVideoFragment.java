@@ -5,8 +5,10 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.v4.util.ArrayMap;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
@@ -21,6 +23,7 @@ import com.winsun.fruitmix.util.Util;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.winsun.fruitmix.file.data.station.StationFileDataSourceImpl.DOWNLOAD_FILE_PARAMETER;
@@ -31,11 +34,15 @@ import static com.winsun.fruitmix.file.data.station.StationFileDataSourceImpl.DO
 
 public class PlayVideoFragment {
 
+    public static final String TAG = PlayVideoFragment.class.getSimpleName();
+
     private VideoView videoView;
 
     private HttpRequestFactory httpRequestFactory;
 
     private View view;
+
+    private ImageView playVideoView;
 
     public PlayVideoFragment(Context context) {
 
@@ -48,11 +55,13 @@ public class PlayVideoFragment {
 
         view = binding.getRoot();
 
+        playVideoView = binding.playVideo;
+
         videoView = binding.videoView;
 
         httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
 
-        final MediaController mediaController = new MediaController(context);
+        MediaController mediaController = new MediaController(context);
 
         videoView.setMediaController(mediaController);
 
@@ -62,6 +71,18 @@ public class PlayVideoFragment {
             @Override
             public void onCompletion(MediaPlayer mp) {
 
+                playVideoView.setVisibility(View.VISIBLE);
+
+            }
+        });
+
+        videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+
+                Log.d(TAG, "onError: what: " + what + " extra: " + extra);
+
+                return false;
             }
         });
 
@@ -71,21 +92,35 @@ public class PlayVideoFragment {
         return view;
     }
 
-    public void startPlayVideo(Video video,Context context){
+    public VideoView getVideoView() {
+        return videoView;
+    }
 
-        startPlayVideo(getHttpRequest(video,context));
+    public ImageView getPlayVideoView() {
+        return playVideoView;
+    }
+
+    public void startPlayVideo(Video video, Context context) {
+
+        startPlayVideo(getHttpRequest(video, context));
 
     }
 
-    public void startPlayVideo(String driveRootUUID, RemoteFile remoteFile){
+    public void startPlayVideo(String driveRootUUID, RemoteFile remoteFile) {
 
-        startPlayVideo(getHttpRequest(driveRootUUID,remoteFile));
+        startPlayVideo(getHttpRequest(driveRootUUID, remoteFile));
     }
 
     private void startPlayVideo(HttpRequest httpRequest) {
-        Uri uri = Uri.parse(httpRequest.getUrl());
 
-        Map<String, String> map = new ArrayMap<>();
+        if (playVideoView.getVisibility() == View.VISIBLE)
+            playVideoView.setVisibility(View.INVISIBLE);
+
+        String url = httpRequest.getUrl();
+
+        Uri uri = Uri.parse(url);
+
+        Map<String, String> map = new HashMap<>();
         map.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
 
         if (Util.checkRunningOnLollipopOrHigher()) {
@@ -129,8 +164,7 @@ public class PlayVideoFragment {
 
     }
 
-    public void onDestroy(){
-
+    public void onDestroy() {
 
 
     }

@@ -34,7 +34,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:visibility="@{equipmentItemViewModel.showNoEquipment?View.VISIBLE:View.GONE,default=gone}">
+                android:visibility="@{equipmentItemViewModel.showNoEquipment?View.VISIBLE:View.GONE,default=visible}">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -43,13 +43,13 @@
                     android:textColor="@color/eighty_seven_percent_white"
                     android:textSize="16dp" />
 
-                <Button
+                <ImageButton
                     android:id="@+id/research"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
                     android:layout_marginTop="8dp"
-                    android:text="Research" />
-
+                    android:background="@null"
+                    android:src="@drawable/refresh" />
 
             </LinearLayout>
 
@@ -59,7 +59,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
-                android:visibility="@{equipmentItemViewModel.showEquipment?View.VISIBLE:View.GONE,default=visible}">
+                android:visibility="@{equipmentItemViewModel.showEquipment?View.VISIBLE:View.GONE,default=gone}">
 
                 <ImageView
                     android:id="@+id/equipment_icon"

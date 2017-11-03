@@ -22,7 +22,7 @@ public interface MainPageView {
 
     void loggedInUserItemOnClick(LoggedInUser loggedInUser);
 
-    void logout();
+    void quitApp();
 
     int getCurrentPage();
 

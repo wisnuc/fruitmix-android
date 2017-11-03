@@ -4,8 +4,8 @@
     <data>
 
         <variable
-            name="showPhotoSelectImg"
-            type="android.databinding.ObservableBoolean" />
+            name="photoItemViewModel"
+            type="com.winsun.fruitmix.mediaModule.viewmodel.PhotoItemViewModel" />
 
         <import type="android.view.View" />
 
@@ -25,6 +25,22 @@
             android:background="@drawable/default_place_holder"
             android:scaleType="centerCrop" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/mask_layout"
+            android:gravity="end"
+            android:paddingRight="4dp"
+            android:paddingTop="4dp"
+            android:visibility="@{photoItemViewModel.showGifCorner?View.VISIBLE:View.INVISIBLE,default=invisible}">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/gif_corner" />
+
+        </LinearLayout>
+
         <ImageView
             android:id="@+id/photo_select_img"
             android:layout_width="20dp"
@@ -33,7 +49,7 @@
             android:layout_alignParentTop="true"
             android:layout_margin="10dp"
             android:src="@drawable/select"
-            android:visibility="@{showPhotoSelectImg?View.VISIBLE:View.INVISIBLE,default=invisible}" />
+            android:visibility="@{photoItemViewModel.showPhotoSelectImg?View.VISIBLE:View.INVISIBLE,default=invisible}" />
 
 
     </RelativeLayout>

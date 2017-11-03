@@ -1,16 +1,21 @@
 package com.winsun.fruitmix.person.info;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.util.StringBuilderPrinter;
 
 import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.winsun.fruitmix.EquipmentSearchActivity;
+import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.interfaces.BaseView;
+import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
@@ -42,16 +47,19 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
     private PersonInfoDataSource personInfoDataSource;
 
+    private LogoutUseCase logoutUseCase;
+
     private String ticketID;
 
     private WeChatTokenUserWrapper mWeChatTokenUserWrapper;
 
     public PersonInfoPresenter(UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
-                               PersonInfoView personInfoView, PersonInfoDataSource personInfoDataSource) {
+                               PersonInfoView personInfoView, PersonInfoDataSource personInfoDataSource, LogoutUseCase logoutUseCase) {
         this.userDataRepository = userDataRepository;
         this.systemSettingDataSource = systemSettingDataSource;
         this.personInfoView = personInfoView;
         this.personInfoDataSource = personInfoDataSource;
+        this.logoutUseCase = logoutUseCase;
     }
 
     public User getCurrentUser() {
@@ -61,6 +69,42 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
     public void onDestroy() {
 
         personInfoView = null;
+
+    }
+
+    public void logout() {
+
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+
+                personInfoView.showProgressDialog(String.format(personInfoView.getString(R.string.operating_title), personInfoView.getString(R.string.logout)));
+
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
+
+                logoutUseCase.logout();
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+
+                personInfoView.dismissDialog();
+
+                personInfoView.setResultCode(NavPagerActivity.RESULT_FINISH_ACTIVITY);
+
+                EquipmentSearchActivity.gotoEquipmentActivity((Activity) personInfoView.getContext(), true);
+
+            }
+
+        }.execute();
 
     }
 

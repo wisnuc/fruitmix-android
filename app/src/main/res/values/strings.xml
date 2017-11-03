@@ -94,8 +94,7 @@
     <string name="user_manage">Manage User</string>
     <string name="setting">Setting</string>
     <string name="help">Help</string>
-    <string name="logout">Logout</string>
-
+    <string name="quit">Quit</string>
     <string name="my_file">My Files</string>
     <string name="my_photo">My Photos</string>
 
@@ -121,14 +120,6 @@
     <string name="password_text">Password</string>
 
     <string name="cancel_login">Cancel Login</string>
-
-    <!-- personal data -->
-
-    <!--
-    <string name="email_text">Email</string>
-    <string name="confirm_password_text">Confirm Password</string>
-    <string name="login_by_password_text">Login By Password</string>
-    -->
 
     <!-- album -->
 
@@ -365,6 +356,8 @@
     <string name="send_wechat_user_info">Send WeChat User Info</string>
     <string name="bind_wechat_user">Bind WeChat User</string>
     <string name="bind">Bind</string>
+
+    <string name="logout">Logout</string>
 
     <!-- modify user password -->
     <string name="original_user_password">Original User Password</string>
