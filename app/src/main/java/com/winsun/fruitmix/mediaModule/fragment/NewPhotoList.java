@@ -44,6 +44,7 @@ import com.winsun.fruitmix.databinding.VideoItemBinding;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
+import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
@@ -61,7 +62,6 @@ import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.util.MediaUtil;
-import com.winsun.fruitmix.video.PlayVideoActivity;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.util.Util;
@@ -155,6 +155,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private boolean hasCallStartUpload = false;
 
+    private CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback;
+
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
@@ -215,6 +217,22 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         mTypeface = Typeface.createFromAsset(containerActivity.getAssets(), "fonts/Roboto-Medium.ttf");
 
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(containerActivity);
+
+        calcMediaDigestCallback = new CalcMediaDigestStrategy.CalcMediaDigestCallback() {
+            @Override
+            public void handleFinished() {
+
+                refreshViewForce();
+
+            }
+
+            @Override
+            public void handleNothing() {
+
+            }
+        };
+
+        mediaDataSourceRepository.registerCalcDigestCallback(calcMediaDigestCallback);
 
     }
 
@@ -778,6 +796,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         cancelPreLoadMediaMiniThumb();
 
         containerActivity = null;
+
+        mediaDataSourceRepository.unregisterCalcDigestCallback(calcMediaDigestCallback);
     }
 
     @Override
@@ -1290,7 +1310,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             }
 
-            photoItemViewModel.showGifCorner.set(currentMedia.getType().equalsIgnoreCase("gif"));
+            photoItemViewModel.showGifCorner.set(MediaUtil.checkMediaIsGif(currentMedia));
 
             binding.setPhotoItemViewModel(photoItemViewModel);
 

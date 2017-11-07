@@ -2,8 +2,9 @@ package com.winsun.fruitmix;
 
 import android.text.format.Formatter;
 
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mock.MockApplication;
-import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
 
 import static org.junit.Assert.*;
@@ -189,14 +190,27 @@ public class StringUtilTest {
     }
 
     @Test
-    public void testDoubleToLong(){
+    public void testDoubleToLong() {
 
         double durationSec = 2.84;
 
         long duration = (long) (durationSec * 1000);
 
-        assertEquals(2840,duration);
+        assertEquals(2840, duration);
 
+    }
+
+    @Test
+    public void testMediaIsGif() {
+
+        Media media = new Media();
+        media.setOriginalPhotoPath("fadf.GIF");
+
+        assertTrue(MediaUtil.checkMediaIsGif(media));
+
+        media.setOriginalPhotoPath("fasd.gif");
+
+        assertTrue(MediaUtil.checkMediaIsGif(media));
     }
 
 }

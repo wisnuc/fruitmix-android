@@ -53,7 +53,7 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
 
     private boolean mediaDataChanged = false;
 
-    private CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback;
+    private List<CalcMediaDigestStrategy.CalcMediaDigestCallback> calcMediaDigestCallbacks;
 
     public static MediaDataSourceRepositoryImpl getInstance(LocalMediaRepository localMediaRepository, StationMediaRepository stationMediaRepository,
                                                             CalcMediaDigestStrategy calcMediaDigestStrategy, ThreadManager threadManager) {
@@ -79,11 +79,21 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
         localMedias = new ArrayList<>();
         stationMedias = new ArrayList<>();
 
+        calcMediaDigestCallbacks = new ArrayList<>();
     }
 
     @Override
-    public void setCalcDigestCallback(CalcMediaDigestStrategy.CalcMediaDigestCallback calcDigestCallback) {
-        this.calcMediaDigestCallback = calcDigestCallback;
+    public void registerCalcDigestCallback(CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback) {
+
+        calcMediaDigestCallbacks.add(calcMediaDigestCallback);
+
+    }
+
+    @Override
+    public void unregisterCalcDigestCallback(CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback) {
+
+        calcMediaDigestCallbacks.remove(calcMediaDigestCallback);
+
     }
 
     @Override
@@ -123,15 +133,24 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
                 @Override
                 public void handleFinished() {
 
-                    if (calcMediaDigestCallback != null)
-                        calcMediaDigestCallback.handleFinished();
+                    for (CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback : calcMediaDigestCallbacks) {
+
+                        if (calcMediaDigestCallback != null)
+                            calcMediaDigestCallback.handleFinished();
+
+                    }
+
                 }
 
                 @Override
                 public void handleNothing() {
 
-                    if (calcMediaDigestCallback != null)
-                        calcMediaDigestCallback.handleNothing();
+                    for (CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback : calcMediaDigestCallbacks) {
+
+                        if (calcMediaDigestCallback != null)
+                            calcMediaDigestCallback.handleNothing();
+
+                    }
 
                 }
             });
@@ -146,7 +165,7 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
             public void onSucceed(List<Media> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);
 
-                Log.d(TAG, "onSucceed: get media from local media repositroy,data size: " + data.size());
+                Log.d(MediaDataSourceRepositoryImpl.TAG, "onSucceed: get media from local media repositroy,data size: " + data.size());
 
                 getLocalMediaCallbackReturn = true;
 

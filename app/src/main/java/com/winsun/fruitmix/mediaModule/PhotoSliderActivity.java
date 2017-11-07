@@ -35,7 +35,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.IImageLoadListener;
@@ -67,6 +66,7 @@ import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.video.PlayVideoFragment;
 
@@ -174,7 +174,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 }
 
-                if(view == null)
+                if (view == null)
                     return;
 
                 view.setDoMatrixOnDraw(false);
@@ -851,7 +851,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view;
 
-        if (systemSettingDataSource.getLoginWithWechatCodeOrNot()) {
+        boolean isGif = MediaUtil.checkMediaIsGif(media);
+
+        if (systemSettingDataSource.getLoginWithWechatCodeOrNot() && !isGif) {
 
             httpRequest = getLargeImageHttpRequest(media);
 
@@ -870,7 +872,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         ArrayMap<String, String> header = new ArrayMap<>();
         header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
 
-        if (media.getType().equalsIgnoreCase("gif")) {
+        if (isGif) {
 
             mGifLoader.setHeaders(header);
 

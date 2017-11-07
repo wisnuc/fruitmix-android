@@ -136,7 +136,7 @@ public class LocalMediaRepository {
 
                         Media media = mediaConcurrentMapKeyIsOriginalPath.remove(mediaPathInAppDB);
 
-                        if(media instanceof Video){
+                        if (media instanceof Video) {
 
                             if (needDeleteVideoPaths == null)
                                 needDeleteVideoPaths = new ArrayList<>();
@@ -147,7 +147,7 @@ public class LocalMediaRepository {
 
                             hasDeleteVideo = true;
 
-                        }else {
+                        } else {
 
                             if (needDeleteMediaPaths == null)
                                 needDeleteMediaPaths = new ArrayList<>();
@@ -167,7 +167,7 @@ public class LocalMediaRepository {
 
                 OperationResult result = operationResult;
 
-                if (hasDeleteMedia || hasDeleteVideo) {
+                if (hasDeleteMedia || hasDeleteVideo || newMedia.size() > 0 || newVideos.size() > 0) {
                     result = new OperationMediaDataChanged();
                 }
 

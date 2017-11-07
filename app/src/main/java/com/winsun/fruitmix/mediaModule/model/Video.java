@@ -17,7 +17,7 @@ public class Video extends Media {
     }
 
     public String getName() {
-        return name;
+        return name == null ? "" : name;
     }
 
     public void setName(String name) {

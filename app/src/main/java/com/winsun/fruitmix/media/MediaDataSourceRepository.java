@@ -21,7 +21,9 @@ public interface MediaDataSourceRepository {
 
     void updateVideo(Video video);
 
-    void setCalcDigestCallback(CalcMediaDigestStrategy.CalcMediaDigestCallback calcDigestCallback);
+    void registerCalcDigestCallback(CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback);
+
+    void unregisterCalcDigestCallback(CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback);
 
     void getLocalMedia(BaseLoadDataCallback<Media> callback);
 

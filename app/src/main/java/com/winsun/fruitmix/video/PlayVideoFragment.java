@@ -194,6 +194,8 @@ public class PlayVideoFragment {
 
         playVideoView.setVisibility(View.VISIBLE);
 
+        mIsPlaying = false;
+
     }
 
 

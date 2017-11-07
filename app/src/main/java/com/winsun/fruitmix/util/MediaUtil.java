@@ -14,7 +14,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 
 public class MediaUtil {
 
-    public static void startLoadRemoteImageUrl(String url, NetworkImageView networkImageView, ImageLoader imageLoader){
+    public static void startLoadRemoteImageUrl(String url, NetworkImageView networkImageView, ImageLoader imageLoader) {
 
         networkImageView.setDefaultImageResId(R.drawable.default_place_holder);
 
@@ -29,7 +29,7 @@ public class MediaUtil {
 
     }
 
-    public static void setMediaImageUrl(Media media,NetworkImageView networkImageView, HttpRequest httpRequest, ImageLoader imageLoader) {
+    public static void setMediaImageUrl(Media media, NetworkImageView networkImageView, HttpRequest httpRequest, ImageLoader imageLoader) {
 
         networkImageView.setDefaultImageResId(R.drawable.default_place_holder);
 
@@ -47,5 +47,12 @@ public class MediaUtil {
 
         networkImageView.setImageUrl(httpRequest.getUrl(), imageLoader);
     }
+
+    public static boolean checkMediaIsGif(Media media) {
+
+        return media.getType().toLowerCase().contains("gif") || media.getOriginalPhotoPath().toLowerCase().contains("gif");
+
+    }
+
 
 }

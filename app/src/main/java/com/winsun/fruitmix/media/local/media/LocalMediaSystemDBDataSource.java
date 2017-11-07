@@ -12,6 +12,7 @@ import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.MediaUtil;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -76,18 +77,24 @@ public class LocalMediaSystemDBDataSource {
 
         Cursor cursor;
 
-        String[] fields = {MediaStore.Images.Media._ID, MediaStore.Images.Media.HEIGHT,
-                MediaStore.Images.Media.WIDTH, MediaStore.Images.Media.DATA, MediaStore.Images.Media.ORIENTATION,
-                MediaStore.Images.Media.LATITUDE, MediaStore.Images.Media.LONGITUDE};
+        String queryData = MediaStore.Images.Media.DATA;
+        String queryWidth = MediaStore.Images.Media.WIDTH;
+        String queryHeight = MediaStore.Images.Media.HEIGHT;
+        String queryOrientation = MediaStore.Images.Media.ORIENTATION;
+        String queryLatitude = MediaStore.Images.Media.LATITUDE;
+        String queryLongitude = MediaStore.Images.Media.LONGITUDE;
+        String queryType = MediaStore.Images.Media.MIME_TYPE;
 
-        String data = MediaStore.Images.Media.DATA;
+        String[] fields = {MediaStore.Images.Media._ID, queryHeight,
+                queryWidth, queryData, queryOrientation,
+                queryLatitude, queryLongitude, queryType};
 
         String miniThumbnailFolderPath = FileUtil.getLocalPhotoMiniThumbnailFolderPath();
         String oldThumbnailFolderPath = FileUtil.getOldLocalPhotoThumbnailFolderPath();
         String thumbnailFolderPath = FileUtil.getLocalPhotoThumbnailFolderPath();
         String originalPhotoFolderPath = FileUtil.getOriginalPhotoFolderPath();
 
-        String selection = data + " not like ? and " + data + " not like ? and " + data + " not like ? and " + data + " not like ?";
+        String selection = queryData + " not like ? and " + queryData + " not like ? and " + queryData + " not like ? and " + queryData + " not like ?";
         String[] selectionArgs = {miniThumbnailFolderPath + "%", oldThumbnailFolderPath + "%", thumbnailFolderPath + "%", originalPhotoFolderPath + "%"};
 
 //        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "='" + bucketName + "'", null, null);
@@ -102,7 +109,7 @@ public class LocalMediaSystemDBDataSource {
 
         do {
 
-            String originalPhotoPath = cursor.getString(cursor.getColumnIndexOrThrow(data));
+            String originalPhotoPath = cursor.getString(cursor.getColumnIndexOrThrow(queryData));
 
             if (originalPhotoPath.contains(miniThumbnailFolderPath) || originalPhotoPath.contains(oldThumbnailFolderPath)
                     || originalPhotoPath.contains(thumbnailFolderPath)
@@ -117,8 +124,8 @@ public class LocalMediaSystemDBDataSource {
 
             media = new Media();
             media.setOriginalPhotoPath(originalPhotoPath);
-            media.setWidth(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)));
-            media.setHeight(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)));
+            media.setWidth(cursor.getString(cursor.getColumnIndexOrThrow(queryWidth)));
+            media.setHeight(cursor.getString(cursor.getColumnIndexOrThrow(queryHeight)));
 
             f = new File(originalPhotoPath);
             date.setTimeInMillis(f.lastModified());
@@ -126,19 +133,26 @@ public class LocalMediaSystemDBDataSource {
             media.setSelected(false);
             media.setLoaded(false);
 
-            setMediaOrientationNumber(cursor, media);
+            int orientation = cursor.getInt(cursor.getColumnIndexOrThrow(queryOrientation));
+            setMediaOrientationNumber(orientation, media);
 
             media.setLocal(true);
             media.setSharing(true);
             media.setUuid("");
 
-            String longitude = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.LONGITUDE));
-            String latitude = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.LATITUDE));
+            String longitude = cursor.getString(cursor.getColumnIndex(queryLongitude));
+            String latitude = cursor.getString(cursor.getColumnIndex(queryLatitude));
 
             Log.d(TAG, "getAllMedias: originalPhotoPath: " + media.getOriginalPhotoPath() + " longitude: " + longitude + " latitude: " + latitude);
 
             media.setLongitude(longitude);
             media.setLatitude(latitude);
+
+            String type = cursor.getString(cursor.getColumnIndex(queryType));
+
+            media.setType(type);
+
+            Log.d(TAG, "getAllMedias: media type:" + type);
 
             medias.add(media);
 
@@ -152,8 +166,7 @@ public class LocalMediaSystemDBDataSource {
         return medias;
     }
 
-    private void setMediaOrientationNumber(Cursor cursor, Media media) {
-        int orientation = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.ORIENTATION));
+    private void setMediaOrientationNumber(int orientation, Media media) {
 
         switch (orientation) {
             case 0:
@@ -171,6 +184,7 @@ public class LocalMediaSystemDBDataSource {
             default:
                 media.setOrientationNumber(1);
         }
+
     }
 
 
@@ -189,11 +203,11 @@ public class LocalMediaSystemDBDataSource {
         String queryLanguage = MediaStore.Video.Media.LANGUAGE;
         String queryResolution = MediaStore.Video.Media.RESOLUTION;
         String querySize = MediaStore.Video.Media.SIZE;
-
+        String queryType = MediaStore.Video.Media.MIME_TYPE;
 
         Cursor cursor = contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 new String[]{queryName, queryPath, queryTitle, queryAlbum, queryArtist, queryTakeDate, queryDescription, queryDuration,
-                        queryLanguage, queryResolution, querySize}, null, null, null);
+                        queryLanguage, queryResolution, querySize, queryType}, null, null, null);
 
         if (cursor == null || !cursor.moveToFirst()) {
             return videos;
@@ -234,6 +248,10 @@ public class LocalMediaSystemDBDataSource {
 
             video.setLocal(true);
             video.setUuid("");
+
+            String type = cursor.getString(cursor.getColumnIndex(queryType));
+
+            video.setType(type);
 
             videos.add(video);
 
