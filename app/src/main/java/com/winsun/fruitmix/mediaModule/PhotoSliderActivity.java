@@ -30,6 +30,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -172,6 +173,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                     view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
 
                 }
+
+                if(view == null)
+                    return;
 
                 view.setDoMatrixOnDraw(false);
 
@@ -392,8 +396,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         NewPhotoList.mEnteringPhotoSlider = false;
 
         for (PlayVideoFragment playVideoFragment : playVideoFragments.values()) {
-            playVideoFragment.getVideoView().stopPlayback();
-            playVideoFragment.getVideoView().suspend();
+            playVideoFragment.stopPlayVideo();
         }
 
         playVideoFragments.clear();
@@ -706,11 +709,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             PlayVideoFragment playVideoFragment = playVideoFragments.get(lastItem);
 
-            VideoView videoView = playVideoFragment.getVideoView();
-            videoView.stopPlayback();
-            videoView.suspend();
-
-            playVideoFragment.getPlayVideoView().setVisibility(View.VISIBLE);
+            playVideoFragment.stopPlayVideo();
 
         }
 
@@ -766,10 +765,10 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             Log.d(TAG, "handleOriginalMediaLoaded: start postponed enter transition");
 
-            ActivityCompat.startPostponedEnterTransition(this);
+            scheduleStartPostponedTransition(view);
             transitionMediaNeedShowThumb = true;
         } else if (media.isLocal() && media.getThumb().isEmpty()) {
-            ActivityCompat.startPostponedEnterTransition(this);
+            scheduleStartPostponedTransition(view);
         }
 
         if (!media.isLoaded()) {
@@ -787,7 +786,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             Log.d(TAG, "handleThumbLoaded: start postponed enter transition");
 
-            ActivityCompat.startPostponedEnterTransition(this);
+            scheduleStartPostponedTransition(view);
 
             startLoadCurrentImageAfterTransition(view, media);
 
@@ -798,20 +797,17 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     }
 
-    private void handleLocalMediaLoaded(Media media) {
-        if (isCurrentViewPage(initialPhotoPosition) && needTransition) {
-            ActivityCompat.startPostponedEnterTransition(this);
-        }
+    private void scheduleStartPostponedTransition(final View view) {
 
-        if (!media.isLoaded()) {
-            media.setLoaded(true);
+        view.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                view.getViewTreeObserver().removeOnPreDrawListener(this);
+                ActivityCompat.startPostponedEnterTransition(PhotoSliderActivity.this);
+                return false;
+            }
+        });
 
-            mediaAlreadyLoadedList.add(media);
-        }
-    }
-
-    public boolean isCurrentViewPage(int viewPosition) {
-        return mViewPager.getCurrentItem() == viewPosition;
     }
 
     public boolean isImageThumb(String imageUrl, Media media) {
@@ -828,6 +824,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private void startLoadCurrentImageAfterTransition(final View view, final Media media) {
         if (Util.checkRunningOnLollipopOrHigher()) {
+
             getWindow().getSharedElementEnterTransition().addListener(new CustomTransitionListener() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
@@ -954,6 +951,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                         return false;
                     }
                 });
+
+                view.setOnTouchListener(new CustomTouchListener());
 
                 playVideoFragments.put(position, playVideoFragment);
 
@@ -1137,18 +1136,24 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                handleTouchEvent(event, (GifTouchNetworkImageView) v);
+                handleTouchEvent(event, v);
                 return false;
             }
 
-            private void handleTouchEvent(MotionEvent event, GifTouchNetworkImageView view) {
+            private void handleTouchEvent(MotionEvent event, View view) {
 
                 int action = event.getAction() & MotionEvent.ACTION_MASK;
 
-                Log.d(TAG, "handleTouchEvent: isEnlargeState: " + view.isEnlargeState());
+                if (view instanceof GifTouchNetworkImageView) {
 
-                if (view.isEnlargeState())
-                    return;
+                    GifTouchNetworkImageView gifTouchNetworkImageView = (GifTouchNetworkImageView) view;
+
+                    Log.d(TAG, "handleTouchEvent: isEnlargeState: " + gifTouchNetworkImageView.isEnlargeState());
+
+                    if (gifTouchNetworkImageView.isEnlargeState())
+                        return;
+
+                }
 
                 if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
 

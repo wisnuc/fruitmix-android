@@ -9,6 +9,7 @@ import com.winsun.fruitmix.equipment.manage.viewmodel.EquipmentInfoItem;
 import com.winsun.fruitmix.equipment.manage.viewmodel.EquipmentInfoViewModel;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
@@ -21,8 +22,13 @@ import java.util.List;
 
 public class EquipmentNetworkPresenter extends BaseEquipmentInfoPresenter {
 
-    public EquipmentNetworkPresenter(EquipmentInfoDataSource equipmentInfoDataSource, EquipmentInfoView equipmentInfoView, LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel) {
+    private SystemSettingDataSource systemSettingDataSource;
+
+    public EquipmentNetworkPresenter(EquipmentInfoDataSource equipmentInfoDataSource, EquipmentInfoView equipmentInfoView,
+                                     LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel,
+                                     SystemSettingDataSource systemSettingDataSource) {
         super(equipmentInfoDataSource, equipmentInfoView, loadingViewModel, noContentViewModel);
+        this.systemSettingDataSource = systemSettingDataSource;
     }
 
     @Override
@@ -32,7 +38,7 @@ public class EquipmentNetworkPresenter extends BaseEquipmentInfoPresenter {
             @Override
             public void onSucceed(List<EquipmentNetworkInfo> data, OperationResult operationResult) {
 
-                if(equipmentInfoView == null)
+                if (equipmentInfoView == null)
                     return;
 
                 handleGetEquipmentNetworkInfoSucceed(data.get(0), callback);
@@ -88,6 +94,17 @@ public class EquipmentNetworkPresenter extends BaseEquipmentInfoPresenter {
         nicMacAddress.setInfoValue(equipmentNetworkInfo.getMacAddress());
 
         equipmentInfoItems.add(nicMacAddress);
+
+        EquipmentInfoViewModel networkConnectionType = new EquipmentInfoViewModel();
+        networkConnectionType.setInfoKey(equipmentInfoView.getString(R.string.network_connection_type));
+
+        if (systemSettingDataSource.getLoginWithWechatCodeOrNot()) {
+            networkConnectionType.setInfoValue(equipmentInfoView.getString(R.string.remote_connection));
+        } else {
+            networkConnectionType.setInfoValue(equipmentInfoView.getString(R.string.local_station_connection));
+        }
+
+        equipmentInfoItems.add(networkConnectionType);
 
         callback.onSucceed(equipmentInfoItems, new OperationSuccess());
 

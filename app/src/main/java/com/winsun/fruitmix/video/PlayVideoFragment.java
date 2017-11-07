@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
+import android.widget.ProgressBar;
 import android.widget.VideoView;
 
 import com.winsun.fruitmix.databinding.PlayVideoFragmentBinding;
@@ -44,6 +45,10 @@ public class PlayVideoFragment {
 
     private ImageView playVideoView;
 
+    private ProgressBar progressBar;
+
+    private boolean mIsPlaying = false;
+
     public PlayVideoFragment(Context context) {
 
         initVideoView(context);
@@ -59,19 +64,23 @@ public class PlayVideoFragment {
 
         videoView = binding.videoView;
 
+        progressBar = binding.progressBar;
+
         httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
 
         MediaController mediaController = new MediaController(context);
 
-        videoView.setMediaController(mediaController);
-
         mediaController.setAnchorView(videoView);
+
+        videoView.setMediaController(mediaController);
 
         videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
 
                 playVideoView.setVisibility(View.VISIBLE);
+
+                mIsPlaying = false;
 
             }
         });
@@ -82,7 +91,21 @@ public class PlayVideoFragment {
 
                 Log.d(TAG, "onError: what: " + what + " extra: " + extra);
 
+                progressBar.setVisibility(View.INVISIBLE);
+
                 return false;
+
+            }
+        });
+
+        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+
+                progressBar.setVisibility(View.INVISIBLE);
+
+                mIsPlaying = true;
+
             }
         });
 
@@ -90,14 +113,6 @@ public class PlayVideoFragment {
 
     public View getView() {
         return view;
-    }
-
-    public VideoView getVideoView() {
-        return videoView;
-    }
-
-    public ImageView getPlayVideoView() {
-        return playVideoView;
     }
 
     public void startPlayVideo(Video video, Context context) {
@@ -113,8 +128,16 @@ public class PlayVideoFragment {
 
     private void startPlayVideo(HttpRequest httpRequest) {
 
+        if (mIsPlaying) {
+
+            return;
+
+        }
+
         if (playVideoView.getVisibility() == View.VISIBLE)
             playVideoView.setVisibility(View.INVISIBLE);
+
+        progressBar.setVisibility(View.VISIBLE);
 
         String url = httpRequest.getUrl();
 
@@ -163,6 +186,16 @@ public class PlayVideoFragment {
         return video.getImageOriginalUrl(context);
 
     }
+
+    public void stopPlayVideo() {
+
+        videoView.stopPlayback();
+        videoView.suspend();
+
+        playVideoView.setVisibility(View.VISIBLE);
+
+    }
+
 
     public void onDestroy() {
 

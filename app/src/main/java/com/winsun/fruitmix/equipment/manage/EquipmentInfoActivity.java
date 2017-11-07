@@ -21,6 +21,8 @@ import com.winsun.fruitmix.equipment.manage.presenter.EquipmentInfoPresenter;
 import com.winsun.fruitmix.equipment.manage.presenter.EquipmentNetworkPresenter;
 import com.winsun.fruitmix.equipment.manage.presenter.EquipmentTimePresenter;
 import com.winsun.fruitmix.equipment.manage.view.EquipmentInfoView;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -81,7 +83,11 @@ public class EquipmentInfoActivity extends BaseActivity implements EquipmentInfo
 
                 break;
             case NETWORK_INFO:
-                equipmentInfoPresenter = new EquipmentNetworkPresenter(equipmentInfoDataSource, this, loadingViewModel, noContentViewModel);
+
+                SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
+
+                equipmentInfoPresenter = new EquipmentNetworkPresenter(equipmentInfoDataSource, this,
+                        loadingViewModel, noContentViewModel,systemSettingDataSource);
 
                 title = getString(R.string.network_info);
 

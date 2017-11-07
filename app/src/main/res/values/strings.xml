@@ -334,6 +334,9 @@
     <string name="network_address">Network Address</string>
     <string name="subnet_mask">Subnet Mask</string>
     <string name="nic_mac_address">NIC Mac Address</string>
+    <string name="network_connection_type">Network Connection Type</string>
+    <string name="remote_connection">Remote Connection</string>
+    <string name="local_station_connection">Local Station Connection</string>
 
     <string name="local_time">Local Time</string>
     <string name="universal_time">Universal Time</string>

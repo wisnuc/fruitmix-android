@@ -1,14 +1,11 @@
 package com.winsun.fruitmix.equipment.search.data;
 
 import android.content.Context;
-import android.os.Build;
 import android.util.Log;
 
 import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
 import com.github.druk.rxdnssd.RxDnssdBindable;
-import com.github.druk.rxdnssd.RxDnssdEmbedded;
-import com.winsun.fruitmix.CustomApplication;
 import com.winsun.fruitmix.util.Util;
 
 import rx.Subscription;
@@ -40,15 +37,6 @@ public class EquipmentSearchManager {
     }
 
     private RxDnssd createDnssd(Context context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            Log.i(TAG, "Using embedded version of dns sd because of API < 16");
-            return new RxDnssdEmbedded();
-        }
-        if (Build.VERSION.RELEASE.contains("4.4.2") && Build.MANUFACTURER.toLowerCase().contains("samsung")) {
-            Log.i(TAG, "Using embedded version of dns sd because of Samsung 4.4.2");
-            return new RxDnssdEmbedded();
-        }
-        Log.i(TAG, "Using systems dns sd daemon");
         return new RxDnssdBindable(context);
     }
 

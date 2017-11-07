@@ -240,8 +240,6 @@ public class EquipmentPresenter {
 
     public void onCreate() {
 
-        startDiscovery();
-
         // handle for huawei mate9 search result has no ip
 
  /*       getEquipmentTypeInfo(new Equipment("", Collections.singletonList("192.168.0.81"), 0));
@@ -256,6 +254,9 @@ public class EquipmentPresenter {
 
         onPause = false;
 
+        stopDiscovery();
+        startDiscovery();
+
     }
 
     public void onPause() {
@@ -268,8 +269,6 @@ public class EquipmentPresenter {
     }
 
     public void onDestroy() {
-
-        stopDiscovery();
 
         mHandler.removeMessages(DISCOVERY_TIMEOUT);
         mHandler.removeMessages(RESUME_DISCOVERY);
@@ -330,6 +329,8 @@ public class EquipmentPresenter {
     }
 
     private void stopDiscovery() {
+
+        mEquipmentSearchManager = equipmentSearchView.getEquipmentSearchManager();
 
         mEquipmentSearchManager.stopDiscovery();
     }

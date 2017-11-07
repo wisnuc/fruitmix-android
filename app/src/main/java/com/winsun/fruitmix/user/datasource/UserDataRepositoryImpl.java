@@ -262,7 +262,7 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
 
         Log.d(TAG, "getUserByUUID: cacheDirty: " + cacheDirty);
 
-        if (cacheDirty || cacheUsers.isEmpty()) {
+        if (cacheDirty || cacheUsers.isEmpty() || !cacheUsers.containsKey(userUUID)) {
 
             List<User> users = userDBDataSource.getUsers();
 

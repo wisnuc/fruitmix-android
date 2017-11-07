@@ -67,8 +67,6 @@ public class PlayVideoActivity extends Activity {
 
         frameLayout.addView(playVideoFragment.getView());
 
-        playVideoFragment.getPlayVideoView().setVisibility(View.INVISIBLE);
-
         if (mVideo != null) {
 
             playVideoFragment.startPlayVideo(mVideo, this);
