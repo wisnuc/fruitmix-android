@@ -310,8 +310,6 @@ public class Media implements Parcelable {
         return true;
     }
 
-    //TODO:refactor create request url
-
     public HttpRequest getImageSmallThumbUrl(Context context) {
 
         String imageUrl;

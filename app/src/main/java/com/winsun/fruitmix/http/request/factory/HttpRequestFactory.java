@@ -247,8 +247,6 @@ public class HttpRequestFactory {
 
     }
 
-    //TODO:refactor create http request:use base class and subclass
-
     public synchronized HttpRequest createGetRequestByPathWithoutToken(String httpPath) {
 
         BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(getGateway(), null);

@@ -30,7 +30,7 @@ public class FileDownloadManager {
         fileDownloadItems = new ArrayList<>();
     }
 
-    public static FileDownloadManager getInstance() {
+    public synchronized static FileDownloadManager getInstance() {
 
         if (instance == null)
             instance = new FileDownloadManager();

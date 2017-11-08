@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.file.data.station.StationFileDataSourceImpl;
 import com.winsun.fruitmix.file.data.station.StationFileRepositoryImpl;
+import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.http.OkHttpUtil;
@@ -41,6 +42,8 @@ public class InitSystem {
         LoginUseCase.destroyInstance();
 
         OkHttpUtil.destroyInstance();
+
+        GroupRepository.destroyInstance();
 
         StationsRepository.destroyInstance();
 

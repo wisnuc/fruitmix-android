@@ -20,4 +20,5 @@ public class FileDownloadErrorState extends FileDownloadState {
 
         FileDownloadManager.getInstance().startPendingDownloadItem();
     }
+
 }

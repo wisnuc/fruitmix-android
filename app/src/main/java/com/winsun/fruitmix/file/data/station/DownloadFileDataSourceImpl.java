@@ -25,17 +25,17 @@ public class DownloadFileDataSourceImpl implements DownloadedFileDataSource {
 
     private static DownloadedFileDataSource instance;
 
-    public static DownloadedFileDataSource getInstance(Context context, FileDownloadManager fileDownloadManager) {
+    public static DownloadedFileDataSource getInstance(DBUtils dbUtils, FileDownloadManager fileDownloadManager) {
 
         if (instance == null)
-            instance = new DownloadFileDataSourceImpl(context, fileDownloadManager);
+            instance = new DownloadFileDataSourceImpl(dbUtils, fileDownloadManager);
 
         return instance;
     }
 
-    private DownloadFileDataSourceImpl(Context context, FileDownloadManager fileDownloadManager) {
+    private DownloadFileDataSourceImpl(DBUtils dbUtils, FileDownloadManager fileDownloadManager) {
 
-        dbUtils = DBUtils.getInstance(context);
+        this.dbUtils = dbUtils;
 
         this.fileDownloadManager = fileDownloadManager;
     }

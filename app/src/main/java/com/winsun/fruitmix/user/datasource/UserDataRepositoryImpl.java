@@ -54,8 +54,6 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
         instance = null;
     }
 
-    //TODO: when setCacheDirty need call insert user
-
     @Override
     public void setCacheDirty() {
         cacheDirty = true;

@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.0'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -29,11 +29,11 @@ def supportLibraryVersion = "25.0.1"
 ext{
 
     compileSdkVersion = 23
-    buildToolsVersion = "25.0.0"
+    buildToolsVersion = "26.0.2"
     minSdkVersion = 16
     targetSdkVersion = 21
     versionCode = 2
-    versionName = "1.2.22"
+    versionName = "1.2.23"
 
     supportV4 = "com.android.support:support-v4:$supportLibraryVersion"
     appcompatV7 = "com.android.support:appcompat-v7:$supportLibraryVersion"

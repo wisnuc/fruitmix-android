@@ -8,9 +8,10 @@ import android.content.Context;
 
 public class InjectNetworkStateManager {
 
-    public static NetworkStateManager provideNetworkStateManager(Context context){
+    public static NetworkStateManager provideNetworkStateManager(Context context) {
 
         return NetworkStateManager.getInstance(context);
+
     }
 
 }

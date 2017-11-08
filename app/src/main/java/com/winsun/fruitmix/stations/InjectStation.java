@@ -11,12 +11,11 @@ import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 
 public class InjectStation {
 
-    public static StationsDataSource provideStationDataSource(Context context){
+    public static StationsDataSource provideStationDataSource(Context context) {
 
         return StationsRepository.getInstance(ThreadManagerImpl.getInstance(),
-                StationsRemoteDataSource.getInstance(InjectHttp.provideIHttpUtil(context),InjectHttp.provideHttpRequestFactory(context)));
+                StationsRemoteDataSource.getInstance(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory(context)));
 
     }
-
 
 }

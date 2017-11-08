@@ -18,17 +18,17 @@ public class LoggedInUserDBDataSource implements LoggedInUserDataSource {
 
     private static LoggedInUserDataSource instance;
 
-    public static LoggedInUserDataSource getInstance(Context context) {
+    public static LoggedInUserDataSource getInstance(DBUtils dbUtils) {
 
         if (instance == null)
-            instance = new LoggedInUserDBDataSource(context);
+            instance = new LoggedInUserDBDataSource(dbUtils);
 
         return instance;
     }
 
-    private LoggedInUserDBDataSource(Context context) {
+    private LoggedInUserDBDataSource(DBUtils dbUtils) {
 
-        dbUtils = DBUtils.getInstance(context);
+        this.dbUtils = dbUtils;
 
     }
 

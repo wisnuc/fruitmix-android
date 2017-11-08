@@ -26,17 +26,17 @@ public class StationMediaDBDataSource {
 
     private static StationMediaDBDataSource instance;
 
-    public static StationMediaDBDataSource getInstance(Context context) {
+    public static StationMediaDBDataSource getInstance(DBUtils dbUtils) {
 
         if (instance == null)
-            instance = new StationMediaDBDataSource(context);
+            instance = new StationMediaDBDataSource(dbUtils);
 
         return instance;
     }
 
-    private StationMediaDBDataSource(Context context) {
+    private StationMediaDBDataSource(DBUtils dbUtils) {
 
-        dbUtils = DBUtils.getInstance(context);
+        this.dbUtils = dbUtils;
 
     }
 

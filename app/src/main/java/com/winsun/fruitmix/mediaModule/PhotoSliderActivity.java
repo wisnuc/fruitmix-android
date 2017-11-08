@@ -155,6 +155,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 Media media = mediaList.get(currentPhotoPosition);
 
+                if (media instanceof Video)
+                    return;
+
                 String imageTag = media.getImageThumbUrl(mContext).getUrl();
 
                 PinchImageView view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
@@ -709,17 +712,28 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             PlayVideoFragment playVideoFragment = playVideoFragments.get(lastItem);
 
-            playVideoFragment.stopPlayVideo();
+            stopPlayVideo(playVideoFragment);
 
         }
 
         if (playVideoFragments.containsKey(currentItem)) {
 
             PlayVideoFragment currentPlayVideoFragment = playVideoFragments.get(currentItem);
+
             currentPlayVideoFragment.startPlayVideo((Video) mediaList.get(currentItem), mContext);
 
         }
 
+    }
+
+    private void stopPlayVideo(PlayVideoFragment playVideoFragment) {
+        playVideoFragment.stopPlayVideo();
+
+    }
+
+    private void toggleFullScreenState() {
+        convertEditState();
+        toggleSystemUIHideOrNot(getWindow().getDecorView());
     }
 
     @Override
@@ -940,7 +954,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        playVideoFragment.startPlayVideo((Video) media, mContext);
+                        playVideo((Video) media, playVideoFragment);
                     }
                 });
 
@@ -1040,8 +1054,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             mainPic.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    convertEditState();
-                    toggleFullScreenState(getWindow().getDecorView());
+                    toggleFullScreenState();
                 }
             });
 
@@ -1294,6 +1307,12 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         return (mediaWidth > mediaHeight && media.getOrientationNumber() <= 4) || (mediaWidth < mediaHeight && media.getOrientationNumber() > 4);
     }
 
+    private void playVideo(Video media, PlayVideoFragment playVideoFragment) {
+        playVideoFragment.startPlayVideo(media, mContext);
+
+        //hide system status bar may fail cause of media controller
+        //toggleFullScreenState();
+    }
 
     private void convertEditState() {
 
@@ -1309,7 +1328,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
     }
 
-    private void toggleFullScreenState(View view) {
+    private void toggleSystemUIHideOrNot(View view) {
 
         mIsFullScreen = !mIsFullScreen;
         if (mIsFullScreen) {

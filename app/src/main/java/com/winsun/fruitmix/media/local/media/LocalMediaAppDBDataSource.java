@@ -21,16 +21,16 @@ public class LocalMediaAppDBDataSource {
 
     private static LocalMediaAppDBDataSource instance;
 
-    public static LocalMediaAppDBDataSource getInstance(Context context) {
+    public static LocalMediaAppDBDataSource getInstance(DBUtils dbUtils) {
 
         if (instance == null)
-            instance = new LocalMediaAppDBDataSource(context);
+            instance = new LocalMediaAppDBDataSource(dbUtils);
 
         return instance;
     }
 
-    private LocalMediaAppDBDataSource(Context context) {
-        dbUtils = DBUtils.getInstance(context);
+    private LocalMediaAppDBDataSource(DBUtils dbUtils) {
+        this.dbUtils = dbUtils;
     }
 
     public void getMedia(BaseLoadDataCallback<Media> callback) {
@@ -54,9 +54,9 @@ public class LocalMediaAppDBDataSource {
 
     }
 
-    public void insertVideos(Collection<Video> videos){
+    public void insertVideos(Collection<Video> videos) {
 
-        if(videos.isEmpty())
+        if (videos.isEmpty())
             return;
 
         dbUtils.insertLocalVideos(videos);
@@ -68,7 +68,7 @@ public class LocalMediaAppDBDataSource {
         return dbUtils.updateLocalMedia(media) > 0;
     }
 
-    public boolean updateVideo(Video video){
+    public boolean updateVideo(Video video) {
         return dbUtils.updateLocalVideo(video) > 0;
     }
 

@@ -2,6 +2,7 @@ package com.winsun.fruitmix.media;
 
 import android.content.Context;
 
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.media.local.media.LocalMediaAppDBDataSource;
 import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
@@ -26,14 +27,14 @@ public class InjectMedia {
 
     private static LocalMediaRepository provideLocalMediaRepository(Context context) {
 
-        return LocalMediaRepository.getInstance(LocalMediaAppDBDataSource.getInstance(context), LocalMediaSystemDBDataSource.getInstance(context),
+        return LocalMediaRepository.getInstance(LocalMediaAppDBDataSource.getInstance(DBUtils.getInstance(context)), LocalMediaSystemDBDataSource.getInstance(context),
                 ThreadManagerImpl.getInstance());
 
     }
 
     private static StationMediaRepository provideStationMediaRepository(Context context) {
 
-        return StationMediaRepository.getInstance(StationMediaDBDataSource.getInstance(context), StationMediaRemoteDataSource.getInstance(InjectHttp.provideIHttpUtil(context),
+        return StationMediaRepository.getInstance(StationMediaDBDataSource.getInstance(DBUtils.getInstance(context)), StationMediaRemoteDataSource.getInstance(InjectHttp.provideIHttpUtil(context),
                 InjectHttp.provideHttpRequestFactory(context), InjectHttp.provideIHttpFileUtil()));
     }
 

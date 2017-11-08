@@ -34,6 +34,10 @@ public class GroupRepository extends BaseDataRepository {
         return ourInstance;
     }
 
+    public static void destroyInstance() {
+        ourInstance = null;
+    }
+
     public GroupRepository(ThreadManager threadManager, GroupDataSource groupDataSource) {
         super(threadManager);
         this.groupDataSource = groupDataSource;
@@ -65,44 +69,90 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-    public void addGroup(PrivateGroup privateGroup, BaseOperateDataCallback<Boolean> callback) {
+    public void addGroup(final PrivateGroup privateGroup, BaseOperateDataCallback<Boolean> callback) {
 
-        groupDataSource.addGroup(Collections.singleton(privateGroup));
+        final BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
-        callback.onSucceed(true, new OperationSuccess());
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
 
-    }
+                groupDataSource.addGroup(Collections.singleton(privateGroup));
 
-
-    public void insertUserComment(String groupUUID, UserComment userComment, BaseOperateDataCallback<UserComment> callback) {
-
-        callback.onSucceed(groupDataSource.insertUserComment(groupUUID, userComment), new OperationSuccess());
-
-    }
-
-    public void insertPin(String groupUUID, Pin pin, BaseOperateDataCallback<Pin> callback) {
-
-        callback.onSucceed(groupDataSource.insertPin(groupUUID, pin), new OperationSuccess());
+                runOnMainThreadCallback.onSucceed(true, new OperationSuccess());
+            }
+        });
 
     }
 
-    public void insertMediaToPin(Collection<Media> medias, String groupUUID, String pinUUID, BaseOperateDataCallback<Boolean> callback) {
 
-        callback.onSucceed(groupDataSource.insertMediaToPin(medias, groupUUID, pinUUID), new OperationSuccess());
+    public void insertUserComment(final String groupUUID, final UserComment userComment, BaseOperateDataCallback<UserComment> callback) {
+
+        final BaseOperateDataCallback<UserComment> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                runOnMainThreadCallback.onSucceed(groupDataSource.insertUserComment(groupUUID, userComment), new OperationSuccess());
+            }
+        });
+
 
     }
 
-    public void insertFileToPin(Collection<AbstractFile> files, String groupUUID, String pinUUID, BaseOperateDataCallback<Boolean> callback) {
+    public void insertPin(final String groupUUID, final Pin pin, BaseOperateDataCallback<Pin> callback) {
 
-        callback.onSucceed(groupDataSource.insertFileToPin(files, groupUUID, pinUUID), new OperationSuccess());
+        final BaseOperateDataCallback<Pin> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                runOnMainThreadCallback.onSucceed(groupDataSource.insertPin(groupUUID, pin), new OperationSuccess());
+            }
+        });
 
     }
 
-    public void updatePinInGroup(Pin pin, String groupUUID, BaseOperateDataCallback<Boolean> callback) {
+    public void insertMediaToPin(final Collection<Media> medias, final String groupUUID, final String pinUUID, BaseOperateDataCallback<Boolean> callback) {
 
-        boolean result = groupDataSource.updatePinInGroup(pin, groupUUID);
+        final BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
-        sendCallback(callback, result);
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                runOnMainThreadCallback.onSucceed(groupDataSource.insertMediaToPin(medias, groupUUID, pinUUID), new OperationSuccess());
+            }
+        });
+
+    }
+
+    public void insertFileToPin(final Collection<AbstractFile> files, final String groupUUID, final String pinUUID, BaseOperateDataCallback<Boolean> callback) {
+
+        final BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                runOnMainThreadCallback.onSucceed(groupDataSource.insertFileToPin(files, groupUUID, pinUUID), new OperationSuccess());
+            }
+        });
+
+    }
+
+    public void updatePinInGroup(final Pin pin, final String groupUUID, BaseOperateDataCallback<Boolean> callback) {
+
+        final BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+
+                boolean result = groupDataSource.updatePinInGroup(pin, groupUUID);
+
+                sendCallback(runOnMainThreadCallback, result);
+
+            }
+        });
 
     }
 
@@ -112,18 +162,37 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-    public void modifyPin(String groupUUID, String pinName, String pinUUID, BaseOperateDataCallback<Boolean> callback) {
+    public void modifyPin(final String groupUUID, final String pinName, final String pinUUID, BaseOperateDataCallback<Boolean> callback) {
 
-        boolean result = groupDataSource.modifyPin(groupUUID, pinName, pinUUID);
+        final BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
-        sendCallback(callback, result);
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+
+                boolean result = groupDataSource.modifyPin(groupUUID, pinName, pinUUID);
+
+                sendCallback(runOnMainThreadCallback, result);
+
+            }
+        });
+
     }
 
-    public void deletePin(String groupUUID, String pinUUID, BaseOperateDataCallback<Boolean> callback) {
+    public void deletePin(final String groupUUID, final String pinUUID, BaseOperateDataCallback<Boolean> callback) {
 
-        boolean result = groupDataSource.deletePin(groupUUID, pinUUID);
+        final BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
-        sendCallback(callback, result);
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+
+                boolean result = groupDataSource.deletePin(groupUUID, pinUUID);
+
+                sendCallback(runOnMainThreadCallback, result);
+
+            }
+        });
 
     }
 

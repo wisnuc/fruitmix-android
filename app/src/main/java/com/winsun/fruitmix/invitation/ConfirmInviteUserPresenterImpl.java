@@ -117,7 +117,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
                 Log.d(TAG, "onSucceed: create invitation,ticket: " + data);
 
-                MiniProgram.shareMiniWXApp(confirmInviteUserView.getContext(),iwxapi, resources, data);
+                MiniProgram.shareMiniWXApp(confirmInviteUserView.getContext(), iwxapi, resources, data);
 
             }
 
@@ -141,14 +141,26 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
                 loadingViewModel.showLoading.set(false);
 
-                noContentViewModel.showNoContent.set(false);
-
-                confirmInviteUserView.setInviteUserFabVisibility(View.VISIBLE);
-
                 createMap(data);
 
-                adapter.setViewItems(createViewItems(mConfirmInviteUserMaps));
-                adapter.notifyDataSetChanged();
+                List<ViewItem> viewItems = createViewItems(mConfirmInviteUserMaps);
+
+                if (viewItems.isEmpty()) {
+
+                    noContentViewModel.showNoContent.set(true);
+
+                    confirmInviteUserView.setInviteUserFabVisibility(View.VISIBLE);
+
+                } else {
+
+                    noContentViewModel.showNoContent.set(false);
+
+                    confirmInviteUserView.setInviteUserFabVisibility(View.VISIBLE);
+
+                    adapter.setViewItems(viewItems);
+                    adapter.notifyDataSetChanged();
+
+                }
 
             }
 

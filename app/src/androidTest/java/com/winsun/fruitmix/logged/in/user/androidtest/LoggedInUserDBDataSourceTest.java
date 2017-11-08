@@ -3,6 +3,7 @@ package com.winsun.fruitmix.logged.in.user.androidtest;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDBDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
@@ -31,7 +32,7 @@ public class LoggedInUserDBDataSourceTest {
     @Before
     public void init() {
 
-        loggedInUserDataSource = LoggedInUserDBDataSource.getInstance(InstrumentationRegistry.getTargetContext());
+        loggedInUserDataSource = LoggedInUserDBDataSource.getInstance(DBUtils.getInstance(InstrumentationRegistry.getTargetContext()));
 
     }
 
