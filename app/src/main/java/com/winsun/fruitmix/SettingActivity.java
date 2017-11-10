@@ -24,6 +24,7 @@ import com.winsun.fruitmix.setting.SettingPresenter;
 import com.winsun.fruitmix.setting.SettingPresenterImpl;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.util.FileUtil;
@@ -51,9 +52,10 @@ public class SettingActivity extends BaseActivity {
 
         SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
 
-        settingPresenter = new SettingPresenterImpl(this,settingViewModel, systemSettingDataSource,
+        settingPresenter = new SettingPresenterImpl(this, settingViewModel, systemSettingDataSource,
                 InjectMedia.provideMediaDataSourceRepository(this), CheckMediaIsUploadStrategy.getInstance(),
-                InjectUploadMediaUseCase.provideUploadMediaUseCase(this),systemSettingDataSource.getCurrentLoginUserUUID());
+                InjectUploadMediaUseCase.provideUploadMediaUseCase(this), systemSettingDataSource.getCurrentLoginUserUUID(),
+                ThreadManagerImpl.getInstance());
 
         binding.setSettingPresenter(settingPresenter);
 
@@ -66,15 +68,6 @@ public class SettingActivity extends BaseActivity {
         toolbarViewModel.setBaseView(this);
 
         binding.setToolbarViewModel(toolbarViewModel);
-
-        binding.autoUploadPhotosSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-                settingPresenter.onCheckedChanged(buttonView,isChecked);
-
-            }
-        });
 
         settingPresenter.onCreate(this);
 

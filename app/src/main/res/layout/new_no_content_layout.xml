@@ -15,7 +15,7 @@
         android:id="@+id/no_content_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
+        android:background="@color/fafafa"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="@{noContentViewModel.showNoContent?View.VISIBLE:View.GONE,default=gone}">

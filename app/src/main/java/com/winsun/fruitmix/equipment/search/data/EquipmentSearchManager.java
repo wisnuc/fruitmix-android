@@ -49,7 +49,7 @@ public class EquipmentSearchManager {
         return instance;
     }
 
-    private void destroyInstance() {
+    public static void destroyInstance() {
         instance = null;
     }
 

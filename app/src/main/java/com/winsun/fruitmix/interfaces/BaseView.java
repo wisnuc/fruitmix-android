@@ -19,4 +19,6 @@ public interface BaseView {
     void showToast(String text);
 
     void showCustomErrorCode(String text);
+
+    void onBackPressed();
 }

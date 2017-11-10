@@ -57,7 +57,7 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
 
         NoContentViewModel noContentViewModel = new NoContentViewModel();
         noContentViewModel.setNoContentText(getString(R.string.no_invitation));
-        noContentViewModel.setNoContentImgResId(R.drawable.no_file);
+        noContentViewModel.setNoContentImgResId(R.drawable.no_invitation);
 
         binding.setNoContentViewModel(noContentViewModel);
 

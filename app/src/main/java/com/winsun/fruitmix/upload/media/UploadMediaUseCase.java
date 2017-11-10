@@ -1155,30 +1155,5 @@ public class UploadMediaUseCase {
 
     }
 
-    private static class RetryUploadHandler extends Handler {
-
-        WeakReference<UploadMediaUseCase> weakReference = null;
-
-        RetryUploadHandler(UploadMediaUseCase uploadMediaUseCase) {
-
-            weakReference = new WeakReference<>(uploadMediaUseCase);
-
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-
-            switch (msg.what) {
-                case RETRY_UPLOAD:
-
-                    weakReference.get().startUploadMedia();
-
-                    break;
-            }
-
-        }
-    }
-
 
 }

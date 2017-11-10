@@ -11,7 +11,7 @@ public interface ThreadManager {
 
     void runOnCacheThread(Runnable runnable);
 
-    void runOnCacheThread(Callable<Boolean> callable);
+    <V> Future<V> runOnCacheThread(Callable<V> callable);
 
     void runOnGenerateThumbThread(Runnable runnable);
 

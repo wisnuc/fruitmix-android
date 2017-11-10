@@ -43,7 +43,7 @@ public class ToolbarViewModel {
 
     public void toolbarNavigationOnClick() {
         if (baseView != null)
-            baseView.finishView();
+            baseView.onBackPressed();
         else
             toolbarNavigationOnClickListener.onClick();
     }

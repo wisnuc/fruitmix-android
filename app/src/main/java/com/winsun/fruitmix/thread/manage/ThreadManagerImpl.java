@@ -43,8 +43,8 @@ public class ThreadManagerImpl implements ThreadManager {
     }
 
     @Override
-    public void runOnCacheThread(Callable<Boolean> callable) {
-        executorServiceInstance.doOneTaskInCachedThreadUsingCallable(callable);
+    public <V> Future<V> runOnCacheThread(Callable<V> callable) {
+        return executorServiceInstance.doOneTaskInCachedThreadUsingCallable(callable);
     }
 
     @Override

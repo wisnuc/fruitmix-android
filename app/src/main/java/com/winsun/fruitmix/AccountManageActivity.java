@@ -40,7 +40,7 @@ public class AccountManageActivity extends BaseActivity implements AccountManage
 
         presenter = new AccountManagePresenterImpl(this, InjectLoggedInUser.provideLoggedInUserRepository(this),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(this),
-                InjectGetAllBindingLocalUserUseCase.provideInstance(this),InjectLogoutUseCase.provideLogoutUseCase(this));
+                InjectGetAllBindingLocalUserUseCase.provideInstance(this), InjectLogoutUseCase.provideLogoutUseCase(this));
 
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 

@@ -13,6 +13,7 @@ import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
@@ -20,6 +21,10 @@ import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Created by Administrator on 2017/6/22.
@@ -53,9 +58,11 @@ public class SettingPresenterImpl implements SettingPresenter {
 
     private String currentUserUUID;
 
+    private ThreadManager threadManager;
+
     public SettingPresenterImpl(BaseView baseView, SettingActivity.SettingViewModel settingViewModel, SystemSettingDataSource systemSettingDataSource,
                                 MediaDataSourceRepository mediaDataSourceRepository, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
-                                UploadMediaUseCase uploadMediaUseCase, String currentUserUUID) {
+                                UploadMediaUseCase uploadMediaUseCase, String currentUserUUID, ThreadManager threadManager) {
         this.baseView = baseView;
         this.settingViewModel = settingViewModel;
         this.systemSettingDataSource = systemSettingDataSource;
@@ -63,6 +70,7 @@ public class SettingPresenterImpl implements SettingPresenter {
         this.checkMediaIsUploadStrategy = checkMediaIsUploadStrategy;
         this.uploadMediaUseCase = uploadMediaUseCase;
         this.currentUserUUID = currentUserUUID;
+        this.threadManager = threadManager;
     }
 
     @Override
@@ -160,9 +168,10 @@ public class SettingPresenterImpl implements SettingPresenter {
 
         settingViewModel.cacheSizeText.set(context.getString(R.string.calculating));
 
-        new AsyncTask<Void, Void, Void>() {
+        Future<Boolean> future = threadManager.runOnCacheThread(new Callable<Boolean>() {
+
             @Override
-            protected Void doInBackground(Void... params) {
+            public Boolean call() throws Exception {
 
 /*                int alreadyUploadMediaCount = 0;
                 int totalUploadMediaCount = 0;
@@ -175,17 +184,21 @@ public class SettingPresenterImpl implements SettingPresenter {
 
                 mTotalCacheSize = FileUtil.getTotalCacheSize(context);
 
-                return null;
+                return true;
             }
+        });
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
+        try {
+            Boolean result = future.get();
 
+            if (result)
                 handleUploadMedia(context);
 
-            }
-        }.execute();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
     }
 

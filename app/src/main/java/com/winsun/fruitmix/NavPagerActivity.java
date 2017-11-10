@@ -62,6 +62,8 @@ import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
@@ -81,6 +83,9 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState.CREATE_FOLDER_FAIL;
 import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState.GET_FOLDER_FAIL;
@@ -320,6 +325,8 @@ public class NavPagerActivity extends BaseActivity
 
     private ActivityNavPagerBinding binding;
 
+    private ThreadManager threadManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -327,6 +334,8 @@ public class NavPagerActivity extends BaseActivity
         mContext = this;
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_nav_pager);
+
+        threadManager = ThreadManagerImpl.getInstance();
 
         mDrawerLayout = binding.drawerLayout;
 
@@ -524,51 +533,6 @@ public class NavPagerActivity extends BaseActivity
         binding.setViewModel(navPagerViewModel);
 
         binding.executePendingBindings();
-    }
-
-    private void calcAlreadyUploadMediaCount(final List<Media> medias) {
-
-        if (medias == null) {
-
-            Log.w(TAG, "calc already upload medias", new NullPointerException());
-
-            return;
-
-        }
-
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-
-                int alreadyUploadMediaCount = 0;
-                int totalUploadMediaCount = 0;
-
-                /*for (Media media : medias) {
-
-                    if (checkMediaIsUploadStrategy.isMediaUploaded(media))
-                        alreadyUploadMediaCount++;
-
-                    totalUploadMediaCount++;
-                }*/
-
-                alreadyUploadMediaCount = uploadMediaUseCase.getAlreadyUploadedMediaCount();
-                totalUploadMediaCount = uploadMediaUseCase.getLocalMedias().size();
-
-                mAlreadyUploadMediaCount = alreadyUploadMediaCount;
-                mTotalLocalMediaCount = totalUploadMediaCount;
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-
-                handleUploadMediaCount();
-
-            }
-        }.execute();
-
     }
 
     private void handleUploadMediaCount() {
@@ -1012,39 +976,44 @@ public class NavPagerActivity extends BaseActivity
     }
 
     private void handleLogoutOnClick() {
-        new AsyncTask<Void, Void, Void>() {
+
+        showProgressDialog(String.format(getString(R.string.operating_title), getString(R.string.logout)));
+
+        Future<Boolean> future = threadManager.runOnCacheThread(new Callable<Boolean>() {
 
             @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-
-                showProgressDialog(String.format(getString(R.string.operating_title), getString(R.string.logout)));
-
-            }
-
-            @Override
-            protected Void doInBackground(Void... params) {
-
-//                LocalCache.clearToken(mContext);
-//
-//                FileDownloadManager.getInstance().clearFileDownloadItems();
+            public Boolean call() throws Exception {
 
                 logoutUseCase.logout();
 
-                return null;
+                return true;
             }
+        });
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
+        try {
+            Boolean result = future.get();
 
-                dismissDialog();
+            dismissDialog();
 
-                EquipmentSearchActivity.gotoEquipmentActivity((Activity) mContext, true);
+            EquipmentSearchActivity.gotoEquipmentActivity((Activity) mContext, true);
 
-            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
 
-        }.execute();
+            dismissDialog();
+
+            showToast(getString(R.string.fail, getString(R.string.logout)));
+
+
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+
+            dismissDialog();
+
+            showToast(getString(R.string.fail, getString(R.string.logout)));
+
+        }
+
     }
 
 }

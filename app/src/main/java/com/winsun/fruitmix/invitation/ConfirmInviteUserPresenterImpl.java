@@ -9,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
-import com.android.volley.toolbox.StringRequest;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
@@ -26,10 +24,7 @@ import com.winsun.fruitmix.invitation.data.InvitationDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
@@ -143,24 +138,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
                 createMap(data);
 
-                List<ViewItem> viewItems = createViewItems(mConfirmInviteUserMaps);
-
-                if (viewItems.isEmpty()) {
-
-                    noContentViewModel.showNoContent.set(true);
-
-                    confirmInviteUserView.setInviteUserFabVisibility(View.VISIBLE);
-
-                } else {
-
-                    noContentViewModel.showNoContent.set(false);
-
-                    confirmInviteUserView.setInviteUserFabVisibility(View.VISIBLE);
-
-                    adapter.setViewItems(viewItems);
-                    adapter.notifyDataSetChanged();
-
-                }
+                handleInvitation();
 
             }
 
@@ -178,6 +156,27 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
             }
         });
+    }
+
+    private void handleInvitation() {
+        List<ViewItem> viewItems = createViewItems(mConfirmInviteUserMaps);
+
+        if (viewItems.size() == 0) {
+
+            noContentViewModel.showNoContent.set(true);
+
+            confirmInviteUserView.setInviteUserFabVisibility(View.VISIBLE);
+
+        } else {
+
+            noContentViewModel.showNoContent.set(false);
+
+            confirmInviteUserView.setInviteUserFabVisibility(View.VISIBLE);
+
+            adapter.setViewItems(viewItems);
+            adapter.notifyDataSetChanged();
+
+        }
     }
 
     private void createMap(List<ConfirmInviteUser> data) {
@@ -288,8 +287,8 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
             if (confirmInviteUsers.isEmpty())
                 mConfirmInviteUserMaps.remove(ticketUUID);
 
-            adapter.setViewItems(createViewItems(mConfirmInviteUserMaps));
-            adapter.notifyDataSetChanged();
+            handleInvitation();
+
         }
 
     }
@@ -475,8 +474,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
         mConfirmInviteUserMaps.clear();
         createMap(confirmInviteUsers);
 
-        adapter.setViewItems(createViewItems(mConfirmInviteUserMaps));
-        adapter.notifyDataSetChanged();
+        handleInvitation();
 
     }
 

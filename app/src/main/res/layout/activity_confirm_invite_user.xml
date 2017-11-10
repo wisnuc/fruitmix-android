@@ -37,14 +37,14 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/fafafa">
+            android:layout_height="match_parent">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/confirm_ticket_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingTop="8dp"/>
+                android:background="@color/fafafa"
+                android:paddingTop="8dp" />
 
             <include
                 layout="@layout/new_loading_layout"

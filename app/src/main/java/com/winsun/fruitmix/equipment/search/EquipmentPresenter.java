@@ -131,7 +131,7 @@ public class EquipmentPresenter {
 
                     Equipment equipment = (Equipment) msg.obj;
 
-                    Log.d(TAG, "handleMessage: retry get user equipment_blue host0: " + equipment.getHosts().get(0));
+                    Log.d(TAG, "handleMessage: retry get user equipment host0: " + equipment.getHosts().get(0));
 
                     getEquipmentInfo(equipment);
 
@@ -254,9 +254,9 @@ public class EquipmentPresenter {
 
         onPause = false;
 
-        stopDiscovery();
         startDiscovery();
 
+        Log.d(TAG, "onResume: start discovery");
     }
 
     public void onPause() {
@@ -265,6 +265,10 @@ public class EquipmentPresenter {
 
         mHandler.removeMessages(RETRY_GET_DATA);
         mHandler.removeMessages(DATA_CHANGE);
+
+        stopDiscovery();
+
+        Log.d(TAG, "onPause: stop discovery");
 
     }
 
@@ -433,6 +437,9 @@ public class EquipmentPresenter {
     }
 
     private void handleRetrieveUserFail(Equipment equipment) {
+
+        equipmentSerialNumbers.remove(equipment.getSerialNumber());
+        equipmentIps.remove(equipment.getHosts().get(0));
 
         if (mHandler != null && !onPause) {
             Message message = Message.obtain(mHandler, RETRY_GET_DATA, equipment);

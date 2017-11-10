@@ -203,8 +203,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     public static void startPhotoSliderActivity(View toolbar, Activity activity, List<Media> transitionMedias, Intent intent, int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
-        //TODO:add video support when scroll page
-
         setMediaList(transitionMedias);
 
         if (transitionView == null || transitionView.isLoaded()) {

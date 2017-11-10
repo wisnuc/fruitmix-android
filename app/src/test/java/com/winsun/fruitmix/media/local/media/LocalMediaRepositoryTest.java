@@ -21,8 +21,10 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
@@ -64,6 +66,9 @@ public class LocalMediaRepositoryTest {
     private String testMediaOriginalPath = "testMediaOriginalPath";
     private String testMediaOriginalPathFromSystemDB = "testMediaOriginalPathFromSystemDB";
 
+    private String testVideoOriginalPath = "testVideoOriginalPath";
+    private String testVideoOriginalPathFromSystemDB = "testVideoOriginalPathFromSystemDB";
+
     private Media createMediaFromAppDB() {
         Media media = new Media();
         media.setOriginalPhotoPath(testMediaOriginalPath);
@@ -71,8 +76,23 @@ public class LocalMediaRepositoryTest {
         return media;
     }
 
+    private Media createVideoFromAppDB() {
+        Video video = new Video();
+        video.setOriginalPhotoPath(testVideoOriginalPath);
+
+        return video;
+    }
+
     @Test
     public void getMediaFromAppDBSucceed() {
+
+        Media media = createMediaFromAppDB();
+
+        getMediaFromAppDBSucceed(Collections.singletonList(media));
+
+    }
+
+    public void getMediaFromAppDBSucceed(List<Media> medias) {
 
         localMediaRepository.getMedia(new BaseLoadDataCallbackImpl<Media>());
 
@@ -80,29 +100,25 @@ public class LocalMediaRepositoryTest {
 
         verify(localMediaAppDBDataSource).getMedia(captor.capture());
 
-        Media media = createMediaFromAppDB();
+        captor.getValue().onSucceed(medias, new OperationSuccess());
 
-        captor.getValue().onSucceed(Collections.singletonList(media), new OperationSuccess());
+        assertEquals(medias.size(), localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.size());
 
-        assertEquals(1, localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.size());
-
-        assertNotNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testMediaOriginalPath));
+        assertNotNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(medias.get(0).getOriginalPhotoPath()));
 
     }
+
 
     //TODO:add newVideo logic test
 
     @Test
-    public void getMediaFromSystemDBSucceed_HasNoNewMediaAndNoPreMediaDeleted() {
+    public void getMediaFromSystemDBSucceed_HasNoNewMediaOrVideoAndNoPreMediaDeleted() {
 
         getMediaFromAppDBSucceed();
 
         ArgumentCaptor<MediaInSystemDBLoadCallback> localMediaSystemDBLoadCallback = ArgumentCaptor.forClass(MediaInSystemDBLoadCallback.class);
 
         verify(localMediaSystemDBDataSource).getMedia(ArgumentMatchers.<String>anyCollection(), localMediaSystemDBLoadCallback.capture());
-
-        Media newMediaFromSystemDB = new Media();
-        newMediaFromSystemDB.setOriginalPhotoPath(testMediaOriginalPathFromSystemDB);
 
         localMediaRepository.setCalcMediaDigestStrategy(calcMediaDigestStrategy);
 
@@ -126,16 +142,13 @@ public class LocalMediaRepositoryTest {
     }
 
     @Test
-    public void getMediaFromSystemDBSucceed_HasNoNewMediaAndPreMediaAlreadyDeleted() {
+    public void getMediaFromSystemDBSucceed_HasNoNewMediaOrVideoAndPreMediaAlreadyDeleted() {
 
         getMediaFromAppDBSucceed();
 
         ArgumentCaptor<MediaInSystemDBLoadCallback> localMediaSystemDBLoadCallback = ArgumentCaptor.forClass(MediaInSystemDBLoadCallback.class);
 
         verify(localMediaSystemDBDataSource).getMedia(ArgumentMatchers.<String>anyCollection(), localMediaSystemDBLoadCallback.capture());
-
-        Media newMediaFromSystemDB = new Media();
-        newMediaFromSystemDB.setOriginalPhotoPath(testMediaOriginalPathFromSystemDB);
 
         localMediaRepository.setCalcMediaDigestStrategy(calcMediaDigestStrategy);
 
@@ -159,7 +172,7 @@ public class LocalMediaRepositoryTest {
     }
 
     @Test
-    public void getMediaFromSystemDB_HasNewMediaAndPreMediaAlreadyDeleted() {
+    public void getMediaFromSystemDB_HasNewMediaNoNewVideoAndPreMediaAlreadyDeleted() {
 
         getMediaFromAppDBSucceed();
 
@@ -190,7 +203,7 @@ public class LocalMediaRepositoryTest {
     }
 
     @Test
-    public void getMediaFromSystemDB_HasNewMediaAndNoPreMediaDeleted() {
+    public void getMediaFromSystemDB_HasNewMediaNoNewVideoAndNoPreMediaDeleted() {
 
         getMediaFromAppDBSucceed();
 
@@ -218,6 +231,116 @@ public class LocalMediaRepositoryTest {
 
         verify(localMediaAppDBDataSource).insertMedias(ArgumentMatchers.<Media>anyCollection());
 
+    }
+
+    @Test
+    public void getMediaFromSystemDB_NoNewMediaHasNewVideoAndNoPreMediaOrVideoDeleted() {
+
+        getMediaFromAppDBSucceed();
+
+        Video video = new Video();
+        video.setOriginalPhotoPath(testVideoOriginalPathFromSystemDB);
+
+        ArgumentCaptor<MediaInSystemDBLoadCallback> localMediaSystemDBLoadCallback = ArgumentCaptor.forClass(MediaInSystemDBLoadCallback.class);
+
+        verify(localMediaSystemDBDataSource).getMedia(ArgumentMatchers.<String>anyCollection(), localMediaSystemDBLoadCallback.capture());
+
+        localMediaRepository.setCalcMediaDigestStrategy(calcMediaDigestStrategy);
+
+        when(calcMediaDigestStrategy.handleMedia(ArgumentMatchers.<Video>anyCollection())).thenReturn(Collections.<Video>emptyList()).thenReturn(Collections.singletonList(video));
+
+        localMediaSystemDBLoadCallback.getValue().onSucceed(Collections.singletonList(testMediaOriginalPath),
+                Collections.<String>emptyList(), Collections.<Media>emptyList(), Collections.singletonList(video), new OperationSuccess());
+
+        assertEquals(2, localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.size());
+
+        assertNotNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testMediaOriginalPath));
+
+        assertNotNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testVideoOriginalPathFromSystemDB));
+
+        verify(calcMediaDigestStrategy, times(2)).handleMedia(ArgumentMatchers.<Media>anyCollection());
+
+        verify(localMediaAppDBDataSource, never()).insertMedias(ArgumentMatchers.<Media>anyCollection());
+
+        verify(calcMediaDigestStrategy).handleMedia(Collections.singletonList(video));
+
+        verify(localMediaAppDBDataSource).insertVideos(ArgumentMatchers.<Video>anyCollection());
+
+    }
+
+
+    @Test
+    public void getMediaFromSystemDB_NoNewMediaOrVideoAndPreVideoDeleted() {
+
+        getMediaFromAppDBSucceed(Collections.singletonList(createVideoFromAppDB()));
+
+        ArgumentCaptor<MediaInSystemDBLoadCallback> localMediaSystemDBLoadCallback = ArgumentCaptor.forClass(MediaInSystemDBLoadCallback.class);
+
+        verify(localMediaSystemDBDataSource).getMedia(ArgumentMatchers.<String>anyCollection(), localMediaSystemDBLoadCallback.capture());
+
+        localMediaRepository.setCalcMediaDigestStrategy(calcMediaDigestStrategy);
+
+        when(calcMediaDigestStrategy.handleMedia(ArgumentMatchers.<Media>anyCollection())).thenReturn(Collections.<Media>emptyList());
+
+        localMediaSystemDBLoadCallback.getValue().onSucceed(Collections.<String>emptyList(), Collections.<String>emptyList(),
+                Collections.<Media>emptyList(), Collections.<Video>emptyList(), new OperationSuccess());
+
+        assertEquals(0, localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.size());
+
+        assertNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testVideoOriginalPath));
+
+        assertNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testVideoOriginalPathFromSystemDB));
+
+        verify(calcMediaDigestStrategy, times(2)).handleMedia(ArgumentMatchers.<Media>anyCollection());
+
+        verify(localMediaAppDBDataSource, never()).insertMedias(ArgumentMatchers.<Media>anyCollection());
+
+        verify(localMediaAppDBDataSource, never()).insertVideos(ArgumentMatchers.<Video>anyCollection());
+
+    }
+
+    @Test
+    public void getMediaFromSystemDB_HasNewMediaAndVideoAndPreVideoOrMediaDeleted() {
+
+        List<Media> medias = new ArrayList<>(2);
+        medias.add(createMediaFromAppDB());
+        medias.add(createVideoFromAppDB());
+
+        getMediaFromAppDBSucceed(medias);
+
+        ArgumentCaptor<MediaInSystemDBLoadCallback> localMediaSystemDBLoadCallback = ArgumentCaptor.forClass(MediaInSystemDBLoadCallback.class);
+
+        verify(localMediaSystemDBDataSource).getMedia(ArgumentMatchers.<String>anyCollection(), localMediaSystemDBLoadCallback.capture());
+
+        Media newMediaFromSystemDB = new Media();
+        newMediaFromSystemDB.setOriginalPhotoPath(testMediaOriginalPathFromSystemDB);
+
+        Video newVideoFromSystemDB = new Video();
+        newVideoFromSystemDB.setOriginalPhotoPath(testVideoOriginalPathFromSystemDB);
+
+        localMediaRepository.setCalcMediaDigestStrategy(calcMediaDigestStrategy);
+
+        when(calcMediaDigestStrategy.handleMedia(ArgumentMatchers.<Media>anyCollection())).thenReturn(Collections.singleton(newMediaFromSystemDB))
+                .thenReturn(Collections.<Media>singleton(newVideoFromSystemDB));
+
+        localMediaSystemDBLoadCallback.getValue().onSucceed(Collections.<String>emptyList(), Collections.<String>emptyList(),
+                Collections.singletonList(newMediaFromSystemDB), Collections.singletonList(newVideoFromSystemDB), new OperationSuccess());
+
+        assertEquals(2, localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.size());
+
+        assertNotNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testMediaOriginalPathFromSystemDB));
+
+        assertNotNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testVideoOriginalPathFromSystemDB));
+
+        assertNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testMediaOriginalPath));
+
+        assertNull(localMediaRepository.mediaConcurrentMapKeyIsOriginalPath.get(testVideoOriginalPath));
+
+        verify(calcMediaDigestStrategy, times(2)).handleMedia(ArgumentMatchers.<Media>anyCollection());
+
+        verify(localMediaAppDBDataSource).insertMedias(ArgumentMatchers.<Media>anyCollection());
+
+        verify(localMediaAppDBDataSource).insertVideos(ArgumentMatchers.<Video>anyCollection());
     }
 
     @Test

@@ -20,6 +20,7 @@ import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.user.BaseOperateUserPresenter;
 import com.winsun.fruitmix.user.OperateUserViewModel;
@@ -30,6 +31,10 @@ import com.winsun.fruitmix.wxapi.MiniProgram;
 import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
 import org.json.JSONException;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Created by Administrator on 2017/10/19.
@@ -53,13 +58,17 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
     private WeChatTokenUserWrapper mWeChatTokenUserWrapper;
 
+    private ThreadManager threadManager;
+
     public PersonInfoPresenter(UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
-                               PersonInfoView personInfoView, PersonInfoDataSource personInfoDataSource, LogoutUseCase logoutUseCase) {
+                               PersonInfoView personInfoView, PersonInfoDataSource personInfoDataSource, LogoutUseCase logoutUseCase,
+                               ThreadManager threadManager) {
         this.userDataRepository = userDataRepository;
         this.systemSettingDataSource = systemSettingDataSource;
         this.personInfoView = personInfoView;
         this.personInfoDataSource = personInfoDataSource;
         this.logoutUseCase = logoutUseCase;
+        this.threadManager = threadManager;
     }
 
     public User getCurrentUser() {
@@ -74,37 +83,44 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
     public void logout() {
 
-        new AsyncTask<Void, Void, Void>() {
+        personInfoView.showProgressDialog(String.format(personInfoView.getString(R.string.operating_title), personInfoView.getString(R.string.logout)));
+
+        Future<Boolean> future = threadManager.runOnCacheThread(new Callable<Boolean>() {
 
             @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-
-                personInfoView.showProgressDialog(String.format(personInfoView.getString(R.string.operating_title), personInfoView.getString(R.string.logout)));
-
-            }
-
-            @Override
-            protected Void doInBackground(Void... params) {
+            public Boolean call() throws Exception {
 
                 logoutUseCase.logout();
 
-                return null;
+                return true;
             }
+        });
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
+        try {
+            Boolean result = future.get();
 
-                personInfoView.dismissDialog();
+            personInfoView.dismissDialog();
 
-                personInfoView.setResultCode(NavPagerActivity.RESULT_FINISH_ACTIVITY);
+            personInfoView.setResultCode(NavPagerActivity.RESULT_FINISH_ACTIVITY);
 
-                EquipmentSearchActivity.gotoEquipmentActivity((Activity) personInfoView.getContext(), true);
+            EquipmentSearchActivity.gotoEquipmentActivity((Activity) personInfoView.getContext(), true);
 
-            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
 
-        }.execute();
+            personInfoView.dismissDialog();
+
+            personInfoView.showToast(personInfoView.getString(R.string.fail, personInfoView.getString(R.string.logout)));
+
+
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+
+            personInfoView.dismissDialog();
+
+            personInfoView.showToast(personInfoView.getString(R.string.fail, personInfoView.getString(R.string.logout)));
+
+        }
 
     }
 
