@@ -10,7 +10,9 @@ import android.widget.BaseExpandableListAdapter;
 
 import com.winsun.fruitmix.AccountManageActivity;
 import com.winsun.fruitmix.NavPagerActivity;
+import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.databinding.AccountChildItemBinding;
 import com.winsun.fruitmix.databinding.AccountGroupItemBinding;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
@@ -33,7 +35,7 @@ import static android.app.Activity.RESULT_OK;
  * Created by Administrator on 2017/6/22.
  */
 
-public class AccountManagePresenterImpl implements AccountManagePresenter {
+public class AccountManagePresenterImpl implements AccountManagePresenter,ActiveView {
 
     private AccountManageView view;
     private LoggedInUserDataSource loggedInUserDataSource;
@@ -97,7 +99,7 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
 
             String token = systemSettingDataSource.getCurrentLoginToken();
 
-            getAllBindingLocalUserUseCase.getAllBindingLocalUser(guid, token, new BaseLoadDataCallback<LoggedInWeChatUser>() {
+            getAllBindingLocalUserUseCase.getAllBindingLocalUser(guid, token, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<LoggedInWeChatUser>() {
                 @Override
                 public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
 
@@ -117,7 +119,7 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
                     mAdapter.notifyDataSetChanged();
 
                 }
-            });
+            },this));
 
         }
 
@@ -189,6 +191,11 @@ public class AccountManagePresenterImpl implements AccountManagePresenter {
             view.finishView();
         }
 
+    }
+
+    @Override
+    public boolean isActive() {
+        return view != null;
     }
 
     private class AccountExpandableListViewAdapter extends BaseExpandableListAdapter {

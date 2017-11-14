@@ -5,6 +5,7 @@ import android.widget.ImageView;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.equipment.manage.data.EquipmentInfoDataSource;
 import com.winsun.fruitmix.equipment.manage.model.BaseEquipmentInfo;
 import com.winsun.fruitmix.equipment.manage.model.EquipmentCPU;
@@ -38,12 +39,9 @@ public class EquipmentInfoPresenter extends BaseEquipmentInfoPresenter {
     @Override
     protected void getEquipmentInfoItem(final BaseLoadDataCallback<EquipmentInfoItem> callback) {
 
-        equipmentInfoDataSource.getBaseEquipmentInfo(new BaseLoadDataCallback<BaseEquipmentInfo>() {
+        equipmentInfoDataSource.getBaseEquipmentInfo(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<BaseEquipmentInfo>() {
             @Override
             public void onSucceed(List<BaseEquipmentInfo> data, OperationResult operationResult) {
-
-                if (equipmentInfoView == null)
-                    return;
 
                 handleGetBaseEquipmentInfoSucceed(data.get(0), callback);
 
@@ -55,7 +53,7 @@ public class EquipmentInfoPresenter extends BaseEquipmentInfoPresenter {
                 callback.onFail(operationResult);
 
             }
-        });
+        },this));
 
     }
 

@@ -10,4 +10,8 @@ public interface FileListSelectModeListener {
 
     void onFileItemLongClick();
 
+    void onFileSelectOperationUnavailable();
+
+    void onFileSelectOperationAvailable();
+
 }

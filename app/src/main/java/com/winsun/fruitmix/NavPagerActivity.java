@@ -699,6 +699,8 @@ public class NavPagerActivity extends BaseActivity
 //        ButlerService.unregisterUploadMediaCountChangeListener(this);
         uploadMediaUseCase.unregisterUploadMediaCountChangeListener(this);
 
+        mainPagePresenter.onDestroy();
+
         mContext = null;
 
     }
@@ -826,7 +828,7 @@ public class NavPagerActivity extends BaseActivity
     }
 
     private void showNeedAutoUploadDialog() {
-        new AlertDialog.Builder(mContext).setMessage(getString(R.string.need_auto_upload)).setPositiveButton(getString(R.string.backup), new DialogInterface.OnClickListener() {
+        new AlertDialog.Builder(mContext).setMessage(getString(R.string.need_auto_upload, getString(R.string.wisnuc_server))).setPositiveButton(getString(R.string.backup), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
@@ -992,6 +994,9 @@ public class NavPagerActivity extends BaseActivity
 
         try {
             Boolean result = future.get();
+
+            if (mContext == null)
+                return;
 
             dismissDialog();
 

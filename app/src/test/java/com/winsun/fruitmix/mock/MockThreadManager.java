@@ -4,6 +4,7 @@ import com.winsun.fruitmix.thread.manage.ThreadManager;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 /**
  * Created by Administrator on 2017/8/23.
@@ -17,12 +18,14 @@ public class MockThreadManager implements ThreadManager {
     }
 
     @Override
-    public void runOnCacheThread(Callable<Boolean> callable) {
+    public <V> Future<V> runOnCacheThread(Callable<V> callable) {
         try {
             callable.call();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return null;
     }
 
     @Override

@@ -30,7 +30,7 @@ public class RemoteEquipmentTypeInfoParser implements RemoteDatasParser<Equipmen
             equipmentTypeInfo.setType(type);
 
         } else {
-            type = EquipmentTypeInfo.VIRTUAL_MACHINE;
+            type = "";
 
             equipmentTypeInfo.setType(type);
         }

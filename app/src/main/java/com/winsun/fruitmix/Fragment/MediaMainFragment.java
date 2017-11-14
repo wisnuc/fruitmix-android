@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
@@ -254,15 +255,12 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 if (viewPager.getCurrentItem() == PAGE_PHOTO) {
 
                     if (!photoList.canEnterSelectMode()) {
-                        Toast.makeText(mContext, getString(R.string.no_photo_for_select), Toast.LENGTH_SHORT).show();
-
                         return;
                     }
 
                 } else if (viewPager.getCurrentItem() == PAGE_FILE) {
 
                     if (!fileFragment.canEnterSelectMode()) {
-                        Toast.makeText(mContext, getString(R.string.no_file_for_select), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -690,10 +688,13 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             mPhotoListRefresh = true;
     }
 
-    public void setSelectCountText(String text) {
+    public void setSelectCountText(String text, int selectCount) {
 //        title.setText(text);
 
         revealToolbarViewModel.selectCountTitleText.set(text);
+
+        if (selectCount > 0 && fab.getVisibility() != View.VISIBLE)
+            showFab();
 
     }
 
@@ -729,26 +730,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private void showChooseHeader() {
 
-//        fab.setVisibility(View.VISIBLE);
-
-        showFab();
-
         showRevealToolbarAnim();
-
-/*        toolbar.setNavigationIcon(R.drawable.ic_back_black);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (sInChooseMode) {
-                    hideChooseHeader();
-                    showBottomNavAnim();
-                } else {
-                    mListener.onBackPress();
-                }
-
-            }
-        });
-        lbRight.setVisibility(View.GONE);*/
 
         mListener.lockDrawer();
     }
@@ -759,7 +741,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         if (viewPager.getCurrentItem() == PAGE_PHOTO) {
             photoList.setSelectMode(sInChooseMode);
 
-            setSelectCountText(getString(R.string.select_photo));
+            setSelectCountText(getString(R.string.select_photo), 0);
         } else if (viewPager.getCurrentItem() == PAGE_FILE) {
 
             if (selectMode)
@@ -767,7 +749,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             else
                 fileFragment.quitSelectMode();
 
-            setSelectCountText(getString(R.string.select_file));
+            setSelectCountText(getString(R.string.select_file), 0);
         }
 
     }
@@ -938,7 +920,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         if (selectedItemCount == 0) {
             handleBackPressed();
         } else {
-            setSelectCountText(String.format(getString(R.string.select_photo_count), selectedItemCount));
+            setSelectCountText(String.format(getString(R.string.select_photo_count), selectedItemCount), selectedItemCount);
         }
 
     }
@@ -953,7 +935,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         enterSelectMode();
 
-        setSelectCountText(String.format(getString(R.string.select_photo_count), 1));
+        setSelectCountText(String.format(getString(R.string.select_photo_count), 1), 1);
     }
 
     @Override
@@ -965,13 +947,20 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         if (noPhotoItem && currentItem == PAGE_PHOTO) {
 
-            toolbarViewModel.showSelect.set(false);
+//            toolbarViewModel.showSelect.set(false);
+
+            toolbarViewModel.showSelect.set(true);
+
+            toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(getContext(), R.color.twenty_six_percent_black));
 
         } else if (!noPhotoItem && currentItem == PAGE_PHOTO) {
 
             toolbarViewModel.showSelect.set(true);
 
+            toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(getContext(), R.color.eighty_seven_percent_black));
+
         }
+
     }
 
     @Override
@@ -1249,15 +1238,13 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         enterSelectMode();
 
-        setSelectCountText(String.format(getString(R.string.select_file_count), 1));
+        setSelectCountText(String.format(getString(R.string.select_file_count), 1), 1);
 
     }
 
     private void enterSelectMode() {
         setSelectMode(true);
-
         showChooseHeader();
-
         dismissBottomNavAnim();
     }
 
@@ -1269,7 +1256,29 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         if (selectItemCount == 0) {
             quitSelectMode();
         } else
-            setSelectCountText(String.format(getString(R.string.select_file_count), selectItemCount));
+            setSelectCountText(String.format(getString(R.string.select_file_count), selectItemCount), selectItemCount);
+
+    }
+
+    @Override
+    public void onFileSelectOperationAvailable() {
+
+        Log.d(TAG, "onFileSelectOperationAvailable: ");
+
+        int currentItem = viewPager.getCurrentItem();
+
+        if (currentItem == PAGE_FILE) {
+            toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(getContext(), R.color.eighty_seven_percent_black));
+        }
+    }
+
+    @Override
+    public void onFileSelectOperationUnavailable() {
+
+        Log.d(TAG, "onFileSelectOperationUnavailable: ");
+
+        if (viewPager.getCurrentItem() == PAGE_FILE)
+            toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(getContext(), R.color.twenty_six_percent_black));
 
     }
 
@@ -1278,7 +1287,6 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         hideChooseHeader();
         showBottomNavAnim();
     }
-
 
     private void onDidAppear(int position) {
 

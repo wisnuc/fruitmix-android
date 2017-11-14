@@ -865,7 +865,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         boolean isGif = MediaUtil.checkMediaIsGif(media);
 
-        if (systemSettingDataSource.getLoginWithWechatCodeOrNot() && !isGif) {
+        if (systemSettingDataSource.getLoginWithWechatCodeOrNot() && !isGif && !media.isLocal()) {
 
             httpRequest = getLargeImageHttpRequest(media);
 
@@ -905,8 +905,19 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         int screenWidth = displayMetrics.widthPixels;
         int screenHeight = displayMetrics.heightPixels;
 
-        int mediaWidth = Integer.parseInt(media.getWidth());
-        int mediaHeight = Integer.parseInt(media.getHeight());
+        String mediaWidthStr = media.getWidth();
+        String mediaHeightStr = media.getHeight();
+
+        int mediaWidth = screenWidth;
+        int mediaHeight = screenHeight;
+
+        if (Util.isNumeric(mediaWidthStr)) {
+            mediaWidth = Integer.parseInt(media.getWidth());
+        }
+
+        if (Util.isNumeric(mediaHeightStr)) {
+            mediaHeight = Integer.parseInt(media.getHeight());
+        }
 
         if (screenWidth / screenHeight > mediaWidth / mediaHeight)
             httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight);

@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.parser;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import com.winsun.fruitmix.db.DBHelper;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -11,6 +12,8 @@ import com.winsun.fruitmix.util.FileUtil;
  * Created by Administrator on 2016/8/31.
  */
 public class LocalMediaParser implements LocalDataParser<Media> {
+
+    public static final String TAG = LocalMediaParser.class.getSimpleName();
 
     @Override
     public Media parse(Cursor cursor) {
@@ -52,5 +55,9 @@ public class LocalMediaParser implements LocalDataParser<Media> {
 
         media.setLongitude(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_LONGITUDE)));
         media.setLatitude(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_LATITUDE)));
+
+        Log.d(TAG, "setMediaValue: " + media);
+
     }
+
 }

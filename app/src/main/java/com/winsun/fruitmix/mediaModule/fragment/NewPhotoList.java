@@ -35,8 +35,10 @@ import android.widget.Toast;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.BR;
+import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.NewPhotoLayoutBinding;
 import com.winsun.fruitmix.databinding.NewPhotoTitleItemBinding;
@@ -80,7 +82,7 @@ import io.github.sin3hz.fastjumper.callback.SpannableCallback;
 /**
  * Created by Administrator on 2016/7/28.
  */
-public class NewPhotoList implements Page, IShowHideFragmentListener {
+public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView {
 
     public static final String TAG = NewPhotoList.class.getSimpleName();
 
@@ -305,10 +307,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private void refreshStationMediaForce() {
 
-        mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallbackImpl<Media>() {
+        mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
             @Override
             public void onSucceed(List<Media> data, OperationResult operationResult) {
-                super.onSucceed(data, operationResult);
 
                 Log.d(TAG, "onSucceed: refresh station media force");
 
@@ -317,19 +318,18 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             @Override
             public void onFail(OperationResult operationResult) {
-                super.onFail(operationResult);
 
                 finishSwipeRefreshAnimation();
 
             }
-        });
+        }, this));
 
     }
 
     @Override
     public void refreshViewForce() {
 
-        mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallback<Media>() {
+        mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
             @Override
             public void onSucceed(List<Media> data, OperationResult operationResult) {
 
@@ -345,7 +345,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 Log.d(TAG, "onFail: refresh view force");
 
             }
-        });
+        }, this));
 
     }
 
@@ -356,7 +356,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
             if (medias.size() < totalLocalMediaCount) {
 
-                mediaDataSourceRepository.getLocalMedia(new BaseLoadDataCallback<Media>() {
+                mediaDataSourceRepository.getLocalMedia(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
                     @Override
                     public void onSucceed(List<Media> data, OperationResult operationResult) {
 
@@ -368,7 +368,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                     public void onFail(OperationResult operationResult) {
 
                     }
-                });
+                }, this));
 
             }
 
@@ -416,7 +416,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
     private void getMediaInThread() {
 
-        mediaDataSourceRepository.getMedia(new BaseLoadDataCallback<Media>() {
+        if (mPhotoListListener != null)
+            mPhotoListListener.onNoPhotoItem(true);
+
+        mediaDataSourceRepository.getMedia(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
             @Override
             public void onSucceed(final List<Media> data, final OperationResult operationResult) {
 
@@ -443,8 +446,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
 
                 mIsLoading = false;
 
+                if (mPhotoListListener != null)
+                    mPhotoListListener.onNoPhotoItem(true);
+
             }
-        });
+        }, this));
 
     }
 
@@ -470,7 +476,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
                 mIsLoaded = true;
             }
         }, data);
-
 
     }
 
@@ -798,6 +803,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener {
         containerActivity = null;
 
         mediaDataSourceRepository.unregisterCalcDigestCallback(calcMediaDigestCallback);
+    }
+
+    @Override
+    public boolean isActive() {
+        return containerActivity != null;
     }
 
     @Override

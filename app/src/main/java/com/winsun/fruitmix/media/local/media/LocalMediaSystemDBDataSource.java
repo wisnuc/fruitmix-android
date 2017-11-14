@@ -143,8 +143,6 @@ public class LocalMediaSystemDBDataSource {
             String longitude = cursor.getString(cursor.getColumnIndex(queryLongitude));
             String latitude = cursor.getString(cursor.getColumnIndex(queryLatitude));
 
-            Log.d(TAG, "getAllMedias: originalPhotoPath: " + media.getOriginalPhotoPath() + " longitude: " + longitude + " latitude: " + latitude);
-
             media.setLongitude(longitude);
             media.setLatitude(latitude);
 
@@ -152,7 +150,7 @@ public class LocalMediaSystemDBDataSource {
 
             media.setType(type);
 
-            Log.d(TAG, "getAllMedias: media type:" + type);
+            Log.d(TAG, "getAllMedias: media: " + media);
 
             medias.add(media);
 
@@ -252,6 +250,8 @@ public class LocalMediaSystemDBDataSource {
             String type = cursor.getString(cursor.getColumnIndex(queryType));
 
             video.setType(type);
+
+            Log.d(TAG, "getAllVideos: video: " + video);
 
             videos.add(video);
 

@@ -190,7 +190,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
             if (httpResponse != null && httpResponse.getResponseCode() == 200)
                 return new OperationSuccess();
             else
-                return new OperationJSONException();
+                return new OperationNetworkException(httpResponse);
 
         } catch (MalformedURLException e) {
 

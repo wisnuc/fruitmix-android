@@ -99,6 +99,9 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
         try {
             Boolean result = future.get();
 
+            if(personInfoView == null)
+                return;
+
             personInfoView.dismissDialog();
 
             personInfoView.setResultCode(NavPagerActivity.RESULT_FINISH_ACTIVITY);
@@ -257,6 +260,7 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
         User user = getCurrentUser();
         user.setAvatar(mWeChatTokenUserWrapper.getAvatarUrl());
+        user.setAssociatedWeChatGUID(mWeChatTokenUserWrapper.getGuid());
 
         userDataRepository.updateUser(user);
 

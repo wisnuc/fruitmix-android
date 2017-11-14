@@ -54,7 +54,7 @@ public class Station {
     }
 
     public String getFirstIp() {
-        return ips.get(0);
+        return ips.size() > 0 ? ips.get(0) : "";
     }
 
 

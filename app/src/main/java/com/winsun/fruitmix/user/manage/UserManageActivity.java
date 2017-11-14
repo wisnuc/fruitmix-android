@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.user.manage;
 
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.databinding.ObservableBoolean;
@@ -44,7 +45,7 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
             mToolbar.setElevation(0f);
         }
 
-        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this,R.color.white));
+        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.white));
 
         mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
 
@@ -66,7 +67,7 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
 
         userMangePresenter = new UserManagePresenterImpl(this, equipmentItemViewModel, userManageViewModel,
                 InjectUser.provideRepository(this), InjectEquipment.provideEquipmentDataSource(this),
-                InjectSystemSettingDataSource.provideSystemSettingDataSource(this),InjectStation.provideStationDataSource(this),
+                InjectSystemSettingDataSource.provideSystemSettingDataSource(this), InjectStation.provideStationDataSource(this),
                 InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
 
         binding.setUserPresenter(userMangePresenter);
@@ -107,6 +108,11 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
     public void gotoCreateUserActivity() {
         Intent intent = new Intent(this, CreateUserActivity.class);
         startActivityForResult(intent, Util.KEY_CREATE_USER_REQUEST_CODE);
+    }
+
+    @Override
+    public Context getContext() {
+        return this;
     }
 
     public class UserManageViewModel {

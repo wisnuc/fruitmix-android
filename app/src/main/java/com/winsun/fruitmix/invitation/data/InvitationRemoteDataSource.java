@@ -55,7 +55,7 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl impleme
 
         boolean state;
 
-        state = confirmInviteUser.getOperateType().equals(ConfirmInviteUser.OPERATE_TYPE_ACCEPT);
+        state = confirmInviteUser.getOperateType() == ConfirmInviteUser.OPERATE_TYPE_ACCEPT;
 
         JSONObject jsonObject = new JSONObject();
 

@@ -61,6 +61,12 @@ public class RemoteEquipmentInfoInControlSystemParser extends BaseRemoteDataPars
         JSONArray cpuInfos = jsonObject.optJSONArray("cpuInfo");
 
         EquipmentCPU equipmentCPU = new EquipmentCPU();
+
+        if (cpuInfos == null) {
+            equipmentInfoInControlSystem.setEquipmentCPU(equipmentCPU);
+            return;
+        }
+
         equipmentCPU.setCpuCoreNumber(cpuInfos.length());
 
         JSONObject cpuInfo0 = cpuInfos.optJSONObject(0);

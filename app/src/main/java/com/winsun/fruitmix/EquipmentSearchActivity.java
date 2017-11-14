@@ -293,4 +293,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     public EquipmentSearchManager getEquipmentSearchManager() {
         return InjectEquipment.provideEquipmentSearchManager(mContext);
     }
+
+    @Override
+    public Context getContext() {
+        return this;
+    }
 }

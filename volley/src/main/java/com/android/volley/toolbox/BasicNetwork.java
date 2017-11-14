@@ -266,6 +266,12 @@ public class BasicNetwork implements Network {
                 bytes.write(buffer, 0, count);
             }
             return bytes.toByteArray();
+        }catch (OutOfMemoryError error) {
+
+            error.printStackTrace();
+
+            throw new ServerError();
+
         } finally {
             try {
                 // Close the InputStream and release the resources by "consuming the content".

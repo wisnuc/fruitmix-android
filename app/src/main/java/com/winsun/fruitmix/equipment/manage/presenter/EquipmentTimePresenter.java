@@ -2,6 +2,7 @@ package com.winsun.fruitmix.equipment.manage.presenter;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.equipment.manage.data.EquipmentInfoDataSource;
 import com.winsun.fruitmix.equipment.manage.model.EquipmentTimeInfo;
 import com.winsun.fruitmix.equipment.manage.view.EquipmentInfoView;
@@ -28,12 +29,9 @@ public class EquipmentTimePresenter extends BaseEquipmentInfoPresenter {
     @Override
     protected void getEquipmentInfoItem(final BaseLoadDataCallback<EquipmentInfoItem> callback) {
 
-        equipmentInfoDataSource.getEquipmentTimeInfo(new BaseLoadDataCallback<EquipmentTimeInfo>() {
+        equipmentInfoDataSource.getEquipmentTimeInfo(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<EquipmentTimeInfo>() {
             @Override
             public void onSucceed(List<EquipmentTimeInfo> data, OperationResult operationResult) {
-
-                if(equipmentInfoView == null)
-                    return;
 
                 handleGetEquipmentTimeInfoSucceed(data.get(0), callback);
 
@@ -43,7 +41,7 @@ public class EquipmentTimePresenter extends BaseEquipmentInfoPresenter {
             public void onFail(OperationResult operationResult) {
                 callback.onFail(operationResult);
             }
-        });
+        },this));
 
     }
 

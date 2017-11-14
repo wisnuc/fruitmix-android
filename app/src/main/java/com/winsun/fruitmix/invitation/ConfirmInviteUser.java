@@ -6,10 +6,10 @@ package com.winsun.fruitmix.invitation;
 
 public class ConfirmInviteUser {
 
-    public static final String OPERATE_TYPE_ACCEPT = "accept";
-    public static final String OPERATE_TYPE_REFUSE = "refuse";
+    public static final int OPERATE_TYPE_ACCEPT = 1;
+    public static final int OPERATE_TYPE_REFUSE = 2;
 
-    public static final String OPERATE_TYPE_PENDING = "pending";
+    public static final int OPERATE_TYPE_PENDING = 0;
 
     private String createFormatTime;
     private String userName;
@@ -18,12 +18,16 @@ public class ConfirmInviteUser {
 
     private String userGUID;
 
-    private String operateType = OPERATE_TYPE_PENDING;
+    private int operateType = OPERATE_TYPE_PENDING;
 
     private String ticketUUID;
 
     public String getCreateFormatTime() {
-        return createFormatTime.substring(0, 10);
+
+        if (createFormatTime.length() > 10)
+            return createFormatTime.substring(0, 10);
+        else
+            return createFormatTime;
     }
 
     public void setCreateFormatTime(String createFormatTime) {
@@ -55,7 +59,7 @@ public class ConfirmInviteUser {
     }
 
     public String getUserGUID() {
-        return userGUID;
+        return userGUID == null ? "" : userGUID;
     }
 
     public void setUserGUID(String userUUID) {
@@ -70,11 +74,32 @@ public class ConfirmInviteUser {
         this.ticketUUID = ticketUUID;
     }
 
-    public String getOperateType() {
+    public int getOperateType() {
         return operateType;
     }
 
-    public void setOperateType(String operateType) {
+    public void setOperateType(int operateType) {
         this.operateType = operateType;
     }
+
+    public void setOperateType(String type) {
+
+        switch (type) {
+            case "pending":
+                setOperateType(OPERATE_TYPE_PENDING);
+                break;
+            case "resolved":
+                setOperateType(OPERATE_TYPE_ACCEPT);
+                break;
+            case "rejected":
+                setOperateType(OPERATE_TYPE_REFUSE);
+                break;
+            default:
+                setOperateType(OPERATE_TYPE_REFUSE);
+                break;
+        }
+
+    }
+
+
 }

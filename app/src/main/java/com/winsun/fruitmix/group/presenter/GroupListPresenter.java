@@ -6,7 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.winsun.fruitmix.BR;
+import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.databinding.GroupListItemBinding;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.TextComment;
@@ -28,7 +30,7 @@ import java.util.List;
  * Created by Administrator on 2017/7/21.
  */
 
-public class GroupListPresenter {
+public class GroupListPresenter implements ActiveView {
 
     private GroupRepository groupRepository;
 
@@ -66,7 +68,7 @@ public class GroupListPresenter {
 
     public void refreshGroups() {
 
-        groupRepository.getGroupList(new BaseLoadDataCallback<PrivateGroup>() {
+        groupRepository.getGroupList(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<PrivateGroup>() {
             @Override
             public void onSucceed(final List<PrivateGroup> data, OperationResult operationResult) {
 
@@ -94,9 +96,13 @@ public class GroupListPresenter {
 
 
             }
-        });
+        },this));
 
+    }
 
+    @Override
+    public boolean isActive() {
+        return groupListPageView != null;
     }
 
 

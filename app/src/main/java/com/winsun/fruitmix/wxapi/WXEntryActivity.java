@@ -17,7 +17,9 @@ import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
@@ -42,6 +44,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
     private ProgressDialog dialog;
 
     private Context mContext;
+
+    private ActiveView activeView;
 
     public interface WXEntryLoginCallback {
 
@@ -78,6 +82,13 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
         mContext = this;
 
         loginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
+
+        activeView = new ActiveView() {
+            @Override
+            public boolean isActive() {
+                return mContext != null;
+            }
+        };
 
         Log.d(TAG, "onCreate: ");
 
@@ -201,7 +212,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
         TokenDataSource tokenDataSource = InjectTokenRemoteDataSource.provideTokenDataSource(this);
 
-        tokenDataSource.getToken(code, new BaseLoadDataCallback<WeChatTokenUserWrapper>() {
+        tokenDataSource.getToken(code, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<WeChatTokenUserWrapper>() {
             @Override
             public void onSucceed(List<WeChatTokenUserWrapper> data, OperationResult operationResult) {
 
@@ -220,7 +231,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                 Toast.makeText(WXEntryActivity.this, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
             }
-        });
+        }, activeView));
 
     }
 
@@ -266,31 +277,32 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                     final WeChatTokenUserWrapper weChatTokenUserWrapper = operationMoreThanOneStation.getWeChatTokenUserWrapper();
 
                     InjectGetAllBindingLocalUserUseCase.provideInstance(WXEntryActivity.this).
-                            getAllBindingLocalUser(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(), new BaseLoadDataCallback<LoggedInWeChatUser>() {
-                                @Override
-                                public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
+                            getAllBindingLocalUser(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(),
+                                    new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<LoggedInWeChatUser>() {
+                                        @Override
+                                        public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
 
-                                    if (data.isEmpty()) {
+                                            if (data.isEmpty()) {
 
-                                        handleLoginFail(new OperationFail(R.string.no_binding_user_in_nas));
+                                                handleLoginFail(new OperationFail(R.string.no_binding_user_in_nas));
 
-                                    } else {
+                                            } else {
 
-                                        dismissDialog();
+                                                dismissDialog();
 
-                                        showChooseStationDialog(weChatTokenUserWrapper, data);
+                                                showChooseStationDialog(weChatTokenUserWrapper, data);
 
-                                    }
+                                            }
 
-                                }
+                                        }
 
-                                @Override
-                                public void onFail(OperationResult operationResult) {
+                                        @Override
+                                        public void onFail(OperationResult operationResult) {
 
-                                    handleLoginFail(operationResult);
+                                            handleLoginFail(operationResult);
 
-                                }
-                            });
+                                        }
+                                    }, activeView));
 
                 } else {
 

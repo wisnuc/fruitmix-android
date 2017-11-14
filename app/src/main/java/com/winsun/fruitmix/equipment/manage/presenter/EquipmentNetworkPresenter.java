@@ -2,6 +2,7 @@ package com.winsun.fruitmix.equipment.manage.presenter;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.equipment.manage.data.EquipmentInfoDataSource;
 import com.winsun.fruitmix.equipment.manage.model.EquipmentNetworkInfo;
 import com.winsun.fruitmix.equipment.manage.view.EquipmentInfoView;
@@ -34,12 +35,9 @@ public class EquipmentNetworkPresenter extends BaseEquipmentInfoPresenter {
     @Override
     protected void getEquipmentInfoItem(final BaseLoadDataCallback<EquipmentInfoItem> callback) {
 
-        equipmentInfoDataSource.getEquipmentNetworkInfo(new BaseLoadDataCallback<EquipmentNetworkInfo>() {
+        equipmentInfoDataSource.getEquipmentNetworkInfo(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<EquipmentNetworkInfo>() {
             @Override
             public void onSucceed(List<EquipmentNetworkInfo> data, OperationResult operationResult) {
-
-                if (equipmentInfoView == null)
-                    return;
 
                 handleGetEquipmentNetworkInfoSucceed(data.get(0), callback);
 
@@ -50,7 +48,8 @@ public class EquipmentNetworkPresenter extends BaseEquipmentInfoPresenter {
 
                 callback.onFail(operationResult);
             }
-        });
+
+        }, this));
 
     }
 

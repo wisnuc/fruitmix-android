@@ -717,7 +717,11 @@ public class UploadMediaUseCase {
 
                     Log.d(TAG, "uploadMediaInThread: upload error EEXIST,user uuid for name and retry upload");
 
-                    String fileName = needUploadedMedias.get(0).getUuid() + ".jpg";
+                    String fileUUID = needUploadedMedias.get(0).getUuid().substring(0, 20);
+
+                    String fileName = fileUUID + ".jpg";
+
+                    Log.d(TAG, "uploadMediaInThread: new upload file name: " + fileName);
 
                     uploadOneMedia(needUploadedMedias, fileName, uploadFolderUUID);
 
@@ -819,6 +823,7 @@ public class UploadMediaUseCase {
 
                                 handleUploadMediaFail(needUploadedMedias, media, uploadFolderUUID);
 
+                                return -1;
                             }
 
                         }

@@ -11,7 +11,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.databinding.ActivityLoginBinding;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginPresenter;
@@ -43,6 +45,8 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
 
     private LoginViewModel loginViewModel;
 
+    private ActiveView activeView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +56,7 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
 
         mToolbar = binding.toolbarLayout.toolbar;
 
-        if(Util.checkRunningOnLollipopOrHigher()){
+        if (Util.checkRunningOnLollipopOrHigher()) {
             mToolbar.setElevation(0f);
         }
 
@@ -91,6 +95,13 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
         binding.setLoginPresenter(this);
 
         loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
+
+        activeView = new ActiveView() {
+            @Override
+            public boolean isActive() {
+                return mContext != null;
+            }
+        };
 
     }
 
@@ -141,7 +152,7 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
     private void startNavPagerActivity() {
 
         Log.d(TAG, "startNavPagerActivity: ");
-        
+
         Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
         startActivity(jumpIntent);
         LoginActivity.this.setResult(RESULT_OK);
@@ -172,7 +183,7 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
     }
 
     private void loginInThread(LoadTokenParam loadTokenParam) {
-        loginUseCase.loginWithLoadTokenParam(loadTokenParam, new BaseLoadDataCallback<String>() {
+        loginUseCase.loginWithLoadTokenParam(loadTokenParam, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<String>() {
             @Override
             public void onSucceed(List<String> data, OperationResult operationResult) {
 
@@ -190,8 +201,7 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
                 Toast.makeText(LoginActivity.this, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
 
             }
-        });
+        }, activeView));
     }
-
 
 }

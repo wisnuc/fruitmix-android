@@ -22,4 +22,7 @@ public interface MainPagePresenter {
     void refreshNavigationLoggedInUsers();
 
     void notifyAdapterDataSetChanged();
+
+    void onDestroy();
+
 }

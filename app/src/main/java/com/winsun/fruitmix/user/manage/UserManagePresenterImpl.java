@@ -9,7 +9,9 @@ import android.widget.BaseAdapter;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.UserManageItemBinding;
 import com.winsun.fruitmix.equipment.search.EquipmentItemViewModel;
@@ -35,7 +37,7 @@ import java.util.Locale;
  * Created by Administrator on 2017/6/21.
  */
 
-public class UserManagePresenterImpl implements UserMangePresenter {
+public class UserManagePresenterImpl implements UserMangePresenter, ActiveView {
 
     public static final String TAG = UserManagePresenterImpl.class.getSimpleName();
 
@@ -91,7 +93,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
         if (currentIPWithHttpHead.equals(HttpRequestFactory.CLOUD_IP)) {
 
-            stationsDataSource.getStationsByWechatGUID(systemSettingDataSource.getCurrentLoginUserGUID(), new BaseLoadDataCallback<Station>() {
+            stationsDataSource.getStationsByWechatGUID(systemSettingDataSource.getCurrentLoginUserGUID(), new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Station>() {
                 @Override
                 public void onSucceed(List<Station> data, OperationResult operationResult) {
 
@@ -117,7 +119,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
                     handleGetEquipmentInfoFail();
 
                 }
-            });
+            }, this));
 
 
         } else {
@@ -141,7 +143,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
     private void getEquipmentInfo(final Station station) {
 
-        equipmentDataSource.getEquipmentTypeInfo(currentIP, new BaseLoadDataCallback<EquipmentTypeInfo>() {
+        equipmentDataSource.getEquipmentTypeInfo(currentIP, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<EquipmentTypeInfo>() {
             @Override
             public void onSucceed(List<EquipmentTypeInfo> data, OperationResult operationResult) {
 
@@ -159,12 +161,12 @@ public class UserManagePresenterImpl implements UserMangePresenter {
                 handleGetEquipmentInfoFail();
 
             }
-        });
+        }, this));
 
     }
 
     private void getEquipmentInfo() {
-        equipmentDataSource.getEquipmentTypeInfo(currentIP, new BaseLoadDataCallback<EquipmentTypeInfo>() {
+        equipmentDataSource.getEquipmentTypeInfo(currentIP, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<EquipmentTypeInfo>() {
             @Override
             public void onSucceed(List<EquipmentTypeInfo> data, OperationResult operationResult) {
 
@@ -180,7 +182,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
                 handleGetEquipmentInfoFail();
 
             }
-        });
+        }, this));
     }
 
     private void handleGetEquipmentInfoFail() {
@@ -191,7 +193,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
 
     private void setEquipmentInfo(EquipmentTypeInfo equipmentTypeInfo) {
 
-        String type = equipmentTypeInfo.getType();
+        String type = equipmentTypeInfo.getType(userManageView.getContext());
 
         if (type.equals(EquipmentTypeInfo.WS215I)) {
 
@@ -211,7 +213,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
     private void getUserInThread() {
 
         userDataRepository.setCacheDirty();
-        userDataRepository.getUsers(currentLoginUserUUID, new BaseLoadDataCallback<User>() {
+        userDataRepository.getUsers(currentLoginUserUUID, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(final List<User> data, OperationResult operationResult) {
 
@@ -231,7 +233,7 @@ public class UserManagePresenterImpl implements UserMangePresenter {
                 userManageViewModel.showUserListView.set(false);
 
             }
-        });
+        }, this));
 
     }
 
@@ -262,6 +264,11 @@ public class UserManagePresenterImpl implements UserMangePresenter {
     @Override
     public void onDestroy() {
         userManageView = null;
+    }
+
+    @Override
+    public boolean isActive() {
+        return userManageView != null;
     }
 
     @Override

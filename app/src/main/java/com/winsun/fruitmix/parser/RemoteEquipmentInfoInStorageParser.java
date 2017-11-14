@@ -30,37 +30,41 @@ public class RemoteEquipmentInfoInStorageParser extends BaseRemoteDataParser imp
 
         List<EquipmentInfoInStorage> equipmentInfoInStorages = new ArrayList<>();
 
-        for (int i = 0; i < volumes.length(); i++) {
+        if (volumes != null) {
 
-            JSONObject volume = volumes.optJSONObject(i);
+            for (int i = 0; i < volumes.length(); i++) {
 
-            EquipmentInfoInStorage equipmentInfoInStorage = new EquipmentInfoInStorage();
+                JSONObject volume = volumes.optJSONObject(i);
 
-            EquipmentFileSystem equipmentFileSystem = new EquipmentFileSystem();
+                EquipmentInfoInStorage equipmentInfoInStorage = new EquipmentInfoInStorage();
 
-            equipmentFileSystem.setUuid(volume.optString("fileSystemUUID"));
-            equipmentFileSystem.setType(volume.optString("fileSystemType"));
-            equipmentFileSystem.setNumber(volume.optInt("total"));
+                EquipmentFileSystem equipmentFileSystem = new EquipmentFileSystem();
 
-            JSONObject usage = volume.optJSONObject("usage");
+                equipmentFileSystem.setUuid(volume.optString("fileSystemUUID"));
+                equipmentFileSystem.setType(volume.optString("fileSystemType"));
+                equipmentFileSystem.setNumber(volume.optInt("total"));
 
-            JSONObject data = usage.optJSONObject("data");
+                JSONObject usage = volume.optJSONObject("usage");
 
-            equipmentFileSystem.setMode(data.optString("mode").toUpperCase());
+                JSONObject data = usage.optJSONObject("data");
 
-            equipmentInfoInStorage.setEquipmentFileSystem(equipmentFileSystem);
+                equipmentFileSystem.setMode(data.optString("mode").toUpperCase());
 
-            EquipmentStorage equipmentStorage = new EquipmentStorage();
+                equipmentInfoInStorage.setEquipmentFileSystem(equipmentFileSystem);
 
-            JSONObject overall = usage.optJSONObject("overall");
+                EquipmentStorage equipmentStorage = new EquipmentStorage();
 
-            equipmentStorage.setTotalSize(overall.optLong("deviceSize"));
-            equipmentStorage.setFreeSize(overall.optLong("free"));
-            equipmentStorage.setUserDataSize(data.optLong("size"));
+                JSONObject overall = usage.optJSONObject("overall");
 
-            equipmentInfoInStorage.setEquipmentStorage(equipmentStorage);
+                equipmentStorage.setTotalSize(overall.optLong("deviceSize"));
+                equipmentStorage.setFreeSize(overall.optLong("free"));
+                equipmentStorage.setUserDataSize(data.optLong("size"));
 
-            equipmentInfoInStorages.add(equipmentInfoInStorage);
+                equipmentInfoInStorage.setEquipmentStorage(equipmentStorage);
+
+                equipmentInfoInStorages.add(equipmentInfoInStorage);
+
+            }
 
         }
 

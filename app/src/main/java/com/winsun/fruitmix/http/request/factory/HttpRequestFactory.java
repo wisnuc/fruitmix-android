@@ -267,7 +267,6 @@ public class HttpRequestFactory {
 
     public synchronized HttpRequest createHttpGetRequestByCloudAPIWithWrap(String httpPath, String stationID) {
 
-
         BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
 
         return factory.createHttpGetRequest(httpPath, false);

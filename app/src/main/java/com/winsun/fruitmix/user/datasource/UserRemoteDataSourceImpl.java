@@ -91,7 +91,7 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
     }
 
     private void getOtherUsers(final List<User> users, final BaseLoadDataCallback<User> callback) {
-        HttpRequest loginHttpRequest = httpRequestFactory.createGetRequestByPathWithoutToken(USER_PARAMETER);
+        HttpRequest loginHttpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER);
 
         wrapper.loadCall(loginHttpRequest, new BaseLoadDataCallback<User>() {
 

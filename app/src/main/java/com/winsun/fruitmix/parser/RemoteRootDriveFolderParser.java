@@ -38,6 +38,9 @@ public class RemoteRootDriveFolderParser extends BaseRemoteDataParser implements
 
                 JSONArray writeList = object.optJSONArray("writelist");
 
+                if (writeList == null)
+                    continue;
+
                 for (int j = 0; j < writeList.length(); j++)
                     file.addWriteList(writeList.optString(j));
 

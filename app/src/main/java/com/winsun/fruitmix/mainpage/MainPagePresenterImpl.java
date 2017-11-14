@@ -11,7 +11,9 @@ import android.view.ViewGroup;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource;
 import com.winsun.fruitmix.equipment.search.data.EquipmentTypeInfo;
@@ -39,7 +41,7 @@ import java.util.List;
  * Created by Administrator on 2017/6/23.
  */
 
-public class MainPagePresenterImpl implements MainPagePresenter {
+public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
 
     public static final String TAG = MainPagePresenterImpl.class.getSimpleName();
 
@@ -106,6 +108,16 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         bindingWeChatLoggedInUser = new ArrayList<>();
 
+    }
+
+    @Override
+    public void onDestroy() {
+        mainPageView = null;
+    }
+
+    @Override
+    public boolean isActive() {
+        return mainPageView != null;
     }
 
     @Override
@@ -249,7 +261,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
                 currentIP = currentIPWithHttpHead;
             }
 
-            equipmentDataSource.getEquipmentTypeInfo(currentIP, new BaseLoadDataCallback<EquipmentTypeInfo>() {
+            equipmentDataSource.getEquipmentTypeInfo(currentIP, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<EquipmentTypeInfo>() {
                 @Override
                 public void onSucceed(List<EquipmentTypeInfo> data, OperationResult operationResult) {
 
@@ -261,7 +273,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
                 public void onFail(OperationResult operationResult) {
                     navPagerViewModel.equipmentNameVisibility.set(false);
                 }
-            });
+            }, this));
 
             Iterator<LoggedInUser> iterator = loggedInUsers.iterator();
             while (iterator.hasNext()) {
@@ -319,7 +331,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
 
         String token = systemSettingDataSource.getCurrentLoginToken();
 
-        getAllBindingLocalUserUseCase.getAllBindingLocalUser(guid, token, new BaseLoadDataCallback<LoggedInWeChatUser>() {
+        getAllBindingLocalUserUseCase.getAllBindingLocalUser(guid, token, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<LoggedInWeChatUser>() {
             @Override
             public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
 
@@ -354,7 +366,7 @@ public class MainPagePresenterImpl implements MainPagePresenter {
                 callback.onFail(new OperationFail("fail on get binding local user"));
 
             }
-        });
+        }, this));
 
     }
 

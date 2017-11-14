@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.equipment.search;
 
+import android.content.Context;
+
 import com.winsun.fruitmix.equipment.search.data.Equipment;
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.user.User;
@@ -19,5 +21,7 @@ public interface EquipmentSearchView {
     int getCurrentViewPagerItem();
 
     EquipmentSearchManager getEquipmentSearchManager();
+
+    Context getContext();
 
 }

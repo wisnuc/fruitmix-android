@@ -46,4 +46,9 @@ public class Video extends Media {
 
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + " name: " + getName() + " size: " + getSize() + " duration: " + getFormatDuration();
+    }
+
 }

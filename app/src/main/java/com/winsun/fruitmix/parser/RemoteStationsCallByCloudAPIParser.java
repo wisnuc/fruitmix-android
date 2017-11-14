@@ -35,9 +35,13 @@ public class RemoteStationsCallByCloudAPIParser extends BaseRemoteDataParser imp
 
             JSONArray ips = jsonObject.optJSONArray("LANIP");
 
-            for (int j = 0;j < ips.length();j++){
+            if (ips == null)
+                continue;
+
+            for (int j = 0; j < ips.length(); j++) {
 
                 station.addIp(ips.optString(j));
+
             }
 
             station.setOnline(jsonObject.optBoolean("isOnline"));

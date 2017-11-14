@@ -33,7 +33,7 @@ public class RemoteEquipmentNetworkInfoParser extends BaseRemoteDataParser imple
             if (rootJsonObject.has("ipAddresses")) {
 
                 ipAddresses = rootJsonObject.optJSONArray("ipAddresses");
-                if (ipAddresses.length() > 0)
+                if (ipAddresses != null && ipAddresses.length() > 0)
                     break;
             }
 

@@ -19,11 +19,11 @@ public class LocalVideoParser extends LocalMediaParser {
 
         Video video = new Video();
 
-        setMediaValue(cursor,path,video);
-
         video.setName(cursor.getString(cursor.getColumnIndex(DBHelper.VIDEO_KEY_NAME)));
         video.setSize(cursor.getLong(cursor.getColumnIndex(DBHelper.VIDEO_KEY_SIZE)));
         video.setDuration(cursor.getLong(cursor.getColumnIndex(DBHelper.VIDEO_KEY_DURATION)));
+
+        setMediaValue(cursor,path,video);
 
         return video;
 

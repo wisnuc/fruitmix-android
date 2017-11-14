@@ -15,7 +15,9 @@ import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.EquipmentItemBinding;
@@ -42,7 +44,7 @@ import java.util.Random;
  * Created by Administrator on 2017/8/15.
  */
 
-public class EquipmentPresenter {
+public class EquipmentPresenter implements ActiveView{
 
     public static final String TAG = EquipmentPresenter.class.getSimpleName();
 
@@ -286,6 +288,11 @@ public class EquipmentPresenter {
 
     }
 
+    @Override
+    public boolean isActive() {
+        return equipmentSearchView != null;
+    }
+
     public void handleInputIpbyByUser(String ip) {
         List<String> hosts = new ArrayList<>();
         hosts.add(ip);
@@ -386,7 +393,7 @@ public class EquipmentPresenter {
     }
 
     private void getEquipmentInfoInThread(final Equipment equipment) {
-        mEquipmentDataSource.getEquipmentTypeInfo(equipment.getHosts().get(0), new BaseLoadDataCallback<EquipmentTypeInfo>() {
+        mEquipmentDataSource.getEquipmentTypeInfo(equipment.getHosts().get(0), new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<EquipmentTypeInfo>() {
             @Override
             public void onSucceed(List<EquipmentTypeInfo> data, OperationResult operationResult) {
 
@@ -416,11 +423,11 @@ public class EquipmentPresenter {
                 getUserInThread(equipment);
 
             }
-        });
+        },this));
     }
 
     private void getUserInThread(final Equipment equipment) {
-        mEquipmentDataSource.getUsersInEquipment(equipment, new BaseLoadDataCallback<User>() {
+        mEquipmentDataSource.getUsersInEquipment(equipment, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
 
@@ -433,7 +440,7 @@ public class EquipmentPresenter {
 
                 handleRetrieveUserFail(equipment);
             }
-        });
+        },this));
     }
 
     private void handleRetrieveUserFail(Equipment equipment) {
@@ -589,7 +596,7 @@ public class EquipmentPresenter {
 
         if (equipmentTypeInfo != null) {
 
-            String type = equipmentTypeInfo.getType();
+            String type = equipmentTypeInfo.getType(equipmentSearchView.getContext());
 
             equipmentItemViewModel.type.set(type);
 

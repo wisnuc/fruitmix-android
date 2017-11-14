@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="72dp"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/white"
     android:gravity="center_vertical"
     android:orientation="vertical">
@@ -31,8 +32,8 @@
                 android:id="@+id/equipment_group_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/equipment_group_default_text"
                 android:textColor="@color/eighty_seven_percent_black"
+                tools:text="WISNUC"
                 android:textSize="16dp" />
 
             <TextView

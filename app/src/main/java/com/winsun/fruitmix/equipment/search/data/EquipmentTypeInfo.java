@@ -1,5 +1,9 @@
 package com.winsun.fruitmix.equipment.search.data;
 
+import android.content.Context;
+
+import com.winsun.fruitmix.R;
+
 /**
  * Created by Administrator on 2017/8/24.
  */
@@ -7,7 +11,6 @@ package com.winsun.fruitmix.equipment.search.data;
 public class EquipmentTypeInfo {
 
     public static final String WS215I = "ws215i";
-    public static final String VIRTUAL_MACHINE = "虚拟机";
 
     private String type;
     private String label;
@@ -19,8 +22,12 @@ public class EquipmentTypeInfo {
 
     }
 
-    public String getType() {
-        return type;
+    public String getType(Context context) {
+
+        if (type.isEmpty())
+            return context.getString(R.string.virtual_machine);
+        else
+            return type;
     }
 
     public void setType(String type) {

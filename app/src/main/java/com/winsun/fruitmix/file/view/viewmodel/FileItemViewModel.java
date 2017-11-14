@@ -2,6 +2,7 @@ package com.winsun.fruitmix.file.view.viewmodel;
 
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
+import android.databinding.ObservableInt;
 
 import com.winsun.fruitmix.R;
 
@@ -15,7 +16,6 @@ public class FileItemViewModel {
 
     public final ObservableBoolean showFileIcon = new ObservableBoolean(true);
 
-    public final ObservableField<Integer> fileIconBg = new ObservableField<>(R.drawable.round_circle);
-
-
+    public final ObservableInt fileIconBg = new ObservableInt(R.drawable.round_circle);
+    
 }

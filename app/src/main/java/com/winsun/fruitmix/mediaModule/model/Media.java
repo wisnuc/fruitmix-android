@@ -52,8 +52,8 @@ public class Media implements Parcelable {
         uuid = "";
         orientationNumber = 1;
         belongingMediaShareUUID = "";
-        width = "200";
-        height = "200";
+        width = "";
+        height = "";
         thumb = "";
         type = "JPEG";
         date = "";
@@ -448,4 +448,9 @@ public class Media implements Parcelable {
             return getUuid();
     }
 
+    @Override
+    public String toString() {
+        return "uuid: " + getUuid() + " path: " + getOriginalPhotoPath() + " width: " + getWidth()
+                + " height: " + getHeight() + " time: " + getTime() + " orientationNumber: " + getOrientationNumber();
+    }
 }

@@ -36,6 +36,9 @@ public class RemoteConfirmInviteUsersParser extends BaseRemoteDataParser impleme
 
             JSONArray users = rootObject.optJSONArray("users");
 
+            if(users == null)
+                continue;
+
             for (int j = 0; j < users.length(); j++) {
 
                 JSONObject user = users.getJSONObject(j);

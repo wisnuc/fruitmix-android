@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.winsun.fruitmix.BR;
+import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.databinding.EquipmentInfoDivideBinding;
 import com.winsun.fruitmix.databinding.EquipmentInfoItemBinding;
@@ -28,7 +29,7 @@ import java.util.List;
  * Created by Administrator on 2017/10/16.
  */
 
-public abstract class BaseEquipmentInfoPresenter {
+public abstract class BaseEquipmentInfoPresenter implements ActiveView{
 
     public static final String TAG = BaseEquipmentInfoPresenter.class.getSimpleName();
 
@@ -58,6 +59,11 @@ public abstract class BaseEquipmentInfoPresenter {
 
         equipmentInfoView = null;
 
+    }
+
+    @Override
+    public boolean isActive() {
+        return equipmentInfoView != null;
     }
 
     protected abstract void getEquipmentInfoItem(BaseLoadDataCallback<EquipmentInfoItem> callback);
