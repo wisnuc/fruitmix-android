@@ -7,14 +7,11 @@ import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collection;
-import java.util.concurrent.Callable;
 
 /**
  * Created by Administrator on 2016/11/18.
@@ -37,7 +34,7 @@ public class DeleteDownloadedFileCommand extends AbstractCommand {
     @Override
     public void execute() {
 
-        stationFileRepository.deleteDownloadedFile(files, currentUserUUID, new BaseOperateDataCallback<Void>() {
+        stationFileRepository.deleteFileFinishedTaskItems(files, currentUserUUID, new BaseOperateDataCallback<Void>() {
             @Override
             public void onSucceed(Void data, OperationResult result) {
 

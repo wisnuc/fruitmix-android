@@ -97,7 +97,7 @@
     <string name="my_file">My Files</string>
     <string name="my_photo">My Photos</string>
 
-    <string name="download_manage">Manage Download</string>
+    <string name="task_manage">Manage Task</string>
 
     <string name="account_manage">Manage Account</string>
 
@@ -240,9 +240,14 @@
     <!-- file download -->
 
     <string name="downloading">Downloading</string>
-    <string name="downloaded">Downloaded</string>
+    <string name="executed">Executed</string>
     <string name="download_failed">Download failed</string>
     <string name="no_download_record">No download record</string>
+
+    <string name="executing">Executing</string>
+
+    <string name="upload">Upload</string>
+
 
     <!-- hints -->
     <string name="success">%1$s succeeded</string>

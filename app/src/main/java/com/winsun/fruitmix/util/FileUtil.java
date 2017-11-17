@@ -21,6 +21,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.Video;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -76,6 +77,21 @@ public class FileUtil {
 
             return availableBlocks * blockSize > 0;
         }
+    }
+
+    public static String getExternalCacheDirPath(Context context) {
+
+        if (checkExternalStorageState()) {
+
+            File cacheDir = context.getExternalCacheDir();
+
+            if (cacheDir != null)
+                return cacheDir.getAbsolutePath();
+            else
+                return context.getCacheDir().getAbsolutePath();
+
+        } else
+            return context.getCacheDir().getAbsolutePath();
     }
 
     public static String getExternalStorageDirectoryPath() {
@@ -154,6 +170,38 @@ public class FileUtil {
 
     public static String getAudioRecordFolderPath() {
         return getDownloadFileStoreFolderPath() + AUDIO_RECORD_FOLDER_NAME;
+    }
+
+    public static boolean copyFileToDir(String srcFile, String destDir) {
+        File fileDir = new File(destDir);
+
+        if (!fileDir.exists()) {
+            boolean result = fileDir.mkdir();
+            if (result)
+                return false;
+        }
+
+        String destFile = destDir + File.separator + new File(srcFile).getName();
+
+        File file = new File(destFile);
+
+        if (file.exists())
+            return true;
+
+        try {
+            InputStream streamFrom = new FileInputStream(srcFile);
+            OutputStream streamTo = new FileOutputStream(destFile);
+            byte buffer[] = new byte[1024];
+            int len;
+            while ((len = streamFrom.read(buffer)) > 0) {
+                streamTo.write(buffer, 0, len);
+            }
+            streamFrom.close();
+            streamTo.close();
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     public static boolean writeBitmapToLocalPhotoMiniThumbnailFolder(Media media) {
@@ -670,6 +718,14 @@ public class FileUtil {
             }
 
         }
+
+    }
+
+    public static boolean checkFileExistInDownloadFolder(String fileName) {
+
+        File file = new File(FileUtil.getDownloadFileStoreFolderPath(), fileName);
+
+        return file.exists();
 
     }
 

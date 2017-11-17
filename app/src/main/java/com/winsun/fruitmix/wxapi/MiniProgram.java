@@ -64,12 +64,12 @@ public class MiniProgram {
 
         wxMediaMessage.title = context.getString(R.string.invite_mini_program_title);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(resources, R.mipmap.launcher_logo);
+        Bitmap bitmap = BitmapFactory.decodeResource(resources, R.drawable.invite_miniprogram_thumb);
 
-        Bitmap thumbBmp = Bitmap.createScaledBitmap(bitmap, THUMB_SIZE, THUMB_SIZE, true);
-        bitmap.recycle();
-        wxMediaMessage.thumbData = bmpToByteArray(thumbBmp, true);
-        wxMediaMessage.setThumbImage(bitmap);
+//        Bitmap thumbBmp = Bitmap.createScaledBitmap(bitmap, THUMB_SIZE, THUMB_SIZE, true);
+//        bitmap.recycle();
+
+        wxMediaMessage.thumbData = bmpToByteArray(bitmap, true);
 
         SendMessageToWX.Req req = new SendMessageToWX.Req();
         req.transaction = buildTransaction("miniprogram");

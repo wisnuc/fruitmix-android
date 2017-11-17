@@ -49,7 +49,7 @@
 
             </FrameLayout>
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -73,12 +73,25 @@
                     android:id="@+id/file_size"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@id/file_name"
                     android:text="@{fileDownloadedItemViewModel.fileSize}"
                     android:textColor="@color/fifty_four_percent_black"
                     android:textSize="12dp"
                     tools:text="100KB" />
 
-            </LinearLayout>
+                <TextView
+                    android:id="@+id/task_state"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/file_name"
+                    android:layout_marginLeft="8dp"
+                    android:text="@{fileDownloadedItemViewModel.taskState}"
+                    android:layout_toRightOf="@id/file_size"
+                    android:textColor="@color/fifty_four_percent_black"
+                    android:textSize="12dp"
+                    tools:text="已完成" />
+
+            </RelativeLayout>
 
         </RelativeLayout>
 

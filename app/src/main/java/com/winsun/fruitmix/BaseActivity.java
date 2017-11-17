@@ -86,7 +86,7 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
         EventBus.getDefault().unregister(this);
 
         super.onStop();
-        
+
     }
 
     @Override

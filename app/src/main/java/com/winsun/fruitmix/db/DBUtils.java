@@ -10,9 +10,15 @@ import android.util.Log;
 
 import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
+import com.winsun.fruitmix.file.data.upload.FileUploadErrorState;
+import com.winsun.fruitmix.file.data.upload.FileUploadFinishedState;
+import com.winsun.fruitmix.file.data.upload.FileUploadItem;
+import com.winsun.fruitmix.file.data.upload.FileUploadPendingState;
+import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.mediaModule.model.Video;
+import com.winsun.fruitmix.parser.FileFinishedTaskItemParser;
 import com.winsun.fruitmix.parser.LocalVideoParser;
 import com.winsun.fruitmix.parser.LocalWeChatUserParser;
 import com.winsun.fruitmix.user.User;
@@ -33,6 +39,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class DBUtils {
 
     private static final String TAG = DBUtils.class.getSimpleName();
+
+    public static final int FILE_UPLOAD_TASK_STATE_UNKNOWN = -1;
+    public static final int FILE_UPLOAD_TASK_STATE_PENDING = 0;
+    public static final int FILE_UPLOAD_TASK_STATE_FINISHED = 1;
+    public static final int FILE_UPLOAD_TASK_STATE_ERROR = 2;
 
     private DBHelper dbHelper;
     private SQLiteDatabase database;
@@ -154,18 +165,48 @@ public class DBUtils {
         return contentValues;
     }
 
+    public long insertFileUploadTaskItem(FinishedTaskItem finishedTaskItem) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues = createFileFinishedTaskItemContentValues(finishedTaskItem);
+
+        FileUploadItem fileUploadItem = (FileUploadItem) finishedTaskItem.getFileTaskItem();
+
+        contentValues.put(DBHelper.FILE_KEY_PATH_SOURCE_FROM_OTHER_APP, fileUploadItem.getFilePath());
+
+        FileUploadState fileUploadState = fileUploadItem.getFileUploadState();
+
+        if (fileUploadState instanceof FileUploadPendingState)
+            contentValues.put(DBHelper.FILE_KEY_UPLOAD_TASK_STATE, FILE_UPLOAD_TASK_STATE_PENDING);
+        else if (fileUploadState instanceof FileUploadFinishedState)
+            contentValues.put(DBHelper.FILE_KEY_UPLOAD_TASK_STATE, FILE_UPLOAD_TASK_STATE_FINISHED);
+        else if (fileUploadState instanceof FileUploadErrorState)
+            contentValues.put(DBHelper.FILE_KEY_UPLOAD_TASK_STATE, FILE_UPLOAD_TASK_STATE_ERROR);
+        else
+            contentValues.put(DBHelper.FILE_KEY_UPLOAD_TASK_STATE, FILE_UPLOAD_TASK_STATE_UNKNOWN);
+
+        returnValue = database.insert(DBHelper.UPLOAD_FILE_TABLE_NAME, null, contentValues);
+
+        return returnValue;
+
+    }
+
+
     public long insertDownloadedFile(FinishedTaskItem finishedTaskItem) {
 
         openWritableDB();
 
         long returnValue = 0;
 
-        returnValue = database.insert(DBHelper.DOWNLOADED_FILE_TABLE_NAME, null, createDownloadedFileContentValues(finishedTaskItem));
+        returnValue = database.insert(DBHelper.DOWNLOADED_FILE_TABLE_NAME, null, createFileFinishedTaskItemContentValues(finishedTaskItem));
 
         return returnValue;
     }
 
-    private ContentValues createDownloadedFileContentValues(FinishedTaskItem finishedTaskItem) {
+    private ContentValues createFileFinishedTaskItemContentValues(FinishedTaskItem finishedTaskItem) {
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.FILE_KEY_NAME, finishedTaskItem.getFileName());
@@ -383,16 +424,29 @@ public class DBUtils {
 
     }
 
-    public long deleteDownloadedFileByUUIDAndCreatorUUID(String fileUUID, String fileCreatorUUID) {
+    public long deleteFileUploadTaskByUUIDAndCreatorUUID(String fileUUID, String fileCreatorUUID) {
+
+        return deleteFileFinishedTaskItem(DBHelper.UPLOAD_FILE_TABLE_NAME, fileUUID, fileCreatorUUID);
+
+    }
+
+    public long deleteFileDownloadedTaskByUUIDAndCreatorUUID(String fileUUID, String fileCreatorUUID) {
+
+        return deleteFileFinishedTaskItem(DBHelper.DOWNLOADED_FILE_TABLE_NAME, fileUUID, fileCreatorUUID);
+    }
+
+    private long deleteFileFinishedTaskItem(String tableName, String fileUUID, String fileCreatorUUID) {
 
         openWritableDB();
 
-        long returnValue = database.delete(DBHelper.DOWNLOADED_FILE_TABLE_NAME, DBHelper.FILE_KEY_UUID + " = ? and " + DBHelper.FILE_KEY_CREATOR_UUID + " = ?", new String[]{fileUUID, fileCreatorUUID});
+        long returnValue = database.delete(tableName, DBHelper.FILE_KEY_UUID + " = ? and " + DBHelper.FILE_KEY_CREATOR_UUID + " = ?", new String[]{fileUUID, fileCreatorUUID});
 
         close();
 
         return returnValue;
+
     }
+
 
     public long deleteDownloadedFileByUUID(String fileUUID) {
 
@@ -597,24 +651,11 @@ public class DBUtils {
 
         while (cursor.moveToNext()) {
 
-            String fileName = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_NAME));
-            String fileUUID = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_UUID));
-            long fileSize = cursor.getLong(cursor.getColumnIndex(DBHelper.FILE_KEY_SIZE));
-            long fileTime = cursor.getLong(cursor.getColumnIndex(DBHelper.FILE_KEY_TIME));
+            FileDownloadItem fileDownloadItem = new FileDownloadItem();
 
-            String fileCreatorUUID;
-            if (cursor.isNull(cursor.getColumnIndex(DBHelper.FILE_KEY_CREATOR_UUID))) {
-                fileCreatorUUID = currentUserUUID;
-            } else {
-                fileCreatorUUID = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_CREATOR_UUID));
-            }
+            FileFinishedTaskItemParser parser = new FileFinishedTaskItemParser();
 
-            FileDownloadItem fileDownloadItem = new FileDownloadItem(fileName, fileSize, fileUUID);
-
-            FinishedTaskItem finishedTaskItem = new FinishedTaskItem(fileDownloadItem);
-
-            finishedTaskItem.setFileTime(fileTime);
-            finishedTaskItem.setFileCreatorUUID(fileCreatorUUID);
+            FinishedTaskItem finishedTaskItem = parser.fillFileTaskItem(fileDownloadItem, cursor, currentUserUUID);
 
             fileDownloadItems.add(finishedTaskItem);
         }
@@ -625,6 +666,37 @@ public class DBUtils {
 
         return fileDownloadItems;
     }
+
+    public List<FinishedTaskItem> getAllCurrentLoginUserUploadedFile(String currentUserUUID) {
+
+        openReadableDB();
+
+        List<FinishedTaskItem> finishedTaskItems = new ArrayList<>();
+
+        Cursor cursor = database.rawQuery(String.format("select * from %s where %s = ? and %s = ?", DBHelper.UPLOAD_FILE_TABLE_NAME, DBHelper.FILE_KEY_CREATOR_UUID, DBHelper.FILE_KEY_UPLOAD_TASK_STATE), new String[]{currentUserUUID, FILE_UPLOAD_TASK_STATE_FINISHED + ""});
+
+        while (cursor.moveToNext()) {
+
+            String filePathSourceFromOtherApp = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_PATH_SOURCE_FROM_OTHER_APP));
+
+            FileFinishedTaskItemParser parser = new FileFinishedTaskItemParser();
+
+            FileUploadItem fileUploadItem = new FileUploadItem();
+            fileUploadItem.setFilePath(filePathSourceFromOtherApp);
+
+            FinishedTaskItem finishedTaskItem = parser.fillFileTaskItem(fileUploadItem, cursor, currentUserUUID);
+
+            finishedTaskItems.add(finishedTaskItem);
+        }
+
+        cursor.close();
+
+        close();
+
+        return finishedTaskItems;
+
+    }
+
 
     public WeChatUser getWeChatUserByToken(String token, String stationID) {
 

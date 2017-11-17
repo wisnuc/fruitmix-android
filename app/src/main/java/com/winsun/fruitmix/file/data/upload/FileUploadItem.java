@@ -11,27 +11,22 @@ public class FileUploadItem extends FileTaskItem {
 
     private String filePath;
 
-    private String fileSourceFromAppName;
-
     private FileUploadState fileUploadState;
 
-    public FileUploadItem(String fileUUID,String fileName, long fileSize, String filePath) {
+    public FileUploadItem() {
+    }
+
+    public FileUploadItem(String fileUUID, String fileName, long fileSize, String filePath) {
         super(fileUUID,fileName, fileSize);
         this.filePath = filePath;
-
-        fileSourceFromAppName = "";
     }
 
     public String getFilePath() {
         return filePath;
     }
 
-    public void setFileSourceFromAppName(String fileSourceFromAppName) {
-        this.fileSourceFromAppName = fileSourceFromAppName;
-    }
-
-    public String getFileSourceFromAppName() {
-        return fileSourceFromAppName;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
     public void setFileUploadState(FileUploadState fileUploadState) {

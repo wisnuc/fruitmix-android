@@ -24,10 +24,6 @@ public class CustomApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        MobclickAgent.setDebugMode(true);
-        MobclickAgent.openActivityDurationTrack(false);
-        MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL);
-
         EventBus.builder().addIndex(new MyEventBusIndex()).installDefaultEventBus();
 
     }

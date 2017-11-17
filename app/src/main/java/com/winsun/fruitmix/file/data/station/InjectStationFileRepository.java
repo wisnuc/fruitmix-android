@@ -15,7 +15,9 @@ public class InjectStationFileRepository {
 
     public static StationFileRepository provideStationFileRepository(Context context) {
 
-        return StationFileRepositoryImpl.getInstance(provideStationFileDataSource(context), provideDownloadedFileDataSource(context), ThreadManagerImpl.getInstance());
+        return StationFileRepositoryImpl.getInstance(FileTaskManager.getInstance(),
+                provideStationFileDataSource(context), provideDownloadedFileDataSource(context),
+                provideUploadFileDataSource(context),ThreadManagerImpl.getInstance());
     }
 
 
@@ -27,8 +29,12 @@ public class InjectStationFileRepository {
 
     private static DownloadedFileDataSource provideDownloadedFileDataSource(Context context) {
 
-        return DownloadFileDataSourceImpl.getInstance(DBUtils.getInstance(context), FileTaskManager.getInstance());
+        return DownloadFileDataSourceImpl.getInstance(DBUtils.getInstance(context));
 
+    }
+
+    private static UploadFileDataSource provideUploadFileDataSource(Context context){
+        return new UploadFileDataSourceImpl(DBUtils.getInstance(context));
     }
 
 }

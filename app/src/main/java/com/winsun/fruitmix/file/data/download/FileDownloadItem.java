@@ -20,6 +20,9 @@ public class FileDownloadItem extends FileTaskItem {
 
     private FileDownloadState fileDownloadState;
 
+    public FileDownloadItem() {
+    }
+
     public FileDownloadItem(String fileName, long fileSize, String fileUUID) {
         super(fileUUID,fileName,fileSize);
     }

@@ -8,10 +8,10 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
+import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.OperationResultType;
-import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.network.NetworkState;
@@ -22,7 +22,7 @@ import com.winsun.fruitmix.parser.RemoteMkDirParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
-import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.util.FileUtil;
 
 import org.json.JSONException;
 
@@ -51,6 +51,8 @@ public class UploadFileUseCase {
 
     private String uploadFolderName;
 
+    private String fileTemporaryFolderPath;
+
     private String currentUserHome;
 
     private String currentUserUUID;
@@ -63,12 +65,13 @@ public class UploadFileUseCase {
 
     public UploadFileUseCase(UserDataRepository userDataRepository, StationFileRepository stationFileRepository,
                              SystemSettingDataSource systemSettingDataSource, NetworkStateManager networkStateManager,
-                             String uploadFolderName) {
+                             String uploadFolderName, String fileTemporaryFolderPath) {
         this.userDataRepository = userDataRepository;
         this.stationFileRepository = stationFileRepository;
         this.systemSettingDataSource = systemSettingDataSource;
         this.uploadFolderName = uploadFolderName;
         this.networkStateManager = networkStateManager;
+        this.fileTemporaryFolderPath = fileTemporaryFolderPath;
     }
 
     public void updateFile(final FileUploadState fileUploadState) {
@@ -178,7 +181,7 @@ public class UploadFileUseCase {
 
             Log.i(TAG, "uploaded folder exist");
 
-            startPrepareAutoUpload(fileUploadState);
+            checkFileExist(uploadFolderUUID, fileUploadState);
 
         } else {
             startCreateFolderAndUpload(fileUploadState);
@@ -189,6 +192,50 @@ public class UploadFileUseCase {
     private String getUploadFolderName() {
         return UPLOAD_FOLDER_NAME_PREFIX + uploadFolderName;
     }
+
+    private void checkFileExist(final String uploadFolderUUID, final FileUploadState fileUploadState) {
+
+        Log.i(TAG, "start checkFileExist");
+
+        stationFileRepository.getFile(currentUserHome, uploadFolderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
+            @Override
+            public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
+                super.onSucceed(data, operationResult);
+
+                for (AbstractRemoteFile file : data) {
+                    if (file instanceof RemoteFile) {
+
+                        String remoteFileHash = ((RemoteFile) file).getFileHash();
+
+                        if (remoteFileHash.equals(fileUploadState.getFileUploadItem().getFileUUID())) {
+
+                            FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
+
+                            fileUploadItem.setFileUploadState(new FileUploadFinishedState(fileUploadItem));
+
+                            handleUploadSucceed(fileUploadState.getFilePath(), fileUploadState.getFileUploadItem());
+
+                            return;
+                        }
+
+                    }
+
+                }
+
+                startPrepareAutoUpload(fileUploadState);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+                super.onFail(operationResult);
+
+                notifyError(fileUploadState);
+            }
+        });
+
+    }
+
 
     private void startCreateFolderAndUpload(FileUploadState fileUploadState) {
         Log.d(TAG, "init upload media hashs no upload folder");
@@ -365,8 +412,16 @@ public class UploadFileUseCase {
 
     private void startUploadFile(FileUploadState fileUploadState) {
 
-        if (!checkCanUploadFile())
+        if (!checkCanUploadFile()) {
+
+            notifyError(fileUploadState);
             return;
+        }
+
+        String fileOriginalPath = fileUploadState.getFilePath();
+        String fileName = fileUploadState.getFileUploadItem().getFileName();
+
+        boolean copyResult = FileUtil.copyFileToDir(fileOriginalPath, fileTemporaryFolderPath);
 
         LocalFile localFile = new LocalFile();
 
@@ -374,19 +429,47 @@ public class UploadFileUseCase {
 
         localFile.setFileHash(fileUploadItem.getFileUUID());
         localFile.setSize(fileUploadItem.getFileSize() + "");
-        localFile.setPath(fileUploadItem.getFilePath());
 
-        localFile.setName(fileUploadState.getFileUploadItem().getFileName());
+        if (copyResult)
+            localFile.setPath(fileTemporaryFolderPath + File.separator + fileName);
+        else
+            localFile.setPath(fileUploadItem.getFilePath());
+
+        localFile.setName(fileName);
 
         Log.d(TAG, "startUploadFile: file name: " + localFile.getName() + " file path: " + localFile.getPath()
                 + " file hash: " + localFile.getFileHash());
 
-        OperationResult result = stationFileRepository.uploadFileWithProgress(localFile, fileUploadState, currentUserHome, uploadFolderUUID,currentUserUUID);
+        OperationResult result = stationFileRepository.uploadFileWithProgress(localFile, fileUploadState, currentUserHome, uploadFolderUUID, currentUserUUID);
 
-        if (result.getOperationResultType() != OperationResultType.SUCCEED) {
+        if (result.getOperationResultType() == OperationResultType.SUCCEED) {
+
+            if (handleUploadSucceed(localFile.getPath(), fileUploadItem)) {
+
+                File file = new File(localFile.getPath());
+                boolean deleteTemporaryFileResult = file.delete();
+
+                Log.d(TAG, "startUploadFile: deleteTemporaryFileResult: " + deleteTemporaryFileResult);
+
+            }
+
+        } else {
+
+            Log.d(TAG, "startUploadFile: fail and notify error");
+
             notifyError(fileUploadState);
         }
 
+    }
+
+    private boolean handleUploadSucceed(String filePath, FileUploadItem fileUploadItem) {
+        stationFileRepository.insertFileUploadTask(fileUploadItem, currentUserUUID);
+
+        boolean copyToDownloadFolderResult = FileUtil.copyFileToDir(filePath, FileUtil.getDownloadFileStoreFolderPath());
+
+        Log.d(TAG, "startUploadFile: succeed,insert record and copy to download folder result: " + copyToDownloadFolderResult);
+
+        return copyToDownloadFolderResult;
     }
 
     private boolean checkCanUploadFile() {

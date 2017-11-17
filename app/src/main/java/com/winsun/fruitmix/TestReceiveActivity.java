@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.download.FileTaskManager;
@@ -61,6 +62,10 @@ public class TestReceiveActivity extends AppCompatActivity {
                 startTaskManageActivity(uploadFilePath);
 
             } else {
+
+                MobclickAgent.setDebugMode(true);
+                MobclickAgent.openActivityDurationTrack(false);
+                MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL);
 
                 handleAppIsNotRunning(uploadFilePath);
 

@@ -544,7 +544,7 @@ public class LoginUseCase extends BaseDataRepository {
 
         systemSettingDataSource.setCurrentLoginUserGUID("");
 
-        stationFileRepository.clearDownloadFileRecordInCache();
+        stationFileRepository.clearAllFileTaskItemInCache();
 
         newPhotoListDataLoader.setNeedRefreshData(true);
 

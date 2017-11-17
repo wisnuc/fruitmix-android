@@ -1,7 +1,10 @@
 package com.winsun.fruitmix.file.data.upload;
 
 import com.winsun.fruitmix.executor.UploadFileTask;
+import com.winsun.fruitmix.file.data.download.FileDownloadErrorState;
 import com.winsun.fruitmix.file.data.download.TaskState;
+import com.winsun.fruitmix.network.NetworkState;
+import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 
 import java.util.concurrent.Future;
@@ -16,10 +19,14 @@ public class FileStartUploadState extends FileUploadState {
 
     private UploadFileUseCase uploadFileUseCase;
 
-    public FileStartUploadState(FileUploadItem fileUploadItem, ThreadManager threadManager,UploadFileUseCase uploadFileUseCase) {
+    private NetworkStateManager networkStateManager;
+
+    public FileStartUploadState(FileUploadItem fileUploadItem, ThreadManager threadManager,UploadFileUseCase uploadFileUseCase,
+                                NetworkStateManager networkStateManager) {
         super(fileUploadItem);
         this.uploadFileUseCase = uploadFileUseCase;
         this.threadManager = threadManager;
+        this.networkStateManager = networkStateManager;
     }
 
     @Override
@@ -29,6 +36,13 @@ public class FileStartUploadState extends FileUploadState {
 
     @Override
     public void startWork() {
+
+        NetworkState networkState = networkStateManager.getNetworkState();
+
+        if (!networkState.isMobileConnected() && !networkState.isWifiConnected()) {
+            getFileUploadItem().setFileUploadState(new FileUploadErrorState(getFileUploadItem()));
+            return;
+        }
 
         UploadFileTask uploadFileTask = new UploadFileTask(this,uploadFileUseCase);
 

@@ -157,7 +157,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
             }
         };
         model.setMenuIconResId(R.drawable.navigation_file_menu_bg);
-        model.setMenuText(context.getString(R.string.download_manage));
+        model.setMenuText(context.getString(R.string.task_manage));
 
         mNavigationMenuItems.add(model);
 

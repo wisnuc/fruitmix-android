@@ -11,7 +11,10 @@ import com.winsun.fruitmix.file.data.upload.FileUploadItem;
 import com.winsun.fruitmix.file.data.upload.FileUploadPendingState;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.file.data.upload.InjectUploadFileCase;
+import com.winsun.fruitmix.network.InjectNetworkStateManager;
+import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.util.FileUtil;
 
 import java.util.ArrayList;
 
@@ -45,17 +48,17 @@ public class FileTaskManager {
         return instance;
     }
 
-    public void addDownloadedFile(FileTaskItem fileTaskItem) {
+    public void addFinishedFileTaskItem(FileTaskItem fileTaskItem) {
 
         if (checkIsAlreadyDownloadingStateOrDownloadedState(fileTaskItem.getFileUUID())) return;
 
         fileTaskItems.add(fileTaskItem);
 
-        if(fileTaskItem instanceof FileUploadItem){
+        if (fileTaskItem instanceof FileUploadItem) {
 
             ((FileUploadItem) fileTaskItem).setFileUploadState(new FileUploadFinishedState((FileUploadItem) fileTaskItem));
 
-        }else if (fileTaskItem instanceof FileDownloadItem){
+        } else if (fileTaskItem instanceof FileDownloadItem) {
 
             ((FileDownloadItem) fileTaskItem).setFileDownloadState(new FileDownloadFinishedState((FileDownloadItem) fileTaskItem));
 
@@ -63,7 +66,8 @@ public class FileTaskManager {
 
     }
 
-    public void addFileDownloadItem(FileDownloadItem fileDownloadItem, StationFileRepository stationFileRepository, String currentUserUUID) {
+    public void addFileDownloadItem(FileDownloadItem fileDownloadItem, StationFileRepository stationFileRepository,
+                                    NetworkStateManager networkStateManager, String currentUserUUID) {
 
         if (checkIsAlreadyDownloadingStateOrDownloadedState(fileDownloadItem.getFileUUID())) return;
 
@@ -71,11 +75,13 @@ public class FileTaskManager {
 
         if (checkDownloadingItemIsMax()) {
 
-            fileDownloadState = new FileDownloadPendingState(fileDownloadItem, stationFileRepository, currentUserUUID);
+            fileDownloadState = new FileDownloadPendingState(fileDownloadItem, stationFileRepository, currentUserUUID,
+                    networkStateManager);
 
         } else {
 
-            fileDownloadState = new FileStartDownloadState(fileDownloadItem, stationFileRepository, ThreadManagerImpl.getInstance(), currentUserUUID);
+            fileDownloadState = new FileStartDownloadState(fileDownloadItem, stationFileRepository,
+                    ThreadManagerImpl.getInstance(), currentUserUUID, networkStateManager);
         }
 
         // must first add and then set,because setFileDownloadState will call notifyDownloadStateChanged,update ui using fileTaskItems
@@ -95,10 +101,11 @@ public class FileTaskManager {
         FileUploadState fileUploadState;
 
         if (checkDownloadingItemIsMax()) {
-            fileUploadState = new FileUploadPendingState(fileUploadItem, InjectUploadFileCase.provideInstance(context));
+            fileUploadState = new FileUploadPendingState(fileUploadItem, InjectUploadFileCase.provideInstance(context),
+                    InjectNetworkStateManager.provideNetworkStateManager(context));
         } else {
             fileUploadState = new FileStartUploadState(fileUploadItem, ThreadManagerImpl.getInstance(),
-                    InjectUploadFileCase.provideInstance(context));
+                    InjectUploadFileCase.provideInstance(context), InjectNetworkStateManager.provideNetworkStateManager(context));
         }
 
         fileTaskItems.add(fileUploadItem);
@@ -201,7 +208,9 @@ public class FileTaskManager {
 
                     Log.d(TAG, "startPendingTaskItem: " + fileDownloadItem.getFileName());
 
-                    fileDownloadItem.setFileDownloadState(new FileStartDownloadState(fileDownloadItem, state.getStationFileRepository(), ThreadManagerImpl.getInstance(), state.getCurrentUserUUID()));
+                    fileDownloadItem.setFileDownloadState(new FileStartDownloadState(fileDownloadItem,
+                            state.getStationFileRepository(), ThreadManagerImpl.getInstance(), state.getCurrentUserUUID(),
+                            state.getNetworkStateManager()));
 
                 } else if (fileTaskItem instanceof FileUploadItem) {
 
@@ -212,7 +221,7 @@ public class FileTaskManager {
                     Log.d(TAG, "startPendingTaskItem: " + fileUploadItem.getFilePath());
 
                     fileUploadItem.setFileUploadState(new FileStartUploadState(fileUploadItem, ThreadManagerImpl.getInstance(),
-                            fileUploadPendingState.getUploadFileUseCase()));
+                            fileUploadPendingState.getUploadFileUseCase(), fileUploadPendingState.getNetworkStateManager()));
                 }
 
             }

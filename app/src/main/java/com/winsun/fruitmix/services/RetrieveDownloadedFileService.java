@@ -89,7 +89,7 @@ public class RetrieveDownloadedFileService extends IntentService {
         }
 
         for (FinishedTaskItem finishedTaskItem : downloadItems) {
-            fileTaskManager.addDownloadedFile( finishedTaskItem.getFileTaskItem());
+            fileTaskManager.addFinishedFileTaskItem( finishedTaskItem.getFileTaskItem());
         }
 
         EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_RETRIEVED, new OperationSuccess(R.string.download)));

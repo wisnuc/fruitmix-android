@@ -38,7 +38,7 @@ public class DeleteDownloadedFileTask implements Callable<Boolean> {
     public Boolean call() throws Exception{
 
         for (String fileUUID : fileUUIDs) {
-            dbUtils.deleteDownloadedFileByUUIDAndCreatorUUID(fileUUID, FNAS.userUUID);
+            dbUtils.deleteFileDownloadedTaskByUUIDAndCreatorUUID(fileUUID, FNAS.userUUID);
         }
 
         FileTaskManager.getInstance().deleteFileDownloadItem(fileUUIDs);

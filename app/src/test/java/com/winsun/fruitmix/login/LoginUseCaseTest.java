@@ -152,7 +152,7 @@ public class LoginUseCaseTest {
 
         verify(weChatUserDataSource, never()).getWeChatUser(eq(""), eq(""));
 
-        verify(stationFileRepository, never()).clearDownloadFileRecordInCache();
+        verify(stationFileRepository, never()).clearAllFileTaskItemInCache();
 
     }
 
@@ -325,7 +325,7 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).setCurrentLoginUserGUID(eq(""));
 
-        verify(stationFileRepository).clearDownloadFileRecordInCache();
+        verify(stationFileRepository).clearAllFileTaskItemInCache();
 
         verify(newPhotoListDataLoader).setNeedRefreshData(eq(true));
 
@@ -649,7 +649,7 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).setCurrentLoginUserGUID(eq(""));
 
-        verify(stationFileRepository).clearDownloadFileRecordInCache();
+        verify(stationFileRepository).clearAllFileTaskItemInCache();
 
         verify(newPhotoListDataLoader).setNeedRefreshData(eq(true));
 

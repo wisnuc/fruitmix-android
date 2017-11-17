@@ -36,6 +36,10 @@ public abstract class FileTaskItem {
         this.fileSize = fileSize;
     }
 
+    public void setFileUUID(String fileUUID) {
+        this.fileUUID = fileUUID;
+    }
+
     public String getFileUUID() {
         return fileUUID;
     }

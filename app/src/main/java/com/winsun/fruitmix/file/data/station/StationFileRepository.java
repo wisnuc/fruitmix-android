@@ -8,6 +8,7 @@ import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
+import com.winsun.fruitmix.file.data.upload.FileUploadItem;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -32,11 +33,11 @@ public interface StationFileRepository {
 
     void downloadFile(String currentUserUUID, FileDownloadState fileDownloadState, BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException;
 
-    List<FinishedTaskItem> getCurrentLoginUserDownloadedFileRecord(String currentLoginUserUUID);
+    void fillAllFinishTaskItemIntoFileTaskManager(String currentLoginUserUUID);
 
-    void clearDownloadFileRecordInCache();
+    void clearAllFileTaskItemInCache();
 
-    void deleteDownloadedFile(Collection<DownloadedFileWrapper> downloadedFileWrappers, String currentLoginUserUUID, BaseOperateDataCallback<Void> callback);
+    void deleteFileFinishedTaskItems(Collection<DownloadedFileWrapper> downloadedFileWrappers, String currentLoginUserUUID, BaseOperateDataCallback<Void> callback);
 
     void createFolder(String folderName,String driveUUID,String dirUUID,BaseOperateDataCallback<HttpResponse> callback);
 
@@ -45,5 +46,7 @@ public interface StationFileRepository {
     OperationResult uploadFile(LocalFile file, String driveUUID, String dirUUID);
 
     OperationResult uploadFileWithProgress(LocalFile file,FileUploadState fileUploadState,String driveUUID,String dirUUID,String currentLoginUserUUID);
+
+    boolean insertFileUploadTask(FileUploadItem fileUploadItem, String currentUserUUID);
 
 }

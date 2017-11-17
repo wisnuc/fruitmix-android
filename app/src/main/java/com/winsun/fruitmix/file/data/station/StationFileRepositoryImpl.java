@@ -1,28 +1,38 @@
 package com.winsun.fruitmix.file.data.station;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
+import com.winsun.fruitmix.file.data.download.FileTaskManager;
 import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
+import com.winsun.fruitmix.file.data.upload.FileUploadFinishedState;
+import com.winsun.fruitmix.file.data.upload.FileUploadItem;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
+
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,10 +41,14 @@ import java.util.List;
 
 public class StationFileRepositoryImpl extends BaseDataRepository implements StationFileRepository {
 
+    public static final String TAG = StationFileRepositoryImpl.class.getSimpleName();
+
     private static StationFileRepositoryImpl instance;
 
     private StationFileDataSource stationFileDataSource;
     private DownloadedFileDataSource downloadedFileDataSource;
+
+    private UploadFileDataSource uploadFileDataSource;
 
     List<AbstractRemoteFile> stationFiles;
 
@@ -42,18 +56,27 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
     boolean cacheDirty = true;
 
-    private StationFileRepositoryImpl(StationFileDataSource stationFileDataSource, DownloadedFileDataSource downloadedFileDataSource, ThreadManager threadManager) {
+    private FileTaskManager fileTaskManager;
+
+    private StationFileRepositoryImpl(FileTaskManager fileTaskManager, StationFileDataSource stationFileDataSource,
+                                      DownloadedFileDataSource downloadedFileDataSource,
+                                      UploadFileDataSource uploadFileDataSource, ThreadManager threadManager) {
         super(threadManager);
         this.stationFileDataSource = stationFileDataSource;
         this.downloadedFileDataSource = downloadedFileDataSource;
+        this.uploadFileDataSource = uploadFileDataSource;
+        this.fileTaskManager = fileTaskManager;
 
         stationFiles = new ArrayList<>();
 
     }
 
-    public static StationFileRepositoryImpl getInstance(StationFileDataSource stationFileDataSource, DownloadedFileDataSource downloadedFileDataSource, ThreadManager threadManager) {
+    public static StationFileRepositoryImpl getInstance(FileTaskManager fileTaskManager, StationFileDataSource stationFileDataSource,
+                                                        DownloadedFileDataSource downloadedFileDataSource,
+                                                        UploadFileDataSource uploadFileDataSource, ThreadManager threadManager) {
         if (instance == null)
-            instance = new StationFileRepositoryImpl(stationFileDataSource, downloadedFileDataSource, threadManager);
+            instance = new StationFileRepositoryImpl(fileTaskManager, stationFileDataSource,
+                    downloadedFileDataSource, uploadFileDataSource, threadManager);
         return instance;
     }
 
@@ -152,7 +175,9 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
                 finishedTaskItem.setFileTime(System.currentTimeMillis());
                 finishedTaskItem.setFileCreatorUUID(currentUserUUID);
 
-                downloadedFileDataSource.insertDownloadedFileRecord(finishedTaskItem);
+                boolean insertResult = downloadedFileDataSource.insertFileTask(finishedTaskItem);
+
+                Log.d(TAG, "onSucceed: insertFileDownloadFinishTask result: " + insertResult);
 
                 callback.onSucceed(fileDownloadState.getFileDownloadItem(), new OperationSuccess());
 
@@ -172,21 +197,29 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
 
     @Override
-    public List<FinishedTaskItem> getCurrentLoginUserDownloadedFileRecord(String currentLoginUserUUID) {
+    public void fillAllFinishTaskItemIntoFileTaskManager(String currentLoginUserUUID) {
 
-        return downloadedFileDataSource.getCurrentLoginUserDownloadedFileRecord(currentLoginUserUUID);
+        List<FinishedTaskItem> finishedTaskItems = downloadedFileDataSource.getCurrentLoginUserFileFinishedTaskItem(currentLoginUserUUID);
+
+        List<FinishedTaskItem> finishUploadTaskItems = uploadFileDataSource.getCurrentLoginUserFileFinishedTaskItem(currentLoginUserUUID);
+
+        finishedTaskItems.addAll(finishUploadTaskItems);
+
+        for (FinishedTaskItem finishedTaskItem : finishedTaskItems) {
+            fileTaskManager.addFinishedFileTaskItem(finishedTaskItem.getFileTaskItem());
+        }
 
     }
 
     @Override
-    public void clearDownloadFileRecordInCache() {
+    public void clearAllFileTaskItemInCache() {
 
-        downloadedFileDataSource.clearDownloadFileRecordInCache();
+        fileTaskManager.clearFileDownloadItems();
 
     }
 
     @Override
-    public void deleteDownloadedFile(final Collection<DownloadedFileWrapper> downloadedFileWrappers, final String currentLoginUserUUID, BaseOperateDataCallback<Void> callback) {
+    public void deleteFileFinishedTaskItems(final Collection<DownloadedFileWrapper> downloadedFileWrappers, final String currentLoginUserUUID, BaseOperateDataCallback<Void> callback) {
 
         final BaseOperateDataCallback<Void> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
@@ -204,10 +237,24 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
         for (DownloadedFileWrapper downloadedFileWrapper : downloadedFileWrappers) {
 
-            result = downloadedFileDataSource.deleteDownloadedFile(downloadedFileWrapper.getFileName());
+            boolean deleteUploadFileTaskResult = uploadFileDataSource.deleteFileTask(downloadedFileWrapper.getFileUnionKey(), currentLoginUserUUID);
+
+            if (!deleteUploadFileTaskResult) {
+
+                //delete upload file task return false,means no record found,delete it in download record table
+
+                result = downloadedFileDataSource.deleteDownloadedFile(downloadedFileWrapper.getFileName());
+
+                if (result) {
+                    downloadedFileDataSource.deleteFileTask(downloadedFileWrapper.getFileUnionKey(), currentLoginUserUUID);
+                }
+
+            } else
+                result = true;
 
             if (result)
-                downloadedFileDataSource.deleteDownloadedFileRecord(downloadedFileWrapper.getFileUnionKey(), currentLoginUserUUID);
+                fileTaskManager.deleteFileDownloadItem(Collections.singletonList(downloadedFileWrapper.getFileUnionKey()));
+
         }
 
         if (result)
@@ -249,16 +296,46 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
         OperationResult result = stationFileDataSource.uploadFileWithProgress(file, fileUploadState, driveUUID, dirUUID);
 
-        if (result.getOperationResultType() != OperationResultType.SUCCEED) {
+        FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
 
-            //insert into db
+        if (result instanceof OperationNetworkException) {
 
+            int code = ((OperationNetworkException) result).getHttpResponseCode();
 
+            Log.d(TAG, "upload onFail,error code: " + code);
+
+            HttpErrorBodyParser parser = new HttpErrorBodyParser();
+
+            try {
+                String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseBody());
+
+                if (messageInBody.contains(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE)) {
+
+                    fileUploadItem.setFileUploadState(new FileUploadFinishedState(fileUploadItem));
+
+                    result = new OperationSuccess();
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         return result;
 
     }
 
+    @Override
+    public boolean insertFileUploadTask(FileUploadItem fileUploadItem,String currentUserUUID) {
+        FinishedTaskItem finishedTaskItem = new FinishedTaskItem(fileUploadItem);
 
+        finishedTaskItem.setFileTime(System.currentTimeMillis());
+        finishedTaskItem.setFileCreatorUUID(currentUserUUID);
+
+        boolean insertResult = uploadFileDataSource.insertFileTask(finishedTaskItem);
+
+        Log.d(TAG, "onSucceed: insertFileUploadFinishTask result: " + insertResult);
+
+        return insertResult;
+    }
 }

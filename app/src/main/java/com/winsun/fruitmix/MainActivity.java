@@ -29,6 +29,10 @@ public class MainActivity extends Activity {
 
 //        Log.d(TAG, "onCreate: getDeviceInfo:" + getDeviceInfo(this));
 
+        MobclickAgent.setDebugMode(true);
+        MobclickAgent.openActivityDurationTrack(false);
+        MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL);
+
         Util.setRemoteMediaLoaded(false);
 
         Intent intent = new Intent();

@@ -12,6 +12,7 @@ public class FileDownloadedItemViewModel {
 
     public final ObservableField<String> fileName = new ObservableField<>();
     public final ObservableField<String> fileSize = new ObservableField<>();
+    public final ObservableField<String> taskState = new ObservableField<>();
 
     public final ObservableBoolean fileIconVisibility = new ObservableBoolean();
 

@@ -27,6 +27,7 @@ import com.winsun.fruitmix.file.view.viewmodel.FileViewModel;
 import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
+import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
@@ -64,7 +65,7 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
         view = onCreateView();
 
         filePresenter = new FilePresenter(activity, this, fileListSelectModeListener, InjectStationFileRepository.provideStationFileRepository(activity),
-                noContentViewModel, loadingViewModel, fileViewModel, handleFileListOperateCallback,
+                InjectNetworkStateManager.provideNetworkStateManager(activity), noContentViewModel, loadingViewModel, fileViewModel, handleFileListOperateCallback,
                 InjectUser.provideRepository(activity),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(activity), FileTaskManager.getInstance());
 
@@ -228,10 +229,9 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
         filePresenter.quitSelectMode();
     }
 
-    public void shareSelectFilesToOtherApp(){
+    public void shareSelectFilesToOtherApp() {
 
         filePresenter.shareSelectFilesToOtherApp(activity);
-
 
     }
 

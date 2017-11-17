@@ -1,29 +1,36 @@
 package com.winsun.fruitmix.file.data.station;
 
+import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
+import com.winsun.fruitmix.file.data.download.FileTaskManager;
 import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadPendingState;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.RemoteFolder;
+import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.mock.MockThreadManager;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.network.NetworkStateManager;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,7 +44,11 @@ import static org.junit.Assert.*;
  * Created by Administrator on 2017/7/19.
  */
 
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
 public class StationFileRepositoryTest {
+
+    //TODO:add UploadFileDataSource test
 
     private StationFileRepositoryImpl fileRepository;
 
@@ -47,6 +58,15 @@ public class StationFileRepositoryTest {
     @Mock
     private DownloadedFileDataSource downloadedFileDataSource;
 
+    @Mock
+    private UploadFileDataSource uploadFileDataSource;
+
+    @Mock
+    private FileTaskManager fileTaskManager;
+
+    @Mock
+    private NetworkStateManager networkStateManager;
+
     @Captor
     private ArgumentCaptor<BaseOperateDataCallback<FileDownloadItem>> captor;
 
@@ -55,7 +75,8 @@ public class StationFileRepositoryTest {
 
         MockitoAnnotations.initMocks(this);
 
-        fileRepository = StationFileRepositoryImpl.getInstance(stationFileDataSource, downloadedFileDataSource,new MockThreadManager());
+        fileRepository = StationFileRepositoryImpl.getInstance(fileTaskManager, stationFileDataSource, downloadedFileDataSource,
+                uploadFileDataSource, new MockThreadManager());
 
     }
 
@@ -160,13 +181,14 @@ public class StationFileRepositoryTest {
         String currentUserUUID = "";
 
         try {
-            fileRepository.downloadFile("", new FileDownloadPendingState(fileDownloadItem, fileRepository, currentUserUUID), new BaseOperateDataCallbackImpl<FileDownloadItem>());
+            fileRepository.downloadFile("", new FileDownloadPendingState(fileDownloadItem, fileRepository, currentUserUUID, networkStateManager),
+                    new BaseOperateDataCallbackImpl<FileDownloadItem>());
 
             verify(stationFileDataSource).downloadFile(any(FileDownloadState.class), captor.capture());
 
             captor.getValue().onSucceed(fileDownloadItem, new OperationSuccess());
 
-            verify(downloadedFileDataSource).insertDownloadedFileRecord(any(FinishedTaskItem.class));
+            verify(downloadedFileDataSource).insertFileTask(any(FinishedTaskItem.class));
 
 
         } catch (IOException e) {
@@ -185,17 +207,17 @@ public class StationFileRepositoryTest {
 
         when(downloadedFileDataSource.deleteDownloadedFile(anyString())).thenReturn(true);
 
-        fileRepository.deleteDownloadedFile(downloadedFileWrappers, "", new BaseOperateDataCallbackImpl<Void>());
+        fileRepository.deleteFileFinishedTaskItems(downloadedFileWrappers, "", new BaseOperateDataCallbackImpl<Void>());
 
         InOrder inOrder = inOrder(downloadedFileDataSource);
 
         inOrder.verify(downloadedFileDataSource).deleteDownloadedFile(anyString());
 
-        inOrder.verify(downloadedFileDataSource).deleteDownloadedFileRecord(anyString(), anyString());
+        inOrder.verify(downloadedFileDataSource).deleteFileTask(anyString(), anyString());
 
         inOrder.verify(downloadedFileDataSource).deleteDownloadedFile(anyString());
 
-        inOrder.verify(downloadedFileDataSource).deleteDownloadedFileRecord(anyString(), anyString());
+        inOrder.verify(downloadedFileDataSource).deleteFileTask(anyString(), anyString());
 
     }
 
@@ -210,7 +232,7 @@ public class StationFileRepositoryTest {
 
         when(downloadedFileDataSource.deleteDownloadedFile(anyString())).thenReturn(false);
 
-        fileRepository.deleteDownloadedFile(downloadedFileWrappers, "", new BaseOperateDataCallback<Void>() {
+        fileRepository.deleteFileFinishedTaskItems(downloadedFileWrappers, "", new BaseOperateDataCallback<Void>() {
             @Override
             public void onSucceed(Void data, OperationResult result) {
 
@@ -224,7 +246,7 @@ public class StationFileRepositoryTest {
 
         verify(downloadedFileDataSource, times(2)).deleteDownloadedFile(anyString());
 
-        verify(downloadedFileDataSource, never()).deleteDownloadedFileRecord(anyString(), anyString());
+        verify(downloadedFileDataSource, never()).deleteFileTask(anyString(), anyString());
 
     }
 

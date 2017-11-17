@@ -24,6 +24,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final int ADD_REMOTE_VIDEO_TABLE_VERSION = 33;
 
+    public static final int ADD_UPLOAD_FILE_TABLE_VERSION = 34;
+
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
     public static final String USER_KEY_UUID = "user_uuid";
@@ -63,6 +65,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String FILE_KEY_SIZE = "file_size";
     public static final String FILE_KEY_CREATOR_UUID = "file_creator_uuid";
 
+    public static final String FILE_KEY_PATH_SOURCE_FROM_OTHER_APP = "file_path_source_from_other_app";
+    public static final String FILE_KEY_UPLOAD_TASK_STATE = "file_upload_task_state";
+
     public static final String LOGGED_IN_USER_GATEWAY = "logged_in_user_gateway";
     public static final String LOGGED_IN_USER_EQUIPMENT_NAME = "logged_in_user_equipment_name";
     public static final String LOGGED_IN_USER_TOKEN = "logged_in_user_token";
@@ -88,8 +93,9 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String LOGGED_IN_WECHAT_USER_TABLE_NAME = "logged_in_wechat_user";
     static final String LOCAL_VIDEO_TABLE_NAME = "local_video";
     static final String REMOTE_VIDEO_TABLE_NAME = "remote_video";
+    static final String UPLOAD_FILE_TABLE_NAME = "upload_file";
 
-    private static final int DB_VERSION = ADD_REMOTE_VIDEO_TABLE_VERSION;
+    private static final int DB_VERSION = ADD_UPLOAD_FILE_TABLE_VERSION;
 
     private static final String CREATE_TABLE = "create table if not exists ";
 
@@ -105,11 +111,15 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final String INTEGER_NOT_NULL = " integer not null,";
 
+    public static final String INTEGER_WITHOUT_COMMA = " integer";
+
     public static final String TEXT = " text,";
 
     public static final String TEXT_NOT_NULL_WITHOUT_COMMA = " text not null";
 
     public static final String INTEGER_NOT_NULL_WITHOUT_COMMA = " integer not null";
+
+    public static final String COMMA = ",";
 
     private static final String DATABASE_MEDIA_CREATE = BEGIN_SQL + MEDIA_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT
             + MEDIA_KEY_UUID + TEXT_NOT_NULL + MEDIA_KEY_TIME + TEXT_NOT_NULL + MEDIA_KEY_WIDTH + TEXT_NOT_NULL
@@ -127,14 +137,19 @@ public class DBHelper extends SQLiteOpenHelper {
             + USER_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT + USER_KEY_UUID + TEXT_NOT_NULL
             + USER_KEY_USERNAME + TEXT_NOT_NULL + USER_KEY_AVATAR + TEXT_NOT_NULL
             + USER_KEY_EMAIL + TEXT + USER_KEY_DEFAULT_AVATAR + TEXT_NOT_NULL + USER_KEY_DEFAULT_AVATAR_BG_COLOR + INTEGER_NOT_NULL
-            + USER_KEY_HOME + TEXT_NOT_NULL + USER_KEY_LIBRARY + TEXT_NOT_NULL + USER_KEY_IS_ADMIN + " integer not null";
+            + USER_KEY_HOME + TEXT_NOT_NULL + USER_KEY_LIBRARY + TEXT_NOT_NULL + USER_KEY_IS_ADMIN + INTEGER_NOT_NULL_WITHOUT_COMMA;
 
-    private static final String DATABASE_REMOTE_USER_CREATE = CREATE_TABLE + REMOTE_USER_TABLE_NAME + USER_FIELD_CREATE + "," + USER_ASSOCIATED_WECHAT_USER_NAME + " text" + END_SQL;
+    private static final String DATABASE_REMOTE_USER_CREATE = CREATE_TABLE + REMOTE_USER_TABLE_NAME + USER_FIELD_CREATE + COMMA + USER_ASSOCIATED_WECHAT_USER_NAME + " text" + END_SQL;
 
-    private static final String DATABASE_DOWNLOADED_FILE_CREATE = CREATE_TABLE + DOWNLOADED_FILE_TABLE_NAME + BEGIN_SQL + FILE_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT
-            + FILE_KEY_NAME + TEXT + FILE_KEY_UUID + TEXT_NOT_NULL + FILE_KEY_TIME + TEXT + FILE_KEY_SIZE + TEXT + FILE_KEY_CREATOR_UUID + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
+    public static final String FILE_FIELD_CREATE = BEGIN_SQL + FILE_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT
+            + FILE_KEY_NAME + TEXT + FILE_KEY_UUID + TEXT_NOT_NULL + FILE_KEY_TIME + TEXT + FILE_KEY_SIZE + TEXT + FILE_KEY_CREATOR_UUID + TEXT_NOT_NULL_WITHOUT_COMMA;
 
-    private static final String DATABASE_LOGGED_IN_USER_CREATE = CREATE_TABLE + LOGGED_IN_USER_TABLE_NAME + USER_FIELD_CREATE + ","
+    private static final String DATABASE_DOWNLOADED_FILE_CREATE = CREATE_TABLE + DOWNLOADED_FILE_TABLE_NAME + FILE_FIELD_CREATE + END_SQL;
+
+    public static final String DATABASE_UPLOAD_FILE_CREATE = CREATE_TABLE + UPLOAD_FILE_TABLE_NAME + FILE_FIELD_CREATE
+            + COMMA + FILE_KEY_PATH_SOURCE_FROM_OTHER_APP + TEXT_NOT_NULL + FILE_KEY_UPLOAD_TASK_STATE + INTEGER_NOT_NULL_WITHOUT_COMMA + END_SQL;
+
+    private static final String DATABASE_LOGGED_IN_USER_CREATE = CREATE_TABLE + LOGGED_IN_USER_TABLE_NAME + USER_FIELD_CREATE + COMMA
             + LOGGED_IN_USER_GATEWAY + TEXT_NOT_NULL + LOGGED_IN_USER_EQUIPMENT_NAME + TEXT_NOT_NULL + LOGGED_IN_USER_TOKEN + TEXT_NOT_NULL
             + LOGGED_IN_USER_DEVICE_ID + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
@@ -143,12 +158,12 @@ public class DBHelper extends SQLiteOpenHelper {
             + LOGGED_IN_WECAHT_USER_TOKEN + TEXT_NOT_NULL + LOGGED_IN_WECHAT_USER_STATION_ID + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
     private static final String DATABASE_LOCAL_VIDEO_CREATE = CREATE_TABLE + LOCAL_VIDEO_TABLE_NAME + DATABASE_MEDIA_CREATE
-            + "," + VIDEO_KEY_NAME + TEXT_NOT_NULL + VIDEO_KEY_SIZE + INTEGER_NOT_NULL
+            + COMMA + VIDEO_KEY_NAME + TEXT_NOT_NULL + VIDEO_KEY_SIZE + INTEGER_NOT_NULL
             + VIDEO_KEY_DURATION + INTEGER_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
     private static final String DATABASE_REMOTE_VIDEO_CREATE = CREATE_TABLE + REMOTE_VIDEO_TABLE_NAME + DATABASE_MEDIA_CREATE
-            + "," + VIDEO_KEY_NAME + TEXT + VIDEO_KEY_SIZE + " integer,"
-            + VIDEO_KEY_DURATION + " integer" + END_SQL;
+            + COMMA + VIDEO_KEY_NAME + TEXT + VIDEO_KEY_SIZE + INTEGER_WITHOUT_COMMA + COMMA
+            + VIDEO_KEY_DURATION + INTEGER_WITHOUT_COMMA + END_SQL;
 
 
     DBHelper(Context context) {
@@ -170,6 +185,8 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DATABASE_LOCAL_VIDEO_CREATE);
 
         db.execSQL(DATABASE_REMOTE_VIDEO_CREATE);
+
+        db.execSQL(DATABASE_UPLOAD_FILE_CREATE);
     }
 
     @Override
@@ -212,6 +229,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
         if (oldVersion < ADD_REMOTE_VIDEO_TABLE_VERSION)
             db.execSQL(DROP_TABLE + REMOTE_VIDEO_TABLE_NAME);
+
+        if (oldVersion < ADD_UPLOAD_FILE_TABLE_VERSION)
+            db.execSQL(DROP_TABLE + UPLOAD_FILE_TABLE_NAME);
 
         onCreate(db);
 

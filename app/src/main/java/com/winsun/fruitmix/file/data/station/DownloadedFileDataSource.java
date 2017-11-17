@@ -8,15 +8,7 @@ import java.util.List;
  * Created by Administrator on 2017/7/28.
  */
 
-public interface DownloadedFileDataSource {
-
-    List<FinishedTaskItem> getCurrentLoginUserDownloadedFileRecord(String currentLoginUserUUID);
-
-    boolean insertDownloadedFileRecord(FinishedTaskItem finishedTaskItem);
-
-    void deleteDownloadedFileRecord(String fileUUID,String currentLoginUserUUID);
-
-    void clearDownloadFileRecordInCache();
+public interface DownloadedFileDataSource extends FileTaskDataSource{
 
     boolean deleteDownloadedFile(String fileName);
 

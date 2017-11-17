@@ -6,6 +6,7 @@ import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileTaskManager;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
+import com.winsun.fruitmix.network.NetworkStateManager;
 
 import java.io.File;
 import java.util.Collections;
@@ -26,17 +27,22 @@ public class DownloadFileCommand extends AbstractCommand {
 
     private StationFileRepository stationFileRepository;
 
+    private NetworkStateManager networkStateManager;
+
     private String currentUserUUID;
 
     private String driveUUID;
 
     private FileTaskManager fileTaskManager;
 
-    public DownloadFileCommand(FileTaskManager fileTaskManager, AbstractRemoteFile abstractRemoteFile, StationFileRepository stationFileRepository, String currentUserUUID, String driveUUID) {
+    public DownloadFileCommand(FileTaskManager fileTaskManager, AbstractRemoteFile abstractRemoteFile,
+                               StationFileRepository stationFileRepository,NetworkStateManager networkStateManager,
+                               String currentUserUUID, String driveUUID) {
         this.abstractRemoteFile = abstractRemoteFile;
         this.fileTaskManager = fileTaskManager;
 
         this.stationFileRepository = stationFileRepository;
+        this.networkStateManager = networkStateManager;
         this.currentUserUUID = currentUserUUID;
         this.driveUUID = driveUUID;
 
@@ -46,7 +52,8 @@ public class DownloadFileCommand extends AbstractCommand {
     public void execute() {
         fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), Long.parseLong(abstractRemoteFile.getSize()), abstractRemoteFile.getUuid(), abstractRemoteFile.getParentFolderUUID(), driveUUID);
 
-        fileTaskManager.addFileDownloadItem(fileDownloadItem, stationFileRepository, currentUserUUID);
+        fileTaskManager.addFileDownloadItem(fileDownloadItem, stationFileRepository,
+                networkStateManager,currentUserUUID);
     }
 
     @Override

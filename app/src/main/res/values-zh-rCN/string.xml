@@ -92,7 +92,7 @@
     <string name="quit">退出</string>
     <string name="my_file">我的文件</string>
     <string name="my_photo">我的照片</string>
-    <string name="download_manage">下载管理</string>
+    <string name="task_manage">任务管理</string>
 
     <string name="account_manage">帐号管理</string>
 
@@ -218,9 +218,13 @@
 
     <!-- 文件-下载模块 -->
     <string name="downloading">正在下载</string>
-    <string name="downloaded">已下载</string>
+    <string name="executed">已执行</string>
     <string name="download_failed">下载失败</string>
     <string name="no_download_record">没有下载记录可选</string>
+    
+    <string name="executing">正在执行</string>
+
+    <string name="upload">上传</string>
 
     <!-- Hints -->
     <string name="success">%1$s成功</string>
