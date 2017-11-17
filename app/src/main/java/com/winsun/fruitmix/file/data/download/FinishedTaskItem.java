@@ -1,17 +1,19 @@
 package com.winsun.fruitmix.file.data.download;
 
+import com.winsun.fruitmix.file.data.model.FileTaskItem;
+
 /**
  * Created by Administrator on 2017/7/28.
  */
 
-public class DownloadedItem {
+public class FinishedTaskItem {
 
-    private FileDownloadItem fileDownloadItem;
+    private FileTaskItem fileTaskItem;
     private long fileTime;
     private String fileCreatorUUID;
 
-    public DownloadedItem(FileDownloadItem fileDownloadItem) {
-        this.fileDownloadItem = fileDownloadItem;
+    public FinishedTaskItem(FileTaskItem fileTaskItem) {
+        this.fileTaskItem = fileTaskItem;
     }
 
     public void setFileTime(long fileTime) {
@@ -31,18 +33,18 @@ public class DownloadedItem {
     }
 
     public String getFileName() {
-        return fileDownloadItem.getFileName();
+        return fileTaskItem.getFileName();
     }
 
     public long getFileSize() {
-        return fileDownloadItem.getFileSize();
+        return fileTaskItem.getFileSize();
     }
 
     public String getFileUUID() {
-        return fileDownloadItem.getFileUUID();
+        return fileTaskItem.getFileUUID();
     }
 
-    public FileDownloadItem getFileDownloadItem() {
-        return fileDownloadItem;
+    public FileTaskItem getFileTaskItem() {
+        return fileTaskItem;
     }
 }

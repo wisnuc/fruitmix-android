@@ -1,9 +1,11 @@
 package com.winsun.fruitmix.http;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.file.data.model.LocalFile;
+import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONException;
@@ -165,50 +167,10 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
         try {
 
             Request.Builder builder;
-            RequestBody requestBody;
 
-            if (httpRequest.getBody().length() != 0) {
+            builder = generateRequestBuilder(httpRequest);
 
-                JSONObject jsonObject = new JSONObject(httpRequest.getBody());
-
-                jsonObject.put("op", "newfile");
-                jsonObject.put("toName", localFile.getName());
-                jsonObject.put(SHA_256_STRING, localFile.getFileHash());
-                jsonObject.put(SIZE_STRING, Integer.valueOf(localFile.getSize()));
-
-                String jsonOjbectStr = jsonObject.toString();
-
-                Log.d(TAG, "uploadFile: " + jsonOjbectStr);
-
-                builder = generateRequestBuilder(httpRequest);
-
-                requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                        .addFormDataPart("manifest", jsonOjbectStr)
-                        .addFormDataPart("", localFile.getName(), RequestBody.create(MediaType.parse(JPEG_STRING), new File(localFile.getPath())))
-                        .build();
-
-            } else {
-
-                builder = generateRequestBuilder(httpRequest);
-
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put(SIZE_STRING, Integer.valueOf(localFile.getSize()));
-                jsonObject.put(SHA_256_STRING, localFile.getFileHash());
-
-                String jsonObjectStr = jsonObject.toString();
-
-                Log.d(TAG, "uploadFile: " + jsonObjectStr);
-
-//            String fileName = "{" +
-//                    "\"size\":" + localFile.getSize() + "," +
-//                    "\"sha256\":\"" + localFile.getFileHash() + "\"" +
-//                    "}";
-
-                requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                        .addFormDataPart(localFile.getName(), jsonObjectStr, RequestBody.create(MediaType.parse(JPEG_STRING), new File(localFile.getPath())))
-                        .build();
-
-            }
+            RequestBody requestBody = getUploadFileRequestBody(httpRequest, localFile);
 
             Request request = builder.post(requestBody).build();
 
@@ -225,6 +187,82 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             return null;
         }
+
+    }
+
+    @NonNull
+    private RequestBody getUploadFileRequestBody(HttpRequest httpRequest, LocalFile localFile) throws JSONException {
+        RequestBody requestBody;
+
+        if (httpRequest.getBody().length() != 0) {
+
+            JSONObject jsonObject = new JSONObject(httpRequest.getBody());
+
+            jsonObject.put("op", "newfile");
+            jsonObject.put("toName", localFile.getName());
+            jsonObject.put(SHA_256_STRING, localFile.getFileHash());
+            jsonObject.put(SIZE_STRING, Integer.valueOf(localFile.getSize()));
+
+            String jsonOjbectStr = jsonObject.toString();
+
+            Log.d(TAG, "uploadFile: " + jsonOjbectStr);
+
+            requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart("manifest", jsonOjbectStr)
+                    .addFormDataPart("", localFile.getName(), RequestBody.create(MediaType.parse(JPEG_STRING), new File(localFile.getPath())))
+                    .build();
+
+        } else {
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(SIZE_STRING, Integer.valueOf(localFile.getSize()));
+            jsonObject.put(SHA_256_STRING, localFile.getFileHash());
+
+            String jsonObjectStr = jsonObject.toString();
+
+            Log.d(TAG, "uploadFile: " + jsonObjectStr);
+
+//            String fileName = "{" +
+//                    "\"size\":" + localFile.getSize() + "," +
+//                    "\"sha256\":\"" + localFile.getFileHash() + "\"" +
+//                    "}";
+
+            requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart(localFile.getName(), jsonObjectStr, RequestBody.create(MediaType.parse(JPEG_STRING), new File(localFile.getPath())))
+                    .build();
+
+        }
+        return requestBody;
+    }
+
+    @Override
+    public HttpResponse uploadFileWithProgress(FileUploadState fileUploadState, HttpRequest httpRequest, LocalFile localFile) throws IOException {
+
+
+        try {
+
+            Request.Builder builder;
+
+            builder = generateRequestBuilder(httpRequest);
+
+            RequestBody requestBody = getUploadFileRequestBody(httpRequest, localFile);
+
+            Request request = builder.post(new ProgressRequestBody(requestBody,fileUploadState)).build();
+
+            Response response = executeRequest(request);
+
+            HttpResponse httpResponse = getHttpResponse(response);
+
+            Log.d(TAG, "remoteCallMethod: after read response body" + Util.getCurrentFormatTime());
+
+            return httpResponse;
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return null;
+        }
+
 
     }
 

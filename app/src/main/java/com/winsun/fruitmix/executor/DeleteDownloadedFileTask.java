@@ -3,7 +3,7 @@ package com.winsun.fruitmix.executor;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FileTaskManager;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
@@ -41,7 +41,7 @@ public class DeleteDownloadedFileTask implements Callable<Boolean> {
             dbUtils.deleteDownloadedFileByUUIDAndCreatorUUID(fileUUID, FNAS.userUUID);
         }
 
-        FileDownloadManager.getInstance().deleteFileDownloadItem(fileUUIDs);
+        FileTaskManager.getInstance().deleteFileDownloadItem(fileUUIDs);
 
         EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_DELETED, new OperationSuccess(R.string.delete_text)));
 

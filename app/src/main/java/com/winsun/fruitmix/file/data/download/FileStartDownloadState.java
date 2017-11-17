@@ -1,9 +1,6 @@
 package com.winsun.fruitmix.file.data.download;
 
-import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
-import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.executor.DownloadFileTask;
-import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.util.FileUtil;
@@ -34,8 +31,8 @@ public class FileStartDownloadState extends FileDownloadState {
     }
 
     @Override
-    public DownloadState getDownloadState() {
-        return DownloadState.START_DOWNLOAD;
+    public TaskState getDownloadState() {
+        return TaskState.START_DOWNLOAD_OR_UPLOAD;
     }
 
     @Override

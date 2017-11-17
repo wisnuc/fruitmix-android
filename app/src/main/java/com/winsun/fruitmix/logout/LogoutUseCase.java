@@ -5,6 +5,7 @@ import android.util.Log;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
@@ -32,12 +33,15 @@ public class LogoutUseCase {
 
     private HttpRequestFactory httpRequestFactory;
 
+    private LoginUseCase loginUseCase;
+
     public static LogoutUseCase getInstance(SystemSettingDataSource systemSettingDataSource,
                                             LoggedInUserDataSource loggedInUserDataSource, UploadMediaUseCase uploadMediaUseCase,
-                                            WeChatUserDataSource weChatUserDataSource, HttpRequestFactory httpRequestFactory) {
+                                            WeChatUserDataSource weChatUserDataSource, HttpRequestFactory httpRequestFactory,
+                                            LoginUseCase loginUseCase) {
         if (ourInstance == null)
             ourInstance = new LogoutUseCase(systemSettingDataSource, loggedInUserDataSource,
-                    uploadMediaUseCase, weChatUserDataSource, httpRequestFactory);
+                    uploadMediaUseCase, weChatUserDataSource, httpRequestFactory,loginUseCase);
         return ourInstance;
     }
 
@@ -49,13 +53,15 @@ public class LogoutUseCase {
 
     private LogoutUseCase(SystemSettingDataSource systemSettingDataSource,
                           LoggedInUserDataSource loggedInUserDataSource, UploadMediaUseCase uploadMediaUseCase,
-                          WeChatUserDataSource weChatUserDataSource, HttpRequestFactory httpRequestFactory) {
+                          WeChatUserDataSource weChatUserDataSource, HttpRequestFactory httpRequestFactory,
+                          LoginUseCase loginUseCase) {
 
         this.systemSettingDataSource = systemSettingDataSource;
         this.loggedInUserDataSource = loggedInUserDataSource;
         this.uploadMediaUseCase = uploadMediaUseCase;
         this.weChatUserDataSource = weChatUserDataSource;
         this.httpRequestFactory = httpRequestFactory;
+        this.loginUseCase = loginUseCase;
 
     }
 
@@ -103,6 +109,8 @@ public class LogoutUseCase {
         httpRequestFactory.reset();
 
         changeLoginUser();
+
+        loginUseCase.setAlreadyLogin(false);
 
     }
 

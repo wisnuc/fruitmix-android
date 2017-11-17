@@ -83,6 +83,8 @@ public class LoginUseCase extends BaseDataRepository {
     private static String mToken;
     private static String mGateway;
 
+    private boolean alreadyLogin = false;
+
     private LoginUseCase(LoggedInUserDataSource loggedInUserDataSource, TokenDataSource tokenDataSource,
                          HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy, UploadMediaUseCase uploadMediaUseCase,
                          UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
@@ -127,6 +129,14 @@ public class LoginUseCase extends BaseDataRepository {
 
     public static void destroyInstance() {
         instance = null;
+    }
+
+    public void setAlreadyLogin(boolean alreadyLogin) {
+        this.alreadyLogin = alreadyLogin;
+    }
+
+    public boolean isAlreadyLogin() {
+        return alreadyLogin;
     }
 
     public void loginWithNoParam(final BaseOperateDataCallback<Boolean> callback) {

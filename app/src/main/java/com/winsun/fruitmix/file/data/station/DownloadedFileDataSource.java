@@ -1,9 +1,6 @@
 package com.winsun.fruitmix.file.data.station;
 
-import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.file.data.download.DownloadedItem;
-
-import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
 
 import java.util.List;
 
@@ -13,9 +10,9 @@ import java.util.List;
 
 public interface DownloadedFileDataSource {
 
-    List<DownloadedItem> getCurrentLoginUserDownloadedFileRecord(String currentLoginUserUUID);
+    List<FinishedTaskItem> getCurrentLoginUserDownloadedFileRecord(String currentLoginUserUUID);
 
-    boolean insertDownloadedFileRecord(DownloadedItem downloadedItem);
+    boolean insertDownloadedFileRecord(FinishedTaskItem finishedTaskItem);
 
     void deleteDownloadedFileRecord(String fileUUID,String currentLoginUserUUID);
 

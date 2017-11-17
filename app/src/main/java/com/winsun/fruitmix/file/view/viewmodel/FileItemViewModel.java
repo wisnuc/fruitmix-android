@@ -17,5 +17,5 @@ public class FileItemViewModel {
     public final ObservableBoolean showFileIcon = new ObservableBoolean(true);
 
     public final ObservableInt fileIconBg = new ObservableInt(R.drawable.round_circle);
-    
+
 }

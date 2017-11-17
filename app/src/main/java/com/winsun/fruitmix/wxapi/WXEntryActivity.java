@@ -408,7 +408,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
     private void handleLoginSucceed() {
         dismissDialog();
 
-        startNavPagerActivity();
+        finishWhenLoginSucceed();
 
         Toast.makeText(mContext, String.format(getString(R.string.success), getString(R.string.login)), Toast.LENGTH_SHORT).show();
     }
@@ -421,9 +421,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
         Toast.makeText(WXEntryActivity.this, result.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
     }
 
-    private void startNavPagerActivity() {
-        Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
-        startActivity(jumpIntent);
+    private void finishWhenLoginSucceed() {
 
         finish();
 
@@ -447,7 +445,6 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             wxEntryLoginCallback = null;
 
         }
-
 
     }
 

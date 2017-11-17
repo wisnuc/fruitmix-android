@@ -12,6 +12,7 @@ import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
@@ -106,7 +107,7 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
         if (getLocalMediaCallbackReturn)
             runOnMainThreadCallback.onSucceed(localMedias, new OperationSuccess());
         else
-            runOnMainThreadCallback.onFail(new OperationSQLException());
+            runOnMainThreadCallback.onFail(new OperationFail("get local media callback is not return"));
 
     }
 

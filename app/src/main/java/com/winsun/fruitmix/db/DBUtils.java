@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.winsun.fruitmix.file.data.download.DownloadedItem;
+import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
@@ -154,25 +154,25 @@ public class DBUtils {
         return contentValues;
     }
 
-    public long insertDownloadedFile(DownloadedItem downloadedItem) {
+    public long insertDownloadedFile(FinishedTaskItem finishedTaskItem) {
 
         openWritableDB();
 
         long returnValue = 0;
 
-        returnValue = database.insert(DBHelper.DOWNLOADED_FILE_TABLE_NAME, null, createDownloadedFileContentValues(downloadedItem));
+        returnValue = database.insert(DBHelper.DOWNLOADED_FILE_TABLE_NAME, null, createDownloadedFileContentValues(finishedTaskItem));
 
         return returnValue;
     }
 
-    private ContentValues createDownloadedFileContentValues(DownloadedItem downloadedItem) {
+    private ContentValues createDownloadedFileContentValues(FinishedTaskItem finishedTaskItem) {
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.FILE_KEY_NAME, downloadedItem.getFileName());
-        contentValues.put(DBHelper.FILE_KEY_SIZE, downloadedItem.getFileSize());
-        contentValues.put(DBHelper.FILE_KEY_UUID, downloadedItem.getFileUUID());
-        contentValues.put(DBHelper.FILE_KEY_TIME, downloadedItem.getFileTime());
-        contentValues.put(DBHelper.FILE_KEY_CREATOR_UUID, downloadedItem.getFileCreatorUUID());
+        contentValues.put(DBHelper.FILE_KEY_NAME, finishedTaskItem.getFileName());
+        contentValues.put(DBHelper.FILE_KEY_SIZE, finishedTaskItem.getFileSize());
+        contentValues.put(DBHelper.FILE_KEY_UUID, finishedTaskItem.getFileUUID());
+        contentValues.put(DBHelper.FILE_KEY_TIME, finishedTaskItem.getFileTime());
+        contentValues.put(DBHelper.FILE_KEY_CREATOR_UUID, finishedTaskItem.getFileCreatorUUID());
 
         return contentValues;
     }
@@ -587,13 +587,13 @@ public class DBUtils {
     }
 
 
-    public List<DownloadedItem> getAllCurrentLoginUserDownloadedFile(String currentUserUUID) {
+    public List<FinishedTaskItem> getAllCurrentLoginUserDownloadedFile(String currentUserUUID) {
 
         openReadableDB();
 
-        List<DownloadedItem> fileDownloadItems = new ArrayList<>();
+        List<FinishedTaskItem> fileDownloadItems = new ArrayList<>();
 
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.DOWNLOADED_FILE_TABLE_NAME + " where " + DBHelper.FILE_KEY_CREATOR_UUID + " = ?", new String[]{currentUserUUID});
+        Cursor cursor = database.rawQuery(String.format("select * from %s where %s = ?", DBHelper.DOWNLOADED_FILE_TABLE_NAME, DBHelper.FILE_KEY_CREATOR_UUID), new String[]{currentUserUUID});
 
         while (cursor.moveToNext()) {
 
@@ -611,12 +611,12 @@ public class DBUtils {
 
             FileDownloadItem fileDownloadItem = new FileDownloadItem(fileName, fileSize, fileUUID);
 
-            DownloadedItem downloadedItem = new DownloadedItem(fileDownloadItem);
+            FinishedTaskItem finishedTaskItem = new FinishedTaskItem(fileDownloadItem);
 
-            downloadedItem.setFileTime(fileTime);
-            downloadedItem.setFileCreatorUUID(fileCreatorUUID);
+            finishedTaskItem.setFileTime(fileTime);
+            finishedTaskItem.setFileCreatorUUID(fileCreatorUUID);
 
-            fileDownloadItems.add(downloadedItem);
+            fileDownloadItems.add(finishedTaskItem);
         }
 
         cursor.close();
@@ -632,8 +632,7 @@ public class DBUtils {
 
         LocalDataParser<WeChatUser> parser = new LocalWeChatUserParser();
 
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOGGED_IN_WECHAT_USER_TABLE_NAME + " where " + DBHelper.LOGGED_IN_WECAHT_USER_TOKEN
-                + " = ? and " + DBHelper.LOGGED_IN_WECHAT_USER_STATION_ID + " = ?", new String[]{token, stationID});
+        Cursor cursor = database.rawQuery(String.format("select * from %s where %s = ? and %s = ?", DBHelper.LOGGED_IN_WECHAT_USER_TABLE_NAME, DBHelper.LOGGED_IN_WECAHT_USER_TOKEN, DBHelper.LOGGED_IN_WECHAT_USER_STATION_ID), new String[]{token, stationID});
 
         if (!cursor.moveToFirst())
             return null;

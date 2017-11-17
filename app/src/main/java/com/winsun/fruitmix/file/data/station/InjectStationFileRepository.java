@@ -3,7 +3,7 @@ package com.winsun.fruitmix.file.data.station;
 import android.content.Context;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FileTaskManager;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 
@@ -27,7 +27,7 @@ public class InjectStationFileRepository {
 
     private static DownloadedFileDataSource provideDownloadedFileDataSource(Context context) {
 
-        return DownloadFileDataSourceImpl.getInstance(DBUtils.getInstance(context), FileDownloadManager.getInstance());
+        return DownloadFileDataSourceImpl.getInstance(DBUtils.getInstance(context), FileTaskManager.getInstance());
 
     }
 

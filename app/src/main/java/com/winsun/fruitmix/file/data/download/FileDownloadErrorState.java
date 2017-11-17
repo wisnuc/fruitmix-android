@@ -11,14 +11,15 @@ public class FileDownloadErrorState extends FileDownloadState {
     }
 
     @Override
-    public DownloadState getDownloadState() {
-        return DownloadState.ERROR;
+    public TaskState getDownloadState() {
+        return TaskState.ERROR;
     }
 
     @Override
     public void startWork() {
 
-        FileDownloadManager.getInstance().startPendingDownloadItem();
+        FileTaskManager.getInstance().startPendingTaskItem();
+
     }
 
 }

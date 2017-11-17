@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,7 +42,7 @@ import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
 import me.relex.circleindicator.CircleIndicator;
 
-public class EquipmentSearchActivity extends AppCompatActivity implements View.OnClickListener, EquipmentSearchView, WeChatLoginListener {
+public class EquipmentSearchActivity extends BaseActivity implements View.OnClickListener, EquipmentSearchView, WeChatLoginListener {
 
     public static final String TAG = "EquipmentSearchActivity";
 
@@ -56,6 +55,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
     private Toolbar toolbar;
 
     private EquipmentPresenter equipmentPresenter;
+
+    private String uploadFilePath = null;
 
     public static void gotoEquipmentActivity(Activity activity, boolean shouldStopService) {
         Intent intent = new Intent(activity, EquipmentSearchActivity.class);
@@ -78,6 +79,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         equipmentUserRecyclerView = binding.equipmentUserRecyclerview;
 
         mContext = this;
+
+        uploadFilePath = getIntent().getStringExtra(TestReceiveActivity.UPLOAD_FILE_PATH);
 
         setBackgroundColor(R.color.equipment_ui_blue);
 
@@ -168,9 +171,8 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         setResult(RESULT_OK);
         finish();
 
-        startActivity(new Intent(mContext, NavPagerActivity.class));
+        handleStartActivityAfterLoginSucceed();
 
-        Log.d(TAG, "handleLoginWithUserSucceed: start nav pager ");
     }
 
     @Override
@@ -235,6 +237,9 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
         if (requestCode == Util.KEY_LOGIN_REQUEST_CODE && resultCode == RESULT_OK) {
             setResult(RESULT_OK);
             finish();
+
+            handleStartActivityAfterLoginSucceed();
+
         } else if (requestCode == Util.KEY_MANUAL_INPUT_IP_REQUEST_CODE && resultCode == RESULT_OK) {
 
             String ip = data.getStringExtra(Util.KEY_MANUAL_INPUT_IP);
@@ -272,7 +277,11 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
 
                 Log.d(TAG, "login with wechat code succeed and finish EquipmentSearchActivity");
 
+                setResultCode(RESULT_OK);
+
                 finish();
+
+                handleStartActivityAfterLoginSucceed();
             }
 
             @Override
@@ -282,10 +291,23 @@ public class EquipmentSearchActivity extends AppCompatActivity implements View.O
             }
         });
 
-
         IWXAPI iwxapi = MiniProgram.registerToWX(this);
 
         MiniProgram.sendAuthRequest(iwxapi);
+
+    }
+
+    private void handleStartActivityAfterLoginSucceed() {
+
+        Log.d(TAG, "handleStartActivityAfterLoginSucceed: uploadFilePath: " + uploadFilePath);
+
+        if (uploadFilePath == null) {
+            startActivity(new Intent(mContext, NavPagerActivity.class));
+        } else {
+
+            TestReceiveActivity.startUploadFileTask(uploadFilePath, mContext);
+
+        }
 
     }
 

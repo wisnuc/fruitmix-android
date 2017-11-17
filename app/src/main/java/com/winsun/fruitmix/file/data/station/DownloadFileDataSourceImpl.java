@@ -1,14 +1,11 @@
 package com.winsun.fruitmix.file.data.station;
 
-import android.content.Context;
-
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.file.data.download.DownloadedItem;
-import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
+import com.winsun.fruitmix.file.data.download.FileTaskManager;
 import com.winsun.fruitmix.util.FileUtil;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -21,29 +18,29 @@ import java.util.List;
 public class DownloadFileDataSourceImpl implements DownloadedFileDataSource {
 
     private DBUtils dbUtils;
-    private FileDownloadManager fileDownloadManager;
+    private FileTaskManager fileTaskManager;
 
     private static DownloadedFileDataSource instance;
 
-    public static DownloadedFileDataSource getInstance(DBUtils dbUtils, FileDownloadManager fileDownloadManager) {
+    public static DownloadedFileDataSource getInstance(DBUtils dbUtils, FileTaskManager fileTaskManager) {
 
         if (instance == null)
-            instance = new DownloadFileDataSourceImpl(dbUtils, fileDownloadManager);
+            instance = new DownloadFileDataSourceImpl(dbUtils, fileTaskManager);
 
         return instance;
     }
 
-    private DownloadFileDataSourceImpl(DBUtils dbUtils, FileDownloadManager fileDownloadManager) {
+    private DownloadFileDataSourceImpl(DBUtils dbUtils, FileTaskManager fileTaskManager) {
 
         this.dbUtils = dbUtils;
 
-        this.fileDownloadManager = fileDownloadManager;
+        this.fileTaskManager = fileTaskManager;
     }
 
     @Override
-    public List<DownloadedItem> getCurrentLoginUserDownloadedFileRecord(String currentLoginUserUUID) {
+    public List<FinishedTaskItem> getCurrentLoginUserDownloadedFileRecord(String currentLoginUserUUID) {
 
-        List<DownloadedItem> downloadItems = dbUtils.getAllCurrentLoginUserDownloadedFile(currentLoginUserUUID);
+        List<FinishedTaskItem> downloadItems = dbUtils.getAllCurrentLoginUserDownloadedFile(currentLoginUserUUID);
 
         String[] fileNames = new File(FileUtil.getDownloadFileStoreFolderPath()).list();
 
@@ -51,29 +48,29 @@ public class DownloadFileDataSourceImpl implements DownloadedFileDataSource {
 
             List<String> fileNameList = Arrays.asList(fileNames);
 
-            Iterator<DownloadedItem> itemIterator = downloadItems.iterator();
+            Iterator<FinishedTaskItem> itemIterator = downloadItems.iterator();
             while (itemIterator.hasNext()) {
-                DownloadedItem downloadedItem = itemIterator.next();
+                FinishedTaskItem finishedTaskItem = itemIterator.next();
 
-                if (!fileNameList.contains(downloadedItem.getFileName())) {
+                if (!fileNameList.contains(finishedTaskItem.getFileName())) {
                     itemIterator.remove();
-                    dbUtils.deleteDownloadedFileByUUID(downloadedItem.getFileUUID());
+                    dbUtils.deleteDownloadedFileByUUID(finishedTaskItem.getFileUUID());
                 }
             }
 
         }
 
-        for (DownloadedItem downloadedItem : downloadItems) {
-            fileDownloadManager.addDownloadedFile(downloadedItem.getFileDownloadItem());
+        for (FinishedTaskItem finishedTaskItem : downloadItems) {
+            fileTaskManager.addDownloadedFile(finishedTaskItem.getFileTaskItem());
         }
 
         return downloadItems;
     }
 
     @Override
-    public boolean insertDownloadedFileRecord(DownloadedItem downloadedItem) {
+    public boolean insertDownloadedFileRecord(FinishedTaskItem finishedTaskItem) {
 
-        return dbUtils.insertDownloadedFile(downloadedItem) > 0;
+        return dbUtils.insertDownloadedFile(finishedTaskItem) > 0;
 
     }
 
@@ -82,13 +79,13 @@ public class DownloadFileDataSourceImpl implements DownloadedFileDataSource {
 
         dbUtils.deleteDownloadedFileByUUIDAndCreatorUUID(fileUUID, currentLoginUserUUID);
 
-        fileDownloadManager.deleteFileDownloadItem(Collections.singletonList(fileUUID));
+        fileTaskManager.deleteFileDownloadItem(Collections.singletonList(fileUUID));
     }
 
     @Override
     public void clearDownloadFileRecordInCache() {
 
-        fileDownloadManager.clearFileDownloadItems();
+        fileTaskManager.clearFileDownloadItems();
 
     }
 

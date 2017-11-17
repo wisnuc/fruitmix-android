@@ -322,7 +322,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
                     if (!ButlerService.startRetrieveTicketTask) {
 
-                        if (!ButlerService.stopRetrieveTicketTask)
+                        if (!ButlerService.stopRetrieveTicketTask && task != null)
                             task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
 
                         return;
@@ -341,7 +341,8 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
                             if (!data.isEmpty())
                                 EventBus.getDefault().post(new RetrieveTicketOperationEvent(Util.REMOTE_CONFIRM_INVITE_USER_RETRIEVED, new OperationSuccess(), new ArrayList<>(data)));
 
-                            task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
+                            if (!ButlerService.stopRetrieveTicketTask && task != null)
+                                task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
 
                         }
 
@@ -351,7 +352,8 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
                             Log.d(ButlerService.TAG, "onFail: retrieve tickets in service");
 
-                            task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
+                            if (!ButlerService.stopRetrieveTicketTask && task != null)
+                                task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
                         }
                     });
 

@@ -34,7 +34,7 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.databinding.NavPagerMainBinding;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
-import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
+import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveVideoThumbnailEvent;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
@@ -578,11 +578,11 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
+    public void handleEvent(TaskStateChangedEvent taskStateChangedEvent) {
 
-        EventBus.getDefault().removeStickyEvent(downloadStateChangedEvent);
+        EventBus.getDefault().removeStickyEvent(taskStateChangedEvent);
 
-        fileFragment.handleEvent(downloadStateChangedEvent);
+        fileFragment.handleEvent(taskStateChangedEvent);
 
     }
 

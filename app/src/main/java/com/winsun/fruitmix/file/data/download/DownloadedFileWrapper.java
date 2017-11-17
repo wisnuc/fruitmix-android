@@ -6,11 +6,11 @@ package com.winsun.fruitmix.file.data.download;
 
 public class DownloadedFileWrapper {
 
-    private String fileUUID;
+    private String fileUnionKey;
     private String fileName;
 
-    public DownloadedFileWrapper(String fileUUID, String fileName) {
-        this.fileUUID = fileUUID;
+    public DownloadedFileWrapper(String fileUnionKey, String fileName) {
+        this.fileUnionKey = fileUnionKey;
         this.fileName = fileName;
     }
 
@@ -18,7 +18,8 @@ public class DownloadedFileWrapper {
         return fileName;
     }
 
-    public String getFileUUID() {
-        return fileUUID;
+    public String getFileUnionKey() {
+        return fileUnionKey;
     }
+
 }

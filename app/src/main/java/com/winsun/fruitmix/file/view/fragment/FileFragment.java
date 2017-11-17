@@ -14,10 +14,10 @@ import android.view.View;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.FragmentFileBinding;
-import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
+import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 
-import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FileTaskManager;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.presenter.FilePresenter;
 import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
@@ -25,7 +25,6 @@ import com.winsun.fruitmix.file.view.interfaces.FileView;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
 import com.winsun.fruitmix.file.view.viewmodel.FileViewModel;
 import com.winsun.fruitmix.interfaces.Page;
-import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
@@ -67,7 +66,7 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
         filePresenter = new FilePresenter(activity, this, fileListSelectModeListener, InjectStationFileRepository.provideStationFileRepository(activity),
                 noContentViewModel, loadingViewModel, fileViewModel, handleFileListOperateCallback,
                 InjectUser.provideRepository(activity),
-                InjectSystemSettingDataSource.provideSystemSettingDataSource(activity), FileDownloadManager.getInstance());
+                InjectSystemSettingDataSource.provideSystemSettingDataSource(activity), FileTaskManager.getInstance());
 
         initSwipeRefreshLayout();
 
@@ -169,9 +168,9 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
         MobclickAgent.onPageEnd("FileFragment");
     }
 
-    public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
+    public void handleEvent(TaskStateChangedEvent taskStateChangedEvent) {
 
-        filePresenter.handleEvent(downloadStateChangedEvent);
+        filePresenter.handleEvent(taskStateChangedEvent);
 
     }
 

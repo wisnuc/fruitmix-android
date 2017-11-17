@@ -1,15 +1,12 @@
 package com.winsun.fruitmix;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
@@ -26,7 +23,7 @@ import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import java.util.List;
 
-public class LoginActivity extends AppCompatActivity implements LoginPresenter {
+public class LoginActivity extends BaseActivity implements LoginPresenter {
 
     public static final String TAG = "LoginActivity";
 
@@ -38,8 +35,6 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
     private String mGateway;
 
     private String mEquipmentGroupName;
-
-    private ProgressDialog mDialog;
 
     private LoginUseCase loginUseCase;
 
@@ -109,7 +104,6 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
     protected void onStart() {
         super.onStart();
 
-
     }
 
     @Override
@@ -140,21 +134,12 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
 
         mContext = null;
 
-        dismissDialog();
-        mDialog = null;
     }
 
-    private void dismissDialog() {
-        if (mDialog != null)
-            mDialog.dismiss();
-    }
+    private void handleLoginSucceed() {
 
-    private void startNavPagerActivity() {
+        Log.d(TAG, "handleLoginSucceed: ");
 
-        Log.d(TAG, "startNavPagerActivity: ");
-
-        Intent jumpIntent = new Intent(mContext, NavPagerActivity.class);
-        startActivity(jumpIntent);
         LoginActivity.this.setResult(RESULT_OK);
         finish();
     }
@@ -168,13 +153,15 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
         Util.hideSoftInput(LoginActivity.this);
 
         if (!Util.isNetworkConnected(mContext)) {
-            Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+
+            showToast(getString(R.string.no_network));
+
             return;
         }
 
         String mPwd = loginViewModel.getPassword();
 
-        mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.login)), true, false);
+        showProgressDialog(getString(R.string.operating_title,getString(R.string.login)));
 
         final LoadTokenParam loadTokenParam = new LoadTokenParam(mGateway, mUserUUid, mPwd, mEquipmentGroupName);
 
@@ -189,7 +176,7 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
 
                 dismissDialog();
 
-                startNavPagerActivity();
+                handleLoginSucceed();
 
             }
 
@@ -198,7 +185,7 @@ public class LoginActivity extends AppCompatActivity implements LoginPresenter {
 
                 dismissDialog();
 
-                Toast.makeText(LoginActivity.this, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+                showToast(operationResult.getResultMessage(mContext));
 
             }
         }, activeView));

@@ -7,9 +7,8 @@ import android.content.Context;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.file.data.download.DownloadedItem;
-import com.winsun.fruitmix.file.data.download.FileDownloadItem;
-import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
+import com.winsun.fruitmix.file.data.download.FileTaskManager;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;
@@ -67,9 +66,9 @@ public class RetrieveDownloadedFileService extends IntentService {
 
         DBUtils dbUtils = DBUtils.getInstance(this);
 
-        FileDownloadManager fileDownloadManager = FileDownloadManager.getInstance();
+        FileTaskManager fileTaskManager = FileTaskManager.getInstance();
 
-        List<DownloadedItem> downloadItems = dbUtils.getAllCurrentLoginUserDownloadedFile(FNAS.userUUID);
+        List<FinishedTaskItem> downloadItems = dbUtils.getAllCurrentLoginUserDownloadedFile(FNAS.userUUID);
 
         String[] fileNames = new File(FileUtil.getDownloadFileStoreFolderPath()).list();
 
@@ -77,20 +76,20 @@ public class RetrieveDownloadedFileService extends IntentService {
 
             List<String> fileNameList = Arrays.asList(fileNames);
 
-            Iterator<DownloadedItem> itemIterator = downloadItems.iterator();
+            Iterator<FinishedTaskItem> itemIterator = downloadItems.iterator();
             while (itemIterator.hasNext()) {
-                DownloadedItem downloadedItem = itemIterator.next();
+                FinishedTaskItem finishedTaskItem = itemIterator.next();
 
-                if (!fileNameList.contains(downloadedItem.getFileName())) {
+                if (!fileNameList.contains(finishedTaskItem.getFileName())) {
                     itemIterator.remove();
-                    dbUtils.deleteDownloadedFileByUUID(downloadedItem.getFileUUID());
+                    dbUtils.deleteDownloadedFileByUUID(finishedTaskItem.getFileUUID());
                 }
             }
 
         }
 
-        for (DownloadedItem downloadedItem : downloadItems) {
-            fileDownloadManager.addDownloadedFile(downloadedItem.getFileDownloadItem());
+        for (FinishedTaskItem finishedTaskItem : downloadItems) {
+            fileTaskManager.addDownloadedFile( finishedTaskItem.getFileTaskItem());
         }
 
         EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_RETRIEVED, new OperationSuccess(R.string.download)));

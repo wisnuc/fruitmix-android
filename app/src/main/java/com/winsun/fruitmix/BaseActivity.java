@@ -47,10 +47,13 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+/*
         networkReceiver = new NetworkReceiver();
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(networkReceiver, intentFilter);
+*/
+
 
     }
 
@@ -83,19 +86,23 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
         EventBus.getDefault().unregister(this);
 
         super.onStop();
+        
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
+
         dismissDialog();
 
         mDialog = null;
 
+/*
         if (networkReceiver != null) {
             unregisterReceiver(networkReceiver);
         }
+*/
 
     }
 
@@ -115,6 +122,10 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
         } else if (action.equals(Util.NETWORK_CHANGED)) {
 
 //            checkShowAutoUploadWhenConnectedWithMobileNetwork();
+
+        } else if (action.equals(Util.KEY_STOP_CURRENT_ACTIVITY)) {
+
+            Log.d(TAG, "handleOperationEvent: call onBackPressed in current activity " + this);
 
         }
 

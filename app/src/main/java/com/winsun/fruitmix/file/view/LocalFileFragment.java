@@ -2,42 +2,26 @@ package com.winsun.fruitmix.file.view;
 
 import android.app.Activity;
 import android.content.Context;
-import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.command.AbstractCommand;
-import com.winsun.fruitmix.command.ChangeToDownloadPageCommand;
-import com.winsun.fruitmix.command.DownloadFileCommand;
-import com.winsun.fruitmix.command.MacroCommand;
-import com.winsun.fruitmix.command.OpenFileCommand;
 import com.winsun.fruitmix.databinding.ActivityLocalFileBinding;
 import com.winsun.fruitmix.databinding.RemoteFileItemLayoutBinding;
 import com.winsun.fruitmix.databinding.RemoteFolderItemLayoutBinding;
-import com.winsun.fruitmix.file.data.download.FileDownloadManager;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractLocalFile;
-import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFolder;
 import com.winsun.fruitmix.file.data.model.LocalFile;
-import com.winsun.fruitmix.file.presenter.FilePresenter;
 import com.winsun.fruitmix.file.view.viewmodel.FileItemViewModel;
-import com.winsun.fruitmix.model.BottomMenuItem;
-import com.winsun.fruitmix.util.DataBindingSetting;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BaseBindingViewHolder;
@@ -45,9 +29,6 @@ import com.winsun.fruitmix.viewholder.BaseBindingViewHolder;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class LocalFileFragment {
 

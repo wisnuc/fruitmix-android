@@ -25,8 +25,8 @@ public class FileDownloadPendingState extends FileDownloadState {
     }
 
     @Override
-    public DownloadState getDownloadState() {
-        return DownloadState.PENDING;
+    public TaskState getDownloadState() {
+        return TaskState.PENDING;
     }
 
     public StationFileRepository getStationFileRepository() {

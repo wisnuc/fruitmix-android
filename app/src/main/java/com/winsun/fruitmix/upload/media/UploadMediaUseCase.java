@@ -79,6 +79,8 @@ public class UploadMediaUseCase {
 
     private NetworkStateManager networkStateManager;
 
+    private UserDataRepository userDataRepository;
+
     boolean mStopUpload = false;
 
     boolean mAlreadyStartUpload = false;
@@ -92,8 +94,6 @@ public class UploadMediaUseCase {
     String uploadFolderUUID = "";
 
     int alreadyUploadedMediaCount = 0;
-
-    private UserDataRepository userDataRepository;
 
     List<String> uploadedMediaHashs;
 

@@ -8,6 +8,7 @@ import android.util.Log;
 import com.github.druk.rxdnssd.RxDnssd;
 import com.github.druk.rxdnssd.RxDnssdBindable;
 import com.github.druk.rxdnssd.RxDnssdEmbedded;
+import com.umeng.analytics.MobclickAgent;
 import com.wisnun.fruitmix.MyEventBusIndex;
 
 import org.greenrobot.eventbus.EventBus;
@@ -22,6 +23,10 @@ public class CustomApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        MobclickAgent.setDebugMode(true);
+        MobclickAgent.openActivityDurationTrack(false);
+        MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL);
 
         EventBus.builder().addIndex(new MyEventBusIndex()).installDefaultEventBus();
 

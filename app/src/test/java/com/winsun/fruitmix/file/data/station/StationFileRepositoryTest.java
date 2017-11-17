@@ -5,7 +5,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
-import com.winsun.fruitmix.file.data.download.DownloadedItem;
+import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadPendingState;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
@@ -20,7 +20,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -167,7 +166,7 @@ public class StationFileRepositoryTest {
 
             captor.getValue().onSucceed(fileDownloadItem, new OperationSuccess());
 
-            verify(downloadedFileDataSource).insertDownloadedFileRecord(any(DownloadedItem.class));
+            verify(downloadedFileDataSource).insertDownloadedFileRecord(any(FinishedTaskItem.class));
 
 
         } catch (IOException e) {

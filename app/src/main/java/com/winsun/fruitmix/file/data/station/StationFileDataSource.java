@@ -7,6 +7,7 @@ import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
 import com.winsun.fruitmix.file.data.model.RemoteFile;
+import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 
@@ -29,5 +30,7 @@ public interface StationFileDataSource {
     void createFolder(String folderName,String driveUUID,String dirUUID,BaseOperateDataCallback<HttpResponse> callback);
 
     OperationResult uploadFile(LocalFile file, String driveUUID, String dirUUID);
+
+    OperationResult uploadFileWithProgress(LocalFile file, FileUploadState fileUploadState, String driveUUID, String dirUUID);
 
 }

@@ -1,14 +1,12 @@
 package com.winsun.fruitmix.file.view;
 
-import android.app.Dialog;
 import android.databinding.DataBindingUtil;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.ActivityFileDownloadBinding;
-import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
+import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.view.fragment.FileDownloadFragment;
 import com.winsun.fruitmix.interfaces.BaseView;
@@ -66,11 +64,13 @@ public class FileDownloadActivity extends BaseActivity implements BaseView {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
+    public void handleEvent(TaskStateChangedEvent taskStateChangedEvent) {
 
-        EventBus.getDefault().removeStickyEvent(downloadStateChangedEvent);
+        EventBus.getDefault().removeStickyEvent(taskStateChangedEvent);
 
-        fileDownloadFragment.handleEvent(downloadStateChangedEvent);
+        if (fileDownloadFragment != null)
+            fileDownloadFragment.handleEvent(taskStateChangedEvent);
+
     }
 
     @Override

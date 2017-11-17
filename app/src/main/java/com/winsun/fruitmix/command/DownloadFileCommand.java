@@ -3,7 +3,7 @@ package com.winsun.fruitmix.command;
 import android.util.Log;
 
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
-import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FileTaskManager;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 
@@ -30,11 +30,11 @@ public class DownloadFileCommand extends AbstractCommand {
 
     private String driveUUID;
 
-    private FileDownloadManager fileDownloadManager;
+    private FileTaskManager fileTaskManager;
 
-    public DownloadFileCommand(FileDownloadManager fileDownloadManager, AbstractRemoteFile abstractRemoteFile, StationFileRepository stationFileRepository, String currentUserUUID, String driveUUID) {
+    public DownloadFileCommand(FileTaskManager fileTaskManager, AbstractRemoteFile abstractRemoteFile, StationFileRepository stationFileRepository, String currentUserUUID, String driveUUID) {
         this.abstractRemoteFile = abstractRemoteFile;
-        this.fileDownloadManager = fileDownloadManager;
+        this.fileTaskManager = fileTaskManager;
 
         this.stationFileRepository = stationFileRepository;
         this.currentUserUUID = currentUserUUID;
@@ -46,7 +46,7 @@ public class DownloadFileCommand extends AbstractCommand {
     public void execute() {
         fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), Long.parseLong(abstractRemoteFile.getSize()), abstractRemoteFile.getUuid(), abstractRemoteFile.getParentFolderUUID(), driveUUID);
 
-        fileDownloadManager.addFileDownloadItem(fileDownloadItem, stationFileRepository, currentUserUUID);
+        fileTaskManager.addFileDownloadItem(fileDownloadItem, stationFileRepository, currentUserUUID);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class DownloadFileCommand extends AbstractCommand {
 
         fileDownloadItem.cancelDownloadItem();
 
-        fileDownloadManager.deleteFileDownloadItem(Collections.singletonList(fileDownloadItem.getFileUUID()));
+        fileTaskManager.deleteFileDownloadItem(Collections.singletonList(fileDownloadItem.getFileUUID()));
 
         File downloadFile = new File(getDownloadFileStoreFolderPath(), abstractRemoteFile.getName());
 

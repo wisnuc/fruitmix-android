@@ -15,8 +15,8 @@ public class FileDownloadingState extends FileDownloadState {
     }
 
     @Override
-    public DownloadState getDownloadState() {
-        return DownloadState.DOWNLOADING;
+    public TaskState getDownloadState() {
+        return TaskState.DOWNLOADING_OR_UPLOADING;
     }
 
     @Override

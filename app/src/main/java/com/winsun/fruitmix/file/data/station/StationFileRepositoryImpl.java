@@ -5,14 +5,14 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
-import com.winsun.fruitmix.file.data.download.DownloadedItem;
+import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
-import com.winsun.fruitmix.file.data.model.RemoteFolder;
-import com.winsun.fruitmix.file.data.model.RemotePrivateDrive;
+import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -97,6 +97,13 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
     }
 
+    @Override
+    public void getFileWithoutCreateNewThread(String rootUUID, String folderUUID, BaseLoadDataCallback<AbstractRemoteFile> callback) {
+
+        handleGeneralFolder(rootUUID, folderUUID, callback);
+
+    }
+
     private void handleGeneralFolder(final String rootUUID, final String folderUUID, final BaseLoadDataCallback<AbstractRemoteFile> runOnMainThreadCallback) {
         stationFileDataSource.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
 
@@ -140,12 +147,12 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
             @Override
             public void onSucceed(FileDownloadItem data, OperationResult result) {
 
-                DownloadedItem downloadedItem = new DownloadedItem(data);
+                FinishedTaskItem finishedTaskItem = new FinishedTaskItem(data);
 
-                downloadedItem.setFileTime(System.currentTimeMillis());
-                downloadedItem.setFileCreatorUUID(currentUserUUID);
+                finishedTaskItem.setFileTime(System.currentTimeMillis());
+                finishedTaskItem.setFileCreatorUUID(currentUserUUID);
 
-                downloadedFileDataSource.insertDownloadedFileRecord(downloadedItem);
+                downloadedFileDataSource.insertDownloadedFileRecord(finishedTaskItem);
 
                 callback.onSucceed(fileDownloadState.getFileDownloadItem(), new OperationSuccess());
 
@@ -165,7 +172,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
 
     @Override
-    public List<DownloadedItem> getCurrentLoginUserDownloadedFileRecord(String currentLoginUserUUID) {
+    public List<FinishedTaskItem> getCurrentLoginUserDownloadedFileRecord(String currentLoginUserUUID) {
 
         return downloadedFileDataSource.getCurrentLoginUserDownloadedFileRecord(currentLoginUserUUID);
 
@@ -200,7 +207,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
             result = downloadedFileDataSource.deleteDownloadedFile(downloadedFileWrapper.getFileName());
 
             if (result)
-                downloadedFileDataSource.deleteDownloadedFileRecord(downloadedFileWrapper.getFileUUID(), currentLoginUserUUID);
+                downloadedFileDataSource.deleteDownloadedFileRecord(downloadedFileWrapper.getFileUnionKey(), currentLoginUserUUID);
         }
 
         if (result)
@@ -224,10 +231,34 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     }
 
     @Override
+    public void createFolderWithoutCreateNewThread(String folderName, String driveUUID, String dirUUID, BaseOperateDataCallback<HttpResponse> callback) {
+        stationFileDataSource.createFolder(folderName, driveUUID, dirUUID, callback);
+    }
+
+    @Override
     public OperationResult uploadFile(LocalFile file, String driveUUID, String dirUUID) {
 
         return stationFileDataSource.uploadFile(file, driveUUID, dirUUID);
 
     }
+
+    //TODO:create upload file db and finish create,delete,get
+
+    @Override
+    public OperationResult uploadFileWithProgress(LocalFile file, FileUploadState fileUploadState, String driveUUID, String dirUUID, String currentLoginUserUUID) {
+
+        OperationResult result = stationFileDataSource.uploadFileWithProgress(file, fileUploadState, driveUUID, dirUUID);
+
+        if (result.getOperationResultType() != OperationResultType.SUCCEED) {
+
+            //insert into db
+
+
+        }
+
+        return result;
+
+    }
+
 
 }

@@ -29,12 +29,13 @@ import com.winsun.fruitmix.databinding.DownloadingFileItemBinding;
 import com.winsun.fruitmix.databinding.FileDownloadGroupItemBinding;
 import com.winsun.fruitmix.databinding.FragmentFileDownloadBinding;
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
-import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
+import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.file.data.download.DownloadState;
+import com.winsun.fruitmix.file.data.download.TaskState;
 import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
-import com.winsun.fruitmix.file.data.download.FileDownloadManager;
+import com.winsun.fruitmix.file.data.download.FileTaskManager;
+import com.winsun.fruitmix.file.data.model.FileTaskItem;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.view.viewmodel.FileDownloadGroupItemViewModel;
@@ -101,7 +102,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     private String currentUserUUID;
 
-    private FileDownloadManager fileDownloadManager;
+    private FileTaskManager fileTaskManager;
 
     private static final int DOWNLOADING_GROUP = 0;
     private static final int DOWNLOADING_CHILD = 1;
@@ -123,14 +124,14 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     private class DownloadingChildItem implements IDownloadItem {
 
-        private FileDownloadItem fileDownloadItem;
+        private FileTaskItem fileTaskItem;
 
-        public DownloadingChildItem(FileDownloadItem fileDownloadItem) {
-            this.fileDownloadItem = fileDownloadItem;
+        public DownloadingChildItem(FileTaskItem fileTaskItem) {
+            this.fileTaskItem = fileTaskItem;
         }
 
-        public FileDownloadItem getFileDownloadItem() {
-            return fileDownloadItem;
+        public FileTaskItem getFileTaskItem() {
+            return fileTaskItem;
         }
 
         @Override
@@ -148,14 +149,14 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     private class DownloadedChildItem implements IDownloadItem {
 
-        private FileDownloadItem fileDownloadItem;
+        private FileTaskItem fileTaskItem;
 
-        public DownloadedChildItem(FileDownloadItem fileDownloadItem) {
-            this.fileDownloadItem = fileDownloadItem;
+        public DownloadedChildItem(FileTaskItem fileTaskItem) {
+            this.fileTaskItem = fileTaskItem;
         }
 
-        public FileDownloadItem getFileDownloadItem() {
-            return fileDownloadItem;
+        public FileTaskItem getFileTaskItem() {
+            return fileTaskItem;
         }
 
         @Override
@@ -176,7 +177,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
         this.activity = activity;
 
-        fileDownloadManager = FileDownloadManager.getInstance();
+        fileTaskManager = FileTaskManager.getInstance();
 
         setToolbarViewModel(toolbarViewModel);
         setDefaultListener(defaultListener);
@@ -245,30 +246,30 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
         MobclickAgent.onPageEnd("FileDownloadFragment");
     }
 
-    public void handleEvent(DownloadStateChangedEvent downloadStateChangedEvent) {
+    public void handleEvent(TaskStateChangedEvent taskStateChangedEvent) {
 
-        DownloadState downloadState = downloadStateChangedEvent.getDownloadState();
+        TaskState taskState = taskStateChangedEvent.getTaskState();
 
-        if (downloadState == DownloadState.FINISHED || downloadState == DownloadState.ERROR) {
+        if (taskState == TaskState.FINISHED || taskState == TaskState.ERROR) {
 
             if (mStartDownloadOrPending) {
                 mStartDownloadOrPending = false;
                 customHandler.sendEmptyMessageDelayed(DOWNLOAD_STATE_CHANGED, DELAY_TIME_MILLISECOND);
             }
 
-        } else if (downloadState == DownloadState.NO_ENOUGH_SPACE) {
+        } else if (taskState == TaskState.NO_ENOUGH_SPACE) {
 
             Toast.makeText(activity, activity.getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
 
-        } else if (downloadState == DownloadState.START_DOWNLOAD || downloadState == DownloadState.PENDING) {
+        } else if (taskState == TaskState.START_DOWNLOAD_OR_UPLOAD || taskState == TaskState.PENDING) {
 
-            Log.d(TAG, "handleEvent: download state: START_DOWNLOAD,PENDING");
+            Log.d(TAG, "handleEvent: download state: START_DOWNLOAD_OR_UPLOAD,PENDING");
 
             mStartDownloadOrPending = true;
 
             refreshView();
 
-        } else if (downloadState == DownloadState.DOWNLOADING) {
+        } else if (taskState == TaskState.DOWNLOADING_OR_UPLOADING) {
 
             if (!mStartDownloadOrPending)
                 mStartDownloadOrPending = true;
@@ -342,23 +343,23 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
     }
 
     private void refreshData() {
-        filterFileDownloadItems(FileDownloadManager.getInstance().getFileDownloadItems());
+        filterFileDownloadItems(FileTaskManager.getInstance().getFileTaskItems());
     }
 
-    private void filterFileDownloadItems(List<FileDownloadItem> fileDownloadItems) {
+    private void filterFileDownloadItems(List<FileTaskItem> fileTaskItems) {
 
         downloadItems.clear();
         downloadingItems.clear();
         downloadedItems.clear();
 
-        for (FileDownloadItem fileDownloadItem : fileDownloadItems) {
+        for (FileTaskItem fileTaskItem : fileTaskItems) {
 
-            DownloadState downloadState = fileDownloadItem.getDownloadState();
+            TaskState taskState = fileTaskItem.getTaskState();
 
-            if (downloadState.equals(DownloadState.FINISHED) || downloadState.equals(DownloadState.ERROR)) {
-                downloadedItems.add(new DownloadedChildItem(fileDownloadItem));
+            if (taskState.equals(TaskState.FINISHED) || taskState.equals(TaskState.ERROR)) {
+                downloadedItems.add(new DownloadedChildItem(fileTaskItem));
             } else {
-                downloadingItems.add(new DownloadingChildItem(fileDownloadItem));
+                downloadingItems.add(new DownloadingChildItem(fileTaskItem));
             }
 
         }
@@ -615,12 +616,12 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
                 binding.setFileDownloadingItemViewModel(fileDownloadingItemViewModel);
             }
 
-            final FileDownloadItem fileDownloadItem = ((DownloadingChildItem) downloadItem).getFileDownloadItem();
+            final FileTaskItem fileTaskItem = ((DownloadingChildItem) downloadItem).getFileTaskItem();
 
-            fileDownloadingItemViewModel.fileName.set(fileDownloadItem.getFileName());
+            fileDownloadingItemViewModel.fileName.set(fileTaskItem.getFileName());
             fileDownloadingItemViewModel.maxProgress.set(max);
 
-            fileDownloadingItemViewModel.currentProgress.set(fileDownloadItem.getCurrentProgress(max));
+            fileDownloadingItemViewModel.currentProgress.set(fileTaskItem.getCurrentProgress(max));
 
             binding.downloadingFileItemMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -632,9 +633,9 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
                         @Override
                         public void execute() {
 
-                            fileDownloadItem.cancelDownloadItem();
+                            fileTaskItem.cancelDownloadItem();
 
-                            fileDownloadManager.deleteFileDownloadItem(Collections.singletonList(fileDownloadItem.getFileUUID()));
+                            fileTaskManager.deleteFileDownloadItem(Collections.singletonList(fileTaskItem.getUnionKey()));
 
                             refreshView();
 
@@ -676,9 +677,9 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
         @Override
         public void refreshDownloadItemView(IDownloadItem downloadItem) {
-            final FileDownloadItem fileDownloadItem = ((DownloadedChildItem) downloadItem).getFileDownloadItem();
+            final FileTaskItem fileTaskItem = ((DownloadedChildItem) downloadItem).getFileTaskItem();
 
-            final DownloadState downloadState = fileDownloadItem.getDownloadState();
+            final TaskState taskState = fileTaskItem.getTaskState();
 
             fileDownloadedItemViewModel = binding.getFileDownloadedItemViewModel();
 
@@ -687,11 +688,11 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
                 binding.setFileDownloadedItemViewModel(fileDownloadedItemViewModel);
             }
 
-            fileDownloadedItemViewModel.fileName.set(fileDownloadItem.getFileName());
+            fileDownloadedItemViewModel.fileName.set(fileTaskItem.getFileName());
 
-            if (downloadState.equals(DownloadState.FINISHED)) {
+            if (taskState.equals(TaskState.FINISHED)) {
 
-                fileDownloadedItemViewModel.fileSize.set(FileUtil.formatFileSize(fileDownloadItem.getFileSize()));
+                fileDownloadedItemViewModel.fileSize.set(FileUtil.formatFileSize(fileTaskItem.getFileSize()));
 
             } else {
 
@@ -699,7 +700,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
             }
 
-            toggleFileIconBgResource(fileDownloadItem.getFileUUID(), fileDownloadedItemViewModel);
+            toggleFileIconBgResource(fileTaskItem.getUnionKey(), fileDownloadedItemViewModel);
 
             if (selectMode) {
 
@@ -708,8 +709,8 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
                 downloadedItemLayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        toggleFileInSelectedFile(fileDownloadItem.getFileUUID(), fileDownloadItem.getFileName());
-                        toggleFileIconBgResource(fileDownloadItem.getFileUUID(), fileDownloadedItemViewModel);
+                        toggleFileInSelectedFile(fileTaskItem.getUnionKey(), fileTaskItem.getFileName());
+                        toggleFileIconBgResource(fileTaskItem.getUnionKey(), fileDownloadedItemViewModel);
                     }
                 });
 
@@ -721,8 +722,8 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
                     @Override
                     public void onClick(View view) {
 
-                        if (downloadState.equals(DownloadState.FINISHED)) {
-                            FileUtil.openAbstractRemoteFile(activity, fileDownloadItem.getFileName());
+                        if (taskState.equals(TaskState.FINISHED)) {
+                            FileUtil.openAbstractRemoteFile(activity, fileTaskItem.getFileName());
                         }
 
                     }

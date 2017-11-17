@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.file.data.download;
 
-import com.winsun.fruitmix.eventbus.DownloadStateChangedEvent;
+import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
+import com.winsun.fruitmix.file.data.model.FileTaskState;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -8,14 +9,13 @@ import org.greenrobot.eventbus.EventBus;
  * Created by Administrator on 2016/11/7.
  */
 
-public abstract class FileDownloadState {
+public abstract class FileDownloadState extends FileTaskState{
 
     private String fileName;
     private String fileUUID;
-    private FileDownloadItem fileDownloadItem;
 
     public FileDownloadState(FileDownloadItem fileDownloadItem) {
-        this.fileDownloadItem = fileDownloadItem;
+        super(fileDownloadItem);
     }
 
     public void setFileName(String fileName) {
@@ -26,14 +26,6 @@ public abstract class FileDownloadState {
         this.fileUUID = fileUUID;
     }
 
-    public void setFileSize(long fileSize) {
-        fileDownloadItem.setFileSize(fileSize);
-    }
-
-    public void setFileCurrentDownloadSize(long fileCurrentDownloadSize) {
-        fileDownloadItem.setFileCurrentDownloadSize(fileCurrentDownloadSize);
-    }
-
     public String getFileName() {
         return fileName;
     }
@@ -42,25 +34,15 @@ public abstract class FileDownloadState {
         return fileUUID;
     }
 
+    public FileDownloadItem getFileDownloadItem() {
+        return (FileDownloadItem) getFileTaskItem();
+    }
+
     public String getParentFolderUUID() {
-        return fileDownloadItem.getParentFolderUUID();
+        return getFileDownloadItem().getParentFolderUUID();
     }
 
     public String getDriveUUID(){
-        return fileDownloadItem.getDriveUUID();
+        return getFileDownloadItem().getDriveUUID();
     }
-
-    public FileDownloadItem getFileDownloadItem() {
-        return fileDownloadItem;
-    }
-
-    public abstract DownloadState getDownloadState();
-
-    public abstract void startWork();
-
-    public void notifyDownloadStateChanged() {
-
-        EventBus.getDefault().postSticky(new DownloadStateChangedEvent(getDownloadState()));
-    }
-
 }

@@ -105,6 +105,8 @@ public class Util {
 
     public static final String NETWORK_CHANGED = "network_changed";
 
+    public static final String KEY_STOP_CURRENT_ACTIVITY = "key_stop_current_activity";
+
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
     public static final String KEY_AUTHORIZATION = "Authorization";
     public static final String KEY_JWT_HEAD = "JWT ";

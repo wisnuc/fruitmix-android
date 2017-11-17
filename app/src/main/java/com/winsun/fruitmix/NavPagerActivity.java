@@ -356,6 +356,8 @@ public class NavPagerActivity extends BaseActivity
 
         loginUseCase = InjectLoginUseCase.provideLoginUseCase(mContext);
 
+        loginUseCase.setAlreadyLogin(true);
+
         logoutUseCase = InjectLogoutUseCase.provideLogoutUseCase(mContext);
 
         loggedInUserDataSource = InjectLoggedInUser.provideLoggedInUserRepository(mContext);

@@ -3,6 +3,7 @@ package com.winsun.fruitmix.logout;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
@@ -41,6 +42,9 @@ public class LogoutUseCaseTest {
     @Mock
     private HttpRequestFactory httpRequestFactory;
 
+    @Mock
+    private LoginUseCase loginUseCase;
+
     private String testToken = "testToken";
 
     private String testStationID = "testStationID";
@@ -51,7 +55,7 @@ public class LogoutUseCaseTest {
         MockitoAnnotations.initMocks(this);
 
         logoutUseCase = LogoutUseCase.getInstance(systemSettingDataSource, loggedInUserDataSource,
-                uploadMediaUseCase, weChatUserDataSource, httpRequestFactory);
+                uploadMediaUseCase, weChatUserDataSource, httpRequestFactory, loginUseCase);
     }
 
     @After
@@ -143,6 +147,7 @@ public class LogoutUseCaseTest {
 
         verify(httpRequestFactory).reset();
 
+        verify(loginUseCase).setAlreadyLogin(eq(false));
     }
 
 }

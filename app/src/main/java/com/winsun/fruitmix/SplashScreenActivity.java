@@ -56,8 +56,6 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         mContext = this;
 
-        LocalCache.Init();
-
         InitSystem.initSystem(this);
 
  /*       String[] items = new String[]{"这是一串测试用的字符串，用于测试一行能放多少字符串", "这是一串测试用的字符串，用于测试一行能放多少字符串"};

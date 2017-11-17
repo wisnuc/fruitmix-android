@@ -1,5 +1,8 @@
 package com.winsun.fruitmix.file.data.download;
 
+import com.winsun.fruitmix.file.data.model.FileTaskItem;
+import com.winsun.fruitmix.file.data.model.FileTaskState;
+
 /**
  * Created by Administrator on 2016/11/7.
  */
@@ -13,14 +16,14 @@ public class FileDownloadFinishedState extends FileDownloadState {
     }
 
     @Override
-    public DownloadState getDownloadState() {
-        return DownloadState.FINISHED;
+    public TaskState getDownloadState() {
+        return TaskState.FINISHED;
     }
 
     @Override
     public void startWork() {
 
-        FileDownloadManager.getInstance().startPendingDownloadItem();
+        FileTaskManager.getInstance().startPendingTaskItem();
 
     }
 

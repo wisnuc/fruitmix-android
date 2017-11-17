@@ -235,6 +235,8 @@
 
     <string name="shared_drive">Shared Drive</string>
 
+    <string name="file_not_exist">File Not Exist</string>
+
     <!-- file download -->
 
     <string name="downloading">Downloading</string>
@@ -375,5 +377,6 @@
 
     <!-- group -->
     <string name="group">Group</string>
+
 
 </resources>

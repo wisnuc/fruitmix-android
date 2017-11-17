@@ -2,40 +2,30 @@ package com.winsun.fruitmix.file.data.download;
 
 import android.util.Log;
 
+import com.winsun.fruitmix.file.data.model.FileTaskItem;
+
 import java.util.concurrent.Future;
 
 /**
  * Created by Administrator on 2016/11/7.
  */
 
-public class FileDownloadItem {
+public class FileDownloadItem extends FileTaskItem {
 
     public static final String TAG = FileDownloadItem.class.getSimpleName();
-
-    private String fileName;
-    private String fileUUID;
-    private long fileSize;
-
-    private long fileCurrentDownloadSize;
-
-    private FileDownloadState fileDownloadState;
 
     private String parentFolderUUID;
 
     private String driveUUID;
 
-    private Future<Boolean> future;
+    private FileDownloadState fileDownloadState;
 
     public FileDownloadItem(String fileName, long fileSize, String fileUUID) {
-        this.fileName = fileName;
-        this.fileSize = fileSize;
-        this.fileUUID = fileUUID;
+        super(fileUUID,fileName,fileSize);
     }
 
-    public FileDownloadItem(String fileName, long fileSize, String fileUUID, String parentFolderUUID,String driveUUID) {
-        this.fileName = fileName;
-        this.fileUUID = fileUUID;
-        this.fileSize = fileSize;
+    public FileDownloadItem(String fileName, long fileSize, String fileUUID, String parentFolderUUID, String driveUUID) {
+        super(fileUUID,fileName,fileSize);
         this.parentFolderUUID = parentFolderUUID;
         this.driveUUID = driveUUID;
     }
@@ -43,45 +33,13 @@ public class FileDownloadItem {
     public void setFileDownloadState(FileDownloadState fileDownloadState) {
         this.fileDownloadState = fileDownloadState;
 
-        fileDownloadState.setFileUUID(fileUUID);
-        fileDownloadState.setFileName(fileName);
-        fileDownloadState.setFileSize(fileSize);
+        fileDownloadState.setFileUUID(getFileUUID());
+        fileDownloadState.setFileName(getFileName());
+        fileDownloadState.setFileSize(getFileSize());
 
         fileDownloadState.startWork();
 
         fileDownloadState.notifyDownloadStateChanged();
-    }
-
-    public FileDownloadState getFileDownloadState() {
-        return fileDownloadState;
-    }
-
-    void setFileSize(long fileSize) {
-        this.fileSize = fileSize;
-    }
-
-    void setFileCurrentDownloadSize(long fileCurrentDownloadSize) {
-        this.fileCurrentDownloadSize = fileCurrentDownloadSize;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public long getFileSize() {
-        return fileSize;
-    }
-
-    public long getFileCurrentDownloadSize() {
-        return fileCurrentDownloadSize;
-    }
-
-    public DownloadState getDownloadState() {
-        return fileDownloadState.getDownloadState();
-    }
-
-    public String getFileUUID() {
-        return fileUUID;
     }
 
     public String getParentFolderUUID() {
@@ -92,22 +50,19 @@ public class FileDownloadItem {
         return driveUUID;
     }
 
-    public void setFuture(Future<Boolean> future) {
-        this.future = future;
+    @Override
+    public TaskState getTaskState() {
+        return fileDownloadState.getDownloadState();
     }
 
-    public void cancelDownloadItem() {
-        if (future != null)
-            future.cancel(true);
+    @Override
+    public String getUnionKey() {
+        return getFileUUID();
     }
 
-    public int getCurrentProgress(int max) {
-        Log.d(TAG, "refreshDownloadItemView: currentDownloadSize:" + getFileCurrentDownloadSize() + " fileSize:" + getFileSize());
-
-        float currentProgress = getFileCurrentDownloadSize() * max / getFileSize();
-
-        Log.d(TAG, "refreshDownloadItemView: currentProgress:" + currentProgress);
-
-        return (int) currentProgress;
+    public FileDownloadState getFileDownloadState() {
+        return fileDownloadState;
     }
+
+
 }

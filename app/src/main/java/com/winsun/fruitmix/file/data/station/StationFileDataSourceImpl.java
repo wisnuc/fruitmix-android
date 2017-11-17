@@ -10,6 +10,7 @@ import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
+import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
@@ -150,7 +151,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
             if (httpResponse != null && httpResponse.getResponseCode() == 200)
                 callback.onSucceed(httpResponse, new OperationSuccess());
             else
-                callback.onFail(new OperationJSONException());
+                callback.onFail(new OperationNetworkException(httpResponse));
 
         } catch (MalformedURLException e) {
 
@@ -186,6 +187,46 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         try {
 
             httpResponse = iHttpFileUtil.uploadFile(httpRequest, file);
+
+            if (httpResponse != null && httpResponse.getResponseCode() == 200)
+                return new OperationSuccess();
+            else
+                return new OperationNetworkException(httpResponse);
+
+        } catch (MalformedURLException e) {
+
+            return new OperationMalformedUrlException();
+
+        } catch (SocketTimeoutException ex) {
+
+            return new OperationSocketTimeoutException();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            return new OperationIOException();
+        }
+
+    }
+
+    @Override
+    public OperationResult uploadFileWithProgress(LocalFile file, FileUploadState fileUploadState, String driveUUID, String dirUUID) {
+
+        String path = "/drives/" + driveUUID + "/dirs/" + dirUUID + "/entries";
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "");
+
+        if (!wrapper.checkUrl(httpRequest.getUrl())) {
+            return new OperationMalformedUrlException();
+        }
+
+        Log.i(TAG, "uploadFile: start upload: " + httpRequest.getUrl());
+
+        HttpResponse httpResponse;
+
+        try {
+
+            httpResponse = iHttpFileUtil.uploadFileWithProgress(fileUploadState,httpRequest, file);
 
             if (httpResponse != null && httpResponse.getResponseCode() == 200)
                 return new OperationSuccess();

@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class CreateNewEquipmentActivity extends AppCompatActivity implements View.OnClickListener {
+public class CreateNewEquipmentActivity extends BaseActivity implements View.OnClickListener {
 
     @BindView(R.id.title)
     TextView mLayoutTitle;

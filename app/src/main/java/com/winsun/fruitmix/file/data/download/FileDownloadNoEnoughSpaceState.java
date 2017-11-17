@@ -15,8 +15,8 @@ public class FileDownloadNoEnoughSpaceState extends FileDownloadState{
     }
 
     @Override
-    public DownloadState getDownloadState() {
-        return DownloadState.NO_ENOUGH_SPACE;
+    public TaskState getDownloadState() {
+        return TaskState.NO_ENOUGH_SPACE;
     }
 
     @Override
