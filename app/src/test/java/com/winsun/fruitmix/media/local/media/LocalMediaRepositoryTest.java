@@ -108,9 +108,6 @@ public class LocalMediaRepositoryTest {
 
     }
 
-
-    //TODO:add newVideo logic test
-
     @Test
     public void getMediaFromSystemDBSucceed_HasNoNewMediaOrVideoAndNoPreMediaDeleted() {
 

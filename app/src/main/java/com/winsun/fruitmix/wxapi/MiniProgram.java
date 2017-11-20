@@ -64,7 +64,7 @@ public class MiniProgram {
 
         wxMediaMessage.title = context.getString(R.string.invite_mini_program_title);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(resources, R.drawable.invite_miniprogram_thumb);
+        Bitmap bitmap = BitmapFactory.decodeResource(resources, R.drawable.invite_miniprogram_thumb2);
 
 //        Bitmap thumbBmp = Bitmap.createScaledBitmap(bitmap, THUMB_SIZE, THUMB_SIZE, true);
 //        bitmap.recycle();
