@@ -44,7 +44,7 @@ import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.download.TaskState;
-import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
+import com.winsun.fruitmix.file.data.model.FinishedTaskItemWrapper;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileTaskManager;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
@@ -247,9 +247,9 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
-                                DownloadedFileWrapper downloadedFileWrapper = new DownloadedFileWrapper(abstractRemoteFile.getUuid(), abstractRemoteFile.getName());
+                                FinishedTaskItemWrapper finishedTaskItemWrapper = new FinishedTaskItemWrapper(abstractRemoteFile.getUuid(), abstractRemoteFile.getName());
 
-                                stationFileRepository.deleteFileFinishedTaskItems(Collections.singleton(downloadedFileWrapper), currentUserUUID, new BaseOperateDataCallback<Void>() {
+                                stationFileRepository.deleteFileFinishedTaskItems(Collections.singleton(finishedTaskItemWrapper), currentUserUUID, new BaseOperateDataCallback<Void>() {
                                     @Override
                                     public void onSucceed(Void data, OperationResult result) {
 

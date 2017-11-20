@@ -21,7 +21,6 @@ import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.ConfirmInviteUserItemBinding;
 import com.winsun.fruitmix.databinding.ConfirmInviteUserItemHeaderBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
 import com.winsun.fruitmix.invitation.data.InvitationDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -256,7 +255,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
                     HttpErrorBodyParser parser = new HttpErrorBodyParser();
 
                     try {
-                        String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseBody());
+                        String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseData());
 
                         confirmInviteUserView.showToast(messageInBody);
 

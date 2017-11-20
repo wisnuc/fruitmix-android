@@ -1,12 +1,9 @@
 package com.winsun.fruitmix.person.info;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.util.StringBuilderPrinter;
 
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.EquipmentSearchActivity;
@@ -14,7 +11,6 @@ import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
-import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -22,11 +18,8 @@ import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
-import com.winsun.fruitmix.user.BaseOperateUserPresenter;
-import com.winsun.fruitmix.user.OperateUserViewModel;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
-import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.wxapi.MiniProgram;
 import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
@@ -227,7 +220,7 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
                                     HttpErrorBodyParser parser = new HttpErrorBodyParser();
 
                                     try {
-                                        String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseBody());
+                                        String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseData());
 
                                         personInfoView.showToast(messageInBody);
 

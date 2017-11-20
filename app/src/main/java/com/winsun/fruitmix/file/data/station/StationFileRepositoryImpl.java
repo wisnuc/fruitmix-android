@@ -6,7 +6,7 @@ import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
+import com.winsun.fruitmix.file.data.model.FinishedTaskItemWrapper;
 import com.winsun.fruitmix.file.data.download.FileTaskManager;
 import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
@@ -17,7 +17,6 @@ import com.winsun.fruitmix.file.data.upload.FileUploadFinishedState;
 import com.winsun.fruitmix.file.data.upload.FileUploadItem;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.http.HttpResponse;
-import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -199,7 +198,11 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     @Override
     public void fillAllFinishTaskItemIntoFileTaskManager(String currentLoginUserUUID) {
 
-        List<FinishedTaskItem> finishedTaskItems = downloadedFileDataSource.getCurrentLoginUserFileFinishedTaskItem(currentLoginUserUUID);
+        List<FinishedTaskItem> finishedTaskItems = new ArrayList<>();
+
+        List<FinishedTaskItem> finishedDownloadTaskItems = downloadedFileDataSource.getCurrentLoginUserFileFinishedTaskItem(currentLoginUserUUID);
+
+        finishedTaskItems.addAll(finishedDownloadTaskItems);
 
         List<FinishedTaskItem> finishUploadTaskItems = uploadFileDataSource.getCurrentLoginUserFileFinishedTaskItem(currentLoginUserUUID);
 
@@ -219,41 +222,41 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     }
 
     @Override
-    public void deleteFileFinishedTaskItems(final Collection<DownloadedFileWrapper> downloadedFileWrappers, final String currentLoginUserUUID, BaseOperateDataCallback<Void> callback) {
+    public void deleteFileFinishedTaskItems(final Collection<FinishedTaskItemWrapper> finishedTaskItemWrappers, final String currentLoginUserUUID, BaseOperateDataCallback<Void> callback) {
 
         final BaseOperateDataCallback<Void> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                deleteDownloadedFileInThread(downloadedFileWrappers, currentLoginUserUUID, runOnMainThreadCallback);
+                deleteFileFinishedTaskItemsInThread(finishedTaskItemWrappers, currentLoginUserUUID, runOnMainThreadCallback);
             }
         });
 
     }
 
-    private void deleteDownloadedFileInThread(Collection<DownloadedFileWrapper> downloadedFileWrappers, String currentLoginUserUUID, BaseOperateDataCallback<Void> callback) {
+    private void deleteFileFinishedTaskItemsInThread(Collection<FinishedTaskItemWrapper> finishedTaskItemWrappers, String currentLoginUserUUID, BaseOperateDataCallback<Void> callback) {
         boolean result = false;
 
-        for (DownloadedFileWrapper downloadedFileWrapper : downloadedFileWrappers) {
+        for (FinishedTaskItemWrapper finishedTaskItemWrapper : finishedTaskItemWrappers) {
 
-            boolean deleteUploadFileTaskResult = uploadFileDataSource.deleteFileTask(downloadedFileWrapper.getFileUnionKey(), currentLoginUserUUID);
+            boolean deleteUploadFileTaskResult = uploadFileDataSource.deleteFileTask(finishedTaskItemWrapper.getFileUnionKey(), currentLoginUserUUID);
 
             if (!deleteUploadFileTaskResult) {
 
                 //delete upload file task return false,means no record found,delete it in download record table
 
-                result = downloadedFileDataSource.deleteDownloadedFile(downloadedFileWrapper.getFileName());
+                result = downloadedFileDataSource.deleteDownloadedFile(finishedTaskItemWrapper.getFileName());
 
                 if (result) {
-                    downloadedFileDataSource.deleteFileTask(downloadedFileWrapper.getFileUnionKey(), currentLoginUserUUID);
+                    downloadedFileDataSource.deleteFileTask(finishedTaskItemWrapper.getFileUnionKey(), currentLoginUserUUID);
                 }
 
             } else
                 result = true;
 
             if (result)
-                fileTaskManager.deleteFileDownloadItem(Collections.singletonList(downloadedFileWrapper.getFileUnionKey()));
+                fileTaskManager.deleteFileDownloadItem(Collections.singletonList(finishedTaskItemWrapper.getFileUnionKey()));
 
         }
 
@@ -289,8 +292,6 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
     }
 
-    //TODO:create upload file db and finish create,delete,get
-
     @Override
     public OperationResult uploadFileWithProgress(LocalFile file, FileUploadState fileUploadState, String driveUUID, String dirUUID, String currentLoginUserUUID) {
 
@@ -307,7 +308,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
             HttpErrorBodyParser parser = new HttpErrorBodyParser();
 
             try {
-                String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseBody());
+                String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseData());
 
                 if (messageInBody.contains(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE)) {
 
@@ -326,7 +327,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     }
 
     @Override
-    public boolean insertFileUploadTask(FileUploadItem fileUploadItem,String currentUserUUID) {
+    public boolean insertFileUploadTask(FileUploadItem fileUploadItem, String currentUserUUID) {
         FinishedTaskItem finishedTaskItem = new FinishedTaskItem(fileUploadItem);
 
         finishedTaskItem.setFileTime(System.currentTimeMillis());

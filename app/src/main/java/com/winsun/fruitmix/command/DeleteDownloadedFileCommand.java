@@ -3,7 +3,7 @@ package com.winsun.fruitmix.command;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
+import com.winsun.fruitmix.file.data.model.FinishedTaskItemWrapper;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -19,13 +19,13 @@ import java.util.Collection;
 
 public class DeleteDownloadedFileCommand extends AbstractCommand {
 
-    private Collection<DownloadedFileWrapper> files;
+    private Collection<FinishedTaskItemWrapper> files;
 
     private String currentUserUUID;
 
     private StationFileRepository stationFileRepository;
 
-    public DeleteDownloadedFileCommand(Collection<DownloadedFileWrapper> files, String currentUserUUID, StationFileRepository stationFileRepository) {
+    public DeleteDownloadedFileCommand(Collection<FinishedTaskItemWrapper> files, String currentUserUUID, StationFileRepository stationFileRepository) {
         this.files = files;
         this.currentUserUUID = currentUserUUID;
         this.stationFileRepository = stationFileRepository;

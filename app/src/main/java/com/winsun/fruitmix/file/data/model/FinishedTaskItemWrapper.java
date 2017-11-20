@@ -1,15 +1,15 @@
-package com.winsun.fruitmix.file.data.download;
+package com.winsun.fruitmix.file.data.model;
 
 /**
  * Created by Administrator on 2017/8/16.
  */
 
-public class DownloadedFileWrapper {
+public class FinishedTaskItemWrapper {
 
     private String fileUnionKey;
     private String fileName;
 
-    public DownloadedFileWrapper(String fileUnionKey, String fileName) {
+    public FinishedTaskItemWrapper(String fileUnionKey, String fileName) {
         this.fileUnionKey = fileUnionKey;
         this.fileName = fileName;
     }

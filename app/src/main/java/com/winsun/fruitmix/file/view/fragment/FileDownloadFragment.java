@@ -33,7 +33,7 @@ import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.TaskState;
-import com.winsun.fruitmix.file.data.download.DownloadedFileWrapper;
+import com.winsun.fruitmix.file.data.model.FinishedTaskItemWrapper;
 import com.winsun.fruitmix.file.data.download.FileTaskManager;
 import com.winsun.fruitmix.file.data.model.FileTaskItem;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
@@ -83,7 +83,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     private boolean mStartDownloadOrPending = false;
 
-    private Map<String, DownloadedFileWrapper> selectDownloadedItemMap;
+    private Map<String, FinishedTaskItemWrapper> selectDownloadedItemMap;
 
     private AbstractCommand showUnSelectModeViewCommand;
 
@@ -761,7 +761,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
             if (selectDownloadedItemMap.containsKey(fileUUID)) {
                 selectDownloadedItemMap.remove(fileUUID);
             } else {
-                selectDownloadedItemMap.put(fileUUID, new DownloadedFileWrapper(fileUUID, fileName));
+                selectDownloadedItemMap.put(fileUUID, new FinishedTaskItemWrapper(fileUUID, fileName));
             }
         }
     }

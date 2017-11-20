@@ -39,7 +39,7 @@ public class UploadFileUseCase {
 
     static final String UPLOAD_PARENT_FOLDER_NAME = "上传的文件";
 
-    static final String UPLOAD_FOLDER_NAME_PREFIX = "来自";
+    private static final String UPLOAD_FOLDER_NAME_PREFIX = "来自";
 
     private UserDataRepository userDataRepository;
 
@@ -103,7 +103,6 @@ public class UploadFileUseCase {
         } while (needRetryForEEXIST);
 
     }
-
 
     private void checkFolderExist(String rootUUID, String dirUUID, final FileUploadState fileUploadState, final BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
@@ -189,7 +188,7 @@ public class UploadFileUseCase {
 
     }
 
-    private String getUploadFolderName() {
+    String getUploadFolderName() {
         return UPLOAD_FOLDER_NAME_PREFIX + uploadFolderName;
     }
 
@@ -197,7 +196,7 @@ public class UploadFileUseCase {
 
         Log.i(TAG, "start checkFileExist");
 
-        stationFileRepository.getFile(currentUserHome, uploadFolderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
+        stationFileRepository.getFileWithoutCreateNewThread(currentUserHome, uploadFolderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
             @Override
             public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);
@@ -238,7 +237,8 @@ public class UploadFileUseCase {
 
 
     private void startCreateFolderAndUpload(FileUploadState fileUploadState) {
-        Log.d(TAG, "init upload media hashs no upload folder");
+
+        Log.d(TAG, "startCreateFolderAndUpload");
 
         startPrepareAutoUpload(fileUploadState);
     }
@@ -386,7 +386,7 @@ public class UploadFileUseCase {
                     HttpErrorBodyParser parser = new HttpErrorBodyParser();
 
                     try {
-                        String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseBody());
+                        String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseData());
 
                         if (messageInBody.contains(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE)) {
 
@@ -463,11 +463,13 @@ public class UploadFileUseCase {
     }
 
     private boolean handleUploadSucceed(String filePath, FileUploadItem fileUploadItem) {
-        stationFileRepository.insertFileUploadTask(fileUploadItem, currentUserUUID);
+        boolean insertResult = stationFileRepository.insertFileUploadTask(fileUploadItem, currentUserUUID);
+
+        Log.d(TAG, "handleUploadSucceed: insert record result: " + insertResult);
 
         boolean copyToDownloadFolderResult = FileUtil.copyFileToDir(filePath, FileUtil.getDownloadFileStoreFolderPath());
 
-        Log.d(TAG, "startUploadFile: succeed,insert record and copy to download folder result: " + copyToDownloadFolderResult);
+        Log.d(TAG, "handleUploadSucceed: copy to download folder result: " + copyToDownloadFolderResult);
 
         return copyToDownloadFolderResult;
     }

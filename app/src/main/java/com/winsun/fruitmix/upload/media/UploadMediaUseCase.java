@@ -1,7 +1,5 @@
 package com.winsun.fruitmix.upload.media;
 
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -17,7 +15,6 @@ import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -30,13 +27,11 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
-import com.winsun.fruitmix.util.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -796,7 +791,7 @@ public class UploadMediaUseCase {
                             HttpErrorBodyParser parser = new HttpErrorBodyParser();
 
                             try {
-                                String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseBody());
+                                String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseData());
 
                                 if (messageInBody.contains(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE)) {
 

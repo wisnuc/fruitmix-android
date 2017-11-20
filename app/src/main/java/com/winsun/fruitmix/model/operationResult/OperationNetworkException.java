@@ -32,7 +32,7 @@ public class OperationNetworkException extends OperationResult {
         return resultMessage;
     }
 
-    public String getHttpResponseBody(){
+    public String getHttpResponseData(){
         return httpResponse.getResponseData();
     }
 
