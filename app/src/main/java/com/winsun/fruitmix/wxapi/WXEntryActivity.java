@@ -274,35 +274,21 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                     OperationMoreThanOneStation operationMoreThanOneStation = (OperationMoreThanOneStation) result;
 
-                    final WeChatTokenUserWrapper weChatTokenUserWrapper = operationMoreThanOneStation.getWeChatTokenUserWrapper();
+                    List<LoggedInWeChatUser> loggedInWeChatUsers = operationMoreThanOneStation.getLoggedInWeChatUsers();
 
-                    InjectGetAllBindingLocalUserUseCase.provideInstance(WXEntryActivity.this).
-                            getAllBindingLocalUser(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(),
-                                    new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<LoggedInWeChatUser>() {
-                                        @Override
-                                        public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
+                    WeChatTokenUserWrapper weChatTokenUserWrapper = operationMoreThanOneStation.getWeChatTokenUserWrapper();
 
-                                            if (data.isEmpty()) {
+                    if (loggedInWeChatUsers.isEmpty()) {
 
-                                                handleLoginFail(new OperationFail(R.string.no_binding_user_in_nas));
+                        handleLoginFail(new OperationFail(R.string.no_binding_user_in_nas));
 
-                                            } else {
+                    }  else {
 
-                                                dismissDialog();
+                        dismissDialog();
 
-                                                showChooseStationDialog(weChatTokenUserWrapper, data);
+                        showChooseStationDialog(weChatTokenUserWrapper, loggedInWeChatUsers);
 
-                                            }
-
-                                        }
-
-                                        @Override
-                                        public void onFail(OperationResult operationResult) {
-
-                                            handleLoginFail(operationResult);
-
-                                        }
-                                    }, activeView));
+                    }
 
                 } else {
 

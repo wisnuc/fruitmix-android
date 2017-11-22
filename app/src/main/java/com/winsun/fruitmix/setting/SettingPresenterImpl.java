@@ -82,8 +82,6 @@ public class SettingPresenterImpl implements SettingPresenter {
         mAutoUploadWhenConnectedWithMobileNetwork = systemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi();
         settingViewModel.onlyAutoUploadWhenConnectedWithWifi.set(mAutoUploadWhenConnectedWithMobileNetwork);
 
-        calcAlreadyUploadMediaCountAndTotalCacheSize(context);
-
         uploadMediaCountChangeListener = new UploadMediaCountChangeListener() {
 
             @Override
@@ -97,7 +95,7 @@ public class SettingPresenterImpl implements SettingPresenter {
                 mAlreadyUploadMediaCount = uploadedMediaCount;
                 mTotalLocalMediaCount = totalCount;
 
-                handleUploadMedia(context);
+                handleUploadMedia();
             }
 
             @Override
@@ -126,6 +124,8 @@ public class SettingPresenterImpl implements SettingPresenter {
                     baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_FOLDER + httpErrorCode);
             }
         };
+
+        calcAlreadyUploadMediaCountAndTotalCacheSize(context);
 
     }
 
@@ -168,41 +168,27 @@ public class SettingPresenterImpl implements SettingPresenter {
 
         settingViewModel.cacheSizeText.set(context.getString(R.string.calculating));
 
-        Future<Boolean> future = threadManager.runOnCacheThread(new Callable<Boolean>() {
+        threadManager.runOnCacheThread(new Runnable() {
 
             @Override
-            public Boolean call() throws Exception {
-
-/*                int alreadyUploadMediaCount = 0;
-                int totalUploadMediaCount = 0;
-
-                alreadyUploadMediaCount = uploadMediaUseCase.getAlreadyUploadedMediaCount();
-                totalUploadMediaCount = uploadMediaUseCase.getLocalMedias().size();
-
-                mAlreadyUploadMediaCount = alreadyUploadMediaCount;
-                mTotalLocalMediaCount = totalUploadMediaCount;*/
+            public void run() {
 
                 mTotalCacheSize = FileUtil.getTotalCacheSize(context);
 
-                return true;
+                threadManager.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        handleUploadMedia();
+                    }
+                });
+
             }
+
         });
-
-        try {
-            Boolean result = future.get();
-
-            if (result)
-                handleUploadMedia(context);
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
 
     }
 
-    private void handleUploadMedia(Context context) {
+    private void handleUploadMedia() {
 
 /*        settingViewModel.alreadyUploadMediaCountTextViewVisibility.set(true);
         settingViewModel.alreadyUploadMediaCountText.set(String.format(context.getString(R.string.already_upload_media_count_text), mAlreadyUploadMediaCount, mTotalLocalMediaCount));*/

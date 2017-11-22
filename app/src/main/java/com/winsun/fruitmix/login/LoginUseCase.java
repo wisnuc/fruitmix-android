@@ -30,6 +30,7 @@ import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
+import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
@@ -80,6 +81,8 @@ public class LoginUseCase extends BaseDataRepository {
 
     private WeChatUserDataSource weChatUserDataSource;
 
+    private GetAllBindingLocalUserUseCase mGetAllBindingLocalUserUseCase;
+
     private static String mToken;
     private static String mGateway;
 
@@ -90,7 +93,7 @@ public class LoginUseCase extends BaseDataRepository {
                          UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
                          SystemSettingDataSource systemSettingDataSource, ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus,
                          ThreadManager threadManager, NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource,
-                         WeChatUserDataSource weChatUserDataSource) {
+                         GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase,WeChatUserDataSource weChatUserDataSource) {
 
         super(threadManager);
         this.loggedInUserDataSource = loggedInUserDataSource;
@@ -106,6 +109,7 @@ public class LoginUseCase extends BaseDataRepository {
         this.newPhotoListDataLoader = newPhotoListDataLoader;
         this.eventBus = eventBus;
         this.stationsDataSource = stationsDataSource;
+        mGetAllBindingLocalUserUseCase = getAllBindingLocalUserUseCase;
         this.weChatUserDataSource = weChatUserDataSource;
 
     }
@@ -116,13 +120,13 @@ public class LoginUseCase extends BaseDataRepository {
                                            StationFileRepository stationFileRepository, SystemSettingDataSource systemSettingDataSource,
                                            ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager,
                                            NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource,
-                                           WeChatUserDataSource weChatUserDataSource) {
+                                           GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase,WeChatUserDataSource weChatUserDataSource) {
 
         if (instance == null)
             instance = new LoginUseCase(loggedInUserDataSource, tokenDataSource,
                     httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, mediaDataSourceRepository,
                     stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager,
-                    newPhotoListDataLoader, stationsDataSource, weChatUserDataSource);
+                    newPhotoListDataLoader, stationsDataSource,getAllBindingLocalUserUseCase, weChatUserDataSource);
 
         return instance;
     }
@@ -622,28 +626,55 @@ public class LoginUseCase extends BaseDataRepository {
 
                     final String stationID = data.get(0).getId();
 
-                    getUsersAfterChooseStationID(weChatTokenUserWrapper, stationID, new BaseOperateDataCallback<Boolean>() {
-                        @Override
-                        public void onSucceed(Boolean data, OperationResult result) {
-
-                            handleLoginWithWeChatCodeSucceed(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(), stationID);
-
-                            callback.onSucceed(data, result);
-                        }
-
-                        @Override
-                        public void onFail(OperationResult result) {
-
-                            callback.onFail(result);
-                        }
-                    });
+                    handleLoginByWeChatCodeWithOneStation(stationID);
 
                 } else if (data.size() > 1) {
 
-                    callback.onSucceed(true, new OperationMoreThanOneStation(data, weChatTokenUserWrapper));
+                    mGetAllBindingLocalUserUseCase.getAllBindingLocalUser(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(),
+                            new BaseLoadDataCallback<LoggedInWeChatUser>() {
+                        @Override
+                        public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
+
+                            if(data.size() == 1){
+
+                                String stationID = data.get(0).getStationID();
+
+                                handleLoginByWeChatCodeWithOneStation(stationID);
+
+                            }else {
+                                callback.onSucceed(true, new OperationMoreThanOneStation(data,weChatTokenUserWrapper));
+                            }
+
+                        }
+
+                        @Override
+                        public void onFail(OperationResult operationResult) {
+
+                            callback.onFail(operationResult);
+
+                        }
+                    });
 
                 }
 
+            }
+
+            private void handleLoginByWeChatCodeWithOneStation(final String stationID) {
+                getUsersAfterChooseStationID(weChatTokenUserWrapper, stationID, new BaseOperateDataCallback<Boolean>() {
+                    @Override
+                    public void onSucceed(Boolean data, OperationResult result) {
+
+                        handleLoginWithWeChatCodeSucceed(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(), stationID);
+
+                        callback.onSucceed(data, result);
+                    }
+
+                    @Override
+                    public void onFail(OperationResult result) {
+
+                        callback.onFail(result);
+                    }
+                });
             }
 
             @Override

@@ -1,7 +1,6 @@
 package com.winsun.fruitmix.group.view;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -109,7 +108,7 @@ public class OperatePinActivity extends BaseToolbarActivity implements CreatePin
 
                 showToast("创建失败");
 
-                setResultCode(RESULT_CANCELED);
+                OperatePinActivity.this.setResult(RESULT_CANCELED);
 
                 finishView();
             }
@@ -151,7 +150,7 @@ public class OperatePinActivity extends BaseToolbarActivity implements CreatePin
 
                 showToast("编辑失败");
 
-                setResultCode(RESULT_CANCELED);
+                OperatePinActivity.this.setResult(RESULT_CANCELED);
 
                 finishView();
             }

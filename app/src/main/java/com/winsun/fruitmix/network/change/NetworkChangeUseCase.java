@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
+import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
@@ -34,18 +35,30 @@ public class NetworkChangeUseCase {
 
     private TokenDataSource tokenDataSource;
 
+    private LoginUseCase mLoginUseCase;
+
     public NetworkChangeUseCase(SystemSettingDataSource systemSettingDataSource, HttpRequestFactory httpRequestFactory,
-                                NetworkStateManager networkStateManager, StationsDataSource stationsDataSource, TokenDataSource tokenDataSource) {
+                                NetworkStateManager networkStateManager, StationsDataSource stationsDataSource,
+                                TokenDataSource tokenDataSource,LoginUseCase loginUseCase) {
         this.systemSettingDataSource = systemSettingDataSource;
         this.httpRequestFactory = httpRequestFactory;
         this.networkStateManager = networkStateManager;
         this.stationsDataSource = stationsDataSource;
         this.tokenDataSource = tokenDataSource;
+        mLoginUseCase = loginUseCase;
+
     }
 
     public void handleNetworkChange() {
 
         Log.d(TAG, "handleNetworkChange: httpRequestFactory:" + httpRequestFactory);
+
+        if(!mLoginUseCase.isAlreadyLogin()){
+
+            Log.d(TAG, "handleNetworkChange: not login,return");
+
+            return;
+        }
 
         NetworkState networkState = networkStateManager.getNetworkState();
 

@@ -1,6 +1,5 @@
 package com.winsun.fruitmix;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -9,10 +8,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.winsun.fruitmix.databinding.ActivityPersonInfoBinding;
 import com.winsun.fruitmix.http.InjectHttp;
@@ -26,9 +21,6 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class PersonInfoActivity extends BaseActivity implements PersonInfoView, View.OnClickListener {
 
@@ -136,7 +128,7 @@ public class PersonInfoActivity extends BaseActivity implements PersonInfoView, 
     }
 
     private void handleModifyUserInfoSucceed() {
-        setResultCode(RESULT_OK);
+        this.setResult(RESULT_OK);
 
         currentUser = personInfoPresenter.getCurrentUser();
 

@@ -7,6 +7,7 @@ import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.datasource.InjectUser;
+import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.util.FileUtil;
 
 /**
@@ -23,7 +24,7 @@ public class InjectUploadFileCase {
 
         return new UploadFileUseCase(InjectUser.provideRepository(context), InjectStationFileRepository.provideStationFileRepository(context),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(context), InjectNetworkStateManager.provideNetworkStateManager(context),
-                uploadFolderName,fileTemporaryFolderName);
+                FileTool.getInstance(),uploadFolderName,fileTemporaryFolderName);
 
     }
 

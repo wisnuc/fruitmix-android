@@ -22,6 +22,7 @@ import com.winsun.fruitmix.parser.RemoteMkDirParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.util.FileUtil;
 
 import org.json.JSONException;
@@ -49,6 +50,8 @@ public class UploadFileUseCase {
 
     private NetworkStateManager networkStateManager;
 
+    private FileTool mFileTool;
+
     private String uploadFolderName;
 
     private String fileTemporaryFolderPath;
@@ -61,16 +64,17 @@ public class UploadFileUseCase {
 
     private String uploadFolderUUID;
 
-    private boolean needRetryForEEXIST = false;
+    boolean needRetryForEEXIST = false;
 
     public UploadFileUseCase(UserDataRepository userDataRepository, StationFileRepository stationFileRepository,
                              SystemSettingDataSource systemSettingDataSource, NetworkStateManager networkStateManager,
-                             String uploadFolderName, String fileTemporaryFolderPath) {
+                             FileTool fileTool, String uploadFolderName, String fileTemporaryFolderPath) {
         this.userDataRepository = userDataRepository;
         this.stationFileRepository = stationFileRepository;
         this.systemSettingDataSource = systemSettingDataSource;
         this.uploadFolderName = uploadFolderName;
         this.networkStateManager = networkStateManager;
+        mFileTool = fileTool;
         this.fileTemporaryFolderPath = fileTemporaryFolderPath;
     }
 
@@ -421,7 +425,7 @@ public class UploadFileUseCase {
         String fileOriginalPath = fileUploadState.getFilePath();
         String fileName = fileUploadState.getFileUploadItem().getFileName();
 
-        boolean copyResult = FileUtil.copyFileToDir(fileOriginalPath, fileTemporaryFolderPath);
+        boolean copyResult = mFileTool.copyFileToDir(fileOriginalPath, fileTemporaryFolderPath);
 
         LocalFile localFile = new LocalFile();
 
@@ -444,14 +448,7 @@ public class UploadFileUseCase {
 
         if (result.getOperationResultType() == OperationResultType.SUCCEED) {
 
-            if (handleUploadSucceed(localFile.getPath(), fileUploadItem)) {
-
-                File file = new File(localFile.getPath());
-                boolean deleteTemporaryFileResult = file.delete();
-
-                Log.d(TAG, "startUploadFile: deleteTemporaryFileResult: " + deleteTemporaryFileResult);
-
-            }
+            handleUploadSucceed(localFile.getPath(), fileUploadItem);
 
         } else {
 
@@ -460,18 +457,19 @@ public class UploadFileUseCase {
             notifyError(fileUploadState);
         }
 
+        mFileTool.deleteFile(localFile.getPath());
+
     }
 
-    private boolean handleUploadSucceed(String filePath, FileUploadItem fileUploadItem) {
+    private void handleUploadSucceed(String filePath, FileUploadItem fileUploadItem) {
         boolean insertResult = stationFileRepository.insertFileUploadTask(fileUploadItem, currentUserUUID);
 
         Log.d(TAG, "handleUploadSucceed: insert record result: " + insertResult);
 
-        boolean copyToDownloadFolderResult = FileUtil.copyFileToDir(filePath, FileUtil.getDownloadFileStoreFolderPath());
+        boolean copyToDownloadFolderResult = mFileTool.copyFileToDir(filePath, FileUtil.getDownloadFileStoreFolderPath());
 
         Log.d(TAG, "handleUploadSucceed: copy to download folder result: " + copyToDownloadFolderResult);
 
-        return copyToDownloadFolderResult;
     }
 
     private boolean checkCanUploadFile() {

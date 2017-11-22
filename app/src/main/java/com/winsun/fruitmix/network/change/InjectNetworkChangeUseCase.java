@@ -3,6 +3,7 @@ package com.winsun.fruitmix.network.change;
 import android.content.Context;
 
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.stations.InjectStation;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
@@ -18,7 +19,8 @@ public class InjectNetworkChangeUseCase {
 
         return new NetworkChangeUseCase(InjectSystemSettingDataSource.provideSystemSettingDataSource(context),
                 InjectHttp.provideHttpRequestFactory(context), InjectNetworkStateManager.provideNetworkStateManager(context),
-                InjectStation.provideStationDataSource(context), InjectTokenRemoteDataSource.provideTokenDataSource(context));
+                InjectStation.provideStationDataSource(context), InjectTokenRemoteDataSource.provideTokenDataSource(context),
+                InjectLoginUseCase.provideLoginUseCase(context));
 
     }
 

@@ -170,11 +170,11 @@ public class AccountManagePresenterImpl implements AccountManagePresenter,Active
     public void handleBack() {
 
         if (mNewUserLoginSucceed) {
-            view.setResultCode(NavPagerActivity.RESULT_FINISH_ACTIVITY);
+            view.setResult(NavPagerActivity.RESULT_FINISH_ACTIVITY);
         } else if (mDeleteCurrentUser) {
-            view.setResultCode(NavPagerActivity.RESULT_LOGOUT);
+            view.setResult(NavPagerActivity.RESULT_LOGOUT);
         } else if (mDeleteOtherUser) {
-            view.setResultCode(NavPagerActivity.RESULT_REFRESH_LOGGED_IN_USER);
+            view.setResult(NavPagerActivity.RESULT_REFRESH_LOGGED_IN_USER);
         }
 
     }

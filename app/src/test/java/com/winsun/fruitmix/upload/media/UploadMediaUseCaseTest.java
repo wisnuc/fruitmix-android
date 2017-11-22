@@ -10,6 +10,7 @@ import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
 import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
+import com.winsun.fruitmix.file.data.station.StationFileRepositoryTest;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
@@ -23,12 +24,14 @@ import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
+import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONArray;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -109,7 +112,7 @@ public class UploadMediaUseCaseTest {
 
         uploadMediaUseCase = UploadMediaUseCase.getInstance(mediaDataSourceRepository, stationFileRepository,
                 userDataRepository, threadManager, systemSettingDataSource, checkMediaIsUploadStrategy, checkMediaIsExistStrategy, testUploadFolderName, eventBus,
-                calcMediaDigestStrategy,networkStateManager);
+                calcMediaDigestStrategy, networkStateManager);
 
     }
 
@@ -163,7 +166,7 @@ public class UploadMediaUseCaseTest {
 
         when(calcMediaDigestStrategy.isFinishCalcMediaDigest()).thenReturn(true);
 
-        when(networkStateManager.getNetworkState()).thenReturn(new NetworkState(true,false));
+        when(networkStateManager.getNetworkState()).thenReturn(new NetworkState(true, false));
     }
 
     private void assertStringIsEmpty(String param) {
@@ -206,7 +209,7 @@ public class UploadMediaUseCaseTest {
 
         HttpResponse httpResponse = new HttpResponse();
 
-        httpResponse.setResponseData("[{\"number\":0,\"op\":\"mkdir\",\"name\":\"来自Huawei-Nexus 6P\",\"data\":{\"uuid\":\""+testUploadParentFolderUUID+"\",\"type\":\"directory\",\"name\":\""+uploadMediaUseCase.UPLOAD_PARENT_FOLDER_NAME+"\",\"mtime\":1503366446508}}]");
+        httpResponse.setResponseData("[{\"number\":0,\"op\":\"mkdir\",\"name\":\"来自Huawei-Nexus 6P\",\"data\":{\"uuid\":\"" + testUploadParentFolderUUID + "\",\"type\":\"directory\",\"name\":\"" + uploadMediaUseCase.UPLOAD_PARENT_FOLDER_NAME + "\",\"mtime\":1503366446508}}]");
 
         createUploadParentFolderCaptor.getValue().onSucceed(httpResponse, new OperationSuccess());
 
@@ -216,13 +219,12 @@ public class UploadMediaUseCaseTest {
 
         HttpResponse uploadFolderResponse = new HttpResponse();
 
-        uploadFolderResponse.setResponseData("[{\"number\":0,\"op\":\"mkdir\",\"name\":\"来自Huawei-Nexus 6P\",\"data\":{\"uuid\":\""+testUploadFolderUUID+"\",\"type\":\"directory\",\"name\":\""+uploadMediaUseCase.UPLOAD_FOLDER_NAME_PREFIX + testUploadFolderName+"\",\"mtime\":1503366446508}}]");
+        uploadFolderResponse.setResponseData("[{\"number\":0,\"op\":\"mkdir\",\"name\":\"来自Huawei-Nexus 6P\",\"data\":{\"uuid\":\"" + testUploadFolderUUID + "\",\"type\":\"directory\",\"name\":\"" + uploadMediaUseCase.UPLOAD_FOLDER_NAME_PREFIX + testUploadFolderName + "\",\"mtime\":1503366446508}}]");
 
         createUploadFolderCaptor.getValue().onSucceed(uploadFolderResponse, new OperationSuccess());
 
         assertTrue(uploadMediaUseCase.mStopUpload);
         assertFalse(uploadMediaUseCase.mAlreadyStartUpload);
-
 
     }
 
@@ -378,11 +380,58 @@ public class UploadMediaUseCaseTest {
 
         uploadWhenUploadParentFolderExistAndUploadFolderExist(Collections.singletonList(media));
 
-
         assertStringIsEmpty(uploadMediaUseCase.uploadParentFolderUUID);
         assertStringIsEmpty(uploadMediaUseCase.uploadFolderUUID);
 
     }
+
+    @Test
+    public void testUploadFileOccur403EEXIST() {
+
+        prepareStartUpload();
+
+        when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
+
+        when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
+
+        when(stationFileRepository.uploadFile(any(LocalFile.class), anyString(), anyString()))
+                .thenReturn(new OperationNetworkException(new HttpResponse(403,
+                        StationFileRepositoryTest.getJSONArrayStringWhenEEXIST(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE))));
+
+        Media media = createMedia();
+
+        uploadWhenUploadParentFolderExistAndUploadFolderExist(Collections.singletonList(media));
+
+        assertEquals(1, uploadMediaUseCase.alreadyUploadedMediaCount);
+
+        assertTrue(uploadMediaUseCase.mStopUpload);
+        assertFalse(uploadMediaUseCase.mAlreadyStartUpload);
+
+    }
+
+    @Test
+    public void testUploadFileOccur403ButNotEEXIST() {
+
+        prepareStartUpload();
+
+        when(systemSettingDataSource.getAutoUploadOrNot()).thenReturn(true);
+
+        when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
+
+        when(stationFileRepository.uploadFile(any(LocalFile.class), anyString(), anyString()))
+                .thenReturn(new OperationNetworkException(new HttpResponse(403, StationFileRepositoryTest.getJSONArrayStringWhenEEXIST(""))));
+
+        Media media = createMedia();
+
+        uploadWhenUploadParentFolderExistAndUploadFolderExist(Collections.singletonList(media));
+
+        assertEquals(0, uploadMediaUseCase.alreadyUploadedMediaCount);
+
+        assertTrue(uploadMediaUseCase.mStopUpload);
+        assertFalse(uploadMediaUseCase.mAlreadyStartUpload);
+
+    }
+
 
     @NonNull
     private Media createMedia() {

@@ -3,9 +3,7 @@ package com.winsun.fruitmix.create.user;
 import android.app.Activity;
 import android.content.Context;
 
-import com.winsun.fruitmix.CreateUserActivity;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
@@ -14,11 +12,6 @@ import com.winsun.fruitmix.user.OperateUserViewModel;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.Util;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by Administrator on 2017/6/22.
@@ -76,7 +69,7 @@ public class CreateUserPresenterImpl extends BaseOperateUserPresenter implements
 
                 createUserView.dismissDialog();
 
-                createUserView.setResultCode(Activity.RESULT_OK);
+                createUserView.setResult(Activity.RESULT_OK);
 
                 createUserView.finishView();
 

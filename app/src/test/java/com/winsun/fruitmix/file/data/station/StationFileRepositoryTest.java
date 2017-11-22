@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.file.data.station;
 
+import android.support.annotation.NonNull;
+
 import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
@@ -355,25 +357,8 @@ public class StationFileRepositoryTest {
 
         FileUploadState fileUploadState = new FileUploadingState(fileUploadItem);
 
-        JSONArray jsonArray = new JSONArray();
-
-        JSONObject jsonObject = new JSONObject();
-
-        JSONObject error = new JSONObject();
-
-        try {
-            error.put("message", "" + HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE);
-
-            jsonObject.put("error", error);
-
-            jsonArray.put(jsonObject);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
         when(stationFileDataSource.uploadFileWithProgress(any(LocalFile.class), any(FileUploadState.class), anyString(), anyString()))
-                .thenReturn(new OperationNetworkException(new HttpResponse(403, jsonArray.toString())));
+                .thenReturn(new OperationNetworkException(new HttpResponse(403, getJSONArrayStringWhenEEXIST(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE))));
 
         OperationResult result = fileRepository.uploadFileWithProgress(localFile, fileUploadState, "", "", "");
 
@@ -383,6 +368,27 @@ public class StationFileRepositoryTest {
 
         assertTrue(fileUploadItem.getFileUploadState() instanceof FileUploadFinishedState);
 
+    }
+
+    @NonNull
+    public static String getJSONArrayStringWhenEEXIST(String message) {
+        JSONArray jsonArray = new JSONArray();
+
+        JSONObject jsonObject = new JSONObject();
+
+        JSONObject error = new JSONObject();
+
+        try {
+            error.put("message", message);
+
+            jsonObject.put("error", error);
+
+            jsonArray.put(jsonObject);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonArray.toString();
     }
 
 

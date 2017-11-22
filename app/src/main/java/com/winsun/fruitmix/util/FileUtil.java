@@ -172,38 +172,6 @@ public class FileUtil {
         return getDownloadFileStoreFolderPath() + AUDIO_RECORD_FOLDER_NAME;
     }
 
-    public static boolean copyFileToDir(String srcFile, String destDir) {
-        File fileDir = new File(destDir);
-
-        if (!fileDir.exists()) {
-            boolean result = fileDir.mkdir();
-            if (result)
-                return false;
-        }
-
-        String destFile = destDir + File.separator + new File(srcFile).getName();
-
-        File file = new File(destFile);
-
-        if (file.exists())
-            return true;
-
-        try {
-            InputStream streamFrom = new FileInputStream(srcFile);
-            OutputStream streamTo = new FileOutputStream(destFile);
-            byte buffer[] = new byte[1024];
-            int len;
-            while ((len = streamFrom.read(buffer)) > 0) {
-                streamTo.write(buffer, 0, len);
-            }
-            streamFrom.close();
-            streamTo.close();
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
-    }
-
     public static boolean writeBitmapToLocalPhotoMiniThumbnailFolder(Media media) {
 
         if (!media.getMiniThumbPath().isEmpty())

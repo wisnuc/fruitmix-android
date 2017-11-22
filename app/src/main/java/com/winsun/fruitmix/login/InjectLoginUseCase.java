@@ -21,6 +21,8 @@ import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
+import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
+import com.winsun.fruitmix.usecase.InjectGetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.wechat.user.InjectWeChatUserDataSource;
@@ -55,10 +57,12 @@ public class InjectLoginUseCase {
 
         ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderInstance(context);
 
+        GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase = InjectGetAllBindingLocalUserUseCase.provideInstance(context);
+
         return LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource, httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase,
                 userDataRepository, mediaDataSourceRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, EventBus.getDefault(),
                 ThreadManagerImpl.getInstance(), NewPhotoListDataLoader.getInstance(), InjectStation.provideStationDataSource(context),
-                InjectWeChatUserDataSource.provideWeChatUserDataSource(context));
+                getAllBindingLocalUserUseCase,InjectWeChatUserDataSource.provideWeChatUserDataSource(context));
 
     }
 

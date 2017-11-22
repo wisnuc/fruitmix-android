@@ -9,6 +9,7 @@ import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.mock.MockApplication;
@@ -25,6 +26,7 @@ import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
+import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
@@ -44,7 +46,9 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
@@ -108,6 +112,9 @@ public class LoginUseCaseTest {
     private StationsDataSource stationsDataSource;
 
     @Mock
+    private GetAllBindingLocalUserUseCase mGetAllBindingLocalUserUseCase;
+
+    @Mock
     private WeChatUserDataSource weChatUserDataSource;
 
     @Before
@@ -120,7 +127,7 @@ public class LoginUseCaseTest {
         loginUseCase = LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource,
                 httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, mediaDataSourceRepository,
                 stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, new MockThreadManager(),
-                newPhotoListDataLoader, stationsDataSource, weChatUserDataSource);
+                newPhotoListDataLoader, stationsDataSource, mGetAllBindingLocalUserUseCase, weChatUserDataSource);
 
     }
 
@@ -201,7 +208,7 @@ public class LoginUseCaseTest {
     }
 
     @Test
-    public void loginWithNoParamStationIPIsUnreachableAndLoginWithWechatToken(){
+    public void loginWithNoParamStationIPIsUnreachableAndLoginWithWechatToken() {
 
         WeChatUser weChatUser = new WeChatUser(testToken, testGUID, testStationID);
 
@@ -243,7 +250,7 @@ public class LoginUseCaseTest {
 
         ArgumentCaptor<BaseOperateDataCallback<Boolean>> captor = ArgumentCaptor.forClass(BaseOperateDataCallback.class);
 
-        verify(stationsDataSource).checkStationIP(eq(""),captor.capture());
+        verify(stationsDataSource).checkStationIP(eq(""), captor.capture());
 
         captor.getValue().onFail(new OperationFail(""));
 
@@ -289,9 +296,9 @@ public class LoginUseCaseTest {
 
         ArgumentCaptor<BaseOperateDataCallback<Boolean>> captor = ArgumentCaptor.forClass(BaseOperateDataCallback.class);
 
-        verify(stationsDataSource).checkStationIP(eq(""),captor.capture());
+        verify(stationsDataSource).checkStationIP(eq(""), captor.capture());
 
-        captor.getValue().onSucceed(true,new OperationSuccess());
+        captor.getValue().onSucceed(true, new OperationSuccess());
 
         verify(systemSettingDataSource).getCurrentLoginUserUUID();
 
@@ -540,10 +547,9 @@ public class LoginUseCaseTest {
 
         verify(httpRequestFactory).setCurrentData(anyString(), anyString());
 
-
     }
 
-    public void testGetStationListAndGetLocalUserAndLoginWithWeChatCodeFail(){
+    public void testGetStationListAndGetLocalUserAndLoginWithWeChatCodeFail() {
 
         testLoginWithWeChatCode_succeed();
 
@@ -580,8 +586,6 @@ public class LoginUseCaseTest {
 
         stationLoadCaptor.getValue().onSucceed(Collections.singletonList(station), new OperationSuccess());
 
-        verify(httpRequestFactory).setStationID(eq(testStationID));
-
         testAfterChooseStationID();
 
         initSystemStateAndVerifyAfterChooseStationID();
@@ -601,6 +605,11 @@ public class LoginUseCaseTest {
     }
 
     private void testAfterChooseStationID() {
+
+        verify(httpRequestFactory).setStationID(eq(testStationID));
+
+        verify(systemSettingDataSource).setLoginWithWechatCodeOrNot(true);
+
         ArgumentCaptor<BaseLoadDataCallback<User>> getUserByStationIDCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
         verify(userDataRepository).getUsersByStationIDWithCloudAPI(eq(testStationID), getUserByStationIDCaptor.capture());
@@ -610,8 +619,6 @@ public class LoginUseCaseTest {
         user.setAssociatedWeChatGUID(testGUID);
 
         getUserByStationIDCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess());
-
-        verify(systemSettingDataSource).setLoginWithWechatCodeOrNot(true);
 
         ArgumentCaptor<BaseLoadDataCallback<User>> getUsersCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -643,7 +650,7 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).setCurrentLoginUserUUID(anyString());
 
-        verify(systemSettingDataSource,times(2)).setCurrentLoginToken(anyString());
+        verify(systemSettingDataSource, times(2)).setCurrentLoginToken(anyString());
 
         verify(systemSettingDataSource).setCurrentEquipmentIp(anyString());
 
@@ -655,5 +662,92 @@ public class LoginUseCaseTest {
 
     }
 
+    @Test
+    public void testGetStationListReturnTwoStations() {
+
+        testLoginWithWeChatCode_succeed();
+
+        ArgumentCaptor<BaseLoadDataCallback<Station>> stationLoadCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(stationsDataSource).getStationsByWechatGUID(eq(testGUID), stationLoadCaptor.capture());
+
+        List<Station> stations = new ArrayList<>();
+
+        Station station = new Station();
+
+        station.setId(testStationID);
+        station.setLabel("testStationLabel");
+
+        stations.add(station);
+
+        Station station2 = new Station();
+        station2.setId("testStationID2");
+        station.setLabel("testStationLabel2");
+
+        stations.add(station2);
+
+        stationLoadCaptor.getValue().onSucceed(stations, new OperationSuccess());
+
+        ArgumentCaptor<BaseLoadDataCallback<LoggedInWeChatUser>> loggedInWeChatUserBaseLoadDataCallback = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(mGetAllBindingLocalUserUseCase).getAllBindingLocalUser(eq(testGUID), eq(testToken), loggedInWeChatUserBaseLoadDataCallback.capture());
+
+        LoggedInWeChatUser loggedInWeChatUser = new LoggedInWeChatUser("", testToken, testGateway,
+                testEquipmentName, null, testStationID);
+
+        loggedInWeChatUserBaseLoadDataCallback.getValue().onSucceed(Collections.singletonList(loggedInWeChatUser), new OperationSuccess());
+
+        testAfterChooseStationID();
+
+    }
+
+    @Test
+    public void testGetBindingLocalUserReturnListSizeMoreThanOne() {
+
+        testLoginWithWeChatCode_succeed();
+
+        ArgumentCaptor<BaseLoadDataCallback<Station>> stationLoadCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(stationsDataSource).getStationsByWechatGUID(eq(testGUID), stationLoadCaptor.capture());
+
+        List<Station> stations = new ArrayList<>();
+
+        Station station = new Station();
+
+        station.setId(testStationID);
+        station.setLabel("testStationLabel");
+
+        stations.add(station);
+
+        Station station2 = new Station();
+        station2.setId("testStationID2");
+        station.setLabel("testStationLabel2");
+
+        stations.add(station2);
+
+        stationLoadCaptor.getValue().onSucceed(stations, new OperationSuccess());
+
+        ArgumentCaptor<BaseLoadDataCallback<LoggedInWeChatUser>> loggedInWeChatUserBaseLoadDataCallback = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(mGetAllBindingLocalUserUseCase).getAllBindingLocalUser(eq(testGUID), eq(testToken), loggedInWeChatUserBaseLoadDataCallback.capture());
+
+        LoggedInWeChatUser loggedInWeChatUser = new LoggedInWeChatUser("", testToken, testGateway,
+                testEquipmentName, null, testStationID);
+
+        LoggedInWeChatUser loggedInWeChatUser2 = new LoggedInWeChatUser("", "", "",
+                "", null, "testStationID2");
+
+        List<LoggedInWeChatUser> loggedInWeChatUsers = new ArrayList<>();
+
+        loggedInWeChatUsers.add(loggedInWeChatUser);
+        loggedInWeChatUsers.add(loggedInWeChatUser2);
+
+        loggedInWeChatUserBaseLoadDataCallback.getValue().onSucceed(loggedInWeChatUsers, new OperationSuccess());
+
+        verify(httpRequestFactory, never()).setStationID(eq(testStationID));
+
+        verify(systemSettingDataSource,never()).setLoginWithWechatCodeOrNot(eq(true));
+
+    }
 
 }

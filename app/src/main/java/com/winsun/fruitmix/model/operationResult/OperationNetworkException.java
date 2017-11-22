@@ -23,11 +23,13 @@ public class OperationNetworkException extends OperationResult {
 
         String resultMessage;
 
-        if (httpResponse.getResponseCode() == 401) {
+ /*       if (httpResponse.getResponseCode() == 401) {
             resultMessage = context.getString(R.string.password_error);
         } else {
             resultMessage = String.format(context.getString(R.string.network_exception), "http " + httpResponse.getResponseCode());
         }
+*/
+        resultMessage = String.format(context.getString(R.string.network_exception), "http " + httpResponse.getResponseCode());
 
         return resultMessage;
     }

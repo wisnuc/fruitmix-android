@@ -15,7 +15,6 @@ import com.winsun.fruitmix.databinding.SingleFileBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.data.model.Pin;
-import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.viewmodel.PinContentItemViewModel;
 import com.winsun.fruitmix.group.interfaces.OnPinContentItemClickListener;
@@ -241,7 +240,7 @@ public class PinContentPresenter implements OnPinContentItemClickListener {
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
 
-                pinContentView.setResultCode(RESULT_OK);
+                pinContentView.setResult(RESULT_OK);
 
                 pinContentView.finishView();
             }

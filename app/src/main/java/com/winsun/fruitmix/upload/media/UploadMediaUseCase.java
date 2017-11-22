@@ -601,20 +601,20 @@ public class UploadMediaUseCase {
 
     private void calcNeedUploadMediaAndUpload(List<Media> medias) {
 
-        List<Media> needUploadedMedia = calcNeedUploadedMedia(medias);
+        List<Media> needUploadedMedias = calcNeedUploadedMedias(medias);
 
-        uploadMedia(needUploadedMedia);
+        uploadMedia(needUploadedMedias);
     }
 
     @NonNull
-    private List<Media> calcNeedUploadedMedia(List<Media> medias) {
-        List<Media> needUploadedMedia = new ArrayList<>();
+    private List<Media> calcNeedUploadedMedias(List<Media> medias) {
+        List<Media> needUploadedMedias = new ArrayList<>();
 
         for (Media media : medias) {
             if (!checkMediaIsUploadStrategy.isMediaUploaded(media))
-                needUploadedMedia.add(media);
+                needUploadedMedias.add(media);
         }
-        return needUploadedMedia;
+        return needUploadedMedias;
     }
 
     private void uploadMedia(final List<Media> needUploadedMedias) {
@@ -712,13 +712,21 @@ public class UploadMediaUseCase {
 
                     Log.d(TAG, "uploadMediaInThread: upload error EEXIST,user uuid for name and retry upload");
 
-                    String fileUUID = needUploadedMedias.get(0).getUuid().substring(0, 20);
+                    Log.d(TAG, "uploadMediaInThread: needUploadMedia size: " + needUploadedMedias.size());
 
-                    String fileName = fileUUID + ".jpg";
+                    if (needUploadedMedias.size() > 0) {
 
-                    Log.d(TAG, "uploadMediaInThread: new upload file name: " + fileName);
+                        String fileUUID = needUploadedMedias.get(0).getUuid();
 
-                    uploadOneMedia(needUploadedMedias, fileName, uploadFolderUUID);
+                        String fileUUIDFormat = fileUUID.length() > 20 ? fileUUID.substring(0, 20) : fileUUID;
+
+                        String fileName = fileUUIDFormat + ".jpg";
+
+                        Log.d(TAG, "uploadMediaInThread: new upload file name: " + fileName);
+
+                        uploadOneMedia(needUploadedMedias, fileName, uploadFolderUUID);
+
+                    }
 
                 }
 
@@ -801,6 +809,8 @@ public class UploadMediaUseCase {
                                         return 403;
                                     } else {
                                         handleUploadMediaSucceed(media, needUploadedMedias, uploadFolderUUID);
+
+                                        return 200;
                                     }
 
                                 } else {
@@ -808,8 +818,10 @@ public class UploadMediaUseCase {
                                     notifyUploadMediaFail(-1);
 
                                     handleUploadMediaFail(needUploadedMedias, media, uploadFolderUUID);
-                                }
 
+                                    return -1;
+
+                                }
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -822,8 +834,6 @@ public class UploadMediaUseCase {
                             }
 
                         }
-
-                        return code;
 
 
                     } else {
@@ -870,8 +880,8 @@ public class UploadMediaUseCase {
             Log.d(TAG, "handleUploadMediaSucceed: currentUserUUID: " + currentUserUUID + " mStopUpload: " + mStopUpload);
 
             return;
-        }
 
+        }
 
         needUploadedMedias.remove(media);
 

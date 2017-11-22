@@ -1,11 +1,7 @@
 package com.winsun.fruitmix.group.view;
 
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.databinding.DataBindingUtil;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
@@ -16,8 +12,6 @@ import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.data.viewmodel.CreateGroupViewModel;
 import com.winsun.fruitmix.group.presenter.CreateGroupPresenter;
-import com.winsun.fruitmix.interfaces.BaseView;
-import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
@@ -68,7 +62,7 @@ public class CreateGroupActivity extends BaseActivity implements CreateGroupPres
             public void onSucceed(Boolean data, OperationResult result) {
                 dismissDialog();
 
-                setResultCode(RESULT_OK);
+                CreateGroupActivity.this.setResult(RESULT_OK);
 
                 finishView();
             }

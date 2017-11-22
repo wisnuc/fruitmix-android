@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -277,7 +278,7 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
 
                 Log.d(TAG, "login with wechat code succeed and finish EquipmentSearchActivity");
 
-                setResultCode(RESULT_OK);
+                setResult(RESULT_OK);
 
                 finish();
 

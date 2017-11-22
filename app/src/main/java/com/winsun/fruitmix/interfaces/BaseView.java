@@ -10,7 +10,7 @@ public interface BaseView {
 
     void finishView();
 
-    void setResultCode(int resultCode);
+    void setResult(int resultCode);
 
     Dialog showProgressDialog(String message);
 

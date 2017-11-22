@@ -47,13 +47,10 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-/*
         networkReceiver = new NetworkReceiver();
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(networkReceiver, intentFilter);
-*/
-
 
     }
 
@@ -93,16 +90,13 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     protected void onDestroy() {
         super.onDestroy();
 
-
         dismissDialog();
 
         mDialog = null;
 
-/*
         if (networkReceiver != null) {
             unregisterReceiver(networkReceiver);
         }
-*/
 
     }
 
@@ -134,11 +128,6 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     @Override
     public void finishView() {
         finish();
-    }
-
-    @Override
-    public void setResultCode(int resultCode) {
-        setResult(resultCode);
     }
 
     @Override

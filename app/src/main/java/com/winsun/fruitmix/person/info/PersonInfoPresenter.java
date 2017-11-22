@@ -92,12 +92,12 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
         try {
             Boolean result = future.get();
 
-            if(personInfoView == null)
+            if (personInfoView == null)
                 return;
 
             personInfoView.dismissDialog();
 
-            personInfoView.setResultCode(NavPagerActivity.RESULT_FINISH_ACTIVITY);
+            personInfoView.setResult(NavPagerActivity.RESULT_FINISH_ACTIVITY);
 
             EquipmentSearchActivity.gotoEquipmentActivity((Activity) personInfoView.getContext(), true);
 
@@ -154,7 +154,7 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
     }
 
     @Override
-    public void succeed(WeChatTokenUserWrapper weChatTokenUserWrapper) {
+    public void succeed(final WeChatTokenUserWrapper weChatTokenUserWrapper) {
 
         personInfoView.showProgressDialog(personInfoView.getString(R.string.operating_title, personInfoView.getString(R.string.send_wechat_user_info)));
 
@@ -166,7 +166,7 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
                 personInfoView.dismissDialog();
 
-                showConfirmBindDialog(ticketID, data);
+                showConfirmBindDialog(ticketID, data,weChatTokenUserWrapper.getNickName());
 
             }
 
@@ -189,9 +189,9 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
     }
 
-    private void showConfirmBindDialog(final String ticketID, final String guid) {
+    private void showConfirmBindDialog(final String ticketID, final String guid, String wechatUserNickName) {
 
-        new AlertDialog.Builder(personInfoView.getContext()).setMessage(personInfoView.getString(R.string.bind_wechat_user) + "?")
+        new AlertDialog.Builder(personInfoView.getContext()).setMessage(personInfoView.getString(R.string.bind_wechat_user) + " " + wechatUserNickName + " ?")
                 .setPositiveButton(personInfoView.getString(R.string.bind), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

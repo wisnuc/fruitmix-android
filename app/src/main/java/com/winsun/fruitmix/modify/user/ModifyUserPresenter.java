@@ -59,7 +59,7 @@ public class ModifyUserPresenter extends BaseOperateUserPresenter {
 
                 modifyUserView.dismissDialog();
 
-                modifyUserView.setResultCode(Activity.RESULT_OK);
+                modifyUserView.setResult(Activity.RESULT_OK);
 
                 modifyUserView.showToast(context.getString(R.string.success, context.getString(R.string.modify_user_name)));
 

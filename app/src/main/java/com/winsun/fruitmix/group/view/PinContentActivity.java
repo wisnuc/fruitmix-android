@@ -16,7 +16,6 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.ActivityPinContentBinding;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.presenter.PinContentPresenter;
-import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.mediaModule.NewPicChooseActivity;
 import com.winsun.fruitmix.util.Util;
@@ -112,10 +111,10 @@ public class PinContentActivity extends BaseToolbarActivity implements PinConten
 
         if (requestCode == REQUEST_MEDIA_FILE_SELECT && resultCode == RESULT_OK) {
             pinContentPresenter.refreshPinContent();
-            setResultCode(RESULT_OK);
+            this.setResult(RESULT_OK);
         } else if (requestCode == REQUEST_MODIFY_PIN && resultCode == RESULT_OK) {
             pinContentPresenter.refreshPinName();
-            setResultCode(RESULT_OK);
+            this.setResult(RESULT_OK);
         }
 
     }

@@ -25,7 +25,6 @@ import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
-import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -279,7 +278,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
             groupDataSource.insertMediaToPin(mNewPhotoList.getSelectedMedias(), groupUUID, pinUUID, new BaseOperateDataCallback<Boolean>() {
                 @Override
                 public void onSucceed(Boolean data, OperationResult result) {
-                    setResultCode(RESULT_OK);
+                    NewPicChooseActivity.this.setResult(RESULT_OK);
 
                     finish();
                 }
@@ -288,7 +287,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
                 public void onFail(OperationResult result) {
                     Toast.makeText(NewPicChooseActivity.this, "插入失败", Toast.LENGTH_SHORT).show();
 
-                    setResultCode(RESULT_CANCELED);
+                    NewPicChooseActivity.this.setResult(RESULT_CANCELED);
 
                     finish();
                 }
@@ -300,7 +299,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
                 @Override
                 public void onSucceed(Boolean data, OperationResult result) {
-                    setResultCode(RESULT_OK);
+                    NewPicChooseActivity.this.setResult(RESULT_OK);
 
                     finish();
                 }
@@ -309,7 +308,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
                 public void onFail(OperationResult result) {
                     Toast.makeText(NewPicChooseActivity.this, "插入失败", Toast.LENGTH_SHORT).show();
 
-                    setResultCode(RESULT_CANCELED);
+                    NewPicChooseActivity.this.setResult(RESULT_CANCELED);
 
                     finish();
                 }
@@ -333,7 +332,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
             public void onSucceed(UserComment data, OperationResult result) {
                 super.onSucceed(data, result);
 
-                setResultCode(RESULT_OK);
+                NewPicChooseActivity.this.setResult(RESULT_OK);
 
                 finish();
 
@@ -345,7 +344,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
                 Toast.makeText(NewPicChooseActivity.this, "插入失败", Toast.LENGTH_SHORT).show();
 
-                setResultCode(RESULT_CANCELED);
+                NewPicChooseActivity.this.setResult(RESULT_CANCELED);
 
                 finish();
             }
