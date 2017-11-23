@@ -3,9 +3,11 @@ package com.winsun.fruitmix.network.change;
 import android.util.Log;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.stations.Station;
@@ -14,6 +16,8 @@ import com.winsun.fruitmix.stations.StationsDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.util.Util;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
@@ -184,11 +188,15 @@ public class NetworkChangeUseCase {
 
         httpRequestFactory.checkToLocalUser(token, ip);
 
+        EventBus.getDefault().postSticky(new OperationEvent(Util.LOGIN_STATE_CHANGED, new OperationSuccess()));
+
     }
 
     private void checkToWeChatUser(String token) {
 
         httpRequestFactory.checkToWeChatUser(token);
+
+        EventBus.getDefault().postSticky(new OperationEvent(Util.LOGIN_STATE_CHANGED, new OperationSuccess()));
 
     }
 

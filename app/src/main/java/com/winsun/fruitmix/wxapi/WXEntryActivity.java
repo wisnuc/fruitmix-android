@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -15,7 +14,6 @@ import com.tencent.mm.opensdk.modelbase.BaseResp;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
-import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
@@ -31,7 +29,6 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
 import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
-import com.winsun.fruitmix.usecase.InjectGetAllBindingLocalUserUseCase;
 
 import java.util.List;
 
@@ -73,6 +70,20 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
     public static void setWxEntryLoginCallback(WXEntryLoginCallback wxEntryLoginCallback) {
         WXEntryActivity.wxEntryLoginCallback = wxEntryLoginCallback;
+    }
+
+    public interface WXEntrySendMiniProgramCallback {
+
+        void succeed();
+
+        void fail();
+
+    }
+
+    private static WXEntrySendMiniProgramCallback wxEntrySendMiniProgramCallback;
+
+    public static void setWxEntrySendMiniProgramCallback(WXEntrySendMiniProgramCallback wxEntrySendMiniProgramCallback) {
+        WXEntryActivity.wxEntrySendMiniProgramCallback = wxEntrySendMiniProgramCallback;
     }
 
     @Override
@@ -149,8 +160,15 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                     }
 
-                } else
+                } else {
+
+                    if (wxEntrySendMiniProgramCallback != null) {
+                        wxEntrySendMiniProgramCallback.succeed();
+                    }
+
                     finish();
+
+                }
 
                 break;
             case BaseResp.ErrCode.ERR_USER_CANCEL:
@@ -160,6 +178,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                     finishWhenLoginFail();
                 else if (wxEntryGetTokenCallback != null)
                     finishWhenGetTokenFail();
+                else if (wxEntrySendMiniProgramCallback != null)
+                    finishWhenSendMiniProgramFail();
                 else
                     finish();
 
@@ -171,6 +191,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                     finishWhenLoginFail();
                 else if (wxEntryGetTokenCallback != null)
                     finishWhenGetTokenFail();
+                else if (wxEntrySendMiniProgramCallback != null)
+                    finishWhenSendMiniProgramFail();
                 else
                     finish();
 
@@ -182,6 +204,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                     finishWhenLoginFail();
                 else if (wxEntryGetTokenCallback != null)
                     finishWhenGetTokenFail();
+                else if (wxEntrySendMiniProgramCallback != null)
+                    finishWhenSendMiniProgramFail();
                 else
                     finish();
 
@@ -193,6 +217,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                     finishWhenLoginFail();
                 else if (wxEntryGetTokenCallback != null)
                     finishWhenGetTokenFail();
+                else if (wxEntrySendMiniProgramCallback != null)
+                    finishWhenSendMiniProgramFail();
                 else
                     finish();
 
@@ -261,6 +287,20 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
     }
 
+    private void finishWhenSendMiniProgramFail() {
+
+        finish();
+
+        if (wxEntrySendMiniProgramCallback != null) {
+
+            wxEntrySendMiniProgramCallback.fail();
+            wxEntrySendMiniProgramCallback = null;
+
+        }
+
+    }
+
+
     private void showLoadingDialog() {
         dialog = ProgressDialog.show(this, null, String.format(getString(R.string.operating_title), getString(R.string.login)), true, false);
     }
@@ -282,7 +322,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                         handleLoginFail(new OperationFail(R.string.no_binding_user_in_nas));
 
-                    }  else {
+                    } else {
 
                         dismissDialog();
 

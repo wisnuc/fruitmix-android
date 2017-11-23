@@ -97,6 +97,8 @@ public class Util {
 
     public static final String DOWNLOADED_FILE_RETRIEVED = "downloaded_file_retrieved";
 
+    public static final String LOGIN_STATE_CHANGED = "login_state_changed";
+
     public static final String SET_CURRENT_LOGIN_USER_AFTER_LOGIN = "set_current_login_user_after_login";
 
     public static final String RECOMMEND_ALBUM_CREATED = "recommend_album_created";

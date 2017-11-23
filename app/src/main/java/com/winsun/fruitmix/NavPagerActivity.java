@@ -11,7 +11,6 @@ import android.databinding.DataBindingUtil;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -51,9 +50,6 @@ import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.mainpage.MainPagePresenter;
 import com.winsun.fruitmix.mainpage.MainPagePresenterImpl;
 import com.winsun.fruitmix.mainpage.MainPageView;
-import com.winsun.fruitmix.media.InjectMedia;
-import com.winsun.fruitmix.media.MediaDataSourceRepository;
-import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.equipment.search.data.Equipment;
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
@@ -751,6 +747,14 @@ public class NavPagerActivity extends BaseActivity
                 }
 
             }
+        }else if(action.equals(Util.LOGIN_STATE_CHANGED)){
+
+            Log.d(TAG, "handleStickyOperationEvent: login state changed");
+
+            EventBus.getDefault().removeStickyEvent(operationEvent);
+
+            refreshUserInNavigationView();
+
         }
 
     }

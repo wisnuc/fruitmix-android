@@ -354,6 +354,8 @@
     <string name="accept_invitation">已接受用户申请</string>
     <string name="refuse_invitation">已拒绝用户申请</string>
 
+    <string name="create_invitation">创建邀请</string>
+
     <string name="accepted">已接受</string>
     <string name="refused">已拒绝</string>
 

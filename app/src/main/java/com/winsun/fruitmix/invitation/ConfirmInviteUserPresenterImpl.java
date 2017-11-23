@@ -17,6 +17,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackWrapper;
 import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.ConfirmInviteUserItemBinding;
 import com.winsun.fruitmix.databinding.ConfirmInviteUserItemHeaderBinding;
@@ -31,6 +32,7 @@ import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.wxapi.MiniProgram;
+import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
 import org.json.JSONException;
 
@@ -47,7 +49,7 @@ import java.util.Set;
  * Created by Andy on 2017/7/12.
  */
 
-public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresenter,ActiveView {
+public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresenter, ActiveView {
 
     public static final String TAG = ConfirmInviteUserPresenterImpl.class.getSimpleName();
 
@@ -68,6 +70,8 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
     private Resources resources;
 
     private IWXAPI iwxapi;
+
+    private boolean isSendingMiniProgram = false;
 
     ConfirmInviteUserPresenterImpl(ConfirmInviteUserView confirmInviteUserView, InvitationDataSource invitationDataSource, ImageLoader imageLoader, final LoadingViewModel loadingViewModel, final NoContentViewModel noContentViewModel) {
         mInvitationDataSource = invitationDataSource;
@@ -92,6 +96,24 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
 //        createFakeConfirmInviteUser();
 
+        WXEntryActivity.setWxEntrySendMiniProgramCallback(new WXEntryActivity.WXEntrySendMiniProgramCallback() {
+            @Override
+            public void succeed() {
+
+                Log.d(TAG, "succeed: set isSendingMiniProgram to false");
+
+                isSendingMiniProgram = false;
+            }
+
+            @Override
+            public void fail() {
+
+                Log.d(TAG, "fail: set isSendingMiniProgram to false");
+
+                isSendingMiniProgram = false;
+            }
+        });
+
     }
 
     @Override
@@ -115,17 +137,44 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
     }
 
     private void createInvitationInThread() {
-        mInvitationDataSource.createInvitation(new BaseOperateDataCallbackImpl<String>() {
+
+        Log.d(TAG, "createInvitationInThread: isSendingMiniProgram: " + isSendingMiniProgram);
+
+        if (isSendingMiniProgram)
+            return;
+
+        confirmInviteUserView.showProgressDialog(String.format(confirmInviteUserView.getString(R.string.operating_title),
+                confirmInviteUserView.getString(R.string.create_invitation)));
+
+        mInvitationDataSource.createInvitation(new BaseOperateDataCallbackWrapper<>(new BaseOperateDataCallback<String>() {
             @Override
             public void onSucceed(final String data, OperationResult result) {
 
                 Log.d(TAG, "onSucceed: create invitation,ticket: " + data);
 
+                confirmInviteUserView.dismissDialog();
+
+                isSendingMiniProgram = true;
+
+                Log.d(TAG, "onSucceed: isSendingMiniProgram: " + isSendingMiniProgram);
+
                 MiniProgram.shareMiniWXApp(confirmInviteUserView.getContext(), iwxapi, resources, data);
 
             }
 
-        });
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                confirmInviteUserView.dismissDialog();
+
+                isSendingMiniProgram = false;
+
+                Log.d(TAG, "onFail: isSendingMiniProgram: " + isSendingMiniProgram);
+
+                confirmInviteUserView.showToast(operationResult.getResultMessage(confirmInviteUserView.getContext()));
+
+            }
+        }, this));
     }
 
     @Override
@@ -158,7 +207,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
                 confirmInviteUserView.setInviteUserFabVisibility(View.VISIBLE);
 
             }
-        },this));
+        }, this));
     }
 
     private void handleInvitation() {

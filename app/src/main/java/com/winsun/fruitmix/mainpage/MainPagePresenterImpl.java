@@ -215,7 +215,6 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
 
     }
 
-
     @Override
     public void refreshNavigationLoggedInUsers() {
 
@@ -383,7 +382,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
 
         if (user.isAdmin()) {
 
-            if (user.getAssociatedWeChatGUID().length() > 0) {
+            if (user.getAssociatedWeChatGUID().length() > 0 && !systemSettingDataSource.getLoginWithWechatCodeOrNot()) {
 
                 if (personAddItemPosition == -1) {
 
