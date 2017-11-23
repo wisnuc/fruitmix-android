@@ -85,6 +85,8 @@ public class GifLoader {
 
     private Object mTag;
 
+    private Request.Priority mPriority = null;
+
     private boolean mShouldCache = true;
 
     /**
@@ -214,6 +216,9 @@ public class GifLoader {
             newRequest.setTag(mTag);
         }
 
+        if (mPriority != null)
+            newRequest.setPriority(mPriority);
+
         newRequest.setShouldCache(mShouldCache);
 
         mRequestQueue.add(newRequest);
@@ -275,6 +280,10 @@ public class GifLoader {
 
     public void setTag(Object tag) {
         mTag = tag;
+    }
+
+    public void setPriority(Request.Priority priority) {
+        mPriority = priority;
     }
 
     public void setShouldCache(boolean shouldCache) {

@@ -696,8 +696,6 @@ public class NavPagerActivity extends BaseActivity
     protected void onDestroy() {
         super.onDestroy();
 
-        InjectHttp.provideImageGifLoaderInstance(mContext).getImageLoader(mContext).cancelAllPreLoadMedia();
-
 //        ButlerService.unregisterUploadMediaCountChangeListener(this);
         uploadMediaUseCase.unregisterUploadMediaCountChangeListener(this);
 

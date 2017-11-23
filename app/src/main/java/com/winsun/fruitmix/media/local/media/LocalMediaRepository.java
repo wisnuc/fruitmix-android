@@ -162,8 +162,8 @@ public class LocalMediaRepository {
 
                 }
 
-                Log.d(TAG, "onSucceed: finish check there is some media has deleted,result: " + hasDeleteMedia
-                        + " some video has deleted,result: " + hasDeleteVideo);
+                Log.d(TAG, "onSucceed: finish check hasDeleteMedia: " + hasDeleteMedia
+                        + " hasDeleteVideo: " + hasDeleteVideo);
 
                 OperationResult result = operationResult;
 

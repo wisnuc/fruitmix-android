@@ -105,6 +105,9 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     /** An opaque token tagging this request; used for bulk cancellation. */
     private Object mTag;
 
+    private Priority mPriority = Priority.NORMAL;
+
+
     /**
      * Creates a new request with the given URL and error listener.  Note that
      * the normal response listener is not provided here as delivery of responses
@@ -511,7 +514,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * Returns the {@link Priority} of this request; {@link Priority#NORMAL} by default.
      */
     public Priority getPriority() {
-        return Priority.NORMAL;
+        return mPriority;
+    }
+
+    public void setPriority(Priority mPriority) {
+        this.mPriority = mPriority;
     }
 
     /**

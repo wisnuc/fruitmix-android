@@ -39,7 +39,7 @@ public class NetworkChangeUseCase {
 
     public NetworkChangeUseCase(SystemSettingDataSource systemSettingDataSource, HttpRequestFactory httpRequestFactory,
                                 NetworkStateManager networkStateManager, StationsDataSource stationsDataSource,
-                                TokenDataSource tokenDataSource,LoginUseCase loginUseCase) {
+                                TokenDataSource tokenDataSource, LoginUseCase loginUseCase) {
         this.systemSettingDataSource = systemSettingDataSource;
         this.httpRequestFactory = httpRequestFactory;
         this.networkStateManager = networkStateManager;
@@ -53,11 +53,12 @@ public class NetworkChangeUseCase {
 
         Log.d(TAG, "handleNetworkChange: httpRequestFactory:" + httpRequestFactory);
 
-        if(!mLoginUseCase.isAlreadyLogin()){
+        if (!mLoginUseCase.isAlreadyLogin()) {
 
             Log.d(TAG, "handleNetworkChange: not login,return");
 
             return;
+
         }
 
         NetworkState networkState = networkStateManager.getNetworkState();
@@ -181,7 +182,7 @@ public class NetworkChangeUseCase {
 
     private void checkToLocalUser(String token, String ip) {
 
-        httpRequestFactory.checkToLocalUser(token,ip);
+        httpRequestFactory.checkToLocalUser(token, ip);
 
     }
 

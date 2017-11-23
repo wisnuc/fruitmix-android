@@ -36,6 +36,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.android.volley.Request;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.IImageLoadListener;
 import com.android.volley.toolbox.NetworkImageView;
@@ -610,7 +611,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private void initImageLoaderAndGifLoader() {
         ImageGifLoaderInstance imageGifLoaderInstance = InjectHttp.provideImageGifLoaderInstance(mContext);
         mImageLoader = imageGifLoaderInstance.getImageLoader(mContext);
+        mImageLoader.setPriority(Request.Priority.HIGH);
         mGifLoader = imageGifLoaderInstance.getGifLoader(mContext);
+        mGifLoader.setPriority(Request.Priority.HIGH);
     }
 
     @Override

@@ -96,6 +96,8 @@ public class ImageLoader {
 
     private Object mTag;
 
+    private Request.Priority mPriority = null;
+
     private boolean mShouldCache = false;
 
     /**
@@ -283,6 +285,9 @@ public class ImageLoader {
             newRequest.setTag(mTag);
         }
 
+        if(mPriority != null)
+            newRequest.setPriority(mPriority);
+
         newRequest.setShouldCache(mShouldCache);
 
         mRequestQueue.add(newRequest);
@@ -328,6 +333,10 @@ public class ImageLoader {
 
     public void setTag(Object tag) {
         mTag = tag;
+    }
+
+    public void setPriority(Request.Priority priority) {
+        mPriority = priority;
     }
 
     public void setShouldCache(boolean shouldCache) {
@@ -624,12 +633,11 @@ public class ImageLoader {
 
     public void cancelAllPreLoadMedia() {
 
-        cancelRetry = true;
+        mRequestQueue.cancelAll(PRE_LOAD_TAG);
 
     }
 
-    private Handler handler;
-    private boolean cancelRetry = false;
+    private static final String PRE_LOAD_TAG = "pre_load";
 
     public void preLoadMediaSmallThumb(final String url, final int width, final int height) {
 
@@ -684,6 +692,7 @@ public class ImageLoader {
         };
 
         request.setPriority(Request.Priority.LOW);
+        request.setTag(PRE_LOAD_TAG);
         mRequestQueue.add(request);
 
     }

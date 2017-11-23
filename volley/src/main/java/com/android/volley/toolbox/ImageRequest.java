@@ -63,7 +63,6 @@ public class ImageRequest extends Request<Bitmap> {
     private final int mMaxHeight;
     private ScaleType mScaleType;
 
-    private Priority mPriority = Priority.NORMAL;
 
     /**
      * Decoding lock so that we don't decode more than one image at a time (to avoid OOM's)
@@ -114,15 +113,6 @@ public class ImageRequest extends Request<Bitmap> {
                         Config decodeConfig, Response.ErrorListener errorListener) {
         this(url, listener, maxWidth, maxHeight,
                 ScaleType.CENTER_INSIDE, decodeConfig, errorListener);
-    }
-
-    @Override
-    public Priority getPriority() {
-        return mPriority;
-    }
-
-    public void setPriority(Priority mPriority) {
-        this.mPriority = mPriority;
     }
 
     /**

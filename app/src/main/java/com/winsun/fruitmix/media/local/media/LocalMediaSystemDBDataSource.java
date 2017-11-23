@@ -3,6 +3,7 @@ package com.winsun.fruitmix.media.local.media;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.format.Formatter;
 import android.util.Log;
@@ -89,15 +90,26 @@ public class LocalMediaSystemDBDataSource {
                 queryWidth, queryData, queryOrientation,
                 queryLatitude, queryLongitude, queryType};
 
-        String miniThumbnailFolderPath = FileUtil.getLocalPhotoMiniThumbnailFolderPath();
+        String selection;
+        String[] selectionArgs;
+
+/*        String miniThumbnailFolderPath = FileUtil.getLocalPhotoMiniThumbnailFolderPath();
         String oldThumbnailFolderPath = FileUtil.getOldLocalPhotoThumbnailFolderPath();
         String thumbnailFolderPath = FileUtil.getLocalPhotoThumbnailFolderPath();
         String originalPhotoFolderPath = FileUtil.getOriginalPhotoFolderPath();
 
         String selection = queryData + " not like ? and " + queryData + " not like ? and " + queryData + " not like ? and " + queryData + " not like ?";
-        String[] selectionArgs = {miniThumbnailFolderPath + "%", oldThumbnailFolderPath + "%", thumbnailFolderPath + "%", originalPhotoFolderPath + "%"};
+        String[] selectionArgs = {miniThumbnailFolderPath + "%", oldThumbnailFolderPath + "%", thumbnailFolderPath + "%", originalPhotoFolderPath + "%"};*/
 
-//        cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "='" + bucketName + "'", null, null);
+        String photoInCameraPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath()
+                + File.separator + "Camera";
+
+        String screenShotsPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()
+                + File.separator + "Screenshots";
+
+        selection = queryData + " like ? or " + queryData + " like ?";
+
+        selectionArgs = new String[]{photoInCameraPath + "%", screenShotsPath + "%"};
 
         cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, selection, selectionArgs, null);
 
@@ -111,11 +123,11 @@ public class LocalMediaSystemDBDataSource {
 
             String originalPhotoPath = cursor.getString(cursor.getColumnIndexOrThrow(queryData));
 
-            if (originalPhotoPath.contains(miniThumbnailFolderPath) || originalPhotoPath.contains(oldThumbnailFolderPath)
+/*            if (originalPhotoPath.contains(miniThumbnailFolderPath) || originalPhotoPath.contains(oldThumbnailFolderPath)
                     || originalPhotoPath.contains(thumbnailFolderPath)
                     || originalPhotoPath.contains(originalPhotoFolderPath)) {
                 continue;
-            }
+            }*/
 
             currentAllMediaPathInSystemDB.add(originalPhotoPath);
 
@@ -203,9 +215,16 @@ public class LocalMediaSystemDBDataSource {
         String querySize = MediaStore.Video.Media.SIZE;
         String queryType = MediaStore.Video.Media.MIME_TYPE;
 
+        String videoInCameraPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath()
+                + File.separator + "Camera";
+
+        String selection = queryPath + " like ? ";
+
+        String[] selectionArgs = new String[]{videoInCameraPath + "%"};
+
         Cursor cursor = contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 new String[]{queryName, queryPath, queryTitle, queryAlbum, queryArtist, queryTakeDate, queryDescription, queryDuration,
-                        queryLanguage, queryResolution, querySize, queryType}, null, null, null);
+                        queryLanguage, queryResolution, querySize, queryType}, selection, selectionArgs, null);
 
         if (cursor == null || !cursor.moveToFirst()) {
             return videos;
@@ -216,9 +235,6 @@ public class LocalMediaSystemDBDataSource {
         do {
 
             String path = cursor.getString(cursor.getColumnIndex(queryPath));
-
-            if (!path.toLowerCase().contains("camera"))
-                continue;
 
             currentAllVideoPathInSystemDB.add(path);
 
