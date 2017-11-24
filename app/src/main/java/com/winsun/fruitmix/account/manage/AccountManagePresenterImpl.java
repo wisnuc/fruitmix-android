@@ -97,7 +97,7 @@ public class AccountManagePresenterImpl implements AccountManagePresenter,Active
 
         } else {
 
-            String token = systemSettingDataSource.getCurrentLoginToken();
+            String token = systemSettingDataSource.getCurrentWAToken();
 
             getAllBindingLocalUserUseCase.getAllBindingLocalUser(guid, token, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<LoggedInWeChatUser>() {
                 @Override

@@ -584,7 +584,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
     private void cancelPreLoadMediaMiniThumb() {
         mCancelPreLoadPhoto = true;
 
-        mImageLoader.cancelAllPreLoadMedia();
+        if (mImageLoader != null)
+            mImageLoader.cancelAllPreLoadMedia();
+
     }
 
     private void setupFastJumper() {

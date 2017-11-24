@@ -97,7 +97,7 @@
     <string name="my_file">My Files</string>
     <string name="my_photo">My Photos</string>
 
-    <string name="task_manage">Manage Task</string>
+    <string name="transmission_manage">Manage Transmission</string>
 
     <string name="account_manage">Manage Account</string>
 
@@ -240,11 +240,11 @@
     <!-- file download -->
 
     <string name="downloading">Downloading</string>
-    <string name="executed">Executed</string>
+    <string name="completed">Completed</string>
     <string name="download_failed">Download failed</string>
     <string name="no_download_record">No download record</string>
 
-    <string name="executing">Executing</string>
+    <string name="incomplete">InComplete</string>
 
     <string name="upload">Upload</string>
 
@@ -306,6 +306,9 @@
     <string name="maintenance_explain">
         After reboot and enter the maintenance mode,you can perform disk operation or system maintenance task in the maintenance mode.
     </string>
+
+    <string name="operation_not_support_when_login_with_wechat_code">Operation is not supported</string>
+
 
     <string name="reboot_and_enter_maintenance">Reboot And Enter Maintenance</string>
 

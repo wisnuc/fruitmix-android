@@ -47,57 +47,69 @@
             android:layout_toRightOf="@id/user_avatar"
             android:background="@color/divide_bg" />
 
-        <TextView
+        <RelativeLayout
+            android:id="@+id/right_container"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="16dp"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="@{confirmInviteUserViewModel.operateResult}"
-            android:textColor="@color/fifty_four_percent_black"
-            android:textSize="14dp"
-            android:visibility="@{confirmInviteUserViewModel.showOperateBtn?View.GONE:View.VISIBLE,default=visible}"
-            tools:text="Accepted" />
+            android:layout_marginRight="16dp">
 
-        <TextView
-            android:id="@+id/refuse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="16dp"
-            android:background="?attr/selectableItemBackground"
-            android:gravity="center"
-            android:onClick="@{()->confirmInviteUserPresenter.refuseInviteUser(confirmInviteUser)}"
-            android:padding="8dp"
-            android:text="@string/refuse"
-            android:textColor="@color/fab_bg_color"
-            android:textSize="14dp"
-            android:visibility="@{confirmInviteUserViewModel.showOperateBtn?View.VISIBLE:View.GONE,default=gone}" />
+            <TextView
+                android:id="@+id/accepted"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@{confirmInviteUserViewModel.operateResult}"
+                android:textColor="@color/fifty_four_percent_black"
+                android:textSize="14dp"
+                android:visibility="@{confirmInviteUserViewModel.showOperateBtn?View.GONE:View.VISIBLE,default=visible}"
+                tools:text="Accepted" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/accept"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="16dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:onClick="@{()->confirmInviteUserPresenter.acceptInviteUser(confirmInviteUser)}"
+                    android:padding="8dp"
+                    android:text="@string/accept"
+                    android:textColor="@color/fab_bg_color"
+                    android:textSize="14dp"
+                    android:visibility="@{confirmInviteUserViewModel.showOperateBtn?View.VISIBLE:View.GONE,default=gone}" />
+
+                <TextView
+                    android:id="@+id/refuse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:onClick="@{()->confirmInviteUserPresenter.refuseInviteUser(confirmInviteUser)}"
+                    android:padding="8dp"
+                    android:text="@string/refuse"
+                    android:textColor="@color/fab_bg_color"
+                    android:textSize="14dp"
+                    android:visibility="@{confirmInviteUserViewModel.showOperateBtn?View.VISIBLE:View.GONE,default=gone}" />
+
+            </LinearLayout>
 
 
-        <TextView
-            android:id="@+id/accept"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="16dp"
-            android:layout_toLeftOf="@id/refuse"
-            android:background="?attr/selectableItemBackground"
-            android:gravity="center"
-            android:onClick="@{()->confirmInviteUserPresenter.acceptInviteUser(confirmInviteUser)}"
-            android:padding="8dp"
-            android:text="@string/accept"
-            android:textColor="@color/fab_bg_color"
-            android:textSize="14dp"
-            android:visibility="@{confirmInviteUserViewModel.showOperateBtn?View.VISIBLE:View.GONE,default=gone}" />
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/right_container"
             android:layout_toRightOf="@id/user_avatar"
             android:gravity="center_vertical"
             android:orientation="vertical">
@@ -106,6 +118,7 @@
                 android:id="@+id/user_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
                 android:gravity="center_vertical"
                 android:text="@{confirmInviteUser.userName}"
                 android:textColor="@color/eighty_seven_percent_black"

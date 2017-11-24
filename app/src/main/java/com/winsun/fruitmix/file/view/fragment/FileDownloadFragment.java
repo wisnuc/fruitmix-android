@@ -586,9 +586,9 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
             }
 
             if (downloadItem instanceof DownloadingGroupItem) {
-                fileDownloadGroupItemViewModel.groupTitle.set(activity.getString(R.string.executing));
+                fileDownloadGroupItemViewModel.groupTitle.set(activity.getString(R.string.incomplete));
             } else if (downloadItem instanceof DownloadedGroupItem) {
-                fileDownloadGroupItemViewModel.groupTitle.set(activity.getString(R.string.executed));
+                fileDownloadGroupItemViewModel.groupTitle.set(activity.getString(R.string.completed));
             }
 
         }

@@ -157,7 +157,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
             }
         };
         model.setMenuIconResId(R.drawable.navigation_file_menu_bg);
-        model.setMenuText(context.getString(R.string.task_manage));
+        model.setMenuText(context.getString(R.string.transmission_manage));
 
         mNavigationMenuItems.add(model);
 
@@ -328,7 +328,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
             return;
         }
 
-        String token = systemSettingDataSource.getCurrentLoginToken();
+        String token = systemSettingDataSource.getCurrentWAToken();
 
         getAllBindingLocalUserUseCase.getAllBindingLocalUser(guid, token, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<LoggedInWeChatUser>() {
             @Override
@@ -382,7 +382,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
 
         if (user.isAdmin()) {
 
-            if (user.getAssociatedWeChatGUID().length() > 0 && !systemSettingDataSource.getLoginWithWechatCodeOrNot()) {
+            if (user.getAssociatedWeChatGUID().length() > 0 ) {
 
                 if (personAddItemPosition == -1) {
 
@@ -390,6 +390,14 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
                         @Override
                         public void onClick() {
                             super.onClick();
+
+                            if(systemSettingDataSource.getLoginWithWechatCodeOrNot()){
+
+                                mainPageView.showToast(mainPageView.getString(R.string.operation_not_support_when_login_with_wechat_code));
+
+                                return;
+
+                            }
 
                             mainPageView.gotoConfirmInviteUserActivity();
 

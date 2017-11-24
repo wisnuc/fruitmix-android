@@ -92,7 +92,7 @@
     <string name="quit">退出</string>
     <string name="my_file">我的文件</string>
     <string name="my_photo">我的照片</string>
-    <string name="task_manage">任务管理</string>
+    <string name="transmission_manage">传输管理</string>
 
     <string name="account_manage">帐号管理</string>
 
@@ -220,13 +220,15 @@
 
     <!-- 文件-下载模块 -->
     <string name="downloading">正在下载</string>
-    <string name="executed">已执行</string>
+    <string name="completed">已完成</string>
     <string name="download_failed">下载失败</string>
     <string name="no_download_record">没有下载记录可选</string>
     
-    <string name="executing">正在执行</string>
+    <string name="incomplete">未完成</string>
 
     <string name="upload">上传</string>
+
+
 
     <!-- Hints -->
     <string name="success">%1$s成功</string>
@@ -285,6 +287,8 @@
     <string name="maintenance_explain">
         重启后进入维护模式，可以在维护模式下执行磁盘操作或系统维护任务。
     </string>
+
+    <string name="operation_not_support_when_login_with_wechat_code">目前仅支持局域网登录操作</string>
 
     <string name="reboot_and_enter_maintenance">重启进入维护模式</string>
 
@@ -363,5 +367,7 @@
 
     <!-- group -->
     <string name="group">"私友群"</string>
+
+
 
 </resources>

@@ -1163,7 +1163,20 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                         List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
 
                         BottomMenuItem menuItem;
-                        if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName())) {
+
+                        FileTaskItem fileTaskItem = fileTaskManager.getFileTaskItem(abstractRemoteFile.getUuid());
+
+                        boolean result = true;
+
+                        if (fileTaskItem != null){
+
+                            TaskState taskState = fileTaskItem.getTaskState();
+
+                            result = taskState != TaskState.START_DOWNLOAD_OR_UPLOAD && taskState != TaskState.PENDING && taskState != TaskState.DOWNLOADING_OR_UPLOADING;
+
+                        }
+
+                        if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName()) && result) {
 
                             bottomMenuItems.add(new BottomMenuItem(R.drawable.download, activity.getString(R.string.re_download_the_item), new ReDownloadCommand(abstractRemoteFile)));
 

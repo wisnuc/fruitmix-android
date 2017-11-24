@@ -98,7 +98,8 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
         task = new TimingRetrieveTicketsTask(this, getMainLooper());
 
-        task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
+        //TODO: commit this for consider get ticket when login with wechat token,api is not exist
+//        task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
 
         calcMediaDigestCallback = new CalcMediaDigestStrategy.CalcMediaDigestCallback() {
             @Override

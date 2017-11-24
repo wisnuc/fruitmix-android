@@ -37,13 +37,6 @@ public class FileStartUploadState extends FileUploadState {
     @Override
     public void startWork() {
 
-        NetworkState networkState = networkStateManager.getNetworkState();
-
-        if (!networkState.isMobileConnected() && !networkState.isWifiConnected()) {
-            getFileUploadItem().setFileUploadState(new FileUploadErrorState(getFileUploadItem()));
-            return;
-        }
-
         UploadFileTask uploadFileTask = new UploadFileTask(this,uploadFileUseCase);
 
         Future<Boolean> future = threadManager.runOnDownloadFileThread(uploadFileTask);

@@ -66,6 +66,8 @@ public class UploadFileUseCase {
 
     boolean needRetryForEEXIST = false;
 
+    private String uploadFilePath;
+
     public UploadFileUseCase(UserDataRepository userDataRepository, StationFileRepository stationFileRepository,
                              SystemSettingDataSource systemSettingDataSource, NetworkStateManager networkStateManager,
                              FileTool fileTool, String uploadFolderName, String fileTemporaryFolderPath) {
@@ -79,6 +81,9 @@ public class UploadFileUseCase {
     }
 
     public void updateFile(final FileUploadState fileUploadState) {
+
+        if (!checkUploadCondition(fileUploadState))
+            return;
 
         do {
 
@@ -108,6 +113,50 @@ public class UploadFileUseCase {
 
     }
 
+    private void copyToTemporaryFolder(FileUploadState fileUploadState) {
+
+        String fileOriginalPath = fileUploadState.getFilePath();
+
+        FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
+
+        boolean copyResult = mFileTool.copyFileToDir(fileOriginalPath, fileTemporaryFolderPath);
+
+        if (copyResult)
+            uploadFilePath = fileTemporaryFolderPath + File.separator + fileUploadItem.getFileName();
+        else
+            uploadFilePath = fileOriginalPath;
+
+    }
+
+    private boolean checkUploadCondition(FileUploadState fileUploadState) {
+
+        NetworkState networkState = networkStateManager.getNetworkState();
+
+        FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
+
+        if (!networkState.isMobileConnected() && !networkState.isWifiConnected()) {
+
+            Log.d(TAG, "checkUploadCondition: network is unreached,set file upload pending state");
+
+            fileUploadItem.setFileUploadState(new FileUploadPendingState(fileUploadItem, this, networkStateManager));
+            return false;
+
+        }
+
+        if (systemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi() && !networkState.isWifiConnected()) {
+
+            Log.d(TAG, "checkUploadCondition: only auto upload when connect with wifi is set,but wifi is not connected,set file upload pending state");
+
+            fileUploadItem.setFileUploadState(new FileUploadPendingState(fileUploadItem, this, networkStateManager));
+
+            return false;
+
+        }
+
+        return true;
+
+    }
+
     private void checkFolderExist(String rootUUID, String dirUUID, final FileUploadState fileUploadState, final BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
         Log.i(TAG, "start check folder exist");
@@ -131,7 +180,7 @@ public class UploadFileUseCase {
     private void notifyError(FileUploadState fileUploadState) {
         FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
 
-        fileUploadItem.setFileUploadState(new FileUploadErrorState(fileUploadItem));
+        fileUploadItem.setFileUploadState(new FileUploadPendingState(fileUploadItem,this,networkStateManager));
 
         needRetryForEEXIST = false;
     }
@@ -416,16 +465,9 @@ public class UploadFileUseCase {
 
     private void startUploadFile(FileUploadState fileUploadState) {
 
-        if (!checkCanUploadFile()) {
+        copyToTemporaryFolder(fileUploadState);
 
-            notifyError(fileUploadState);
-            return;
-        }
-
-        String fileOriginalPath = fileUploadState.getFilePath();
         String fileName = fileUploadState.getFileUploadItem().getFileName();
-
-        boolean copyResult = mFileTool.copyFileToDir(fileOriginalPath, fileTemporaryFolderPath);
 
         LocalFile localFile = new LocalFile();
 
@@ -434,10 +476,7 @@ public class UploadFileUseCase {
         localFile.setFileHash(fileUploadItem.getFileUUID());
         localFile.setSize(fileUploadItem.getFileSize() + "");
 
-        if (copyResult)
-            localFile.setPath(fileTemporaryFolderPath + File.separator + fileName);
-        else
-            localFile.setPath(fileUploadItem.getFilePath());
+        localFile.setPath(uploadFilePath);
 
         localFile.setName(fileName);
 
@@ -469,21 +508,6 @@ public class UploadFileUseCase {
         boolean copyToDownloadFolderResult = mFileTool.copyFileToDir(filePath, FileUtil.getDownloadFileStoreFolderPath());
 
         Log.d(TAG, "handleUploadSucceed: copy to download folder result: " + copyToDownloadFolderResult);
-
-    }
-
-    private boolean checkCanUploadFile() {
-
-        NetworkState networkState = networkStateManager.getNetworkState();
-
-        if (systemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi() && !networkState.isWifiConnected()) {
-
-            Log.d(TAG, "uploadFile: only auto upload when connect with wifi is true,but wifi is not connected,stop upload");
-
-            return false;
-
-        } else
-            return true;
 
     }
 

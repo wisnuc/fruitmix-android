@@ -83,6 +83,7 @@ public class GetAllBindingLocalUserUseCase {
                     if (user.getAssociatedWeChatGUID().equals(guid)) {
 
                         currentLocalUser = user;
+
                         break;
                     }
 

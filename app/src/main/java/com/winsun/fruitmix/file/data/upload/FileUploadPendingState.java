@@ -43,4 +43,5 @@ public class FileUploadPendingState extends FileUploadState {
     public void startWork() {
         Log.d(TAG, "startWork: it is pending now");
     }
+
 }

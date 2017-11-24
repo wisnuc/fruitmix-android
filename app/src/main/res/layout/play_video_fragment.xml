@@ -20,7 +20,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_gravity="center"
-            android:src="@drawable/play_video_icon" />
+            android:src="@drawable/play_video_big_icon" />
 
         <ProgressBar
             android:id="@+id/progress_bar"

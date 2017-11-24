@@ -36,6 +36,7 @@ public abstract class FileTaskState {
     public void notifyDownloadStateChanged() {
 
         EventBus.getDefault().postSticky(new TaskStateChangedEvent(getDownloadState()));
+
     }
 
 }

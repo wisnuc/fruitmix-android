@@ -38,7 +38,7 @@ public class FileDownloadActivity extends BaseActivity implements BaseView {
     private void initToolbar(ActivityFileDownloadBinding binding) {
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 
-        toolbarViewModel.titleText.set(getString(R.string.task_manage));
+        toolbarViewModel.titleText.set(getString(R.string.transmission_manage));
 
         toolbarViewModel.showMenu.set(true);
         toolbarViewModel.setBaseView(this);

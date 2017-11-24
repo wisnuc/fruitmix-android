@@ -100,13 +100,16 @@ public class FileTaskManager {
 
         FileUploadState fileUploadState;
 
-        if (checkDownloadingItemIsMax()) {
+/*        if (checkDownloadingItemIsMax()) {
             fileUploadState = new FileUploadPendingState(fileUploadItem, InjectUploadFileCase.provideInstance(context),
                     InjectNetworkStateManager.provideNetworkStateManager(context));
         } else {
             fileUploadState = new FileStartUploadState(fileUploadItem, ThreadManagerImpl.getInstance(),
                     InjectUploadFileCase.provideInstance(context), InjectNetworkStateManager.provideNetworkStateManager(context));
-        }
+        }*/
+
+        fileUploadState = new FileStartUploadState(fileUploadItem, ThreadManagerImpl.getInstance(),
+                InjectUploadFileCase.provideInstance(context), InjectNetworkStateManager.provideNetworkStateManager(context));
 
         fileTaskItems.add(fileUploadItem);
 
@@ -226,8 +229,8 @@ public class FileTaskManager {
 
             }
 
-
         }
+
     }
 
     public List<FileTaskItem> getFileTaskItems() {

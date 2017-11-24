@@ -101,15 +101,13 @@ public class LocalMediaSystemDBDataSource {
         String selection = queryData + " not like ? and " + queryData + " not like ? and " + queryData + " not like ? and " + queryData + " not like ?";
         String[] selectionArgs = {miniThumbnailFolderPath + "%", oldThumbnailFolderPath + "%", thumbnailFolderPath + "%", originalPhotoFolderPath + "%"};*/
 
-        String photoInCameraPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath()
-                + File.separator + "Camera";
+        String photoInCameraPath = "Camera";
 
-        String screenShotsPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()
-                + File.separator + "Screenshots";
+        String screenShotsPath = "Screenshots";
 
         selection = queryData + " like ? or " + queryData + " like ?";
 
-        selectionArgs = new String[]{photoInCameraPath + "%", screenShotsPath + "%"};
+        selectionArgs = new String[]{"%" + photoInCameraPath + "%", "%" + screenShotsPath + "%"};
 
         cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, selection, selectionArgs, null);
 
@@ -215,12 +213,11 @@ public class LocalMediaSystemDBDataSource {
         String querySize = MediaStore.Video.Media.SIZE;
         String queryType = MediaStore.Video.Media.MIME_TYPE;
 
-        String videoInCameraPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath()
-                + File.separator + "Camera";
+        String videoInCameraPath = "Camera";
 
         String selection = queryPath + " like ? ";
 
-        String[] selectionArgs = new String[]{videoInCameraPath + "%"};
+        String[] selectionArgs = new String[]{"%" + videoInCameraPath + "%"};
 
         Cursor cursor = contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 new String[]{queryName, queryPath, queryTitle, queryAlbum, queryArtist, queryTakeDate, queryDescription, queryDuration,
