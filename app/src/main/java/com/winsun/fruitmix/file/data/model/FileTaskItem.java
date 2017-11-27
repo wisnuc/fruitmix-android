@@ -76,7 +76,7 @@ public abstract class FileTaskItem {
         this.future = future;
     }
 
-    public void cancelDownloadItem() {
+    public void cancelTaskItem() {
         if (future != null)
             future.cancel(true);
     }

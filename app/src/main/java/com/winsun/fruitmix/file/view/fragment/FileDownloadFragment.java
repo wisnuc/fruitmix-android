@@ -634,9 +634,9 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
                         @Override
                         public void execute() {
 
-                            fileTaskItem.cancelDownloadItem();
+                            fileTaskItem.cancelTaskItem();
 
-                            fileTaskManager.deleteFileDownloadItem(Collections.singletonList(fileTaskItem.getUnionKey()));
+                            fileTaskManager.deleteFileTaskItem(Collections.singletonList(fileTaskItem.getUnionKey()));
 
                             refreshView();
 

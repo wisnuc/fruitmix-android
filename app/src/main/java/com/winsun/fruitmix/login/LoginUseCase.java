@@ -33,11 +33,13 @@ import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
 import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -88,12 +90,15 @@ public class LoginUseCase extends BaseDataRepository {
 
     private boolean alreadyLogin = false;
 
+    private LoginNewUserCallbackWrapper<Boolean> mBooleanLoginNewUserCallbackWrapper;
+
     private LoginUseCase(LoggedInUserDataSource loggedInUserDataSource, TokenDataSource tokenDataSource,
                          HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy, UploadMediaUseCase uploadMediaUseCase,
                          UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
                          SystemSettingDataSource systemSettingDataSource, ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus,
                          ThreadManager threadManager, NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource,
-                         GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase,WeChatUserDataSource weChatUserDataSource) {
+                         GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase, WeChatUserDataSource weChatUserDataSource,
+                         LoginNewUserCallbackWrapper<Boolean> loginNewUserCallbackWrapper) {
 
         super(threadManager);
         this.loggedInUserDataSource = loggedInUserDataSource;
@@ -112,6 +117,8 @@ public class LoginUseCase extends BaseDataRepository {
         mGetAllBindingLocalUserUseCase = getAllBindingLocalUserUseCase;
         this.weChatUserDataSource = weChatUserDataSource;
 
+        mBooleanLoginNewUserCallbackWrapper = loginNewUserCallbackWrapper;
+
     }
 
     public static LoginUseCase getInstance(LoggedInUserDataSource loggedInUserDataSource, TokenDataSource tokenDataSource,
@@ -120,13 +127,14 @@ public class LoginUseCase extends BaseDataRepository {
                                            StationFileRepository stationFileRepository, SystemSettingDataSource systemSettingDataSource,
                                            ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager,
                                            NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource,
-                                           GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase,WeChatUserDataSource weChatUserDataSource) {
+                                           GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase, WeChatUserDataSource weChatUserDataSource,
+                                           LoginNewUserCallbackWrapper<Boolean> loginNewUserCallbackWrapper) {
 
         if (instance == null)
             instance = new LoginUseCase(loggedInUserDataSource, tokenDataSource,
                     httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, mediaDataSourceRepository,
                     stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager,
-                    newPhotoListDataLoader, stationsDataSource,getAllBindingLocalUserUseCase, weChatUserDataSource);
+                    newPhotoListDataLoader, stationsDataSource, getAllBindingLocalUserUseCase, weChatUserDataSource, loginNewUserCallbackWrapper);
 
         return instance;
     }
@@ -145,30 +153,30 @@ public class LoginUseCase extends BaseDataRepository {
 
     public void loginWithNoParam(final BaseOperateDataCallback<Boolean> callback) {
 
-        final String currentLoginToken = systemSettingDataSource.getCurrentLoginToken();
+        String waToken = systemSettingDataSource.getCurrentWAToken();
 
-        if (currentLoginToken.isEmpty()) {
+        if (!waToken.isEmpty()) {
 
-            Log.d(TAG, "loginWithNoParam: no token,callback on fail");
-
-            callback.onFail(new OperationFail("no token"));
-            return;
-        }
-
-        boolean loginWithWeChatCodeOrNot = systemSettingDataSource.getLoginWithWechatCodeOrNot();
-
-        if (loginWithWeChatCodeOrNot) {
-
-            Log.d(TAG, "loginWithNoParam: loginWithWeChatCodeOrNot is true,login with wechat user");
+            Log.d(TAG, "loginWithNoParam: wa token is exist,login with wechat user");
 
             String currentLoginStationID = systemSettingDataSource.getCurrentLoginStationID();
 
-            final WeChatUser weChatUser = weChatUserDataSource.getWeChatUser(currentLoginToken, currentLoginStationID);
+            final WeChatUser weChatUser = weChatUserDataSource.getWeChatUser(waToken, currentLoginStationID);
 
             loginWithWeChatUser(callback, weChatUser);
 
-
         } else {
+
+            final String currentLoginToken = systemSettingDataSource.getCurrentLoginToken();
+
+            if (currentLoginToken.isEmpty()) {
+
+                Log.d(TAG, "loginWithNoParam: no wa token and login token,callback on fail");
+
+                callback.onFail(new OperationFail("no token"));
+
+                return;
+            }
 
             mGateway = systemSettingDataSource.getCurrentEquipmentIp();
 
@@ -185,12 +193,18 @@ public class LoginUseCase extends BaseDataRepository {
                 @Override
                 public void onFail(OperationResult operationResult) {
 
-                    handleGetStationInfoFailed(callback);
+//                    handleGetStationInfoFailed(callback);
+
+                    Log.d(TAG, "onFail: check station ip fail");
+
+                    callback.onFail(new OperationFail("ip is unreachable"));
 
                 }
             });
 
         }
+
+
     }
 
     private void handleGetStationInfoSucceed(final BaseOperateDataCallback<Boolean> callback, String currentLoginToken) {
@@ -200,13 +214,13 @@ public class LoginUseCase extends BaseDataRepository {
 
         httpRequestFactory.setCurrentData(mToken, mGateway);
 
-        String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
-
-        initSystemState(mToken, mGateway, currentUserUUID);
+        final String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
 
         getUsers(currentUserUUID, new BaseOperateDataCallback<Boolean>() {
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
+
+                initSystemState(mToken, mGateway, currentUserUUID);
 
                 callback.onSucceed(true, new OperationSuccess());
 
@@ -355,7 +369,9 @@ public class LoginUseCase extends BaseDataRepository {
 
     }
 
-    public void loginWithLoadTokenParam(final LoadTokenParam loadTokenParam, final BaseLoadDataCallback<String> callback) {
+    public void loginWithLoadTokenParam(final LoadTokenParam loadTokenParam, final BaseOperateDataCallback<Boolean> callback) {
+
+        mBooleanLoginNewUserCallbackWrapper.setCallback(callback);
 
         tokenDataSource.getToken(loadTokenParam, new BaseLoadDataCallback<String>() {
             @Override
@@ -372,20 +388,20 @@ public class LoginUseCase extends BaseDataRepository {
 
                 userDataRepository.clearAllUsersInDB();
 
-                getUsers(loadTokenParam, token, callback);
+                getUsers(loadTokenParam, token, mBooleanLoginNewUserCallbackWrapper);
 
             }
 
             @Override
             public void onFail(OperationResult operationResult) {
 
-                callback.onFail(operationResult);
+                mBooleanLoginNewUserCallbackWrapper.onFail(operationResult);
             }
         });
 
     }
 
-    private void getUsers(final LoadTokenParam loadTokenParam, final String token, final BaseLoadDataCallback<String> callback) {
+    private void getUsers(final LoadTokenParam loadTokenParam, final String token, final BaseOperateDataCallback<Boolean> callback) {
 
         systemSettingDataSource.setLoginWithWechatCodeOrNot(false);
 
@@ -423,7 +439,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                                 mediaDataSourceRepository.resetState();
 
-                                callback.onSucceed(Collections.singletonList(token), new OperationSuccess());
+                                callback.onSucceed(true, new OperationSuccess());
 
 //                                eventBus.postSticky(new OperationEvent(Util.SET_CURRENT_LOGIN_USER_AFTER_LOGIN, new OperationSuccess()));
 
@@ -469,26 +485,34 @@ public class LoginUseCase extends BaseDataRepository {
 
         }
 
-        if (currentLoggedInUser == null)
-            runOnMainThreadCallback.onFail(new OperationSQLException());
-        else
+        if (currentLoggedInUser == null) {
+
+            mBooleanLoginNewUserCallbackWrapper.setCallback(runOnMainThreadCallback);
+            mBooleanLoginNewUserCallbackWrapper.onFail(new OperationSQLException());
+
+        } else {
+
             loginWithLoggedInUser(currentLoggedInUser, callback);
+
+        }
 
 
     }
 
     public void loginWithLoggedInUser(final LoggedInUser currentLoggedInUser, final BaseOperateDataCallback<Boolean> callback) {
 
+        mBooleanLoginNewUserCallbackWrapper.setCallback(createOperateCallbackRunOnMainThread(callback));
+
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                loginWithLoggedInUserInThread(currentLoggedInUser, createOperateCallbackRunOnMainThread(callback));
+                loginWithLoggedInUserInThread(currentLoggedInUser, mBooleanLoginNewUserCallbackWrapper);
             }
         });
 
     }
 
-    private void loginWithLoggedInUserInThread(LoggedInUser currentLoggedInUser, final BaseOperateDataCallback<Boolean> callback) {
+    private void loginWithLoggedInUserInThread(final LoggedInUser currentLoggedInUser, final BaseOperateDataCallback<Boolean> callback) {
         Log.d(TAG, "loginWithLoggedInUser: http request factory set current data token:" + currentLoggedInUser.getToken() + " gateway: " + currentLoggedInUser.getGateway());
 
         mToken = currentLoggedInUser.getToken();
@@ -496,28 +520,29 @@ public class LoginUseCase extends BaseDataRepository {
 
         httpRequestFactory.setCurrentData(mToken, mGateway);
 
-        initSystemState(currentLoggedInUser.getToken(), currentLoggedInUser.getGateway(), currentLoggedInUser.getUser().getUuid());
-
         userDataRepository.clearAllUsersInDB();
-
-        mediaDataSourceRepository.clearAllStationMediasInDB();
-
-        mediaDataSourceRepository.resetState();
-
-        String preUploadUserUUID = systemSettingDataSource.getCurrentUploadUserUUID();
-
-        if (preUploadUserUUID.equals(currentLoggedInUser.getUser().getUuid())) {
-
-            systemSettingDataSource.setAutoUploadOrNot(true);
-
-        } else {
-            systemSettingDataSource.setAutoUploadOrNot(false);
-
-        }
 
         getUsers(currentLoggedInUser.getUser().getUuid(), new BaseOperateDataCallback<Boolean>() {
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
+
+                initSystemState(currentLoggedInUser.getToken(), currentLoggedInUser.getGateway(), currentLoggedInUser.getUser().getUuid());
+
+                mediaDataSourceRepository.clearAllStationMediasInDB();
+
+                mediaDataSourceRepository.resetState();
+
+                String preUploadUserUUID = systemSettingDataSource.getCurrentUploadUserUUID();
+
+                if (preUploadUserUUID.equals(currentLoggedInUser.getUser().getUuid())) {
+
+                    systemSettingDataSource.setAutoUploadOrNot(true);
+
+                } else {
+                    systemSettingDataSource.setAutoUploadOrNot(false);
+
+                }
+
                 callback.onSucceed(true, new OperationSuccess());
             }
 
@@ -559,7 +584,9 @@ public class LoginUseCase extends BaseDataRepository {
 
     public void loginWithWeChatCode(String code, final BaseOperateDataCallback<Boolean> callback) {
 
-        final BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+        BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mBooleanLoginNewUserCallbackWrapper.setCallback(runOnMainThreadCallback);
 
         tokenDataSource.getToken(code, new BaseLoadDataCallback<WeChatTokenUserWrapper>() {
             @Override
@@ -587,7 +614,7 @@ public class LoginUseCase extends BaseDataRepository {
                 getStationList(weChatTokenUserWrapper, new BaseOperateDataCallback<Boolean>() {
                     @Override
                     public void onSucceed(Boolean data, OperationResult result) {
-                        runOnMainThreadCallback.onSucceed(data, result);
+                        mBooleanLoginNewUserCallbackWrapper.onSucceed(data, result);
                     }
 
                     @Override
@@ -597,7 +624,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                         systemSettingDataSource.setCurrentLoginToken("");
 
-                        runOnMainThreadCallback.onFail(result);
+                        mBooleanLoginNewUserCallbackWrapper.onFail(result);
 
                     }
                 });
@@ -607,7 +634,7 @@ public class LoginUseCase extends BaseDataRepository {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                runOnMainThreadCallback.onFail(operationResult);
+                mBooleanLoginNewUserCallbackWrapper.onFail(operationResult);
 
             }
         });
@@ -632,28 +659,28 @@ public class LoginUseCase extends BaseDataRepository {
 
                     mGetAllBindingLocalUserUseCase.getAllBindingLocalUser(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(),
                             new BaseLoadDataCallback<LoggedInWeChatUser>() {
-                        @Override
-                        public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
+                                @Override
+                                public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
 
-                            if(data.size() == 1){
+                                    if (data.size() == 1) {
 
-                                String stationID = data.get(0).getStationID();
+                                        String stationID = data.get(0).getStationID();
 
-                                handleLoginByWeChatCodeWithOneStation(stationID);
+                                        handleLoginByWeChatCodeWithOneStation(stationID);
 
-                            }else {
-                                callback.onSucceed(true, new OperationMoreThanOneStation(data,weChatTokenUserWrapper));
-                            }
+                                    } else {
+                                        callback.onSucceed(true, new OperationMoreThanOneStation(data, weChatTokenUserWrapper));
+                                    }
 
-                        }
+                                }
 
-                        @Override
-                        public void onFail(OperationResult operationResult) {
+                                @Override
+                                public void onFail(OperationResult operationResult) {
 
-                            callback.onFail(operationResult);
+                                    callback.onFail(operationResult);
 
-                        }
-                    });
+                                }
+                            });
 
                 }
 
@@ -748,7 +775,7 @@ public class LoginUseCase extends BaseDataRepository {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                callback.onFail(operationResult);
+                mBooleanLoginNewUserCallbackWrapper.onFail(operationResult);
             }
         });
 
@@ -834,12 +861,14 @@ public class LoginUseCase extends BaseDataRepository {
                 guid, stationID));
     }
 
-    public void loginWithOtherWeChatUserBindingLocalUser(LoggedInWeChatUser loggedInWeChatUser, final BaseOperateDataCallback<Boolean> callback) {
+    public void loginWithOtherWeChatUserBindingLocalUser(LoggedInWeChatUser loggedInWeChatUser, BaseOperateDataCallback<Boolean> callback) {
 
         final WeChatUser weChatUser = new WeChatUser(loggedInWeChatUser.getToken(), loggedInWeChatUser.getUser().getAssociatedWeChatGUID(), loggedInWeChatUser.getStationID());
 
         Log.d(TAG, "loginWithOtherWeChatUserBindingLocalUser: weChatUserToken: " + weChatUser.getToken()
                 + " weChatUserGUID: " + weChatUser.getGuid() + " weChatUserStationID: " + weChatUser.getStationID());
+
+        mBooleanLoginNewUserCallbackWrapper.setCallback(callback);
 
         loginWithWeChatUser(new BaseOperateDataCallback<Boolean>() {
             @Override
@@ -850,14 +879,14 @@ public class LoginUseCase extends BaseDataRepository {
                 //do not show dialog in this case
                 systemSettingDataSource.setShowAutoUploadDialog(false);
 
-                callback.onSucceed(true, new OperationSuccess());
+                mBooleanLoginNewUserCallbackWrapper.onSucceed(true, new OperationSuccess());
 
             }
 
             @Override
             public void onFail(OperationResult result) {
 
-                callback.onFail(result);
+                mBooleanLoginNewUserCallbackWrapper.onFail(result);
 
             }
         }, weChatUser);

@@ -11,8 +11,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.PlayVideoFragmentBinding;
 import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.http.HttpRequest;
@@ -78,9 +80,7 @@ public class PlayVideoFragment {
             @Override
             public void onCompletion(MediaPlayer mp) {
 
-                playVideoView.setVisibility(View.VISIBLE);
-
-                mIsPlaying = false;
+                onPlayCompleted();
 
             }
         });
@@ -93,7 +93,13 @@ public class PlayVideoFragment {
 
                 progressBar.setVisibility(View.INVISIBLE);
 
-                return false;
+                onPlayCompleted();
+
+                Context viewContext = view.getContext();
+
+                Toast.makeText(viewContext, viewContext.getString(R.string.fail, viewContext.getString(R.string.play_video)), Toast.LENGTH_SHORT).show();
+
+                return true;
 
             }
         });
@@ -109,6 +115,12 @@ public class PlayVideoFragment {
             }
         });
 
+    }
+
+    private void onPlayCompleted() {
+        playVideoView.setVisibility(View.VISIBLE);
+
+        mIsPlaying = false;
     }
 
     public View getView() {
@@ -192,9 +204,7 @@ public class PlayVideoFragment {
         videoView.stopPlayback();
         videoView.suspend();
 
-        playVideoView.setVisibility(View.VISIBLE);
-
-        mIsPlaying = false;
+        onPlayCompleted();
 
     }
 

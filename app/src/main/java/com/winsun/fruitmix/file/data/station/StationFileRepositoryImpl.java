@@ -217,7 +217,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     @Override
     public void clearAllFileTaskItemInCache() {
 
-        fileTaskManager.clearFileDownloadItems();
+        fileTaskManager.clearFileTaskItems();
 
     }
 
@@ -256,7 +256,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
                 result = true;
 
             if (result)
-                fileTaskManager.deleteFileDownloadItem(Collections.singletonList(finishedTaskItemWrapper.getFileUnionKey()));
+                fileTaskManager.deleteFileTaskItem(Collections.singletonList(finishedTaskItemWrapper.getFileUnionKey()));
 
         }
 

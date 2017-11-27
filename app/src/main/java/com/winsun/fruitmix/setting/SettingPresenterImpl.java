@@ -2,16 +2,17 @@ package com.winsun.fruitmix.setting;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.widget.CompoundButton;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.SettingActivity;
+import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.model.OperationType;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
@@ -22,10 +23,6 @@ import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 /**
  * Created by Administrator on 2017/6/22.
  */
@@ -34,7 +31,7 @@ public class SettingPresenterImpl implements SettingPresenter {
 
     private boolean mAutoUploadOrNot = false;
 
-    private boolean mAutoUploadWhenConnectedWithMobileNetwork = false;
+    private boolean mOnlyUploadOrDownloadWithWIFI = false;
 
     private int mAlreadyUploadMediaCount = -1;
 
@@ -79,8 +76,8 @@ public class SettingPresenterImpl implements SettingPresenter {
         mAutoUploadOrNot = systemSettingDataSource.getAutoUploadOrNot();
         settingViewModel.autoUploadOrNot.set(mAutoUploadOrNot);
 
-        mAutoUploadWhenConnectedWithMobileNetwork = systemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi();
-        settingViewModel.onlyAutoUploadWhenConnectedWithWifi.set(mAutoUploadWhenConnectedWithMobileNetwork);
+        mOnlyUploadOrDownloadWithWIFI = systemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi();
+        settingViewModel.onlyAutoUploadWhenConnectedWithWifi.set(mOnlyUploadOrDownloadWithWIFI);
 
         uploadMediaCountChangeListener = new UploadMediaCountChangeListener() {
 
@@ -204,8 +201,8 @@ public class SettingPresenterImpl implements SettingPresenter {
             case R.id.auto_upload_photos_switch:
                 handleAutoUploadCheckedChange(isChecked);
                 break;
-            case R.id.mobile_network_upload_switch:
-                handleAutoUploadWhenConnectedWithMobileNetwork(isChecked);
+            case R.id.only_upload_with_wifi_switch:
+                handleOnlyUploadOrDownloadWithWIFI(isChecked);
                 break;
 
         }
@@ -230,11 +227,11 @@ public class SettingPresenterImpl implements SettingPresenter {
         }
     }
 
-    private void handleAutoUploadWhenConnectedWithMobileNetwork(boolean isChecked) {
+    private void handleOnlyUploadOrDownloadWithWIFI(boolean isChecked) {
 
-        if (mAutoUploadWhenConnectedWithMobileNetwork != isChecked) {
+        if (mOnlyUploadOrDownloadWithWIFI != isChecked) {
 
-            mAutoUploadWhenConnectedWithMobileNetwork = isChecked;
+            mOnlyUploadOrDownloadWithWIFI = isChecked;
 
             systemSettingDataSource.setOnlyAutoUploadWhenConnectedWithWifi(isChecked);
 
@@ -243,6 +240,8 @@ public class SettingPresenterImpl implements SettingPresenter {
                 EventBus.getDefault().post(new RequestEvent(OperationType.START_UPLOAD, null));
 
             }
+
+            EventBus.getDefault().post(new OperationEvent(Util.ONLY_UPLOAD_OR_DOWNLOAD_WITH_WIFI_SETTING_CHANGED, new OperationSuccess()));
 
         }
 

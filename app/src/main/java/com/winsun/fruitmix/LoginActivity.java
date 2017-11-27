@@ -12,6 +12,8 @@ import android.util.Log;
 import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackWrapper;
 import com.winsun.fruitmix.databinding.ActivityLoginBinding;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginPresenter;
@@ -171,9 +173,9 @@ public class LoginActivity extends BaseActivity implements LoginPresenter {
     }
 
     private void loginInThread(LoadTokenParam loadTokenParam) {
-        loginUseCase.loginWithLoadTokenParam(loadTokenParam, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<String>() {
+        loginUseCase.loginWithLoadTokenParam(loadTokenParam, new BaseOperateDataCallbackWrapper<>(new BaseOperateDataCallback<Boolean>() {
             @Override
-            public void onSucceed(List<String> data, OperationResult operationResult) {
+            public void onSucceed(Boolean data, OperationResult operationResult) {
 
                 dismissDialog();
 

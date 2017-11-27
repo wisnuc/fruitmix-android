@@ -24,7 +24,7 @@ public class RetrieveFileFromOtherAppUseCase {
 
         if ((Intent.ACTION_SEND.equals(action) || Intent.ACTION_VIEW.equals(action)) && type != null) {
 
-            switch (type) {
+/*            switch (type) {
                 case "application/pdf":
                 case "application/msword":
                 case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
@@ -38,7 +38,9 @@ public class RetrieveFileFromOtherAppUseCase {
                 case "image/":
                     return handleSendFile(intent);
 
-            }
+            }*/
+
+            return handleSendFile(intent);
 
         }
 

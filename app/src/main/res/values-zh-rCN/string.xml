@@ -223,12 +223,10 @@
     <string name="completed">已完成</string>
     <string name="download_failed">下载失败</string>
     <string name="no_download_record">没有下载记录可选</string>
-    
+
     <string name="incomplete">未完成</string>
 
     <string name="upload">上传</string>
-
-
 
     <!-- Hints -->
     <string name="success">%1$s成功</string>
@@ -347,6 +345,8 @@
 
     <string name="logout">注销</string>
 
+    <string name="clear_temporary_folder_before_logout_toast">当前还有未完成的上传任务，注销将清空任务，是否注销?</string>
+
     <!-- modify user password -->
     <string name="original_user_password">原密码</string>
     <string name="new_user_password">新密码</string>
@@ -365,9 +365,11 @@
 
     <string name="invite_mini_program_title">邀请您成为Wisnuc用户</string>
 
+    <!-- play video -->
+    <string name="play_video">播放视频</string>
+
     <!-- group -->
     <string name="group">"私友群"</string>
-
 
 
 </resources>

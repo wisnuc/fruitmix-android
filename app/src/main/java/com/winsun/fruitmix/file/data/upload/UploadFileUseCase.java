@@ -68,7 +68,7 @@ public class UploadFileUseCase {
 
     private String uploadFilePath;
 
-    public UploadFileUseCase(UserDataRepository userDataRepository, StationFileRepository stationFileRepository,
+    UploadFileUseCase(UserDataRepository userDataRepository, StationFileRepository stationFileRepository,
                              SystemSettingDataSource systemSettingDataSource, NetworkStateManager networkStateManager,
                              FileTool fileTool, String uploadFolderName, String fileTemporaryFolderPath) {
         this.userDataRepository = userDataRepository;
@@ -81,6 +81,8 @@ public class UploadFileUseCase {
     }
 
     public void updateFile(final FileUploadState fileUploadState) {
+
+        copyToTemporaryFolder(fileUploadState);
 
         if (!checkUploadCondition(fileUploadState))
             return;
@@ -130,15 +132,27 @@ public class UploadFileUseCase {
 
     private boolean checkUploadCondition(FileUploadState fileUploadState) {
 
-        NetworkState networkState = networkStateManager.getNetworkState();
-
         FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
+
+        if (!checkUploadCondition(networkStateManager, systemSettingDataSource)) {
+
+            fileUploadItem.setFileUploadState(new FileUploadPendingState(fileUploadItem, this, networkStateManager));
+
+            return false;
+
+        } else
+            return true;
+
+    }
+
+    public static boolean checkUploadCondition(NetworkStateManager networkStateManager, SystemSettingDataSource systemSettingDataSource) {
+
+        NetworkState networkState = networkStateManager.getNetworkState();
 
         if (!networkState.isMobileConnected() && !networkState.isWifiConnected()) {
 
             Log.d(TAG, "checkUploadCondition: network is unreached,set file upload pending state");
 
-            fileUploadItem.setFileUploadState(new FileUploadPendingState(fileUploadItem, this, networkStateManager));
             return false;
 
         }
@@ -147,8 +161,6 @@ public class UploadFileUseCase {
 
             Log.d(TAG, "checkUploadCondition: only auto upload when connect with wifi is set,but wifi is not connected,set file upload pending state");
 
-            fileUploadItem.setFileUploadState(new FileUploadPendingState(fileUploadItem, this, networkStateManager));
-
             return false;
 
         }
@@ -156,6 +168,7 @@ public class UploadFileUseCase {
         return true;
 
     }
+
 
     private void checkFolderExist(String rootUUID, String dirUUID, final FileUploadState fileUploadState, final BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
@@ -180,7 +193,7 @@ public class UploadFileUseCase {
     private void notifyError(FileUploadState fileUploadState) {
         FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
 
-        fileUploadItem.setFileUploadState(new FileUploadPendingState(fileUploadItem,this,networkStateManager));
+        fileUploadItem.setFileUploadState(new FileUploadPendingState(fileUploadItem, this, networkStateManager));
 
         needRetryForEEXIST = false;
     }
@@ -464,8 +477,6 @@ public class UploadFileUseCase {
     }
 
     private void startUploadFile(FileUploadState fileUploadState) {
-
-        copyToTemporaryFolder(fileUploadState);
 
         String fileName = fileUploadState.getFileUploadItem().getFileName();
 

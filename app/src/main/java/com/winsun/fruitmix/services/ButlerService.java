@@ -20,6 +20,8 @@ import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
 import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.UploadMediaTask;
+import com.winsun.fruitmix.file.data.download.FileTaskManager;
+import com.winsun.fruitmix.file.data.upload.UploadFileUseCase;
 import com.winsun.fruitmix.generate.media.GenerateMediaThumbUseCase;
 import com.winsun.fruitmix.generate.media.InjectGenerateMediaThumbUseCase;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
@@ -32,8 +34,12 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.network.InjectNetworkStateManager;
+import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.network.change.InjectNetworkChangeUseCase;
 import com.winsun.fruitmix.network.change.NetworkChangeUseCase;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
@@ -385,10 +391,31 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
                 NetworkChangeUseCase networkChangeUseCase = InjectNetworkChangeUseCase.provideInstance(this);
                 networkChangeUseCase.handleNetworkChange();
 
+                handleUploadOrDownloadConditionChanged();
+
+                break;
+
+            case Util.ONLY_UPLOAD_OR_DOWNLOAD_WITH_WIFI_SETTING_CHANGED:
+
+                handleUploadOrDownloadConditionChanged();
+
                 break;
 
         }
 
+    }
+
+    private void handleUploadOrDownloadConditionChanged() {
+        NetworkStateManager networkStateManager = InjectNetworkStateManager.provideNetworkStateManager(this);
+
+        SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
+
+        FileTaskManager fileTaskManager = FileTaskManager.getInstance();
+
+        if(UploadFileUseCase.checkUploadCondition(networkStateManager,systemSettingDataSource))
+            fileTaskManager.startPendingTaskItem();
+        else
+            fileTaskManager.cancelAllStartItem(this);
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING)

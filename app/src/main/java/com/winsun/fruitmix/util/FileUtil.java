@@ -21,7 +21,6 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.Video;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,7 +40,7 @@ public class FileUtil {
 
     public static final String TAG = FileUtil.class.getSimpleName();
 
-    private static final String DOWNLOAD_FOLDER_NAME = "winsuc";
+    private static final String WISNUC_FOLDER_NAME = "winsuc";
 
     private static final String LOCAL_PHOTO_THUMBNAIL_FOLDER_NAME = "thumbnail_200";
 
@@ -79,7 +78,13 @@ public class FileUtil {
         }
     }
 
-    public static String getExternalCacheDirPath(Context context) {
+    public static String getTemporaryUploadFolderPath(Context context) {
+
+        return getExternalCacheDirPath(context) + File.separator + WISNUC_FOLDER_NAME;
+
+    }
+
+    private static String getExternalCacheDirPath(Context context) {
 
         if (checkExternalStorageState()) {
 
@@ -88,10 +93,10 @@ public class FileUtil {
             if (cacheDir != null)
                 return cacheDir.getAbsolutePath();
             else
-                return context.getCacheDir().getAbsolutePath();
+                return "";
 
         } else
-            return context.getCacheDir().getAbsolutePath();
+            return "";
     }
 
     public static String getExternalStorageDirectoryPath() {
@@ -149,7 +154,7 @@ public class FileUtil {
     }
 
     public static String getDownloadFileStoreFolderPath() {
-        return getExternalDirectoryPathForDownload() + File.separator + DOWNLOAD_FOLDER_NAME + File.separator;
+        return getExternalDirectoryPathForDownload() + File.separator + WISNUC_FOLDER_NAME + File.separator;
     }
 
     public static String getLocalPhotoMiniThumbnailFolderPath() {
@@ -928,7 +933,7 @@ public class FileUtil {
         }
     }
 
-    private static boolean deleteDir(File dir) {
+    public static boolean deleteDir(File dir) {
         if (dir != null && dir.isDirectory()) {
             String[] children = dir.list();
             int length;

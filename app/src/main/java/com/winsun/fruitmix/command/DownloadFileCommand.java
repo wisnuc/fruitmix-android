@@ -59,9 +59,9 @@ public class DownloadFileCommand extends AbstractCommand {
     @Override
     public void unExecute() {
 
-        fileDownloadItem.cancelDownloadItem();
+        fileDownloadItem.cancelTaskItem();
 
-        fileTaskManager.deleteFileDownloadItem(Collections.singletonList(fileDownloadItem.getFileUUID()));
+        fileTaskManager.deleteFileTaskItem(Collections.singletonList(fileDownloadItem.getFileUUID()));
 
         File downloadFile = new File(getDownloadFileStoreFolderPath(), abstractRemoteFile.getName());
 

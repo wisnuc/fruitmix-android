@@ -20,11 +20,13 @@ import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.wxapi.MiniProgram;
 import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
 import org.json.JSONException;
 
+import java.io.File;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -74,8 +76,33 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
     }
 
+
     public void logout() {
 
+        File file = new File(FileUtil.getTemporaryUploadFolderPath(personInfoView.getContext()));
+
+        if (file.exists() && file.list().length > 0) {
+
+            AlertDialog dialog = new AlertDialog.Builder(personInfoView.getContext())
+                    .setMessage(R.string.clear_temporary_folder_before_logout_toast).setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            dialog.dismiss();
+
+                            doLogout();
+
+                        }
+                    }).setNegativeButton(R.string.cancel, null).create();
+
+            dialog.show();
+
+        } else
+            doLogout();
+
+    }
+
+    private void doLogout() {
         personInfoView.showProgressDialog(String.format(personInfoView.getString(R.string.operating_title), personInfoView.getString(R.string.logout)));
 
         Future<Boolean> future = threadManager.runOnCacheThread(new Callable<Boolean>() {
@@ -117,7 +144,6 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
             personInfoView.showToast(personInfoView.getString(R.string.fail, personInfoView.getString(R.string.logout)));
 
         }
-
     }
 
     public void bindWeChatUser() {
@@ -166,7 +192,7 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
                 personInfoView.dismissDialog();
 
-                showConfirmBindDialog(ticketID, data,weChatTokenUserWrapper.getNickName());
+                showConfirmBindDialog(ticketID, data, weChatTokenUserWrapper.getNickName());
 
             }
 

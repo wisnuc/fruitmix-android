@@ -124,16 +124,14 @@ public class TestReceiveActivity extends AppCompatActivity {
     }
 
     public static void startUploadFileTask(String uploadFilePath,Context context) {
+
         Intent gotoTaskManageActivityIntent = new Intent(context, FileDownloadActivity.class);
         context.startActivity(gotoTaskManageActivityIntent);
 
         FileTaskManager fileTaskManager = FileTaskManager.getInstance();
 
-        File file = new File(uploadFilePath);
+        fileTaskManager.addFileUploadItem(uploadFilePath,context,true);
 
-        String fileHash = Util.calcSHA256OfFile(uploadFilePath);
-
-        fileTaskManager.addFileUploadItem(new FileUploadItem(fileHash,file.getName(),file.length(), uploadFilePath), context);
     }
 
     //TODO:consider alreadyLogin logic,init system and destroy instance will cause large gc?

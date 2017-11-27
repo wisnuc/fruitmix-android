@@ -107,6 +107,8 @@ public class Util {
 
     public static final String NETWORK_CHANGED = "network_changed";
 
+    public static final String ONLY_UPLOAD_OR_DOWNLOAD_WITH_WIFI_SETTING_CHANGED = "only_upload_or_download_with_wifi_setting_changed";
+
     public static final String KEY_STOP_CURRENT_ACTIVITY = "key_stop_current_activity";
 
     public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";

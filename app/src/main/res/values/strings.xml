@@ -367,6 +367,8 @@
 
     <string name="logout">Logout</string>
 
+    <string name="clear_temporary_folder_before_logout_toast">There are still unfinished upload tasks,logout will clear them,Would do you want to logout or not</string>
+
     <!-- modify user password -->
     <string name="original_user_password">Original User Password</string>
     <string name="new_user_password">New User Password</string>
@@ -384,6 +386,9 @@
     <string name="refused">Refused</string>
 
     <string name="invite_mini_program_title">邀请您加入私友群</string>
+
+    <!-- play video -->
+    <string name="play_video">Play Video</string>
 
     <!-- group -->
     <string name="group">Group</string>

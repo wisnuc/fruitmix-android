@@ -37,8 +37,6 @@ public class ModifyUserNameActivity extends BaseActivity implements ModifyUserVi
 
         binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
 
-        binding.toolbarLayout.select.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
-
         mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
 
         Util.setStatusBarColor(this, R.color.login_ui_blue);
@@ -62,6 +60,8 @@ public class ModifyUserNameActivity extends BaseActivity implements ModifyUserVi
         toolbarViewModel.setBaseView(this);
 
         toolbarViewModel.showSelect.set(true);
+
+        toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(mContext,R.color.eighty_seven_percent_white));
 
         toolbarViewModel.selectTextResID.set(R.string.finish_text);
 

@@ -1,28 +1,38 @@
 package com.winsun.fruitmix.logout;
 
+import com.winsun.fruitmix.BuildConfig;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.login.LoginUseCase;
+import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
 import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+
+import java.io.File;
 
 import static org.mockito.Mockito.*;
 
 /**
  * Created by Administrator on 2017/8/30.
  */
-
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
 public class LogoutUseCaseTest {
 
     @Mock
@@ -45,6 +55,12 @@ public class LogoutUseCaseTest {
     @Mock
     private LoginUseCase loginUseCase;
 
+    @Mock
+    private FileTool mFileTool;
+
+    @Mock
+    private StationFileRepository mStationFileRepository;
+
     private String testToken = "testToken";
 
     private String testStationID = "testStationID";
@@ -55,7 +71,8 @@ public class LogoutUseCaseTest {
         MockitoAnnotations.initMocks(this);
 
         logoutUseCase = LogoutUseCase.getInstance(systemSettingDataSource, loggedInUserDataSource,
-                uploadMediaUseCase, weChatUserDataSource, httpRequestFactory, loginUseCase);
+                uploadMediaUseCase, weChatUserDataSource, httpRequestFactory, loginUseCase, "", mFileTool,
+                mStationFileRepository);
     }
 
     @After
@@ -148,6 +165,11 @@ public class LogoutUseCaseTest {
         verify(httpRequestFactory).reset();
 
         verify(loginUseCase).setAlreadyLogin(eq(false));
+
+        verify(mFileTool).deleteDir(any(File.class));
+
+        verify(mStationFileRepository).clearAllFileTaskItemInCache();
+
     }
 
 }

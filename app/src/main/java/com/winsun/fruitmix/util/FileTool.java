@@ -66,5 +66,8 @@ public class FileTool {
 
     }
 
+    public boolean deleteDir(File dir) {
+        return FileUtil.deleteDir(dir);
+    }
 
 }

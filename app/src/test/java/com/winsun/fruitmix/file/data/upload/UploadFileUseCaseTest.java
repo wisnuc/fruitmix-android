@@ -114,6 +114,12 @@ public class UploadFileUseCaseTest {
 
         prepareTest();
 
+        NetworkState networkState = new NetworkState(true, true);
+
+        when(mNetworkStateManager.getNetworkState()).thenReturn(networkState);
+
+        when(mSystemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi()).thenReturn(true);
+
         FileUploadItem fileUploadItem = getFileUploadItem();
 
         FileUploadState fileUploadState = new FileUploadingState(fileUploadItem);
@@ -191,19 +197,11 @@ public class UploadFileUseCaseTest {
 
         mUploadFileUseCase.updateFile(fileUploadState);
 
-        setUploadFolderExist();
-
-        ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getUploadFolderCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
-
-        verify(mStationFileRepository).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUploadFolderUUID), getUploadFolderCaptor.capture());
-
-        getUploadFolderCaptor.getValue().onSucceed(Collections.<AbstractRemoteFile>emptyList(), new OperationSuccess());
-
         verify(mNetworkStateManager).getNetworkState();
 
         verify(mSystemSettingDataSource).getOnlyAutoUploadWhenConnectedWithWifi();
 
-        assertTrue(fileUploadItem.getFileUploadState() instanceof FileUploadErrorState);
+        assertTrue(fileUploadItem.getFileUploadState() instanceof FileUploadPendingState);
 
         assertFalse(mUploadFileUseCase.needRetryForEEXIST);
 
@@ -325,6 +323,12 @@ public class UploadFileUseCaseTest {
 
         prepareTest();
 
+        NetworkState networkState = new NetworkState(true, true);
+
+        when(mNetworkStateManager.getNetworkState()).thenReturn(networkState);
+
+        when(mSystemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi()).thenReturn(true);
+
         FileUploadItem fileUploadItem = getFileUploadItem();
         FileUploadState fileUploadState = new FileUploadingState(fileUploadItem);
 
@@ -356,6 +360,12 @@ public class UploadFileUseCaseTest {
     public void testUploadFolderNotExistCreateFolderReturnEEXIST() {
 
         prepareTest();
+
+        NetworkState networkState = new NetworkState(true, true);
+
+        when(mNetworkStateManager.getNetworkState()).thenReturn(networkState);
+
+        when(mSystemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi()).thenReturn(true);
 
         FileUploadItem fileUploadItem = getFileUploadItem();
         FileUploadState fileUploadState = new FileUploadingState(fileUploadItem);

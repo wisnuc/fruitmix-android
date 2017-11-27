@@ -17,7 +17,6 @@ import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.FileTaskItem;
 import com.winsun.fruitmix.file.data.model.LocalFile;
 import com.winsun.fruitmix.file.data.model.RemoteFolder;
-import com.winsun.fruitmix.file.data.upload.FileStartUploadState;
 import com.winsun.fruitmix.file.data.upload.FileUploadFinishedState;
 import com.winsun.fruitmix.file.data.upload.FileUploadItem;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
@@ -236,13 +235,13 @@ public class StationFileRepositoryTest {
 
         inOrder.verify(downloadedFileDataSource).deleteFileTask(anyString(), anyString());
 
-        inOrder.verify(fileTaskManager).deleteFileDownloadItem(eq(Collections.singletonList(testUUID1)));
+        inOrder.verify(fileTaskManager).deleteFileTaskItem(eq(Collections.singletonList(testUUID1)));
 
         inOrder.verify(downloadedFileDataSource).deleteDownloadedFile(anyString());
 
         inOrder.verify(downloadedFileDataSource).deleteFileTask(anyString(), anyString());
 
-        inOrder.verify(fileTaskManager).deleteFileDownloadItem(eq(Collections.singletonList(testUUID2)));
+        inOrder.verify(fileTaskManager).deleteFileTaskItem(eq(Collections.singletonList(testUUID2)));
 
     }
 
@@ -273,7 +272,7 @@ public class StationFileRepositoryTest {
 
         verify(downloadedFileDataSource, never()).deleteFileTask(anyString(), anyString());
 
-        verify(fileTaskManager, never()).deleteFileDownloadItem(ArgumentMatchers.<String>anyList());
+        verify(fileTaskManager, never()).deleteFileTaskItem(ArgumentMatchers.<String>anyList());
 
     }
 
@@ -296,7 +295,7 @@ public class StationFileRepositoryTest {
 
         verify(downloadedFileDataSource, never()).deleteFileTask(anyString(), anyString());
 
-        verify(fileTaskManager).deleteFileDownloadItem(ArgumentMatchers.<String>anyList());
+        verify(fileTaskManager).deleteFileTaskItem(ArgumentMatchers.<String>anyList());
 
     }
 

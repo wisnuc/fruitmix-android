@@ -540,7 +540,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                     FileDownloadItem fileDownloadItem = mCurrentDownloadFileCommand.getFileDownloadItem();
 
-                    if (fileDownloadItem.getTaskState().equals(TaskState.FINISHED)) {
+                    if (fileDownloadItem.getTaskState() == TaskState.FINISHED) {
 
                         mCurrentDownloadFileCommand = null;
 
@@ -570,7 +570,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                 break;
             case ERROR:
 
-                if (mCurrentDownloadFileCommand != null && mCurrentDownloadFileCommand.getFileDownloadItem().getTaskState().equals(TaskState.ERROR)) {
+                if (mCurrentDownloadFileCommand != null && mCurrentDownloadFileCommand.getFileDownloadItem().getTaskState() == TaskState.ERROR) {
 
                     mCurrentDownloadFileCommand.unExecute();
 
@@ -591,7 +591,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                         FileTaskItem fileTaskItem = fileTaskManager.getFileTaskItem(file.getUuid());
 
-                        if (fileTaskItem.getTaskState().equals(TaskState.ERROR)) {
+                        if (fileTaskItem.getTaskState() == TaskState.ERROR) {
                             occurError = true;
                             break;
                         }
@@ -633,7 +633,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                         FileTaskItem fileTaskItem = fileTaskManager.getFileTaskItem(file.getUuid());
 
-                        if (fileTaskItem.getTaskState().equals(TaskState.NO_ENOUGH_SPACE)) {
+                        if (fileTaskItem.getTaskState() == TaskState.NO_ENOUGH_SPACE) {
                             occurNoEnoughSpace = true;
                             break;
                         }
@@ -864,13 +864,19 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         currentDownloadFileProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, activity.getText(R.string.cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                mCurrentDownloadFileCommand.unExecute();
 
-                mCurrentDownloadFileCommand = null;
+                if (mCurrentDownloadFileCommand != null) {
 
-                cancelDownload = true;
+                    mCurrentDownloadFileCommand.unExecute();
 
-                currentDownloadFileProgressDialog.dismiss();
+                    mCurrentDownloadFileCommand = null;
+
+                    cancelDownload = true;
+
+                    currentDownloadFileProgressDialog.dismiss();
+
+                }
+
             }
         });
 
@@ -1168,7 +1174,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                         boolean result = true;
 
-                        if (fileTaskItem != null){
+                        if (fileTaskItem != null) {
 
                             TaskState taskState = fileTaskItem.getTaskState();
 

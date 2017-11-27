@@ -37,8 +37,6 @@ public class ModifyEquipmentLabelActivity extends BaseActivity {
 
         binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
 
-        binding.toolbarLayout.select.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
-
         mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
 
         Util.setStatusBarColor(this, R.color.login_ui_blue);
@@ -60,6 +58,8 @@ public class ModifyEquipmentLabelActivity extends BaseActivity {
         toolbarViewModel.setBaseView(this);
 
         toolbarViewModel.showSelect.set(true);
+
+        toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
 
         toolbarViewModel.selectTextResID.set(R.string.finish_text);
 
@@ -100,9 +100,9 @@ public class ModifyEquipmentLabelActivity extends BaseActivity {
                 dismissDialog();
 
                 Intent intent = new Intent();
-                intent.putExtra(EquipmentInfoActivity.NEW_EQUIPMENT_LABEL_KEY,modifiedEquipmentLabel);
+                intent.putExtra(EquipmentInfoActivity.NEW_EQUIPMENT_LABEL_KEY, modifiedEquipmentLabel);
 
-                setResult(RESULT_OK,intent);
+                setResult(RESULT_OK, intent);
 
                 showToast(getString(R.string.success, getString(R.string.modify_equipment_label)));
 

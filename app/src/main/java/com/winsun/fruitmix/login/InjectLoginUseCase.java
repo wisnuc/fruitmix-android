@@ -25,6 +25,8 @@ import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.usecase.InjectGetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.FileTool;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.wechat.user.InjectWeChatUserDataSource;
 
 import org.greenrobot.eventbus.EventBus;
@@ -59,10 +61,14 @@ public class InjectLoginUseCase {
 
         GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase = InjectGetAllBindingLocalUserUseCase.provideInstance(context);
 
+        String temporaryUploadFolderPath = FileUtil.getTemporaryUploadFolderPath(context);
+
+        LoginNewUserCallbackWrapper<Boolean> loginNewUserCallbackWrapper = new LoginNewUserCallbackWrapper<>(temporaryUploadFolderPath, FileTool.getInstance());
+
         return LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource, httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase,
                 userDataRepository, mediaDataSourceRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, EventBus.getDefault(),
                 ThreadManagerImpl.getInstance(), NewPhotoListDataLoader.getInstance(), InjectStation.provideStationDataSource(context),
-                getAllBindingLocalUserUseCase,InjectWeChatUserDataSource.provideWeChatUserDataSource(context));
+                getAllBindingLocalUserUseCase,InjectWeChatUserDataSource.provideWeChatUserDataSource(context),loginNewUserCallbackWrapper);
 
     }
 

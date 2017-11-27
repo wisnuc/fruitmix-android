@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.winsun.fruitmix.file.data.model.FileTaskItem;
+import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.data.upload.FileStartUploadState;
 import com.winsun.fruitmix.file.data.upload.FileUploadFinishedState;
@@ -11,11 +12,15 @@ import com.winsun.fruitmix.file.data.upload.FileUploadItem;
 import com.winsun.fruitmix.file.data.upload.FileUploadPendingState;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.file.data.upload.InjectUploadFileCase;
+import com.winsun.fruitmix.file.data.upload.UploadFileUseCase;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.network.NetworkStateManager;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.Util;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import java.util.Collections;
@@ -37,7 +42,9 @@ public class FileTaskManager {
     private static int FILE_DOWNLOADING_MAX_NUM = 3;
 
     private FileTaskManager() {
+
         fileTaskItems = new ArrayList<>();
+
     }
 
     public synchronized static FileTaskManager getInstance() {
@@ -94,7 +101,41 @@ public class FileTaskManager {
 
     }
 
-    public void addFileUploadItem(FileUploadItem fileUploadItem, Context context) {
+    public void initPendingUploadItem(Context context) {
+
+        String temporaryUploadFolderPath = FileUtil.getTemporaryUploadFolderPath(context);
+
+        File file = new File(temporaryUploadFolderPath);
+
+        if (file.exists() && file.isDirectory()) {
+
+            String[] files = file.list();
+
+            for (String fileChildPath : files) {
+
+                String uploadFilePath = temporaryUploadFolderPath + File.separator + fileChildPath;
+
+                Log.d(TAG, "initPendingUploadItem: file path: " + uploadFilePath);
+
+                addFileUploadItem(uploadFilePath, context, false);
+
+            }
+
+        }
+
+    }
+
+    public void addFileUploadItem(String uploadFilePath, Context context, boolean startUploadImmediately) {
+
+        File file = new File(uploadFilePath);
+
+        String fileHash = Util.calcSHA256OfFile(uploadFilePath);
+
+        addFileUploadItem(new FileUploadItem(fileHash, file.getName(), file.length(), uploadFilePath), context, startUploadImmediately);
+
+    }
+
+    private void addFileUploadItem(FileUploadItem fileUploadItem, Context context, boolean startUploadImmediately) {
 
         if (checkIsAlreadyDownloadingStateOrDownloadedState(fileUploadItem.getFilePath())) return;
 
@@ -108,8 +149,14 @@ public class FileTaskManager {
                     InjectUploadFileCase.provideInstance(context), InjectNetworkStateManager.provideNetworkStateManager(context));
         }*/
 
-        fileUploadState = new FileStartUploadState(fileUploadItem, ThreadManagerImpl.getInstance(),
-                InjectUploadFileCase.provideInstance(context), InjectNetworkStateManager.provideNetworkStateManager(context));
+        UploadFileUseCase uploadFileUseCase = InjectUploadFileCase.provideInstance(context);
+        NetworkStateManager networkStateManager = InjectNetworkStateManager.provideNetworkStateManager(context);
+
+        if (startUploadImmediately)
+            fileUploadState = new FileStartUploadState(fileUploadItem, ThreadManagerImpl.getInstance(),
+                    uploadFileUseCase, networkStateManager);
+        else
+            fileUploadState = new FileUploadPendingState(fileUploadItem, uploadFileUseCase, networkStateManager);
 
         fileTaskItems.add(fileUploadItem);
 
@@ -120,7 +167,7 @@ public class FileTaskManager {
     }
 
 
-    public void deleteFileDownloadItem(List<String> fileUnionKeys) {
+    public void deleteFileTaskItem(List<String> fileUnionKeys) {
 
         for (String fileUnionKey : fileUnionKeys) {
 
@@ -142,7 +189,7 @@ public class FileTaskManager {
         int downloadingItem = 0;
 
         for (FileTaskItem fileTaskItem : fileTaskItems) {
-            if (fileTaskItem.getTaskState().equals(TaskState.DOWNLOADING_OR_UPLOADING) || fileTaskItem.getTaskState().equals(TaskState.START_DOWNLOAD_OR_UPLOAD)) {
+            if (fileTaskItem.getTaskState() == TaskState.DOWNLOADING_OR_UPLOADING || fileTaskItem.getTaskState() == TaskState.START_DOWNLOAD_OR_UPLOAD) {
                 downloadingItem++;
             }
             if (downloadingItem == FILE_DOWNLOADING_MAX_NUM) {
@@ -201,9 +248,9 @@ public class FileTaskManager {
 
         for (FileTaskItem fileTaskItem : fileTaskItems) {
 
-            if (!checkDownloadingItemIsMax() && fileTaskItem.getTaskState().equals(TaskState.PENDING)) {
+            if (fileTaskItem.getTaskState() == TaskState.PENDING) {
 
-                if (fileTaskItem instanceof FileDownloadItem) {
+                if (fileTaskItem instanceof FileDownloadItem && !checkDownloadingItemIsMax()) {
 
                     FileDownloadItem fileDownloadItem = (FileDownloadItem) fileTaskItem;
 
@@ -233,12 +280,56 @@ public class FileTaskManager {
 
     }
 
+    public void cancelAllStartItem(Context context) {
+
+        for (FileTaskItem fileTaskItem : fileTaskItems) {
+
+            TaskState taskState = fileTaskItem.getTaskState();
+
+            if (taskState == TaskState.START_DOWNLOAD_OR_UPLOAD || taskState == TaskState.DOWNLOADING_OR_UPLOADING) {
+
+                fileTaskItem.cancelTaskItem();
+
+                NetworkStateManager networkStateManager = InjectNetworkStateManager.provideNetworkStateManager(context);
+
+                if (fileTaskItem instanceof FileDownloadItem) {
+
+                    FileDownloadItem fileDownloadItem = (FileDownloadItem) fileTaskItem;
+
+                    Log.d(TAG, "cancel start download or downloading state and set pending state,file name: " + fileDownloadItem.getFileName());
+
+                    StationFileRepository stationFileRepository = InjectStationFileRepository.provideStationFileRepository(context);
+                    String currentUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(context).getCurrentLoginUserUUID();
+
+                    fileDownloadItem.setFileDownloadState(new FileDownloadPendingState(fileDownloadItem,
+                            stationFileRepository, currentUserUUID,
+                            networkStateManager));
+
+                } else if (fileTaskItem instanceof FileUploadItem) {
+
+                    UploadFileUseCase uploadFileUseCase = InjectUploadFileCase.provideInstance(context);
+
+                    FileUploadItem fileUploadItem = (FileUploadItem) fileTaskItem;
+
+                    Log.d(TAG, "cancel start upload or uploading state and set pending state,file path: " + fileUploadItem.getFilePath());
+
+                    fileUploadItem.setFileUploadState(new FileUploadPendingState(fileUploadItem,
+                            uploadFileUseCase, networkStateManager));
+
+                }
+
+            }
+
+        }
+
+    }
+
     public List<FileTaskItem> getFileTaskItems() {
 
         return Collections.unmodifiableList(fileTaskItems);
     }
 
-    public void clearFileDownloadItems() {
+    public void clearFileTaskItems() {
         if (fileTaskItems != null) {
             fileTaskItems.clear();
         }
