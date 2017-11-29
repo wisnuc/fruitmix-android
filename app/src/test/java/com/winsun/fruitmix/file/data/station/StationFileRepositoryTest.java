@@ -8,7 +8,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.file.data.model.FinishedTaskItemWrapper;
-import com.winsun.fruitmix.file.data.download.FileTaskManager;
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadPendingState;

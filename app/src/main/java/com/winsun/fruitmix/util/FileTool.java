@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.util;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.File;
@@ -66,8 +67,37 @@ public class FileTool {
 
     }
 
-    public boolean deleteDir(File dir) {
-        return FileUtil.deleteDir(dir);
+    public boolean deleteDir(String folderPath) {
+        return FileUtil.deleteDir(new File(folderPath));
     }
+
+    public String getTemporaryUploadFolderPath(String temporaryDataFolderPath, String currentUserUUID) {
+
+        String temporaryUserFolderPath = temporaryDataFolderPath + File.separator + currentUserUUID;
+
+        if(FileUtil.createFolderIfNotExist(temporaryDataFolderPath)){
+
+            String temporaryUploadFolderPath = temporaryUserFolderPath + File.separator+ "upload";
+
+            if(FileUtil.createFolderIfNotExist(temporaryUploadFolderPath))
+                return temporaryUploadFolderPath;
+            else
+                return "";
+
+        }else
+            return "";
+
+    }
+
+    public boolean checkTemporaryUploadFolderNotEmpty(Context context,String currentUserUUID){
+
+        File file = new File(getTemporaryUploadFolderPath(FileUtil.getTemporaryDataFolderParentFolderPath(context), currentUserUUID));
+
+        return file.exists() && file.list().length > 0;
+
+    }
+
+
+
 
 }

@@ -5,6 +5,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDBDataSource;
+import com.winsun.fruitmix.logged.in.user.LoggedInUserDBSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.user.User;
@@ -27,7 +28,7 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class LoggedInUserDBDataSourceTest {
 
-    private LoggedInUserDataSource loggedInUserDataSource;
+    private LoggedInUserDBSource loggedInUserDataSource;
 
     @Before
     public void init() {

@@ -1,9 +1,15 @@
-package com.winsun.fruitmix.file.data.download;
+package com.winsun.fruitmix.file.data.model;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.winsun.fruitmix.file.data.model.FileTaskItem;
+import com.android.volley.Network;
+import com.winsun.fruitmix.file.data.download.FileDownloadFinishedState;
+import com.winsun.fruitmix.file.data.download.FileDownloadItem;
+import com.winsun.fruitmix.file.data.download.FileDownloadPendingState;
+import com.winsun.fruitmix.file.data.download.FileDownloadState;
+import com.winsun.fruitmix.file.data.download.FileStartDownloadState;
+import com.winsun.fruitmix.file.data.download.TaskState;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.data.upload.FileStartUploadState;
@@ -14,9 +20,11 @@ import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.file.data.upload.InjectUploadFileCase;
 import com.winsun.fruitmix.file.data.upload.UploadFileUseCase;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
+import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
@@ -101,11 +109,10 @@ public class FileTaskManager {
 
     }
 
-    public void initPendingUploadItem(Context context) {
+    public void initPendingUploadItem(UploadFileUseCase uploadFileUseCase, NetworkStateManager networkStateManager,
+                                      String temporaryUploadFolderPath, String currentUserUUID, FileTool fileTool) {
 
-        String temporaryUploadFolderPath = FileUtil.getTemporaryUploadFolderPath(context);
-
-        File file = new File(temporaryUploadFolderPath);
+        File file = new File(fileTool.getTemporaryUploadFolderPath(temporaryUploadFolderPath, currentUserUUID));
 
         if (file.exists() && file.isDirectory()) {
 
@@ -117,7 +124,7 @@ public class FileTaskManager {
 
                 Log.d(TAG, "initPendingUploadItem: file path: " + uploadFilePath);
 
-                addFileUploadItem(uploadFilePath, context, false);
+                addFileUploadItem(uploadFilePath, uploadFileUseCase, networkStateManager, false);
 
             }
 
@@ -125,19 +132,21 @@ public class FileTaskManager {
 
     }
 
-    public void addFileUploadItem(String uploadFilePath, Context context, boolean startUploadImmediately) {
+    public void addFileUploadItem(String uploadFilePath, UploadFileUseCase uploadFileUseCase, NetworkStateManager networkStateManager,
+                                  boolean startUploadImmediately) {
 
         File file = new File(uploadFilePath);
 
         String fileHash = Util.calcSHA256OfFile(uploadFilePath);
 
-        addFileUploadItem(new FileUploadItem(fileHash, file.getName(), file.length(), uploadFilePath), context, startUploadImmediately);
+        addFileUploadItem(new FileUploadItem(fileHash, file.getName(), file.length(), uploadFilePath), uploadFileUseCase, networkStateManager, startUploadImmediately);
 
     }
 
-    private void addFileUploadItem(FileUploadItem fileUploadItem, Context context, boolean startUploadImmediately) {
+    private void addFileUploadItem(FileUploadItem fileUploadItem, UploadFileUseCase uploadFileUseCase, NetworkStateManager networkStateManager,
+                                   boolean startUploadImmediately) {
 
-        if (checkIsAlreadyDownloadingStateOrDownloadedState(fileUploadItem.getFilePath())) return;
+        if (checkIsAlreadyDownloadingStateOrDownloadedState(fileUploadItem.getFileUUID())) return;
 
         FileUploadState fileUploadState;
 
@@ -148,9 +157,6 @@ public class FileTaskManager {
             fileUploadState = new FileStartUploadState(fileUploadItem, ThreadManagerImpl.getInstance(),
                     InjectUploadFileCase.provideInstance(context), InjectNetworkStateManager.provideNetworkStateManager(context));
         }*/
-
-        UploadFileUseCase uploadFileUseCase = InjectUploadFileCase.provideInstance(context);
-        NetworkStateManager networkStateManager = InjectNetworkStateManager.provideNetworkStateManager(context);
 
         if (startUploadImmediately)
             fileUploadState = new FileStartUploadState(fileUploadItem, ThreadManagerImpl.getInstance(),
@@ -280,7 +286,21 @@ public class FileTaskManager {
 
     }
 
-    public void cancelAllStartItem(Context context) {
+    public void cancelAllStartItem() {
+        for (FileTaskItem fileTaskItem : fileTaskItems) {
+
+            TaskState taskState = fileTaskItem.getTaskState();
+
+            if (taskState == TaskState.START_DOWNLOAD_OR_UPLOAD || taskState == TaskState.DOWNLOADING_OR_UPLOADING) {
+
+                fileTaskItem.cancelTaskItem();
+
+            }
+
+        }
+    }
+
+    public void cancelAllStartItemAndSetPending(Context context) {
 
         for (FileTaskItem fileTaskItem : fileTaskItems) {
 

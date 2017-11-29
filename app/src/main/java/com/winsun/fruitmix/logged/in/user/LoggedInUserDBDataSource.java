@@ -12,13 +12,13 @@ import java.util.Collection;
  * Created by Administrator on 2017/7/4.
  */
 
-public class LoggedInUserDBDataSource implements LoggedInUserDataSource {
+public class LoggedInUserDBDataSource implements LoggedInUserDBSource {
 
     private DBUtils dbUtils;
 
-    private static LoggedInUserDataSource instance;
+    private static LoggedInUserDBSource instance;
 
-    public static LoggedInUserDataSource getInstance(DBUtils dbUtils) {
+    public static LoggedInUserDBSource getInstance(DBUtils dbUtils) {
 
         if (instance == null)
             instance = new LoggedInUserDBDataSource(dbUtils);

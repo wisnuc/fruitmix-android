@@ -25,7 +25,7 @@
 
     <string name="android_ellipsize">…</string>
 
-    <string name="android_no_write_external_storage_permission">System Issue: Write permission denied.</string>
+    <string name="android_no_write_external_storage_permission">Write permission denied in SDCard.</string>
 
     <!-- android end -->
 
@@ -44,18 +44,21 @@
     <string name="choose_text">Select</string>
 
     <string name="delete_text">Delete</string>
+    ??? //use in bottom dialog in file download fragment
 
-    <string name="loading">Loading</string>
+    <string name="loading">Loading…</string>
+    ???
 
     <!-- <string name="loading_message">Please Wait!</string> -->
 
-    <string name="no_photos">No Photos</string>
+    <string name="no_photos">Photos is empty</string>
+
 
     <string name="no_media_shares">No Media Shares</string>
 
     <string name="no_albums">No Albums</string>
 
-    <string name="no_files">No Files</string>
+    <string name="no_files">Folder is empty</string>
 
     <string name="no_file_shares">No File Shares</string>
 
@@ -67,46 +70,47 @@
 
     <string name="clear_select_item">Clear selection</string>
 
-    <string name="confirm_delete">%1$s will be removed.</string>
-
-    <string name="confirm_clear_cache">Temporary files will be cleared.</string>
-
-    <string name="clear">Clear</string>
+    <string name="clear">Erase</string>
 
     <string name="backup">Backup</string>
 
-    <string name="wisnuc_server">WISNUC服务器</string>
+    <string name="wisnuc_server">WISNUC</string>
 
-    <string name="need_auto_upload">Automatic backup your photos to %1$s?</string>
+    <string name="need_auto_upload">Do you want to backup photos to %1$s?</string>
 
-    <string name="photo_auto_upload_already_close">Automatic backup turn off, you can turn on in \'Setting\'.</string>
+    <string name="photo_auto_upload_already_close">Photo Backup is off, to turn on in \'Setting\'.</string>
 
-    <string name="no_photo">No photo</string>
+    <string name="no_photo">Gallery is empty</string>
 
     <string name="send">Send</string>
 
-    <string name="getting_download_progress">Getting download progress</string>
+    <string name="getting_backup_progress">Preparing to backup…</string>
+
+    <string name="select_count">%1$d Selected</string>
 
     <!-- slide menu -->
 
     <string name="person_data">Biography</string>
-    <string name="user_manage">Manage User</string>
+    <string name="user_manage">Users</string>
     <string name="setting">Setting</string>
     <string name="help">Help</string>
     <string name="quit">Quit</string>
     <string name="my_file">My Files</string>
     <string name="my_photo">My Photos</string>
 
-    <string name="transmission_manage">Manage Transmission</string>
+    <string name="transmission_manage">Transfer</string>
 
-    <string name="account_manage">Manage Account</string>
+    <string name="account_manage">Account</string>
 
     <string name="main_menu">Main Menu</string>
 
-    <string name="already_upload_media_percent_text">Already upload %1$s</string>
+    <string name="already_upload_media_percent_text">Backup %1$s</string>
+    //???
     <string name="already_upload_finished">Backup Completed</string>
+    //???
 
-    <string name="change_user">Change user</string>
+    <string name="change_user">%1$s is logging</string>
+    // *** is logging
 
     <!-- share bottom menu -->
     <string name="all_people">All users</string>
@@ -115,7 +119,7 @@
     <!-- login -->
 
     <string name="login">Login</string>
-    <string name="password_error">Wrong password. Try again.</string>
+    <string name="password_error">Password is incorrect, Try again.</string>
     <string name="password_text">Password</string>
 
     <string name="cancel_login">Cancel Login</string>
@@ -133,15 +137,14 @@
 
     <!-- photo -->
 
-    <string name="photo">Photo</string>
+    <string name="photo">Photos</string>
     <string name="unknown_time">Unknown Time</string>
 
-    <string name="select_photo">Select Photo</string>
-    <string name="select_photo_count">Select %1$d item</string>
+    <string name="select_photo">Select Photos</string>
 
-    <string name="download_original_photo">Download original photo</string>
+    <string name="download_original_photo">Download full size photo</string>
 
-    <string name="download_original_photo_fail">Download original photo failed!</string>
+    <string name="download_original_photo_fail">Can not download full size photo.</string>
 
     <!-- share -->
 
@@ -173,6 +176,7 @@
     <string name="ws215i">ws215i</string>
 
     <string name="user">User</string>
+    // equipment search user title
 
     <string name="virtual_machine">Virtual Machine</string>
 
@@ -202,9 +206,11 @@
     <string name="setting_text">Setting</string>
     <string name="photo_auto_upload_setting_text">Automatic backup</string>
     <string name="only_auto_upload_when_connect_with_wifi">Only auto upload when connected with wifi</string>
-    <string name="clear_cache">Clear temporary files</string>
+    <string name="clear_cache">Erase temporary files</string>
     <string name="already_upload_media_count_hint">Backups / Total Photos</string>
     <string name="already_upload_media_count_text">%1$d/%2$d</string>
+
+    <string name="confirm_clear_cache">Erase all temporary files?</string>
 
     <string name="calculating">Calculating</string>
 
@@ -221,12 +227,11 @@
 
     <!-- file -->
 
-    <string name="file">File</string>
+    <string name="file">Files</string>
     <string name="download">Download</string>
-    <string name="select_file">Select File</string>
-    <string name="select_file_count">Select %1$d Item</string>
+    <string name="select_file">Select Files</string>
     <string name="download_select_item">Download selection</string>
-    <string name="download_the_item">Download</string>
+    <string name="download_the_item">Download the item</string>
     <string name="open_the_item">Open</string>
     <string name="re_download_the_item">Re Download</string>
     <string name="need_download_and_cover_original_file">Download and cover original file?</string>
@@ -235,23 +240,26 @@
 
     <string name="shared_drive">Shared Drive</string>
 
+    //retrieve other app share file,but file path is empty
     <string name="file_not_exist">File Not Exist</string>
 
     <!-- file download -->
 
     <string name="downloading">Downloading</string>
-    <string name="completed">Completed</string>
-    <string name="download_failed">Download failed</string>
     <string name="no_download_record">No download record</string>
 
+    <string name="completed">Completed</string>
     <string name="incomplete">InComplete</string>
 
     <string name="upload">Upload</string>
 
+    <string name="waiting_for_download">Wait for download</string>
+    <string name="waiting_for_upload">Wait for upload</string>
 
     <!-- hints -->
     <string name="success">%1$s succeeded</string>
     <string name="fail">%1$s failed</string>
+
     <string name="local_media_share_uploading">Sorry,it is uploading,please wait!</string>
 
     <!-- Errors -->
@@ -288,13 +296,13 @@
     <string name="wechat_login">WeChat Login</string>
 
     <!-- equipment manage -->
-    <string name="equipment_manage">Equipment Manage</string>
-    <string name="equipment">Equipment</string>
+    <string name="equipment_manage">Station</string>
+    <string name="equipment">Device</string>
     <string name="network">Network</string>
     <string name="time">Time</string>
-    <string name="reboot_shutdown">Reboot And Shutdown</string>
+    <string name="reboot_shutdown">Reboot And Poweroff</string>
     <string name="reboot">Reboot</string>
-    <string name="shutdown">Shutdown</string>
+    <string name="shutdown">Poweroff</string>
 
     <string name="equipment_info">Equipment Info</string>
     <string name="network_info">Network Info</string>
@@ -316,7 +324,7 @@
 
     <!-- equipment info -->
 
-    <string name="equipment_label">Equipment Label</string>
+    <string name="equipment_label">Device Name</string>
     <string name="equipment_type">Equipment Type</string>
     <string name="hardware_serial_number">Hardware Serial Number</string>
     <string name="mac_address">Mac Address</string>
@@ -374,18 +382,17 @@
     <string name="new_user_password">New User Password</string>
 
     <!-- invite user -->
-    <string name="invitation">Invitation</string>
-    <string name="confirm_invitation">Confirm invitation</string>
-    <string name="no_invitation">No invitation</string>
+    <string name="invitation">Invite a friend</string>
+    <string name="no_invitation">No history</string>
     <string name="accept_invitation">Accept invitation</string>
     <string name="refuse_invitation">Refuse invitation</string>
 
-    <string name="create_invitation">Create Invitation</string>
+    <string name="create_invitation">Open Wechat</string>
 
     <string name="accepted">Accepted</string>
     <string name="refused">Refused</string>
 
-    <string name="invite_mini_program_title">邀请您加入私友群</string>
+    <string name="invite_mini_program_title">Invite you to join Wisnuc</string>
 
     <!-- play video -->
     <string name="play_video">Play Video</string>

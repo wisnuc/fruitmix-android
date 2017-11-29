@@ -2,12 +2,14 @@ package com.winsun.fruitmix.util;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Parcelable;
 import android.os.StatFs;
 import android.util.Log;
 
@@ -78,7 +80,7 @@ public class FileUtil {
         }
     }
 
-    public static String getTemporaryUploadFolderPath(Context context) {
+    public static String getTemporaryDataFolderParentFolderPath(Context context) {
 
         return getExternalCacheDirPath(context) + File.separator + WISNUC_FOLDER_NAME;
 
@@ -142,6 +144,19 @@ public class FileUtil {
     public static boolean createAudioRecordFolder() {
         return createFolder(getAudioRecordFolderPath());
     }
+
+    public static boolean createFolderIfNotExist(String filePath) {
+
+        File file = new File(filePath);
+
+        boolean createTemporaryUserFolderResult;
+
+        createTemporaryUserFolderResult = file.exists() || createFolder(file.getPath());
+
+        return createTemporaryUserFolderResult;
+
+    }
+
 
     private static boolean createFolder(String path) {
         if (!checkExternalStorageState()) {
@@ -630,7 +645,7 @@ public class FileUtil {
 
                     fileDownloadedSize += read;
 
-                    newFileDownloadState.setFileCurrentDownloadSize(fileDownloadedSize);
+                    newFileDownloadState.setFileCurrentTaskSize(fileDownloadedSize);
 
                     Log.d(TAG, "writeResponseBodyToFolder: fileDownloadedSize: " + fileDownloadedSize);
 
@@ -720,11 +735,51 @@ public class FileUtil {
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(Intent.ACTION_VIEW);
-        String type = getMIMEType(file);
+        String type = getMIMEType(file.getName());
         intent.setDataAndType(Uri.fromFile(file), type);
 
-        context.startActivity(intent);
+        context.startActivity(filterIntent(context, intent));
     }
+
+    private static Intent filterIntent(Context context, Intent intent) {
+
+        List<ResolveInfo> resolveInfos = context.getPackageManager().queryIntentActivities(intent, 0);
+
+        if (resolveInfos.size() > 0) {
+
+            List<Intent> targetIntents = new ArrayList<>();
+
+            for (ResolveInfo resolveInfo : resolveInfos) {
+
+                String packageName = resolveInfo.activityInfo.packageName.toLowerCase();
+
+                if (!packageName.contains("com.winsun.fruitmix")) {
+
+                    Intent targetIntent = new Intent();
+                    targetIntent.setPackage(packageName);
+                    targetIntent.setAction(intent.getAction());
+                    targetIntent.setDataAndType(intent.getData(), intent.getType());
+                    targetIntents.add(targetIntent);
+
+                }
+
+            }
+
+            Intent chooseIntent = targetIntents.remove(0);
+
+            if (chooseIntent == null)
+                return intent;
+
+            chooseIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, targetIntents.toArray(new Parcelable[]{}));
+            chooseIntent.addFlags(intent.getFlags());
+
+            return chooseIntent;
+
+        } else
+            return intent;
+
+    }
+
 
     public static void sendShareToOtherApp(Context context, List<String> filePaths) {
         ArrayList<Uri> uris = new ArrayList<>();
@@ -738,7 +793,7 @@ public class FileUtil {
             Uri uri = Uri.fromFile(file);
             uris.add(uri);
 
-            String type = getMIMEType(file);
+            String type = getMIMEType(file.getName());
 
             int index = type.indexOf("/");
             type = type.substring(0, index) + "/*";
@@ -776,15 +831,14 @@ public class FileUtil {
 
     }
 
-    private static String getMIMEType(File file) {
+    public static String getMIMEType(String fileName) {
 
         String type = "*/*";
-        String fName = file.getName();
-        int dotIndex = fName.lastIndexOf(".");
+        int dotIndex = fileName.lastIndexOf(".");
         if (dotIndex < 0) {
             return type;
         }
-        String end = fName.substring(dotIndex, fName.length()).toLowerCase();
+        String end = fileName.substring(dotIndex, fileName.length()).toLowerCase();
         if (end.equals("")) return type;
         for (String[] aMIME_MapTable : MIME_MapTable) {
             if (end.equals(aMIME_MapTable[0]))
@@ -933,7 +987,7 @@ public class FileUtil {
         }
     }
 
-    public static boolean deleteDir(File dir) {
+    static boolean deleteDir(File dir) {
         if (dir != null && dir.isDirectory()) {
             String[] children = dir.list();
             int length;

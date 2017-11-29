@@ -2,8 +2,6 @@ package com.winsun.fruitmix.http;
 
 import android.util.Log;
 
-import com.winsun.fruitmix.file.data.download.FileDownloadState;
-import com.winsun.fruitmix.file.data.download.FileDownloadingState;
 import com.winsun.fruitmix.file.data.upload.FileUploadFinishedState;
 import com.winsun.fruitmix.file.data.upload.FileUploadItem;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
@@ -91,9 +89,9 @@ public class ProgressRequestBody extends RequestBody {
                     fileUploadItem.setFileUploadState(new FileUploadFinishedState(fileUploadItem));
                 } else {
 
-                    Log.d(TAG, "currentDownloadSize: " + bytesWritten);
+                    Log.d(TAG, "currentUploadSize: " + bytesWritten);
 
-                    newFileUploadState.setFileCurrentDownloadSize(bytesWritten);
+                    newFileUploadState.setFileCurrentTaskSize(bytesWritten);
 
                     newFileUploadState.notifyDownloadStateChanged();
 

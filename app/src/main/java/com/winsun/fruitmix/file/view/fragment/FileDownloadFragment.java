@@ -34,7 +34,7 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.TaskState;
 import com.winsun.fruitmix.file.data.model.FinishedTaskItemWrapper;
-import com.winsun.fruitmix.file.data.download.FileTaskManager;
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.model.FileTaskItem;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
@@ -620,9 +620,28 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
             final FileTaskItem fileTaskItem = ((DownloadingChildItem) downloadItem).getFileTaskItem();
 
             fileDownloadingItemViewModel.fileName.set(fileTaskItem.getFileName());
-            fileDownloadingItemViewModel.maxProgress.set(max);
 
-            fileDownloadingItemViewModel.currentProgress.set(fileTaskItem.getCurrentProgress(max));
+            TaskState taskState = fileTaskItem.getTaskState();
+
+            if(taskState == TaskState.PENDING){
+
+                fileDownloadingItemViewModel.showTaskState.set(true);
+
+                if (fileTaskItem instanceof FileUploadItem) {
+                    fileDownloadingItemViewModel.taskState.set(activity.getString(R.string.waiting_for_upload));
+                } else if (fileTaskItem instanceof FileDownloadItem) {
+                    fileDownloadingItemViewModel.taskState.set(activity.getString(R.string.waiting_for_download));
+                }
+
+            }else {
+
+                fileDownloadingItemViewModel.showTaskState.set(false);
+
+                fileDownloadingItemViewModel.maxProgress.set(max);
+
+                fileDownloadingItemViewModel.currentProgress.set(fileTaskItem.getCurrentProgress(max));
+
+            }
 
             binding.downloadingFileItemMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -706,7 +725,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
                 if (fileTaskItem instanceof FileUploadItem) {
                     fileDownloadedItemViewModel.taskState.set(activity.getString(R.string.fail, activity.getString(R.string.upload)));
                 } else if (fileTaskItem instanceof FileDownloadItem) {
-                    fileDownloadedItemViewModel.fileSize.set(activity.getString(R.string.download_failed));
+                    fileDownloadedItemViewModel.fileSize.set(activity.getString(R.string.fail,activity.getString(R.string.download)));
                 }
 
             }
@@ -734,7 +753,11 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
                     public void onClick(View view) {
 
                         if (taskState.equals(TaskState.FINISHED)) {
-                            FileUtil.openAbstractRemoteFile(activity, fileTaskItem.getFileName());
+
+                            if (!FileUtil.openAbstractRemoteFile(activity, fileTaskItem.getFileName())) {
+                                Toast.makeText(activity, activity.getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
+                            }
+
                         }
 
                     }

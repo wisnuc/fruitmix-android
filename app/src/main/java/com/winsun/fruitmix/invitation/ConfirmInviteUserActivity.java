@@ -46,7 +46,7 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
         inviteUserFab = binding.inviteUser;
 
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
-        toolbarViewModel.titleText.set(getString(R.string.confirm_invitation));
+        toolbarViewModel.titleText.set(getString(R.string.invitation));
         toolbarViewModel.setBaseView(this);
 
         binding.setToolbarViewModel(toolbarViewModel);

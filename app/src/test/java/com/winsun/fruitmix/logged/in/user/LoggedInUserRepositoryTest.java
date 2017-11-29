@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.logged.in.user;
 
+import com.winsun.fruitmix.mock.MockThreadManager;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +23,10 @@ import java.util.Collection;
 public class LoggedInUserRepositoryTest {
 
     @Mock
-    private LoggedInUserDataSource loggedInUserDataSource;
+    private LoggedInUserDBSource loggedInUserDataSource;
+
+    @Mock
+    private LoggedInUserRemoteDataSource mLoggedInUserRemoteDataSource;
 
     @Mock
     private Collection<LoggedInUser> cacheLoggedInUsers;
@@ -43,7 +48,7 @@ public class LoggedInUserRepositoryTest {
 
         MockitoAnnotations.initMocks(this);
 
-        loggedInUserRepository = LoggedInUserRepository.getInstance(loggedInUserDataSource);
+        loggedInUserRepository = LoggedInUserRepository.getInstance(new MockThreadManager(),loggedInUserDataSource,mLoggedInUserRemoteDataSource);
 
     }
 

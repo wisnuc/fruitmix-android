@@ -17,7 +17,7 @@ import com.winsun.fruitmix.databinding.FragmentFileBinding;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 
-import com.winsun.fruitmix.file.data.download.FileTaskManager;
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.presenter.FilePresenter;
 import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;

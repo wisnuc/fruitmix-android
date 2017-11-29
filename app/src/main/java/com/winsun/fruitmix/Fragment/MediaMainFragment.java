@@ -920,7 +920,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         if (selectedItemCount == 0) {
             handleBackPressed();
         } else {
-            setSelectCountText(String.format(getString(R.string.select_photo_count), selectedItemCount), selectedItemCount);
+            setSelectCountText(String.format(getString(R.string.select_count), selectedItemCount), selectedItemCount);
         }
 
     }
@@ -935,7 +935,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         enterSelectMode();
 
-        setSelectCountText(String.format(getString(R.string.select_photo_count), 1), 1);
+        setSelectCountText(String.format(getString(R.string.select_count), 1), 1);
     }
 
     @Override
@@ -1238,7 +1238,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         enterSelectMode();
 
-        setSelectCountText(String.format(getString(R.string.select_file_count), 1), 1);
+        setSelectCountText(String.format(getString(R.string.select_count), 1), 1);
 
     }
 
@@ -1256,7 +1256,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         if (selectItemCount == 0) {
             quitSelectMode();
         } else
-            setSelectCountText(String.format(getString(R.string.select_file_count), selectItemCount), selectItemCount);
+            setSelectCountText(String.format(getString(R.string.select_count), selectItemCount), selectItemCount);
 
     }
 

@@ -2,7 +2,7 @@ package com.winsun.fruitmix.logout;
 
 import android.util.Log;
 
-import com.winsun.fruitmix.file.data.download.FileTaskManager;
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
@@ -37,23 +37,22 @@ public class LogoutUseCase {
 
     private HttpRequestFactory httpRequestFactory;
 
-    private LoginUseCase loginUseCase;
-
-    private String temporaryUploadFolderPath;
+    private String temporaryUploadFolderParentFolderPath;
 
     private FileTool mFileTool;
 
     private StationFileRepository mStationFileRepository;
 
+    private FileTaskManager mFileTaskManager;
+
     public static LogoutUseCase getInstance(SystemSettingDataSource systemSettingDataSource,
                                             LoggedInUserDataSource loggedInUserDataSource, UploadMediaUseCase uploadMediaUseCase,
-                                            WeChatUserDataSource weChatUserDataSource, HttpRequestFactory httpRequestFactory,
-                                            LoginUseCase loginUseCase, String temporaryUploadFolderPath, FileTool fileTool,
-                                            StationFileRepository stationFileRepository) {
+                                            WeChatUserDataSource weChatUserDataSource, HttpRequestFactory httpRequestFactory, String temporaryUploadFolderParentFolderPath, FileTool fileTool,
+                                            StationFileRepository stationFileRepository, FileTaskManager fileTaskManager) {
         if (ourInstance == null)
             ourInstance = new LogoutUseCase(systemSettingDataSource, loggedInUserDataSource,
-                    uploadMediaUseCase, weChatUserDataSource, httpRequestFactory, loginUseCase, temporaryUploadFolderPath,
-                    fileTool,stationFileRepository);
+                    uploadMediaUseCase, weChatUserDataSource, httpRequestFactory, temporaryUploadFolderParentFolderPath,
+                    fileTool, stationFileRepository, fileTaskManager);
         return ourInstance;
     }
 
@@ -66,21 +65,25 @@ public class LogoutUseCase {
     private LogoutUseCase(SystemSettingDataSource systemSettingDataSource,
                           LoggedInUserDataSource loggedInUserDataSource, UploadMediaUseCase uploadMediaUseCase,
                           WeChatUserDataSource weChatUserDataSource, HttpRequestFactory httpRequestFactory,
-                          LoginUseCase loginUseCase, String temporaryUploadFolderPath, FileTool fileTool,
-                          StationFileRepository stationFileRepository) {
+                          String temporaryUploadFolderParentFolderPath, FileTool fileTool,
+                          StationFileRepository stationFileRepository, FileTaskManager fileTaskManager) {
 
         this.systemSettingDataSource = systemSettingDataSource;
         this.loggedInUserDataSource = loggedInUserDataSource;
         this.uploadMediaUseCase = uploadMediaUseCase;
         this.weChatUserDataSource = weChatUserDataSource;
         this.httpRequestFactory = httpRequestFactory;
-        this.loginUseCase = loginUseCase;
-        this.temporaryUploadFolderPath = temporaryUploadFolderPath;
+        this.temporaryUploadFolderParentFolderPath = temporaryUploadFolderParentFolderPath;
         mFileTool = fileTool;
         mStationFileRepository = stationFileRepository;
+        mFileTaskManager = fileTaskManager;
     }
 
     public void changeLoginUser() {
+
+        mFileTaskManager.cancelAllStartItem();
+
+        mStationFileRepository.clearAllFileTaskItemInCache();
 
         uploadMediaUseCase.stopUploadMedia();
 
@@ -125,23 +128,19 @@ public class LogoutUseCase {
 
         changeLoginUser();
 
-        loginUseCase.setAlreadyLogin(false);
-
         deleteTemporaryUploadFile();
 
     }
 
     private void deleteTemporaryUploadFile() {
 
-        File file = new File(temporaryUploadFolderPath);
+        Log.d(TAG, "deleteTemporaryUploadFile:cancel all start item and clearAllFileTaskItemInCache");
 
-        boolean result = mFileTool.deleteDir(file);
+        String folderPath = mFileTool.getTemporaryUploadFolderPath(temporaryUploadFolderParentFolderPath, systemSettingDataSource.getCurrentLoginUserUUID());
 
-        Log.d(TAG, "logout,deleteTemporaryUploadFile,result: " + result);
+        boolean result = mFileTool.deleteDir(folderPath);
 
-        mStationFileRepository.clearAllFileTaskItemInCache();
-
-        Log.d(TAG, "deleteTemporaryUploadFile: clearAllFileTaskItemInCache");
+        Log.d(TAG, "logout,deleteTemporaryUploadFile,path:" + folderPath + "result: " + result);
 
     }
 

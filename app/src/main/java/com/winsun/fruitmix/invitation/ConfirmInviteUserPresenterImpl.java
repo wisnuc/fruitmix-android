@@ -279,7 +279,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
     private void postOperation(final ConfirmInviteUser confirmInviteUser, final boolean isAccepted, final int resID) {
 
         confirmInviteUserView.showProgressDialog(String.format(confirmInviteUserView.getString(R.string.operating_title),
-                confirmInviteUserView.getString(R.string.confirm_invitation)));
+                confirmInviteUserView.getString(R.string.invitation)));
 
         mInvitationDataSource.confirmInvitation(confirmInviteUser, new BaseOperateDataCallback<String>() {
             @Override

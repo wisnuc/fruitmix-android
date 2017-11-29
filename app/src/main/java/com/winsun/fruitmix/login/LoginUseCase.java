@@ -7,6 +7,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
+import com.winsun.fruitmix.equipment.search.data.Equipment;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
@@ -34,6 +35,7 @@ import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
 import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 

@@ -46,7 +46,7 @@ import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.download.TaskState;
 import com.winsun.fruitmix.file.data.model.FinishedTaskItemWrapper;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
-import com.winsun.fruitmix.file.data.download.FileTaskManager;
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.FileTaskItem;
 import com.winsun.fruitmix.file.data.model.RemoteFile;
@@ -581,7 +581,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                     if (cancelDownload)
                         cancelDownload = false;
                     else
-                        Toast.makeText(activity, activity.getText(R.string.download_failed), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, activity.getString(R.string.fail, activity.getString(R.string.download)), Toast.LENGTH_SHORT).show();
 
                 } else if (currentDownloadFileForShareCommand != null) {
 
@@ -606,7 +606,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                         currentDownloadFileForShareProgressDialog.dismiss();
 
-                        Toast.makeText(activity, activity.getString(R.string.download_failed), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, activity.getString(R.string.fail, activity.getString(R.string.download)), Toast.LENGTH_SHORT).show();
 
                     }
 

@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.file.data.upload;
 
-import com.winsun.fruitmix.file.data.download.FileTaskManager;
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.download.TaskState;
 
 /**

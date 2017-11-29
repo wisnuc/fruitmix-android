@@ -8,6 +8,8 @@
             name="fileDownloadingItemViewModel"
             type="com.winsun.fruitmix.file.view.viewmodel.FileDownloadingItemViewModel" />
 
+        <import type="android.view.View" />
+
     </data>
 
     <RelativeLayout
@@ -64,13 +66,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:max="@{fileDownloadingItemViewModel.maxProgress}"
-                android:progress="@{fileDownloadingItemViewModel.currentProgress}" />
+                android:progress="@{fileDownloadingItemViewModel.currentProgress}"
+                android:visibility="@{fileDownloadingItemViewModel.showTaskState?View.GONE:View.VISIBLE,default=gone}" />
 
             <TextView
+                android:id="@+id/task_state"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:text="@string/accept"/>
+                android:text="@{fileDownloadingItemViewModel.taskState}"
+                android:textColor="@color/fifty_four_percent_black"
+                android:textSize="14dp"
+                android:visibility="@{fileDownloadingItemViewModel.showTaskState?View.VISIBLE:View.GONE,default=visible}"
+                tools:text="@string/accept" />
 
         </LinearLayout>
 

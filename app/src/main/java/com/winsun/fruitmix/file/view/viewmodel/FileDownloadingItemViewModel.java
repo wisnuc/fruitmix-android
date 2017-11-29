@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.file.view.viewmodel;
 
+import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
 
@@ -14,5 +15,9 @@ public class FileDownloadingItemViewModel {
     public final ObservableField<String> fileName = new ObservableField<>();
 
     public final ObservableInt currentProgress = new ObservableInt();
+
+    public final ObservableBoolean showTaskState = new ObservableBoolean();
+
+    public final ObservableField<String> taskState = new ObservableField<>();
 
 }

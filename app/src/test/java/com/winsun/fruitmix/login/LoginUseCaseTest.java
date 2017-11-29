@@ -4,12 +4,15 @@ import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
+import com.winsun.fruitmix.file.data.upload.UploadFileUseCase;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
+import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.mock.MockApplication;
@@ -18,6 +21,7 @@ import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.stations.Station;
 import com.winsun.fruitmix.stations.StationsDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
@@ -47,7 +51,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -124,6 +127,18 @@ public class LoginUseCaseTest {
 
     private LoginNewUserCallbackWrapper<Boolean> mBooleanLoginNewUserCallbackWrapper;
 
+    @Mock
+    private UploadFileUseCase mUploadFileUseCase;
+
+    @Mock
+    private NetworkStateManager mNetworkStateManager;
+
+    @Mock
+    private FileTaskManager mFileTaskManager;
+
+    @Mock
+    private LogoutUseCase mLogoutUseCase;
+
     @Before
     public void setup() {
 
@@ -131,14 +146,19 @@ public class LoginUseCaseTest {
 
         LoginUseCase.destroyInstance();
 
-        mBooleanLoginNewUserCallbackWrapper = new LoginNewUserCallbackWrapper<>("", mFileTool);
+        mBooleanLoginNewUserCallbackWrapper = new LoginNewUserCallbackWrapper<>("", mFileTool,
+                mUploadFileUseCase, mNetworkStateManager, mFileTaskManager, systemSettingDataSource, mLogoutUseCase);
 
         loginUseCase = LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource,
                 httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, mediaDataSourceRepository,
                 stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, new MockThreadManager(),
                 newPhotoListDataLoader, stationsDataSource, mGetAllBindingLocalUserUseCase, weChatUserDataSource, mBooleanLoginNewUserCallbackWrapper);
 
-        when(mFileTool.deleteDir(any(File.class))).thenReturn(true);
+        when(systemSettingDataSource.getCurrentLoginUserUUID()).thenReturn("");
+
+        when(mFileTool.getTemporaryUploadFolderPath(anyString(), anyString())).thenReturn("");
+
+        when(mFileTool.deleteDir(anyString())).thenReturn(true);
 
     }
 
@@ -445,6 +465,8 @@ public class LoginUseCaseTest {
 
         verify(callback).onSucceed(eq(true), any(OperationResult.class));
 
+        verifyLoginWithNewUserSucceed();
+
     }
 
     @Test
@@ -535,6 +557,7 @@ public class LoginUseCaseTest {
 
         verify(systemSettingDataSource).getCurrentUploadUserUUID();
 
+        verifyLoginWithNewUserSucceed();
     }
 
     @Test
@@ -560,7 +583,7 @@ public class LoginUseCaseTest {
     }
 
     @Test
-    public void testLoginWithWeChatCode_succeed() {
+    public void testGetWechatTokenSucceed() {
 
         WeChatTokenUserWrapper weChatTokenUserWrapper = new WeChatTokenUserWrapper();
         weChatTokenUserWrapper.setToken(testToken);
@@ -588,7 +611,7 @@ public class LoginUseCaseTest {
 
     public void testGetStationListAndGetLocalUserAndLoginWithWeChatCodeFail() {
 
-        testLoginWithWeChatCode_succeed();
+        testGetWechatTokenSucceed();
 
         ArgumentCaptor<BaseLoadDataCallback<Station>> stationLoadCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -610,7 +633,7 @@ public class LoginUseCaseTest {
     @Test
     public void testGetStationListAndGetLocalUserAndLoginWithWeChatCodeSucceed() {
 
-        testLoginWithWeChatCode_succeed();
+        testGetWechatTokenSucceed();
 
         ArgumentCaptor<BaseLoadDataCallback<Station>> stationLoadCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -638,6 +661,8 @@ public class LoginUseCaseTest {
         verify(mediaDataSourceRepository).resetState();
 
         verify(weChatUserDataSource).insertWeChatUser(any(WeChatUser.class));
+
+        verifyLoginWithNewUserSucceed();
 
     }
 
@@ -702,7 +727,7 @@ public class LoginUseCaseTest {
     @Test
     public void testGetStationListReturnTwoStations() {
 
-        testLoginWithWeChatCode_succeed();
+        testGetWechatTokenSucceed();
 
         ArgumentCaptor<BaseLoadDataCallback<Station>> stationLoadCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -741,7 +766,7 @@ public class LoginUseCaseTest {
     @Test
     public void testGetBindingLocalUserReturnListSizeMoreThanOne() {
 
-        testLoginWithWeChatCode_succeed();
+        testGetWechatTokenSucceed();
 
         ArgumentCaptor<BaseLoadDataCallback<Station>> stationLoadCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -786,5 +811,15 @@ public class LoginUseCaseTest {
         verify(systemSettingDataSource, never()).setLoginWithWechatCodeOrNot(eq(true));
 
     }
+
+    private void verifyLoginWithNewUserSucceed() {
+
+        verify(mLogoutUseCase).changeLoginUser();
+
+        verify(mFileTaskManager).initPendingUploadItem(any(UploadFileUseCase.class), any(NetworkStateManager.class),
+                anyString(), anyString(), any(FileTool.class));
+
+    }
+
 
 }

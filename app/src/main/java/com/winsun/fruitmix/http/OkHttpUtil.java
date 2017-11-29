@@ -6,6 +6,7 @@ import android.util.Log;
 import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.file.data.model.LocalFile;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONException;
@@ -209,7 +210,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                     .addFormDataPart("manifest", jsonOjbectStr)
-                    .addFormDataPart("", localFile.getName(), RequestBody.create(MediaType.parse(JPEG_STRING), new File(localFile.getPath())))
+                    .addFormDataPart("", localFile.getName(), RequestBody.create(MediaType.parse(FileUtil.getMIMEType(localFile.getName())), new File(localFile.getPath())))
                     .build();
 
         } else {
@@ -247,7 +248,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             RequestBody requestBody = getUploadFileRequestBody(httpRequest, localFile);
 
-            Request request = builder.post(new ProgressRequestBody(requestBody,fileUploadState)).build();
+            Request request = builder.post(new ProgressRequestBody(requestBody, fileUploadState)).build();
 
             Response response = executeRequest(request);
 
@@ -298,7 +299,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             return httpResponse;
 
-        }  catch (JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
 
             return null;

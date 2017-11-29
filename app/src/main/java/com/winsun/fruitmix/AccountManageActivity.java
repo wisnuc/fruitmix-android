@@ -16,6 +16,7 @@ import com.winsun.fruitmix.logout.InjectLogoutUseCase;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.usecase.InjectGetAllBindingLocalUserUseCase;
+import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
@@ -40,7 +41,8 @@ public class AccountManageActivity extends BaseActivity implements AccountManage
 
         presenter = new AccountManagePresenterImpl(this, InjectLoggedInUser.provideLoggedInUserRepository(this),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(this),
-                InjectGetAllBindingLocalUserUseCase.provideInstance(this), InjectLogoutUseCase.provideLogoutUseCase(this));
+                InjectGetAllBindingLocalUserUseCase.provideInstance(this), InjectLogoutUseCase.provideLogoutUseCase(this),
+                FileTool.getInstance());
 
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 

@@ -10,20 +10,19 @@ import android.widget.Toast;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.file.data.download.FileTaskManager;
-import com.winsun.fruitmix.file.data.upload.FileUploadItem;
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
+import com.winsun.fruitmix.file.data.upload.InjectUploadFileCase;
 import com.winsun.fruitmix.file.view.FileDownloadActivity;
 import com.winsun.fruitmix.init.system.InitSystem;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.retrieve.file.from.other.app.RetrieveFileFromOtherAppUseCase;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
-
-import java.io.File;
 
 public class TestReceiveActivity extends AppCompatActivity {
 
@@ -130,7 +129,8 @@ public class TestReceiveActivity extends AppCompatActivity {
 
         FileTaskManager fileTaskManager = FileTaskManager.getInstance();
 
-        fileTaskManager.addFileUploadItem(uploadFilePath,context,true);
+        fileTaskManager.addFileUploadItem(uploadFilePath, InjectUploadFileCase.provideInstance(context),
+                InjectNetworkStateManager.provideNetworkStateManager(context),true);
 
     }
 

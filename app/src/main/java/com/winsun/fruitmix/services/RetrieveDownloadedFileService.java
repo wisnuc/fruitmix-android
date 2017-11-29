@@ -8,7 +8,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
-import com.winsun.fruitmix.file.data.download.FileTaskManager;
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.FileUtil;

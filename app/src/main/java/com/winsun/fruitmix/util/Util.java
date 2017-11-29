@@ -132,7 +132,7 @@ public class Util {
     public static final String ADMIN_USER_PARAMETER = "/admin/users";
     public static final String ACCOUNT_PARAMETER = "/account";
     public static final String TOKEN_PARAMETER = "/token";
-    public static final String LOGIN_PARAMETER = "/users";
+    public static final String USERS_PARAMETER = "/users";
     public static final String DEVICE_ID_PARAMETER = "/libraries";
     public static final String LIST_FILE_PARAMETER = "/files/fruitmix/list";
     public static final String DOWNLOAD_FILE_PARAMETER = "/files/fruitmix/download";

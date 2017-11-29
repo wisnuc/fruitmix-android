@@ -29,6 +29,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
 import com.winsun.fruitmix.equipment.manage.EquipmentManageActivity;
@@ -134,7 +135,7 @@ public class NavPagerActivity extends BaseActivity
     @Override
     public void loggedInUserItemOnClick(LoggedInUser loggedInUser) {
 
-        showProgressDialog(String.format(getString(R.string.operating_title), getString(R.string.change_user)));
+        showProgressDialog(getString(R.string.change_user, loggedInUser.getUser().getUserName()));
 
         if (loggedInUser instanceof LoggedInWeChatUser) {
 
@@ -143,8 +144,6 @@ public class NavPagerActivity extends BaseActivity
             loginUseCase.loginWithOtherWeChatUserBindingLocalUser(loggedInWeChatUser, new BaseOperateDataCallback<Boolean>() {
                 @Override
                 public void onSucceed(Boolean data, OperationResult result) {
-
-                    logoutUseCase.changeLoginUser();
 
                     dismissDialog();
 
@@ -599,14 +598,23 @@ public class NavPagerActivity extends BaseActivity
 
     }
 
-    private void handleFoundEquipment(Equipment createdEquipment, final LoggedInUser loggedInUser) {
-        Log.d(TAG, "search equipment_blue: loggedinuser equipment_blue name: " + loggedInUser.getEquipmentName() + " createEquipment equipment_blue name: " + createdEquipment.getEquipmentName());
+    private void handleFoundEquipment(final Equipment createdEquipment, final LoggedInUser loggedInUser) {
+        Log.d(TAG, "search equipment_blue: loggedinuser equipment name: " + loggedInUser.getEquipmentName() + " createEquipment equipment name: " + createdEquipment.getEquipmentName());
 
-        if (!loggedInUser.getEquipmentName().equals(createdEquipment.getEquipmentName()))
-            return;
+        loggedInUserDataSource.checkFoundedEquipment(createdEquipment, loggedInUser, new BaseOperateDataCallbackImpl<Boolean>() {
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
+                super.onSucceed(data, result);
 
-        logoutUseCase.changeLoginUser();
+                loggedInUser.setGateway(createdEquipment.getHosts().get(0));
 
+                handleFoundEquipmentSucceed(loggedInUser);
+            }
+        });
+
+    }
+
+    private void handleFoundEquipmentSucceed(LoggedInUser loggedInUser) {
         dismissDialog();
 
         stopDiscovery();
@@ -630,7 +638,6 @@ public class NavPagerActivity extends BaseActivity
 
             }
         });
-
     }
 
     private void handleChangeUserSucceed(Boolean data) {
@@ -641,21 +648,12 @@ public class NavPagerActivity extends BaseActivity
         uploadMediaUseCase.startUploadMedia();
 
         if (systemSettingDataSource.getAutoUploadOrNot())
-            handleLoginWithLoggedInUserSucceed();
+            Toast.makeText(mContext, String.format(getString(R.string.success), getString(R.string.login)), Toast.LENGTH_SHORT).show();
         else
-            handleLoginWithLoggedInUserFail();
-    }
-
-    private void handleLoginWithLoggedInUserSucceed() {
-        Toast.makeText(mContext, String.format(getString(R.string.success), getString(R.string.change_user)), Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
 
         handleFinishLoginWithLoggedInUser();
-    }
 
-    private void handleLoginWithLoggedInUserFail() {
-        Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
-
-        handleFinishLoginWithLoggedInUser();
     }
 
     private void handleFinishLoginWithLoggedInUser() {
@@ -747,7 +745,7 @@ public class NavPagerActivity extends BaseActivity
                 }
 
             }
-        }else if(action.equals(Util.LOGIN_STATE_CHANGED)){
+        } else if (action.equals(Util.LOGIN_STATE_CHANGED)) {
 
             Log.d(TAG, "handleStickyOperationEvent: login state changed");
 
@@ -991,6 +989,9 @@ public class NavPagerActivity extends BaseActivity
             public Boolean call() throws Exception {
 
                 logoutUseCase.logout();
+
+                //TODO:check put setAlreadyLogin here will cause everytime call logout need call logout
+                loginUseCase.setAlreadyLogin(false);
 
                 return true;
             }

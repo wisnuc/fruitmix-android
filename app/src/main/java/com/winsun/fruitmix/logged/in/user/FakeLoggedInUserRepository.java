@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.logged.in.user;
 
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.equipment.search.data.Equipment;
 import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
@@ -70,5 +72,10 @@ public class FakeLoggedInUserRepository implements LoggedInUserDataSource {
         user.setUuid(FakeGroupDataSource.MYSELF_UUID);
 
         return new LoggedInUser("", "", "", "", user);
+    }
+
+    @Override
+    public void checkFoundedEquipment(Equipment foundedEquipment, LoggedInUser loggedInUser, BaseOperateDataCallback<Boolean> callback) {
+
     }
 }

@@ -54,7 +54,7 @@ public class UploadFileUseCase {
 
     private String uploadFolderName;
 
-    private String fileTemporaryFolderPath;
+    private String fileTemporaryFolderParentFolderPath;
 
     private String currentUserHome;
 
@@ -69,15 +69,15 @@ public class UploadFileUseCase {
     private String uploadFilePath;
 
     UploadFileUseCase(UserDataRepository userDataRepository, StationFileRepository stationFileRepository,
-                             SystemSettingDataSource systemSettingDataSource, NetworkStateManager networkStateManager,
-                             FileTool fileTool, String uploadFolderName, String fileTemporaryFolderPath) {
+                      SystemSettingDataSource systemSettingDataSource, NetworkStateManager networkStateManager,
+                      FileTool fileTool, String uploadFolderName, String fileTemporaryFolderParentFolderPath) {
         this.userDataRepository = userDataRepository;
         this.stationFileRepository = stationFileRepository;
         this.systemSettingDataSource = systemSettingDataSource;
         this.uploadFolderName = uploadFolderName;
         this.networkStateManager = networkStateManager;
         mFileTool = fileTool;
-        this.fileTemporaryFolderPath = fileTemporaryFolderPath;
+        this.fileTemporaryFolderParentFolderPath = fileTemporaryFolderParentFolderPath;
     }
 
     public void updateFile(final FileUploadState fileUploadState) {
@@ -121,12 +121,19 @@ public class UploadFileUseCase {
 
         FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
 
-        boolean copyResult = mFileTool.copyFileToDir(fileOriginalPath, fileTemporaryFolderPath);
+        String fileTemporaryUploadFolderPath = mFileTool.getTemporaryUploadFolderPath(fileTemporaryFolderParentFolderPath,
+                systemSettingDataSource.getCurrentLoginUserUUID());
+
+        boolean copyResult = mFileTool.copyFileToDir(fileOriginalPath, fileTemporaryUploadFolderPath);
 
         if (copyResult)
-            uploadFilePath = fileTemporaryFolderPath + File.separator + fileUploadItem.getFileName();
+            uploadFilePath = fileTemporaryUploadFolderPath;
         else
             uploadFilePath = fileOriginalPath;
+
+        uploadFilePath += File.separator + fileUploadItem.getFileName();
+
+        Log.d(TAG, "copyToTemporaryFolder: upload file path: " + uploadFilePath);
 
     }
 

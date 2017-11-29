@@ -20,7 +20,7 @@ import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
 import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.UploadMediaTask;
-import com.winsun.fruitmix.file.data.download.FileTaskManager;
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.upload.UploadFileUseCase;
 import com.winsun.fruitmix.generate.media.GenerateMediaThumbUseCase;
 import com.winsun.fruitmix.generate.media.InjectGenerateMediaThumbUseCase;
@@ -415,7 +415,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
         if(UploadFileUseCase.checkUploadCondition(networkStateManager,systemSettingDataSource))
             fileTaskManager.startPendingTaskItem();
         else
-            fileTaskManager.cancelAllStartItem(this);
+            fileTaskManager.cancelAllStartItemAndSetPending(this);
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING)

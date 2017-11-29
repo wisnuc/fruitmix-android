@@ -859,6 +859,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
     public void refreshVideo(Video video) {
 
         int index = mMapKeyIsPhotoPositionValueIsPhoto.indexOfValue(video);
+
+        if (index == -1)
+            return;
+
         int key = mMapKeyIsPhotoPositionValueIsPhoto.keyAt(index);
 
         mPhotoRecycleAdapter.notifyItemChanged(key);

@@ -20,7 +20,7 @@ public class InjectUploadFileCase {
 
         String uploadFolderName = Build.MANUFACTURER + "-" + Build.MODEL;
 
-        String fileTemporaryFolderName = FileUtil.getTemporaryUploadFolderPath(context);
+        String fileTemporaryFolderName = FileUtil.getTemporaryDataFolderParentFolderPath(context);
 
         return new UploadFileUseCase(InjectUser.provideRepository(context), InjectStationFileRepository.provideStationFileRepository(context),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(context), InjectNetworkStateManager.provideNetworkStateManager(context),

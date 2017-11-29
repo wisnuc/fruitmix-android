@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.file.data.download;
 
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
+
 /**
  * Created by Administrator on 2016/11/9.
  */

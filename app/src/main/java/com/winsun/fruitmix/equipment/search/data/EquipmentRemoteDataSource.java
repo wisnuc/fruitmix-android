@@ -7,7 +7,6 @@ import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentTypeInfoParser;
 import com.winsun.fruitmix.parser.RemoteStationsCallByStationAPIParser;
 import com.winsun.fruitmix.stations.StationInfoCallByStationAPI;
@@ -15,9 +14,6 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.parser.RemoteEquipmentHostAliasParser;
 import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
 import com.winsun.fruitmix.util.Util;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +39,7 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
     @Override
     public void getUsersInEquipment(Equipment equipment, BaseLoadDataCallback<User> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(equipment.getHosts().get(0), Util.LOGIN_PARAMETER);
+        HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(equipment.getHosts().get(0), Util.USERS_PARAMETER);
 
         wrapper.loadCall(httpRequest, callback, new RemoteLoginUsersParser());
 

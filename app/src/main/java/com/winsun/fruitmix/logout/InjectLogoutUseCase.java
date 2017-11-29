@@ -2,6 +2,7 @@ package com.winsun.fruitmix.logout;
 
 import android.content.Context;
 
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
@@ -22,8 +23,9 @@ public class InjectLogoutUseCase {
 
         return LogoutUseCase.getInstance(InjectSystemSettingDataSource.provideSystemSettingDataSource(context), InjectLoggedInUser.provideLoggedInUserRepository(context),
                 InjectUploadMediaUseCase.provideUploadMediaUseCase(context), InjectWeChatUserDataSource.provideWeChatUserDataSource(context),
-                InjectHttp.provideHttpRequestFactory(context), InjectLoginUseCase.provideLoginUseCase(context),
-                FileUtil.getTemporaryUploadFolderPath(context), FileTool.getInstance(), InjectStationFileRepository.provideStationFileRepository(context));
+                InjectHttp.provideHttpRequestFactory(context), FileUtil.getTemporaryDataFolderParentFolderPath(context),
+                FileTool.getInstance(), InjectStationFileRepository.provideStationFileRepository(context),
+                FileTaskManager.getInstance());
 
     }
 

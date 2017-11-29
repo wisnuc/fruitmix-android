@@ -11,6 +11,7 @@ import android.view.View;
 
 import com.winsun.fruitmix.databinding.ActivityPersonInfoBinding;
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.logout.InjectLogoutUseCase;
 import com.winsun.fruitmix.person.info.InjectPersonInfoDataSource;
 import com.winsun.fruitmix.person.info.PersonInfoPresenter;
@@ -19,6 +20,7 @@ import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
+import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
@@ -57,7 +59,8 @@ public class PersonInfoActivity extends BaseActivity implements PersonInfoView, 
 
         personInfoPresenter = new PersonInfoPresenter(InjectUser.provideRepository(this),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(this), this, InjectPersonInfoDataSource.provideInstance(this),
-                InjectLogoutUseCase.provideLogoutUseCase(this), ThreadManagerImpl.getInstance());
+                InjectLogoutUseCase.provideLogoutUseCase(this), InjectLoginUseCase.provideLoginUseCase(this),
+                ThreadManagerImpl.getInstance(), FileTool.getInstance());
 
         currentUser = personInfoPresenter.getCurrentUser();
 

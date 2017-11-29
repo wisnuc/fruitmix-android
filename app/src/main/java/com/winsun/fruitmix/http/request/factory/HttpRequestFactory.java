@@ -237,6 +237,14 @@ public class HttpRequestFactory {
 
     }
 
+    public HttpRequest createGetRequestWithToken(String ip,String token, String httpPath) {
+
+        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(ip, new HttpHeader(Util.KEY_AUTHORIZATION,Util.KEY_JWT_HEAD + token));
+
+        return factory.createHttpGetRequest(httpPath, false);
+
+    }
+
     public HttpRequest createHttpGetTokenRequest(LoadTokenParam loadTokenParam) {
 
         HttpHeader httpHeader = new HttpHeader(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((loadTokenParam.getUserUUID() + ":" + loadTokenParam.getUserPassword()).getBytes(), Base64.NO_WRAP));

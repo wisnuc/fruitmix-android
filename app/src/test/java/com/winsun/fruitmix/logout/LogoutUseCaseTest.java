@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.logout;
 
 import com.winsun.fruitmix.BuildConfig;
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
@@ -53,13 +54,13 @@ public class LogoutUseCaseTest {
     private HttpRequestFactory httpRequestFactory;
 
     @Mock
-    private LoginUseCase loginUseCase;
-
-    @Mock
     private FileTool mFileTool;
 
     @Mock
     private StationFileRepository mStationFileRepository;
+
+    @Mock
+    private FileTaskManager mFileTaskManager;
 
     private String testToken = "testToken";
 
@@ -71,8 +72,13 @@ public class LogoutUseCaseTest {
         MockitoAnnotations.initMocks(this);
 
         logoutUseCase = LogoutUseCase.getInstance(systemSettingDataSource, loggedInUserDataSource,
-                uploadMediaUseCase, weChatUserDataSource, httpRequestFactory, loginUseCase, "", mFileTool,
-                mStationFileRepository);
+                uploadMediaUseCase, weChatUserDataSource, httpRequestFactory, "", mFileTool,
+                mStationFileRepository, mFileTaskManager);
+
+        when(systemSettingDataSource.getCurrentLoginUserUUID()).thenReturn("");
+
+        when(mFileTool.getTemporaryUploadFolderPath(anyString(), anyString())).thenReturn("");
+
     }
 
     @After
@@ -164,11 +170,13 @@ public class LogoutUseCaseTest {
 
         verify(httpRequestFactory).reset();
 
-        verify(loginUseCase).setAlreadyLogin(eq(false));
-
-        verify(mFileTool).deleteDir(any(File.class));
+        verify(mFileTaskManager).cancelAllStartItem();
 
         verify(mStationFileRepository).clearAllFileTaskItemInCache();
+
+        verify(mFileTool).getTemporaryUploadFolderPath(anyString(), anyString());
+
+        verify(mFileTool).deleteDir(anyString());
 
     }
 

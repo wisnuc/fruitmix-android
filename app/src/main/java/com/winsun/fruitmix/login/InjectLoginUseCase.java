@@ -2,16 +2,21 @@ package com.winsun.fruitmix.login;
 
 import android.content.Context;
 
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
+import com.winsun.fruitmix.file.data.upload.InjectUploadFileCase;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
+import com.winsun.fruitmix.logout.InjectLogoutUseCase;
+import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
+import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.stations.InjectStation;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
@@ -61,14 +66,18 @@ public class InjectLoginUseCase {
 
         GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase = InjectGetAllBindingLocalUserUseCase.provideInstance(context);
 
-        String temporaryUploadFolderPath = FileUtil.getTemporaryUploadFolderPath(context);
+        String temporaryUploadFolderPath = FileUtil.getTemporaryDataFolderParentFolderPath(context);
 
-        LoginNewUserCallbackWrapper<Boolean> loginNewUserCallbackWrapper = new LoginNewUserCallbackWrapper<>(temporaryUploadFolderPath, FileTool.getInstance());
+        LogoutUseCase logoutUseCase = InjectLogoutUseCase.provideLogoutUseCase(context);
+
+        LoginNewUserCallbackWrapper<Boolean> loginNewUserCallbackWrapper = new LoginNewUserCallbackWrapper<>(temporaryUploadFolderPath, FileTool.getInstance(),
+                InjectUploadFileCase.provideInstance(context), InjectNetworkStateManager.provideNetworkStateManager(context),
+                FileTaskManager.getInstance(), systemSettingDataSource,logoutUseCase);
 
         return LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource, httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase,
                 userDataRepository, mediaDataSourceRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, EventBus.getDefault(),
                 ThreadManagerImpl.getInstance(), NewPhotoListDataLoader.getInstance(), InjectStation.provideStationDataSource(context),
-                getAllBindingLocalUserUseCase,InjectWeChatUserDataSource.provideWeChatUserDataSource(context),loginNewUserCallbackWrapper);
+                getAllBindingLocalUserUseCase, InjectWeChatUserDataSource.provideWeChatUserDataSource(context), loginNewUserCallbackWrapper);
 
     }
 

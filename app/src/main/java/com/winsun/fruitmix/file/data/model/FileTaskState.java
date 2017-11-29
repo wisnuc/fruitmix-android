@@ -21,8 +21,8 @@ public abstract class FileTaskState {
         fileTaskItem.setFileSize(fileSize);
     }
 
-    public void setFileCurrentDownloadSize(long fileCurrentDownloadSize) {
-        fileTaskItem.setFileCurrentTaskSize(fileCurrentDownloadSize);
+    public void setFileCurrentTaskSize(long fileCurrentTaskSize) {
+        fileTaskItem.setFileCurrentTaskSize(fileCurrentTaskSize);
     }
 
     protected FileTaskItem getFileTaskItem() {

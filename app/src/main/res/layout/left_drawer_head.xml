@@ -189,7 +189,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="@string/getting_download_progress"
+                    android:text="@string/getting_backup_progress"
                     android:textColor="#8AFFFFFF"
                     android:textSize="12dp" />
 

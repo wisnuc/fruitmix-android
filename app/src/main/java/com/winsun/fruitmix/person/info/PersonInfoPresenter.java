@@ -11,6 +11,7 @@ import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
+import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -20,6 +21,7 @@ import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.wxapi.MiniProgram;
 import com.winsun.fruitmix.wxapi.WXEntryActivity;
@@ -49,21 +51,27 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
     private LogoutUseCase logoutUseCase;
 
+    private LoginUseCase mLoginUseCase;
+
     private String ticketID;
 
     private WeChatTokenUserWrapper mWeChatTokenUserWrapper;
 
     private ThreadManager threadManager;
 
+    private FileTool mFileTool;
+
     public PersonInfoPresenter(UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
                                PersonInfoView personInfoView, PersonInfoDataSource personInfoDataSource, LogoutUseCase logoutUseCase,
-                               ThreadManager threadManager) {
+                               LoginUseCase loginUseCase,ThreadManager threadManager, FileTool fileTool) {
         this.userDataRepository = userDataRepository;
         this.systemSettingDataSource = systemSettingDataSource;
         this.personInfoView = personInfoView;
         this.personInfoDataSource = personInfoDataSource;
         this.logoutUseCase = logoutUseCase;
+        mLoginUseCase = loginUseCase;
         this.threadManager = threadManager;
+        mFileTool = fileTool;
     }
 
     public User getCurrentUser() {
@@ -79,9 +87,7 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
     public void logout() {
 
-        File file = new File(FileUtil.getTemporaryUploadFolderPath(personInfoView.getContext()));
-
-        if (file.exists() && file.list().length > 0) {
+        if (mFileTool.checkTemporaryUploadFolderNotEmpty(personInfoView.getContext(),systemSettingDataSource.getCurrentLoginUserUUID())) {
 
             AlertDialog dialog = new AlertDialog.Builder(personInfoView.getContext())
                     .setMessage(R.string.clear_temporary_folder_before_logout_toast).setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
@@ -111,6 +117,8 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
             public Boolean call() throws Exception {
 
                 logoutUseCase.logout();
+
+                mLoginUseCase.setAlreadyLogin(false);
 
                 return true;
             }

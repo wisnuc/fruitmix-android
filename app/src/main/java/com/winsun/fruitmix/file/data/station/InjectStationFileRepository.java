@@ -3,7 +3,7 @@ package com.winsun.fruitmix.file.data.station;
 import android.content.Context;
 
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.file.data.download.FileTaskManager;
+import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 

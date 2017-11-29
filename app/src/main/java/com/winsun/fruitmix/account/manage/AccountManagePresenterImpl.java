@@ -1,8 +1,10 @@
 package com.winsun.fruitmix.account.manage;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.BaseExpandableListAdapter;
 
 import com.winsun.fruitmix.AccountManageActivity;
 import com.winsun.fruitmix.NavPagerActivity;
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
@@ -23,8 +26,11 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.util.FileTool;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +41,7 @@ import static android.app.Activity.RESULT_OK;
  * Created by Administrator on 2017/6/22.
  */
 
-public class AccountManagePresenterImpl implements AccountManagePresenter,ActiveView {
+public class AccountManagePresenterImpl implements AccountManagePresenter, ActiveView {
 
     private AccountManageView view;
     private LoggedInUserDataSource loggedInUserDataSource;
@@ -43,6 +49,8 @@ public class AccountManagePresenterImpl implements AccountManagePresenter,Active
     private SystemSettingDataSource systemSettingDataSource;
 
     private GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase;
+
+    private FileTool mFileTool;
 
     private List<String> mEquipmentNames;
     private List<List<LoggedInUser>> mUsers;
@@ -60,13 +68,14 @@ public class AccountManagePresenterImpl implements AccountManagePresenter,Active
     private LogoutUseCase logoutUseCase;
 
     public AccountManagePresenterImpl(AccountManageView view, LoggedInUserDataSource loggedInUserDataSource, SystemSettingDataSource systemSettingDataSource,
-                                      GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase,LogoutUseCase logoutUseCase) {
+                                      GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase, LogoutUseCase logoutUseCase, FileTool fileTool) {
         this.view = view;
         this.loggedInUserDataSource = loggedInUserDataSource;
         this.systemSettingDataSource = systemSettingDataSource;
         this.getAllBindingLocalUserUseCase = getAllBindingLocalUserUseCase;
 
         this.logoutUseCase = logoutUseCase;
+        mFileTool = fileTool;
 
         mEquipmentNames = new ArrayList<>();
         mUsers = new ArrayList<>();
@@ -119,7 +128,7 @@ public class AccountManagePresenterImpl implements AccountManagePresenter,Active
                     mAdapter.notifyDataSetChanged();
 
                 }
-            },this));
+            }, this));
 
         }
 
@@ -183,8 +192,6 @@ public class AccountManagePresenterImpl implements AccountManagePresenter,Active
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (requestCode == AccountManageActivity.START_EQUIPMENT_SEARCH && resultCode == RESULT_OK) {
-
-            logoutUseCase.changeLoginUser();
 
             mNewUserLoginSucceed = true;
             handleBack();
@@ -336,14 +343,38 @@ public class AccountManagePresenterImpl implements AccountManagePresenter,Active
 
         public void deleteUser(Context context) {
 
-            loggedInUserDataSource.deleteLoggedInUsers(Collections.singletonList(loggedInUser));
-
-            refreshData();
-
             if (user.getUuid().equals(currentUserUUID)) {
-                mDeleteCurrentUser = true;
+
+                if (mFileTool.checkTemporaryUploadFolderNotEmpty(context,systemSettingDataSource.getCurrentLoginUserUUID())) {
+
+                    AlertDialog dialog = new AlertDialog.Builder(context)
+                            .setMessage(R.string.clear_temporary_folder_before_logout_toast).setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                    dialog.dismiss();
+
+                                    mDeleteCurrentUser = true;
+
+                                    loggedInUserDataSource.deleteLoggedInUsers(Collections.singletonList(loggedInUser));
+
+                                    refreshData();
+
+
+                                }
+                            }).setNegativeButton(R.string.cancel, null).create();
+
+                    dialog.show();
+
+                }
+
             } else {
                 mDeleteOtherUser = true;
+
+                loggedInUserDataSource.deleteLoggedInUsers(Collections.singletonList(loggedInUser));
+
+                refreshData();
+
             }
 
         }

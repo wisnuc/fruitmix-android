@@ -156,6 +156,8 @@ public class UploadFileUseCaseTest {
         when(mSystemSettingDataSource.getCurrentLoginUserUUID()).thenReturn(testUserUUID);
 
         when(mUserDataRepository.getUserByUUID(eq(testUserUUID))).thenReturn(createUser());
+
+        when(mFileTool.getTemporaryUploadFolderPath(anyString(), anyString())).thenReturn("");
     }
 
     private void setUploadFolderExist() {
