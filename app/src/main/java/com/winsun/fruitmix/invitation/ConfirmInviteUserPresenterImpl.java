@@ -16,7 +16,6 @@ import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackWrapper;
 import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.ConfirmInviteUserItemBinding;
@@ -555,7 +554,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
             user.setUserName(confirmInviteUser.getUserName());
             user.setAvatar(confirmInviteUser.getUserAvatar());
 
-            user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
+            user.setDefaultAvatar(Util.getUserNameForAvatar(user.getUserName()));
             user.setDefaultAvatarBgColor(random.nextInt(3) + 1);
 
             userAvatar.setUser(user, imageLoader);

@@ -200,9 +200,16 @@ public class LocalMediaRepository {
         threadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
+
+                if (calcMediaDigestStrategy != null)
+                    calcMediaDigestStrategy.setFinishCalcMediaDigest(false);
+
                 Collection<Media> calcMediaResult = calcMediaDigestInThread(medias);
 
                 Collection<Video> calcVideoResult = calcVideoDigestInThread(videos);
+
+                if (calcMediaDigestStrategy != null)
+                    calcMediaDigestStrategy.setFinishCalcMediaDigest(true);
 
                 int size = calcMediaResult.size() + calcVideoResult.size();
 
@@ -242,10 +249,16 @@ public class LocalMediaRepository {
 
 
     public boolean updateMedia(Media media) {
+
+        Log.d(TAG, "updateMedia: " + media);
+
         return localMediaAppDBDataSource.updateMedia(media);
     }
 
     public boolean updateVideo(Video video) {
+
+        Log.d(TAG, "updateVideo: " + video);
+
         return localMediaAppDBDataSource.updateVideo(video);
     }
 

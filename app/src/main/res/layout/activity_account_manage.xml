@@ -15,6 +15,10 @@
             name="toolbarViewModel"
             type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
+        <variable
+            name="loadingViewModel"
+            type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
+
     </data>
 
     <FrameLayout
@@ -29,7 +33,7 @@
 
             <include
                 layout="@layout/toolbar_layout"
-                app:toolbarViewModel="@{toolbarViewModel}"/>
+                app:toolbarViewModel="@{toolbarViewModel}" />
 
             <!--<android.support.v7.widget.Toolbar-->
             <!--android:layout_width="match_parent"-->
@@ -55,13 +59,24 @@
 
             <!--</android.support.v7.widget.Toolbar>-->
 
-            <ExpandableListView
-                android:id="@+id/account_expandable_list_view"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/white"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp" />
+                android:layout_height="match_parent">
+
+                <ExpandableListView
+                    android:id="@+id/account_expandable_list_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/white"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp" />
+
+                <include
+                    layout="@layout/new_loading_layout"
+                    app:loadingViewModel="@{loadingViewModel}" />
+
+            </FrameLayout>
+
 
         </LinearLayout>
 

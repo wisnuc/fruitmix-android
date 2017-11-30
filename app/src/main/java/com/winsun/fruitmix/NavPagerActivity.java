@@ -960,11 +960,7 @@ public class NavPagerActivity extends BaseActivity
 
             if (resultCode == RESULT_OK) {
 
-                User user = userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
-
-                refreshUserName(user);
-
-                userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
+                refreshUserInNavigationView();
 
             } else if (resultCode == RESULT_FINISH_ACTIVITY) {
                 finish();

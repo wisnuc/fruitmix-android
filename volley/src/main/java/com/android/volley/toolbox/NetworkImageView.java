@@ -249,7 +249,7 @@ public class NetworkImageView extends ImageView {
                                         loadImageIfNecessary(false);
 
                                     }
-                                }, 3000);
+                                }, 10000);
 
                             }
 

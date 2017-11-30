@@ -18,6 +18,7 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.usecase.InjectGetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 public class AccountManageActivity extends BaseActivity implements AccountManageView {
@@ -39,11 +40,6 @@ public class AccountManageActivity extends BaseActivity implements AccountManage
 
         mAccountExpandableListView = binding.accountExpandableListView;
 
-        presenter = new AccountManagePresenterImpl(this, InjectLoggedInUser.provideLoggedInUserRepository(this),
-                InjectSystemSettingDataSource.provideSystemSettingDataSource(this),
-                InjectGetAllBindingLocalUserUseCase.provideInstance(this), InjectLogoutUseCase.provideLogoutUseCase(this),
-                FileTool.getInstance());
-
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 
         toolbarViewModel.titleText.set(getString(R.string.account_manage));
@@ -51,6 +47,15 @@ public class AccountManageActivity extends BaseActivity implements AccountManage
         toolbarViewModel.setBaseView(this);
 
         binding.setToolbarViewModel(toolbarViewModel);
+
+        LoadingViewModel loadingViewModel = new LoadingViewModel();
+
+        binding.setLoadingViewModel(loadingViewModel);
+
+        presenter = new AccountManagePresenterImpl(this,loadingViewModel, InjectLoggedInUser.provideLoggedInUserRepository(this),
+                InjectSystemSettingDataSource.provideSystemSettingDataSource(this),
+                InjectGetAllBindingLocalUserUseCase.provideInstance(this), InjectLogoutUseCase.provideLogoutUseCase(this),
+                FileTool.getInstance());
 
         binding.setAccountManagePresenter(presenter);
 

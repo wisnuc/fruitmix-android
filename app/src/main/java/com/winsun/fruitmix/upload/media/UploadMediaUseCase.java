@@ -27,6 +27,7 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
@@ -43,6 +44,8 @@ import java.util.List;
 public class UploadMediaUseCase {
 
     public static final String TAG = UploadMediaUseCase.class.getSimpleName();
+
+    public static final int UPLOAD_FILE_HASH_MISMATCH = 0x1001;
 
     static final String UPLOAD_PARENT_FOLDER_NAME = "上传的照片";
 
@@ -728,6 +731,27 @@ public class UploadMediaUseCase {
 
                     }
 
+                } else if (code == UPLOAD_FILE_HASH_MISMATCH) {
+
+                    if (needUploadedMedias.size() > 0) {
+
+                        Media media = needUploadedMedias.get(0);
+
+                        String newUUID = Util.calcSHA256OfFile(media.getOriginalPhotoPath());
+
+                        media.setUuid(newUUID);
+
+                        Log.d(TAG, "uploadMediaInThread: file hash mismatch,file path: " + media.getOriginalPhotoPath()
+                                + " new hash: " + media.getUuid());
+
+                        int result = uploadOneMedia(needUploadedMedias, uploadFolderUUID);
+
+                        if(result == 200){
+                            mediaDataSourceRepository.updateMedia(media);
+                        }
+
+                    }
+
                 }
 
             }
@@ -812,6 +836,12 @@ public class UploadMediaUseCase {
 
                                         return 200;
                                     }
+
+                                } else if (messageInBody.contains(HttpErrorBodyParser.SHA256_MISMATCH)) {
+
+                                    Log.d(TAG, "uploadOneMedia: file hash mismatch,recalculate hash");
+
+                                    return UPLOAD_FILE_HASH_MISMATCH;
 
                                 } else {
 

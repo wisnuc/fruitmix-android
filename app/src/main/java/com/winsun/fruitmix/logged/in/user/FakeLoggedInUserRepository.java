@@ -48,7 +48,7 @@ public class FakeLoggedInUserRepository implements LoggedInUserDataSource {
             User user = new User();
             user.setUuid("testUserUUID" + i);
             user.setUserName("testUserName" + i);
-            user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
+            user.setDefaultAvatar(Util.getUserNameForAvatar(user.getUserName()));
 
             loggedInUser.setUser(user);
 

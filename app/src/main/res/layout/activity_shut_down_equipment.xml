@@ -58,6 +58,7 @@
                 android:layout_height="36dp"
                 android:layout_alignLeft="@id/reboot_shutdown_title"
                 android:layout_below="@id/reboot_shutdown_title"
+                android:layout_marginBottom="1dp"
                 android:layout_marginTop="20dp"
                 app:cardElevation="2dp">
 
@@ -146,6 +147,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_below="@id/maintenance_subtitle"
+                android:layout_marginBottom="1dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/maintenance_icon"
                 app:cardElevation="2dp">

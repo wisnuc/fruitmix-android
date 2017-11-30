@@ -52,7 +52,7 @@ public class RemoteUserJSONObjectParser {
         user.setDisabled(itemRaw.optBoolean("disabled"));
 
         if (user.getDefaultAvatar() == null || user.getDefaultAvatar().isEmpty()) {
-            user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
+            user.setDefaultAvatar(Util.getUserNameForAvatar(user.getUserName()));
         }
         if (user.getDefaultAvatarBgColor() == 0) {
 

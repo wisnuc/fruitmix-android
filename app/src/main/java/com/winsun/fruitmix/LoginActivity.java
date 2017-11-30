@@ -5,13 +5,10 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import com.winsun.fruitmix.callback.ActiveView;
-import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackWrapper;
 import com.winsun.fruitmix.databinding.ActivityLoginBinding;
@@ -23,8 +20,6 @@ import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
-
-import java.util.List;
 
 public class LoginActivity extends BaseActivity implements LoginPresenter {
 
@@ -86,7 +81,7 @@ public class LoginActivity extends BaseActivity implements LoginPresenter {
 
         loginViewModel = new LoginViewModel();
         loginViewModel.userName.set(mEquipmentChildName);
-        loginViewModel.userNameFirstLetter.set(Util.getUserNameFirstLetter(mEquipmentChildName));
+        loginViewModel.userNameFirstLetter.set(Util.getUserNameForAvatar(mEquipmentChildName));
 
         binding.setLoginViewModel(loginViewModel);
 

@@ -12,6 +12,8 @@ public class HttpErrorBodyParser extends BaseRemoteDataParser implements RemoteD
 
     public static final String UPLOAD_FILE_EXIST_CODE = "EEXIST";
 
+    public static final String SHA256_MISMATCH = "sha256 mismatch";
+
     @Override
     public String parse(String json) throws JSONException {
 

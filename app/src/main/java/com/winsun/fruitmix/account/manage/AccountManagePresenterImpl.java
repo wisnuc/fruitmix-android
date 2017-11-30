@@ -27,10 +27,9 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.FileTool;
-import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +43,9 @@ import static android.app.Activity.RESULT_OK;
 public class AccountManagePresenterImpl implements AccountManagePresenter, ActiveView {
 
     private AccountManageView view;
+
+    private LoadingViewModel mLoadingViewModel;
+
     private LoggedInUserDataSource loggedInUserDataSource;
 
     private SystemSettingDataSource systemSettingDataSource;
@@ -67,9 +69,11 @@ public class AccountManagePresenterImpl implements AccountManagePresenter, Activ
 
     private LogoutUseCase logoutUseCase;
 
-    public AccountManagePresenterImpl(AccountManageView view, LoggedInUserDataSource loggedInUserDataSource, SystemSettingDataSource systemSettingDataSource,
+    public AccountManagePresenterImpl(AccountManageView view, LoadingViewModel loadingViewModel,
+                                      LoggedInUserDataSource loggedInUserDataSource, SystemSettingDataSource systemSettingDataSource,
                                       GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase, LogoutUseCase logoutUseCase, FileTool fileTool) {
         this.view = view;
+        mLoadingViewModel = loadingViewModel;
         this.loggedInUserDataSource = loggedInUserDataSource;
         this.systemSettingDataSource = systemSettingDataSource;
         this.getAllBindingLocalUserUseCase = getAllBindingLocalUserUseCase;
@@ -112,6 +116,8 @@ public class AccountManagePresenterImpl implements AccountManagePresenter, Activ
                 @Override
                 public void onSucceed(List<LoggedInWeChatUser> data, OperationResult operationResult) {
 
+                    mLoadingViewModel.showLoading.set(false);
+
                     loggedInUsers.addAll(data);
 
                     fillData();
@@ -122,6 +128,8 @@ public class AccountManagePresenterImpl implements AccountManagePresenter, Activ
 
                 @Override
                 public void onFail(OperationResult operationResult) {
+
+                    mLoadingViewModel.showLoading.set(false);
 
                     fillData();
                     mAdapter.setData(mEquipmentNames, mUsers);
@@ -330,7 +338,7 @@ public class AccountManagePresenterImpl implements AccountManagePresenter, Activ
         }
 
         public String getAvatarName() {
-            return Util.getUserNameFirstLetter(user.getUserName());
+            return Util.getUserNameForAvatar(user.getUserName());
         }
 
         public int getBackgroundResource() {
@@ -345,7 +353,7 @@ public class AccountManagePresenterImpl implements AccountManagePresenter, Activ
 
             if (user.getUuid().equals(currentUserUUID)) {
 
-                if (mFileTool.checkTemporaryUploadFolderNotEmpty(context,systemSettingDataSource.getCurrentLoginUserUUID())) {
+                if (mFileTool.checkTemporaryUploadFolderNotEmpty(context, systemSettingDataSource.getCurrentLoginUserUUID())) {
 
                     AlertDialog dialog = new AlertDialog.Builder(context)
                             .setMessage(R.string.clear_temporary_folder_before_logout_toast).setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {

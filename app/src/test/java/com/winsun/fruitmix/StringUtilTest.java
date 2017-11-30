@@ -213,4 +213,28 @@ public class StringUtilTest {
         assertTrue(MediaUtil.checkMediaIsGif(media));
     }
 
+    @Test
+    public void testFormatAvatarName() {
+
+        String userName = "Leo";
+        assertEquals("LE", Util.getUserNameForAvatar(userName));
+
+        userName = "L我";
+        assertEquals("L", Util.getUserNameForAvatar(userName));
+
+        userName = "Leo Wu";
+        assertEquals("LW", Util.getUserNameForAvatar(userName));
+
+        userName = "Leo 无";
+        assertEquals("L", Util.getUserNameForAvatar(userName));
+
+        userName = "Leo K Wu";
+        assertEquals("LW", Util.getUserNameForAvatar(userName));
+
+        userName = "元 发";
+        assertEquals("元", Util.getUserNameForAvatar(userName));
+
+    }
+
+
 }

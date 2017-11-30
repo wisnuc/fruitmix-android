@@ -85,6 +85,8 @@ public class LogoutUseCase {
 
         mStationFileRepository.clearAllFileTaskItemInCache();
 
+        Log.d(TAG, "change login user: cancel all start item and clearAllFileTaskItemInCache");
+
         uploadMediaUseCase.stopUploadMedia();
 
         uploadMediaUseCase.stopRetryUploadTemporary();
@@ -133,8 +135,6 @@ public class LogoutUseCase {
     }
 
     private void deleteTemporaryUploadFile() {
-
-        Log.d(TAG, "deleteTemporaryUploadFile:cancel all start item and clearAllFileTaskItemInCache");
 
         String folderPath = mFileTool.getTemporaryUploadFolderPath(temporaryUploadFolderParentFolderPath, systemSettingDataSource.getCurrentLoginUserUUID());
 

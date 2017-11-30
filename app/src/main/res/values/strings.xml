@@ -300,56 +300,56 @@
     <string name="equipment">Device</string>
     <string name="network">Network</string>
     <string name="time">Time</string>
-    <string name="reboot_shutdown">Reboot And Poweroff</string>
+    <string name="reboot_shutdown">Reboot or Poweroff</string>
     <string name="reboot">Reboot</string>
     <string name="shutdown">Poweroff</string>
 
-    <string name="equipment_info">Equipment Info</string>
-    <string name="network_info">Network Info</string>
-    <string name="time_info">Time Info</string>
+    <string name="equipment_info">Device</string>
+    <string name="network_info">Network</string>
+    <string name="time_info">Time</string>
 
     <string name="operation_not_support">Operation not supported</string>
 
-    <string name="enter_maintenance">Enter Maintenance Mode</string>
+    <string name="enter_maintenance">Maintenance Mode</string>
     <string name="maintenance_explain">
-        After reboot and enter the maintenance mode,you can perform disk operation or system maintenance task in the maintenance mode.
+        In maintenance mode, you can reconfigure disks or Wisnuc system, your device will reboot before entering maintenance mode.
     </string>
 
-    <string name="operation_not_support_when_login_with_wechat_code">Operation is not supported</string>
+    <string name="operation_not_support_when_login_with_wechat_code">This feature is not supported on remote access mode.</string>
 
 
-    <string name="reboot_and_enter_maintenance">Reboot And Enter Maintenance</string>
+    <string name="reboot_and_enter_maintenance">Go Maintenance Mode</string>
 
-    <string name="no_equipment_info">No equipment info</string>
+    <string name="no_equipment_info">No device information</string>
 
     <!-- equipment info -->
 
     <string name="equipment_label">Device Name</string>
-    <string name="equipment_type">Equipment Type</string>
-    <string name="hardware_serial_number">Hardware Serial Number</string>
+    <string name="equipment_type">Device Type</string>				 
+    <string name="hardware_serial_number">Serial Number</string>	
     <string name="mac_address">Mac Address</string>
-    <string name="total_memory_size">Total Memory Size</string>
-    <string name="free_memory_size">Free Memory Size</string>
-    <string name="available_memory_size">Available Memory Size</string>
-    <string name="cpu_core_number">CPU Core Number</string>
-    <string name="cpu_type">CPU Type</string>
-    <string name="cpu_cache_size">CPU Cache Size</string>
-    <string name="file_system_type">File System Type</string>
+    <string name="total_memory_size">RAM Size</string>
+    <string name="free_memory_size">Free RAM Size</string>
+    <string name="available_memory_size">Available RAM Size</string>
+    <string name="cpu_core_number">Processor Count</string>
+    <string name="cpu_type">Processor Series</string>
+    <string name="cpu_cache_size">Processor Cache</string>
+    <string name="file_system_type">File System</string>
     <string name="disk_count">Disk Count</string>
-    <string name="disk_array_mode">Disk Array Mode</string>
-    <string name="total_space">Total Space</string>
-    <string name="user_data_space">User Data Space</string>
+    <string name="disk_array_mode">RAID Type</string>
+    <string name="total_space">Hard Drive</string>
+    <string name="user_data_space">Used Space</string>
     <string name="available_space">Available Space</string>
 
     <string name="nic_name">NIC Name</string>
     <string name="bandwidth">Bandwidth</string>
     <string name="type">Type</string>
-    <string name="network_address">Network Address</string>
+    <string name="network_address">Eth Address</string>
     <string name="subnet_mask">Subnet Mask</string>
     <string name="nic_mac_address">NIC Mac Address</string>
-    <string name="network_connection_type">Network Connection Type</string>
+    <string name="network_connection_type">Connection Type</string>
     <string name="remote_connection">Remote Connection</string>
-    <string name="local_station_connection">Local Station Connection</string>
+    <string name="local_station_connection">Local network Connection</string>
 
     <string name="local_time">Local Time</string>
     <string name="universal_time">Universal Time</string>

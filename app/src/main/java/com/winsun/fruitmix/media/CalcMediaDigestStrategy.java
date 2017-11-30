@@ -46,6 +46,10 @@ public class CalcMediaDigestStrategy {
     private CalcMediaDigestStrategy() {
     }
 
+    public void setFinishCalcMediaDigest(boolean finishCalcMediaDigest) {
+        this.finishCalcMediaDigest = finishCalcMediaDigest;
+    }
+
     public boolean isFinishCalcMediaDigest() {
         return finishCalcMediaDigest;
     }
@@ -60,8 +64,6 @@ public class CalcMediaDigestStrategy {
 
         Log.d(TAG, "start calc media digest" + Util.getCurrentFormatTime());
 
-        finishCalcMediaDigest = false;
-
         for (T media : medias) {
             if (media.getUuid().isEmpty()) {
                 String uuid = Util.calcSHA256OfFile(media.getOriginalPhotoPath());
@@ -72,8 +74,6 @@ public class CalcMediaDigestStrategy {
                 Log.d(TAG, "media original photo path: " + media.getOriginalPhotoPath() + " uuid: " + media.getUuid());
             }
         }
-
-        finishCalcMediaDigest = true;
 
         return newMediaList;
 

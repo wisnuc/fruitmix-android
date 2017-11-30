@@ -56,11 +56,11 @@ public class PersonInfoRemoteDataSource extends BaseRemoteDataSourceImpl impleme
     @Override
     public void fillBindWeChatUserTicket(String ticketID, String wechatUserToken, BaseOperateDataCallback<String> callback) {
 
-        String httpPath = CloudHttpRequestFactory.CLOUD_API_LEVEL +"/tickets/" + ticketID + "/users";
+        String httpPath = CloudHttpRequestFactory.CLOUD_API_LEVEL + "/tickets/" + ticketID + "/users";
 
         HttpRequest httpRequest = httpRequestFactory.createHttpPostRequestByCloudAPIWithoutWrap(httpPath, "", wechatUserToken);
 
-        wrapper.operateCall(httpRequest,callback,new RemoteFillBindWeChatUserTicketParser());
+        wrapper.operateCall(httpRequest, callback, new RemoteFillBindWeChatUserTicketParser());
 
     }
 
@@ -77,10 +77,9 @@ public class PersonInfoRemoteDataSource extends BaseRemoteDataSourceImpl impleme
             e.printStackTrace();
         }
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(httpPath,jsonObject.toString());
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(httpPath, jsonObject.toString());
 
-        wrapper.operateCall(httpRequest,callback,new RemoteConfirmTicketResultParser());
-
+        wrapper.operateCall(httpRequest, callback, new RemoteConfirmTicketResultParser());
 
     }
 }

@@ -25,6 +25,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -334,6 +335,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 }
             }
         });
+
+        setSupportActionBar(binding.toolbar);
 
 //        initShareBtn();
 
@@ -1280,6 +1283,29 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         public boolean isViewFromObject(View arg0, Object arg1) {
             return arg0 == arg1;
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu_photo_slider, menu);
+
+        return true;
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case R.id.share:
+                showCreateShareBottomDialog();
+                break;
+
+        }
+
+        return true;
     }
 
     private void setMainPicScreenWidthHeight(View mainPic, Media media) {

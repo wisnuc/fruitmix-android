@@ -445,7 +445,7 @@ public class LocalCache {
 
         User user = new User();
         user.setUserName(sp.getString(Util.USER_NAME, ""));
-        user.setDefaultAvatar(Util.getUserNameFirstLetter(user.getUserName()));
+        user.setDefaultAvatar(Util.getUserNameForAvatar(user.getUserName()));
         user.setDefaultAvatarBgColor(sp.getInt(Util.USER_BG_COLOR, 0));
         user.setAdmin(sp.getBoolean(Util.USER_IS_ADMIN, false));
         user.setHome(sp.getString(Util.USER_HOME, ""));

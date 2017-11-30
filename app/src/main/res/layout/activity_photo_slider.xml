@@ -37,12 +37,12 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@android:color/transparent"
+                android:background="@drawable/mask_layout"
                 android:elevation="@dimen/appbar_elevation"
-                android:theme="@style/AppTheme.AppBarOverlay"
+                android:theme="@style/DarkToolBar"
                 android:transitionName="@string/transition_toolbar"
-                app:navigationIcon="@{photoSliderViewModel.toolbarIconResId}"
                 android:visibility="@{photoSliderViewModel.showToolbar?View.VISIBLE:View.INVISIBLE}"
+                app:navigationIcon="@{photoSliderViewModel.toolbarIconResId}"
                 app:navigationOnClickListener="@{()-> baseView.finishView()}"
                 app:popupTheme="@style/AppTheme.PopupOverlay">
 
@@ -67,12 +67,12 @@
 
             </android.support.v7.widget.Toolbar>
 
-            <View
-                android:id="@+id/mask_layout"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@drawable/mask_layout"
-                android:visibility="@{photoSliderViewModel.showMaskLayout?View.VISIBLE:View.INVISIBLE}" />
+            <!--            <View
+                            android:id="@+id/mask_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="?attr/actionBarSize"
+                            android:background="@drawable/mask_layout"
+                            android:visibility="@{photoSliderViewModel.showMaskLayout?View.VISIBLE:View.INVISIBLE}" />-->
 
             <RelativeLayout
                 android:id="@+id/panelFooter"

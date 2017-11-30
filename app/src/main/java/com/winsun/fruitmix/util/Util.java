@@ -153,6 +153,8 @@ public class Util {
     public static final String HTTP_PUT_METHOD = "PUT";
     public static final int HTTP_CONNECT_TIMEOUT = 30 * 1000;
 
+    public static final int HTTP_READ_TIMEOUT = 60 * 1000;
+
     public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
     public static final String CURRENT_PHOTO_POSITION = "current_photo_position";
     public static final String CURRENT_MEDIA_KEY = "current_media_key";
@@ -409,18 +411,66 @@ public class Util {
         return "";
     }
 
-    public static String getUserNameFirstLetter(String userName) {
+    public static String getUserNameForAvatar(String userName) {
 
         if (userName.isEmpty())
             return userName;
 
-        StringBuilder stringBuilder = new StringBuilder();
-        String[] splitStrings = userName.split(" ");
-        for (String splitString : splitStrings) {
-            stringBuilder.append(splitString.substring(0, 1).toUpperCase());
+        if (userName.contains(" ")) {
+
+            String[] splitStrings = userName.split(" ");
+
+            String firstStr = splitStrings[0].length() > 0 ? splitStrings[0].substring(0, 1).toUpperCase() : "";
+
+            if (isChinese(firstStr))
+                return firstStr;
+            else {
+
+                int position = splitStrings.length - 1;
+
+                String lastStr = splitStrings[position].length() > 0 ? splitStrings[position].substring(0, 1).toUpperCase() : "";
+
+                if (isChinese(lastStr))
+                    return firstStr;
+                else
+                    return firstStr + lastStr;
+
+            }
+
+        } else {
+
+            String firstStr = userName.substring(0, 1).toUpperCase();
+
+            if (isChinese(firstStr))
+                return firstStr;
+            else {
+
+                String lastStr = userName.length() > 1 ? userName.substring(1, 2).toUpperCase() : "";
+
+                if (isChinese(lastStr))
+                    return firstStr;
+                else
+                    return firstStr + lastStr;
+
+            }
+
         }
-        return stringBuilder.toString();
+
+
     }
+
+    private static boolean isChinese(String param) {
+
+        String regEx = "[\\u4e00-\\u9fa5]";
+
+        Pattern pattern = Pattern.compile(regEx);
+
+        Matcher matcher = pattern.matcher(param);
+
+        return matcher.matches();
+
+    }
+
 
     public static void hideSystemUI(View view) {
 

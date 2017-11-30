@@ -9,9 +9,11 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.IImageLoadListener;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
@@ -83,8 +85,25 @@ public class UserAvatar extends FrameLayout {
                 return;
             }
 
-            avatarImageView.setVisibility(VISIBLE);
-            avatarTextView.setVisibility(GONE);
+            avatarImageView.setVisibility(GONE);
+            avatarTextView.setVisibility(VISIBLE);
+
+            binding.setUser(user);
+
+            avatarImageView.registerImageLoadListener(new IImageLoadListener() {
+                @Override
+                public void onImageLoadFinish(String url, View view) {
+
+                    avatarTextView.setVisibility(GONE);
+                    avatarImageView.setVisibility(VISIBLE);
+
+                }
+
+                @Override
+                public void onImageLoadFail(String url, View view) {
+
+                }
+            });
 
             MediaUtil.startLoadRemoteImageUrl(url, avatarImageView, imageLoader);
 
