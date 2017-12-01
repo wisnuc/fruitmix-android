@@ -669,9 +669,7 @@ public class Util {
 
     public static boolean checkIP(String ip) {
 
-        String http = "http://";
-
-        if (ip.contains(http)) {
+        if (ip.contains(HTTP)) {
             ip = ip.substring(7, ip.length());
         }
 

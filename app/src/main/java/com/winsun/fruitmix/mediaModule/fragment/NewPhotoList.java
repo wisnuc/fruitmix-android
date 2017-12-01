@@ -62,6 +62,7 @@ import com.winsun.fruitmix.mediaModule.viewmodel.PhotoItemViewModel;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
@@ -159,6 +160,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback;
 
+    private CheckMediaIsUploadStrategy mCheckMediaIsUploadStrategy;
+
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
@@ -235,6 +238,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         };
 
         mediaDataSourceRepository.registerCalcDigestCallback(calcMediaDigestCallback);
+
+        mCheckMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
 
     }
 
@@ -1329,6 +1334,17 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             }
 
             photoItemViewModel.showGifCorner.set(MediaUtil.checkMediaIsGif(currentMedia));
+
+            if (currentMedia.isLocal()) {
+
+                if (mCheckMediaIsUploadStrategy.isMediaUploaded(currentMedia)) {
+                    photoItemViewModel.showCloudOff.set(false);
+                } else {
+                    photoItemViewModel.showCloudOff.set(true);
+                }
+
+            } else
+                photoItemViewModel.showCloudOff.set(false);
 
             binding.setPhotoItemViewModel(photoItemViewModel);
 

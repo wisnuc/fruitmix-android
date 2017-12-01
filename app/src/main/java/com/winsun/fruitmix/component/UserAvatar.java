@@ -76,14 +76,16 @@ public class UserAvatar extends FrameLayout {
 
         } else {
 
-            if (preUrl == null)
+            //fix bug:show user avatar but use other user avatar
+            
+/*            if (preUrl == null)
                 preUrl = url;
             else if (preUrl.equals(url)) {
 
                 Log.d(TAG, "setUser: url is as same as pre url,url: " + url);
 
                 return;
-            }
+            }*/
 
             avatarImageView.setVisibility(GONE);
             avatarTextView.setVisibility(VISIBLE);

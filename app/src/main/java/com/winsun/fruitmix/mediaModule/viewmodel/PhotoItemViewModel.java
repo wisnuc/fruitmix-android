@@ -10,5 +10,6 @@ public class PhotoItemViewModel {
 
     public final ObservableBoolean showPhotoSelectImg = new ObservableBoolean(false);
     public final ObservableBoolean showGifCorner = new ObservableBoolean(false);
+    public final ObservableBoolean showCloudOff = new ObservableBoolean(false);
 
 }

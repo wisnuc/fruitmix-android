@@ -165,7 +165,16 @@ public class LoginUseCase extends BaseDataRepository {
 
             final WeChatUser weChatUser = weChatUserDataSource.getWeChatUser(waToken, currentLoginStationID);
 
-            loginWithWeChatUser(callback, weChatUser);
+            loginWithWeChatUser(new BaseOperateDataCallbackImpl<Boolean>() {
+                @Override
+                public void onFail(OperationResult result) {
+                    super.onFail(result);
+
+                    systemSettingDataSource.setCurrentWAToken("");
+                    systemSettingDataSource.setCurrentLoginStationID("");
+
+                }
+            }, weChatUser);
 
         } else {
 
@@ -777,7 +786,7 @@ public class LoginUseCase extends BaseDataRepository {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                mBooleanLoginNewUserCallbackWrapper.onFail(operationResult);
+                callback.onFail(operationResult);
             }
         });
 

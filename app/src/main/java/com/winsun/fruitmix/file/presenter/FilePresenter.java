@@ -861,6 +861,8 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         currentDownloadFileProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         currentDownloadFileProgressDialog.setIndeterminate(false);
 
+        currentDownloadFileProgressDialog.setProgressNumberFormat(null);
+
         currentDownloadFileProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, activity.getText(R.string.cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

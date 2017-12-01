@@ -557,6 +557,8 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
             user.setDefaultAvatar(Util.getUserNameForAvatar(user.getUserName()));
             user.setDefaultAvatarBgColor(random.nextInt(3) + 1);
 
+            Log.d(TAG, "refreshView: user avatar:" + user.getAvatar());
+
             userAvatar.setUser(user, imageLoader);
 
         }
