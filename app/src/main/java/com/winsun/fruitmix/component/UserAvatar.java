@@ -77,7 +77,7 @@ public class UserAvatar extends FrameLayout {
         } else {
 
             //fix bug:show user avatar but use other user avatar
-            
+
 /*            if (preUrl == null)
                 preUrl = url;
             else if (preUrl.equals(url)) {

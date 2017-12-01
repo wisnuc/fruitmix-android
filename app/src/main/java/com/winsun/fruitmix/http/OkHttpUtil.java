@@ -229,7 +229,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 //                    "}";
 
             requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart(localFile.getName(), jsonObjectStr, RequestBody.create(MediaType.parse(JPEG_STRING), new File(localFile.getPath())))
+                    .addFormDataPart(localFile.getName(), jsonObjectStr, RequestBody.create(MediaType.parse(FileUtil.getMIMEType(localFile.getName())), new File(localFile.getPath())))
                     .build();
 
         }

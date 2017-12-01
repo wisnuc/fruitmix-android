@@ -156,7 +156,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
 
             }
         };
-        model.setMenuIconResId(R.drawable.navigation_file_menu_bg);
+        model.setMenuIconResId(R.drawable.transfer_menu_icon);
         model.setMenuText(context.getString(R.string.transmission_manage));
 
         mNavigationMenuItems.add(model);
@@ -382,7 +382,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
 
         if (user.isAdmin()) {
 
-            if (user.getAssociatedWeChatGUID().length() > 0 ) {
+            if (user.getAssociatedWeChatGUID().length() > 0) {
 
                 if (personAddItemPosition == -1) {
 
@@ -391,7 +391,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
                         public void onClick() {
                             super.onClick();
 
-                            if(systemSettingDataSource.getLoginWithWechatCodeOrNot()){
+                            if (systemSettingDataSource.getLoginWithWechatCodeOrNot()) {
 
                                 mainPageView.showToast(mainPageView.getString(R.string.operation_not_support_when_login_with_wechat_code));
 
@@ -404,7 +404,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
                         }
                     };
 
-                    model.setMenuIconResId(R.drawable.ic_person_add_black_24dp);
+                    model.setMenuIconResId(R.drawable.invite_menu_icon);
                     model.setMenuText(context.getString(R.string.invitation));
                     mNavigationMenuItems.add(navigationMenuItemSize - 2, model);
 
