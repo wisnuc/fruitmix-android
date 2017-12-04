@@ -14,6 +14,7 @@ import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
@@ -67,6 +68,8 @@ public class UploadFileUseCase {
     boolean needRetryForEEXIST = false;
 
     private String uploadFilePath;
+
+    private int renameCode = 0;
 
     UploadFileUseCase(UserDataRepository userDataRepository, StationFileRepository stationFileRepository,
                       SystemSettingDataSource systemSettingDataSource, NetworkStateManager networkStateManager,
@@ -253,7 +256,9 @@ public class UploadFileUseCase {
 
             Log.i(TAG, "uploaded folder exist");
 
-            checkFileExist(uploadFolderUUID, fileUploadState);
+//            checkFileExist(uploadFolderUUID, fileUploadState);
+
+            startPrepareAutoUpload(fileUploadState);
 
         } else {
             startCreateFolderAndUpload(fileUploadState);
@@ -337,7 +342,7 @@ public class UploadFileUseCase {
         } else {
             Log.i(TAG, "start upload file");
 
-            startUploadFile(fileUploadState);
+            startUploadFile(fileUploadState, renameCode);
 
         }
 
@@ -411,7 +416,7 @@ public class UploadFileUseCase {
 
                         Log.i(TAG, "create upload folder succeed folder uuid:" + uploadFolderUUID);
 
-                        startUploadFile(fileUploadState);
+                        startUploadFile(fileUploadState, renameCode);
 
                     } else {
 
@@ -483,13 +488,28 @@ public class UploadFileUseCase {
         });
     }
 
-    private void startUploadFile(FileUploadState fileUploadState) {
-
-        String fileName = fileUploadState.getFileUploadItem().getFileName();
-
-        LocalFile localFile = new LocalFile();
+    private void startUploadFile(FileUploadState fileUploadState, int renameCode) {
 
         FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
+        String fileName;
+        if (renameCode == 0) {
+            fileName = fileUploadItem.getFileName();
+        } else {
+            fileName = fileUploadItem.getFileName();
+
+            int dotIndex = fileName.lastIndexOf(".");
+
+            String fileNameWithEnd = fileName.substring(0, dotIndex);
+
+            String end = fileName.substring(dotIndex, fileName.length()).toLowerCase();
+
+            fileName = fileNameWithEnd + "_" + renameCode + end;
+
+            fileUploadItem.setFileName(fileName);
+
+        }
+
+        LocalFile localFile = new LocalFile();
 
         localFile.setFileHash(fileUploadItem.getFileUUID());
         localFile.setSize(fileUploadItem.getFileSize() + "");
@@ -507,14 +527,39 @@ public class UploadFileUseCase {
 
             handleUploadSucceed(localFile.getPath(), fileUploadItem);
 
+            mFileTool.deleteFile(localFile.getPath());
+
+        } else if (result instanceof OperationNetworkException) {
+
+            int code = ((OperationNetworkException) result).getHttpResponseCode();
+
+            Log.d(TAG, "upload onFail,error code: " + code);
+
+            HttpErrorBodyParser parser = new HttpErrorBodyParser();
+
+            try {
+                String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseData());
+
+                if (messageInBody.contains(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE)) {
+
+                    startUploadFile(fileUploadState, renameCode + 1);
+
+                } else
+                    notifyError(fileUploadState);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+
+                notifyError(fileUploadState);
+            }
+
         } else {
 
             Log.d(TAG, "startUploadFile: fail and notify error");
 
             notifyError(fileUploadState);
-        }
 
-        mFileTool.deleteFile(localFile.getPath());
+        }
 
     }
 

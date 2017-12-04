@@ -120,7 +120,7 @@ public class FileTaskManager {
 
             for (String fileChildPath : files) {
 
-                String uploadFilePath = temporaryUploadFolderPath + File.separator + fileChildPath;
+                String uploadFilePath = file.getAbsolutePath() + File.separator + fileChildPath;
 
                 Log.d(TAG, "initPendingUploadItem: file path: " + uploadFilePath);
 
@@ -146,7 +146,7 @@ public class FileTaskManager {
     private void addFileUploadItem(FileUploadItem fileUploadItem, UploadFileUseCase uploadFileUseCase, NetworkStateManager networkStateManager,
                                    boolean startUploadImmediately) {
 
-        if (checkIsAlreadyDownloadingStateOrDownloadedState(fileUploadItem.getFileUUID())) return;
+        if (checkIsAlreadyDownloadingState(fileUploadItem.getFileUUID())) return;
 
         FileUploadState fileUploadState;
 
@@ -171,7 +171,6 @@ public class FileTaskManager {
         Log.d(TAG, "addFileUploadItem: " + fileUploadItem.getFilePath());
 
     }
-
 
     public void deleteFileTaskItem(List<String> fileUnionKeys) {
 
@@ -204,6 +203,15 @@ public class FileTaskManager {
         }
 
         return false;
+
+    }
+
+    private boolean checkIsAlreadyDownloadingState(String fileUnionKey){
+
+        FileTaskItem fileTaskItem = getFileTaskItem(fileUnionKey);
+
+        return fileTaskItem != null && (fileTaskItem.getTaskState() == TaskState.START_DOWNLOAD_OR_UPLOAD ||
+                fileTaskItem.getTaskState() == TaskState.DOWNLOADING_OR_UPLOADING);
 
     }
 

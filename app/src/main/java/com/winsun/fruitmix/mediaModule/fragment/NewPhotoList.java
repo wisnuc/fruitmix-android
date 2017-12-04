@@ -519,12 +519,23 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             newPhotoListViewModel.showContent.set(true);
 
             //modify by liang.wu: add handler for crash:Cannot call this method while RecyclerView is computing a layout or scrolling
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    mPhotoRecycleAdapter.notifyDataSetChanged();
+
+            if (!mRecyclerView.isComputingLayout()) {
+
+                try {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mPhotoRecycleAdapter.notifyDataSetChanged();
+                        }
+                    });
+
+                } catch (Exception e) {
+
+                    e.printStackTrace();
                 }
-            });
+
+            }
 
             if (mPhotoListListener != null)
                 mPhotoListListener.onNoPhotoItem(false);

@@ -157,6 +157,8 @@ public class LoginUseCase extends BaseDataRepository {
 
         String waToken = systemSettingDataSource.getCurrentWAToken();
 
+        mBooleanLoginNewUserCallbackWrapper.setCallback(callback);
+
         if (!waToken.isEmpty()) {
 
             Log.d(TAG, "loginWithNoParam: wa token is exist,login with wechat user");
@@ -166,12 +168,22 @@ public class LoginUseCase extends BaseDataRepository {
             final WeChatUser weChatUser = weChatUserDataSource.getWeChatUser(waToken, currentLoginStationID);
 
             loginWithWeChatUser(new BaseOperateDataCallbackImpl<Boolean>() {
+
+                @Override
+                public void onSucceed(Boolean data, OperationResult result) {
+                    super.onSucceed(data, result);
+
+                    mBooleanLoginNewUserCallbackWrapper.onSucceed(data, result);
+                }
+
                 @Override
                 public void onFail(OperationResult result) {
                     super.onFail(result);
 
                     systemSettingDataSource.setCurrentWAToken("");
                     systemSettingDataSource.setCurrentLoginStationID("");
+
+                    mBooleanLoginNewUserCallbackWrapper.onFail(result);
 
                 }
             }, weChatUser);
@@ -184,7 +196,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                 Log.d(TAG, "loginWithNoParam: no wa token and login token,callback on fail");
 
-                callback.onFail(new OperationFail("no token"));
+                mBooleanLoginNewUserCallbackWrapper.onFail(new OperationFail("no token"));
 
                 return;
             }
@@ -197,7 +209,7 @@ public class LoginUseCase extends BaseDataRepository {
                 @Override
                 public void onSucceed(Boolean data, OperationResult operationResult) {
 
-                    handleGetStationInfoSucceed(callback, currentLoginToken);
+                    handleGetStationInfoSucceed(mBooleanLoginNewUserCallbackWrapper, currentLoginToken);
 
                 }
 
@@ -208,7 +220,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                     Log.d(TAG, "onFail: check station ip fail");
 
-                    callback.onFail(new OperationFail("ip is unreachable"));
+                    mBooleanLoginNewUserCallbackWrapper.onFail(new OperationFail("ip is unreachable"));
 
                 }
             });

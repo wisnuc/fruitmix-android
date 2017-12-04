@@ -86,6 +86,13 @@ public class ProgressRequestBody extends RequestBody {
                 bytesWritten += byteCount;
 
                 if (bytesWritten == contentLength) {
+
+                    Log.d(TAG, "currentUploadSize: " + bytesWritten);
+
+                    newFileUploadState.setFileCurrentTaskSize(bytesWritten);
+
+                    newFileUploadState.notifyDownloadStateChanged();
+
                     fileUploadItem.setFileUploadState(new FileUploadFinishedState(fileUploadItem));
                 } else {
 

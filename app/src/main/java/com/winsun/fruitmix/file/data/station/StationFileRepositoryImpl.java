@@ -295,34 +295,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     @Override
     public OperationResult uploadFileWithProgress(LocalFile file, FileUploadState fileUploadState, String driveUUID, String dirUUID, String currentLoginUserUUID) {
 
-        OperationResult result = stationFileDataSource.uploadFileWithProgress(file, fileUploadState, driveUUID, dirUUID);
-
-        FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
-
-        if (result instanceof OperationNetworkException) {
-
-            int code = ((OperationNetworkException) result).getHttpResponseCode();
-
-            Log.d(TAG, "upload onFail,error code: " + code);
-
-            HttpErrorBodyParser parser = new HttpErrorBodyParser();
-
-            try {
-                String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseData());
-
-                if (messageInBody.contains(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE)) {
-
-                    fileUploadItem.setFileUploadState(new FileUploadFinishedState(fileUploadItem));
-
-                    result = new OperationSuccess();
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return result;
+        return stationFileDataSource.uploadFileWithProgress(file, fileUploadState, driveUUID, dirUUID);
 
     }
 

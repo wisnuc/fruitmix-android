@@ -344,29 +344,6 @@ public class StationFileRepositoryTest {
 
         verify(stationFileDataSource).uploadFileWithProgress(eq(localFile), eq(fileUploadState), eq(""), eq(""));
 
-
-    }
-
-    @Test
-    public void testUploadFileWithProgress403Error() {
-
-        LocalFile localFile = new LocalFile();
-
-        FileUploadItem fileUploadItem = new FileUploadItem();
-
-        FileUploadState fileUploadState = new FileUploadingState(fileUploadItem);
-
-        when(stationFileDataSource.uploadFileWithProgress(any(LocalFile.class), any(FileUploadState.class), anyString(), anyString()))
-                .thenReturn(new OperationNetworkException(new HttpResponse(403, getJSONArrayStringWhenEEXIST(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE))));
-
-        OperationResult result = fileRepository.uploadFileWithProgress(localFile, fileUploadState, "", "", "");
-
-        verify(stationFileDataSource).uploadFileWithProgress(eq(localFile), eq(fileUploadState), eq(""), eq(""));
-
-        assertTrue(result instanceof OperationSuccess);
-
-        assertTrue(fileUploadItem.getFileUploadState() instanceof FileUploadFinishedState);
-
     }
 
     @NonNull

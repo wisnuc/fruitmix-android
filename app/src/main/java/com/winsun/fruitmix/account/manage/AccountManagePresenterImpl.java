@@ -104,6 +104,8 @@ public class AccountManagePresenterImpl implements AccountManagePresenter, Activ
 
         if (guid == null || guid.isEmpty()) {
 
+            mLoadingViewModel.showLoading.set(false);
+
             fillData();
             mAdapter.setData(mEquipmentNames, mUsers);
             mAdapter.notifyDataSetChanged();
@@ -374,9 +376,18 @@ public class AccountManagePresenterImpl implements AccountManagePresenter, Activ
 
                     dialog.show();
 
+                } else {
+
+                    mDeleteCurrentUser = true;
+
+                    loggedInUserDataSource.deleteLoggedInUsers(Collections.singletonList(loggedInUser));
+
+                    refreshData();
+
                 }
 
             } else {
+
                 mDeleteOtherUser = true;
 
                 loggedInUserDataSource.deleteLoggedInUsers(Collections.singletonList(loggedInUser));

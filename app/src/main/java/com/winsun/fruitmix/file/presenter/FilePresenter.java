@@ -1174,7 +1174,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                         FileTaskItem fileTaskItem = fileTaskManager.getFileTaskItem(abstractRemoteFile.getUuid());
 
-                        boolean result = true;
+                        boolean result = false;
 
                         if (fileTaskItem != null) {
 
