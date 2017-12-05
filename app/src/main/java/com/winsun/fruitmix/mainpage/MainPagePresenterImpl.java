@@ -450,7 +450,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
 
             if (baseNavigationItemViewModel instanceof NavigationMenuViewModel) {
 
-                if (((NavigationMenuViewModel) baseNavigationItemViewModel).getMenuIconResId() == R.drawable.ic_person_add_black_24dp) {
+                if (((NavigationMenuViewModel) baseNavigationItemViewModel).getMenuIconResId() == R.drawable.invite_menu_icon) {
 
                     personAddItemPosition = i;
                     break;

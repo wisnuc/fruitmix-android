@@ -3,7 +3,6 @@ package com.winsun.fruitmix.file.data.model;
 import android.content.Context;
 import android.util.Log;
 
-import com.android.volley.Network;
 import com.winsun.fruitmix.file.data.download.FileDownloadFinishedState;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadPendingState;
@@ -20,12 +19,10 @@ import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.file.data.upload.InjectUploadFileCase;
 import com.winsun.fruitmix.file.data.upload.UploadFileUseCase;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
-import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.FileTool;
-import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.File;
@@ -65,7 +62,9 @@ public class FileTaskManager {
 
     public void addFinishedFileTaskItem(FileTaskItem fileTaskItem) {
 
-        if (checkIsAlreadyDownloadingStateOrDownloadedState(fileTaskItem.getFileUUID())) return;
+        if (checkIsAlreadyDownloadingState(fileTaskItem.getFileUUID())) return;
+
+        if (getFileTaskItemByName(fileTaskItem.getFileName()) != null) return;
 
         fileTaskItems.add(fileTaskItem);
 
@@ -148,6 +147,24 @@ public class FileTaskManager {
 
         if (checkIsAlreadyDownloadingState(fileUploadItem.getFileUUID())) return;
 
+        String fileOriginalName = fileUploadItem.getFileName();
+        String fileName = fileOriginalName;
+
+        while (true) {
+
+            int renameCode = 0;
+
+            if (getPendingFileTaskItemByName(fileName) != null) {
+
+                fileName = uploadFileUseCase.renameFileName(++renameCode, fileOriginalName);
+
+            } else
+                break;
+
+        }
+
+        fileUploadItem.setFileName(fileName);
+
         FileUploadState fileUploadState;
 
 /*        if (checkDownloadingItemIsMax()) {
@@ -168,7 +185,7 @@ public class FileTaskManager {
 
         fileUploadItem.setFileUploadState(fileUploadState);
 
-        Log.d(TAG, "addFileUploadItem: " + fileUploadItem.getFilePath());
+        Log.d(TAG, "addFileUploadItem: " + fileUploadItem.getFilePath() + " fileName: " + fileUploadItem.getFileName());
 
     }
 
@@ -206,7 +223,7 @@ public class FileTaskManager {
 
     }
 
-    private boolean checkIsAlreadyDownloadingState(String fileUnionKey){
+    private boolean checkIsAlreadyDownloadingState(String fileUnionKey) {
 
         FileTaskItem fileTaskItem = getFileTaskItem(fileUnionKey);
 
@@ -250,6 +267,33 @@ public class FileTaskManager {
         return null;
 
     }
+
+    private FileTaskItem getFileTaskItemByName(String fileName) {
+
+        for (FileTaskItem fileTaskItem : fileTaskItems) {
+
+            if (fileTaskItem.getFileName().equals(fileName))
+                return fileTaskItem;
+
+        }
+
+        return null;
+
+    }
+
+    private FileTaskItem getPendingFileTaskItemByName(String fileName) {
+
+        for (FileTaskItem fileTaskItem : fileTaskItems) {
+
+            if (fileTaskItem.getFileName().equals(fileName) && fileTaskItem.getTaskState() == TaskState.PENDING)
+                return fileTaskItem;
+
+        }
+
+        return null;
+
+    }
+
 
     private boolean checkFileTaskItem(FileTaskItem fileTaskItem, String fileUnionKey) {
 

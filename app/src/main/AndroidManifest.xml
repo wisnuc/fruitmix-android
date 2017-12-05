@@ -105,7 +105,9 @@
 
         <activity
             android:name=".file.view.FileDownloadActivity"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:exported="true"

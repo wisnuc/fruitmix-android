@@ -82,6 +82,8 @@ public class ProgressRequestBody extends RequestBody {
                 super.write(source, byteCount);
                 if (contentLength == 0) {
                     contentLength = contentLength();
+
+                    Log.d(TAG, "write: contentLength:" + contentLength);
                 }
                 bytesWritten += byteCount;
 
@@ -93,7 +95,6 @@ public class ProgressRequestBody extends RequestBody {
 
                     newFileUploadState.notifyDownloadStateChanged();
 
-                    fileUploadItem.setFileUploadState(new FileUploadFinishedState(fileUploadItem));
                 } else {
 
                     Log.d(TAG, "currentUploadSize: " + bytesWritten);

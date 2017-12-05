@@ -14,6 +14,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/7/27.
@@ -24,6 +25,8 @@ public interface StationFileDataSource {
     void getRootDrive(BaseLoadDataCallback<AbstractRemoteFile> callback);
 
     void getFile(String rootUUID,final String folderUUID, final BaseLoadDataCallback<AbstractRemoteFile> callback);
+
+    List<AbstractRemoteFile> getFile(String rootUUID,String folderUUID);
 
     void downloadFile(FileDownloadState fileDownloadState, BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException;
 

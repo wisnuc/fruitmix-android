@@ -94,13 +94,15 @@ public class LoginUseCase extends BaseDataRepository {
 
     private LoginNewUserCallbackWrapper<Boolean> mBooleanLoginNewUserCallbackWrapper;
 
+    private LoginWithExistUserCallbackWrapper<Boolean> mBooleanLoginWithExistUserCallbackWrapper;
+
     private LoginUseCase(LoggedInUserDataSource loggedInUserDataSource, TokenDataSource tokenDataSource,
                          HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy, UploadMediaUseCase uploadMediaUseCase,
                          UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
                          SystemSettingDataSource systemSettingDataSource, ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus,
                          ThreadManager threadManager, NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource,
                          GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase, WeChatUserDataSource weChatUserDataSource,
-                         LoginNewUserCallbackWrapper<Boolean> loginNewUserCallbackWrapper) {
+                         LoginNewUserCallbackWrapper<Boolean> loginNewUserCallbackWrapper, LoginWithExistUserCallbackWrapper<Boolean> loginWithExistUserCallbackWrapper) {
 
         super(threadManager);
         this.loggedInUserDataSource = loggedInUserDataSource;
@@ -120,6 +122,7 @@ public class LoginUseCase extends BaseDataRepository {
         this.weChatUserDataSource = weChatUserDataSource;
 
         mBooleanLoginNewUserCallbackWrapper = loginNewUserCallbackWrapper;
+        mBooleanLoginWithExistUserCallbackWrapper = loginWithExistUserCallbackWrapper;
 
     }
 
@@ -130,13 +133,15 @@ public class LoginUseCase extends BaseDataRepository {
                                            ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager,
                                            NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource,
                                            GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase, WeChatUserDataSource weChatUserDataSource,
-                                           LoginNewUserCallbackWrapper<Boolean> loginNewUserCallbackWrapper) {
+                                           LoginNewUserCallbackWrapper<Boolean> loginNewUserCallbackWrapper,
+                                           LoginWithExistUserCallbackWrapper<Boolean> loginWithExistUserCallbackWrapper) {
 
         if (instance == null)
             instance = new LoginUseCase(loggedInUserDataSource, tokenDataSource,
                     httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, mediaDataSourceRepository,
                     stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, threadManager,
-                    newPhotoListDataLoader, stationsDataSource, getAllBindingLocalUserUseCase, weChatUserDataSource, loginNewUserCallbackWrapper);
+                    newPhotoListDataLoader, stationsDataSource, getAllBindingLocalUserUseCase, weChatUserDataSource, loginNewUserCallbackWrapper,
+                    loginWithExistUserCallbackWrapper);
 
         return instance;
     }
@@ -157,7 +162,7 @@ public class LoginUseCase extends BaseDataRepository {
 
         String waToken = systemSettingDataSource.getCurrentWAToken();
 
-        mBooleanLoginNewUserCallbackWrapper.setCallback(callback);
+        mBooleanLoginWithExistUserCallbackWrapper.setCallback(callback);
 
         if (!waToken.isEmpty()) {
 
@@ -173,7 +178,7 @@ public class LoginUseCase extends BaseDataRepository {
                 public void onSucceed(Boolean data, OperationResult result) {
                     super.onSucceed(data, result);
 
-                    mBooleanLoginNewUserCallbackWrapper.onSucceed(data, result);
+                    mBooleanLoginWithExistUserCallbackWrapper.onSucceed(data, result);
                 }
 
                 @Override
@@ -183,7 +188,7 @@ public class LoginUseCase extends BaseDataRepository {
                     systemSettingDataSource.setCurrentWAToken("");
                     systemSettingDataSource.setCurrentLoginStationID("");
 
-                    mBooleanLoginNewUserCallbackWrapper.onFail(result);
+                    mBooleanLoginWithExistUserCallbackWrapper.onFail(result);
 
                 }
             }, weChatUser);
@@ -196,7 +201,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                 Log.d(TAG, "loginWithNoParam: no wa token and login token,callback on fail");
 
-                mBooleanLoginNewUserCallbackWrapper.onFail(new OperationFail("no token"));
+                mBooleanLoginWithExistUserCallbackWrapper.onFail(new OperationFail("no token"));
 
                 return;
             }
@@ -209,7 +214,7 @@ public class LoginUseCase extends BaseDataRepository {
                 @Override
                 public void onSucceed(Boolean data, OperationResult operationResult) {
 
-                    handleGetStationInfoSucceed(mBooleanLoginNewUserCallbackWrapper, currentLoginToken);
+                    handleGetStationInfoSucceed(mBooleanLoginWithExistUserCallbackWrapper, currentLoginToken);
 
                 }
 
@@ -220,7 +225,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                     Log.d(TAG, "onFail: check station ip fail");
 
-                    mBooleanLoginNewUserCallbackWrapper.onFail(new OperationFail("ip is unreachable"));
+                    mBooleanLoginWithExistUserCallbackWrapper.onFail(new OperationFail("ip is unreachable"));
 
                 }
             });

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/7/28.
@@ -27,7 +28,7 @@ public interface StationFileRepository {
 
     void getFile(String rootUUID, final String folderUUID, final BaseLoadDataCallback<AbstractRemoteFile> callback);
 
-    void getFileWithoutCreateNewThread(String rootUUID, final String folderUUID, final BaseLoadDataCallback<AbstractRemoteFile> callback);
+    List<AbstractRemoteFile> getFileWithoutCreateNewThread(String rootUUID, final String folderUUID);
 
     void downloadFile(String currentUserUUID, FileDownloadState fileDownloadState, BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException;
 
@@ -37,13 +38,13 @@ public interface StationFileRepository {
 
     void deleteFileFinishedTaskItems(Collection<FinishedTaskItemWrapper> finishedTaskItemWrappers, String currentLoginUserUUID, BaseOperateDataCallback<Void> callback);
 
-    void createFolder(String folderName,String driveUUID,String dirUUID,BaseOperateDataCallback<HttpResponse> callback);
+    void createFolder(String folderName, String driveUUID, String dirUUID, BaseOperateDataCallback<HttpResponse> callback);
 
     void createFolderWithoutCreateNewThread(String folderName, String driveUUID, String dirUUID, BaseOperateDataCallback<HttpResponse> callback);
 
     OperationResult uploadFile(LocalFile file, String driveUUID, String dirUUID);
 
-    OperationResult uploadFileWithProgress(LocalFile file,FileUploadState fileUploadState,String driveUUID,String dirUUID,String currentLoginUserUUID);
+    OperationResult uploadFileWithProgress(LocalFile file, FileUploadState fileUploadState, String driveUUID, String dirUUID, String currentLoginUserUUID);
 
     boolean insertFileUploadTask(FileUploadItem fileUploadItem, String currentUserUUID);
 

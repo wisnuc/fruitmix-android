@@ -125,8 +125,6 @@ public class LoginUseCaseTest {
     @Mock
     private FileTool mFileTool;
 
-    private LoginNewUserCallbackWrapper<Boolean> mBooleanLoginNewUserCallbackWrapper;
-
     @Mock
     private UploadFileUseCase mUploadFileUseCase;
 
@@ -146,13 +144,17 @@ public class LoginUseCaseTest {
 
         LoginUseCase.destroyInstance();
 
-        mBooleanLoginNewUserCallbackWrapper = new LoginNewUserCallbackWrapper<>("", mFileTool,
+        LoginNewUserCallbackWrapper<Boolean> booleanLoginNewUserCallbackWrapper = new LoginNewUserCallbackWrapper<>("", mFileTool,
                 mUploadFileUseCase, mNetworkStateManager, mFileTaskManager, systemSettingDataSource, mLogoutUseCase);
+
+        LoginWithExistUserCallbackWrapper<Boolean> booleanLoginWithExistUserCallbackWrapper = new LoginWithExistUserCallbackWrapper<>("",
+                mFileTool, mUploadFileUseCase, mNetworkStateManager, mFileTaskManager, systemSettingDataSource);
 
         loginUseCase = LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource,
                 httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, mediaDataSourceRepository,
                 stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, new MockThreadManager(),
-                newPhotoListDataLoader, stationsDataSource, mGetAllBindingLocalUserUseCase, weChatUserDataSource, mBooleanLoginNewUserCallbackWrapper);
+                newPhotoListDataLoader, stationsDataSource, mGetAllBindingLocalUserUseCase, weChatUserDataSource,
+                booleanLoginNewUserCallbackWrapper, booleanLoginWithExistUserCallbackWrapper);
 
         when(systemSettingDataSource.getCurrentLoginUserUUID()).thenReturn("");
 

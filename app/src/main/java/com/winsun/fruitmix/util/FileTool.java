@@ -27,6 +27,12 @@ public class FileTool {
     }
 
     public boolean copyFileToDir(String srcFile, String destDir) {
+
+        return copyFileToDir(srcFile, new File(srcFile).getName(), destDir);
+
+    }
+
+    public boolean copyFileToDir(String srcFile, String newFileName, String destDir) {
         File fileDir = new File(destDir);
 
         if (!fileDir.exists()) {
@@ -35,7 +41,7 @@ public class FileTool {
                 return false;
         }
 
-        String destFile = destDir + File.separator + new File(srcFile).getName();
+        String destFile = destDir + File.separator + newFileName;
 
         File file = new File(destFile);
 
@@ -75,29 +81,27 @@ public class FileTool {
 
         String temporaryUserFolderPath = temporaryDataFolderPath + File.separator + currentUserUUID;
 
-        if(FileUtil.createFolderIfNotExist(temporaryDataFolderPath)){
+        if (FileUtil.createFolderIfNotExist(temporaryDataFolderPath)) {
 
-            String temporaryUploadFolderPath = temporaryUserFolderPath + File.separator+ "upload";
+            String temporaryUploadFolderPath = temporaryUserFolderPath + File.separator + "upload";
 
-            if(FileUtil.createFolderIfNotExist(temporaryUploadFolderPath))
+            if (FileUtil.createFolderIfNotExist(temporaryUploadFolderPath))
                 return temporaryUploadFolderPath;
             else
                 return "";
 
-        }else
+        } else
             return "";
 
     }
 
-    public boolean checkTemporaryUploadFolderNotEmpty(Context context,String currentUserUUID){
+    public boolean checkTemporaryUploadFolderNotEmpty(Context context, String currentUserUUID) {
 
         File file = new File(getTemporaryUploadFolderPath(FileUtil.getTemporaryDataFolderParentFolderPath(context), currentUserUUID));
 
         return file.exists() && file.list().length > 0;
 
     }
-
-
 
 
 }

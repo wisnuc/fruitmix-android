@@ -337,6 +337,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         });
 
         setSupportActionBar(binding.toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
 //        initShareBtn();
 

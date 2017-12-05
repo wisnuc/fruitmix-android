@@ -23,6 +23,7 @@ public abstract class BaseToolbarActivity extends BaseActivity {
         initToolbar(binding);
 
         setSupportActionBar(binding.toolbarLayout.toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
     }
 

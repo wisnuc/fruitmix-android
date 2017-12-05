@@ -17,23 +17,11 @@ import java.io.File;
  * Created by Administrator on 2017/11/24.
  */
 
-public class LoginNewUserCallbackWrapper<T> implements BaseOperateDataCallback<T> {
+public class LoginNewUserCallbackWrapper<T> extends LoginWithExistUserCallbackWrapper<T> {
 
     public static final String TAG = LoginNewUserCallbackWrapper.class.getSimpleName();
 
     private BaseOperateDataCallback<T> mCallback;
-
-    private String temporaryUploadFolderParentFolderPath;
-
-    private FileTool mFileTool;
-
-    private UploadFileUseCase mUploadFileUseCase;
-
-    private NetworkStateManager mNetworkStateManager;
-
-    private FileTaskManager mFileTaskManager;
-
-    private SystemSettingDataSource mSystemSettingDataSource;
 
     private LogoutUseCase mLogoutUseCase;
 
@@ -41,14 +29,10 @@ public class LoginNewUserCallbackWrapper<T> implements BaseOperateDataCallback<T
                                        UploadFileUseCase uploadFileUseCase, NetworkStateManager networkStateManager,
                                        FileTaskManager fileTaskManager, SystemSettingDataSource systemSettingDataSource,
                                        LogoutUseCase logoutUseCase) {
-        this.temporaryUploadFolderParentFolderPath = temporaryUploadFolderParentFolderPath;
-        mFileTool = fileTool;
-        mUploadFileUseCase = uploadFileUseCase;
-        mNetworkStateManager = networkStateManager;
-        mFileTaskManager = fileTaskManager;
-        mSystemSettingDataSource = systemSettingDataSource;
+        super(temporaryUploadFolderParentFolderPath, fileTool, uploadFileUseCase, networkStateManager, fileTaskManager, systemSettingDataSource);
         mLogoutUseCase = logoutUseCase;
     }
+
 
     public void setCallback(BaseOperateDataCallback<T> callback) {
         mCallback = callback;
@@ -64,8 +48,8 @@ public class LoginNewUserCallbackWrapper<T> implements BaseOperateDataCallback<T
 
         mLogoutUseCase.changeLoginUser();
 
-        mFileTaskManager.initPendingUploadItem(mUploadFileUseCase, mNetworkStateManager, temporaryUploadFolderParentFolderPath,
-                mSystemSettingDataSource.getCurrentLoginUserUUID(), mFileTool);
+        getFileTaskManager().initPendingUploadItem(getUploadFileUseCase(), getNetworkStateManager(), getTemporaryUploadFolderParentFolderPath(),
+                getSystemSettingDataSource().getCurrentLoginUserUUID(),getFileTool());
 
         mCallback.onSucceed(data, result);
 

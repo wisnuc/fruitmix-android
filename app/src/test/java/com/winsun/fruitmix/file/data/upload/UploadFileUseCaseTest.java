@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
 import com.winsun.fruitmix.file.data.model.RemoteFile;
@@ -15,7 +14,6 @@ import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
-import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
@@ -32,7 +30,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -126,18 +123,18 @@ public class UploadFileUseCaseTest {
 
         FileUploadState fileUploadState = new FileUploadingState(fileUploadItem);
 
-        mUploadFileUseCase.updateFile(fileUploadState);
-
         setUploadFolderExist();
-
-        ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getUploadFolderCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
-
-        verify(mStationFileRepository).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUploadFolderUUID), getUploadFolderCaptor.capture());
 
         AbstractRemoteFile uploadFolder = new RemoteFile();
         ((RemoteFile) uploadFolder).setFileHash(testUploadFileUUID);
 
-        getUploadFolderCaptor.getValue().onSucceed(Collections.singletonList(uploadFolder), new OperationSuccess());
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testUploadFolderUUID))).thenReturn(Collections.singletonList(uploadFolder));
+
+        mUploadFileUseCase.updateFile(fileUploadState);
+
+        verifyUploadFolderExist();
+
+        verify(mStationFileRepository).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUploadFolderUUID));
 
         assertTrue(fileUploadItem.getFileUploadState() instanceof FileUploadFinishedState);
 
@@ -163,26 +160,29 @@ public class UploadFileUseCaseTest {
     }
 
     private void setUploadFolderExist() {
-        ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getRootFolderCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
-
-        verify(mStationFileRepository).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome), getRootFolderCaptor.capture());
 
         AbstractRemoteFile file = new RemoteFile();
         file.setName(UploadFileUseCase.UPLOAD_PARENT_FOLDER_NAME);
         file.setUuid(testRootFolderUUID);
 
-        getRootFolderCaptor.getValue().onSucceed(Collections.singletonList(file), new OperationSuccess());
-
-        ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getUploadParentFolderCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
-
-        verify(mStationFileRepository).getFileWithoutCreateNewThread(eq(testUserHome), eq(testRootFolderUUID), getUploadParentFolderCaptor.capture());
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome))).thenReturn(Collections.singletonList(file));
 
         AbstractRemoteFile uploadFolder = new RemoteFile();
         uploadFolder.setName(mUploadFileUseCase.getUploadFolderName());
         uploadFolder.setUuid(testUploadFolderUUID);
 
-        getUploadParentFolderCaptor.getValue().onSucceed(Collections.singletonList(uploadFolder), new OperationSuccess());
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testRootFolderUUID))).thenReturn(Collections.singletonList(uploadFolder));
+
     }
+
+    private void verifyUploadFolderExist() {
+
+        verify(mStationFileRepository).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome));
+
+        verify(mStationFileRepository).getFileWithoutCreateNewThread(eq(testUserHome), eq(testRootFolderUUID));
+
+    }
+
 
     @Test
     public void testCheckAutoUploadCondition() {
@@ -207,7 +207,7 @@ public class UploadFileUseCaseTest {
 
         assertTrue(fileUploadItem.getFileUploadState() instanceof FileUploadPendingState);
 
-        assertFalse(mUploadFileUseCase.needRetryForEEXIST);
+        assertFalse(mUploadFileUseCase.needRetryForCreateFolderEEXIST);
 
     }
 
@@ -228,10 +228,12 @@ public class UploadFileUseCaseTest {
 
         when(mStationFileRepository.insertFileUploadTask(any(FileUploadItem.class), anyString())).thenReturn(true);
 
-        when(mFileTool.copyFileToDir(anyString(), anyString())).thenReturn(true);
+        when(mFileTool.copyFileToDir(anyString(), anyString(), anyString())).thenReturn(true);
 
         when(mStationFileRepository.uploadFileWithProgress(any(LocalFile.class), any(FileUploadState.class), anyString(), anyString(), anyString()))
                 .thenReturn(new OperationSuccess());
+
+        setUploadFolderExist();
 
         String testFilePath = "testFilePath";
         String testFileName = "testFileName";
@@ -247,9 +249,9 @@ public class UploadFileUseCaseTest {
 
         mUploadFileUseCase.updateFile(fileUploadState);
 
-        verify(mFileTool).copyFileToDir(eq(testFilePath), eq(fileTemporaryFolderPath));
+        verify(mFileTool).copyFileToDir(eq(testFilePath), eq(testFileName), eq(fileTemporaryFolderPath));
 
-        setUploadFolderExist();
+        verifyUploadFolderExist();
 
 /*
         ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getUploadFolderCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
@@ -267,7 +269,7 @@ public class UploadFileUseCaseTest {
 
         String copyFilePath = fileTemporaryFolderPath + File.separator + testFileName;
 
-        verify(mFileTool).copyFileToDir(eq(copyFilePath), eq(FileUtil.getDownloadFileStoreFolderPath()));
+        verify(mFileTool).copyFileToDir(eq(copyFilePath), eq(testFileName), eq(FileUtil.getDownloadFileStoreFolderPath()));
 
         verify(mFileTool).deleteFile(eq(copyFilePath));
 
@@ -289,10 +291,12 @@ public class UploadFileUseCaseTest {
 
         when(mStationFileRepository.insertFileUploadTask(any(FileUploadItem.class), anyString())).thenReturn(true);
 
-        when(mFileTool.copyFileToDir(anyString(), anyString())).thenReturn(true);
+        when(mFileTool.copyFileToDir(anyString(), anyString(), anyString())).thenReturn(true);
 
         when(mStationFileRepository.uploadFileWithProgress(any(LocalFile.class), any(FileUploadState.class), anyString(), anyString(), anyString()))
                 .thenReturn(new OperationFail(""));
+
+        setUploadFolderExist();
 
         String testFilePath = "testFilePath";
         String testFileName = "testFileName";
@@ -308,9 +312,9 @@ public class UploadFileUseCaseTest {
 
         mUploadFileUseCase.updateFile(fileUploadState);
 
-        verify(mFileTool).copyFileToDir(eq(testFilePath), eq(fileTemporaryFolderPath));
+        verify(mFileTool).copyFileToDir(eq(testFilePath), eq(testFileName), eq(fileTemporaryFolderPath));
 
-        setUploadFolderExist();
+        verifyUploadFolderExist();
 
 /*        ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getUploadFolderCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
@@ -327,7 +331,7 @@ public class UploadFileUseCaseTest {
 
         verify(mFileTool, never()).copyFileToDir(eq(copyFilePath), eq(FileUtil.getDownloadFileStoreFolderPath()));
 
-        verify(mFileTool,never()).deleteFile(eq(copyFilePath));
+        verify(mFileTool, never()).deleteFile(eq(copyFilePath));
 
     }
 
@@ -342,16 +346,14 @@ public class UploadFileUseCaseTest {
 
         when(mSystemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi()).thenReturn(true);
 
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome))).thenReturn(Collections.<AbstractRemoteFile>emptyList());
+
         FileUploadItem fileUploadItem = getFileUploadItem();
         FileUploadState fileUploadState = new FileUploadingState(fileUploadItem);
 
         mUploadFileUseCase.updateFile(fileUploadState);
 
-        ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getRootFolderCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
-
-        verify(mStationFileRepository).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome), getRootFolderCaptor.capture());
-
-        getRootFolderCaptor.getValue().onSucceed(Collections.<AbstractRemoteFile>emptyList(), new OperationSuccess());
+        verify(mStationFileRepository).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome));
 
         ArgumentCaptor<BaseOperateDataCallback<HttpResponse>> createRootFolderCallback = ArgumentCaptor.forClass(BaseOperateDataCallback.class);
 
@@ -380,16 +382,14 @@ public class UploadFileUseCaseTest {
 
         when(mSystemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi()).thenReturn(true);
 
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome))).thenReturn(Collections.<AbstractRemoteFile>emptyList());
+
         FileUploadItem fileUploadItem = getFileUploadItem();
         FileUploadState fileUploadState = new FileUploadingState(fileUploadItem);
 
         mUploadFileUseCase.updateFile(fileUploadState);
 
-        ArgumentCaptor<BaseLoadDataCallback<AbstractRemoteFile>> getRootFolderCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
-
-        verify(mStationFileRepository).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome), getRootFolderCaptor.capture());
-
-        getRootFolderCaptor.getValue().onSucceed(Collections.<AbstractRemoteFile>emptyList(), new OperationSuccess());
+        verify(mStationFileRepository).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome));
 
         ArgumentCaptor<BaseOperateDataCallback<HttpResponse>> createRootFolderCallback = ArgumentCaptor.forClass(BaseOperateDataCallback.class);
 
@@ -399,7 +399,7 @@ public class UploadFileUseCaseTest {
         createRootFolderCallback.getValue().onFail(new OperationNetworkException(new HttpResponse(403,
                 StationFileRepositoryTest.getJSONArrayStringWhenEEXIST(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE))));
 
-        assertTrue(mUploadFileUseCase.needRetryForEEXIST);
+        assertTrue(mUploadFileUseCase.needRetryForCreateFolderEEXIST);
 
     }
 
@@ -418,6 +418,8 @@ public class UploadFileUseCaseTest {
                 .thenReturn(new OperationNetworkException(new HttpResponse(403, StationFileRepositoryTest.getJSONArrayStringWhenEEXIST(HttpErrorBodyParser.UPLOAD_FILE_EXIST_CODE))))
                 .thenReturn(new OperationSuccess());
 
+        setUploadFolderExist();
+
         FileUploadItem fileUploadItem = getFileUploadItem();
         fileUploadItem.setFileName("test.txt");
 
@@ -425,7 +427,7 @@ public class UploadFileUseCaseTest {
 
         mUploadFileUseCase.updateFile(fileUploadState);
 
-        setUploadFolderExist();
+        verifyUploadFolderExist();
 
         verify(mStationFileRepository, times(2))
                 .uploadFileWithProgress(any(LocalFile.class), eq(fileUploadState), anyString(), anyString(), anyString());

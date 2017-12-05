@@ -9,6 +9,7 @@ import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteDataParser;
@@ -19,6 +20,7 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,7 +38,7 @@ public class BaseHttpCallWrapper {
     public boolean checkPreCondition(HttpRequest httpRequest, BaseDataCallback callback) {
         if (checkUrl(httpRequest.getUrl())) {
             return true;
-        }else {
+        } else {
             callback.onFail(new OperationMalformedUrlException());
             return false;
         }
@@ -140,6 +142,48 @@ public class BaseHttpCallWrapper {
             e.printStackTrace();
 
             callback.onFail(new OperationJSONException());
+        }
+
+    }
+
+    public <T> List<T> loadCall(HttpRequest httpRequest, RemoteDatasParser<T> parser) {
+
+        List<T> list = new ArrayList<>();
+
+        if (!checkUrl(httpRequest.getUrl()))
+            return list;
+
+        try {
+
+            HttpResponse httpResponse = iHttpUtil.remoteCall(httpRequest);
+
+            if (httpResponse.getResponseCode() == 200) {
+
+                return parser.parse(httpResponse.getResponseData());
+
+            } else {
+
+                return list;
+
+            }
+
+
+        } catch (MalformedURLException e) {
+
+            return list;
+
+        } catch (SocketTimeoutException ex) {
+
+            return list;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            return list;
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return list;
         }
 
     }

@@ -120,9 +120,13 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     }
 
     @Override
-    public void getFileWithoutCreateNewThread(String rootUUID, String folderUUID, BaseLoadDataCallback<AbstractRemoteFile> callback) {
+    public List<AbstractRemoteFile> getFileWithoutCreateNewThread(String rootUUID, final String folderUUID) {
 
-        handleGeneralFolder(rootUUID, folderUUID, callback);
+        List<AbstractRemoteFile> files = stationFileDataSource.getFile(rootUUID,folderUUID);
+
+        handleGetFileSucceed(files,folderUUID);
+
+        return files;
 
     }
 
@@ -133,19 +137,9 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
             public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);
 
-                currentFolderUUID = folderUUID;
-
-                for (AbstractRemoteFile file : data) {
-                    file.setParentFolderUUID(folderUUID);
-                }
-
-                stationFiles.clear();
-
-                stationFiles.addAll(data);
+                handleGetFileSucceed(data, folderUUID);
 
                 runOnMainThreadCallback.onSucceed(data, operationResult);
-
-                cacheDirty = false;
 
             }
 
@@ -153,13 +147,33 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
             public void onFail(OperationResult operationResult) {
                 super.onFail(operationResult);
 
-                currentFolderUUID = folderUUID;
+                handleGetFileFail(folderUUID);
 
                 runOnMainThreadCallback.onFail(operationResult);
 
-                cacheDirty = false;
             }
         });
+    }
+
+    private void handleGetFileFail(String folderUUID) {
+        currentFolderUUID = folderUUID;
+
+        cacheDirty = false;
+    }
+
+    private void handleGetFileSucceed(List<AbstractRemoteFile> data, String folderUUID) {
+        currentFolderUUID = folderUUID;
+
+        for (AbstractRemoteFile file : data) {
+            file.setParentFolderUUID(folderUUID);
+        }
+
+        stationFiles.clear();
+
+        stationFiles.addAll(data);
+
+        cacheDirty = false;
+
     }
 
     @Override

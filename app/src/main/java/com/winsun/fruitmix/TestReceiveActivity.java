@@ -24,6 +24,8 @@ import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
+
 public class TestReceiveActivity extends AppCompatActivity {
 
     public static final String TAG = TestReceiveActivity.class.getSimpleName();
@@ -33,6 +35,8 @@ public class TestReceiveActivity extends AppCompatActivity {
     public static final String UPLOAD_FILE_SOURCE_FROM_APP_NAME = "upload_file_source_from_app_name";
 
     public static final int EQUIPMENT_SEARCH_REQUEST_CODE = 0x1001;
+
+    public static final long MAX_UPLOAD_FILE_SIZE = 1024 * 1024 * 1024;
 
     private Context mContext;
 
@@ -51,6 +55,15 @@ public class TestReceiveActivity extends AppCompatActivity {
         uploadFilePath = retrieveFileFromOtherAppUseCase.getUploadFilePath(intent);
 
         if (uploadFilePath != null) {
+
+            File file = new File(uploadFilePath);
+
+            if (file.isFile() && file.length() > MAX_UPLOAD_FILE_SIZE) {
+
+                Toast.makeText(mContext, "暂不支持超过1G文件上传", Toast.LENGTH_SHORT).show();
+
+                return;
+            }
 
             LoginUseCase loginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
 
@@ -116,13 +129,13 @@ public class TestReceiveActivity extends AppCompatActivity {
 
         Log.d(TAG, "startTaskManageActivity: uploadFilePath: " + uploadFilePath);
 
-        startUploadFileTask(uploadFilePath,mContext);
+        startUploadFileTask(uploadFilePath, mContext);
 
         finish();
 
     }
 
-    public static void startUploadFileTask(String uploadFilePath,Context context) {
+    public static void startUploadFileTask(String uploadFilePath, Context context) {
 
         Intent gotoTaskManageActivityIntent = new Intent(context, FileDownloadActivity.class);
         context.startActivity(gotoTaskManageActivityIntent);
@@ -130,7 +143,7 @@ public class TestReceiveActivity extends AppCompatActivity {
         FileTaskManager fileTaskManager = FileTaskManager.getInstance();
 
         fileTaskManager.addFileUploadItem(uploadFilePath, InjectUploadFileCase.provideInstance(context),
-                InjectNetworkStateManager.provideNetworkStateManager(context),true);
+                InjectNetworkStateManager.provideNetworkStateManager(context), true);
 
     }
 

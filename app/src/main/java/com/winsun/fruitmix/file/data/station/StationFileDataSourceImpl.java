@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
+import java.util.List;
 
 import okhttp3.ResponseBody;
 
@@ -92,6 +93,14 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     }
 
     @Override
+    public List<AbstractRemoteFile> getFile(String rootUUID, String folderUUID) {
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(LIST_FILE_PARAMETER + "/" + rootUUID + "/dirs/" + folderUUID);
+
+        return wrapper.loadCall(httpRequest, new RemoteFileFolderParser());
+    }
+
+    @Override
     public void downloadFile(FileDownloadState fileDownloadState, BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException {
 
         String encodedFileName = URLEncoder.encode(fileDownloadState.getFileName(), "UTF-8");
@@ -100,7 +109,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
                 + fileDownloadState.getDriveUUID() + "/dirs/" + fileDownloadState.getParentFolderUUID()
                 + "/entries/" + fileDownloadState.getFileUUID() + "?name=" + encodedFileName);
 
-        if(!wrapper.checkPreCondition(httpRequest,callback))
+        if (!wrapper.checkPreCondition(httpRequest, callback))
             return;
 
         ResponseBody responseBody = null;
@@ -138,7 +147,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path, "");
 
-        if (!wrapper.checkPreCondition(httpRequest,callback)) {
+        if (!wrapper.checkPreCondition(httpRequest, callback)) {
             return;
         }
 
@@ -226,7 +235,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         try {
 
-            httpResponse = iHttpFileUtil.uploadFileWithProgress(fileUploadState,httpRequest, file);
+            httpResponse = iHttpFileUtil.uploadFileWithProgress(fileUploadState, httpRequest, file);
 
             if (httpResponse != null && httpResponse.getResponseCode() == 200)
                 return new OperationSuccess();
