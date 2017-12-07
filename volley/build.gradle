@@ -22,7 +22,6 @@ android {
 
     useLibrary 'org.apache.http.legacy'
 
-    buildToolsVersion '26.0.2'
 }
 apply from: 'rules.gradle'
 apply from: 'bintray.gradle'

@@ -15,6 +15,7 @@ import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationSuccessWithFile;
 import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
@@ -128,7 +129,7 @@ public class UploadFileUseCaseTest {
         AbstractRemoteFile uploadFolder = new RemoteFile();
         ((RemoteFile) uploadFolder).setFileHash(testUploadFileUUID);
 
-        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testUploadFolderUUID))).thenReturn(Collections.singletonList(uploadFolder));
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testUploadFolderUUID))).thenReturn(new OperationSuccessWithFile(Collections.singletonList(uploadFolder)));
 
         mUploadFileUseCase.updateFile(fileUploadState);
 
@@ -165,13 +166,13 @@ public class UploadFileUseCaseTest {
         file.setName(UploadFileUseCase.UPLOAD_PARENT_FOLDER_NAME);
         file.setUuid(testRootFolderUUID);
 
-        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome))).thenReturn(Collections.singletonList(file));
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome))).thenReturn(new OperationSuccessWithFile(Collections.singletonList(file)));
 
         AbstractRemoteFile uploadFolder = new RemoteFile();
         uploadFolder.setName(mUploadFileUseCase.getUploadFolderName());
         uploadFolder.setUuid(testUploadFolderUUID);
 
-        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testRootFolderUUID))).thenReturn(Collections.singletonList(uploadFolder));
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testRootFolderUUID))).thenReturn(new OperationSuccessWithFile(Collections.singletonList(uploadFolder)));
 
     }
 
@@ -235,6 +236,8 @@ public class UploadFileUseCaseTest {
 
         setUploadFolderExist();
 
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadFolderUUID))).thenReturn(new OperationSuccessWithFile(Collections.<AbstractRemoteFile>emptyList()));
+
         String testFilePath = "testFilePath";
         String testFileName = "testFileName";
         long testFileSize = 1024;
@@ -260,7 +263,6 @@ public class UploadFileUseCaseTest {
 
         getUploadFolderCaptor.getValue().onSucceed(Collections.<AbstractRemoteFile>emptyList(), new OperationSuccess());
 */
-
 
         verify(mStationFileRepository).uploadFileWithProgress(any(LocalFile.class), eq(fileUploadState), eq(testUserHome),
                 eq(testUploadFolderUUID), eq(testUserUUID));
@@ -297,6 +299,8 @@ public class UploadFileUseCaseTest {
                 .thenReturn(new OperationFail(""));
 
         setUploadFolderExist();
+
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadFolderUUID))).thenReturn(new OperationSuccessWithFile(Collections.<AbstractRemoteFile>emptyList()));
 
         String testFilePath = "testFilePath";
         String testFileName = "testFileName";
@@ -346,7 +350,7 @@ public class UploadFileUseCaseTest {
 
         when(mSystemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi()).thenReturn(true);
 
-        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome))).thenReturn(Collections.<AbstractRemoteFile>emptyList());
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome))).thenReturn(new OperationSuccessWithFile(Collections.<AbstractRemoteFile>emptyList()));
 
         FileUploadItem fileUploadItem = getFileUploadItem();
         FileUploadState fileUploadState = new FileUploadingState(fileUploadItem);
@@ -382,7 +386,7 @@ public class UploadFileUseCaseTest {
 
         when(mSystemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi()).thenReturn(true);
 
-        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome))).thenReturn(Collections.<AbstractRemoteFile>emptyList());
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome))).thenReturn(new OperationSuccessWithFile(Collections.<AbstractRemoteFile>emptyList()));
 
         FileUploadItem fileUploadItem = getFileUploadItem();
         FileUploadState fileUploadState = new FileUploadingState(fileUploadItem);
@@ -419,6 +423,8 @@ public class UploadFileUseCaseTest {
                 .thenReturn(new OperationSuccess());
 
         setUploadFolderExist();
+
+        when(mStationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadFolderUUID))).thenReturn(new OperationSuccessWithFile(Collections.<AbstractRemoteFile>emptyList()));
 
         FileUploadItem fileUploadItem = getFileUploadItem();
         fileUploadItem.setFileName("test.txt");

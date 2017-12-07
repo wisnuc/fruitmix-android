@@ -13,18 +13,14 @@ import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
-import com.winsun.fruitmix.file.data.upload.FileUploadFinishedState;
 import com.winsun.fruitmix.file.data.upload.FileUploadItem;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
-import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.parser.HttpErrorBodyParser;
+import com.winsun.fruitmix.model.operationResult.OperationSuccessWithFile;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
-
-import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -120,13 +116,14 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     }
 
     @Override
-    public List<AbstractRemoteFile> getFileWithoutCreateNewThread(String rootUUID, final String folderUUID) {
+    public OperationResult getFileWithoutCreateNewThread(String rootUUID, final String folderUUID) {
 
-        List<AbstractRemoteFile> files = stationFileDataSource.getFile(rootUUID,folderUUID);
+        OperationResult result = stationFileDataSource.getFile(rootUUID, folderUUID);
 
-        handleGetFileSucceed(files,folderUUID);
+        if (result instanceof OperationSuccessWithFile)
+            handleGetFileSucceed(((OperationSuccessWithFile) result).getList(), folderUUID);
 
-        return files;
+        return result;
 
     }
 
@@ -185,7 +182,6 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
                 FinishedTaskItem finishedTaskItem = new FinishedTaskItem(data);
 
-                finishedTaskItem.setFileTime(System.currentTimeMillis());
                 finishedTaskItem.setFileCreatorUUID(currentUserUUID);
 
                 boolean insertResult = downloadedFileDataSource.insertFileTask(finishedTaskItem);
@@ -254,7 +250,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
         for (FinishedTaskItemWrapper finishedTaskItemWrapper : finishedTaskItemWrappers) {
 
-            boolean deleteUploadFileTaskResult = uploadFileDataSource.deleteFileTask(finishedTaskItemWrapper.getFileUnionKey(), currentLoginUserUUID);
+            boolean deleteUploadFileTaskResult = uploadFileDataSource.deleteFileTask(finishedTaskItemWrapper.getFileUUID(), currentLoginUserUUID);
 
             if (!deleteUploadFileTaskResult) {
 
@@ -263,14 +259,14 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
                 result = downloadedFileDataSource.deleteDownloadedFile(finishedTaskItemWrapper.getFileName());
 
                 if (result) {
-                    downloadedFileDataSource.deleteFileTask(finishedTaskItemWrapper.getFileUnionKey(), currentLoginUserUUID);
+                    downloadedFileDataSource.deleteFileTask(finishedTaskItemWrapper.getFileUUID(), currentLoginUserUUID);
                 }
 
             } else
                 result = true;
 
             if (result)
-                fileTaskManager.deleteFileTaskItem(Collections.singletonList(finishedTaskItemWrapper.getFileUnionKey()));
+                fileTaskManager.deleteFileTaskItem(Collections.singletonList(finishedTaskItemWrapper));
 
         }
 
@@ -317,7 +313,6 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     public boolean insertFileUploadTask(FileUploadItem fileUploadItem, String currentUserUUID) {
         FinishedTaskItem finishedTaskItem = new FinishedTaskItem(fileUploadItem);
 
-        finishedTaskItem.setFileTime(System.currentTimeMillis());
         finishedTaskItem.setFileCreatorUUID(currentUserUUID);
 
         boolean insertResult = uploadFileDataSource.insertFileTask(finishedTaskItem);

@@ -654,11 +654,15 @@ public class FileUtil {
 
                 outputStream.flush();
 
+                fileDownloadItem.setFileTime(System.currentTimeMillis());
+
                 fileDownloadItem.setFileDownloadState(new FileDownloadFinishedState(fileDownloadItem));
 
                 return true;
 
             } else {
+
+                fileDownloadItem.setFileTime(System.currentTimeMillis());
 
                 fileDownloadItem.setFileDownloadState(new FileDownloadErrorState(fileDownloadItem));
 
@@ -669,11 +673,15 @@ public class FileUtil {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
 
+            fileDownloadItem.setFileTime(System.currentTimeMillis());
+
             fileDownloadItem.setFileDownloadState(new FileDownloadErrorState(fileDownloadItem));
 
             return false;
         } catch (IOException e) {
             e.printStackTrace();
+
+            fileDownloadItem.setFileTime(System.currentTimeMillis());
 
             fileDownloadItem.setFileDownloadState(new FileDownloadErrorState(fileDownloadItem));
 

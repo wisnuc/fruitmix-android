@@ -27,6 +27,8 @@ import com.winsun.fruitmix.generate.media.InjectGenerateMediaThumbUseCase;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
 import com.winsun.fruitmix.invitation.data.InjectInvitationDataSource;
 import com.winsun.fruitmix.invitation.data.InvitationDataSource;
+import com.winsun.fruitmix.logout.InjectLogoutUseCase;
+import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
@@ -293,11 +295,9 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
         generateMediaThumbUseCase.stopGenerateLocalPhotoThumbnail();
         generateMediaThumbUseCase.stopGenerateLocalPhotoMiniThumbnail();
 
-        uploadMediaUseCase.stopUploadMedia();
+        LogoutUseCase logoutUseCase = InjectLogoutUseCase.provideLogoutUseCase(this);
 
-        uploadMediaUseCase.stopRetryUploadForever();
-
-//        uploadMediaUseCase.unregisterUploadMediaCountChangeListener(this);
+        logoutUseCase.stopUploadTask();
 
         MediaDataSourceRepository mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
 
@@ -412,7 +412,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
         FileTaskManager fileTaskManager = FileTaskManager.getInstance();
 
-        if(UploadFileUseCase.checkUploadCondition(networkStateManager,systemSettingDataSource))
+        if (UploadFileUseCase.checkUploadCondition(networkStateManager, systemSettingDataSource))
             fileTaskManager.startPendingTaskItem();
         else
             fileTaskManager.cancelAllStartItemAndSetPending(this);

@@ -30,10 +30,11 @@ public class FileFinishedTaskItemParser {
         fileTaskItem.setFileUUID(fileUUID);
         fileTaskItem.setFileSize(fileSize);
 
+        fileTaskItem.setFileTime(fileTime);
+
         FinishedTaskItem finishedTaskItem = new FinishedTaskItem(fileTaskItem);
 
         finishedTaskItem.setFileCreatorUUID(fileCreatorUUID);
-        finishedTaskItem.setFileTime(fileTime);
 
         return finishedTaskItem;
     }

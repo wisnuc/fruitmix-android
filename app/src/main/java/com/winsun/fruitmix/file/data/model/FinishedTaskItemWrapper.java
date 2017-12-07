@@ -6,11 +6,11 @@ package com.winsun.fruitmix.file.data.model;
 
 public class FinishedTaskItemWrapper {
 
-    private String fileUnionKey;
+    private String fileUUID;
     private String fileName;
 
-    public FinishedTaskItemWrapper(String fileUnionKey, String fileName) {
-        this.fileUnionKey = fileUnionKey;
+    public FinishedTaskItemWrapper(String fileUUID, String fileName) {
+        this.fileUUID = fileUUID;
         this.fileName = fileName;
     }
 
@@ -18,8 +18,8 @@ public class FinishedTaskItemWrapper {
         return fileName;
     }
 
-    public String getFileUnionKey() {
-        return fileUnionKey;
+    public String getFileUUID() {
+        return fileUUID;
     }
 
 }

@@ -31,6 +31,10 @@ public interface ThreadManager {
 
     Future<Boolean> runOnDownloadFileThread(Callable<Boolean> callable);
 
+    Future<Boolean> runOnUploadFileThread(Callable<Boolean> callable);
+
+    void stopUploadFileThreadNow();
+
     void stopUploadMediaThreadNow();
 
     void stopUploadMediaThread();

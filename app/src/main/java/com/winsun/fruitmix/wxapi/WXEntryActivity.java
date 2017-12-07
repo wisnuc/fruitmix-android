@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
+import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import com.winsun.fruitmix.R;
@@ -160,7 +161,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                     }
 
-                } else {
+                } else if (baseResp instanceof SendMessageToWX.Resp) {
 
                     if (wxEntrySendMiniProgramCallback != null) {
                         wxEntrySendMiniProgramCallback.succeed();
@@ -457,7 +458,6 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             wxEntryLoginCallback = null;
 
         }
-
 
     }
 

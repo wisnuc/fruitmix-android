@@ -1,7 +1,12 @@
 package com.winsun.fruitmix.file.data.upload;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.file.data.download.TaskState;
 import com.winsun.fruitmix.file.data.model.FileTaskItem;
+import com.winsun.fruitmix.util.FileTool;
+
+import java.io.File;
 
 /**
  * Created by Administrator on 2017/11/15.
@@ -13,11 +18,13 @@ public class FileUploadItem extends FileTaskItem {
 
     private FileUploadState fileUploadState;
 
+    private String temporaryUploadFilePath;
+
     public FileUploadItem() {
     }
 
     public FileUploadItem(String fileUUID, String fileName, long fileSize, String filePath) {
-        super(fileUUID,fileName, fileSize);
+        super(fileUUID, fileName, fileSize);
         this.filePath = filePath;
     }
 
@@ -44,6 +51,14 @@ public class FileUploadItem extends FileTaskItem {
         return fileUploadState;
     }
 
+    public void setTemporaryUploadFilePath(String temporaryUploadFilePath) {
+        this.temporaryUploadFilePath = temporaryUploadFilePath;
+    }
+
+    public String getTemporaryUploadFilePath() {
+        return temporaryUploadFilePath;
+    }
+
     @Override
     public String getUnionKey() {
         return getFileUUID();
@@ -53,4 +68,5 @@ public class FileUploadItem extends FileTaskItem {
     public TaskState getTaskState() {
         return fileUploadState.getDownloadState();
     }
+
 }

@@ -9,19 +9,10 @@ import com.winsun.fruitmix.file.data.model.FileTaskItem;
 public class FinishedTaskItem {
 
     private FileTaskItem fileTaskItem;
-    private long fileTime;
     private String fileCreatorUUID;
 
     public FinishedTaskItem(FileTaskItem fileTaskItem) {
         this.fileTaskItem = fileTaskItem;
-    }
-
-    public void setFileTime(long fileTime) {
-        this.fileTime = fileTime;
-    }
-
-    public long getFileTime() {
-        return fileTime;
     }
 
     public String getFileCreatorUUID() {

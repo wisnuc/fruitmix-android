@@ -39,7 +39,7 @@ public class FileStartUploadState extends FileUploadState {
 
         UploadFileTask uploadFileTask = new UploadFileTask(this,uploadFileUseCase);
 
-        Future<Boolean> future = threadManager.runOnDownloadFileThread(uploadFileTask);
+        Future<Boolean> future = threadManager.runOnUploadFileThread(uploadFileTask);
 
         getFileUploadItem().setFuture(future);
 

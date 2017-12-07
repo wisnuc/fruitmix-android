@@ -19,6 +19,8 @@ public abstract class FileTaskItem {
     private String fileName;
     private long fileSize;
 
+    private long fileTime;
+
     private long fileCurrentTaskSize;
 
     private Future<Boolean> future;
@@ -52,6 +54,14 @@ public abstract class FileTaskItem {
         this.fileName = fileName;
     }
 
+    public void setFileTime(long fileTime) {
+        this.fileTime = fileTime;
+    }
+
+    public long getFileTime() {
+        return fileTime;
+    }
+
     public void setFileCurrentTaskSize(long fileCurrentTaskSize) {
         this.fileCurrentTaskSize = fileCurrentTaskSize;
     }
@@ -82,11 +92,8 @@ public abstract class FileTaskItem {
     }
 
     public int getCurrentProgress(int max) {
-        Log.d(TAG, "refreshItemView: currentTaskSize:" + getFileCurrentTaskSize() + " fileSize:" + getFileSize());
 
         float currentProgress = getFileCurrentTaskSize() * max / getFileSize();
-
-        Log.d(TAG, "refreshDownloadItemView: currentProgress:" + currentProgress);
 
         return (int) currentProgress;
     }

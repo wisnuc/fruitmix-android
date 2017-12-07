@@ -62,6 +62,7 @@ public class FileStartDownloadState extends FileDownloadState {
             Future<Boolean> future = threadManager.runOnDownloadFileThread(downloadFileTask);
 
             getFileDownloadItem().setFuture(future);
+
         }
 
     }

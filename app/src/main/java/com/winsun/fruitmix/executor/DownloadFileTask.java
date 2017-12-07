@@ -37,7 +37,7 @@ public class DownloadFileTask implements Callable<Boolean> {
 
         return true;
 
-/*        String downloadFileUrl = FNAS.getDownloadFileUrl(fileDownloadState.getFileUnionKey(), fileDownloadState.getParentFolderUUID());
+/*        String downloadFileUrl = FNAS.getDownloadFileUrl(fileDownloadState.getFileUUID(), fileDownloadState.getParentFolderUUID());
 
         HttpRequest httpRequest = new HttpRequest(downloadFileUrl, Util.HTTP_GET_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);

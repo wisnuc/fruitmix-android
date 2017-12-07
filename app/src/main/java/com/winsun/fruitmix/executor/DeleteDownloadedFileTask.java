@@ -35,15 +35,7 @@ public class DeleteDownloadedFileTask implements Callable<Boolean> {
      * implements {@code Runnable}.
      */
     @Override
-    public Boolean call() throws Exception{
-
-        for (String fileUUID : fileUUIDs) {
-            dbUtils.deleteFileDownloadedTaskByUUIDAndCreatorUUID(fileUUID, FNAS.userUUID);
-        }
-
-        FileTaskManager.getInstance().deleteFileTaskItem(fileUUIDs);
-
-        EventBus.getDefault().post(new OperationEvent(Util.DOWNLOADED_FILE_DELETED, new OperationSuccess(R.string.delete_text)));
+    public Boolean call() throws Exception {
 
         return true;
     }

@@ -239,7 +239,6 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     @Override
     public HttpResponse uploadFileWithProgress(FileUploadState fileUploadState, HttpRequest httpRequest, LocalFile localFile) throws IOException {
 
-
         try {
 
             Request.Builder builder;

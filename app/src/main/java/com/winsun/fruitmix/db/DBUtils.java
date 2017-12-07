@@ -212,7 +212,7 @@ public class DBUtils {
         contentValues.put(DBHelper.FILE_KEY_NAME, finishedTaskItem.getFileName());
         contentValues.put(DBHelper.FILE_KEY_SIZE, finishedTaskItem.getFileSize());
         contentValues.put(DBHelper.FILE_KEY_UUID, finishedTaskItem.getFileUUID());
-        contentValues.put(DBHelper.FILE_KEY_TIME, finishedTaskItem.getFileTime());
+        contentValues.put(DBHelper.FILE_KEY_TIME, finishedTaskItem.getFileTaskItem().getFileTime());
         contentValues.put(DBHelper.FILE_KEY_CREATOR_UUID, finishedTaskItem.getFileCreatorUUID());
 
         return contentValues;
@@ -433,6 +433,7 @@ public class DBUtils {
     public long deleteFileDownloadedTaskByUUIDAndCreatorUUID(String fileUUID, String fileCreatorUUID) {
 
         return deleteFileFinishedTaskItem(DBHelper.DOWNLOADED_FILE_TABLE_NAME, fileUUID, fileCreatorUUID);
+
     }
 
     private long deleteFileFinishedTaskItem(String tableName, String fileUUID, String fileCreatorUUID) {

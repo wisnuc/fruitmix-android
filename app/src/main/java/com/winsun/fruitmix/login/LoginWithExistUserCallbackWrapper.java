@@ -2,6 +2,7 @@ package com.winsun.fruitmix.login;
 
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.data.upload.UploadFileUseCase;
 import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -31,15 +32,19 @@ public class LoginWithExistUserCallbackWrapper<T> implements BaseOperateDataCall
 
     private SystemSettingDataSource mSystemSettingDataSource;
 
-    public LoginWithExistUserCallbackWrapper(String temporaryUploadFolderParentFolderPath, FileTool fileTool,
+    private StationFileRepository mStationFileRepository;
+
+    LoginWithExistUserCallbackWrapper(String temporaryUploadFolderParentFolderPath, FileTool fileTool,
                                              UploadFileUseCase uploadFileUseCase, NetworkStateManager networkStateManager,
-                                             FileTaskManager fileTaskManager, SystemSettingDataSource systemSettingDataSource) {
+                                             FileTaskManager fileTaskManager, SystemSettingDataSource systemSettingDataSource,
+                                             StationFileRepository stationFileRepository) {
         this.temporaryUploadFolderParentFolderPath = temporaryUploadFolderParentFolderPath;
         mFileTool = fileTool;
         mUploadFileUseCase = uploadFileUseCase;
         mNetworkStateManager = networkStateManager;
         mFileTaskManager = fileTaskManager;
         mSystemSettingDataSource = systemSettingDataSource;
+        mStationFileRepository = stationFileRepository;
 
     }
 
@@ -55,8 +60,12 @@ public class LoginWithExistUserCallbackWrapper<T> implements BaseOperateDataCall
     @Override
     public void onSucceed(T data, OperationResult result) {
 
+        String currentUserUUID = mSystemSettingDataSource.getCurrentLoginUserUUID();
+
+        mStationFileRepository.fillAllFinishTaskItemIntoFileTaskManager(currentUserUUID);
+
         mFileTaskManager.initPendingUploadItem(mUploadFileUseCase, mNetworkStateManager, temporaryUploadFolderParentFolderPath,
-                mSystemSettingDataSource.getCurrentLoginUserUUID(), mFileTool);
+                currentUserUUID, mFileTool);
 
         mCallback.onSucceed(data, result);
 
@@ -84,5 +93,9 @@ public class LoginWithExistUserCallbackWrapper<T> implements BaseOperateDataCall
 
     SystemSettingDataSource getSystemSettingDataSource() {
         return mSystemSettingDataSource;
+    }
+
+    public BaseOperateDataCallback<T> getCallback() {
+        return mCallback;
     }
 }

@@ -145,16 +145,13 @@ public class LoginUseCaseTest {
         LoginUseCase.destroyInstance();
 
         LoginNewUserCallbackWrapper<Boolean> booleanLoginNewUserCallbackWrapper = new LoginNewUserCallbackWrapper<>("", mFileTool,
-                mUploadFileUseCase, mNetworkStateManager, mFileTaskManager, systemSettingDataSource, mLogoutUseCase);
-
-        LoginWithExistUserCallbackWrapper<Boolean> booleanLoginWithExistUserCallbackWrapper = new LoginWithExistUserCallbackWrapper<>("",
-                mFileTool, mUploadFileUseCase, mNetworkStateManager, mFileTaskManager, systemSettingDataSource);
+                mUploadFileUseCase, mNetworkStateManager, mFileTaskManager, systemSettingDataSource, stationFileRepository, mLogoutUseCase);
 
         loginUseCase = LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource,
                 httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase, userDataRepository, mediaDataSourceRepository,
                 stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, eventBus, new MockThreadManager(),
                 newPhotoListDataLoader, stationsDataSource, mGetAllBindingLocalUserUseCase, weChatUserDataSource,
-                booleanLoginNewUserCallbackWrapper, booleanLoginWithExistUserCallbackWrapper);
+                booleanLoginNewUserCallbackWrapper);
 
         when(systemSettingDataSource.getCurrentLoginUserUUID()).thenReturn("");
 
@@ -816,7 +813,7 @@ public class LoginUseCaseTest {
 
     private void verifyLoginWithNewUserSucceed() {
 
-        verify(mLogoutUseCase).changeLoginUser();
+        verify(mLogoutUseCase).stopUploadTask();
 
         verify(mFileTaskManager).initPendingUploadItem(any(UploadFileUseCase.class), any(NetworkStateManager.class),
                 anyString(), anyString(), any(FileTool.class));

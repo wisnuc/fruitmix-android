@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -14,16 +15,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/avatar_textview"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@{user.defaultAvatarBgColorResourceId,default=@drawable/share_portrait_bg}"
-            android:gravity="center"
-            android:text="@{user.defaultAvatar}"
-            android:textColor="@color/eighty_seven_percent_white"
-            android:textSize="18dp"
-            android:visibility="gone" />
+            android:visibility="visible">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@{user.defaultAvatarBgColorResourceId,default=@drawable/share_portrait_bg}"
+                android:scaleType="center" />
+
+            <TextView
+                android:id="@+id/avatar_textview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@{user.defaultAvatar}"
+                android:textColor="@color/eighty_seven_percent_white"
+                android:textSize="18dp"
+                tools:text="fdads" />
+
+        </FrameLayout>
+
 
         <com.winsun.fruitmix.component.CircleImageView
             android:id="@+id/avatar_imageview"

@@ -93,6 +93,16 @@ public class ThreadManagerImpl implements ThreadManager {
     }
 
     @Override
+    public Future<Boolean> runOnUploadFileThread(Callable<Boolean> callable) {
+        return executorServiceInstance.doOneTaskInUploadFileThreadPool(callable);
+    }
+
+    @Override
+    public void stopUploadFileThreadNow() {
+        executorServiceInstance.shutdownUploadFileThreadPoolNow();
+    }
+
+    @Override
     public void stopUploadMediaThreadNow() {
         executorServiceInstance.shutdownUploadMediaThreadPoolNow();
     }

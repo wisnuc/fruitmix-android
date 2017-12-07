@@ -15,6 +15,7 @@ import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationSuccessWithFile;
 import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
@@ -29,7 +30,6 @@ import com.winsun.fruitmix.util.FileUtil;
 import org.json.JSONException;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -40,11 +40,11 @@ public class UploadFileUseCase {
 
     public static final String TAG = UploadFileUseCase.class.getSimpleName();
 
-    public static final int UPLOAD_FILE_EEXIST = 0x1001;
+    private static final int UPLOAD_FILE_EEXIST = 0x1001;
 
-    public static final int UPLOAD_FILE_SUCCEED = 0x1002;
+    private static final int UPLOAD_FILE_SUCCEED = 0x1002;
 
-    public static final int UPLOAD_FILE_FAIL = 0x1003;
+    private static final int UPLOAD_FILE_FAIL = 0x1003;
 
     static final String UPLOAD_PARENT_FOLDER_NAME = "上传的文件";
 
@@ -74,11 +74,9 @@ public class UploadFileUseCase {
 
     boolean needRetryForCreateFolderEEXIST = false;
 
-    private String fileOriginalPath;
-
     private String uploadFilePath;
 
-    private int renameCode = 0;
+    private String fileOriginalName;
 
     UploadFileUseCase(UserDataRepository userDataRepository, StationFileRepository stationFileRepository,
                       SystemSettingDataSource systemSettingDataSource, NetworkStateManager networkStateManager,
@@ -90,6 +88,13 @@ public class UploadFileUseCase {
         this.networkStateManager = networkStateManager;
         mFileTool = fileTool;
         this.fileTemporaryFolderParentFolderPath = fileTemporaryFolderParentFolderPath;
+    }
+
+    public UploadFileUseCase copySelf(){
+
+        return new UploadFileUseCase(userDataRepository,stationFileRepository,systemSettingDataSource,
+                networkStateManager,mFileTool,uploadFolderName,fileTemporaryFolderParentFolderPath);
+
     }
 
     public void updateFile(final FileUploadState fileUploadState) {
@@ -136,7 +141,44 @@ public class UploadFileUseCase {
         String fileTemporaryUploadFolderPath = mFileTool.getTemporaryUploadFolderPath(fileTemporaryFolderParentFolderPath,
                 systemSettingDataSource.getCurrentLoginUserUUID());
 
-        boolean copyResult = mFileTool.copyFileToDir(fileOriginalPath, fileUploadItem.getFileName(),fileTemporaryUploadFolderPath);
+        fileOriginalName = fileUploadItem.getFileName();
+
+        Log.d(TAG, "copyToTemporaryFolder: originalName: " + fileOriginalName + this);
+
+        boolean copyResult;
+
+        copyResult = mFileTool.copyFileToDir(fileOriginalPath, fileUploadItem.getFileName(), fileTemporaryUploadFolderPath);
+
+/*        fileOriginalName = fileUploadItem.getFileName();
+
+        Log.d(TAG, "copyToTemporaryFolder: originalName: " + fileOriginalName);
+
+        String fileName = fileOriginalName;
+
+        int renameCode = 0;
+
+        while (true) {
+
+            String filePath = fileTemporaryUploadFolderPath + File.separator + fileName;
+
+            File file = new File(filePath);
+
+            if (file.exists()) {
+
+                fileName = renameFileName(++renameCode, fileOriginalName);
+
+            } else {
+
+                Log.d(TAG, "copyToTemporaryFolder: file final name: " + fileName);
+
+                fileUploadItem.setFileName(fileName);
+
+                copyResult = mFileTool.copyFileToDir(fileOriginalPath, fileUploadItem.getFileName(), fileTemporaryUploadFolderPath);
+
+                break;
+            }
+
+        }*/
 
         if (copyResult)
             uploadFilePath = fileTemporaryUploadFolderPath;
@@ -144,6 +186,9 @@ public class UploadFileUseCase {
             uploadFilePath = fileOriginalPath;
 
         uploadFilePath += File.separator + fileUploadItem.getFileName();
+
+        if (copyResult)
+            fileUploadItem.setTemporaryUploadFilePath(uploadFilePath);
 
         Log.d(TAG, "copyToTemporaryFolder: upload file path: " + uploadFilePath);
 
@@ -193,10 +238,12 @@ public class UploadFileUseCase {
 
         Log.i(TAG, "start check folder exist");
 
-        List<AbstractRemoteFile> files = stationFileRepository.getFileWithoutCreateNewThread(rootUUID, dirUUID);
+        OperationResult result = stationFileRepository.getFileWithoutCreateNewThread(rootUUID, dirUUID);
 
-        callback.onSucceed(files, new OperationSuccess());
-
+        if (result instanceof OperationSuccessWithFile)
+            callback.onSucceed(((OperationSuccessWithFile) result).getList(), new OperationSuccess());
+        else
+            callback.onFail(result);
     }
 
     private void notifyError(FileUploadState fileUploadState) {
@@ -314,10 +361,6 @@ public class UploadFileUseCase {
 
                 try {
 
-//                    List<AbstractRemoteFile> files = parser.parse(data.getResponseData());
-//
-//                    uploadParentFolderUUID = getFolderUUIDByName(files, UPLOAD_PARENT_FOLDER_NAME);
-
                     AbstractRemoteFile file = parser.parse(data.getResponseData());
 
                     uploadParentFolderUUID = file.getUuid();
@@ -358,10 +401,6 @@ public class UploadFileUseCase {
                 RemoteDataParser<AbstractRemoteFile> parser = new RemoteMkDirParser();
 
                 try {
-
-//                    List<AbstractRemoteFile> files = parser.parse(data.getResponseData());
-//
-//                    uploadFolderUUID = getFolderUUIDByName(files, getUploadFolderName());
 
                     AbstractRemoteFile file = parser.parse(data.getResponseData());
 
@@ -451,13 +490,19 @@ public class UploadFileUseCase {
 
             final FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
 
-            List<AbstractRemoteFile> files = stationFileRepository.getFileWithoutCreateNewThread(currentUserHome, uploadFolderUUID);
+            OperationResult result = stationFileRepository.getFileWithoutCreateNewThread(currentUserHome, uploadFolderUUID);
+
+            if (!(result instanceof OperationSuccessWithFile))
+                return;
+
+            List<AbstractRemoteFile> files = ((OperationSuccessWithFile) result).getList();
 
             int preRenameCode;
+            int renameCode = 0;
 
-            String originalFileName = fileUploadItem.getFileName();
+            Log.d(TAG, "startUploadFile: fileOriginalName: " + fileOriginalName + this);
 
-            String newFileName = originalFileName;
+            String newFileName = fileOriginalName;
 
             do {
 
@@ -467,7 +512,7 @@ public class UploadFileUseCase {
 
                     if (file.getName().equals(newFileName)) {
 
-                        newFileName = renameFileName(++renameCode, originalFileName);
+                        newFileName = renameFileName(++renameCode, fileOriginalName);
 
                         break;
                     }
@@ -476,11 +521,13 @@ public class UploadFileUseCase {
 
             } while (preRenameCode != renameCode);
 
+            Log.d(TAG, "after getFileInUploadFolder newFileName: " + newFileName);
+
             fileUploadItem.setFileName(newFileName);
 
-            int result = startUploadFileAfterCheck(fileUploadState);
+            int uploadResult = startUploadFileAfterCheck(fileUploadState);
 
-            if (result != UPLOAD_FILE_EEXIST)
+            if (uploadResult != UPLOAD_FILE_EEXIST)
                 break;
 
         }
@@ -496,9 +543,9 @@ public class UploadFileUseCase {
 
         String fileNameWithEnd = fileName.substring(0, dotIndex);
 
-        String end = fileName.substring(dotIndex, fileName.length()).toLowerCase();
+        String end = fileName.substring(dotIndex, fileName.length());
 
-        fileName = fileNameWithEnd + "_" + renameCode + end;
+        fileName = fileNameWithEnd + "(" + renameCode + ")" + end;
 
         return fileName;
 
@@ -509,7 +556,7 @@ public class UploadFileUseCase {
         FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
         String fileName = fileUploadItem.getFileName();
 
-        LocalFile localFile = new LocalFile();
+        final LocalFile localFile = new LocalFile();
 
         localFile.setFileHash(fileUploadItem.getFileUUID());
         localFile.setSize(fileUploadItem.getFileSize() + "");
@@ -576,8 +623,6 @@ public class UploadFileUseCase {
 
     private void handleUploadSucceed(String filePath, String newFileName, FileUploadItem fileUploadItem) {
 
-        fileUploadItem.setFileUploadState(new FileUploadFinishedState(fileUploadItem));
-
         boolean copyToDownloadFolderResult = mFileTool.copyFileToDir(filePath, newFileName, FileUtil.getDownloadFileStoreFolderPath());
 
         Log.d(TAG, "handleUploadSucceed: copy to download folder result: " + copyToDownloadFolderResult);
@@ -586,10 +631,13 @@ public class UploadFileUseCase {
 
         Log.d(TAG, "handleUploadSucceed: insert record,file path: " + fileUploadItem.getFilePath());
 
+        fileUploadItem.setFileTime(System.currentTimeMillis());
+
+        fileUploadItem.setFileUploadState(new FileUploadFinishedState(fileUploadItem));
+
         boolean insertResult = stationFileRepository.insertFileUploadTask(fileUploadItem, currentUserUUID);
 
         Log.d(TAG, "handleUploadSucceed: insert record result: " + insertResult);
-
 
     }
 

@@ -21,6 +21,7 @@ import com.winsun.fruitmix.file.data.upload.UploadFileUseCase;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.util.Util;
@@ -31,6 +32,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Created by Administrator on 2016/11/7.
@@ -62,8 +66,6 @@ public class FileTaskManager {
 
     public void addFinishedFileTaskItem(FileTaskItem fileTaskItem) {
 
-        if (checkIsAlreadyDownloadingState(fileTaskItem.getFileUUID())) return;
-
         if (getFileTaskItemByName(fileTaskItem.getFileName()) != null) return;
 
         fileTaskItems.add(fileTaskItem);
@@ -83,7 +85,8 @@ public class FileTaskManager {
     public void addFileDownloadItem(FileDownloadItem fileDownloadItem, StationFileRepository stationFileRepository,
                                     NetworkStateManager networkStateManager, String currentUserUUID) {
 
-        if (checkIsAlreadyDownloadingStateOrDownloadedState(fileDownloadItem.getFileUUID())) return;
+        if (checkIsAlreadyDownloadingStateOrDownloadedState(fileDownloadItem.getFileName(), fileDownloadItem.getFileUUID()))
+            return;
 
         FileDownloadState fileDownloadState;
 
@@ -123,7 +126,7 @@ public class FileTaskManager {
 
                 Log.d(TAG, "initPendingUploadItem: file path: " + uploadFilePath);
 
-                addFileUploadItem(uploadFilePath, uploadFileUseCase, networkStateManager, false);
+                addFileUploadItem(uploadFilePath, uploadFileUseCase.copySelf(), networkStateManager, false);
 
             }
 
@@ -131,30 +134,45 @@ public class FileTaskManager {
 
     }
 
-    public void addFileUploadItem(String uploadFilePath, UploadFileUseCase uploadFileUseCase, NetworkStateManager networkStateManager,
+    public void addFileUploadItem(final String uploadFilePath, UploadFileUseCase uploadFileUseCase, NetworkStateManager networkStateManager,
                                   boolean startUploadImmediately) {
 
         File file = new File(uploadFilePath);
 
-        String fileHash = Util.calcSHA256OfFile(uploadFilePath);
+        ThreadManager threadManager = ThreadManagerImpl.getInstance();
 
-        addFileUploadItem(new FileUploadItem(fileHash, file.getName(), file.length(), uploadFilePath), uploadFileUseCase, networkStateManager, startUploadImmediately);
+        Future<String> future = threadManager.runOnCacheThread(new Callable<String>() {
+
+            @Override
+            public String call() throws Exception {
+                return Util.calcSHA256OfFile(uploadFilePath);
+            }
+        });
+
+        try {
+            String fileHash = future.get();
+
+            addFileUploadItem(new FileUploadItem(fileHash, file.getName(), file.length(), uploadFilePath), uploadFileUseCase, networkStateManager, startUploadImmediately);
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
     }
 
     private void addFileUploadItem(FileUploadItem fileUploadItem, UploadFileUseCase uploadFileUseCase, NetworkStateManager networkStateManager,
                                    boolean startUploadImmediately) {
 
-        if (checkIsAlreadyDownloadingState(fileUploadItem.getFileUUID())) return;
-
         String fileOriginalName = fileUploadItem.getFileName();
         String fileName = fileOriginalName;
 
+        int renameCode = 0;
+
         while (true) {
 
-            int renameCode = 0;
-
-            if (getPendingFileTaskItemByName(fileName) != null) {
+            if (getFileTaskItemByName(fileName) != null) {
 
                 fileName = uploadFileUseCase.renameFileName(++renameCode, fileOriginalName);
 
@@ -166,14 +184,6 @@ public class FileTaskManager {
         fileUploadItem.setFileName(fileName);
 
         FileUploadState fileUploadState;
-
-/*        if (checkDownloadingItemIsMax()) {
-            fileUploadState = new FileUploadPendingState(fileUploadItem, InjectUploadFileCase.provideInstance(context),
-                    InjectNetworkStateManager.provideNetworkStateManager(context));
-        } else {
-            fileUploadState = new FileStartUploadState(fileUploadItem, ThreadManagerImpl.getInstance(),
-                    InjectUploadFileCase.provideInstance(context), InjectNetworkStateManager.provideNetworkStateManager(context));
-        }*/
 
         if (startUploadImmediately)
             fileUploadState = new FileStartUploadState(fileUploadItem, ThreadManagerImpl.getInstance(),
@@ -189,15 +199,15 @@ public class FileTaskManager {
 
     }
 
-    public void deleteFileTaskItem(List<String> fileUnionKeys) {
+    public void deleteFileTaskItem(List<FinishedTaskItemWrapper> finishedTaskItemWrappers) {
 
-        for (String fileUnionKey : fileUnionKeys) {
+        for (FinishedTaskItemWrapper finishedTaskItemWrapper : finishedTaskItemWrappers) {
 
             Iterator<FileTaskItem> itemIterator = fileTaskItems.iterator();
             while (itemIterator.hasNext()) {
                 FileTaskItem fileTaskItem = itemIterator.next();
 
-                if (checkFileTaskItem(fileTaskItem, fileUnionKey))
+                if (checkFileTaskItem(fileTaskItem, finishedTaskItemWrapper.getFileName(), finishedTaskItemWrapper.getFileUUID()))
                     itemIterator.remove();
 
             }
@@ -223,43 +233,20 @@ public class FileTaskManager {
 
     }
 
-    private boolean checkIsAlreadyDownloadingState(String fileUnionKey) {
+    private boolean checkIsAlreadyDownloadingStateOrDownloadedState(String fileName, String fileUUID) {
 
-        FileTaskItem fileTaskItem = getFileTaskItem(fileUnionKey);
-
-        return fileTaskItem != null && (fileTaskItem.getTaskState() == TaskState.START_DOWNLOAD_OR_UPLOAD ||
-                fileTaskItem.getTaskState() == TaskState.DOWNLOADING_OR_UPLOADING);
-
-    }
-
-    private boolean checkIsAlreadyDownloadingStateOrDownloadedState(String fileUnionKey) {
-
-        FileTaskItem fileTaskItem = getFileTaskItem(fileUnionKey);
+        FileTaskItem fileTaskItem = getFileTaskItem(fileName, fileUUID);
 
         return fileTaskItem != null && (fileTaskItem.getTaskState() == TaskState.START_DOWNLOAD_OR_UPLOAD ||
                 fileTaskItem.getTaskState() == TaskState.DOWNLOADING_OR_UPLOADING || fileTaskItem.getTaskState() == TaskState.FINISHED);
 
     }
 
-    public boolean checkIsDownloaded(String fileUnionKey) {
-
-        FileTaskItem fileTaskItem = getFileTaskItem(fileUnionKey);
-
-        return fileTaskItem != null && fileTaskItem.getTaskState() == TaskState.FINISHED;
-
-    }
-
-    /**
-     * get file task item by fileUnionKey or FilePath
-     *
-     * @param fileUnionKey file uuid for download or file path for upload
-     * @return
-     */
-    public FileTaskItem getFileTaskItem(String fileUnionKey) {
+    public FileTaskItem getFileTaskItem(String fileName, String fileUUID) {
 
         for (FileTaskItem fileTaskItem : fileTaskItems) {
 
-            if (checkFileTaskItem(fileTaskItem, fileUnionKey))
+            if (checkFileTaskItem(fileTaskItem, fileName, fileUUID))
                 return fileTaskItem;
 
         }
@@ -281,11 +268,15 @@ public class FileTaskManager {
 
     }
 
-    private FileTaskItem getPendingFileTaskItemByName(String fileName) {
+    private FileTaskItem getPendingOrExecutingFileTaskItemByName(String fileName) {
 
         for (FileTaskItem fileTaskItem : fileTaskItems) {
 
-            if (fileTaskItem.getFileName().equals(fileName) && fileTaskItem.getTaskState() == TaskState.PENDING)
+            if (fileTaskItem.getFileName().equals(fileName) && (
+                    fileTaskItem.getTaskState() == TaskState.PENDING
+                            || fileTaskItem.getTaskState() == TaskState.START_DOWNLOAD_OR_UPLOAD ||
+                            fileTaskItem.getTaskState() == TaskState.DOWNLOADING_OR_UPLOADING))
+
                 return fileTaskItem;
 
         }
@@ -295,12 +286,11 @@ public class FileTaskManager {
     }
 
 
-    private boolean checkFileTaskItem(FileTaskItem fileTaskItem, String fileUnionKey) {
+    private boolean checkFileTaskItem(FileTaskItem fileTaskItem, String fileName, String fileUUID) {
 
-        return fileTaskItem.getUnionKey().equals(fileUnionKey);
+        return fileTaskItem.getFileName().equals(fileName) && fileTaskItem.getFileUUID().equals(fileUUID);
 
     }
-
 
     public void startPendingTaskItem() {
 
@@ -343,13 +333,14 @@ public class FileTaskManager {
 
             TaskState taskState = fileTaskItem.getTaskState();
 
-            if (taskState == TaskState.START_DOWNLOAD_OR_UPLOAD || taskState == TaskState.DOWNLOADING_OR_UPLOADING) {
+            if (taskState == TaskState.START_DOWNLOAD_OR_UPLOAD || taskState == TaskState.DOWNLOADING_OR_UPLOADING || taskState == TaskState.PENDING) {
 
                 fileTaskItem.cancelTaskItem();
 
             }
 
         }
+
     }
 
     public void cancelAllStartItemAndSetPending(Context context) {

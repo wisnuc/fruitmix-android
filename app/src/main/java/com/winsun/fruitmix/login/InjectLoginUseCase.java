@@ -80,19 +80,14 @@ public class InjectLoginUseCase {
 
         FileTaskManager fileTaskManager = FileTaskManager.getInstance();
 
-        LoginWithExistUserCallbackWrapper<Boolean> loginWithExistUserCallbackWrapper = new LoginWithExistUserCallbackWrapper<>(temporaryUploadFolderPath, fileTool,
-                uploadFileUseCase, networkStateManager,
-                fileTaskManager, systemSettingDataSource);
-
         LoginNewUserCallbackWrapper<Boolean> loginNewUserCallbackWrapper = new LoginNewUserCallbackWrapper<>(temporaryUploadFolderPath, fileTool,
                 uploadFileUseCase, networkStateManager,
-                fileTaskManager, systemSettingDataSource, logoutUseCase);
+                fileTaskManager, systemSettingDataSource, stationFileRepository,logoutUseCase);
 
         return LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource, httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase,
                 userDataRepository, mediaDataSourceRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, EventBus.getDefault(),
                 ThreadManagerImpl.getInstance(), NewPhotoListDataLoader.getInstance(), InjectStation.provideStationDataSource(context),
-                getAllBindingLocalUserUseCase, InjectWeChatUserDataSource.provideWeChatUserDataSource(context), loginNewUserCallbackWrapper,
-                loginWithExistUserCallbackWrapper);
+                getAllBindingLocalUserUseCase, InjectWeChatUserDataSource.provideWeChatUserDataSource(context), loginNewUserCallbackWrapper);
 
     }
 

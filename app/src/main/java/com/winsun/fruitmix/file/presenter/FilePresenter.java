@@ -498,7 +498,17 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         Comparator<AbstractRemoteFile> comparator = new Comparator<AbstractRemoteFile>() {
             @Override
             public int compare(AbstractRemoteFile lhs, AbstractRemoteFile rhs) {
-                return (int) (Long.parseLong(lhs.getTime()) - Long.parseLong(rhs.getTime()));
+
+                long lhsTime = Long.parseLong(lhs.getTime());
+                long rhsTime = Long.parseLong(rhs.getTime());
+
+                if (lhsTime > rhsTime)
+                    return 1;
+                else if (rhsTime > lhsTime)
+                    return -1;
+                else
+                    return 0;
+
             }
         };
 
@@ -589,7 +599,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                     for (AbstractRemoteFile file : needDownloadFilesForShare) {
 
-                        FileTaskItem fileTaskItem = fileTaskManager.getFileTaskItem(file.getUuid());
+                        FileTaskItem fileTaskItem = fileTaskManager.getFileTaskItem(file.getName(),file.getUuid());
 
                         if (fileTaskItem.getTaskState() == TaskState.ERROR) {
                             occurError = true;
@@ -631,7 +641,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                     for (AbstractRemoteFile file : needDownloadFilesForShare) {
 
-                        FileTaskItem fileTaskItem = fileTaskManager.getFileTaskItem(file.getUuid());
+                        FileTaskItem fileTaskItem = fileTaskManager.getFileTaskItem(file.getName(),file.getUuid());
 
                         if (fileTaskItem.getTaskState() == TaskState.NO_ENOUGH_SPACE) {
                             occurNoEnoughSpace = true;
@@ -839,7 +849,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
         AbstractRemoteFile file = selectedFiles.get(0);
 
-        FileTaskItem fileTaskItem = fileTaskManager.getFileTaskItem(file.getUuid());
+        FileTaskItem fileTaskItem = fileTaskManager.getFileTaskItem(file.getName(),file.getUuid());
 
         if (fileTaskItem != null &&
                 (fileTaskItem.getTaskState().equals(TaskState.PENDING) || fileTaskItem.getTaskState().equals(TaskState.DOWNLOADING_OR_UPLOADING) || fileTaskItem.getTaskState().equals(TaskState.START_DOWNLOAD_OR_UPLOAD))) {
@@ -1172,7 +1182,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                         BottomMenuItem menuItem;
 
-                        FileTaskItem fileTaskItem = fileTaskManager.getFileTaskItem(abstractRemoteFile.getUuid());
+                        FileTaskItem fileTaskItem = fileTaskManager.getFileTaskItem(abstractRemoteFile.getName(),abstractRemoteFile.getUuid());
 
                         boolean result = false;
 

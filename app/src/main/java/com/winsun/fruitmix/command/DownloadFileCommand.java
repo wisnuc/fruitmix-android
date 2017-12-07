@@ -5,6 +5,7 @@ import android.util.Log;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.model.FinishedTaskItemWrapper;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.network.NetworkStateManager;
 
@@ -61,7 +62,7 @@ public class DownloadFileCommand extends AbstractCommand {
 
         fileDownloadItem.cancelTaskItem();
 
-        fileTaskManager.deleteFileTaskItem(Collections.singletonList(fileDownloadItem.getFileUUID()));
+        fileTaskManager.deleteFileTaskItem(Collections.singletonList(new FinishedTaskItemWrapper(fileDownloadItem.getFileUUID(),abstractRemoteFile.getName())));
 
         File downloadFile = new File(getDownloadFileStoreFolderPath(), abstractRemoteFile.getName());
 

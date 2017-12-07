@@ -22,9 +22,11 @@ public enum ExecutorServiceInstance {
 
     private ExecutorService downloadFileThreadPool;
 
+    private ExecutorService uploadFileThreadPool;
+
     private static final int THREAD_SIZE = 4;
 
-    private static final int DOWNLOAD_THREAD_SIZE = 3;
+    private static final int UPLOAD_DOWNLOAD_THREAD_SIZE = 3;
 
     ExecutorServiceInstance() {
         cacheThreadPool = Executors.newCachedThreadPool();
@@ -92,13 +94,26 @@ public enum ExecutorServiceInstance {
     }
 
     private void startDownloadFileThreadPool() {
-        downloadFileThreadPool = Executors.newFixedThreadPool(DOWNLOAD_THREAD_SIZE);
+        downloadFileThreadPool = Executors.newFixedThreadPool(UPLOAD_DOWNLOAD_THREAD_SIZE);
     }
 
-    public void shutdownDownloadFileThreadPoolNow() {
-        if (downloadFileThreadPool != null && !downloadFileThreadPool.isShutdown()) {
-            downloadFileThreadPool.shutdownNow();
-            downloadFileThreadPool = null;
+    public Future<Boolean> doOneTaskInUploadFileThreadPool(Callable<Boolean> callable) {
+
+        if (uploadFileThreadPool == null || uploadFileThreadPool.isShutdown())
+            startUploadFileThreadPool();
+
+        return uploadFileThreadPool.submit(callable);
+
+    }
+
+    private void startUploadFileThreadPool() {
+        uploadFileThreadPool = Executors.newFixedThreadPool(UPLOAD_DOWNLOAD_THREAD_SIZE);
+    }
+
+    public void shutdownUploadFileThreadPoolNow() {
+        if (uploadFileThreadPool != null && !uploadFileThreadPool.isShutdown()) {
+            uploadFileThreadPool.shutdownNow();
+            uploadFileThreadPool = null;
         }
     }
 

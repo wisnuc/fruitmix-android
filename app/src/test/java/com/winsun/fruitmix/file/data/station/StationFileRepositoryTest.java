@@ -221,8 +221,12 @@ public class StationFileRepositoryTest {
 
         String testUUID2 = "testUUID2";
 
-        finishedTaskItemWrappers.add(new FinishedTaskItemWrapper(testUUID1, "testName1"));
-        finishedTaskItemWrappers.add(new FinishedTaskItemWrapper(testUUID2, "testName2"));
+        FinishedTaskItemWrapper finishedTaskItemWrapper1 = new FinishedTaskItemWrapper(testUUID1, "testName1");
+
+        FinishedTaskItemWrapper finishedTaskItemWrapper2 = new FinishedTaskItemWrapper(testUUID2, "testName2");
+
+        finishedTaskItemWrappers.add(finishedTaskItemWrapper1);
+        finishedTaskItemWrappers.add(finishedTaskItemWrapper2);
 
         when(uploadFileDataSource.deleteFileTask(anyString(), anyString())).thenReturn(false);
         when(downloadedFileDataSource.deleteDownloadedFile(anyString())).thenReturn(true);
@@ -235,13 +239,13 @@ public class StationFileRepositoryTest {
 
         inOrder.verify(downloadedFileDataSource).deleteFileTask(anyString(), anyString());
 
-        inOrder.verify(fileTaskManager).deleteFileTaskItem(eq(Collections.singletonList(testUUID1)));
+        inOrder.verify(fileTaskManager).deleteFileTaskItem(eq(Collections.singletonList(finishedTaskItemWrapper1)));
 
         inOrder.verify(downloadedFileDataSource).deleteDownloadedFile(anyString());
 
         inOrder.verify(downloadedFileDataSource).deleteFileTask(anyString(), anyString());
 
-        inOrder.verify(fileTaskManager).deleteFileTaskItem(eq(Collections.singletonList(testUUID2)));
+        inOrder.verify(fileTaskManager).deleteFileTaskItem(eq(Collections.singletonList(finishedTaskItemWrapper2)));
 
     }
 
@@ -272,7 +276,7 @@ public class StationFileRepositoryTest {
 
         verify(downloadedFileDataSource, never()).deleteFileTask(anyString(), anyString());
 
-        verify(fileTaskManager, never()).deleteFileTaskItem(ArgumentMatchers.<String>anyList());
+        verify(fileTaskManager, never()).deleteFileTaskItem(ArgumentMatchers.<FinishedTaskItemWrapper>anyList());
 
     }
 
@@ -295,7 +299,7 @@ public class StationFileRepositoryTest {
 
         verify(downloadedFileDataSource, never()).deleteFileTask(anyString(), anyString());
 
-        verify(fileTaskManager).deleteFileTaskItem(ArgumentMatchers.<String>anyList());
+        verify(fileTaskManager).deleteFileTaskItem(ArgumentMatchers.<FinishedTaskItemWrapper>anyList());
 
     }
 

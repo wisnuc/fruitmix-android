@@ -7,14 +7,12 @@ import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
-import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
 import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
-import java.io.File;
 import java.util.Collections;
 
 /**
@@ -79,7 +77,7 @@ public class LogoutUseCase {
         mFileTaskManager = fileTaskManager;
     }
 
-    public void changeLoginUser() {
+    public void stopUploadTask() {
 
         mFileTaskManager.cancelAllStartItem();
 
@@ -128,7 +126,7 @@ public class LogoutUseCase {
 
         httpRequestFactory.reset();
 
-        changeLoginUser();
+        stopUploadTask();
 
         deleteTemporaryUploadFile();
 

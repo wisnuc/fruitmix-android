@@ -6,7 +6,6 @@ import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
-import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
@@ -24,8 +23,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
-import java.io.File;
 
 import static org.mockito.Mockito.*;
 
@@ -91,7 +88,7 @@ public class LogoutUseCaseTest {
     @Test
     public void testChangeLoginUser() {
 
-        logoutUseCase.changeLoginUser();
+        logoutUseCase.stopUploadTask();
 
         testChangeLoginUserResult();
 

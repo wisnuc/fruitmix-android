@@ -18,7 +18,6 @@ import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
-import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -93,11 +92,12 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     }
 
     @Override
-    public List<AbstractRemoteFile> getFile(String rootUUID, String folderUUID) {
+    public OperationResult getFile(String rootUUID, String folderUUID) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(LIST_FILE_PARAMETER + "/" + rootUUID + "/dirs/" + folderUUID);
 
         return wrapper.loadCall(httpRequest, new RemoteFileFolderParser());
+
     }
 
     @Override
@@ -113,6 +113,9 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
             return;
 
         ResponseBody responseBody = null;
+
+        FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
+
         try {
             responseBody = iHttpFileUtil.downloadFile(httpRequest);
 
@@ -123,14 +126,14 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
             Log.d(TAG, "call: download result:" + result);
 
             if (result)
-                callback.onSucceed(fileDownloadState.getFileDownloadItem(), new OperationSuccess());
+                callback.onSucceed(fileDownloadItem, new OperationSuccess());
             else
                 callback.onFail(new OperationIOException());
 
         } catch (NetworkException e) {
             e.printStackTrace();
 
-            FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
+            fileDownloadItem.setFileTime(System.currentTimeMillis());
 
             fileDownloadItem.setFileDownloadState(new FileDownloadErrorState(fileDownloadItem));
 

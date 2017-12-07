@@ -6,7 +6,6 @@ import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
-import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -26,7 +25,7 @@ public interface StationFileDataSource {
 
     void getFile(String rootUUID,final String folderUUID, final BaseLoadDataCallback<AbstractRemoteFile> callback);
 
-    List<AbstractRemoteFile> getFile(String rootUUID,String folderUUID);
+    OperationResult getFile(String rootUUID,String folderUUID);
 
     void downloadFile(FileDownloadState fileDownloadState, BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException;
 

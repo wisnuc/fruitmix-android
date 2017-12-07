@@ -81,6 +81,24 @@ public class MockThreadManager implements ThreadManager {
     }
 
     @Override
+    public Future<Boolean> runOnUploadFileThread(Callable<Boolean> callable) {
+        try {
+            callable.call();
+
+            return null;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public void stopUploadFileThreadNow() {
+
+    }
+
+    @Override
     public void stopUploadMediaThreadNow() {
 
     }

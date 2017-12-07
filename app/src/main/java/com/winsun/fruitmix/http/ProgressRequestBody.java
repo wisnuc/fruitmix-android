@@ -97,11 +97,13 @@ public class ProgressRequestBody extends RequestBody {
 
                 } else {
 
-                    Log.d(TAG, "currentUploadSize: " + bytesWritten);
+                    if (bytesWritten - newFileUploadState.getFileUploadItem().getFileCurrentTaskSize() > 1024) {
 
-                    newFileUploadState.setFileCurrentTaskSize(bytesWritten);
+                        newFileUploadState.setFileCurrentTaskSize(bytesWritten);
 
-                    newFileUploadState.notifyDownloadStateChanged();
+                        newFileUploadState.notifyDownloadStateChanged();
+
+                    }
 
                 }
 

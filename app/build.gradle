@@ -88,7 +88,6 @@ configurations.all {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':volley')
-    compile rootProject.ext.supportV4
     compile rootProject.ext.appcompatV7
     compile rootProject.ext.design
     compile rootProject.ext.cardviewV7
