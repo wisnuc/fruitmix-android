@@ -74,7 +74,7 @@ public abstract class FileTaskItem {
         return fileCurrentTaskSize;
     }
 
-    public abstract TaskState getTaskState() ;
+    public abstract TaskState getTaskState();
 
     public abstract String getUnionKey();
 
@@ -92,6 +92,10 @@ public abstract class FileTaskItem {
     }
 
     public int getCurrentProgress(int max) {
+
+        //fix bug:#150,download 0 byte file cause crash
+        if (getFileCurrentTaskSize() == 0 && getFileSize() == 0)
+            return max;
 
         float currentProgress = getFileCurrentTaskSize() * max / getFileSize();
 

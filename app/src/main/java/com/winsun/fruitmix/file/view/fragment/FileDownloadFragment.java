@@ -83,6 +83,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     private boolean selectMode = false;
 
+    //remove using mStartDownloadOrPending: file finish state will not be refresh because of one task set false,other file is finish but the value is false
     private boolean mStartDownloadOrPending = false;
 
     private Map<String, FinishedTaskItemWrapper> selectDownloadedItemMap;
@@ -253,10 +254,9 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
         if (taskState == TaskState.FINISHED || taskState == TaskState.ERROR) {
 
-            if (mStartDownloadOrPending) {
-                mStartDownloadOrPending = false;
-                customHandler.sendEmptyMessageDelayed(DOWNLOAD_STATE_CHANGED, DELAY_TIME_MILLISECOND);
-            }
+
+            customHandler.sendEmptyMessageDelayed(DOWNLOAD_STATE_CHANGED, DELAY_TIME_MILLISECOND);
+
 
         } else if (taskState == TaskState.NO_ENOUGH_SPACE) {
 
@@ -266,14 +266,10 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
             Log.d(TAG, "handleEvent: download state: START_DOWNLOAD_OR_UPLOAD,PENDING");
 
-            mStartDownloadOrPending = true;
-
             refreshView();
 
         } else if (taskState == TaskState.DOWNLOADING_OR_UPLOADING) {
 
-            if (!mStartDownloadOrPending)
-                mStartDownloadOrPending = true;
 
             refreshViewBeforeDownloadedGroupItem();
         }
@@ -683,7 +679,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
                             fileTaskItem.cancelTaskItem();
 
-                            if(fileTaskItem instanceof FileUploadItem){
+                            if (fileTaskItem instanceof FileUploadItem) {
 
                                 String temporaryUploadFilePath = ((FileUploadItem) fileTaskItem).getTemporaryUploadFilePath();
 

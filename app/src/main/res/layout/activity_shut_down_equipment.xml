@@ -65,7 +65,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:background="?attr/selectableItemBackground"
+                    android:background="?android:attr/selectableItemBackground"
                     android:gravity="center_vertical"
                     android:onClick="@{()-> manageEquipmentPresenter.shutdownEquipment()}"
                     android:paddingLeft="16dp"
@@ -89,7 +89,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:background="?attr/selectableItemBackground"
+                    android:background="?android:attr/selectableItemBackground"
                     android:gravity="center_vertical"
                     android:onClick="@{()-> manageEquipmentPresenter.rebootEquipment()}"
                     android:paddingLeft="16dp"
@@ -156,7 +156,7 @@
                     android:id="@+id/maintenance_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:background="?attr/selectableItemBackground"
+                    android:background="?android:attr/selectableItemBackground"
                     android:gravity="center_vertical"
                     android:onClick="@{()-> manageEquipmentPresenter.rebootAndEnterMaintenanceMode()}"
                     android:paddingLeft="16dp"

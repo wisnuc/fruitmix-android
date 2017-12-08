@@ -37,14 +37,16 @@ import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
  * Created by Administrator on 2017/8/15.
  */
 
-public class EquipmentPresenter implements ActiveView{
+public class EquipmentPresenter implements ActiveView {
 
     public static final String TAG = EquipmentPresenter.class.getSimpleName();
 
@@ -66,7 +68,7 @@ public class EquipmentPresenter implements ActiveView{
 
     private Equipment currentEquipment;
 
-    private List<List<User>> mUserExpandableLists;
+    private Map<String, List<User>> mMapKeyIsIpValueIsUsers;
 
     private CustomHandler mHandler;
 
@@ -196,7 +198,7 @@ public class EquipmentPresenter implements ActiveView{
 
             equipmentSearchViewModel.showEquipmentViewPager.set(true);
             equipmentSearchViewModel.showEquipmentViewPagerIndicator.set(true);
-            equipmentSearchViewModel.showEquipmentUsers.set(true);
+
 
             adapter.setEquipments(mUserLoadedEquipments);
 
@@ -221,7 +223,7 @@ public class EquipmentPresenter implements ActiveView{
         this.mEquipmentDataSource = equipmentDataSource;
         this.loginUseCase = loginUseCase;
 
-        mUserExpandableLists = new ArrayList<>();
+        mMapKeyIsIpValueIsUsers = new HashMap<>();
 
         mHandler = new CustomHandler(this, Looper.getMainLooper());
 
@@ -303,22 +305,39 @@ public class EquipmentPresenter implements ActiveView{
 
     public void refreshEquipment(int position) {
 
-        if (mUserLoadedEquipments.size() < position)
+        if (mUserLoadedEquipments.size() <= position)
             return;
 
         currentEquipment = mUserLoadedEquipments.get(position);
 
-        int size = equipmentUserRecyclerViewAdapter.mCurrentUsers.size();
+        int state = currentEquipment.getState();
 
-        equipmentUserRecyclerViewAdapter.clearCurrentUsers();
+        if (state == EquipmentDataSource.EQUIPMENT_READY) {
 
-        equipmentUserRecyclerViewAdapter.notifyItemRangeRemoved(0, size);
+            equipmentSearchViewModel.showEquipmentUsers.set(true);
 
-        List<User> users = mUserExpandableLists.get(position);
+            int size = equipmentUserRecyclerViewAdapter.mCurrentUsers.size();
 
-        equipmentUserRecyclerViewAdapter.setCurrentUsers(users);
+            equipmentUserRecyclerViewAdapter.clearCurrentUsers();
 
-        equipmentUserRecyclerViewAdapter.notifyItemRangeInserted(0, users.size());
+            equipmentUserRecyclerViewAdapter.notifyItemRangeRemoved(0, size);
+
+            List<User> users = mMapKeyIsIpValueIsUsers.get(currentEquipment.getHosts().get(0));
+
+            equipmentUserRecyclerViewAdapter.setCurrentUsers(users);
+
+            equipmentUserRecyclerViewAdapter.notifyItemRangeInserted(0, users.size());
+
+        } else {
+
+            equipmentSearchViewModel.showEquipmentUsers.set(false);
+
+            if (state == EquipmentDataSource.EQUIPMENT_SYSTEM_ERROR)
+                equipmentSearchViewModel.equipmentState.set(equipmentSearchView.getContext().getString(R.string.equipment_system_error));
+            else if (state == EquipmentDataSource.EQUIPMENT_UNINITIALIZED)
+                equipmentSearchViewModel.equipmentState.set(equipmentSearchView.getContext().getString(R.string.initial_equipment));
+
+        }
 
     }
 
@@ -407,7 +426,7 @@ public class EquipmentPresenter implements ActiveView{
 
                 equipment.setEquipmentTypeInfo(equipmentTypeInfo);
 
-                getUserInThread(equipment);
+                checkEquipmentState(equipment);
 
             }
 
@@ -420,10 +439,52 @@ public class EquipmentPresenter implements ActiveView{
 
                 equipment.setEquipmentTypeInfo(equipmentTypeInfo);
 
-                getUserInThread(equipment);
+                checkEquipmentState(equipment);
 
             }
-        },this));
+        }, this));
+    }
+
+    private void checkEquipmentState(final Equipment equipment) {
+
+        mEquipmentDataSource.checkEquipmentState(equipment.getHosts().get(0), new BaseOperateDataCallback<Integer>() {
+            @Override
+            public void onSucceed(Integer data, OperationResult result) {
+
+                switch (data) {
+                    case EquipmentDataSource.EQUIPMENT_READY:
+
+                        equipment.setState(EquipmentDataSource.EQUIPMENT_READY);
+
+                        getUserInThread(equipment);
+                        break;
+                    case EquipmentDataSource.EQUIPMENT_UNINITIALIZED:
+
+                        equipment.setState(EquipmentDataSource.EQUIPMENT_UNINITIALIZED);
+
+                        mUserLoadedEquipments.add(equipment);
+
+                        sendUpdateListMessage();
+
+                        break;
+                    default:
+                        Log.d(TAG, "onSucceed: equipment not ready or uninitialized,error");
+                }
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                equipment.setState(EquipmentDataSource.EQUIPMENT_SYSTEM_ERROR);
+
+                mUserLoadedEquipments.add(equipment);
+
+                sendUpdateListMessage();
+
+            }
+        });
+
     }
 
     private void getUserInThread(final Equipment equipment) {
@@ -440,7 +501,7 @@ public class EquipmentPresenter implements ActiveView{
 
                 handleRetrieveUserFail(equipment);
             }
-        },this));
+        }, this));
     }
 
     private void handleRetrieveUserFail(Equipment equipment) {
@@ -454,25 +515,21 @@ public class EquipmentPresenter implements ActiveView{
         }
     }
 
+
     private void handleRetrieveUsers(List<User> data, Equipment equipment) {
         if (data.isEmpty())
             return;
 
-        synchronized (mUserLoadedEquipments) {
+        mUserLoadedEquipments.add(equipment);
+        mMapKeyIsIpValueIsUsers.put(equipment.getHosts().get(0), data);
 
-            for (Equipment userLoadedEquipment : mUserLoadedEquipments) {
-                if (userLoadedEquipment.getSerialNumber().equals(equipment.getSerialNumber()))
-                    return;
-                else if (userLoadedEquipment.getHosts().contains(equipment.getHosts().get(0)))
-                    return;
-            }
+        Log.d(TAG, "EquipmentSearch: " + mMapKeyIsIpValueIsUsers.toString());
 
-            mUserLoadedEquipments.add(equipment);
-            mUserExpandableLists.add(data);
+        sendUpdateListMessage();
 
-            Log.d(TAG, "EquipmentSearch: " + mUserExpandableLists.toString());
-        }
+    }
 
+    private void sendUpdateListMessage() {
         //update list
         if (mHandler != null && !onPause)
             mHandler.sendEmptyMessage(DATA_CHANGE);

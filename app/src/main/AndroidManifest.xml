@@ -107,7 +107,6 @@
             android:name=".file.view.FileDownloadActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:exported="true"
@@ -146,7 +145,6 @@
 
                 <data android:mimeType="*/*" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -154,7 +152,6 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:mimeType="*/*" />
-
                 <data android:scheme="file" />
             </intent-filter>
         </activity>
@@ -174,7 +171,9 @@
         <activity
             android:name=".equipment.manage.ModifyEquipmentLabelActivity"
             android:screenOrientation="portrait" />
-
+        <activity
+            android:name=".equipment.initial.InitialEquipmentActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

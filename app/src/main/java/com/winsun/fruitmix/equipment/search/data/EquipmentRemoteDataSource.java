@@ -1,12 +1,18 @@
 package com.winsun.fruitmix.equipment.search.data;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
+import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.parser.RemoteDatasParser;
+import com.winsun.fruitmix.parser.RemoteEquipmentBootInfoParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentTypeInfoParser;
 import com.winsun.fruitmix.parser.RemoteStationsCallByStationAPIParser;
 import com.winsun.fruitmix.stations.StationInfoCallByStationAPI;
@@ -14,6 +20,10 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.parser.RemoteEquipmentHostAliasParser;
 import com.winsun.fruitmix.parser.RemoteLoginUsersParser;
 import com.winsun.fruitmix.util.Util;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +42,12 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
 
     private static final String EQUIPMENT_NAME = "/station/info";
 
+    public static final String BOOT = "/boot";
+    public static final String STORAGE = "/storage";
+
+    public static final String BOOT_ENOALT = "ENOALT";
+
+
     public EquipmentRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
         super(iHttpUtil, httpRequestFactory);
     }
@@ -44,6 +60,96 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
         wrapper.loadCall(httpRequest, callback, new RemoteLoginUsersParser());
 
     }
+
+    @Override
+    public void checkEquipmentState(final String equipmentIP, final BaseOperateDataCallback<Integer> callback) {
+
+        HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(equipmentIP, BOOT);
+
+        wrapper.loadCall(httpRequest, new BaseLoadDataCallback<EquipmentBootInfo>() {
+            @Override
+            public void onSucceed(List<EquipmentBootInfo> data, OperationResult operationResult) {
+
+                EquipmentBootInfo equipmentBootInfo = data.get(0);
+
+                if (equipmentBootInfo.getError() != null && equipmentBootInfo.getError().equals(BOOT_ENOALT)) {
+
+                    Log.d(TAG, "onSucceed: ip:" + equipmentIP + " BOOT_ENOALT");
+
+                    handleGetEquipmentBootInfo(equipmentIP, callback);
+
+                } else {
+
+                    Log.d(TAG, "onSucceed: ip:" + equipmentIP + " ready");
+
+                    callback.onSucceed(EQUIPMENT_READY, new OperationSuccess());
+                }
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                callback.onFail(operationResult);
+
+            }
+        }, new RemoteEquipmentBootInfoParser());
+
+    }
+
+    private void handleGetEquipmentBootInfo(final String ip, final BaseOperateDataCallback<Integer> callback) {
+
+        HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(ip, STORAGE);
+
+        wrapper.loadCall(httpRequest, new BaseLoadDataCallback<EquipmentStorageInfo>() {
+            @Override
+            public void onSucceed(List<EquipmentStorageInfo> data, OperationResult operationResult) {
+
+                EquipmentStorageInfo equipmentStorageInfo = data.get(0);
+
+                if (equipmentStorageInfo.getEmptyVolumes()) {
+
+                    Log.d(TAG, "onSucceed: ip:" + ip + " uninitialized");
+
+                    callback.onSucceed(EQUIPMENT_UNINITIALIZED, new OperationSuccess());
+                } else {
+
+                    Log.d(TAG, "onSucceed: ip:" + ip + " no volume");
+
+                    callback.onFail(new OperationFail("no volume"));
+                }
+
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                callback.onFail(operationResult);
+
+            }
+        }, new RemoteDatasParser<EquipmentStorageInfo>() {
+            @Override
+            public List<EquipmentStorageInfo> parse(String json) throws JSONException {
+
+                JSONObject jsonObject = new JSONObject(json);
+
+                boolean emptyVolumes = jsonObject.has("volumes");
+
+                if (emptyVolumes) {
+
+                    JSONArray jsonArray = jsonObject.optJSONArray("volumes");
+
+                    emptyVolumes = jsonArray.length() == 0;
+
+                }
+
+                return Collections.singletonList(new EquipmentStorageInfo(emptyVolumes));
+            }
+        });
+
+    }
+
 
     public void getEquipmentHostAlias(Equipment equipment, BaseLoadDataCallback<String> callback) {
 

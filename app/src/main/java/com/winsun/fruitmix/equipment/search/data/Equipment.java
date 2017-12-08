@@ -24,6 +24,8 @@ public class Equipment {
 
     private EquipmentTypeInfo equipmentTypeInfo;
 
+    private int state;
+
     public Equipment(String serviceName, List<String> hosts, int port) {
         this.serviceName = serviceName;
         this.hosts = hosts;
@@ -87,6 +89,14 @@ public class Equipment {
 
     public void setEquipmentTypeInfo(EquipmentTypeInfo equipmentTypeInfo) {
         this.equipmentTypeInfo = equipmentTypeInfo;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
     }
 
     public static Equipment createEquipment(BonjourService bonjourService) {

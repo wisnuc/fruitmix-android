@@ -11,7 +11,7 @@
         android:id="@+id/equipment_user_item_layout"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="?attr/selectableItemBackground"
+        android:background="?android:attr/selectableItemBackground"
         android:clickable="true"
         android:orientation="vertical">
 

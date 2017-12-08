@@ -20,7 +20,7 @@
         android:id="@+id/remote_file_item_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackground"
+        android:background="?android:attr/selectableItemBackground"
         android:orientation="vertical"
         android:paddingLeft="16dp">
 
@@ -61,7 +61,7 @@
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:src="@drawable/ic_menu"
                 android:visibility="@{fileItemViewModel.selectMode?View.GONE:View.VISIBLE,default=visible}" />

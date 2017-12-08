@@ -145,6 +145,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
 //                Toast.makeText(this, "baseresp.getType = " + baseResp.getType() + "onResp: state: " + resp.state + " code: " + code, Toast.LENGTH_LONG).show();
 
+                    //TODO:use one callback for retrieve code for issue:#141
+
                     Log.d(TAG, "onResp: wechat code: " + code);
 
                     if (wxEntryLoginCallback != null) {

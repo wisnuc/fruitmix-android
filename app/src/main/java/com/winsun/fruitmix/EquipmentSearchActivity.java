@@ -321,4 +321,11 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
     public Context getContext() {
         return this;
     }
+
+    @Override
+    public void gotoInitialEquipmentActivity() {
+
+
+
+    }
 }

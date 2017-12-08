@@ -325,8 +325,8 @@
     <!-- equipment info -->
 
     <string name="equipment_label">Device Name</string>
-    <string name="equipment_type">Device Type</string>				 
-    <string name="hardware_serial_number">Serial Number</string>	
+    <string name="equipment_type">Device Type</string>
+    <string name="hardware_serial_number">Serial Number</string>
     <string name="mac_address">Mac Address</string>
     <string name="total_memory_size">RAM Size</string>
     <string name="free_memory_size">Free RAM Size</string>
@@ -396,6 +396,10 @@
 
     <!-- play video -->
     <string name="play_video">Play Video</string>
+
+    <!-- initial equipment -->
+    <string name="initial_equipment">Initial</string>
+    <string name="equipment_system_error">System Error</string>
 
     <!-- group -->
     <string name="group">Group</string>

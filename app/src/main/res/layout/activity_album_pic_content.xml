@@ -15,8 +15,8 @@
     <!--<android.support.v7.widget.Toolbar-->
     <!--android:id="@+id/toolbar"-->
     <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="?attr/actionBarSize"-->
-    <!--android:background="?attr/colorPrimary"-->
+    <!--android:layout_height="?android:attr/actionBarSize"-->
+    <!--android:background="?android:attr/colorPrimary"-->
     <!--app:popupTheme="@style/AppTheme.PopupOverlay" >-->
     <!--<RelativeLayout-->
     <!--android:layout_width="wrap_content"-->
@@ -48,7 +48,7 @@
     <!--<android.support.v7.widget.Toolbar-->
         <!--android:id="@+id/toolbar"-->
         <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="?attr/actionBarSize"-->
+        <!--android:layout_height="?android:attr/actionBarSize"-->
         <!--android:background="@color/colorPrimary"-->
         <!--android:elevation="@dimen/appbar_elevation"-->
         <!--android:theme="@style/AppTheme.AppBarOverlay"-->
@@ -77,7 +77,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:layout_marginTop="?android:attr/actionBarSize">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/album_content_recycler_view"

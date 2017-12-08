@@ -14,7 +14,7 @@
         android:id="@+id/equipment_info_layout"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="?attr/selectableItemBackground"
+        android:background="?android:attr/selectableItemBackground"
         android:paddingLeft="16dp"
         android:paddingRight="16dp">
 

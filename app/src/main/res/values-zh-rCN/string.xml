@@ -371,6 +371,11 @@
     <!-- play video -->
     <string name="play_video">播放视频</string>
 
+    <!-- initial equipment -->
+    <string name="initial_equipment">初始化</string>
+    <string name="equipment_system_error">系统错误</string>
+
+
     <!-- group -->
     <string name="group">"私友群"</string>
 
