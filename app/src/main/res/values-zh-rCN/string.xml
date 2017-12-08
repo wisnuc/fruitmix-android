@@ -374,7 +374,7 @@
     <!-- initial equipment -->
     <string name="initial_equipment">初始化</string>
     <string name="equipment_system_error">系统错误</string>
-
+    <string name="initial_title">初始化向导</string>
 
     <!-- group -->
     <string name="group">"私友群"</string>

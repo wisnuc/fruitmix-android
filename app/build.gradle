@@ -87,34 +87,28 @@ configurations.all {
 }
 
 dependencies {
+    implementation 'com.android.support:support-v4:26.1.0'
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':volley')
     compile rootProject.ext.appcompatV7
     compile rootProject.ext.design
     compile rootProject.ext.cardviewV7
     compile rootProject.ext.recyclerviewV7
-
     testCompile "junit:junit:$rootProject.ext.junitVersion"
     testCompile "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
     testCompile "org.hamcrest:hamcrest-all:$rootProject.ext.hamcrestVersion"
-
     testCompile "org.robolectric:robolectric:$rootProject.ext.robolectricVersion"
-
     androidTestCompile "com.android.support.test:runner:$rootProject.ext.runnerVersion"
     androidTestCompile "com.android.support.test:rules:$rootProject.ext.rulesVersion"
-
     androidTestCompile "junit:junit:$rootProject.ext.junitVersion"
     androidTestCompile "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
-
     // Resolve conflicts between main and test APK:
     androidTestCompile rootProject.ext.supportV4
     androidTestCompile rootProject.ext.recyclerviewV7
     androidTestCompile rootProject.ext.appcompatV7
     androidTestCompile rootProject.ext.design
     androidTestCompile rootProject.ext.cardviewV7
-
     compile "com.squareup.okhttp3:logging-interceptor:$rootProject.ext.okhttpVersion"
-
     compile 'pl.droidsonroids.gif:android-gif-drawable:1.2.8'
     compile 'me.relex:circleindicator:1.2.2@aar'
     compile 'com.jakewharton:butterknife:8.1.0'
@@ -128,6 +122,7 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.1.0'
     annotationProcessor 'org.greenrobot:eventbus-annotation-processor:3.0.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation project(':steppers')
 }
 repositories {
     mavenCentral()

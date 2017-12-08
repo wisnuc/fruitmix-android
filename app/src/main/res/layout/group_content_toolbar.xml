@@ -48,7 +48,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginRight="16dp"
                 android:layout_toLeftOf="@id/menu"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:background="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">

@@ -10,16 +10,25 @@ import org.jetbrains.annotations.NotNull;
  * Created by Administrator on 2017/12/7.
  */
 
-public class InitialEquipmentRepository extends BaseDataRepository implements InitialEquipmentDataSource{
+public class InitialEquipmentRepository extends BaseDataRepository implements InitialEquipmentDataSource {
 
-    public InitialEquipmentRepository(ThreadManager threadManager) {
+    private InitialEquipmentRemoteDataSource mInitialEquipmentRemoteDataSource;
+
+    public InitialEquipmentRepository(ThreadManager threadManager, InitialEquipmentRemoteDataSource initialEquipmentRemoteDataSource) {
         super(threadManager);
+        mInitialEquipmentRemoteDataSource = initialEquipmentRemoteDataSource;
     }
 
-    @NotNull
     @Override
-    public Void getStorageInfo(@NotNull String ip, @NotNull BaseLoadDataCallback<EquipmentDiskVolume> callback) {
-        return null;
+    public void getStorageInfo(@NotNull final String ip, @NotNull final BaseLoadDataCallback<EquipmentDiskVolume> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                mInitialEquipmentRemoteDataSource.getStorageInfo(ip, createLoadCallbackRunOnMainThread(callback));
+            }
+        });
+
     }
 
 }

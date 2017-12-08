@@ -191,14 +191,14 @@
                         android:layout_height="wrap_content"
                         android:src="@drawable/initial_equipment" />
 
-                    <Button
+                    <TextView
                         android:layout_width="120dp"
                         android:layout_height="80dp"
                         android:layout_marginTop="8dp"
                         android:gravity="center"
                         android:onClick="@{()->equipmentSearchView.gotoInitialEquipmentActivity()}"
                         android:text="@{equipmentSearchViewModel.equipmentState}"
-                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textColor="@color/login_ui_blue"
                         android:textSize="18dp"
                         tools:text="@string/initial_equipment" />
 

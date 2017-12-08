@@ -1,0 +1,22 @@
+apply plugin: 'com.android.library'
+
+android {
+
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+    }
+
+}
+
+dependencies {
+    testCompile "junit:junit:$rootProject.ext.junitVersion"
+    compile rootProject.ext.appcompatV7
+    compile rootProject.ext.recyclerviewV7
+    compile rootProject.ext.supportV4
+}

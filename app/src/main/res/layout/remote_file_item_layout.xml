@@ -61,7 +61,7 @@
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:background="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:src="@drawable/ic_menu"
                 android:visibility="@{fileItemViewModel.selectMode?View.GONE:View.VISIBLE,default=visible}" />

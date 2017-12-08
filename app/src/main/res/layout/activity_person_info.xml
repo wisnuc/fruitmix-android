@@ -196,7 +196,7 @@
             android:layout_marginBottom="16dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:background="@color/logout_btn_bg"
+            android:background="@drawable/logout_bg"
             android:onClick="@{()->personInfoPresenter.logout()}"
             android:text="@string/logout"
             android:textColor="@color/eighty_seven_percent_white"

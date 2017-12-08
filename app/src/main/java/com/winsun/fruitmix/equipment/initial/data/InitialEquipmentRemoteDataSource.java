@@ -2,6 +2,7 @@ package com.winsun.fruitmix.equipment.initial.data;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
+import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.parser.RemoteDatasParser;
@@ -20,20 +21,23 @@ import java.util.List;
 
 public class InitialEquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implements InitialEquipmentDataSource {
 
+    public static final String isPartitioned = "isPartitioned";
+
+    private static final String STORAGE = "/storage";
+
     public InitialEquipmentRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
         super(iHttpUtil, httpRequestFactory);
     }
 
-    @NotNull
     @Override
-    public Void getStorageInfo(@NotNull String ip, @NotNull BaseLoadDataCallback<EquipmentDiskVolume> callback) {
+    public void getStorageInfo(@NotNull String ip, @NotNull BaseLoadDataCallback<EquipmentDiskVolume> callback) {
 
+        HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(ip, STORAGE);
 
-        return null;
+        wrapper.loadCall(httpRequest, callback, new RemoteEquipmentDiskVolume());
     }
 
     private class RemoteEquipmentDiskVolume implements RemoteDatasParser<EquipmentDiskVolume> {
-
 
         @Override
         public List<EquipmentDiskVolume> parse(String json) throws JSONException {
@@ -64,12 +68,12 @@ public class InitialEquipmentRemoteDataSource extends BaseRemoteDataSourceImpl i
                     if (block.optBoolean("isFileSystem")) {
                         state = block.optString("fileSystemType");
                     } else if (block.optBoolean("isPartitioned ")) {
-                        state = "isPartitioned";
+                        state = isPartitioned;
                     }
 
                     EquipmentDiskVolume equipmentDiskVolume = new EquipmentDiskVolume(block.optString("model"), block.optString("name"),
                             block.optLong("size") * 512, type, state,
-                            block.optString("unformattable"));
+                            block.optString("unformattable"), block.optBoolean("removable"));
 
                     equipmentDiskVolumes.add(equipmentDiskVolume);
                 }

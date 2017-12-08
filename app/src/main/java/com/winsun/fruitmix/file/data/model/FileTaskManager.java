@@ -195,7 +195,8 @@ public class FileTaskManager {
 
         fileUploadItem.setFileUploadState(fileUploadState);
 
-        Log.d(TAG, "addFileUploadItem: " + fileUploadItem.getFilePath() + " fileName: " + fileUploadItem.getFileName());
+        Log.d(TAG, "addFileUploadItem: " + fileUploadItem.getFilePath() + " fileName: " + fileUploadItem.getFileName() + this
+                + Thread.currentThread().getId());
 
     }
 
